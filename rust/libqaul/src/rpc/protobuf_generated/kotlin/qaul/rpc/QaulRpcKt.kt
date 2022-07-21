@@ -4,15 +4,15 @@
 package qaul.rpc;
 
 @kotlin.jvm.JvmName("-initializeqaulRpc")
-public inline fun qaulRpc(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
+inline fun qaulRpc(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
   qaul.rpc.QaulRpcKt.Dsl._create(qaul.rpc.QaulRpcOuterClass.QaulRpc.newBuilder()).apply { block() }._build()
-public object QaulRpcKt {
+object QaulRpcKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.QaulRpcOuterClass.QaulRpc.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.QaulRpcOuterClass.QaulRpc.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object QaulRpcKt {
      *
      * <code>.qaul.rpc.Modules module = 1;</code>
      */
-    public var module: qaul.rpc.QaulRpcOuterClass.Modules
+     var module: qaul.rpc.QaulRpcOuterClass.Modules
       @JvmName("getModule")
       get() = _builder.getModule()
       @JvmName("setModule")
@@ -43,7 +43,7 @@ public object QaulRpcKt {
      *
      * <code>.qaul.rpc.Modules module = 1;</code>
      */
-    public fun clearModule() {
+    fun clearModule() {
       _builder.clearModule()
     }
 
@@ -54,7 +54,7 @@ public object QaulRpcKt {
      *
      * <code>string request_id = 2;</code>
      */
-    public var requestId: kotlin.String
+    var requestId: kotlin.String
       @JvmName("getRequestId")
       get() = _builder.getRequestId()
       @JvmName("setRequestId")
@@ -68,7 +68,7 @@ public object QaulRpcKt {
      *
      * <code>string request_id = 2;</code>
      */
-    public fun clearRequestId() {
+    fun clearRequestId() {
       _builder.clearRequestId()
     }
 
@@ -80,7 +80,7 @@ public object QaulRpcKt {
      *
      * <code>bytes user_id = 3;</code>
      */
-    public var userId: com.google.protobuf.ByteString
+    var userId: com.google.protobuf.ByteString
       @JvmName("getUserId")
       get() = _builder.getUserId()
       @JvmName("setUserId")
@@ -95,7 +95,7 @@ public object QaulRpcKt {
      *
      * <code>bytes user_id = 3;</code>
      */
-    public fun clearUserId() {
+    fun clearUserId() {
       _builder.clearUserId()
     }
 
@@ -107,7 +107,7 @@ public object QaulRpcKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public var data: com.google.protobuf.ByteString
+    var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -122,12 +122,12 @@ public object QaulRpcKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public fun clearData() {
+    fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.QaulRpcOuterClass.QaulRpc.copy(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
+inline fun qaul.rpc.QaulRpcOuterClass.QaulRpc.copy(block: qaul.rpc.QaulRpcKt.Dsl.() -> kotlin.Unit): qaul.rpc.QaulRpcOuterClass.QaulRpc =
   qaul.rpc.QaulRpcKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

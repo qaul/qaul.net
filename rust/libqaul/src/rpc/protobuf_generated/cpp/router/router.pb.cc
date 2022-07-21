@@ -24,8 +24,10 @@ namespace qaul {
 namespace rpc {
 namespace router {
 PROTOBUF_CONSTEXPR Router::Router(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct RouterDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RouterDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,7 +38,7 @@ struct RouterDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterDefaultTypeInternal _Router_default_instance_;
 PROTOBUF_CONSTEXPR RoutingTableRequest::RoutingTableRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct RoutingTableRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RoutingTableRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -47,8 +49,9 @@ struct RoutingTableRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableRequestDefaultTypeInternal _RoutingTableRequest_default_instance_;
 PROTOBUF_CONSTEXPR RoutingTableList::RoutingTableList(
-    ::_pbi::ConstantInitialized)
-  : routing_table_(){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.routing_table_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RoutingTableListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -59,9 +62,10 @@ struct RoutingTableListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableListDefaultTypeInternal _RoutingTableList_default_instance_;
 PROTOBUF_CONSTEXPR RoutingTableEntry::RoutingTableEntry(
-    ::_pbi::ConstantInitialized)
-  : connections_()
-  , user_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.connections_)*/{}
+  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RoutingTableEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -72,12 +76,12 @@ struct RoutingTableEntryDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableEntryDefaultTypeInternal _RoutingTableEntry_default_instance_;
 PROTOBUF_CONSTEXPR RoutingTableConnection::RoutingTableConnection(
-    ::_pbi::ConstantInitialized)
-  : via_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , module_(0)
-
-  , rtt_(0u)
-  , hop_count_(0u){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.via_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.module_)*/0
+  , /*decltype(_impl_.rtt_)*/0u
+  , /*decltype(_impl_.hop_count_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableConnectionDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RoutingTableConnectionDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -88,7 +92,7 @@ struct RoutingTableConnectionDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableConnectionDefaultTypeInternal _RoutingTableConnection_default_instance_;
 PROTOBUF_CONSTEXPR ConnectionsRequest::ConnectionsRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct ConnectionsRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ConnectionsRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -99,11 +103,12 @@ struct ConnectionsRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsRequestDefaultTypeInternal _ConnectionsRequest_default_instance_;
 PROTOBUF_CONSTEXPR ConnectionsList::ConnectionsList(
-    ::_pbi::ConstantInitialized)
-  : lan_()
-  , internet_()
-  , ble_()
-  , local_(){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.lan_)*/{}
+  , /*decltype(_impl_.internet_)*/{}
+  , /*decltype(_impl_.ble_)*/{}
+  , /*decltype(_impl_.local_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionsListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ConnectionsListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -114,9 +119,10 @@ struct ConnectionsListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsListDefaultTypeInternal _ConnectionsList_default_instance_;
 PROTOBUF_CONSTEXPR ConnectionsUserEntry::ConnectionsUserEntry(
-    ::_pbi::ConstantInitialized)
-  : connections_()
-  , user_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.connections_)*/{}
+  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionsUserEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ConnectionsUserEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -127,10 +133,11 @@ struct ConnectionsUserEntryDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsUserEntryDefaultTypeInternal _ConnectionsUserEntry_default_instance_;
 PROTOBUF_CONSTEXPR ConnectionEntry::ConnectionEntry(
-    ::_pbi::ConstantInitialized)
-  : via_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , rtt_(0u)
-  , hop_count_(0u){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.via_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.rtt_)*/0u
+  , /*decltype(_impl_.hop_count_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ConnectionEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -141,7 +148,7 @@ struct ConnectionEntryDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionEntryDefaultTypeInternal _ConnectionEntry_default_instance_;
 PROTOBUF_CONSTEXPR NeighboursRequest::NeighboursRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct NeighboursRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NeighboursRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -152,10 +159,11 @@ struct NeighboursRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursRequestDefaultTypeInternal _NeighboursRequest_default_instance_;
 PROTOBUF_CONSTEXPR NeighboursList::NeighboursList(
-    ::_pbi::ConstantInitialized)
-  : lan_()
-  , internet_()
-  , ble_(){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.lan_)*/{}
+  , /*decltype(_impl_.internet_)*/{}
+  , /*decltype(_impl_.ble_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NeighboursListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NeighboursListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -166,9 +174,10 @@ struct NeighboursListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursListDefaultTypeInternal _NeighboursList_default_instance_;
 PROTOBUF_CONSTEXPR NeighboursEntry::NeighboursEntry(
-    ::_pbi::ConstantInitialized)
-  : node_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , rtt_(0u){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.node_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.rtt_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NeighboursEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NeighboursEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -189,7 +198,7 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
@@ -198,7 +207,7 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -211,25 +220,25 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, routing_table_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, _impl_.routing_table_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, connections_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.user_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.connections_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, module_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, rtt_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, hop_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, via_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.module_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.rtt_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.hop_count_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.via_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -242,27 +251,27 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, lan_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, internet_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, ble_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, local_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.lan_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.internet_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.ble_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.local_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, connections_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.user_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.connections_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, rtt_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, hop_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, via_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.rtt_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.hop_count_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.via_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -275,17 +284,17 @@ const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, lan_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, internet_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, ble_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.lan_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.internet_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.ble_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, node_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, rtt_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.node_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.rtt_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::router::Router)},
@@ -407,27 +416,27 @@ class Router::_Internal {
 
 const ::qaul::rpc::router::RoutingTableRequest&
 Router::_Internal::routing_table_request(const Router* msg) {
-  return *msg->message_.routing_table_request_;
+  return *msg->_impl_.message_.routing_table_request_;
 }
 const ::qaul::rpc::router::RoutingTableList&
 Router::_Internal::routing_table(const Router* msg) {
-  return *msg->message_.routing_table_;
+  return *msg->_impl_.message_.routing_table_;
 }
 const ::qaul::rpc::router::ConnectionsRequest&
 Router::_Internal::connections_request(const Router* msg) {
-  return *msg->message_.connections_request_;
+  return *msg->_impl_.message_.connections_request_;
 }
 const ::qaul::rpc::router::ConnectionsList&
 Router::_Internal::connections_list(const Router* msg) {
-  return *msg->message_.connections_list_;
+  return *msg->_impl_.message_.connections_list_;
 }
 const ::qaul::rpc::router::NeighboursRequest&
 Router::_Internal::neighbours_request(const Router* msg) {
-  return *msg->message_.neighbours_request_;
+  return *msg->_impl_.message_.neighbours_request_;
 }
 const ::qaul::rpc::router::NeighboursList&
 Router::_Internal::neighbours_list(const Router* msg) {
-  return *msg->message_.neighbours_list_;
+  return *msg->_impl_.message_.neighbours_list_;
 }
 void Router::set_allocated_routing_table_request(::qaul::rpc::router::RoutingTableRequest* routing_table_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -440,7 +449,7 @@ void Router::set_allocated_routing_table_request(::qaul::rpc::router::RoutingTab
           message_arena, routing_table_request, submessage_arena);
     }
     set_has_routing_table_request();
-    message_.routing_table_request_ = routing_table_request;
+    _impl_.message_.routing_table_request_ = routing_table_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.routing_table_request)
 }
@@ -455,7 +464,7 @@ void Router::set_allocated_routing_table(::qaul::rpc::router::RoutingTableList* 
           message_arena, routing_table, submessage_arena);
     }
     set_has_routing_table();
-    message_.routing_table_ = routing_table;
+    _impl_.message_.routing_table_ = routing_table;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.routing_table)
 }
@@ -470,7 +479,7 @@ void Router::set_allocated_connections_request(::qaul::rpc::router::ConnectionsR
           message_arena, connections_request, submessage_arena);
     }
     set_has_connections_request();
-    message_.connections_request_ = connections_request;
+    _impl_.message_.connections_request_ = connections_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.connections_request)
 }
@@ -485,7 +494,7 @@ void Router::set_allocated_connections_list(::qaul::rpc::router::ConnectionsList
           message_arena, connections_list, submessage_arena);
     }
     set_has_connections_list();
-    message_.connections_list_ = connections_list;
+    _impl_.message_.connections_list_ = connections_list;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.connections_list)
 }
@@ -500,7 +509,7 @@ void Router::set_allocated_neighbours_request(::qaul::rpc::router::NeighboursReq
           message_arena, neighbours_request, submessage_arena);
     }
     set_has_neighbours_request();
-    message_.neighbours_request_ = neighbours_request;
+    _impl_.message_.neighbours_request_ = neighbours_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.neighbours_request)
 }
@@ -515,43 +524,55 @@ void Router::set_allocated_neighbours_list(::qaul::rpc::router::NeighboursList* 
           message_arena, neighbours_list, submessage_arena);
     }
     set_has_neighbours_list();
-    message_.neighbours_list_ = neighbours_list;
+    _impl_.message_.neighbours_list_ = neighbours_list;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.neighbours_list)
 }
 Router::Router(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.Router)
 }
 Router::Router(const Router& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Router* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kRoutingTableRequest: {
-      _internal_mutable_routing_table_request()->::qaul::rpc::router::RoutingTableRequest::MergeFrom(from._internal_routing_table_request());
+      _this->_internal_mutable_routing_table_request()->::qaul::rpc::router::RoutingTableRequest::MergeFrom(
+          from._internal_routing_table_request());
       break;
     }
     case kRoutingTable: {
-      _internal_mutable_routing_table()->::qaul::rpc::router::RoutingTableList::MergeFrom(from._internal_routing_table());
+      _this->_internal_mutable_routing_table()->::qaul::rpc::router::RoutingTableList::MergeFrom(
+          from._internal_routing_table());
       break;
     }
     case kConnectionsRequest: {
-      _internal_mutable_connections_request()->::qaul::rpc::router::ConnectionsRequest::MergeFrom(from._internal_connections_request());
+      _this->_internal_mutable_connections_request()->::qaul::rpc::router::ConnectionsRequest::MergeFrom(
+          from._internal_connections_request());
       break;
     }
     case kConnectionsList: {
-      _internal_mutable_connections_list()->::qaul::rpc::router::ConnectionsList::MergeFrom(from._internal_connections_list());
+      _this->_internal_mutable_connections_list()->::qaul::rpc::router::ConnectionsList::MergeFrom(
+          from._internal_connections_list());
       break;
     }
     case kNeighboursRequest: {
-      _internal_mutable_neighbours_request()->::qaul::rpc::router::NeighboursRequest::MergeFrom(from._internal_neighbours_request());
+      _this->_internal_mutable_neighbours_request()->::qaul::rpc::router::NeighboursRequest::MergeFrom(
+          from._internal_neighbours_request());
       break;
     }
     case kNeighboursList: {
-      _internal_mutable_neighbours_list()->::qaul::rpc::router::NeighboursList::MergeFrom(from._internal_neighbours_list());
+      _this->_internal_mutable_neighbours_list()->::qaul::rpc::router::NeighboursList::MergeFrom(
+          from._internal_neighbours_list());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -561,8 +582,16 @@ Router::Router(const Router& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.Router)
 }
 
-inline void Router::SharedCtor() {
-clear_has_message();
+inline void Router::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Router::~Router() {
@@ -582,7 +611,7 @@ inline void Router::SharedDtor() {
 }
 
 void Router::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Router::clear_message() {
@@ -590,37 +619,37 @@ void Router::clear_message() {
   switch (message_case()) {
     case kRoutingTableRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.routing_table_request_;
+        delete _impl_.message_.routing_table_request_;
       }
       break;
     }
     case kRoutingTable: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.routing_table_;
+        delete _impl_.message_.routing_table_;
       }
       break;
     }
     case kConnectionsRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.connections_request_;
+        delete _impl_.message_.connections_request_;
       }
       break;
     }
     case kConnectionsList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.connections_list_;
+        delete _impl_.message_.connections_list_;
       }
       break;
     }
     case kNeighboursRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.neighbours_request_;
+        delete _impl_.message_.neighbours_request_;
       }
       break;
     }
     case kNeighboursList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.neighbours_list_;
+        delete _impl_.message_.neighbours_list_;
       }
       break;
     }
@@ -628,7 +657,7 @@ void Router::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -788,100 +817,102 @@ size_t Router::ByteSizeLong() const {
     case kRoutingTableRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.routing_table_request_);
+          *_impl_.message_.routing_table_request_);
       break;
     }
     // .qaul.rpc.router.RoutingTableList routing_table = 2;
     case kRoutingTable: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.routing_table_);
+          *_impl_.message_.routing_table_);
       break;
     }
     // .qaul.rpc.router.ConnectionsRequest connections_request = 3;
     case kConnectionsRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.connections_request_);
+          *_impl_.message_.connections_request_);
       break;
     }
     // .qaul.rpc.router.ConnectionsList connections_list = 4;
     case kConnectionsList: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.connections_list_);
+          *_impl_.message_.connections_list_);
       break;
     }
     // .qaul.rpc.router.NeighboursRequest neighbours_request = 5;
     case kNeighboursRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.neighbours_request_);
+          *_impl_.message_.neighbours_request_);
       break;
     }
     // .qaul.rpc.router.NeighboursList neighbours_list = 6;
     case kNeighboursList: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.neighbours_list_);
+          *_impl_.message_.neighbours_list_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Router::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Router::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Router::GetClassData() const { return &_class_data_; }
 
-void Router::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Router *>(to)->MergeFrom(
-      static_cast<const Router &>(from));
-}
 
-
-void Router::MergeFrom(const Router& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.Router)
-  GOOGLE_DCHECK_NE(&from, this);
+void Router::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Router*>(&to_msg);
+  auto& from = static_cast<const Router&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.Router)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kRoutingTableRequest: {
-      _internal_mutable_routing_table_request()->::qaul::rpc::router::RoutingTableRequest::MergeFrom(from._internal_routing_table_request());
+      _this->_internal_mutable_routing_table_request()->::qaul::rpc::router::RoutingTableRequest::MergeFrom(
+          from._internal_routing_table_request());
       break;
     }
     case kRoutingTable: {
-      _internal_mutable_routing_table()->::qaul::rpc::router::RoutingTableList::MergeFrom(from._internal_routing_table());
+      _this->_internal_mutable_routing_table()->::qaul::rpc::router::RoutingTableList::MergeFrom(
+          from._internal_routing_table());
       break;
     }
     case kConnectionsRequest: {
-      _internal_mutable_connections_request()->::qaul::rpc::router::ConnectionsRequest::MergeFrom(from._internal_connections_request());
+      _this->_internal_mutable_connections_request()->::qaul::rpc::router::ConnectionsRequest::MergeFrom(
+          from._internal_connections_request());
       break;
     }
     case kConnectionsList: {
-      _internal_mutable_connections_list()->::qaul::rpc::router::ConnectionsList::MergeFrom(from._internal_connections_list());
+      _this->_internal_mutable_connections_list()->::qaul::rpc::router::ConnectionsList::MergeFrom(
+          from._internal_connections_list());
       break;
     }
     case kNeighboursRequest: {
-      _internal_mutable_neighbours_request()->::qaul::rpc::router::NeighboursRequest::MergeFrom(from._internal_neighbours_request());
+      _this->_internal_mutable_neighbours_request()->::qaul::rpc::router::NeighboursRequest::MergeFrom(
+          from._internal_neighbours_request());
       break;
     }
     case kNeighboursList: {
-      _internal_mutable_neighbours_list()->::qaul::rpc::router::NeighboursList::MergeFrom(from._internal_neighbours_list());
+      _this->_internal_mutable_neighbours_list()->::qaul::rpc::router::NeighboursList::MergeFrom(
+          from._internal_neighbours_list());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Router::CopyFrom(const Router& from) {
@@ -898,8 +929,8 @@ bool Router::IsInitialized() const {
 void Router::InternalSwap(Router* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Router::GetMetadata() const {
@@ -921,6 +952,7 @@ RoutingTableRequest::RoutingTableRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 RoutingTableRequest::RoutingTableRequest(const RoutingTableRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  RoutingTableRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableRequest)
 }
@@ -955,19 +987,29 @@ class RoutingTableList::_Internal {
 
 RoutingTableList::RoutingTableList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  routing_table_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableList)
 }
 RoutingTableList::RoutingTableList(const RoutingTableList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      routing_table_(from.routing_table_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RoutingTableList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.routing_table_){from._impl_.routing_table_}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableList)
 }
 
-inline void RoutingTableList::SharedCtor() {
+inline void RoutingTableList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.routing_table_){arena}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 RoutingTableList::~RoutingTableList() {
@@ -981,10 +1023,11 @@ RoutingTableList::~RoutingTableList() {
 
 inline void RoutingTableList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.routing_table_.~RepeatedPtrField();
 }
 
 void RoutingTableList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void RoutingTableList::Clear() {
@@ -993,7 +1036,7 @@ void RoutingTableList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  routing_table_.Clear();
+  _impl_.routing_table_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1071,35 +1114,31 @@ size_t RoutingTableList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;
   total_size += 1UL * this->_internal_routing_table_size();
-  for (const auto& msg : this->routing_table_) {
+  for (const auto& msg : this->_impl_.routing_table_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RoutingTableList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     RoutingTableList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RoutingTableList::GetClassData() const { return &_class_data_; }
 
-void RoutingTableList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<RoutingTableList *>(to)->MergeFrom(
-      static_cast<const RoutingTableList &>(from));
-}
 
-
-void RoutingTableList::MergeFrom(const RoutingTableList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableList)
-  GOOGLE_DCHECK_NE(&from, this);
+void RoutingTableList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RoutingTableList*>(&to_msg);
+  auto& from = static_cast<const RoutingTableList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  routing_table_.MergeFrom(from.routing_table_);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.routing_table_.MergeFrom(from._impl_.routing_table_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RoutingTableList::CopyFrom(const RoutingTableList& from) {
@@ -1116,7 +1155,7 @@ bool RoutingTableList::IsInitialized() const {
 void RoutingTableList::InternalSwap(RoutingTableList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  routing_table_.InternalSwap(&other->routing_table_);
+  _impl_.routing_table_.InternalSwap(&other->_impl_.routing_table_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RoutingTableList::GetMetadata() const {
@@ -1133,31 +1172,43 @@ class RoutingTableEntry::_Internal {
 
 RoutingTableEntry::RoutingTableEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  connections_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableEntry)
 }
 RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      connections_(from.connections_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RoutingTableEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.connections_){from._impl_.connections_}
+    , decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  user_id_.InitDefault();
+  _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    user_id_.Set("", GetArenaForAllocation());
+    _impl_.user_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    user_id_.Set(from._internal_user_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableEntry)
 }
 
-inline void RoutingTableEntry::SharedCtor() {
-user_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  user_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void RoutingTableEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.connections_){arena}
+    , decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RoutingTableEntry::~RoutingTableEntry() {
@@ -1171,11 +1222,12 @@ RoutingTableEntry::~RoutingTableEntry() {
 
 inline void RoutingTableEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  user_id_.Destroy();
+  _impl_.connections_.~RepeatedPtrField();
+  _impl_.user_id_.Destroy();
 }
 
 void RoutingTableEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void RoutingTableEntry::Clear() {
@@ -1184,8 +1236,8 @@ void RoutingTableEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  connections_.Clear();
-  user_id_.ClearToEmpty();
+  _impl_.connections_.Clear();
+  _impl_.user_id_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1278,7 +1330,7 @@ size_t RoutingTableEntry::ByteSizeLong() const {
 
   // repeated .qaul.rpc.router.RoutingTableConnection connections = 2;
   total_size += 1UL * this->_internal_connections_size();
-  for (const auto& msg : this->connections_) {
+  for (const auto& msg : this->_impl_.connections_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -1290,33 +1342,29 @@ size_t RoutingTableEntry::ByteSizeLong() const {
         this->_internal_user_id());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RoutingTableEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     RoutingTableEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RoutingTableEntry::GetClassData() const { return &_class_data_; }
 
-void RoutingTableEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<RoutingTableEntry *>(to)->MergeFrom(
-      static_cast<const RoutingTableEntry &>(from));
-}
 
-
-void RoutingTableEntry::MergeFrom(const RoutingTableEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void RoutingTableEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RoutingTableEntry*>(&to_msg);
+  auto& from = static_cast<const RoutingTableEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  connections_.MergeFrom(from.connections_);
+  _this->_impl_.connections_.MergeFrom(from._impl_.connections_);
   if (!from._internal_user_id().empty()) {
-    _internal_set_user_id(from._internal_user_id());
+    _this->_internal_set_user_id(from._internal_user_id());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RoutingTableEntry::CopyFrom(const RoutingTableEntry& from) {
@@ -1335,10 +1383,10 @@ void RoutingTableEntry::InternalSwap(RoutingTableEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  connections_.InternalSwap(&other->connections_);
+  _impl_.connections_.InternalSwap(&other->_impl_.connections_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &user_id_, lhs_arena,
-      &other->user_id_, rhs_arena
+      &_impl_.user_id_, lhs_arena,
+      &other->_impl_.user_id_, rhs_arena
   );
 }
 
@@ -1357,35 +1405,49 @@ class RoutingTableConnection::_Internal {
 RoutingTableConnection::RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableConnection)
 }
 RoutingTableConnection::RoutingTableConnection(const RoutingTableConnection& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RoutingTableConnection* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.module_){}
+    , decltype(_impl_.rtt_){}
+    , decltype(_impl_.hop_count_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  via_.InitDefault();
+  _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    via_.Set("", GetArenaForAllocation());
+    _impl_.via_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_via().empty()) {
-    via_.Set(from._internal_via(), 
-      GetArenaForAllocation());
+    _this->_impl_.via_.Set(from._internal_via(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&module_, &from.module_,
-    static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
-    reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
+  ::memcpy(&_impl_.module_, &from._impl_.module_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
+    reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableConnection)
 }
 
-inline void RoutingTableConnection::SharedCtor() {
-via_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  via_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&module_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
-    reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
+inline void RoutingTableConnection::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.module_){0}
+    , decltype(_impl_.rtt_){0u}
+    , decltype(_impl_.hop_count_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.via_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.via_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RoutingTableConnection::~RoutingTableConnection() {
@@ -1399,11 +1461,11 @@ RoutingTableConnection::~RoutingTableConnection() {
 
 inline void RoutingTableConnection::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  via_.Destroy();
+  _impl_.via_.Destroy();
 }
 
 void RoutingTableConnection::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void RoutingTableConnection::Clear() {
@@ -1412,10 +1474,10 @@ void RoutingTableConnection::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  via_.ClearToEmpty();
-  ::memset(&module_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&hop_count_) -
-      reinterpret_cast<char*>(&module_)) + sizeof(hop_count_));
+  _impl_.via_.ClearToEmpty();
+  ::memset(&_impl_.module_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.hop_count_) -
+      reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1437,7 +1499,7 @@ const char* RoutingTableConnection::_InternalParse(const char* ptr, ::_pbi::Pars
       // uint32 rtt = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
-          rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1454,7 +1516,7 @@ const char* RoutingTableConnection::_InternalParse(const char* ptr, ::_pbi::Pars
       // uint32 hop_count = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
-          hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1552,41 +1614,37 @@ size_t RoutingTableConnection::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RoutingTableConnection::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     RoutingTableConnection::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RoutingTableConnection::GetClassData() const { return &_class_data_; }
 
-void RoutingTableConnection::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<RoutingTableConnection *>(to)->MergeFrom(
-      static_cast<const RoutingTableConnection &>(from));
-}
 
-
-void RoutingTableConnection::MergeFrom(const RoutingTableConnection& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableConnection)
-  GOOGLE_DCHECK_NE(&from, this);
+void RoutingTableConnection::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RoutingTableConnection*>(&to_msg);
+  auto& from = static_cast<const RoutingTableConnection&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableConnection)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_via().empty()) {
-    _internal_set_via(from._internal_via());
+    _this->_internal_set_via(from._internal_via());
   }
   if (from._internal_module() != 0) {
-    _internal_set_module(from._internal_module());
+    _this->_internal_set_module(from._internal_module());
   }
   if (from._internal_rtt() != 0) {
-    _internal_set_rtt(from._internal_rtt());
+    _this->_internal_set_rtt(from._internal_rtt());
   }
   if (from._internal_hop_count() != 0) {
-    _internal_set_hop_count(from._internal_hop_count());
+    _this->_internal_set_hop_count(from._internal_hop_count());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RoutingTableConnection::CopyFrom(const RoutingTableConnection& from) {
@@ -1606,15 +1664,15 @@ void RoutingTableConnection::InternalSwap(RoutingTableConnection* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &via_, lhs_arena,
-      &other->via_, rhs_arena
+      &_impl_.via_, lhs_arena,
+      &other->_impl_.via_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RoutingTableConnection, hop_count_)
-      + sizeof(RoutingTableConnection::hop_count_)
-      - PROTOBUF_FIELD_OFFSET(RoutingTableConnection, module_)>(
-          reinterpret_cast<char*>(&module_),
-          reinterpret_cast<char*>(&other->module_));
+      PROTOBUF_FIELD_OFFSET(RoutingTableConnection, _impl_.hop_count_)
+      + sizeof(RoutingTableConnection::_impl_.hop_count_)
+      - PROTOBUF_FIELD_OFFSET(RoutingTableConnection, _impl_.module_)>(
+          reinterpret_cast<char*>(&_impl_.module_),
+          reinterpret_cast<char*>(&other->_impl_.module_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RoutingTableConnection::GetMetadata() const {
@@ -1636,6 +1694,7 @@ ConnectionsRequest::ConnectionsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 ConnectionsRequest::ConnectionsRequest(const ConnectionsRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  ConnectionsRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionsRequest)
 }
@@ -1670,25 +1729,35 @@ class ConnectionsList::_Internal {
 
 ConnectionsList::ConnectionsList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  lan_(arena),
-  internet_(arena),
-  ble_(arena),
-  local_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionsList)
 }
 ConnectionsList::ConnectionsList(const ConnectionsList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      lan_(from.lan_),
-      internet_(from.internet_),
-      ble_(from.ble_),
-      local_(from.local_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  ConnectionsList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.lan_){from._impl_.lan_}
+    , decltype(_impl_.internet_){from._impl_.internet_}
+    , decltype(_impl_.ble_){from._impl_.ble_}
+    , decltype(_impl_.local_){from._impl_.local_}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionsList)
 }
 
-inline void ConnectionsList::SharedCtor() {
+inline void ConnectionsList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.lan_){arena}
+    , decltype(_impl_.internet_){arena}
+    , decltype(_impl_.ble_){arena}
+    , decltype(_impl_.local_){arena}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 ConnectionsList::~ConnectionsList() {
@@ -1702,10 +1771,14 @@ ConnectionsList::~ConnectionsList() {
 
 inline void ConnectionsList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.lan_.~RepeatedPtrField();
+  _impl_.internet_.~RepeatedPtrField();
+  _impl_.ble_.~RepeatedPtrField();
+  _impl_.local_.~RepeatedPtrField();
 }
 
 void ConnectionsList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void ConnectionsList::Clear() {
@@ -1714,10 +1787,10 @@ void ConnectionsList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  lan_.Clear();
-  internet_.Clear();
-  ble_.Clear();
-  local_.Clear();
+  _impl_.lan_.Clear();
+  _impl_.internet_.Clear();
+  _impl_.ble_.Clear();
+  _impl_.local_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1858,59 +1931,55 @@ size_t ConnectionsList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;
   total_size += 1UL * this->_internal_lan_size();
-  for (const auto& msg : this->lan_) {
+  for (const auto& msg : this->_impl_.lan_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;
   total_size += 1UL * this->_internal_internet_size();
-  for (const auto& msg : this->internet_) {
+  for (const auto& msg : this->_impl_.internet_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;
   total_size += 1UL * this->_internal_ble_size();
-  for (const auto& msg : this->ble_) {
+  for (const auto& msg : this->_impl_.ble_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;
   total_size += 1UL * this->_internal_local_size();
-  for (const auto& msg : this->local_) {
+  for (const auto& msg : this->_impl_.local_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ConnectionsList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     ConnectionsList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ConnectionsList::GetClassData() const { return &_class_data_; }
 
-void ConnectionsList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<ConnectionsList *>(to)->MergeFrom(
-      static_cast<const ConnectionsList &>(from));
-}
 
-
-void ConnectionsList::MergeFrom(const ConnectionsList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsList)
-  GOOGLE_DCHECK_NE(&from, this);
+void ConnectionsList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<ConnectionsList*>(&to_msg);
+  auto& from = static_cast<const ConnectionsList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  lan_.MergeFrom(from.lan_);
-  internet_.MergeFrom(from.internet_);
-  ble_.MergeFrom(from.ble_);
-  local_.MergeFrom(from.local_);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.lan_.MergeFrom(from._impl_.lan_);
+  _this->_impl_.internet_.MergeFrom(from._impl_.internet_);
+  _this->_impl_.ble_.MergeFrom(from._impl_.ble_);
+  _this->_impl_.local_.MergeFrom(from._impl_.local_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void ConnectionsList::CopyFrom(const ConnectionsList& from) {
@@ -1927,10 +1996,10 @@ bool ConnectionsList::IsInitialized() const {
 void ConnectionsList::InternalSwap(ConnectionsList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  lan_.InternalSwap(&other->lan_);
-  internet_.InternalSwap(&other->internet_);
-  ble_.InternalSwap(&other->ble_);
-  local_.InternalSwap(&other->local_);
+  _impl_.lan_.InternalSwap(&other->_impl_.lan_);
+  _impl_.internet_.InternalSwap(&other->_impl_.internet_);
+  _impl_.ble_.InternalSwap(&other->_impl_.ble_);
+  _impl_.local_.InternalSwap(&other->_impl_.local_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConnectionsList::GetMetadata() const {
@@ -1947,31 +2016,43 @@ class ConnectionsUserEntry::_Internal {
 
 ConnectionsUserEntry::ConnectionsUserEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  connections_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionsUserEntry)
 }
 ConnectionsUserEntry::ConnectionsUserEntry(const ConnectionsUserEntry& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      connections_(from.connections_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  ConnectionsUserEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.connections_){from._impl_.connections_}
+    , decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  user_id_.InitDefault();
+  _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    user_id_.Set("", GetArenaForAllocation());
+    _impl_.user_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    user_id_.Set(from._internal_user_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionsUserEntry)
 }
 
-inline void ConnectionsUserEntry::SharedCtor() {
-user_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  user_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void ConnectionsUserEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.connections_){arena}
+    , decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ConnectionsUserEntry::~ConnectionsUserEntry() {
@@ -1985,11 +2066,12 @@ ConnectionsUserEntry::~ConnectionsUserEntry() {
 
 inline void ConnectionsUserEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  user_id_.Destroy();
+  _impl_.connections_.~RepeatedPtrField();
+  _impl_.user_id_.Destroy();
 }
 
 void ConnectionsUserEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void ConnectionsUserEntry::Clear() {
@@ -1998,8 +2080,8 @@ void ConnectionsUserEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  connections_.Clear();
-  user_id_.ClearToEmpty();
+  _impl_.connections_.Clear();
+  _impl_.user_id_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2092,7 +2174,7 @@ size_t ConnectionsUserEntry::ByteSizeLong() const {
 
   // repeated .qaul.rpc.router.ConnectionEntry connections = 2;
   total_size += 1UL * this->_internal_connections_size();
-  for (const auto& msg : this->connections_) {
+  for (const auto& msg : this->_impl_.connections_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -2104,33 +2186,29 @@ size_t ConnectionsUserEntry::ByteSizeLong() const {
         this->_internal_user_id());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ConnectionsUserEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     ConnectionsUserEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ConnectionsUserEntry::GetClassData() const { return &_class_data_; }
 
-void ConnectionsUserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<ConnectionsUserEntry *>(to)->MergeFrom(
-      static_cast<const ConnectionsUserEntry &>(from));
-}
 
-
-void ConnectionsUserEntry::MergeFrom(const ConnectionsUserEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsUserEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void ConnectionsUserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<ConnectionsUserEntry*>(&to_msg);
+  auto& from = static_cast<const ConnectionsUserEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsUserEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  connections_.MergeFrom(from.connections_);
+  _this->_impl_.connections_.MergeFrom(from._impl_.connections_);
   if (!from._internal_user_id().empty()) {
-    _internal_set_user_id(from._internal_user_id());
+    _this->_internal_set_user_id(from._internal_user_id());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void ConnectionsUserEntry::CopyFrom(const ConnectionsUserEntry& from) {
@@ -2149,10 +2227,10 @@ void ConnectionsUserEntry::InternalSwap(ConnectionsUserEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  connections_.InternalSwap(&other->connections_);
+  _impl_.connections_.InternalSwap(&other->_impl_.connections_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &user_id_, lhs_arena,
-      &other->user_id_, rhs_arena
+      &_impl_.user_id_, lhs_arena,
+      &other->_impl_.user_id_, rhs_arena
   );
 }
 
@@ -2171,35 +2249,47 @@ class ConnectionEntry::_Internal {
 ConnectionEntry::ConnectionEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionEntry)
 }
 ConnectionEntry::ConnectionEntry(const ConnectionEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  ConnectionEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.rtt_){}
+    , decltype(_impl_.hop_count_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  via_.InitDefault();
+  _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    via_.Set("", GetArenaForAllocation());
+    _impl_.via_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_via().empty()) {
-    via_.Set(from._internal_via(), 
-      GetArenaForAllocation());
+    _this->_impl_.via_.Set(from._internal_via(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&rtt_, &from.rtt_,
-    static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
-    reinterpret_cast<char*>(&rtt_)) + sizeof(hop_count_));
+  ::memcpy(&_impl_.rtt_, &from._impl_.rtt_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
+    reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.hop_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionEntry)
 }
 
-inline void ConnectionEntry::SharedCtor() {
-via_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  via_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&rtt_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&hop_count_) -
-    reinterpret_cast<char*>(&rtt_)) + sizeof(hop_count_));
+inline void ConnectionEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.rtt_){0u}
+    , decltype(_impl_.hop_count_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.via_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.via_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ConnectionEntry::~ConnectionEntry() {
@@ -2213,11 +2303,11 @@ ConnectionEntry::~ConnectionEntry() {
 
 inline void ConnectionEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  via_.Destroy();
+  _impl_.via_.Destroy();
 }
 
 void ConnectionEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void ConnectionEntry::Clear() {
@@ -2226,10 +2316,10 @@ void ConnectionEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  via_.ClearToEmpty();
-  ::memset(&rtt_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&hop_count_) -
-      reinterpret_cast<char*>(&rtt_)) + sizeof(hop_count_));
+  _impl_.via_.ClearToEmpty();
+  ::memset(&_impl_.rtt_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.hop_count_) -
+      reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.hop_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2242,7 +2332,7 @@ const char* ConnectionEntry::_InternalParse(const char* ptr, ::_pbi::ParseContex
       // uint32 rtt = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2250,7 +2340,7 @@ const char* ConnectionEntry::_InternalParse(const char* ptr, ::_pbi::ParseContex
       // uint32 hop_count = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2344,38 +2434,34 @@ size_t ConnectionEntry::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ConnectionEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     ConnectionEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ConnectionEntry::GetClassData() const { return &_class_data_; }
 
-void ConnectionEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<ConnectionEntry *>(to)->MergeFrom(
-      static_cast<const ConnectionEntry &>(from));
-}
 
-
-void ConnectionEntry::MergeFrom(const ConnectionEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void ConnectionEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<ConnectionEntry*>(&to_msg);
+  auto& from = static_cast<const ConnectionEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_via().empty()) {
-    _internal_set_via(from._internal_via());
+    _this->_internal_set_via(from._internal_via());
   }
   if (from._internal_rtt() != 0) {
-    _internal_set_rtt(from._internal_rtt());
+    _this->_internal_set_rtt(from._internal_rtt());
   }
   if (from._internal_hop_count() != 0) {
-    _internal_set_hop_count(from._internal_hop_count());
+    _this->_internal_set_hop_count(from._internal_hop_count());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void ConnectionEntry::CopyFrom(const ConnectionEntry& from) {
@@ -2395,15 +2481,15 @@ void ConnectionEntry::InternalSwap(ConnectionEntry* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &via_, lhs_arena,
-      &other->via_, rhs_arena
+      &_impl_.via_, lhs_arena,
+      &other->_impl_.via_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ConnectionEntry, hop_count_)
-      + sizeof(ConnectionEntry::hop_count_)
-      - PROTOBUF_FIELD_OFFSET(ConnectionEntry, rtt_)>(
-          reinterpret_cast<char*>(&rtt_),
-          reinterpret_cast<char*>(&other->rtt_));
+      PROTOBUF_FIELD_OFFSET(ConnectionEntry, _impl_.hop_count_)
+      + sizeof(ConnectionEntry::_impl_.hop_count_)
+      - PROTOBUF_FIELD_OFFSET(ConnectionEntry, _impl_.rtt_)>(
+          reinterpret_cast<char*>(&_impl_.rtt_),
+          reinterpret_cast<char*>(&other->_impl_.rtt_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConnectionEntry::GetMetadata() const {
@@ -2425,6 +2511,7 @@ NeighboursRequest::NeighboursRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 NeighboursRequest::NeighboursRequest(const NeighboursRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  NeighboursRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursRequest)
 }
@@ -2459,23 +2546,33 @@ class NeighboursList::_Internal {
 
 NeighboursList::NeighboursList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  lan_(arena),
-  internet_(arena),
-  ble_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.NeighboursList)
 }
 NeighboursList::NeighboursList(const NeighboursList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      lan_(from.lan_),
-      internet_(from.internet_),
-      ble_(from.ble_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  NeighboursList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.lan_){from._impl_.lan_}
+    , decltype(_impl_.internet_){from._impl_.internet_}
+    , decltype(_impl_.ble_){from._impl_.ble_}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursList)
 }
 
-inline void NeighboursList::SharedCtor() {
+inline void NeighboursList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.lan_){arena}
+    , decltype(_impl_.internet_){arena}
+    , decltype(_impl_.ble_){arena}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 NeighboursList::~NeighboursList() {
@@ -2489,10 +2586,13 @@ NeighboursList::~NeighboursList() {
 
 inline void NeighboursList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.lan_.~RepeatedPtrField();
+  _impl_.internet_.~RepeatedPtrField();
+  _impl_.ble_.~RepeatedPtrField();
 }
 
 void NeighboursList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void NeighboursList::Clear() {
@@ -2501,9 +2601,9 @@ void NeighboursList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  lan_.Clear();
-  internet_.Clear();
-  ble_.Clear();
+  _impl_.lan_.Clear();
+  _impl_.internet_.Clear();
+  _impl_.ble_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2623,51 +2723,47 @@ size_t NeighboursList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.router.NeighboursEntry lan = 1;
   total_size += 1UL * this->_internal_lan_size();
-  for (const auto& msg : this->lan_) {
+  for (const auto& msg : this->_impl_.lan_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.NeighboursEntry internet = 2;
   total_size += 1UL * this->_internal_internet_size();
-  for (const auto& msg : this->internet_) {
+  for (const auto& msg : this->_impl_.internet_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
   total_size += 1UL * this->_internal_ble_size();
-  for (const auto& msg : this->ble_) {
+  for (const auto& msg : this->_impl_.ble_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData NeighboursList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     NeighboursList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*NeighboursList::GetClassData() const { return &_class_data_; }
 
-void NeighboursList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<NeighboursList *>(to)->MergeFrom(
-      static_cast<const NeighboursList &>(from));
-}
 
-
-void NeighboursList::MergeFrom(const NeighboursList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursList)
-  GOOGLE_DCHECK_NE(&from, this);
+void NeighboursList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<NeighboursList*>(&to_msg);
+  auto& from = static_cast<const NeighboursList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  lan_.MergeFrom(from.lan_);
-  internet_.MergeFrom(from.internet_);
-  ble_.MergeFrom(from.ble_);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.lan_.MergeFrom(from._impl_.lan_);
+  _this->_impl_.internet_.MergeFrom(from._impl_.internet_);
+  _this->_impl_.ble_.MergeFrom(from._impl_.ble_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void NeighboursList::CopyFrom(const NeighboursList& from) {
@@ -2684,9 +2780,9 @@ bool NeighboursList::IsInitialized() const {
 void NeighboursList::InternalSwap(NeighboursList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  lan_.InternalSwap(&other->lan_);
-  internet_.InternalSwap(&other->internet_);
-  ble_.InternalSwap(&other->ble_);
+  _impl_.lan_.InternalSwap(&other->_impl_.lan_);
+  _impl_.internet_.InternalSwap(&other->_impl_.internet_);
+  _impl_.ble_.InternalSwap(&other->_impl_.ble_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NeighboursList::GetMetadata() const {
@@ -2704,30 +2800,43 @@ class NeighboursEntry::_Internal {
 NeighboursEntry::NeighboursEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.NeighboursEntry)
 }
 NeighboursEntry::NeighboursEntry(const NeighboursEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  NeighboursEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.node_id_){}
+    , decltype(_impl_.rtt_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  node_id_.InitDefault();
+  _impl_.node_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    node_id_.Set("", GetArenaForAllocation());
+    _impl_.node_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_node_id().empty()) {
-    node_id_.Set(from._internal_node_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.node_id_.Set(from._internal_node_id(), 
+      _this->GetArenaForAllocation());
   }
-  rtt_ = from.rtt_;
+  _this->_impl_.rtt_ = from._impl_.rtt_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursEntry)
 }
 
-inline void NeighboursEntry::SharedCtor() {
-node_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  node_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-rtt_ = 0u;
+inline void NeighboursEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.node_id_){}
+    , decltype(_impl_.rtt_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.node_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.node_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NeighboursEntry::~NeighboursEntry() {
@@ -2741,11 +2850,11 @@ NeighboursEntry::~NeighboursEntry() {
 
 inline void NeighboursEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  node_id_.Destroy();
+  _impl_.node_id_.Destroy();
 }
 
 void NeighboursEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void NeighboursEntry::Clear() {
@@ -2754,8 +2863,8 @@ void NeighboursEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  node_id_.ClearToEmpty();
-  rtt_ = 0u;
+  _impl_.node_id_.ClearToEmpty();
+  _impl_.rtt_ = 0u;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2777,7 +2886,7 @@ const char* NeighboursEntry::_InternalParse(const char* ptr, ::_pbi::ParseContex
       // uint32 rtt = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2851,35 +2960,31 @@ size_t NeighboursEntry::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData NeighboursEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     NeighboursEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*NeighboursEntry::GetClassData() const { return &_class_data_; }
 
-void NeighboursEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<NeighboursEntry *>(to)->MergeFrom(
-      static_cast<const NeighboursEntry &>(from));
-}
 
-
-void NeighboursEntry::MergeFrom(const NeighboursEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void NeighboursEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<NeighboursEntry*>(&to_msg);
+  auto& from = static_cast<const NeighboursEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_node_id().empty()) {
-    _internal_set_node_id(from._internal_node_id());
+    _this->_internal_set_node_id(from._internal_node_id());
   }
   if (from._internal_rtt() != 0) {
-    _internal_set_rtt(from._internal_rtt());
+    _this->_internal_set_rtt(from._internal_rtt());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void NeighboursEntry::CopyFrom(const NeighboursEntry& from) {
@@ -2899,10 +3004,10 @@ void NeighboursEntry::InternalSwap(NeighboursEntry* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &node_id_, lhs_arena,
-      &other->node_id_, rhs_arena
+      &_impl_.node_id_, lhs_arena,
+      &other->_impl_.node_id_, rhs_arena
   );
-  swap(rtt_, other->rtt_);
+  swap(_impl_.rtt_, other->_impl_.rtt_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NeighboursEntry::GetMetadata() const {

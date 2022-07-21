@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleStartRequest")
-public inline fun bleStartRequest(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
+inline fun bleStartRequest(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
   qaul.sys.ble.BleStartRequestKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStartRequest.newBuilder()).apply { block() }._build()
-public object BleStartRequestKt {
+object BleStartRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleStartRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleStartRequest.Builder): Dsl = Dsl(builder)
@@ -31,7 +31,7 @@ public object BleStartRequestKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public var qaulId: com.google.protobuf.ByteString
+    var qaulId: com.google.protobuf.ByteString
       @JvmName("getQaulId")
       get() = _builder.getQaulId()
       @JvmName("setQaulId")
@@ -47,7 +47,7 @@ public object BleStartRequestKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public fun clearQaulId() {
+    fun clearQaulId() {
       _builder.clearQaulId()
     }
 
@@ -58,7 +58,7 @@ public object BleStartRequestKt {
      *
      * <code>.qaul.sys.ble.BlePowerSetting power_setting = 2;</code>
      */
-    public var powerSetting: qaul.sys.ble.BleOuterClass.BlePowerSetting
+     var powerSetting: qaul.sys.ble.BleOuterClass.BlePowerSetting
       @JvmName("getPowerSetting")
       get() = _builder.getPowerSetting()
       @JvmName("setPowerSetting")
@@ -72,12 +72,12 @@ public object BleStartRequestKt {
      *
      * <code>.qaul.sys.ble.BlePowerSetting power_setting = 2;</code>
      */
-    public fun clearPowerSetting() {
+    fun clearPowerSetting() {
       _builder.clearPowerSetting()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleStartRequest.copy(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
+inline fun qaul.sys.ble.BleOuterClass.BleStartRequest.copy(block: qaul.sys.ble.BleStartRequestKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartRequest =
   qaul.sys.ble.BleStartRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

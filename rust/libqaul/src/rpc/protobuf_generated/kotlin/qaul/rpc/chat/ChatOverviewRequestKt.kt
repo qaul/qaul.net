@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatOverviewRequest")
-public inline fun chatOverviewRequest(block: qaul.rpc.chat.ChatOverviewRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest =
+inline fun chatOverviewRequest(block: qaul.rpc.chat.ChatOverviewRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest =
   qaul.rpc.chat.ChatOverviewRequestKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest.newBuilder()).apply { block() }._build()
-public object ChatOverviewRequestKt {
+object ChatOverviewRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object ChatOverviewRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest.copy(block: qaul.rpc.chat.ChatOverviewRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest.copy(block: qaul.rpc.chat.ChatOverviewRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest =
   qaul.rpc.chat.ChatOverviewRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

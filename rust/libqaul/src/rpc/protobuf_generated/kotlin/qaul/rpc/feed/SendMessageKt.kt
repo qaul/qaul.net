@@ -4,15 +4,15 @@
 package qaul.rpc.feed;
 
 @kotlin.jvm.JvmName("-initializesendMessage")
-public inline fun sendMessage(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
+inline fun sendMessage(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
   qaul.rpc.feed.SendMessageKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.SendMessage.newBuilder()).apply { block() }._build()
-public object SendMessageKt {
+object SendMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.feed.FeedOuterClass.SendMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.feed.FeedOuterClass.SendMessage.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object SendMessageKt {
     /**
      * <code>string content = 1;</code>
      */
-    public var content: kotlin.String
+    var content: kotlin.String
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -35,12 +35,12 @@ public object SendMessageKt {
     /**
      * <code>string content = 1;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.feed.FeedOuterClass.SendMessage.copy(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
+inline fun qaul.rpc.feed.FeedOuterClass.SendMessage.copy(block: qaul.rpc.feed.SendMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.SendMessage =
   qaul.rpc.feed.SendMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

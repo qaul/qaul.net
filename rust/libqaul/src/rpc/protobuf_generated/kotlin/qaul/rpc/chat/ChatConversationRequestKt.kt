@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatConversationRequest")
-public inline fun chatConversationRequest(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
+inline fun chatConversationRequest(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
   qaul.rpc.chat.ChatConversationRequestKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.newBuilder()).apply { block() }._build()
-public object ChatConversationRequestKt {
+object ChatConversationRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object ChatConversationRequestKt {
     /**
      * <code>bytes conversation_id = 1;</code>
      */
-    public var conversationId: com.google.protobuf.ByteString
+    var conversationId: com.google.protobuf.ByteString
       @JvmName("getConversationId")
       get() = _builder.getConversationId()
       @JvmName("setConversationId")
@@ -35,7 +35,7 @@ public object ChatConversationRequestKt {
     /**
      * <code>bytes conversation_id = 1;</code>
      */
-    public fun clearConversationId() {
+    fun clearConversationId() {
       _builder.clearConversationId()
     }
 
@@ -46,7 +46,7 @@ public object ChatConversationRequestKt {
      *
      * <code>uint64 last_index = 2;</code>
      */
-    public var lastIndex: kotlin.Long
+    var lastIndex: kotlin.Long
       @JvmName("getLastIndex")
       get() = _builder.getLastIndex()
       @JvmName("setLastIndex")
@@ -60,12 +60,12 @@ public object ChatConversationRequestKt {
      *
      * <code>uint64 last_index = 2;</code>
      */
-    public fun clearLastIndex() {
+    fun clearLastIndex() {
       _builder.clearLastIndex()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.copy(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.copy(block: qaul.rpc.chat.ChatConversationRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest =
   qaul.rpc.chat.ChatConversationRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

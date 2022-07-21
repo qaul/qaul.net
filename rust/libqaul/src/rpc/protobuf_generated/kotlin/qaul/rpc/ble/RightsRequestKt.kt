@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializerightsRequest")
-public inline fun rightsRequest(block: qaul.rpc.ble.RightsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsRequest =
+inline fun rightsRequest(block: qaul.rpc.ble.RightsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsRequest =
   qaul.rpc.ble.RightsRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.RightsRequest.newBuilder()).apply { block() }._build()
-public object RightsRequestKt {
+object RightsRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.RightsRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.RightsRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object RightsRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.RightsRequest.copy(block: qaul.rpc.ble.RightsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsRequest =
+inline fun qaul.rpc.ble.BleRpc.RightsRequest.copy(block: qaul.rpc.ble.RightsRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.RightsRequest =
   qaul.rpc.ble.RightsRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

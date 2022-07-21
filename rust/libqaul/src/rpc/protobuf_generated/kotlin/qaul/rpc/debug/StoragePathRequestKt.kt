@@ -4,15 +4,15 @@
 package qaul.rpc.debug;
 
 @kotlin.jvm.JvmName("-initializestoragePathRequest")
-public inline fun storagePathRequest(block: qaul.rpc.debug.StoragePathRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathRequest =
+inline fun storagePathRequest(block: qaul.rpc.debug.StoragePathRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathRequest =
   qaul.rpc.debug.StoragePathRequestKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.StoragePathRequest.newBuilder()).apply { block() }._build()
-public object StoragePathRequestKt {
+object StoragePathRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.debug.DebugOuterClass.StoragePathRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object StoragePathRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.debug.DebugOuterClass.StoragePathRequest.copy(block: qaul.rpc.debug.StoragePathRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathRequest =
+inline fun qaul.rpc.debug.DebugOuterClass.StoragePathRequest.copy(block: qaul.rpc.debug.StoragePathRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathRequest =
   qaul.rpc.debug.StoragePathRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

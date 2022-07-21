@@ -4,15 +4,15 @@
 package qaul.net.router_net_info;
 
 @kotlin.jvm.JvmName("-initializeuserInfoTable")
-public inline fun userInfoTable(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
+inline fun userInfoTable(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
   qaul.net.router_net_info.UserInfoTableKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.UserInfoTable.newBuilder()).apply { block() }._build()
-public object UserInfoTableKt {
+object UserInfoTableKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder): Dsl = Dsl(builder)
@@ -27,11 +27,11 @@ public object UserInfoTableKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class InfoProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class InfoProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      */
-     public val info: com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>
+     val info: com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getInfoList()
@@ -42,7 +42,7 @@ public object UserInfoTableKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addInfo")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.add(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.add(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       _builder.addInfo(value)
     }
     /**
@@ -52,7 +52,7 @@ public object UserInfoTableKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignInfo")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       add(value)
     }
     /**
@@ -61,7 +61,7 @@ public object UserInfoTableKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllInfo")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
       _builder.addAllInfo(values)
     }
     /**
@@ -71,7 +71,7 @@ public object UserInfoTableKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllInfo")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.router_net_info.RouterNetInfo.UserInfo>) {
       addAll(values)
     }
     /**
@@ -81,7 +81,7 @@ public object UserInfoTableKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setInfo")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.set(index: kotlin.Int, value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.set(index: kotlin.Int, value: qaul.net.router_net_info.RouterNetInfo.UserInfo) {
       _builder.setInfo(index, value)
     }
     /**
@@ -89,13 +89,13 @@ public object UserInfoTableKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearInfo")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>.clear() {
       _builder.clearInfo()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.router_net_info.RouterNetInfo.UserInfoTable.copy(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
+inline fun qaul.net.router_net_info.RouterNetInfo.UserInfoTable.copy(block: qaul.net.router_net_info.UserInfoTableKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.UserInfoTable =
   qaul.net.router_net_info.UserInfoTableKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

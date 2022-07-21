@@ -185,32 +185,47 @@ public final class UsersOuterClass {
     qaul.rpc.users.UsersOuterClass.UserRequestOrBuilder getUserRequestOrBuilder();
 
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     * @return Whether the userOnlineRequest field is set.
+     */
+    boolean hasUserOnlineRequest();
+    /**
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     * @return The userOnlineRequest.
+     */
+    qaul.rpc.users.UsersOuterClass.UserOnlineRequest getUserOnlineRequest();
+    /**
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     */
+    qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder getUserOnlineRequestOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return Whether the userList field is set.
      */
     boolean hasUserList();
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return The userList.
      */
     qaul.rpc.users.UsersOuterClass.UserList getUserList();
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserListOrBuilder getUserListOrBuilder();
 
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return Whether the userUpdate field is set.
      */
     boolean hasUserUpdate();
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return The userUpdate.
      */
     qaul.rpc.users.UsersOuterClass.UserEntry getUserUpdate();
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder getUserUpdateOrBuilder();
 
@@ -280,8 +295,22 @@ public final class UsersOuterClass {
               break;
             }
             case 18: {
-              qaul.rpc.users.UsersOuterClass.UserList.Builder subBuilder = null;
+              qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder subBuilder = null;
               if (messageCase_ == 2) {
+                subBuilder = ((qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.users.UsersOuterClass.UserOnlineRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 2;
+              break;
+            }
+            case 26: {
+              qaul.rpc.users.UsersOuterClass.UserList.Builder subBuilder = null;
+              if (messageCase_ == 3) {
                 subBuilder = ((qaul.rpc.users.UsersOuterClass.UserList) message_).toBuilder();
               }
               message_ =
@@ -290,12 +319,12 @@ public final class UsersOuterClass {
                 subBuilder.mergeFrom((qaul.rpc.users.UsersOuterClass.UserList) message_);
                 message_ = subBuilder.buildPartial();
               }
-              messageCase_ = 2;
+              messageCase_ = 3;
               break;
             }
-            case 26: {
+            case 34: {
               qaul.rpc.users.UsersOuterClass.UserEntry.Builder subBuilder = null;
-              if (messageCase_ == 3) {
+              if (messageCase_ == 4) {
                 subBuilder = ((qaul.rpc.users.UsersOuterClass.UserEntry) message_).toBuilder();
               }
               message_ =
@@ -304,7 +333,7 @@ public final class UsersOuterClass {
                 subBuilder.mergeFrom((qaul.rpc.users.UsersOuterClass.UserEntry) message_);
                 message_ = subBuilder.buildPartial();
               }
-              messageCase_ = 3;
+              messageCase_ = 4;
               break;
             }
             default: {
@@ -347,8 +376,9 @@ public final class UsersOuterClass {
         implements com.google.protobuf.Internal.EnumLite,
             com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       USER_REQUEST(1),
-      USER_LIST(2),
-      USER_UPDATE(3),
+      USER_ONLINE_REQUEST(2),
+      USER_LIST(3),
+      USER_UPDATE(4),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -367,8 +397,9 @@ public final class UsersOuterClass {
       public static MessageCase forNumber(int value) {
         switch (value) {
           case 1: return USER_REQUEST;
-          case 2: return USER_LIST;
-          case 3: return USER_UPDATE;
+          case 2: return USER_ONLINE_REQUEST;
+          case 3: return USER_LIST;
+          case 4: return USER_UPDATE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -415,63 +446,94 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserRequest.getDefaultInstance();
     }
 
-    public static final int USER_LIST_FIELD_NUMBER = 2;
+    public static final int USER_ONLINE_REQUEST_FIELD_NUMBER = 2;
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     * @return Whether the userOnlineRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasUserOnlineRequest() {
+      return messageCase_ == 2;
+    }
+    /**
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     * @return The userOnlineRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.UserOnlineRequest getUserOnlineRequest() {
+      if (messageCase_ == 2) {
+         return (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder getUserOnlineRequestOrBuilder() {
+      if (messageCase_ == 2) {
+         return (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+    }
+
+    public static final int USER_LIST_FIELD_NUMBER = 3;
+    /**
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return Whether the userList field is set.
      */
     @java.lang.Override
     public boolean hasUserList() {
-      return messageCase_ == 2;
+      return messageCase_ == 3;
     }
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return The userList.
      */
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserList getUserList() {
-      if (messageCase_ == 2) {
+      if (messageCase_ == 3) {
          return (qaul.rpc.users.UsersOuterClass.UserList) message_;
       }
       return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
     }
     /**
-     * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+     * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserListOrBuilder getUserListOrBuilder() {
-      if (messageCase_ == 2) {
+      if (messageCase_ == 3) {
          return (qaul.rpc.users.UsersOuterClass.UserList) message_;
       }
       return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
     }
 
-    public static final int USER_UPDATE_FIELD_NUMBER = 3;
+    public static final int USER_UPDATE_FIELD_NUMBER = 4;
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return Whether the userUpdate field is set.
      */
     @java.lang.Override
     public boolean hasUserUpdate() {
-      return messageCase_ == 3;
+      return messageCase_ == 4;
     }
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return The userUpdate.
      */
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserEntry getUserUpdate() {
-      if (messageCase_ == 3) {
+      if (messageCase_ == 4) {
          return (qaul.rpc.users.UsersOuterClass.UserEntry) message_;
       }
       return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
     }
     /**
-     * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+     * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder getUserUpdateOrBuilder() {
-      if (messageCase_ == 3) {
+      if (messageCase_ == 4) {
          return (qaul.rpc.users.UsersOuterClass.UserEntry) message_;
       }
       return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
@@ -495,10 +557,13 @@ public final class UsersOuterClass {
         output.writeMessage(1, (qaul.rpc.users.UsersOuterClass.UserRequest) message_);
       }
       if (messageCase_ == 2) {
-        output.writeMessage(2, (qaul.rpc.users.UsersOuterClass.UserList) message_);
+        output.writeMessage(2, (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_);
       }
       if (messageCase_ == 3) {
-        output.writeMessage(3, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
+        output.writeMessage(3, (qaul.rpc.users.UsersOuterClass.UserList) message_);
+      }
+      if (messageCase_ == 4) {
+        output.writeMessage(4, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
       }
       unknownFields.writeTo(output);
     }
@@ -515,11 +580,15 @@ public final class UsersOuterClass {
       }
       if (messageCase_ == 2) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, (qaul.rpc.users.UsersOuterClass.UserList) message_);
+          .computeMessageSize(2, (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_);
       }
       if (messageCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
+          .computeMessageSize(3, (qaul.rpc.users.UsersOuterClass.UserList) message_);
+      }
+      if (messageCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -543,10 +612,14 @@ public final class UsersOuterClass {
               .equals(other.getUserRequest())) return false;
           break;
         case 2:
+          if (!getUserOnlineRequest()
+              .equals(other.getUserOnlineRequest())) return false;
+          break;
+        case 3:
           if (!getUserList()
               .equals(other.getUserList())) return false;
           break;
-        case 3:
+        case 4:
           if (!getUserUpdate()
               .equals(other.getUserUpdate())) return false;
           break;
@@ -570,10 +643,14 @@ public final class UsersOuterClass {
           hash = (53 * hash) + getUserRequest().hashCode();
           break;
         case 2:
+          hash = (37 * hash) + USER_ONLINE_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getUserOnlineRequest().hashCode();
+          break;
+        case 3:
           hash = (37 * hash) + USER_LIST_FIELD_NUMBER;
           hash = (53 * hash) + getUserList().hashCode();
           break;
-        case 3:
+        case 4:
           hash = (37 * hash) + USER_UPDATE_FIELD_NUMBER;
           hash = (53 * hash) + getUserUpdate().hashCode();
           break;
@@ -753,13 +830,20 @@ public final class UsersOuterClass {
           }
         }
         if (messageCase_ == 2) {
+          if (userOnlineRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = userOnlineRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 3) {
           if (userListBuilder_ == null) {
             result.message_ = message_;
           } else {
             result.message_ = userListBuilder_.build();
           }
         }
-        if (messageCase_ == 3) {
+        if (messageCase_ == 4) {
           if (userUpdateBuilder_ == null) {
             result.message_ = message_;
           } else {
@@ -818,6 +902,10 @@ public final class UsersOuterClass {
         switch (other.getMessageCase()) {
           case USER_REQUEST: {
             mergeUserRequest(other.getUserRequest());
+            break;
+          }
+          case USER_ONLINE_REQUEST: {
+            mergeUserOnlineRequest(other.getUserOnlineRequest());
             break;
           }
           case USER_LIST: {
@@ -1019,35 +1107,177 @@ public final class UsersOuterClass {
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.UserOnlineRequest, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder, qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder> userOnlineRequestBuilder_;
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       * @return Whether the userOnlineRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasUserOnlineRequest() {
+        return messageCase_ == 2;
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       * @return The userOnlineRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequest getUserOnlineRequest() {
+        if (userOnlineRequestBuilder_ == null) {
+          if (messageCase_ == 2) {
+            return (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 2) {
+            return userOnlineRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      public Builder setUserOnlineRequest(qaul.rpc.users.UsersOuterClass.UserOnlineRequest value) {
+        if (userOnlineRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          userOnlineRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      public Builder setUserOnlineRequest(
+          qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder builderForValue) {
+        if (userOnlineRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          userOnlineRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      public Builder mergeUserOnlineRequest(qaul.rpc.users.UsersOuterClass.UserOnlineRequest value) {
+        if (userOnlineRequestBuilder_ == null) {
+          if (messageCase_ == 2 &&
+              message_ != qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.users.UsersOuterClass.UserOnlineRequest.newBuilder((qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 2) {
+            userOnlineRequestBuilder_.mergeFrom(value);
+          } else {
+            userOnlineRequestBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      public Builder clearUserOnlineRequest() {
+        if (userOnlineRequestBuilder_ == null) {
+          if (messageCase_ == 2) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 2) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          userOnlineRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder getUserOnlineRequestBuilder() {
+        return getUserOnlineRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder getUserOnlineRequestOrBuilder() {
+        if ((messageCase_ == 2) && (userOnlineRequestBuilder_ != null)) {
+          return userOnlineRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 2) {
+            return (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.UserOnlineRequest, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder, qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder> 
+          getUserOnlineRequestFieldBuilder() {
+        if (userOnlineRequestBuilder_ == null) {
+          if (!(messageCase_ == 2)) {
+            message_ = qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+          }
+          userOnlineRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.users.UsersOuterClass.UserOnlineRequest, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder, qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder>(
+                  (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 2;
+        onChanged();;
+        return userOnlineRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserList, qaul.rpc.users.UsersOuterClass.UserList.Builder, qaul.rpc.users.UsersOuterClass.UserListOrBuilder> userListBuilder_;
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        * @return Whether the userList field is set.
        */
       @java.lang.Override
       public boolean hasUserList() {
-        return messageCase_ == 2;
+        return messageCase_ == 3;
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        * @return The userList.
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserList getUserList() {
         if (userListBuilder_ == null) {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             return (qaul.rpc.users.UsersOuterClass.UserList) message_;
           }
           return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
         } else {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             return userListBuilder_.getMessage();
           }
           return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder setUserList(qaul.rpc.users.UsersOuterClass.UserList value) {
         if (userListBuilder_ == null) {
@@ -1059,11 +1289,11 @@ public final class UsersOuterClass {
         } else {
           userListBuilder_.setMessage(value);
         }
-        messageCase_ = 2;
+        messageCase_ = 3;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder setUserList(
           qaul.rpc.users.UsersOuterClass.UserList.Builder builderForValue) {
@@ -1073,15 +1303,15 @@ public final class UsersOuterClass {
         } else {
           userListBuilder_.setMessage(builderForValue.build());
         }
-        messageCase_ = 2;
+        messageCase_ = 3;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder mergeUserList(qaul.rpc.users.UsersOuterClass.UserList value) {
         if (userListBuilder_ == null) {
-          if (messageCase_ == 2 &&
+          if (messageCase_ == 3 &&
               message_ != qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance()) {
             message_ = qaul.rpc.users.UsersOuterClass.UserList.newBuilder((qaul.rpc.users.UsersOuterClass.UserList) message_)
                 .mergeFrom(value).buildPartial();
@@ -1090,27 +1320,27 @@ public final class UsersOuterClass {
           }
           onChanged();
         } else {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             userListBuilder_.mergeFrom(value);
           } else {
             userListBuilder_.setMessage(value);
           }
         }
-        messageCase_ = 2;
+        messageCase_ = 3;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder clearUserList() {
         if (userListBuilder_ == null) {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             messageCase_ = 0;
             message_ = null;
             onChanged();
           }
         } else {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             messageCase_ = 0;
             message_ = null;
           }
@@ -1119,33 +1349,33 @@ public final class UsersOuterClass {
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserList.Builder getUserListBuilder() {
         return getUserListFieldBuilder().getBuilder();
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserListOrBuilder getUserListOrBuilder() {
-        if ((messageCase_ == 2) && (userListBuilder_ != null)) {
+        if ((messageCase_ == 3) && (userListBuilder_ != null)) {
           return userListBuilder_.getMessageOrBuilder();
         } else {
-          if (messageCase_ == 2) {
+          if (messageCase_ == 3) {
             return (qaul.rpc.users.UsersOuterClass.UserList) message_;
           }
           return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.users.UserList user_list = 2;</code>
+       * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserList, qaul.rpc.users.UsersOuterClass.UserList.Builder, qaul.rpc.users.UsersOuterClass.UserListOrBuilder> 
           getUserListFieldBuilder() {
         if (userListBuilder_ == null) {
-          if (!(messageCase_ == 2)) {
+          if (!(messageCase_ == 3)) {
             message_ = qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
           }
           userListBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -1155,7 +1385,7 @@ public final class UsersOuterClass {
                   isClean());
           message_ = null;
         }
-        messageCase_ = 2;
+        messageCase_ = 3;
         onChanged();;
         return userListBuilder_;
       }
@@ -1163,33 +1393,33 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserEntry, qaul.rpc.users.UsersOuterClass.UserEntry.Builder, qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder> userUpdateBuilder_;
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        * @return Whether the userUpdate field is set.
        */
       @java.lang.Override
       public boolean hasUserUpdate() {
-        return messageCase_ == 3;
+        return messageCase_ == 4;
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        * @return The userUpdate.
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserEntry getUserUpdate() {
         if (userUpdateBuilder_ == null) {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             return (qaul.rpc.users.UsersOuterClass.UserEntry) message_;
           }
           return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
         } else {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             return userUpdateBuilder_.getMessage();
           }
           return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder setUserUpdate(qaul.rpc.users.UsersOuterClass.UserEntry value) {
         if (userUpdateBuilder_ == null) {
@@ -1201,11 +1431,11 @@ public final class UsersOuterClass {
         } else {
           userUpdateBuilder_.setMessage(value);
         }
-        messageCase_ = 3;
+        messageCase_ = 4;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder setUserUpdate(
           qaul.rpc.users.UsersOuterClass.UserEntry.Builder builderForValue) {
@@ -1215,15 +1445,15 @@ public final class UsersOuterClass {
         } else {
           userUpdateBuilder_.setMessage(builderForValue.build());
         }
-        messageCase_ = 3;
+        messageCase_ = 4;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder mergeUserUpdate(qaul.rpc.users.UsersOuterClass.UserEntry value) {
         if (userUpdateBuilder_ == null) {
-          if (messageCase_ == 3 &&
+          if (messageCase_ == 4 &&
               message_ != qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance()) {
             message_ = qaul.rpc.users.UsersOuterClass.UserEntry.newBuilder((qaul.rpc.users.UsersOuterClass.UserEntry) message_)
                 .mergeFrom(value).buildPartial();
@@ -1232,27 +1462,27 @@ public final class UsersOuterClass {
           }
           onChanged();
         } else {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             userUpdateBuilder_.mergeFrom(value);
           } else {
             userUpdateBuilder_.setMessage(value);
           }
         }
-        messageCase_ = 3;
+        messageCase_ = 4;
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder clearUserUpdate() {
         if (userUpdateBuilder_ == null) {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             messageCase_ = 0;
             message_ = null;
             onChanged();
           }
         } else {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             messageCase_ = 0;
             message_ = null;
           }
@@ -1261,33 +1491,33 @@ public final class UsersOuterClass {
         return this;
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserEntry.Builder getUserUpdateBuilder() {
         return getUserUpdateFieldBuilder().getBuilder();
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder getUserUpdateOrBuilder() {
-        if ((messageCase_ == 3) && (userUpdateBuilder_ != null)) {
+        if ((messageCase_ == 4) && (userUpdateBuilder_ != null)) {
           return userUpdateBuilder_.getMessageOrBuilder();
         } else {
-          if (messageCase_ == 3) {
+          if (messageCase_ == 4) {
             return (qaul.rpc.users.UsersOuterClass.UserEntry) message_;
           }
           return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
         }
       }
       /**
-       * <code>.qaul.rpc.users.UserEntry user_update = 3;</code>
+       * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserEntry, qaul.rpc.users.UsersOuterClass.UserEntry.Builder, qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder> 
           getUserUpdateFieldBuilder() {
         if (userUpdateBuilder_ == null) {
-          if (!(messageCase_ == 3)) {
+          if (!(messageCase_ == 4)) {
             message_ = qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
           }
           userUpdateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -1297,7 +1527,7 @@ public final class UsersOuterClass {
                   isClean());
           message_ = null;
         }
-        messageCase_ = 3;
+        messageCase_ = 4;
         onChanged();;
         return userUpdateBuilder_;
       }
@@ -1777,6 +2007,434 @@ public final class UsersOuterClass {
 
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UserOnlineRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.users.UserOnlineRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * UI request for some online users
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.users.UserOnlineRequest}
+   */
+  public static final class UserOnlineRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.users.UserOnlineRequest)
+      UserOnlineRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UserOnlineRequest.newBuilder() to construct.
+    private UserOnlineRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UserOnlineRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UserOnlineRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserOnlineRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.users.UsersOuterClass.UserOnlineRequest.class, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.users.UsersOuterClass.UserOnlineRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.users.UsersOuterClass.UserOnlineRequest other = (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.users.UsersOuterClass.UserOnlineRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * UI request for some online users
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.users.UserOnlineRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.users.UserOnlineRequest)
+        qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.users.UsersOuterClass.UserOnlineRequest.class, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.users.UsersOuterClass.UserOnlineRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequest getDefaultInstanceForType() {
+        return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequest build() {
+        qaul.rpc.users.UsersOuterClass.UserOnlineRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.UserOnlineRequest buildPartial() {
+        qaul.rpc.users.UsersOuterClass.UserOnlineRequest result = new qaul.rpc.users.UsersOuterClass.UserOnlineRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.users.UsersOuterClass.UserOnlineRequest) {
+          return mergeFrom((qaul.rpc.users.UsersOuterClass.UserOnlineRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.users.UsersOuterClass.UserOnlineRequest other) {
+        if (other == qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.users.UsersOuterClass.UserOnlineRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.users.UsersOuterClass.UserOnlineRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.users.UserOnlineRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.users.UserOnlineRequest)
+    private static final qaul.rpc.users.UsersOuterClass.UserOnlineRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.users.UsersOuterClass.UserOnlineRequest();
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UserOnlineRequest>
+        PARSER = new com.google.protobuf.AbstractParser<UserOnlineRequest>() {
+      @java.lang.Override
+      public UserOnlineRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserOnlineRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<UserOnlineRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserOnlineRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.UserOnlineRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4041,6 +4699,11 @@ public final class UsersOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_users_UserRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_users_UserOnlineRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_users_UserOnlineRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_users_UserList_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -4059,20 +4722,22 @@ public final class UsersOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022router/users.proto\022\016qaul.rpc.users\"\250\001\n" +
+      "\n\022router/users.proto\022\016qaul.rpc.users\"\352\001\n" +
       "\005Users\0223\n\014user_request\030\001 \001(\0132\033.qaul.rpc." +
-      "users.UserRequestH\000\022-\n\tuser_list\030\002 \001(\0132\030" +
-      ".qaul.rpc.users.UserListH\000\0220\n\013user_updat" +
-      "e\030\003 \001(\0132\031.qaul.rpc.users.UserEntryH\000B\t\n\007" +
-      "message\"\r\n\013UserRequest\"3\n\010UserList\022\'\n\004us" +
-      "er\030\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\302\001\n\t" +
-      "UserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\021\n\ti" +
-      "d_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010key_type\030" +
-      "\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connectivit" +
-      "y\030\010 \001(\0162\034.qaul.rpc.users.Connectivity\022\020\n" +
-      "\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*6\n\014Conn" +
-      "ectivity\022\n\n\006Online\020\000\022\r\n\tReachable\020\001\022\013\n\007O" +
-      "ffline\020\002b\006proto3"
+      "users.UserRequestH\000\022@\n\023user_online_reque" +
+      "st\030\002 \001(\0132!.qaul.rpc.users.UserOnlineRequ" +
+      "estH\000\022-\n\tuser_list\030\003 \001(\0132\030.qaul.rpc.user" +
+      "s.UserListH\000\0220\n\013user_update\030\004 \001(\0132\031.qaul" +
+      ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use" +
+      "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis" +
+      "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt" +
+      "ry\"\302\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
+      "(\014\022\021\n\tid_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010ke" +
+      "y_type\030\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014conn" +
+      "ectivity\030\010 \001(\0162\034.qaul.rpc.users.Connecti" +
+      "vity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*" +
+      "6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tReachable" +
+      "\020\001\022\013\n\007Offline\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4083,21 +4748,27 @@ public final class UsersOuterClass {
     internal_static_qaul_rpc_users_Users_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_Users_descriptor,
-        new java.lang.String[] { "UserRequest", "UserList", "UserUpdate", "Message", });
+        new java.lang.String[] { "UserRequest", "UserOnlineRequest", "UserList", "UserUpdate", "Message", });
     internal_static_qaul_rpc_users_UserRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_users_UserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserRequest_descriptor,
         new java.lang.String[] { });
-    internal_static_qaul_rpc_users_UserList_descriptor =
+    internal_static_qaul_rpc_users_UserOnlineRequest_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_qaul_rpc_users_UserOnlineRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_users_UserOnlineRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_qaul_rpc_users_UserList_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_qaul_rpc_users_UserList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserList_descriptor,
         new java.lang.String[] { "User", });
     internal_static_qaul_rpc_users_UserEntry_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserEntry_descriptor,

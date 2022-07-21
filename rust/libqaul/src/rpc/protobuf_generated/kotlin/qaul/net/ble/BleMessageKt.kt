@@ -4,15 +4,15 @@
 package qaul.net.ble;
 
 @kotlin.jvm.JvmName("-initializebleMessage")
-public inline fun bleMessage(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
+inline fun bleMessage(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
   qaul.net.ble.BleMessageKt.Dsl._create(qaul.net.ble.BleNet.BleMessage.newBuilder()).apply { block() }._build()
-public object BleMessageKt {
+object BleMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.ble.BleNet.BleMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.ble.BleNet.BleMessage.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleMessageKt {
      *
      * <code>bytes info = 1;</code>
      */
-    public var info: com.google.protobuf.ByteString
+    var info: com.google.protobuf.ByteString
       @JvmName("getInfo")
       get() = _builder.getInfo()
       @JvmName("setInfo")
@@ -43,7 +43,7 @@ public object BleMessageKt {
      *
      * <code>bytes info = 1;</code>
      */
-    public fun clearInfo() {
+    fun clearInfo() {
       _builder.clearInfo()
     }
     /**
@@ -54,7 +54,7 @@ public object BleMessageKt {
      * <code>bytes info = 1;</code>
      * @return Whether the info field is set.
      */
-    public fun hasInfo(): kotlin.Boolean {
+    fun hasInfo(): kotlin.Boolean {
       return _builder.hasInfo()
     }
 
@@ -65,7 +65,7 @@ public object BleMessageKt {
      *
      * <code>bytes feed = 2;</code>
      */
-    public var feed: com.google.protobuf.ByteString
+    var feed: com.google.protobuf.ByteString
       @JvmName("getFeed")
       get() = _builder.getFeed()
       @JvmName("setFeed")
@@ -79,7 +79,7 @@ public object BleMessageKt {
      *
      * <code>bytes feed = 2;</code>
      */
-    public fun clearFeed() {
+    fun clearFeed() {
       _builder.clearFeed()
     }
     /**
@@ -90,7 +90,7 @@ public object BleMessageKt {
      * <code>bytes feed = 2;</code>
      * @return Whether the feed field is set.
      */
-    public fun hasFeed(): kotlin.Boolean {
+    fun hasFeed(): kotlin.Boolean {
       return _builder.hasFeed()
     }
 
@@ -101,7 +101,7 @@ public object BleMessageKt {
      *
      * <code>bytes messaging = 3;</code>
      */
-    public var messaging: com.google.protobuf.ByteString
+    var messaging: com.google.protobuf.ByteString
       @JvmName("getMessaging")
       get() = _builder.getMessaging()
       @JvmName("setMessaging")
@@ -115,7 +115,7 @@ public object BleMessageKt {
      *
      * <code>bytes messaging = 3;</code>
      */
-    public fun clearMessaging() {
+    fun clearMessaging() {
       _builder.clearMessaging()
     }
     /**
@@ -126,7 +126,7 @@ public object BleMessageKt {
      * <code>bytes messaging = 3;</code>
      * @return Whether the messaging field is set.
      */
-    public fun hasMessaging(): kotlin.Boolean {
+    fun hasMessaging(): kotlin.Boolean {
       return _builder.hasMessaging()
     }
 
@@ -137,7 +137,7 @@ public object BleMessageKt {
      *
      * <code>.qaul.net.ble.Identification identification = 4;</code>
      */
-    public var identification: qaul.net.ble.BleNet.Identification
+    var identification: qaul.net.ble.BleNet.Identification
       @JvmName("getIdentification")
       get() = _builder.getIdentification()
       @JvmName("setIdentification")
@@ -151,7 +151,7 @@ public object BleMessageKt {
      *
      * <code>.qaul.net.ble.Identification identification = 4;</code>
      */
-    public fun clearIdentification() {
+    fun clearIdentification() {
       _builder.clearIdentification()
     }
     /**
@@ -162,20 +162,20 @@ public object BleMessageKt {
      * <code>.qaul.net.ble.Identification identification = 4;</code>
      * @return Whether the identification field is set.
      */
-    public fun hasIdentification(): kotlin.Boolean {
+    fun hasIdentification(): kotlin.Boolean {
       return _builder.hasIdentification()
     }
-    public val messageCase: qaul.net.ble.BleNet.BleMessage.MessageCase
+    val messageCase: qaul.net.ble.BleNet.BleMessage.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.ble.BleNet.BleMessage.copy(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
+inline fun qaul.net.ble.BleNet.BleMessage.copy(block: qaul.net.ble.BleMessageKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.BleMessage =
   qaul.net.ble.BleMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.net.ble.BleNet.BleMessageOrBuilder.identificationOrNull: qaul.net.ble.BleNet.Identification?

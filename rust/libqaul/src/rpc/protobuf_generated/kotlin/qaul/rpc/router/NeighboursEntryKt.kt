@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmName("-initializeneighboursEntry")
-public inline fun neighboursEntry(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
+inline fun neighboursEntry(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
   qaul.rpc.router.NeighboursEntryKt.Dsl._create(qaul.rpc.router.RouterOuterClass.NeighboursEntry.newBuilder()).apply { block() }._build()
-public object NeighboursEntryKt {
+object NeighboursEntryKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.NeighboursEntry.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object NeighboursEntryKt {
      *
      * <code>bytes node_id = 1;</code>
      */
-    public var nodeId: com.google.protobuf.ByteString
+    var nodeId: com.google.protobuf.ByteString
       @JvmName("getNodeId")
       get() = _builder.getNodeId()
       @JvmName("setNodeId")
@@ -43,7 +43,7 @@ public object NeighboursEntryKt {
      *
      * <code>bytes node_id = 1;</code>
      */
-    public fun clearNodeId() {
+    fun clearNodeId() {
       _builder.clearNodeId()
     }
 
@@ -54,7 +54,7 @@ public object NeighboursEntryKt {
      *
      * <code>uint32 rtt = 2;</code>
      */
-    public var rtt: kotlin.Int
+    var rtt: kotlin.Int
       @JvmName("getRtt")
       get() = _builder.getRtt()
       @JvmName("setRtt")
@@ -68,12 +68,12 @@ public object NeighboursEntryKt {
      *
      * <code>uint32 rtt = 2;</code>
      */
-    public fun clearRtt() {
+    fun clearRtt() {
       _builder.clearRtt()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.router.RouterOuterClass.NeighboursEntry.copy(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
+inline fun qaul.rpc.router.RouterOuterClass.NeighboursEntry.copy(block: qaul.rpc.router.NeighboursEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.NeighboursEntry =
   qaul.rpc.router.NeighboursEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

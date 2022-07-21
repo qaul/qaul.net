@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatMessageSend")
-public inline fun chatMessageSend(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
+inline fun chatMessageSend(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
   qaul.rpc.chat.ChatMessageSendKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatMessageSend.newBuilder()).apply { block() }._build()
-public object ChatMessageSendKt {
+object ChatMessageSendKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatMessageSend.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatMessageSend.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ChatMessageSendKt {
      *
      * <code>bytes conversation_id = 1;</code>
      */
-    public var conversationId: com.google.protobuf.ByteString
+    var conversationId: com.google.protobuf.ByteString
       @JvmName("getConversationId")
       get() = _builder.getConversationId()
       @JvmName("setConversationId")
@@ -43,7 +43,7 @@ public object ChatMessageSendKt {
      *
      * <code>bytes conversation_id = 1;</code>
      */
-    public fun clearConversationId() {
+    fun clearConversationId() {
       _builder.clearConversationId()
     }
 
@@ -54,7 +54,7 @@ public object ChatMessageSendKt {
      *
      * <code>string content = 2;</code>
      */
-    public var content: kotlin.String
+    var content: kotlin.String
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -68,12 +68,12 @@ public object ChatMessageSendKt {
      *
      * <code>string content = 2;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatMessageSend.copy(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatMessageSend.copy(block: qaul.rpc.chat.ChatMessageSendKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessageSend =
   qaul.rpc.chat.ChatMessageSendKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

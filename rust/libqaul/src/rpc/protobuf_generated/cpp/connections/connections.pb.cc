@@ -24,8 +24,10 @@ namespace qaul {
 namespace rpc {
 namespace connections {
 PROTOBUF_CONSTEXPR Connections::Connections(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct ConnectionsDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ConnectionsDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,7 +38,7 @@ struct ConnectionsDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsDefaultTypeInternal _Connections_default_instance_;
 PROTOBUF_CONSTEXPR InternetNodesRequest::InternetNodesRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct InternetNodesRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR InternetNodesRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -47,10 +49,10 @@ struct InternetNodesRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InternetNodesRequestDefaultTypeInternal _InternetNodesRequest_default_instance_;
 PROTOBUF_CONSTEXPR InternetNodesList::InternetNodesList(
-    ::_pbi::ConstantInitialized)
-  : nodes_()
-  , info_(0)
-{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.nodes_)*/{}
+  , /*decltype(_impl_.info_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct InternetNodesListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR InternetNodesListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -61,8 +63,9 @@ struct InternetNodesListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InternetNodesListDefaultTypeInternal _InternetNodesList_default_instance_;
 PROTOBUF_CONSTEXPR InternetNodesEntry::InternetNodesEntry(
-    ::_pbi::ConstantInitialized)
-  : address_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct InternetNodesEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR InternetNodesEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -83,14 +86,14 @@ const uint32_t TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::Connections, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -103,15 +106,15 @@ const uint32_t TableStruct_connections_2fconnections_2eproto::offsets[] PROTOBUF
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, info_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, nodes_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, _impl_.info_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesList, _impl_.nodes_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesEntry, address_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::connections::InternetNodesEntry, _impl_.address_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::connections::Connections)},
@@ -194,19 +197,19 @@ class Connections::_Internal {
 
 const ::qaul::rpc::connections::InternetNodesRequest&
 Connections::_Internal::internet_nodes_request(const Connections* msg) {
-  return *msg->message_.internet_nodes_request_;
+  return *msg->_impl_.message_.internet_nodes_request_;
 }
 const ::qaul::rpc::connections::InternetNodesList&
 Connections::_Internal::internet_nodes_list(const Connections* msg) {
-  return *msg->message_.internet_nodes_list_;
+  return *msg->_impl_.message_.internet_nodes_list_;
 }
 const ::qaul::rpc::connections::InternetNodesEntry&
 Connections::_Internal::internet_nodes_add(const Connections* msg) {
-  return *msg->message_.internet_nodes_add_;
+  return *msg->_impl_.message_.internet_nodes_add_;
 }
 const ::qaul::rpc::connections::InternetNodesEntry&
 Connections::_Internal::internet_nodes_remove(const Connections* msg) {
-  return *msg->message_.internet_nodes_remove_;
+  return *msg->_impl_.message_.internet_nodes_remove_;
 }
 void Connections::set_allocated_internet_nodes_request(::qaul::rpc::connections::InternetNodesRequest* internet_nodes_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -219,7 +222,7 @@ void Connections::set_allocated_internet_nodes_request(::qaul::rpc::connections:
           message_arena, internet_nodes_request, submessage_arena);
     }
     set_has_internet_nodes_request();
-    message_.internet_nodes_request_ = internet_nodes_request;
+    _impl_.message_.internet_nodes_request_ = internet_nodes_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.connections.Connections.internet_nodes_request)
 }
@@ -234,7 +237,7 @@ void Connections::set_allocated_internet_nodes_list(::qaul::rpc::connections::In
           message_arena, internet_nodes_list, submessage_arena);
     }
     set_has_internet_nodes_list();
-    message_.internet_nodes_list_ = internet_nodes_list;
+    _impl_.message_.internet_nodes_list_ = internet_nodes_list;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.connections.Connections.internet_nodes_list)
 }
@@ -249,7 +252,7 @@ void Connections::set_allocated_internet_nodes_add(::qaul::rpc::connections::Int
           message_arena, internet_nodes_add, submessage_arena);
     }
     set_has_internet_nodes_add();
-    message_.internet_nodes_add_ = internet_nodes_add;
+    _impl_.message_.internet_nodes_add_ = internet_nodes_add;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.connections.Connections.internet_nodes_add)
 }
@@ -264,35 +267,45 @@ void Connections::set_allocated_internet_nodes_remove(::qaul::rpc::connections::
           message_arena, internet_nodes_remove, submessage_arena);
     }
     set_has_internet_nodes_remove();
-    message_.internet_nodes_remove_ = internet_nodes_remove;
+    _impl_.message_.internet_nodes_remove_ = internet_nodes_remove;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.connections.Connections.internet_nodes_remove)
 }
 Connections::Connections(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.Connections)
 }
 Connections::Connections(const Connections& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Connections* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kInternetNodesRequest: {
-      _internal_mutable_internet_nodes_request()->::qaul::rpc::connections::InternetNodesRequest::MergeFrom(from._internal_internet_nodes_request());
+      _this->_internal_mutable_internet_nodes_request()->::qaul::rpc::connections::InternetNodesRequest::MergeFrom(
+          from._internal_internet_nodes_request());
       break;
     }
     case kInternetNodesList: {
-      _internal_mutable_internet_nodes_list()->::qaul::rpc::connections::InternetNodesList::MergeFrom(from._internal_internet_nodes_list());
+      _this->_internal_mutable_internet_nodes_list()->::qaul::rpc::connections::InternetNodesList::MergeFrom(
+          from._internal_internet_nodes_list());
       break;
     }
     case kInternetNodesAdd: {
-      _internal_mutable_internet_nodes_add()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(from._internal_internet_nodes_add());
+      _this->_internal_mutable_internet_nodes_add()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(
+          from._internal_internet_nodes_add());
       break;
     }
     case kInternetNodesRemove: {
-      _internal_mutable_internet_nodes_remove()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(from._internal_internet_nodes_remove());
+      _this->_internal_mutable_internet_nodes_remove()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(
+          from._internal_internet_nodes_remove());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -302,8 +315,16 @@ Connections::Connections(const Connections& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.Connections)
 }
 
-inline void Connections::SharedCtor() {
-clear_has_message();
+inline void Connections::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Connections::~Connections() {
@@ -323,7 +344,7 @@ inline void Connections::SharedDtor() {
 }
 
 void Connections::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Connections::clear_message() {
@@ -331,25 +352,25 @@ void Connections::clear_message() {
   switch (message_case()) {
     case kInternetNodesRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.internet_nodes_request_;
+        delete _impl_.message_.internet_nodes_request_;
       }
       break;
     }
     case kInternetNodesList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.internet_nodes_list_;
+        delete _impl_.message_.internet_nodes_list_;
       }
       break;
     }
     case kInternetNodesAdd: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.internet_nodes_add_;
+        delete _impl_.message_.internet_nodes_add_;
       }
       break;
     }
     case kInternetNodesRemove: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.internet_nodes_remove_;
+        delete _impl_.message_.internet_nodes_remove_;
       }
       break;
     }
@@ -357,7 +378,7 @@ void Connections::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -487,78 +508,78 @@ size_t Connections::ByteSizeLong() const {
     case kInternetNodesRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.internet_nodes_request_);
+          *_impl_.message_.internet_nodes_request_);
       break;
     }
     // .qaul.rpc.connections.InternetNodesList internet_nodes_list = 2;
     case kInternetNodesList: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.internet_nodes_list_);
+          *_impl_.message_.internet_nodes_list_);
       break;
     }
     // .qaul.rpc.connections.InternetNodesEntry internet_nodes_add = 3;
     case kInternetNodesAdd: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.internet_nodes_add_);
+          *_impl_.message_.internet_nodes_add_);
       break;
     }
     // .qaul.rpc.connections.InternetNodesEntry internet_nodes_remove = 4;
     case kInternetNodesRemove: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.internet_nodes_remove_);
+          *_impl_.message_.internet_nodes_remove_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Connections::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Connections::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Connections::GetClassData() const { return &_class_data_; }
 
-void Connections::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Connections *>(to)->MergeFrom(
-      static_cast<const Connections &>(from));
-}
 
-
-void Connections::MergeFrom(const Connections& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.Connections)
-  GOOGLE_DCHECK_NE(&from, this);
+void Connections::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Connections*>(&to_msg);
+  auto& from = static_cast<const Connections&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.Connections)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kInternetNodesRequest: {
-      _internal_mutable_internet_nodes_request()->::qaul::rpc::connections::InternetNodesRequest::MergeFrom(from._internal_internet_nodes_request());
+      _this->_internal_mutable_internet_nodes_request()->::qaul::rpc::connections::InternetNodesRequest::MergeFrom(
+          from._internal_internet_nodes_request());
       break;
     }
     case kInternetNodesList: {
-      _internal_mutable_internet_nodes_list()->::qaul::rpc::connections::InternetNodesList::MergeFrom(from._internal_internet_nodes_list());
+      _this->_internal_mutable_internet_nodes_list()->::qaul::rpc::connections::InternetNodesList::MergeFrom(
+          from._internal_internet_nodes_list());
       break;
     }
     case kInternetNodesAdd: {
-      _internal_mutable_internet_nodes_add()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(from._internal_internet_nodes_add());
+      _this->_internal_mutable_internet_nodes_add()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(
+          from._internal_internet_nodes_add());
       break;
     }
     case kInternetNodesRemove: {
-      _internal_mutable_internet_nodes_remove()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(from._internal_internet_nodes_remove());
+      _this->_internal_mutable_internet_nodes_remove()->::qaul::rpc::connections::InternetNodesEntry::MergeFrom(
+          from._internal_internet_nodes_remove());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Connections::CopyFrom(const Connections& from) {
@@ -575,8 +596,8 @@ bool Connections::IsInitialized() const {
 void Connections::InternalSwap(Connections* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Connections::GetMetadata() const {
@@ -598,6 +619,7 @@ InternetNodesRequest::InternetNodesRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena
 }
 InternetNodesRequest::InternetNodesRequest(const InternetNodesRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  InternetNodesRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.InternetNodesRequest)
 }
@@ -632,21 +654,32 @@ class InternetNodesList::_Internal {
 
 InternetNodesList::InternetNodesList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  nodes_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.InternetNodesList)
 }
 InternetNodesList::InternetNodesList(const InternetNodesList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      nodes_(from.nodes_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  InternetNodesList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.nodes_){from._impl_.nodes_}
+    , decltype(_impl_.info_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  info_ = from.info_;
+  _this->_impl_.info_ = from._impl_.info_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.InternetNodesList)
 }
 
-inline void InternetNodesList::SharedCtor() {
-info_ = 0;
+inline void InternetNodesList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.nodes_){arena}
+    , decltype(_impl_.info_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 InternetNodesList::~InternetNodesList() {
@@ -660,10 +693,11 @@ InternetNodesList::~InternetNodesList() {
 
 inline void InternetNodesList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.nodes_.~RepeatedPtrField();
 }
 
 void InternetNodesList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void InternetNodesList::Clear() {
@@ -672,8 +706,8 @@ void InternetNodesList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  nodes_.Clear();
-  info_ = 0;
+  _impl_.nodes_.Clear();
+  _impl_.info_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -767,7 +801,7 @@ size_t InternetNodesList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;
   total_size += 1UL * this->_internal_nodes_size();
-  for (const auto& msg : this->nodes_) {
+  for (const auto& msg : this->_impl_.nodes_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -778,33 +812,29 @@ size_t InternetNodesList::ByteSizeLong() const {
       ::_pbi::WireFormatLite::EnumSize(this->_internal_info());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData InternetNodesList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     InternetNodesList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*InternetNodesList::GetClassData() const { return &_class_data_; }
 
-void InternetNodesList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<InternetNodesList *>(to)->MergeFrom(
-      static_cast<const InternetNodesList &>(from));
-}
 
-
-void InternetNodesList::MergeFrom(const InternetNodesList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.InternetNodesList)
-  GOOGLE_DCHECK_NE(&from, this);
+void InternetNodesList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<InternetNodesList*>(&to_msg);
+  auto& from = static_cast<const InternetNodesList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.InternetNodesList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  nodes_.MergeFrom(from.nodes_);
+  _this->_impl_.nodes_.MergeFrom(from._impl_.nodes_);
   if (from._internal_info() != 0) {
-    _internal_set_info(from._internal_info());
+    _this->_internal_set_info(from._internal_info());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void InternetNodesList::CopyFrom(const InternetNodesList& from) {
@@ -821,8 +851,8 @@ bool InternetNodesList::IsInitialized() const {
 void InternetNodesList::InternalSwap(InternetNodesList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  nodes_.InternalSwap(&other->nodes_);
-  swap(info_, other->info_);
+  _impl_.nodes_.InternalSwap(&other->_impl_.nodes_);
+  swap(_impl_.info_, other->_impl_.info_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InternetNodesList::GetMetadata() const {
@@ -840,28 +870,40 @@ class InternetNodesEntry::_Internal {
 InternetNodesEntry::InternetNodesEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.connections.InternetNodesEntry)
 }
 InternetNodesEntry::InternetNodesEntry(const InternetNodesEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  InternetNodesEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.address_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  address_.InitDefault();
+  _impl_.address_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    address_.Set("", GetArenaForAllocation());
+    _impl_.address_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_address().empty()) {
-    address_.Set(from._internal_address(), 
-      GetArenaForAllocation());
+    _this->_impl_.address_.Set(from._internal_address(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.connections.InternetNodesEntry)
 }
 
-inline void InternetNodesEntry::SharedCtor() {
-address_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  address_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void InternetNodesEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.address_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.address_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.address_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 InternetNodesEntry::~InternetNodesEntry() {
@@ -875,11 +917,11 @@ InternetNodesEntry::~InternetNodesEntry() {
 
 inline void InternetNodesEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  address_.Destroy();
+  _impl_.address_.Destroy();
 }
 
 void InternetNodesEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void InternetNodesEntry::Clear() {
@@ -888,7 +930,7 @@ void InternetNodesEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  address_.ClearToEmpty();
+  _impl_.address_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -970,32 +1012,28 @@ size_t InternetNodesEntry::ByteSizeLong() const {
         this->_internal_address());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData InternetNodesEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     InternetNodesEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*InternetNodesEntry::GetClassData() const { return &_class_data_; }
 
-void InternetNodesEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<InternetNodesEntry *>(to)->MergeFrom(
-      static_cast<const InternetNodesEntry &>(from));
-}
 
-
-void InternetNodesEntry::MergeFrom(const InternetNodesEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.InternetNodesEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void InternetNodesEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<InternetNodesEntry*>(&to_msg);
+  auto& from = static_cast<const InternetNodesEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.connections.InternetNodesEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_address().empty()) {
-    _internal_set_address(from._internal_address());
+    _this->_internal_set_address(from._internal_address());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void InternetNodesEntry::CopyFrom(const InternetNodesEntry& from) {
@@ -1015,8 +1053,8 @@ void InternetNodesEntry::InternalSwap(InternetNodesEntry* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &address_, lhs_arena,
-      &other->address_, rhs_arena
+      &_impl_.address_, lhs_arena,
+      &other->_impl_.address_, rhs_arena
   );
 }
 

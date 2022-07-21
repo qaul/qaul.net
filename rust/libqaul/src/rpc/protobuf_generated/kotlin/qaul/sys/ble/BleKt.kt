@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializeble")
-public inline fun ble(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
+inline fun ble(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(qaul.sys.ble.BleOuterClass.Ble.newBuilder()).apply { block() }._build()
-public object BleKt {
+object BleKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.Ble.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.Ble.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      */
-    public var infoRequest: qaul.sys.ble.BleOuterClass.BleInfoRequest
+    var infoRequest: qaul.sys.ble.BleOuterClass.BleInfoRequest
       @JvmName("getInfoRequest")
       get() = _builder.getInfoRequest()
       @JvmName("setInfoRequest")
@@ -43,7 +43,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      */
-    public fun clearInfoRequest() {
+    fun clearInfoRequest() {
       _builder.clearInfoRequest()
     }
     /**
@@ -54,7 +54,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleInfoRequest info_request = 1;</code>
      * @return Whether the infoRequest field is set.
      */
-    public fun hasInfoRequest(): kotlin.Boolean {
+    fun hasInfoRequest(): kotlin.Boolean {
       return _builder.hasInfoRequest()
     }
 
@@ -65,7 +65,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      */
-    public var infoResponse: qaul.sys.ble.BleOuterClass.BleInfoResponse
+    var infoResponse: qaul.sys.ble.BleOuterClass.BleInfoResponse
       @JvmName("getInfoResponse")
       get() = _builder.getInfoResponse()
       @JvmName("setInfoResponse")
@@ -79,7 +79,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      */
-    public fun clearInfoResponse() {
+    fun clearInfoResponse() {
       _builder.clearInfoResponse()
     }
     /**
@@ -90,7 +90,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleInfoResponse info_response = 2;</code>
      * @return Whether the infoResponse field is set.
      */
-    public fun hasInfoResponse(): kotlin.Boolean {
+    fun hasInfoResponse(): kotlin.Boolean {
       return _builder.hasInfoResponse()
     }
 
@@ -101,7 +101,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      */
-    public var startRequest: qaul.sys.ble.BleOuterClass.BleStartRequest
+    var startRequest: qaul.sys.ble.BleOuterClass.BleStartRequest
       @JvmName("getStartRequest")
       get() = _builder.getStartRequest()
       @JvmName("setStartRequest")
@@ -115,7 +115,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      */
-    public fun clearStartRequest() {
+    fun clearStartRequest() {
       _builder.clearStartRequest()
     }
     /**
@@ -126,7 +126,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleStartRequest start_request = 3;</code>
      * @return Whether the startRequest field is set.
      */
-    public fun hasStartRequest(): kotlin.Boolean {
+    fun hasStartRequest(): kotlin.Boolean {
       return _builder.hasStartRequest()
     }
 
@@ -137,7 +137,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      */
-    public var startResult: qaul.sys.ble.BleOuterClass.BleStartResult
+    var startResult: qaul.sys.ble.BleOuterClass.BleStartResult
       @JvmName("getStartResult")
       get() = _builder.getStartResult()
       @JvmName("setStartResult")
@@ -151,7 +151,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      */
-    public fun clearStartResult() {
+    fun clearStartResult() {
       _builder.clearStartResult()
     }
     /**
@@ -162,7 +162,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleStartResult start_result = 4;</code>
      * @return Whether the startResult field is set.
      */
-    public fun hasStartResult(): kotlin.Boolean {
+    fun hasStartResult(): kotlin.Boolean {
       return _builder.hasStartResult()
     }
 
@@ -173,7 +173,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStopRequest stop_request = 5;</code>
      */
-    public var stopRequest: qaul.sys.ble.BleOuterClass.BleStopRequest
+    var stopRequest: qaul.sys.ble.BleOuterClass.BleStopRequest
       @JvmName("getStopRequest")
       get() = _builder.getStopRequest()
       @JvmName("setStopRequest")
@@ -187,7 +187,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStopRequest stop_request = 5;</code>
      */
-    public fun clearStopRequest() {
+    fun clearStopRequest() {
       _builder.clearStopRequest()
     }
     /**
@@ -198,7 +198,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleStopRequest stop_request = 5;</code>
      * @return Whether the stopRequest field is set.
      */
-    public fun hasStopRequest(): kotlin.Boolean {
+    fun hasStopRequest(): kotlin.Boolean {
       return _builder.hasStopRequest()
     }
 
@@ -209,7 +209,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStopResult stop_result = 6;</code>
      */
-    public var stopResult: qaul.sys.ble.BleOuterClass.BleStopResult
+    var stopResult: qaul.sys.ble.BleOuterClass.BleStopResult
       @JvmName("getStopResult")
       get() = _builder.getStopResult()
       @JvmName("setStopResult")
@@ -223,7 +223,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleStopResult stop_result = 6;</code>
      */
-    public fun clearStopResult() {
+    fun clearStopResult() {
       _builder.clearStopResult()
     }
     /**
@@ -234,7 +234,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleStopResult stop_result = 6;</code>
      * @return Whether the stopResult field is set.
      */
-    public fun hasStopResult(): kotlin.Boolean {
+    fun hasStopResult(): kotlin.Boolean {
       return _builder.hasStopResult()
     }
 
@@ -245,7 +245,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDeviceDiscovered device_discovered = 7;</code>
      */
-    public var deviceDiscovered: qaul.sys.ble.BleOuterClass.BleDeviceDiscovered
+    var deviceDiscovered: qaul.sys.ble.BleOuterClass.BleDeviceDiscovered
       @JvmName("getDeviceDiscovered")
       get() = _builder.getDeviceDiscovered()
       @JvmName("setDeviceDiscovered")
@@ -259,7 +259,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDeviceDiscovered device_discovered = 7;</code>
      */
-    public fun clearDeviceDiscovered() {
+    fun clearDeviceDiscovered() {
       _builder.clearDeviceDiscovered()
     }
     /**
@@ -270,7 +270,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleDeviceDiscovered device_discovered = 7;</code>
      * @return Whether the deviceDiscovered field is set.
      */
-    public fun hasDeviceDiscovered(): kotlin.Boolean {
+    fun hasDeviceDiscovered(): kotlin.Boolean {
       return _builder.hasDeviceDiscovered()
     }
 
@@ -281,7 +281,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDeviceUnavailable device_unavailable = 8;</code>
      */
-    public var deviceUnavailable: qaul.sys.ble.BleOuterClass.BleDeviceUnavailable
+    var deviceUnavailable: qaul.sys.ble.BleOuterClass.BleDeviceUnavailable
       @JvmName("getDeviceUnavailable")
       get() = _builder.getDeviceUnavailable()
       @JvmName("setDeviceUnavailable")
@@ -295,7 +295,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDeviceUnavailable device_unavailable = 8;</code>
      */
-    public fun clearDeviceUnavailable() {
+    fun clearDeviceUnavailable() {
       _builder.clearDeviceUnavailable()
     }
     /**
@@ -306,7 +306,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleDeviceUnavailable device_unavailable = 8;</code>
      * @return Whether the deviceUnavailable field is set.
      */
-    public fun hasDeviceUnavailable(): kotlin.Boolean {
+    fun hasDeviceUnavailable(): kotlin.Boolean {
       return _builder.hasDeviceUnavailable()
     }
 
@@ -317,7 +317,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 9;</code>
      */
-    public var directSend: qaul.sys.ble.BleOuterClass.BleDirectSend
+    var directSend: qaul.sys.ble.BleOuterClass.BleDirectSend
       @JvmName("getDirectSend")
       get() = _builder.getDirectSend()
       @JvmName("setDirectSend")
@@ -331,7 +331,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 9;</code>
      */
-    public fun clearDirectSend() {
+    fun clearDirectSend() {
       _builder.clearDirectSend()
     }
     /**
@@ -342,7 +342,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleDirectSend direct_send = 9;</code>
      * @return Whether the directSend field is set.
      */
-    public fun hasDirectSend(): kotlin.Boolean {
+    fun hasDirectSend(): kotlin.Boolean {
       return _builder.hasDirectSend()
     }
 
@@ -353,7 +353,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSendResult direct_send_result = 10;</code>
      */
-    public var directSendResult: qaul.sys.ble.BleOuterClass.BleDirectSendResult
+    var directSendResult: qaul.sys.ble.BleOuterClass.BleDirectSendResult
       @JvmName("getDirectSendResult")
       get() = _builder.getDirectSendResult()
       @JvmName("setDirectSendResult")
@@ -367,7 +367,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectSendResult direct_send_result = 10;</code>
      */
-    public fun clearDirectSendResult() {
+    fun clearDirectSendResult() {
       _builder.clearDirectSendResult()
     }
     /**
@@ -378,7 +378,7 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleDirectSendResult direct_send_result = 10;</code>
      * @return Whether the directSendResult field is set.
      */
-    public fun hasDirectSendResult(): kotlin.Boolean {
+    fun hasDirectSendResult(): kotlin.Boolean {
       return _builder.hasDirectSendResult()
     }
 
@@ -389,7 +389,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 11;</code>
      */
-    public var directReceived: qaul.sys.ble.BleOuterClass.BleDirectReceived
+    var directReceived: qaul.sys.ble.BleOuterClass.BleDirectReceived
       @JvmName("getDirectReceived")
       get() = _builder.getDirectReceived()
       @JvmName("setDirectReceived")
@@ -403,7 +403,7 @@ public object BleKt {
      *
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 11;</code>
      */
-    public fun clearDirectReceived() {
+    fun clearDirectReceived() {
       _builder.clearDirectReceived()
     }
     /**
@@ -414,20 +414,20 @@ public object BleKt {
      * <code>.qaul.sys.ble.BleDirectReceived direct_received = 11;</code>
      * @return Whether the directReceived field is set.
      */
-    public fun hasDirectReceived(): kotlin.Boolean {
+    fun hasDirectReceived(): kotlin.Boolean {
       return _builder.hasDirectReceived()
     }
-    public val messageCase: qaul.sys.ble.BleOuterClass.Ble.MessageCase
+    val messageCase: qaul.sys.ble.BleOuterClass.Ble.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.Ble.copy(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
+inline fun qaul.sys.ble.BleOuterClass.Ble.copy(block: qaul.sys.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.Ble =
   qaul.sys.ble.BleKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.sys.ble.BleOuterClass.BleOrBuilder.infoRequestOrNull: qaul.sys.ble.BleOuterClass.BleInfoRequest?

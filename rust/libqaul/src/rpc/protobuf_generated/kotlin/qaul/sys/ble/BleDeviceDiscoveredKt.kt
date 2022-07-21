@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDeviceDiscovered")
-public inline fun bleDeviceDiscovered(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
+inline fun bleDeviceDiscovered(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
   qaul.sys.ble.BleDeviceDiscoveredKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.newBuilder()).apply { block() }._build()
-public object BleDeviceDiscoveredKt {
+object BleDeviceDiscoveredKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleDeviceDiscoveredKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public var qaulId: com.google.protobuf.ByteString
+    var qaulId: com.google.protobuf.ByteString
       @JvmName("getQaulId")
       get() = _builder.getQaulId()
       @JvmName("setQaulId")
@@ -43,7 +43,7 @@ public object BleDeviceDiscoveredKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public fun clearQaulId() {
+    fun clearQaulId() {
       _builder.clearQaulId()
     }
 
@@ -54,7 +54,7 @@ public object BleDeviceDiscoveredKt {
      *
      * <code>int32 rssi = 2;</code>
      */
-    public var rssi: kotlin.Int
+    var rssi: kotlin.Int
       @JvmName("getRssi")
       get() = _builder.getRssi()
       @JvmName("setRssi")
@@ -68,12 +68,12 @@ public object BleDeviceDiscoveredKt {
      *
      * <code>int32 rssi = 2;</code>
      */
-    public fun clearRssi() {
+    fun clearRssi() {
       _builder.clearRssi()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.copy(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
+inline fun qaul.sys.ble.BleOuterClass.BleDeviceDiscovered.copy(block: qaul.sys.ble.BleDeviceDiscoveredKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceDiscovered =
   qaul.sys.ble.BleDeviceDiscoveredKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

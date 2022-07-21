@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializestopRequest")
-public inline fun stopRequest(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
+inline fun stopRequest(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
   qaul.rpc.ble.StopRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.StopRequest.newBuilder()).apply { block() }._build()
-public object StopRequestKt {
+object StopRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.StopRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.StopRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object StopRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.StopRequest.copy(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
+inline fun qaul.rpc.ble.BleRpc.StopRequest.copy(block: qaul.rpc.ble.StopRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StopRequest =
   qaul.rpc.ble.StopRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

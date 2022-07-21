@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializeconfirmation")
-public inline fun confirmation(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
+inline fun confirmation(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
   qaul.net.messaging.ConfirmationKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Confirmation.newBuilder()).apply { block() }._build()
-public object ConfirmationKt {
+object ConfirmationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.Confirmation.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Confirmation.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ConfirmationKt {
      *
      * <code>bytes message_id = 1;</code>
      */
-    public var messageId: com.google.protobuf.ByteString
+    var messageId: com.google.protobuf.ByteString
       @JvmName("getMessageId")
       get() = _builder.getMessageId()
       @JvmName("setMessageId")
@@ -43,7 +43,7 @@ public object ConfirmationKt {
      *
      * <code>bytes message_id = 1;</code>
      */
-    public fun clearMessageId() {
+    fun clearMessageId() {
       _builder.clearMessageId()
     }
 
@@ -54,7 +54,7 @@ public object ConfirmationKt {
      *
      * <code>uint64 received_at = 2;</code>
      */
-    public var receivedAt: kotlin.Long
+    var receivedAt: kotlin.Long
       @JvmName("getReceivedAt")
       get() = _builder.getReceivedAt()
       @JvmName("setReceivedAt")
@@ -68,12 +68,12 @@ public object ConfirmationKt {
      *
      * <code>uint64 received_at = 2;</code>
      */
-    public fun clearReceivedAt() {
+    fun clearReceivedAt() {
       _builder.clearReceivedAt()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.Confirmation.copy(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
+inline fun qaul.net.messaging.MessagingOuterClass.Confirmation.copy(block: qaul.net.messaging.ConfirmationKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Confirmation =
   qaul.net.messaging.ConfirmationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

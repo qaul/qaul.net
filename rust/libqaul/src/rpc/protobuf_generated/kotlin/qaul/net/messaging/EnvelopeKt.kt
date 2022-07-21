@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializeenvelope")
-public inline fun envelope(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
+inline fun envelope(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
   qaul.net.messaging.EnvelopeKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Envelope.newBuilder()).apply { block() }._build()
-public object EnvelopeKt {
+object EnvelopeKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.Envelope.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Envelope.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object EnvelopeKt {
      *
      * <code>bytes sender_id = 1;</code>
      */
-    public var senderId: com.google.protobuf.ByteString
+    var senderId: com.google.protobuf.ByteString
       @JvmName("getSenderId")
       get() = _builder.getSenderId()
       @JvmName("setSenderId")
@@ -43,7 +43,7 @@ public object EnvelopeKt {
      *
      * <code>bytes sender_id = 1;</code>
      */
-    public fun clearSenderId() {
+    fun clearSenderId() {
       _builder.clearSenderId()
     }
 
@@ -54,7 +54,7 @@ public object EnvelopeKt {
      *
      * <code>bytes receiver_id = 2;</code>
      */
-    public var receiverId: com.google.protobuf.ByteString
+    var receiverId: com.google.protobuf.ByteString
       @JvmName("getReceiverId")
       get() = _builder.getReceiverId()
       @JvmName("setReceiverId")
@@ -68,7 +68,7 @@ public object EnvelopeKt {
      *
      * <code>bytes receiver_id = 2;</code>
      */
-    public fun clearReceiverId() {
+    fun clearReceiverId() {
       _builder.clearReceiverId()
     }
 
@@ -77,7 +77,7 @@ public object EnvelopeKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class DataProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class DataProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * encrypted message data
@@ -85,7 +85,7 @@ public object EnvelopeKt {
      *
      * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      */
-     public val data: com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>
+     val data: com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getDataList()
@@ -100,7 +100,7 @@ public object EnvelopeKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addData")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.add(value: qaul.net.messaging.MessagingOuterClass.Data) {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.add(value: qaul.net.messaging.MessagingOuterClass.Data) {
       _builder.addData(value)
     }
     /**
@@ -114,7 +114,7 @@ public object EnvelopeKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignData")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(value: qaul.net.messaging.MessagingOuterClass.Data) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(value: qaul.net.messaging.MessagingOuterClass.Data) {
       add(value)
     }
     /**
@@ -127,7 +127,7 @@ public object EnvelopeKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllData")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
       _builder.addAllData(values)
     }
     /**
@@ -141,7 +141,7 @@ public object EnvelopeKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllData")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
       addAll(values)
     }
     /**
@@ -155,7 +155,7 @@ public object EnvelopeKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setData")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.set(index: kotlin.Int, value: qaul.net.messaging.MessagingOuterClass.Data) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.set(index: kotlin.Int, value: qaul.net.messaging.MessagingOuterClass.Data) {
       _builder.setData(index, value)
     }
     /**
@@ -167,13 +167,13 @@ public object EnvelopeKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearData")
-    public fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.clear() {
       _builder.clearData()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.Envelope.copy(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
+inline fun qaul.net.messaging.MessagingOuterClass.Envelope.copy(block: qaul.net.messaging.EnvelopeKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Envelope =
   qaul.net.messaging.EnvelopeKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

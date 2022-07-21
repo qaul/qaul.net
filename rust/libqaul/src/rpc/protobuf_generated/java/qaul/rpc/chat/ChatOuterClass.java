@@ -3271,20 +3271,10 @@ public final class ChatOuterClass {
      * preview text of the last message
      * </pre>
      *
-     * <code>string content = 6;</code>
+     * <code>bytes content = 6;</code>
      * @return The content.
      */
-    java.lang.String getContent();
-    /**
-     * <pre>
-     * preview text of the last message
-     * </pre>
-     *
-     * <code>string content = 6;</code>
-     * @return The bytes for content.
-     */
-    com.google.protobuf.ByteString
-        getContentBytes();
+    com.google.protobuf.ByteString getContent();
 
     /**
      * <pre>
@@ -3315,7 +3305,7 @@ public final class ChatOuterClass {
     private ChatOverview() {
       conversationId_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
-      content_ = "";
+      content_ = com.google.protobuf.ByteString.EMPTY;
       lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
@@ -3376,9 +3366,8 @@ public final class ChatOuterClass {
               break;
             }
             case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              content_ = s;
+              content_ = input.readBytes();
               break;
             }
             case 58: {
@@ -3527,49 +3516,18 @@ public final class ChatOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 6;
-    private volatile java.lang.Object content_;
+    private com.google.protobuf.ByteString content_;
     /**
      * <pre>
      * preview text of the last message
      * </pre>
      *
-     * <code>string content = 6;</code>
+     * <code>bytes content = 6;</code>
      * @return The content.
      */
     @java.lang.Override
-    public java.lang.String getContent() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        content_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * preview text of the last message
-     * </pre>
-     *
-     * <code>string content = 6;</code>
-     * @return The bytes for content.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getContentBytes() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        content_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getContent() {
+      return content_;
     }
 
     public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 7;
@@ -3616,8 +3574,8 @@ public final class ChatOuterClass {
       if (unread_ != 0) {
         output.writeInt32(5, unread_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, content_);
+      if (!content_.isEmpty()) {
+        output.writeBytes(6, content_);
       }
       if (!lastMessageSenderId_.isEmpty()) {
         output.writeBytes(7, lastMessageSenderId_);
@@ -3650,8 +3608,9 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, unread_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, content_);
+      if (!content_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, content_);
       }
       if (!lastMessageSenderId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
@@ -3859,7 +3818,7 @@ public final class ChatOuterClass {
 
         unread_ = 0;
 
-        content_ = "";
+        content_ = com.google.protobuf.ByteString.EMPTY;
 
         lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
 
@@ -3960,9 +3919,8 @@ public final class ChatOuterClass {
         if (other.getUnread() != 0) {
           setUnread(other.getUnread());
         }
-        if (!other.getContent().isEmpty()) {
-          content_ = other.content_;
-          onChanged();
+        if (other.getContent() != com.google.protobuf.ByteString.EMPTY) {
+          setContent(other.getContent());
         }
         if (other.getLastMessageSenderId() != com.google.protobuf.ByteString.EMPTY) {
           setLastMessageSenderId(other.getLastMessageSenderId());
@@ -4267,59 +4225,29 @@ public final class ChatOuterClass {
         return this;
       }
 
-      private java.lang.Object content_ = "";
+      private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
        * preview text of the last message
        * </pre>
        *
-       * <code>string content = 6;</code>
+       * <code>bytes content = 6;</code>
        * @return The content.
        */
-      public java.lang.String getContent() {
-        java.lang.Object ref = content_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          content_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public com.google.protobuf.ByteString getContent() {
+        return content_;
       }
       /**
        * <pre>
        * preview text of the last message
        * </pre>
        *
-       * <code>string content = 6;</code>
-       * @return The bytes for content.
-       */
-      public com.google.protobuf.ByteString
-          getContentBytes() {
-        java.lang.Object ref = content_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          content_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * preview text of the last message
-       * </pre>
-       *
-       * <code>string content = 6;</code>
+       * <code>bytes content = 6;</code>
        * @param value The content to set.
        * @return This builder for chaining.
        */
-      public Builder setContent(
-          java.lang.String value) {
+      public Builder setContent(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -4333,32 +4261,12 @@ public final class ChatOuterClass {
        * preview text of the last message
        * </pre>
        *
-       * <code>string content = 6;</code>
+       * <code>bytes content = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearContent() {
         
         content_ = getDefaultInstance().getContent();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * preview text of the last message
-       * </pre>
-       *
-       * <code>string content = 6;</code>
-       * @param value The bytes for content to set.
-       * @return This builder for chaining.
-       */
-      public Builder setContentBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        content_ = value;
         onChanged();
         return this;
       }
@@ -6003,20 +5911,10 @@ public final class ChatOuterClass {
      * content of the message
      * </pre>
      *
-     * <code>string content = 7;</code>
+     * <code>bytes content = 7;</code>
      * @return The content.
      */
-    java.lang.String getContent();
-    /**
-     * <pre>
-     * content of the message
-     * </pre>
-     *
-     * <code>string content = 7;</code>
-     * @return The bytes for content.
-     */
-    com.google.protobuf.ByteString
-        getContentBytes();
+    com.google.protobuf.ByteString getContent();
   }
   /**
    * <pre>
@@ -6037,7 +5935,7 @@ public final class ChatOuterClass {
     private ChatMessage() {
       senderId_ = com.google.protobuf.ByteString.EMPTY;
       messageId_ = com.google.protobuf.ByteString.EMPTY;
-      content_ = "";
+      content_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -6101,9 +5999,8 @@ public final class ChatOuterClass {
               break;
             }
             case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              content_ = s;
+              content_ = input.readBytes();
               break;
             }
             default: {
@@ -6234,49 +6131,18 @@ public final class ChatOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 7;
-    private volatile java.lang.Object content_;
+    private com.google.protobuf.ByteString content_;
     /**
      * <pre>
      * content of the message
      * </pre>
      *
-     * <code>string content = 7;</code>
+     * <code>bytes content = 7;</code>
      * @return The content.
      */
     @java.lang.Override
-    public java.lang.String getContent() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        content_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * content of the message
-     * </pre>
-     *
-     * <code>string content = 7;</code>
-     * @return The bytes for content.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getContentBytes() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        content_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getContent() {
+      return content_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -6311,8 +6177,8 @@ public final class ChatOuterClass {
       if (receivedAt_ != 0L) {
         output.writeUInt64(6, receivedAt_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, content_);
+      if (!content_.isEmpty()) {
+        output.writeBytes(7, content_);
       }
       unknownFields.writeTo(output);
     }
@@ -6347,8 +6213,9 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(6, receivedAt_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, content_);
+      if (!content_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(7, content_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -6555,7 +6422,7 @@ public final class ChatOuterClass {
 
         receivedAt_ = 0L;
 
-        content_ = "";
+        content_ = com.google.protobuf.ByteString.EMPTY;
 
         return this;
       }
@@ -6656,9 +6523,8 @@ public final class ChatOuterClass {
         if (other.getReceivedAt() != 0L) {
           setReceivedAt(other.getReceivedAt());
         }
-        if (!other.getContent().isEmpty()) {
-          content_ = other.content_;
-          onChanged();
+        if (other.getContent() != com.google.protobuf.ByteString.EMPTY) {
+          setContent(other.getContent());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -6962,59 +6828,29 @@ public final class ChatOuterClass {
         return this;
       }
 
-      private java.lang.Object content_ = "";
+      private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
        * content of the message
        * </pre>
        *
-       * <code>string content = 7;</code>
+       * <code>bytes content = 7;</code>
        * @return The content.
        */
-      public java.lang.String getContent() {
-        java.lang.Object ref = content_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          content_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public com.google.protobuf.ByteString getContent() {
+        return content_;
       }
       /**
        * <pre>
        * content of the message
        * </pre>
        *
-       * <code>string content = 7;</code>
-       * @return The bytes for content.
-       */
-      public com.google.protobuf.ByteString
-          getContentBytes() {
-        java.lang.Object ref = content_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          content_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * content of the message
-       * </pre>
-       *
-       * <code>string content = 7;</code>
+       * <code>bytes content = 7;</code>
        * @param value The content to set.
        * @return This builder for chaining.
        */
-      public Builder setContent(
-          java.lang.String value) {
+      public Builder setContent(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -7028,32 +6864,12 @@ public final class ChatOuterClass {
        * content of the message
        * </pre>
        *
-       * <code>string content = 7;</code>
+       * <code>bytes content = 7;</code>
        * @return This builder for chaining.
        */
       public Builder clearContent() {
         
         content_ = getDefaultInstance().getContent();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * content of the message
-       * </pre>
-       *
-       * <code>string content = 7;</code>
-       * @param value The bytes for content to set.
-       * @return This builder for chaining.
-       */
-      public Builder setContentBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        content_ = value;
         onChanged();
         return this;
       }
@@ -7105,6 +6921,2771 @@ public final class ChatOuterClass {
 
     @java.lang.Override
     public qaul.rpc.chat.ChatOuterClass.ChatMessage getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ChatMessageContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.ChatMessageContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     * @return Whether the chatContent field is set.
+     */
+    boolean hasChatContent();
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     * @return The chatContent.
+     */
+    qaul.rpc.chat.ChatOuterClass.ChatContent getChatContent();
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     */
+    qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder getChatContentOrBuilder();
+
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     * @return Whether the fileContent field is set.
+     */
+    boolean hasFileContent();
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     * @return The fileContent.
+     */
+    qaul.rpc.chat.ChatOuterClass.FileShareContent getFileContent();
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     */
+    qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder getFileContentOrBuilder();
+
+    public qaul.rpc.chat.ChatOuterClass.ChatMessageContent.ContentCase getContentCase();
+  }
+  /**
+   * <pre>
+   * chat message content
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.ChatMessageContent}
+   */
+  public static final class ChatMessageContent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.ChatMessageContent)
+      ChatMessageContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ChatMessageContent.newBuilder() to construct.
+    private ChatMessageContent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ChatMessageContent() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChatMessageContent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ChatMessageContent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              qaul.rpc.chat.ChatOuterClass.ChatContent.Builder subBuilder = null;
+              if (contentCase_ == 1) {
+                subBuilder = ((qaul.rpc.chat.ChatOuterClass.ChatContent) content_).toBuilder();
+              }
+              content_ =
+                  input.readMessage(qaul.rpc.chat.ChatOuterClass.ChatContent.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.chat.ChatOuterClass.ChatContent) content_);
+                content_ = subBuilder.buildPartial();
+              }
+              contentCase_ = 1;
+              break;
+            }
+            case 18: {
+              qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder subBuilder = null;
+              if (contentCase_ == 2) {
+                subBuilder = ((qaul.rpc.chat.ChatOuterClass.FileShareContent) content_).toBuilder();
+              }
+              content_ =
+                  input.readMessage(qaul.rpc.chat.ChatOuterClass.FileShareContent.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.chat.ChatOuterClass.FileShareContent) content_);
+                content_ = subBuilder.buildPartial();
+              }
+              contentCase_ = 2;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatMessageContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatMessageContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.ChatMessageContent.class, qaul.rpc.chat.ChatOuterClass.ChatMessageContent.Builder.class);
+    }
+
+    private int contentCase_ = 0;
+    private java.lang.Object content_;
+    public enum ContentCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      CHAT_CONTENT(1),
+      FILE_CONTENT(2),
+      CONTENT_NOT_SET(0);
+      private final int value;
+      private ContentCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static ContentCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static ContentCase forNumber(int value) {
+        switch (value) {
+          case 1: return CHAT_CONTENT;
+          case 2: return FILE_CONTENT;
+          case 0: return CONTENT_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public ContentCase
+    getContentCase() {
+      return ContentCase.forNumber(
+          contentCase_);
+    }
+
+    public static final int CHAT_CONTENT_FIELD_NUMBER = 1;
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     * @return Whether the chatContent field is set.
+     */
+    @java.lang.Override
+    public boolean hasChatContent() {
+      return contentCase_ == 1;
+    }
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     * @return The chatContent.
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.ChatContent getChatContent() {
+      if (contentCase_ == 1) {
+         return (qaul.rpc.chat.ChatOuterClass.ChatContent) content_;
+      }
+      return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder getChatContentOrBuilder() {
+      if (contentCase_ == 1) {
+         return (qaul.rpc.chat.ChatOuterClass.ChatContent) content_;
+      }
+      return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+    }
+
+    public static final int FILE_CONTENT_FIELD_NUMBER = 2;
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     * @return Whether the fileContent field is set.
+     */
+    @java.lang.Override
+    public boolean hasFileContent() {
+      return contentCase_ == 2;
+    }
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     * @return The fileContent.
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.FileShareContent getFileContent() {
+      if (contentCase_ == 2) {
+         return (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_;
+      }
+      return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * file sharing content
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder getFileContentOrBuilder() {
+      if (contentCase_ == 2) {
+         return (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_;
+      }
+      return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (contentCase_ == 1) {
+        output.writeMessage(1, (qaul.rpc.chat.ChatOuterClass.ChatContent) content_);
+      }
+      if (contentCase_ == 2) {
+        output.writeMessage(2, (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (contentCase_ == 1) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, (qaul.rpc.chat.ChatOuterClass.ChatContent) content_);
+      }
+      if (contentCase_ == 2) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.ChatMessageContent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.ChatMessageContent other = (qaul.rpc.chat.ChatOuterClass.ChatMessageContent) obj;
+
+      if (!getContentCase().equals(other.getContentCase())) return false;
+      switch (contentCase_) {
+        case 1:
+          if (!getChatContent()
+              .equals(other.getChatContent())) return false;
+          break;
+        case 2:
+          if (!getFileContent()
+              .equals(other.getFileContent())) return false;
+          break;
+        case 0:
+        default:
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      switch (contentCase_) {
+        case 1:
+          hash = (37 * hash) + CHAT_CONTENT_FIELD_NUMBER;
+          hash = (53 * hash) + getChatContent().hashCode();
+          break;
+        case 2:
+          hash = (37 * hash) + FILE_CONTENT_FIELD_NUMBER;
+          hash = (53 * hash) + getFileContent().hashCode();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.ChatMessageContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * chat message content
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.ChatMessageContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.ChatMessageContent)
+        qaul.rpc.chat.ChatOuterClass.ChatMessageContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatMessageContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatMessageContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.ChatMessageContent.class, qaul.rpc.chat.ChatOuterClass.ChatMessageContent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.ChatMessageContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        contentCase_ = 0;
+        content_ = null;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatMessageContent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatMessageContent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.ChatMessageContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatMessageContent build() {
+        qaul.rpc.chat.ChatOuterClass.ChatMessageContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatMessageContent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.ChatMessageContent result = new qaul.rpc.chat.ChatOuterClass.ChatMessageContent(this);
+        if (contentCase_ == 1) {
+          if (chatContentBuilder_ == null) {
+            result.content_ = content_;
+          } else {
+            result.content_ = chatContentBuilder_.build();
+          }
+        }
+        if (contentCase_ == 2) {
+          if (fileContentBuilder_ == null) {
+            result.content_ = content_;
+          } else {
+            result.content_ = fileContentBuilder_.build();
+          }
+        }
+        result.contentCase_ = contentCase_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.ChatMessageContent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.ChatMessageContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatMessageContent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.ChatMessageContent.getDefaultInstance()) return this;
+        switch (other.getContentCase()) {
+          case CHAT_CONTENT: {
+            mergeChatContent(other.getChatContent());
+            break;
+          }
+          case FILE_CONTENT: {
+            mergeFileContent(other.getFileContent());
+            break;
+          }
+          case CONTENT_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.ChatMessageContent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.ChatMessageContent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int contentCase_ = 0;
+      private java.lang.Object content_;
+      public ContentCase
+          getContentCase() {
+        return ContentCase.forNumber(
+            contentCase_);
+      }
+
+      public Builder clearContent() {
+        contentCase_ = 0;
+        content_ = null;
+        onChanged();
+        return this;
+      }
+
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.ChatContent, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder, qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder> chatContentBuilder_;
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       * @return Whether the chatContent field is set.
+       */
+      @java.lang.Override
+      public boolean hasChatContent() {
+        return contentCase_ == 1;
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       * @return The chatContent.
+       */
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent getChatContent() {
+        if (chatContentBuilder_ == null) {
+          if (contentCase_ == 1) {
+            return (qaul.rpc.chat.ChatOuterClass.ChatContent) content_;
+          }
+          return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+        } else {
+          if (contentCase_ == 1) {
+            return chatContentBuilder_.getMessage();
+          }
+          return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      public Builder setChatContent(qaul.rpc.chat.ChatOuterClass.ChatContent value) {
+        if (chatContentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          content_ = value;
+          onChanged();
+        } else {
+          chatContentBuilder_.setMessage(value);
+        }
+        contentCase_ = 1;
+        return this;
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      public Builder setChatContent(
+          qaul.rpc.chat.ChatOuterClass.ChatContent.Builder builderForValue) {
+        if (chatContentBuilder_ == null) {
+          content_ = builderForValue.build();
+          onChanged();
+        } else {
+          chatContentBuilder_.setMessage(builderForValue.build());
+        }
+        contentCase_ = 1;
+        return this;
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      public Builder mergeChatContent(qaul.rpc.chat.ChatOuterClass.ChatContent value) {
+        if (chatContentBuilder_ == null) {
+          if (contentCase_ == 1 &&
+              content_ != qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance()) {
+            content_ = qaul.rpc.chat.ChatOuterClass.ChatContent.newBuilder((qaul.rpc.chat.ChatOuterClass.ChatContent) content_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            content_ = value;
+          }
+          onChanged();
+        } else {
+          if (contentCase_ == 1) {
+            chatContentBuilder_.mergeFrom(value);
+          } else {
+            chatContentBuilder_.setMessage(value);
+          }
+        }
+        contentCase_ = 1;
+        return this;
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      public Builder clearChatContent() {
+        if (chatContentBuilder_ == null) {
+          if (contentCase_ == 1) {
+            contentCase_ = 0;
+            content_ = null;
+            onChanged();
+          }
+        } else {
+          if (contentCase_ == 1) {
+            contentCase_ = 0;
+            content_ = null;
+          }
+          chatContentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.ChatContent.Builder getChatContentBuilder() {
+        return getChatContentFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder getChatContentOrBuilder() {
+        if ((contentCase_ == 1) && (chatContentBuilder_ != null)) {
+          return chatContentBuilder_.getMessageOrBuilder();
+        } else {
+          if (contentCase_ == 1) {
+            return (qaul.rpc.chat.ChatOuterClass.ChatContent) content_;
+          }
+          return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * chat content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.ChatContent chat_content = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.ChatContent, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder, qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder> 
+          getChatContentFieldBuilder() {
+        if (chatContentBuilder_ == null) {
+          if (!(contentCase_ == 1)) {
+            content_ = qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+          }
+          chatContentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.chat.ChatOuterClass.ChatContent, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder, qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder>(
+                  (qaul.rpc.chat.ChatOuterClass.ChatContent) content_,
+                  getParentForChildren(),
+                  isClean());
+          content_ = null;
+        }
+        contentCase_ = 1;
+        onChanged();;
+        return chatContentBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.FileShareContent, qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder, qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder> fileContentBuilder_;
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       * @return Whether the fileContent field is set.
+       */
+      @java.lang.Override
+      public boolean hasFileContent() {
+        return contentCase_ == 2;
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       * @return The fileContent.
+       */
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileShareContent getFileContent() {
+        if (fileContentBuilder_ == null) {
+          if (contentCase_ == 2) {
+            return (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_;
+          }
+          return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+        } else {
+          if (contentCase_ == 2) {
+            return fileContentBuilder_.getMessage();
+          }
+          return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      public Builder setFileContent(qaul.rpc.chat.ChatOuterClass.FileShareContent value) {
+        if (fileContentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          content_ = value;
+          onChanged();
+        } else {
+          fileContentBuilder_.setMessage(value);
+        }
+        contentCase_ = 2;
+        return this;
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      public Builder setFileContent(
+          qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder builderForValue) {
+        if (fileContentBuilder_ == null) {
+          content_ = builderForValue.build();
+          onChanged();
+        } else {
+          fileContentBuilder_.setMessage(builderForValue.build());
+        }
+        contentCase_ = 2;
+        return this;
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      public Builder mergeFileContent(qaul.rpc.chat.ChatOuterClass.FileShareContent value) {
+        if (fileContentBuilder_ == null) {
+          if (contentCase_ == 2 &&
+              content_ != qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance()) {
+            content_ = qaul.rpc.chat.ChatOuterClass.FileShareContent.newBuilder((qaul.rpc.chat.ChatOuterClass.FileShareContent) content_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            content_ = value;
+          }
+          onChanged();
+        } else {
+          if (contentCase_ == 2) {
+            fileContentBuilder_.mergeFrom(value);
+          } else {
+            fileContentBuilder_.setMessage(value);
+          }
+        }
+        contentCase_ = 2;
+        return this;
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      public Builder clearFileContent() {
+        if (fileContentBuilder_ == null) {
+          if (contentCase_ == 2) {
+            contentCase_ = 0;
+            content_ = null;
+            onChanged();
+          }
+        } else {
+          if (contentCase_ == 2) {
+            contentCase_ = 0;
+            content_ = null;
+          }
+          fileContentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder getFileContentBuilder() {
+        return getFileContentFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder getFileContentOrBuilder() {
+        if ((contentCase_ == 2) && (fileContentBuilder_ != null)) {
+          return fileContentBuilder_.getMessageOrBuilder();
+        } else {
+          if (contentCase_ == 2) {
+            return (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_;
+          }
+          return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * file sharing content
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.FileShareContent file_content = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.FileShareContent, qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder, qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder> 
+          getFileContentFieldBuilder() {
+        if (fileContentBuilder_ == null) {
+          if (!(contentCase_ == 2)) {
+            content_ = qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+          }
+          fileContentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.chat.ChatOuterClass.FileShareContent, qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder, qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder>(
+                  (qaul.rpc.chat.ChatOuterClass.FileShareContent) content_,
+                  getParentForChildren(),
+                  isClean());
+          content_ = null;
+        }
+        contentCase_ = 2;
+        onChanged();;
+        return fileContentBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.ChatMessageContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatMessageContent)
+    private static final qaul.rpc.chat.ChatOuterClass.ChatMessageContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.ChatMessageContent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatMessageContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ChatMessageContent>
+        PARSER = new com.google.protobuf.AbstractParser<ChatMessageContent>() {
+      @java.lang.Override
+      public ChatMessageContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ChatMessageContent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ChatMessageContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ChatMessageContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.ChatMessageContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ChatContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.ChatContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     *content
+     * </pre>
+     *
+     * <code>string content = 1;</code>
+     * @return The content.
+     */
+    java.lang.String getContent();
+    /**
+     * <pre>
+     *content
+     * </pre>
+     *
+     * <code>string content = 1;</code>
+     * @return The bytes for content.
+     */
+    com.google.protobuf.ByteString
+        getContentBytes();
+  }
+  /**
+   * <pre>
+   *chat content 
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.ChatContent}
+   */
+  public static final class ChatContent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.ChatContent)
+      ChatContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ChatContent.newBuilder() to construct.
+    private ChatContent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ChatContent() {
+      content_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChatContent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ChatContent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              content_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.ChatContent.class, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder.class);
+    }
+
+    public static final int CONTENT_FIELD_NUMBER = 1;
+    private volatile java.lang.Object content_;
+    /**
+     * <pre>
+     *content
+     * </pre>
+     *
+     * <code>string content = 1;</code>
+     * @return The content.
+     */
+    @java.lang.Override
+    public java.lang.String getContent() {
+      java.lang.Object ref = content_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        content_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *content
+     * </pre>
+     *
+     * <code>string content = 1;</code>
+     * @return The bytes for content.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getContentBytes() {
+      java.lang.Object ref = content_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        content_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, content_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, content_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.ChatContent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.ChatContent other = (qaul.rpc.chat.ChatOuterClass.ChatContent) obj;
+
+      if (!getContent()
+          .equals(other.getContent())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+      hash = (53 * hash) + getContent().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.ChatContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *chat content 
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.ChatContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.ChatContent)
+        qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.ChatContent.class, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.ChatContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        content_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent build() {
+        qaul.rpc.chat.ChatOuterClass.ChatContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.ChatContent result = new qaul.rpc.chat.ChatOuterClass.ChatContent(this);
+        result.content_ = content_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.ChatContent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.ChatContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatContent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance()) return this;
+        if (!other.getContent().isEmpty()) {
+          content_ = other.content_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.ChatContent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.ChatContent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object content_ = "";
+      /**
+       * <pre>
+       *content
+       * </pre>
+       *
+       * <code>string content = 1;</code>
+       * @return The content.
+       */
+      public java.lang.String getContent() {
+        java.lang.Object ref = content_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          content_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *content
+       * </pre>
+       *
+       * <code>string content = 1;</code>
+       * @return The bytes for content.
+       */
+      public com.google.protobuf.ByteString
+          getContentBytes() {
+        java.lang.Object ref = content_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          content_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *content
+       * </pre>
+       *
+       * <code>string content = 1;</code>
+       * @param value The content to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContent(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        content_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *content
+       * </pre>
+       *
+       * <code>string content = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContent() {
+        
+        content_ = getDefaultInstance().getContent();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *content
+       * </pre>
+       *
+       * <code>string content = 1;</code>
+       * @param value The bytes for content to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContentBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        content_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.ChatContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatContent)
+    private static final qaul.rpc.chat.ChatOuterClass.ChatContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.ChatContent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ChatContent>
+        PARSER = new com.google.protobuf.AbstractParser<ChatContent>() {
+      @java.lang.Override
+      public ChatContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ChatContent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ChatContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ChatContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileShareContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.FileShareContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     *file history index in DB
+     * </pre>
+     *
+     * <code>uint64 history_index = 1;</code>
+     * @return The historyIndex.
+     */
+    long getHistoryIndex();
+
+    /**
+     * <pre>
+     *file identifier
+     * </pre>
+     *
+     * <code>uint64 file_id = 2;</code>
+     * @return The fileId.
+     */
+    long getFileId();
+
+    /**
+     * <pre>
+     *file name
+     * </pre>
+     *
+     * <code>string file_name = 3;</code>
+     * @return The fileName.
+     */
+    java.lang.String getFileName();
+    /**
+     * <pre>
+     *file name
+     * </pre>
+     *
+     * <code>string file_name = 3;</code>
+     * @return The bytes for fileName.
+     */
+    com.google.protobuf.ByteString
+        getFileNameBytes();
+
+    /**
+     * <pre>
+     *file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     * @return The fileSize.
+     */
+    int getFileSize();
+
+    /**
+     * <pre>
+     *file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     * @return The fileDescr.
+     */
+    java.lang.String getFileDescr();
+    /**
+     * <pre>
+     *file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     * @return The bytes for fileDescr.
+     */
+    com.google.protobuf.ByteString
+        getFileDescrBytes();
+  }
+  /**
+   * <pre>
+   *file sharing content
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.FileShareContent}
+   */
+  public static final class FileShareContent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.FileShareContent)
+      FileShareContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileShareContent.newBuilder() to construct.
+    private FileShareContent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileShareContent() {
+      fileName_ = "";
+      fileDescr_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileShareContent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileShareContent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              historyIndex_ = input.readUInt64();
+              break;
+            }
+            case 16: {
+
+              fileId_ = input.readUInt64();
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileName_ = s;
+              break;
+            }
+            case 32: {
+
+              fileSize_ = input.readUInt32();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileDescr_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileShareContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileShareContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.FileShareContent.class, qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder.class);
+    }
+
+    public static final int HISTORY_INDEX_FIELD_NUMBER = 1;
+    private long historyIndex_;
+    /**
+     * <pre>
+     *file history index in DB
+     * </pre>
+     *
+     * <code>uint64 history_index = 1;</code>
+     * @return The historyIndex.
+     */
+    @java.lang.Override
+    public long getHistoryIndex() {
+      return historyIndex_;
+    }
+
+    public static final int FILE_ID_FIELD_NUMBER = 2;
+    private long fileId_;
+    /**
+     * <pre>
+     *file identifier
+     * </pre>
+     *
+     * <code>uint64 file_id = 2;</code>
+     * @return The fileId.
+     */
+    @java.lang.Override
+    public long getFileId() {
+      return fileId_;
+    }
+
+    public static final int FILE_NAME_FIELD_NUMBER = 3;
+    private volatile java.lang.Object fileName_;
+    /**
+     * <pre>
+     *file name
+     * </pre>
+     *
+     * <code>string file_name = 3;</code>
+     * @return The fileName.
+     */
+    @java.lang.Override
+    public java.lang.String getFileName() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *file name
+     * </pre>
+     *
+     * <code>string file_name = 3;</code>
+     * @return The bytes for fileName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileNameBytes() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILE_SIZE_FIELD_NUMBER = 4;
+    private int fileSize_;
+    /**
+     * <pre>
+     *file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     * @return The fileSize.
+     */
+    @java.lang.Override
+    public int getFileSize() {
+      return fileSize_;
+    }
+
+    public static final int FILE_DESCR_FIELD_NUMBER = 5;
+    private volatile java.lang.Object fileDescr_;
+    /**
+     * <pre>
+     *file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     * @return The fileDescr.
+     */
+    @java.lang.Override
+    public java.lang.String getFileDescr() {
+      java.lang.Object ref = fileDescr_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileDescr_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     * @return The bytes for fileDescr.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileDescrBytes() {
+      java.lang.Object ref = fileDescr_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileDescr_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (historyIndex_ != 0L) {
+        output.writeUInt64(1, historyIndex_);
+      }
+      if (fileId_ != 0L) {
+        output.writeUInt64(2, fileId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, fileName_);
+      }
+      if (fileSize_ != 0) {
+        output.writeUInt32(4, fileSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileDescr_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, fileDescr_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (historyIndex_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(1, historyIndex_);
+      }
+      if (fileId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, fileId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, fileName_);
+      }
+      if (fileSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, fileSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileDescr_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, fileDescr_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.FileShareContent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.FileShareContent other = (qaul.rpc.chat.ChatOuterClass.FileShareContent) obj;
+
+      if (getHistoryIndex()
+          != other.getHistoryIndex()) return false;
+      if (getFileId()
+          != other.getFileId()) return false;
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (getFileSize()
+          != other.getFileSize()) return false;
+      if (!getFileDescr()
+          .equals(other.getFileDescr())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + HISTORY_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHistoryIndex());
+      hash = (37 * hash) + FILE_ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getFileId());
+      hash = (37 * hash) + FILE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFileName().hashCode();
+      hash = (37 * hash) + FILE_SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getFileSize();
+      hash = (37 * hash) + FILE_DESCR_FIELD_NUMBER;
+      hash = (53 * hash) + getFileDescr().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.FileShareContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *file sharing content
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.FileShareContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.FileShareContent)
+        qaul.rpc.chat.ChatOuterClass.FileShareContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileShareContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileShareContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.FileShareContent.class, qaul.rpc.chat.ChatOuterClass.FileShareContent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.FileShareContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        historyIndex_ = 0L;
+
+        fileId_ = 0L;
+
+        fileName_ = "";
+
+        fileSize_ = 0;
+
+        fileDescr_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileShareContent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileShareContent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileShareContent build() {
+        qaul.rpc.chat.ChatOuterClass.FileShareContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileShareContent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.FileShareContent result = new qaul.rpc.chat.ChatOuterClass.FileShareContent(this);
+        result.historyIndex_ = historyIndex_;
+        result.fileId_ = fileId_;
+        result.fileName_ = fileName_;
+        result.fileSize_ = fileSize_;
+        result.fileDescr_ = fileDescr_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.FileShareContent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.FileShareContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.FileShareContent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.FileShareContent.getDefaultInstance()) return this;
+        if (other.getHistoryIndex() != 0L) {
+          setHistoryIndex(other.getHistoryIndex());
+        }
+        if (other.getFileId() != 0L) {
+          setFileId(other.getFileId());
+        }
+        if (!other.getFileName().isEmpty()) {
+          fileName_ = other.fileName_;
+          onChanged();
+        }
+        if (other.getFileSize() != 0) {
+          setFileSize(other.getFileSize());
+        }
+        if (!other.getFileDescr().isEmpty()) {
+          fileDescr_ = other.fileDescr_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.FileShareContent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.FileShareContent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long historyIndex_ ;
+      /**
+       * <pre>
+       *file history index in DB
+       * </pre>
+       *
+       * <code>uint64 history_index = 1;</code>
+       * @return The historyIndex.
+       */
+      @java.lang.Override
+      public long getHistoryIndex() {
+        return historyIndex_;
+      }
+      /**
+       * <pre>
+       *file history index in DB
+       * </pre>
+       *
+       * <code>uint64 history_index = 1;</code>
+       * @param value The historyIndex to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHistoryIndex(long value) {
+        
+        historyIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file history index in DB
+       * </pre>
+       *
+       * <code>uint64 history_index = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHistoryIndex() {
+        
+        historyIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long fileId_ ;
+      /**
+       * <pre>
+       *file identifier
+       * </pre>
+       *
+       * <code>uint64 file_id = 2;</code>
+       * @return The fileId.
+       */
+      @java.lang.Override
+      public long getFileId() {
+        return fileId_;
+      }
+      /**
+       * <pre>
+       *file identifier
+       * </pre>
+       *
+       * <code>uint64 file_id = 2;</code>
+       * @param value The fileId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileId(long value) {
+        
+        fileId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file identifier
+       * </pre>
+       *
+       * <code>uint64 file_id = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileId() {
+        
+        fileId_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileName_ = "";
+      /**
+       * <pre>
+       *file name
+       * </pre>
+       *
+       * <code>string file_name = 3;</code>
+       * @return The fileName.
+       */
+      public java.lang.String getFileName() {
+        java.lang.Object ref = fileName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *file name
+       * </pre>
+       *
+       * <code>string file_name = 3;</code>
+       * @return The bytes for fileName.
+       */
+      public com.google.protobuf.ByteString
+          getFileNameBytes() {
+        java.lang.Object ref = fileName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *file name
+       * </pre>
+       *
+       * <code>string file_name = 3;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file name
+       * </pre>
+       *
+       * <code>string file_name = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileName() {
+        
+        fileName_ = getDefaultInstance().getFileName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file name
+       * </pre>
+       *
+       * <code>string file_name = 3;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int fileSize_ ;
+      /**
+       * <pre>
+       *file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @return The fileSize.
+       */
+      @java.lang.Override
+      public int getFileSize() {
+        return fileSize_;
+      }
+      /**
+       * <pre>
+       *file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @param value The fileSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileSize(int value) {
+        
+        fileSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileSize() {
+        
+        fileSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileDescr_ = "";
+      /**
+       * <pre>
+       *file description
+       * </pre>
+       *
+       * <code>string file_descr = 5;</code>
+       * @return The fileDescr.
+       */
+      public java.lang.String getFileDescr() {
+        java.lang.Object ref = fileDescr_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileDescr_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *file description
+       * </pre>
+       *
+       * <code>string file_descr = 5;</code>
+       * @return The bytes for fileDescr.
+       */
+      public com.google.protobuf.ByteString
+          getFileDescrBytes() {
+        java.lang.Object ref = fileDescr_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileDescr_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *file description
+       * </pre>
+       *
+       * <code>string file_descr = 5;</code>
+       * @param value The fileDescr to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileDescr(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileDescr_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file description
+       * </pre>
+       *
+       * <code>string file_descr = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileDescr() {
+        
+        fileDescr_ = getDefaultInstance().getFileDescr();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *file description
+       * </pre>
+       *
+       * <code>string file_descr = 5;</code>
+       * @param value The bytes for fileDescr to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileDescrBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileDescr_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.FileShareContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.FileShareContent)
+    private static final qaul.rpc.chat.ChatOuterClass.FileShareContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.FileShareContent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.FileShareContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileShareContent>
+        PARSER = new com.google.protobuf.AbstractParser<FileShareContent>() {
+      @java.lang.Override
+      public FileShareContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileShareContent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileShareContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileShareContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.FileShareContent getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -7854,6 +10435,21 @@ public final class ChatOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_chat_ChatMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_ChatMessageContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_ChatMessageContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_ChatContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_FileShareContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_FileShareContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_chat_ChatMessageSend_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -7882,7 +10478,7 @@ public final class ChatOuterClass {
       "w\022\027\n\017conversation_id\030\001 \001(\014\022\032\n\022last_messa" +
       "ge_index\030\002 \001(\r\022\014\n\004name\030\003 \001(\t\022\027\n\017last_mes" +
       "sage_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(\005\022\017\n\007content" +
-      "\030\006 \001(\t\022\036\n\026last_message_sender_id\030\007 \001(\014\"F" +
+      "\030\006 \001(\014\022\036\n\026last_message_sender_id\030\007 \001(\014\"F" +
       "\n\027ChatConversationRequest\022\027\n\017conversatio" +
       "n_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"a\n\024ChatCo" +
       "nversationList\022\027\n\017conversation_id\030\001 \001(\014\022" +
@@ -7890,9 +10486,16 @@ public final class ChatOuterClass {
       "atMessage\"\212\001\n\013ChatMessage\022\r\n\005index\030\001 \001(\r" +
       "\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_id\030\003 \001(\014\022" +
       "\016\n\006status\030\004 \001(\005\022\017\n\007sent_at\030\005 \001(\004\022\023\n\013rece" +
-      "ived_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\t\";\n\017ChatMe" +
-      "ssageSend\022\027\n\017conversation_id\030\001 \001(\014\022\017\n\007co" +
-      "ntent\030\002 \001(\tb\006proto3"
+      "ived_at\030\006 \001(\004\022\017\n\007content\030\007 \001(\014\"\214\001\n\022ChatM" +
+      "essageContent\0222\n\014chat_content\030\001 \001(\0132\032.qa" +
+      "ul.rpc.chat.ChatContentH\000\0227\n\014file_conten" +
+      "t\030\002 \001(\0132\037.qaul.rpc.chat.FileShareContent" +
+      "H\000B\t\n\007content\"\036\n\013ChatContent\022\017\n\007content\030" +
+      "\001 \001(\t\"t\n\020FileShareContent\022\025\n\rhistory_ind" +
+      "ex\030\001 \001(\004\022\017\n\007file_id\030\002 \001(\004\022\021\n\tfile_name\030\003" +
+      " \001(\t\022\021\n\tfile_size\030\004 \001(\r\022\022\n\nfile_descr\030\005 " +
+      "\001(\t\";\n\017ChatMessageSend\022\027\n\017conversation_i" +
+      "d\030\001 \001(\014\022\017\n\007content\030\002 \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7940,8 +10543,26 @@ public final class ChatOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatMessage_descriptor,
         new java.lang.String[] { "Index", "SenderId", "MessageId", "Status", "SentAt", "ReceivedAt", "Content", });
-    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor =
+    internal_static_qaul_rpc_chat_ChatMessageContent_descriptor =
       getDescriptor().getMessageTypes().get(7);
+    internal_static_qaul_rpc_chat_ChatMessageContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_ChatMessageContent_descriptor,
+        new java.lang.String[] { "ChatContent", "FileContent", "Content", });
+    internal_static_qaul_rpc_chat_ChatContent_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_ChatContent_descriptor,
+        new java.lang.String[] { "Content", });
+    internal_static_qaul_rpc_chat_FileShareContent_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_qaul_rpc_chat_FileShareContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_FileShareContent_descriptor,
+        new java.lang.String[] { "HistoryIndex", "FileId", "FileName", "FileSize", "FileDescr", });
+    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatMessageSend_descriptor,

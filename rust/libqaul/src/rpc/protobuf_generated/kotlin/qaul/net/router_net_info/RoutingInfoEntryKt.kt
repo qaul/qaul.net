@@ -4,15 +4,15 @@
 package qaul.net.router_net_info;
 
 @kotlin.jvm.JvmName("-initializeroutingInfoEntry")
-public inline fun routingInfoEntry(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
+inline fun routingInfoEntry(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
   qaul.net.router_net_info.RoutingInfoEntryKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.newBuilder()).apply { block() }._build()
-public object RoutingInfoEntryKt {
+object RoutingInfoEntryKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object RoutingInfoEntryKt {
      *
      * <code>bytes user = 1;</code>
      */
-    public var user: com.google.protobuf.ByteString
+    var user: com.google.protobuf.ByteString
       @JvmName("getUser")
       get() = _builder.getUser()
       @JvmName("setUser")
@@ -43,7 +43,7 @@ public object RoutingInfoEntryKt {
      *
      * <code>bytes user = 1;</code>
      */
-    public fun clearUser() {
+    fun clearUser() {
       _builder.clearUser()
     }
 
@@ -54,7 +54,7 @@ public object RoutingInfoEntryKt {
      *
      * <code>uint32 rtt = 2;</code>
      */
-    public var rtt: kotlin.Int
+    var rtt: kotlin.Int
       @JvmName("getRtt")
       get() = _builder.getRtt()
       @JvmName("setRtt")
@@ -68,7 +68,7 @@ public object RoutingInfoEntryKt {
      *
      * <code>uint32 rtt = 2;</code>
      */
-    public fun clearRtt() {
+    fun clearRtt() {
       _builder.clearRtt()
     }
 
@@ -79,7 +79,7 @@ public object RoutingInfoEntryKt {
      *
      * <code>bytes hc = 3;</code>
      */
-    public var hc: com.google.protobuf.ByteString
+    var hc: com.google.protobuf.ByteString
       @JvmName("getHc")
       get() = _builder.getHc()
       @JvmName("setHc")
@@ -93,37 +93,37 @@ public object RoutingInfoEntryKt {
      *
      * <code>bytes hc = 3;</code>
      */
-    public fun clearHc() {
+    fun clearHc() {
       _builder.clearHc()
     }
 
     /**
      * <pre>
-     *&#47; package loss
+     *&#47; propagation id
      * </pre>
      *
-     * <code>float pl = 4;</code>
+     * <code>uint32 pgid = 5;</code>
      */
-    public var pl: kotlin.Float
-      @JvmName("getPl")
-      get() = _builder.getPl()
-      @JvmName("setPl")
+    var pgid: kotlin.Int
+      @JvmName("getPgid")
+      get() = _builder.getPgid()
+      @JvmName("setPgid")
       set(value) {
-        _builder.setPl(value)
+        _builder.setPgid(value)
       }
     /**
      * <pre>
-     *&#47; package loss
+     *&#47; propagation id
      * </pre>
      *
-     * <code>float pl = 4;</code>
+     * <code>uint32 pgid = 5;</code>
      */
-    public fun clearPl() {
-      _builder.clearPl()
+    fun clearPgid() {
+      _builder.clearPgid()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.copy(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
+inline fun qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry.copy(block: qaul.net.router_net_info.RoutingInfoEntryKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry =
   qaul.net.router_net_info.RoutingInfoEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

@@ -24,8 +24,10 @@ namespace qaul {
 namespace rpc {
 namespace node {
 PROTOBUF_CONSTEXPR Node::Node(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct NodeDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NodeDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,9 +38,10 @@ struct NodeDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
 PROTOBUF_CONSTEXPR NodeInformation::NodeInformation(
-    ::_pbi::ConstantInitialized)
-  : addresses_()
-  , id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.addresses_)*/{}
+  , /*decltype(_impl_.id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NodeInformationDefaultTypeInternal {
   PROTOBUF_CONSTEXPR NodeInformationDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -59,20 +62,20 @@ const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIA
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, addresses_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.id_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.addresses_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::node::Node)},
@@ -119,7 +122,7 @@ class Node::_Internal {
 
 const ::qaul::rpc::node::NodeInformation&
 Node::_Internal::info(const Node* msg) {
-  return *msg->message_.info_;
+  return *msg->_impl_.message_.info_;
 }
 void Node::set_allocated_info(::qaul::rpc::node::NodeInformation* info) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -132,27 +135,34 @@ void Node::set_allocated_info(::qaul::rpc::node::NodeInformation* info) {
           message_arena, info, submessage_arena);
     }
     set_has_info();
-    message_.info_ = info;
+    _impl_.message_.info_ = info;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.node.Node.info)
 }
 Node::Node(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.Node)
 }
 Node::Node(const Node& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Node* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kGetNodeInfo: {
-      _internal_set_get_node_info(from._internal_get_node_info());
+      _this->_internal_set_get_node_info(from._internal_get_node_info());
       break;
     }
     case kInfo: {
-      _internal_mutable_info()->::qaul::rpc::node::NodeInformation::MergeFrom(from._internal_info());
+      _this->_internal_mutable_info()->::qaul::rpc::node::NodeInformation::MergeFrom(
+          from._internal_info());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -162,8 +172,16 @@ Node::Node(const Node& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.node.Node)
 }
 
-inline void Node::SharedCtor() {
-clear_has_message();
+inline void Node::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Node::~Node() {
@@ -183,7 +201,7 @@ inline void Node::SharedDtor() {
 }
 
 void Node::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Node::clear_message() {
@@ -195,7 +213,7 @@ void Node::clear_message() {
     }
     case kInfo: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.info_;
+        delete _impl_.message_.info_;
       }
       break;
     }
@@ -203,7 +221,7 @@ void Node::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -307,49 +325,46 @@ size_t Node::ByteSizeLong() const {
     case kInfo: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.info_);
+          *_impl_.message_.info_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Node::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Node::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Node::GetClassData() const { return &_class_data_; }
 
-void Node::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Node *>(to)->MergeFrom(
-      static_cast<const Node &>(from));
-}
 
-
-void Node::MergeFrom(const Node& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.Node)
-  GOOGLE_DCHECK_NE(&from, this);
+void Node::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Node*>(&to_msg);
+  auto& from = static_cast<const Node&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.Node)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kGetNodeInfo: {
-      _internal_set_get_node_info(from._internal_get_node_info());
+      _this->_internal_set_get_node_info(from._internal_get_node_info());
       break;
     }
     case kInfo: {
-      _internal_mutable_info()->::qaul::rpc::node::NodeInformation::MergeFrom(from._internal_info());
+      _this->_internal_mutable_info()->::qaul::rpc::node::NodeInformation::MergeFrom(
+          from._internal_info());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Node::CopyFrom(const Node& from) {
@@ -366,8 +381,8 @@ bool Node::IsInitialized() const {
 void Node::InternalSwap(Node* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Node::GetMetadata() const {
@@ -384,31 +399,43 @@ class NodeInformation::_Internal {
 
 NodeInformation::NodeInformation(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  addresses_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.NodeInformation)
 }
 NodeInformation::NodeInformation(const NodeInformation& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      addresses_(from.addresses_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  NodeInformation* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.addresses_){from._impl_.addresses_}
+    , decltype(_impl_.id_base58_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_base58_.InitDefault();
+  _impl_.id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_base58_.Set("", GetArenaForAllocation());
+    _impl_.id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id_base58().empty()) {
-    id_base58_.Set(from._internal_id_base58(), 
-      GetArenaForAllocation());
+    _this->_impl_.id_base58_.Set(from._internal_id_base58(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.node.NodeInformation)
 }
 
-inline void NodeInformation::SharedCtor() {
-id_base58_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_base58_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void NodeInformation::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.addresses_){arena}
+    , decltype(_impl_.id_base58_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.id_base58_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.id_base58_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NodeInformation::~NodeInformation() {
@@ -422,11 +449,12 @@ NodeInformation::~NodeInformation() {
 
 inline void NodeInformation::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  id_base58_.Destroy();
+  _impl_.addresses_.~RepeatedPtrField();
+  _impl_.id_base58_.Destroy();
 }
 
 void NodeInformation::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void NodeInformation::Clear() {
@@ -435,8 +463,8 @@ void NodeInformation::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  addresses_.Clear();
-  id_base58_.ClearToEmpty();
+  _impl_.addresses_.Clear();
+  _impl_.id_base58_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -538,10 +566,10 @@ size_t NodeInformation::ByteSizeLong() const {
 
   // repeated string addresses = 2;
   total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(addresses_.size());
-  for (int i = 0, n = addresses_.size(); i < n; i++) {
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_impl_.addresses_.size());
+  for (int i = 0, n = _impl_.addresses_.size(); i < n; i++) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-      addresses_.Get(i));
+      _impl_.addresses_.Get(i));
   }
 
   // string id_base58 = 1;
@@ -551,33 +579,29 @@ size_t NodeInformation::ByteSizeLong() const {
         this->_internal_id_base58());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData NodeInformation::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     NodeInformation::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*NodeInformation::GetClassData() const { return &_class_data_; }
 
-void NodeInformation::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<NodeInformation *>(to)->MergeFrom(
-      static_cast<const NodeInformation &>(from));
-}
 
-
-void NodeInformation::MergeFrom(const NodeInformation& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.NodeInformation)
-  GOOGLE_DCHECK_NE(&from, this);
+void NodeInformation::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<NodeInformation*>(&to_msg);
+  auto& from = static_cast<const NodeInformation&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.NodeInformation)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  addresses_.MergeFrom(from.addresses_);
+  _this->_impl_.addresses_.MergeFrom(from._impl_.addresses_);
   if (!from._internal_id_base58().empty()) {
-    _internal_set_id_base58(from._internal_id_base58());
+    _this->_internal_set_id_base58(from._internal_id_base58());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void NodeInformation::CopyFrom(const NodeInformation& from) {
@@ -596,10 +620,10 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  addresses_.InternalSwap(&other->addresses_);
+  _impl_.addresses_.InternalSwap(&other->_impl_.addresses_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &id_base58_, lhs_arena,
-      &other->id_base58_, rhs_arena
+      &_impl_.id_base58_, lhs_arena,
+      &other->_impl_.id_base58_, rhs_arena
   );
 }
 

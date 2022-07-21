@@ -47,8 +47,9 @@ const Messaging$json = const {
   '1': 'Messaging',
   '2': const [
     const {'1': 'confirmation_message', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.messaging.Confirmation', '9': 0, '10': 'confirmationMessage'},
-    const {'1': 'chat_message', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.ChatMessage', '9': 0, '10': 'chatMessage'},
-    const {'1': 'crypto_service', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
+    const {'1': 'crypto_service', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
+    const {'1': 'chat_message', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.ChatMessage', '9': 0, '10': 'chatMessage'},
+    const {'1': 'file_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.FileMessage', '9': 0, '10': 'fileMessage'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -56,7 +57,7 @@ const Messaging$json = const {
 };
 
 /// Descriptor for `Messaging`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USRAoMY2hhdF9tZXNzYWdlGAIgASgLMh8ucWF1bC5uZXQubWVzc2FnaW5nLkNoYXRNZXNzYWdlSABSC2NoYXRNZXNzYWdlEkoKDmNyeXB0b19zZXJ2aWNlGAMgASgLMiEucWF1bC5uZXQubWVzc2FnaW5nLkNyeXB0b1NlcnZpY2VIAFINY3J5cHRvU2VydmljZUIJCgdtZXNzYWdl');
+final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USSgoOY3J5cHRvX3NlcnZpY2UYAiABKAsyIS5xYXVsLm5ldC5tZXNzYWdpbmcuQ3J5cHRvU2VydmljZUgAUg1jcnlwdG9TZXJ2aWNlEkQKDGNoYXRfbWVzc2FnZRgDIAEoCzIfLnFhdWwubmV0Lm1lc3NhZ2luZy5DaGF0TWVzc2FnZUgAUgtjaGF0TWVzc2FnZRJECgxmaWxlX21lc3NhZ2UYBCABKAsyHy5xYXVsLm5ldC5tZXNzYWdpbmcuRmlsZU1lc3NhZ2VIAFILZmlsZU1lc3NhZ2VCCQoHbWVzc2FnZQ==');
 @$core.Deprecated('Use cryptoServiceDescriptor instead')
 const CryptoService$json = const {
   '1': 'CryptoService',
@@ -88,3 +89,13 @@ const ChatMessage$json = const {
 
 /// Descriptor for `ChatMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List chatMessageDescriptor = $convert.base64Decode('CgtDaGF0TWVzc2FnZRIUCgVncm91cBgBIAEoCFIFZ3JvdXASJwoPY29udmVyc2F0aW9uX2lkGAIgASgMUg5jb252ZXJzYXRpb25JZBIXCgdzZW50X2F0GAMgASgEUgZzZW50QXQSGAoHY29udGVudBgEIAEoCVIHY29udGVudA==');
+@$core.Deprecated('Use fileMessageDescriptor instead')
+const FileMessage$json = const {
+  '1': 'FileMessage',
+  '2': const [
+    const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
+  ],
+};
+
+/// Descriptor for `FileMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fileMessageDescriptor = $convert.base64Decode('CgtGaWxlTWVzc2FnZRIYCgdjb250ZW50GAEgASgMUgdjb250ZW50');

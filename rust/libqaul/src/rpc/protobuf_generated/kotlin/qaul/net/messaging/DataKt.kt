@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializedata")
-public inline fun data(block: qaul.net.messaging.DataKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Data =
+inline fun data(block: qaul.net.messaging.DataKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Data =
   qaul.net.messaging.DataKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Data.newBuilder()).apply { block() }._build()
-public object DataKt {
+object DataKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.Data.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Data.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object DataKt {
      *
      * <code>uint64 nonce = 1;</code>
      */
-    public var nonce: kotlin.Long
+    var nonce: kotlin.Long
       @JvmName("getNonce")
       get() = _builder.getNonce()
       @JvmName("setNonce")
@@ -43,7 +43,7 @@ public object DataKt {
      *
      * <code>uint64 nonce = 1;</code>
      */
-    public fun clearNonce() {
+    fun clearNonce() {
       _builder.clearNonce()
     }
 
@@ -54,7 +54,7 @@ public object DataKt {
      *
      * <code>bytes data = 2;</code>
      */
-    public var data: com.google.protobuf.ByteString
+    var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -68,12 +68,12 @@ public object DataKt {
      *
      * <code>bytes data = 2;</code>
      */
-    public fun clearData() {
+    fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.Data.copy(block: qaul.net.messaging.DataKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Data =
+inline fun qaul.net.messaging.MessagingOuterClass.Data.copy(block: qaul.net.messaging.DataKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Data =
   qaul.net.messaging.DataKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

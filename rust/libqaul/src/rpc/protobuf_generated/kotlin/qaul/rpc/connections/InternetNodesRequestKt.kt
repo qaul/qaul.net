@@ -4,15 +4,15 @@
 package qaul.rpc.connections;
 
 @kotlin.jvm.JvmName("-initializeinternetNodesRequest")
-public inline fun internetNodesRequest(block: qaul.rpc.connections.InternetNodesRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest =
+inline fun internetNodesRequest(block: qaul.rpc.connections.InternetNodesRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest =
   qaul.rpc.connections.InternetNodesRequestKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.newBuilder()).apply { block() }._build()
-public object InternetNodesRequestKt {
+object InternetNodesRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object InternetNodesRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.copy(block: qaul.rpc.connections.InternetNodesRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest =
+inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.copy(block: qaul.rpc.connections.InternetNodesRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest =
   qaul.rpc.connections.InternetNodesRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

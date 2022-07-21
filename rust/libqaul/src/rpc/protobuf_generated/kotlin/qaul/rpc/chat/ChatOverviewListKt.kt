@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatOverviewList")
-public inline fun chatOverviewList(block: qaul.rpc.chat.ChatOverviewListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewList =
+inline fun chatOverviewList(block: qaul.rpc.chat.ChatOverviewListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewList =
   qaul.rpc.chat.ChatOverviewListKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatOverviewList.newBuilder()).apply { block() }._build()
-public object ChatOverviewListKt {
+object ChatOverviewListKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatOverviewList.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatOverviewList.Builder): Dsl = Dsl(builder)
@@ -27,11 +27,11 @@ public object ChatOverviewListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class OverviewListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class OverviewListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <code>repeated .qaul.rpc.chat.ChatOverview overview_list = 1;</code>
      */
-     public val overviewList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>
+     val overviewList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getOverviewListList()
@@ -42,7 +42,7 @@ public object ChatOverviewListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addOverviewList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
       _builder.addOverviewList(value)
     }
     /**
@@ -52,7 +52,7 @@ public object ChatOverviewListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignOverviewList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
       add(value)
     }
     /**
@@ -61,7 +61,7 @@ public object ChatOverviewListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllOverviewList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
       _builder.addAllOverviewList(values)
     }
     /**
@@ -71,7 +71,7 @@ public object ChatOverviewListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllOverviewList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatOverview>) {
       addAll(values)
     }
     /**
@@ -81,7 +81,7 @@ public object ChatOverviewListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setOverviewList")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatOverview) {
       _builder.setOverviewList(index, value)
     }
     /**
@@ -89,13 +89,13 @@ public object ChatOverviewListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearOverviewList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatOverview, OverviewListProxy>.clear() {
       _builder.clearOverviewList()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatOverviewList.copy(block: qaul.rpc.chat.ChatOverviewListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewList =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatOverviewList.copy(block: qaul.rpc.chat.ChatOverviewListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatOverviewList =
   qaul.rpc.chat.ChatOverviewListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

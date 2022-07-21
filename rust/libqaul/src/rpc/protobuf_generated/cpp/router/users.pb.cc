@@ -24,8 +24,10 @@ namespace qaul {
 namespace rpc {
 namespace users {
 PROTOBUF_CONSTEXPR Users::Users(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct UsersDefaultTypeInternal {
   PROTOBUF_CONSTEXPR UsersDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,7 +38,7 @@ struct UsersDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UsersDefaultTypeInternal _Users_default_instance_;
 PROTOBUF_CONSTEXPR UserRequest::UserRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct UserRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR UserRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -46,9 +48,21 @@ struct UserRequestDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserRequestDefaultTypeInternal _UserRequest_default_instance_;
+PROTOBUF_CONSTEXPR UserOnlineRequest::UserOnlineRequest(
+    ::_pbi::ConstantInitialized) {}
+struct UserOnlineRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR UserOnlineRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~UserOnlineRequestDefaultTypeInternal() {}
+  union {
+    UserOnlineRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserOnlineRequestDefaultTypeInternal _UserOnlineRequest_default_instance_;
 PROTOBUF_CONSTEXPR UserList::UserList(
-    ::_pbi::ConstantInitialized)
-  : user_(){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.user_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct UserListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR UserListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -59,17 +73,17 @@ struct UserListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserListDefaultTypeInternal _UserList_default_instance_;
 PROTOBUF_CONSTEXPR UserEntry::UserEntry(
-    ::_pbi::ConstantInitialized)
-  : name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , key_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , key_type_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , key_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , connectivity_(0)
-
-  , verified_(false)
-  , blocked_(false){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.key_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.key_type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.key_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.connectivity_)*/0
+  , /*decltype(_impl_.verified_)*/false
+  , /*decltype(_impl_.blocked_)*/false
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct UserEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR UserEntryDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -82,7 +96,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace users
 }  // namespace rpc
 }  // namespace qaul
-static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[4];
+static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[5];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2fusers_2eproto[1];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_router_2fusers_2eproto = nullptr;
 
@@ -90,15 +104,22 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, message_),
+  ::_pbi::kInvalidFieldOffsetTag,
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserOnlineRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
@@ -109,58 +130,62 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserList, user_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserList, _impl_.user_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, key_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, key_type_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, key_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, connectivity_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, verified_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, blocked_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.name_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.id_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_type_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.connectivity_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.verified_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.blocked_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::users::Users)},
-  { 10, -1, -1, sizeof(::qaul::rpc::users::UserRequest)},
-  { 16, -1, -1, sizeof(::qaul::rpc::users::UserList)},
-  { 23, -1, -1, sizeof(::qaul::rpc::users::UserEntry)},
+  { 11, -1, -1, sizeof(::qaul::rpc::users::UserRequest)},
+  { 17, -1, -1, sizeof(::qaul::rpc::users::UserOnlineRequest)},
+  { 23, -1, -1, sizeof(::qaul::rpc::users::UserList)},
+  { 30, -1, -1, sizeof(::qaul::rpc::users::UserEntry)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::rpc::users::_Users_default_instance_._instance,
   &::qaul::rpc::users::_UserRequest_default_instance_._instance,
+  &::qaul::rpc::users::_UserOnlineRequest_default_instance_._instance,
   &::qaul::rpc::users::_UserList_default_instance_._instance,
   &::qaul::rpc::users::_UserEntry_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_router_2fusers_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022router/users.proto\022\016qaul.rpc.users\"\250\001\n"
+  "\n\022router/users.proto\022\016qaul.rpc.users\"\352\001\n"
   "\005Users\0223\n\014user_request\030\001 \001(\0132\033.qaul.rpc."
-  "users.UserRequestH\000\022-\n\tuser_list\030\002 \001(\0132\030"
-  ".qaul.rpc.users.UserListH\000\0220\n\013user_updat"
-  "e\030\003 \001(\0132\031.qaul.rpc.users.UserEntryH\000B\t\n\007"
-  "message\"\r\n\013UserRequest\"3\n\010UserList\022\'\n\004us"
-  "er\030\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\302\001\n\t"
-  "UserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\021\n\ti"
-  "d_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010key_type\030"
-  "\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connectivit"
-  "y\030\010 \001(\0162\034.qaul.rpc.users.Connectivity\022\020\n"
-  "\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*6\n\014Conn"
-  "ectivity\022\n\n\006Online\020\000\022\r\n\tReachable\020\001\022\013\n\007O"
-  "ffline\020\002b\006proto3"
+  "users.UserRequestH\000\022@\n\023user_online_reque"
+  "st\030\002 \001(\0132!.qaul.rpc.users.UserOnlineRequ"
+  "estH\000\022-\n\tuser_list\030\003 \001(\0132\030.qaul.rpc.user"
+  "s.UserListH\000\0220\n\013user_update\030\004 \001(\0132\031.qaul"
+  ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use"
+  "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis"
+  "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt"
+  "ry\"\302\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001"
+  "(\014\022\021\n\tid_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010ke"
+  "y_type\030\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014conn"
+  "ectivity\030\010 \001(\0162\034.qaul.rpc.users.Connecti"
+  "vity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*"
+  "6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tReachable"
+  "\020\001\022\013\n\007Offline\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_router_2fusers_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2fusers_2eproto = {
-    false, false, 536, descriptor_table_protodef_router_2fusers_2eproto,
+    false, false, 623, descriptor_table_protodef_router_2fusers_2eproto,
     "router/users.proto",
-    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 4,
+    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 5,
     schemas, file_default_instances, TableStruct_router_2fusers_2eproto::offsets,
     file_level_metadata_router_2fusers_2eproto, file_level_enum_descriptors_router_2fusers_2eproto,
     file_level_service_descriptors_router_2fusers_2eproto,
@@ -195,21 +220,26 @@ bool Connectivity_IsValid(int value) {
 class Users::_Internal {
  public:
   static const ::qaul::rpc::users::UserRequest& user_request(const Users* msg);
+  static const ::qaul::rpc::users::UserOnlineRequest& user_online_request(const Users* msg);
   static const ::qaul::rpc::users::UserList& user_list(const Users* msg);
   static const ::qaul::rpc::users::UserEntry& user_update(const Users* msg);
 };
 
 const ::qaul::rpc::users::UserRequest&
 Users::_Internal::user_request(const Users* msg) {
-  return *msg->message_.user_request_;
+  return *msg->_impl_.message_.user_request_;
+}
+const ::qaul::rpc::users::UserOnlineRequest&
+Users::_Internal::user_online_request(const Users* msg) {
+  return *msg->_impl_.message_.user_online_request_;
 }
 const ::qaul::rpc::users::UserList&
 Users::_Internal::user_list(const Users* msg) {
-  return *msg->message_.user_list_;
+  return *msg->_impl_.message_.user_list_;
 }
 const ::qaul::rpc::users::UserEntry&
 Users::_Internal::user_update(const Users* msg) {
-  return *msg->message_.user_update_;
+  return *msg->_impl_.message_.user_update_;
 }
 void Users::set_allocated_user_request(::qaul::rpc::users::UserRequest* user_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -222,9 +252,24 @@ void Users::set_allocated_user_request(::qaul::rpc::users::UserRequest* user_req
           message_arena, user_request, submessage_arena);
     }
     set_has_user_request();
-    message_.user_request_ = user_request;
+    _impl_.message_.user_request_ = user_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.user_request)
+}
+void Users::set_allocated_user_online_request(::qaul::rpc::users::UserOnlineRequest* user_online_request) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (user_online_request) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(user_online_request);
+    if (message_arena != submessage_arena) {
+      user_online_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, user_online_request, submessage_arena);
+    }
+    set_has_user_online_request();
+    _impl_.message_.user_online_request_ = user_online_request;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.user_online_request)
 }
 void Users::set_allocated_user_list(::qaul::rpc::users::UserList* user_list) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -237,7 +282,7 @@ void Users::set_allocated_user_list(::qaul::rpc::users::UserList* user_list) {
           message_arena, user_list, submessage_arena);
     }
     set_has_user_list();
-    message_.user_list_ = user_list;
+    _impl_.message_.user_list_ = user_list;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.user_list)
 }
@@ -252,31 +297,45 @@ void Users::set_allocated_user_update(::qaul::rpc::users::UserEntry* user_update
           message_arena, user_update, submessage_arena);
     }
     set_has_user_update();
-    message_.user_update_ = user_update;
+    _impl_.message_.user_update_ = user_update;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.user_update)
 }
 Users::Users(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.Users)
 }
 Users::Users(const Users& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Users* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kUserRequest: {
-      _internal_mutable_user_request()->::qaul::rpc::users::UserRequest::MergeFrom(from._internal_user_request());
+      _this->_internal_mutable_user_request()->::qaul::rpc::users::UserRequest::MergeFrom(
+          from._internal_user_request());
+      break;
+    }
+    case kUserOnlineRequest: {
+      _this->_internal_mutable_user_online_request()->::qaul::rpc::users::UserOnlineRequest::MergeFrom(
+          from._internal_user_online_request());
       break;
     }
     case kUserList: {
-      _internal_mutable_user_list()->::qaul::rpc::users::UserList::MergeFrom(from._internal_user_list());
+      _this->_internal_mutable_user_list()->::qaul::rpc::users::UserList::MergeFrom(
+          from._internal_user_list());
       break;
     }
     case kUserUpdate: {
-      _internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(from._internal_user_update());
+      _this->_internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(
+          from._internal_user_update());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -286,8 +345,16 @@ Users::Users(const Users& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.Users)
 }
 
-inline void Users::SharedCtor() {
-clear_has_message();
+inline void Users::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Users::~Users() {
@@ -307,7 +374,7 @@ inline void Users::SharedDtor() {
 }
 
 void Users::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Users::clear_message() {
@@ -315,19 +382,25 @@ void Users::clear_message() {
   switch (message_case()) {
     case kUserRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.user_request_;
+        delete _impl_.message_.user_request_;
+      }
+      break;
+    }
+    case kUserOnlineRequest: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete _impl_.message_.user_online_request_;
       }
       break;
     }
     case kUserList: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.user_list_;
+        delete _impl_.message_.user_list_;
       }
       break;
     }
     case kUserUpdate: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.user_update_;
+        delete _impl_.message_.user_update_;
       }
       break;
     }
@@ -335,7 +408,7 @@ void Users::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -363,17 +436,25 @@ const char* Users::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
-      // .qaul.rpc.users.UserList user_list = 2;
+      // .qaul.rpc.users.UserOnlineRequest user_online_request = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_user_online_request(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.users.UserList user_list = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_user_list(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .qaul.rpc.users.UserEntry user_update = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+      // .qaul.rpc.users.UserEntry user_update = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_user_update(), ptr);
           CHK_(ptr);
         } else
@@ -415,17 +496,24 @@ uint8_t* Users::_InternalSerialize(
         _Internal::user_request(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.rpc.users.UserList user_list = 2;
+  // .qaul.rpc.users.UserOnlineRequest user_online_request = 2;
+  if (_internal_has_user_online_request()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::user_online_request(this),
+        _Internal::user_online_request(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.rpc.users.UserList user_list = 3;
   if (_internal_has_user_list()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::user_list(this),
+      InternalWriteMessage(3, _Internal::user_list(this),
         _Internal::user_list(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.rpc.users.UserEntry user_update = 3;
+  // .qaul.rpc.users.UserEntry user_update = 4;
   if (_internal_has_user_update()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::user_update(this),
+      InternalWriteMessage(4, _Internal::user_update(this),
         _Internal::user_update(this).GetCachedSize(), target, stream);
   }
 
@@ -450,67 +538,78 @@ size_t Users::ByteSizeLong() const {
     case kUserRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.user_request_);
+          *_impl_.message_.user_request_);
       break;
     }
-    // .qaul.rpc.users.UserList user_list = 2;
+    // .qaul.rpc.users.UserOnlineRequest user_online_request = 2;
+    case kUserOnlineRequest: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.message_.user_online_request_);
+      break;
+    }
+    // .qaul.rpc.users.UserList user_list = 3;
     case kUserList: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.user_list_);
+          *_impl_.message_.user_list_);
       break;
     }
-    // .qaul.rpc.users.UserEntry user_update = 3;
+    // .qaul.rpc.users.UserEntry user_update = 4;
     case kUserUpdate: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.user_update_);
+          *_impl_.message_.user_update_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Users::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Users::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Users::GetClassData() const { return &_class_data_; }
 
-void Users::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Users *>(to)->MergeFrom(
-      static_cast<const Users &>(from));
-}
 
-
-void Users::MergeFrom(const Users& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.Users)
-  GOOGLE_DCHECK_NE(&from, this);
+void Users::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Users*>(&to_msg);
+  auto& from = static_cast<const Users&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.Users)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kUserRequest: {
-      _internal_mutable_user_request()->::qaul::rpc::users::UserRequest::MergeFrom(from._internal_user_request());
+      _this->_internal_mutable_user_request()->::qaul::rpc::users::UserRequest::MergeFrom(
+          from._internal_user_request());
+      break;
+    }
+    case kUserOnlineRequest: {
+      _this->_internal_mutable_user_online_request()->::qaul::rpc::users::UserOnlineRequest::MergeFrom(
+          from._internal_user_online_request());
       break;
     }
     case kUserList: {
-      _internal_mutable_user_list()->::qaul::rpc::users::UserList::MergeFrom(from._internal_user_list());
+      _this->_internal_mutable_user_list()->::qaul::rpc::users::UserList::MergeFrom(
+          from._internal_user_list());
       break;
     }
     case kUserUpdate: {
-      _internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(from._internal_user_update());
+      _this->_internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(
+          from._internal_user_update());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Users::CopyFrom(const Users& from) {
@@ -527,8 +626,8 @@ bool Users::IsInitialized() const {
 void Users::InternalSwap(Users* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Users::GetMetadata() const {
@@ -550,6 +649,7 @@ UserRequest::UserRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 UserRequest::UserRequest(const UserRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  UserRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.UserRequest)
 }
@@ -578,25 +678,75 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UserRequest::GetClassData() co
 
 // ===================================================================
 
+class UserOnlineRequest::_Internal {
+ public:
+};
+
+UserOnlineRequest::UserOnlineRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.UserOnlineRequest)
+}
+UserOnlineRequest::UserOnlineRequest(const UserOnlineRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  UserOnlineRequest* const _this = this; (void)_this;
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.UserOnlineRequest)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UserOnlineRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UserOnlineRequest::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata UserOnlineRequest::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
+      file_level_metadata_router_2fusers_2eproto[2]);
+}
+
+// ===================================================================
+
 class UserList::_Internal {
  public:
 };
 
 UserList::UserList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  user_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.UserList)
 }
 UserList::UserList(const UserList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      user_(from.user_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  UserList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.user_){from._impl_.user_}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.UserList)
 }
 
-inline void UserList::SharedCtor() {
+inline void UserList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.user_){arena}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 UserList::~UserList() {
@@ -610,10 +760,11 @@ UserList::~UserList() {
 
 inline void UserList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.user_.~RepeatedPtrField();
 }
 
 void UserList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void UserList::Clear() {
@@ -622,7 +773,7 @@ void UserList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  user_.Clear();
+  _impl_.user_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -700,35 +851,31 @@ size_t UserList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.users.UserEntry user = 1;
   total_size += 1UL * this->_internal_user_size();
-  for (const auto& msg : this->user_) {
+  for (const auto& msg : this->_impl_.user_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UserList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     UserList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UserList::GetClassData() const { return &_class_data_; }
 
-void UserList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<UserList *>(to)->MergeFrom(
-      static_cast<const UserList &>(from));
-}
 
-
-void UserList::MergeFrom(const UserList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.UserList)
-  GOOGLE_DCHECK_NE(&from, this);
+void UserList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<UserList*>(&to_msg);
+  auto& from = static_cast<const UserList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.UserList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  user_.MergeFrom(from.user_);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.user_.MergeFrom(from._impl_.user_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void UserList::CopyFrom(const UserList& from) {
@@ -745,13 +892,13 @@ bool UserList::IsInitialized() const {
 void UserList::InternalSwap(UserList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  user_.InternalSwap(&other->user_);
+  _impl_.user_.InternalSwap(&other->_impl_.user_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserList::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
-      file_level_metadata_router_2fusers_2eproto[2]);
+      file_level_metadata_router_2fusers_2eproto[3]);
 }
 
 // ===================================================================
@@ -763,95 +910,119 @@ class UserEntry::_Internal {
 UserEntry::UserEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.UserEntry)
 }
 UserEntry::UserEntry(const UserEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  UserEntry* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.name_){}
+    , decltype(_impl_.id_){}
+    , decltype(_impl_.id_base58_){}
+    , decltype(_impl_.key_){}
+    , decltype(_impl_.key_type_){}
+    , decltype(_impl_.key_base58_){}
+    , decltype(_impl_.connectivity_){}
+    , decltype(_impl_.verified_){}
+    , decltype(_impl_.blocked_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  name_.InitDefault();
+  _impl_.name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    name_.Set("", GetArenaForAllocation());
+    _impl_.name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    name_.Set(from._internal_name(), 
-      GetArenaForAllocation());
+    _this->_impl_.name_.Set(from._internal_name(), 
+      _this->GetArenaForAllocation());
   }
-  id_.InitDefault();
+  _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_.Set("", GetArenaForAllocation());
+    _impl_.id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    id_.Set(from._internal_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), 
+      _this->GetArenaForAllocation());
   }
-  id_base58_.InitDefault();
+  _impl_.id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_base58_.Set("", GetArenaForAllocation());
+    _impl_.id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id_base58().empty()) {
-    id_base58_.Set(from._internal_id_base58(), 
-      GetArenaForAllocation());
+    _this->_impl_.id_base58_.Set(from._internal_id_base58(), 
+      _this->GetArenaForAllocation());
   }
-  key_.InitDefault();
+  _impl_.key_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_.Set("", GetArenaForAllocation());
+    _impl_.key_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key().empty()) {
-    key_.Set(from._internal_key(), 
-      GetArenaForAllocation());
+    _this->_impl_.key_.Set(from._internal_key(), 
+      _this->GetArenaForAllocation());
   }
-  key_type_.InitDefault();
+  _impl_.key_type_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_type_.Set("", GetArenaForAllocation());
+    _impl_.key_type_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key_type().empty()) {
-    key_type_.Set(from._internal_key_type(), 
-      GetArenaForAllocation());
+    _this->_impl_.key_type_.Set(from._internal_key_type(), 
+      _this->GetArenaForAllocation());
   }
-  key_base58_.InitDefault();
+  _impl_.key_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    key_base58_.Set("", GetArenaForAllocation());
+    _impl_.key_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key_base58().empty()) {
-    key_base58_.Set(from._internal_key_base58(), 
-      GetArenaForAllocation());
+    _this->_impl_.key_base58_.Set(from._internal_key_base58(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&connectivity_, &from.connectivity_,
-    static_cast<size_t>(reinterpret_cast<char*>(&blocked_) -
-    reinterpret_cast<char*>(&connectivity_)) + sizeof(blocked_));
+  ::memcpy(&_impl_.connectivity_, &from._impl_.connectivity_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.blocked_) -
+    reinterpret_cast<char*>(&_impl_.connectivity_)) + sizeof(_impl_.blocked_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.UserEntry)
 }
 
-inline void UserEntry::SharedCtor() {
-name_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  name_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-id_base58_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_base58_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_type_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_type_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-key_base58_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  key_base58_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&connectivity_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&blocked_) -
-    reinterpret_cast<char*>(&connectivity_)) + sizeof(blocked_));
+inline void UserEntry::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.name_){}
+    , decltype(_impl_.id_){}
+    , decltype(_impl_.id_base58_){}
+    , decltype(_impl_.key_){}
+    , decltype(_impl_.key_type_){}
+    , decltype(_impl_.key_base58_){}
+    , decltype(_impl_.connectivity_){0}
+    , decltype(_impl_.verified_){false}
+    , decltype(_impl_.blocked_){false}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.name_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.name_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.id_base58_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.id_base58_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.key_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.key_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.key_type_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.key_type_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.key_base58_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.key_base58_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 UserEntry::~UserEntry() {
@@ -865,16 +1036,16 @@ UserEntry::~UserEntry() {
 
 inline void UserEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  name_.Destroy();
-  id_.Destroy();
-  id_base58_.Destroy();
-  key_.Destroy();
-  key_type_.Destroy();
-  key_base58_.Destroy();
+  _impl_.name_.Destroy();
+  _impl_.id_.Destroy();
+  _impl_.id_base58_.Destroy();
+  _impl_.key_.Destroy();
+  _impl_.key_type_.Destroy();
+  _impl_.key_base58_.Destroy();
 }
 
 void UserEntry::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void UserEntry::Clear() {
@@ -883,15 +1054,15 @@ void UserEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  name_.ClearToEmpty();
-  id_.ClearToEmpty();
-  id_base58_.ClearToEmpty();
-  key_.ClearToEmpty();
-  key_type_.ClearToEmpty();
-  key_base58_.ClearToEmpty();
-  ::memset(&connectivity_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&blocked_) -
-      reinterpret_cast<char*>(&connectivity_)) + sizeof(blocked_));
+  _impl_.name_.ClearToEmpty();
+  _impl_.id_.ClearToEmpty();
+  _impl_.id_base58_.ClearToEmpty();
+  _impl_.key_.ClearToEmpty();
+  _impl_.key_type_.ClearToEmpty();
+  _impl_.key_base58_.ClearToEmpty();
+  ::memset(&_impl_.connectivity_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.blocked_) -
+      reinterpret_cast<char*>(&_impl_.connectivity_)) + sizeof(_impl_.blocked_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -971,7 +1142,7 @@ const char* UserEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
       // bool verified = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
-          verified_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.verified_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -979,7 +1150,7 @@ const char* UserEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
       // bool blocked = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 80)) {
-          blocked_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.blocked_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1158,56 +1329,52 @@ size_t UserEntry::ByteSizeLong() const {
     total_size += 1 + 1;
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UserEntry::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     UserEntry::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UserEntry::GetClassData() const { return &_class_data_; }
 
-void UserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<UserEntry *>(to)->MergeFrom(
-      static_cast<const UserEntry &>(from));
-}
 
-
-void UserEntry::MergeFrom(const UserEntry& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.UserEntry)
-  GOOGLE_DCHECK_NE(&from, this);
+void UserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<UserEntry*>(&to_msg);
+  auto& from = static_cast<const UserEntry&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.UserEntry)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_name().empty()) {
-    _internal_set_name(from._internal_name());
+    _this->_internal_set_name(from._internal_name());
   }
   if (!from._internal_id().empty()) {
-    _internal_set_id(from._internal_id());
+    _this->_internal_set_id(from._internal_id());
   }
   if (!from._internal_id_base58().empty()) {
-    _internal_set_id_base58(from._internal_id_base58());
+    _this->_internal_set_id_base58(from._internal_id_base58());
   }
   if (!from._internal_key().empty()) {
-    _internal_set_key(from._internal_key());
+    _this->_internal_set_key(from._internal_key());
   }
   if (!from._internal_key_type().empty()) {
-    _internal_set_key_type(from._internal_key_type());
+    _this->_internal_set_key_type(from._internal_key_type());
   }
   if (!from._internal_key_base58().empty()) {
-    _internal_set_key_base58(from._internal_key_base58());
+    _this->_internal_set_key_base58(from._internal_key_base58());
   }
   if (from._internal_connectivity() != 0) {
-    _internal_set_connectivity(from._internal_connectivity());
+    _this->_internal_set_connectivity(from._internal_connectivity());
   }
   if (from._internal_verified() != 0) {
-    _internal_set_verified(from._internal_verified());
+    _this->_internal_set_verified(from._internal_verified());
   }
   if (from._internal_blocked() != 0) {
-    _internal_set_blocked(from._internal_blocked());
+    _this->_internal_set_blocked(from._internal_blocked());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void UserEntry::CopyFrom(const UserEntry& from) {
@@ -1227,41 +1394,41 @@ void UserEntry::InternalSwap(UserEntry* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &name_, lhs_arena,
-      &other->name_, rhs_arena
+      &_impl_.name_, lhs_arena,
+      &other->_impl_.name_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &id_, lhs_arena,
-      &other->id_, rhs_arena
+      &_impl_.id_, lhs_arena,
+      &other->_impl_.id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &id_base58_, lhs_arena,
-      &other->id_base58_, rhs_arena
+      &_impl_.id_base58_, lhs_arena,
+      &other->_impl_.id_base58_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &key_, lhs_arena,
-      &other->key_, rhs_arena
+      &_impl_.key_, lhs_arena,
+      &other->_impl_.key_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &key_type_, lhs_arena,
-      &other->key_type_, rhs_arena
+      &_impl_.key_type_, lhs_arena,
+      &other->_impl_.key_type_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &key_base58_, lhs_arena,
-      &other->key_base58_, rhs_arena
+      &_impl_.key_base58_, lhs_arena,
+      &other->_impl_.key_base58_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(UserEntry, blocked_)
-      + sizeof(UserEntry::blocked_)
-      - PROTOBUF_FIELD_OFFSET(UserEntry, connectivity_)>(
-          reinterpret_cast<char*>(&connectivity_),
-          reinterpret_cast<char*>(&other->connectivity_));
+      PROTOBUF_FIELD_OFFSET(UserEntry, _impl_.blocked_)
+      + sizeof(UserEntry::_impl_.blocked_)
+      - PROTOBUF_FIELD_OFFSET(UserEntry, _impl_.connectivity_)>(
+          reinterpret_cast<char*>(&_impl_.connectivity_),
+          reinterpret_cast<char*>(&other->_impl_.connectivity_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserEntry::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
-      file_level_metadata_router_2fusers_2eproto[3]);
+      file_level_metadata_router_2fusers_2eproto[4]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -1276,6 +1443,10 @@ Arena::CreateMaybeMessage< ::qaul::rpc::users::Users >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::qaul::rpc::users::UserRequest*
 Arena::CreateMaybeMessage< ::qaul::rpc::users::UserRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::users::UserRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::users::UserOnlineRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::users::UserOnlineRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::users::UserOnlineRequest >(arena);
 }
 template<> PROTOBUF_NOINLINE ::qaul::rpc::users::UserList*
 Arena::CreateMaybeMessage< ::qaul::rpc::users::UserList >(Arena* arena) {

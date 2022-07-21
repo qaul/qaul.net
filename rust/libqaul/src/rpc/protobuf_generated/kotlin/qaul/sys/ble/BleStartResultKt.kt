@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleStartResult")
-public inline fun bleStartResult(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
+inline fun bleStartResult(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleStartResult.newBuilder()).apply { block() }._build()
-public object BleStartResultKt {
+object BleStartResultKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleStartResult.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleStartResult.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleStartResultKt {
      *
      * <code>bool success = 1;</code>
      */
-    public var success: kotlin.Boolean
+    var success: kotlin.Boolean
       @JvmName("getSuccess")
       get() = _builder.getSuccess()
       @JvmName("setSuccess")
@@ -43,7 +43,7 @@ public object BleStartResultKt {
      *
      * <code>bool success = 1;</code>
      */
-    public fun clearSuccess() {
+    fun clearSuccess() {
       _builder.clearSuccess()
     }
 
@@ -54,7 +54,7 @@ public object BleStartResultKt {
      *
      * <code>.qaul.sys.ble.BleError error_reason = 2;</code>
      */
-    public var errorReason: qaul.sys.ble.BleOuterClass.BleError
+     var errorReason: qaul.sys.ble.BleOuterClass.BleError
       @JvmName("getErrorReason")
       get() = _builder.getErrorReason()
       @JvmName("setErrorReason")
@@ -68,7 +68,7 @@ public object BleStartResultKt {
      *
      * <code>.qaul.sys.ble.BleError error_reason = 2;</code>
      */
-    public fun clearErrorReason() {
+    fun clearErrorReason() {
       _builder.clearErrorReason()
     }
 
@@ -79,7 +79,7 @@ public object BleStartResultKt {
      *
      * <code>string error_message = 3;</code>
      */
-    public var errorMessage: kotlin.String
+    var errorMessage: kotlin.String
       @JvmName("getErrorMessage")
       get() = _builder.getErrorMessage()
       @JvmName("setErrorMessage")
@@ -93,12 +93,12 @@ public object BleStartResultKt {
      *
      * <code>string error_message = 3;</code>
      */
-    public fun clearErrorMessage() {
+    fun clearErrorMessage() {
       _builder.clearErrorMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleStartResult.copy(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
+inline fun qaul.sys.ble.BleOuterClass.BleStartResult.copy(block: qaul.sys.ble.BleStartResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleStartResult =
   qaul.sys.ble.BleStartResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

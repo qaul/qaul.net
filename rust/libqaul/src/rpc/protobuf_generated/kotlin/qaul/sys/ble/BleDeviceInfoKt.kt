@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDeviceInfo")
-public inline fun bleDeviceInfo(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
+inline fun bleDeviceInfo(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceInfo.newBuilder()).apply { block() }._build()
-public object BleDeviceInfoKt {
+object BleDeviceInfoKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder): Dsl = Dsl(builder)
@@ -30,7 +30,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool ble_support = 1;</code>
      */
-    public var bleSupport: kotlin.Boolean
+    var bleSupport: kotlin.Boolean
       @JvmName("getBleSupport")
       get() = _builder.getBleSupport()
       @JvmName("setBleSupport")
@@ -45,7 +45,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool ble_support = 1;</code>
      */
-    public fun clearBleSupport() {
+    fun clearBleSupport() {
       _builder.clearBleSupport()
     }
 
@@ -61,7 +61,7 @@ public object BleDeviceInfoKt {
      *
      * <code>string id = 2;</code>
      */
-    public var id: kotlin.String
+    var id: kotlin.String
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -80,7 +80,7 @@ public object BleDeviceInfoKt {
      *
      * <code>string id = 2;</code>
      */
-    public fun clearId() {
+    fun clearId() {
       _builder.clearId()
     }
 
@@ -94,7 +94,7 @@ public object BleDeviceInfoKt {
      *
      * <code>string name = 3;</code>
      */
-    public var name: kotlin.String
+    var name: kotlin.String
       @JvmName("getName")
       get() = _builder.getName()
       @JvmName("setName")
@@ -111,7 +111,7 @@ public object BleDeviceInfoKt {
      *
      * <code>string name = 3;</code>
      */
-    public fun clearName() {
+    fun clearName() {
       _builder.clearName()
     }
 
@@ -124,7 +124,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool bluetooth_on = 4;</code>
      */
-    public var bluetoothOn: kotlin.Boolean
+    var bluetoothOn: kotlin.Boolean
       @JvmName("getBluetoothOn")
       get() = _builder.getBluetoothOn()
       @JvmName("setBluetoothOn")
@@ -140,7 +140,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool bluetooth_on = 4;</code>
      */
-    public fun clearBluetoothOn() {
+    fun clearBluetoothOn() {
       _builder.clearBluetoothOn()
     }
 
@@ -153,7 +153,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool adv_extended = 5;</code>
      */
-    public var advExtended: kotlin.Boolean
+    var advExtended: kotlin.Boolean
       @JvmName("getAdvExtended")
       get() = _builder.getAdvExtended()
       @JvmName("setAdvExtended")
@@ -169,7 +169,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool adv_extended = 5;</code>
      */
-    public fun clearAdvExtended() {
+    fun clearAdvExtended() {
       _builder.clearAdvExtended()
     }
 
@@ -182,7 +182,7 @@ public object BleDeviceInfoKt {
      *
      * <code>uint32 adv_extended_bytes = 6;</code>
      */
-    public var advExtendedBytes: kotlin.Int
+    var advExtendedBytes: kotlin.Int
       @JvmName("getAdvExtendedBytes")
       get() = _builder.getAdvExtendedBytes()
       @JvmName("setAdvExtendedBytes")
@@ -198,7 +198,7 @@ public object BleDeviceInfoKt {
      *
      * <code>uint32 adv_extended_bytes = 6;</code>
      */
-    public fun clearAdvExtendedBytes() {
+    fun clearAdvExtendedBytes() {
       _builder.clearAdvExtendedBytes()
     }
 
@@ -211,7 +211,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_2m = 7;</code>
      */
-    public var le2M: kotlin.Boolean
+    var le2M: kotlin.Boolean
       @JvmName("getLe2M")
       get() = _builder.getLe2M()
       @JvmName("setLe2M")
@@ -227,7 +227,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_2m = 7;</code>
      */
-    public fun clearLe2M() {
+    fun clearLe2M() {
       _builder.clearLe2M()
     }
 
@@ -241,7 +241,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_coded = 8;</code>
      */
-    public var leCoded: kotlin.Boolean
+    var leCoded: kotlin.Boolean
       @JvmName("getLeCoded")
       get() = _builder.getLeCoded()
       @JvmName("setLeCoded")
@@ -258,7 +258,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_coded = 8;</code>
      */
-    public fun clearLeCoded() {
+    fun clearLeCoded() {
       _builder.clearLeCoded()
     }
 
@@ -277,7 +277,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_audio = 9;</code>
      */
-    public var leAudio: kotlin.Boolean
+    var leAudio: kotlin.Boolean
       @JvmName("getLeAudio")
       get() = _builder.getLeAudio()
       @JvmName("setLeAudio")
@@ -299,7 +299,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_audio = 9;</code>
      */
-    public fun clearLeAudio() {
+    fun clearLeAudio() {
       _builder.clearLeAudio()
     }
 
@@ -312,7 +312,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_periodic_adv_support = 14;</code>
      */
-    public var lePeriodicAdvSupport: kotlin.Boolean
+    var lePeriodicAdvSupport: kotlin.Boolean
       @JvmName("getLePeriodicAdvSupport")
       get() = _builder.getLePeriodicAdvSupport()
       @JvmName("setLePeriodicAdvSupport")
@@ -328,7 +328,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_periodic_adv_support = 14;</code>
      */
-    public fun clearLePeriodicAdvSupport() {
+    fun clearLePeriodicAdvSupport() {
       _builder.clearLePeriodicAdvSupport()
     }
 
@@ -348,7 +348,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_multiple_adv_support = 15;</code>
      */
-    public var leMultipleAdvSupport: kotlin.Boolean
+    var leMultipleAdvSupport: kotlin.Boolean
       @JvmName("getLeMultipleAdvSupport")
       get() = _builder.getLeMultipleAdvSupport()
       @JvmName("setLeMultipleAdvSupport")
@@ -371,7 +371,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool le_multiple_adv_support = 15;</code>
      */
-    public fun clearLeMultipleAdvSupport() {
+    fun clearLeMultipleAdvSupport() {
       _builder.clearLeMultipleAdvSupport()
     }
 
@@ -384,7 +384,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool offload_filter_support = 16;</code>
      */
-    public var offloadFilterSupport: kotlin.Boolean
+    var offloadFilterSupport: kotlin.Boolean
       @JvmName("getOffloadFilterSupport")
       get() = _builder.getOffloadFilterSupport()
       @JvmName("setOffloadFilterSupport")
@@ -400,7 +400,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool offload_filter_support = 16;</code>
      */
-    public fun clearOffloadFilterSupport() {
+    fun clearOffloadFilterSupport() {
       _builder.clearOffloadFilterSupport()
     }
 
@@ -413,7 +413,7 @@ public object BleDeviceInfoKt {
      *
      * <code>bool offload_scan_batching_support = 17;</code>
      */
-    public var offloadScanBatchingSupport: kotlin.Boolean
+    var offloadScanBatchingSupport: kotlin.Boolean
       @JvmName("getOffloadScanBatchingSupport")
       get() = _builder.getOffloadScanBatchingSupport()
       @JvmName("setOffloadScanBatchingSupport")
@@ -429,12 +429,12 @@ public object BleDeviceInfoKt {
      *
      * <code>bool offload_scan_batching_support = 17;</code>
      */
-    public fun clearOffloadScanBatchingSupport() {
+    fun clearOffloadScanBatchingSupport() {
       _builder.clearOffloadScanBatchingSupport()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDeviceInfo.copy(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
+inline fun qaul.sys.ble.BleOuterClass.BleDeviceInfo.copy(block: qaul.sys.ble.BleDeviceInfoKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceInfo =
   qaul.sys.ble.BleDeviceInfoKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializeinfoResponse")
-public inline fun infoResponse(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
+inline fun infoResponse(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
   qaul.rpc.ble.InfoResponseKt.Dsl._create(qaul.rpc.ble.BleRpc.InfoResponse.newBuilder()).apply { block() }._build()
-public object InfoResponseKt {
+object InfoResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.InfoResponse.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.InfoResponse.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object InfoResponseKt {
      *
      * <code>bytes small_id = 1;</code>
      */
-    public var smallId: com.google.protobuf.ByteString
+    var smallId: com.google.protobuf.ByteString
       @JvmName("getSmallId")
       get() = _builder.getSmallId()
       @JvmName("setSmallId")
@@ -43,7 +43,7 @@ public object InfoResponseKt {
      *
      * <code>bytes small_id = 1;</code>
      */
-    public fun clearSmallId() {
+    fun clearSmallId() {
       _builder.clearSmallId()
     }
 
@@ -54,7 +54,7 @@ public object InfoResponseKt {
      *
      * <code>string status = 2;</code>
      */
-    public var status: kotlin.String
+    var status: kotlin.String
       @JvmName("getStatus")
       get() = _builder.getStatus()
       @JvmName("setStatus")
@@ -68,7 +68,7 @@ public object InfoResponseKt {
      *
      * <code>string status = 2;</code>
      */
-    public fun clearStatus() {
+    fun clearStatus() {
       _builder.clearStatus()
     }
 
@@ -79,7 +79,7 @@ public object InfoResponseKt {
      *
      * <code>bytes device_info = 3;</code>
      */
-    public var deviceInfo: com.google.protobuf.ByteString
+    var deviceInfo: com.google.protobuf.ByteString
       @JvmName("getDeviceInfo")
       get() = _builder.getDeviceInfo()
       @JvmName("setDeviceInfo")
@@ -93,12 +93,12 @@ public object InfoResponseKt {
      *
      * <code>bytes device_info = 3;</code>
      */
-    public fun clearDeviceInfo() {
+    fun clearDeviceInfo() {
       _builder.clearDeviceInfo()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.InfoResponse.copy(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
+inline fun qaul.rpc.ble.BleRpc.InfoResponse.copy(block: qaul.rpc.ble.InfoResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.InfoResponse =
   qaul.rpc.ble.InfoResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

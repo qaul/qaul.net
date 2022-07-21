@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleInfoResponse")
-public inline fun bleInfoResponse(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
+inline fun bleInfoResponse(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
   qaul.sys.ble.BleInfoResponseKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleInfoResponse.newBuilder()).apply { block() }._build()
-public object BleInfoResponseKt {
+object BleInfoResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleInfoResponse.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleInfoResponse.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleInfoResponseKt {
      *
      * <code>.qaul.sys.ble.BleDeviceInfo device = 1;</code>
      */
-    public var device: qaul.sys.ble.BleOuterClass.BleDeviceInfo
+    var device: qaul.sys.ble.BleOuterClass.BleDeviceInfo
       @JvmName("getDevice")
       get() = _builder.getDevice()
       @JvmName("setDevice")
@@ -43,7 +43,7 @@ public object BleInfoResponseKt {
      *
      * <code>.qaul.sys.ble.BleDeviceInfo device = 1;</code>
      */
-    public fun clearDevice() {
+    fun clearDevice() {
       _builder.clearDevice()
     }
     /**
@@ -54,13 +54,13 @@ public object BleInfoResponseKt {
      * <code>.qaul.sys.ble.BleDeviceInfo device = 1;</code>
      * @return Whether the device field is set.
      */
-    public fun hasDevice(): kotlin.Boolean {
+    fun hasDevice(): kotlin.Boolean {
       return _builder.hasDevice()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleInfoResponse.copy(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
+inline fun qaul.sys.ble.BleOuterClass.BleInfoResponse.copy(block: qaul.sys.ble.BleInfoResponseKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleInfoResponse =
   qaul.sys.ble.BleInfoResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.sys.ble.BleOuterClass.BleInfoResponseOrBuilder.deviceOrNull: qaul.sys.ble.BleOuterClass.BleDeviceInfo?

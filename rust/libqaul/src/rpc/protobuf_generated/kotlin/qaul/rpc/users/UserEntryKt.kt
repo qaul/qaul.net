@@ -4,15 +4,15 @@
 package qaul.rpc.users;
 
 @kotlin.jvm.JvmName("-initializeuserEntry")
-public inline fun userEntry(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
+inline fun userEntry(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
   qaul.rpc.users.UserEntryKt.Dsl._create(qaul.rpc.users.UsersOuterClass.UserEntry.newBuilder()).apply { block() }._build()
-public object UserEntryKt {
+object UserEntryKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.users.UsersOuterClass.UserEntry.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.users.UsersOuterClass.UserEntry.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object UserEntryKt {
     /**
      * <code>string name = 1;</code>
      */
-    public var name: kotlin.String
+    var name: kotlin.String
       @JvmName("getName")
       get() = _builder.getName()
       @JvmName("setName")
@@ -35,14 +35,14 @@ public object UserEntryKt {
     /**
      * <code>string name = 1;</code>
      */
-    public fun clearName() {
+    fun clearName() {
       _builder.clearName()
     }
 
     /**
      * <code>bytes id = 2;</code>
      */
-    public var id: com.google.protobuf.ByteString
+    var id: com.google.protobuf.ByteString
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -52,14 +52,14 @@ public object UserEntryKt {
     /**
      * <code>bytes id = 2;</code>
      */
-    public fun clearId() {
+    fun clearId() {
       _builder.clearId()
     }
 
     /**
      * <code>string id_base58 = 4;</code>
      */
-    public var idBase58: kotlin.String
+    var idBase58: kotlin.String
       @JvmName("getIdBase58")
       get() = _builder.getIdBase58()
       @JvmName("setIdBase58")
@@ -69,7 +69,7 @@ public object UserEntryKt {
     /**
      * <code>string id_base58 = 4;</code>
      */
-    public fun clearIdBase58() {
+    fun clearIdBase58() {
       _builder.clearIdBase58()
     }
 
@@ -80,7 +80,7 @@ public object UserEntryKt {
      *
      * <code>bytes key = 5;</code>
      */
-    public var key: com.google.protobuf.ByteString
+    var key: com.google.protobuf.ByteString
       @JvmName("getKey")
       get() = _builder.getKey()
       @JvmName("setKey")
@@ -94,14 +94,14 @@ public object UserEntryKt {
      *
      * <code>bytes key = 5;</code>
      */
-    public fun clearKey() {
+    fun clearKey() {
       _builder.clearKey()
     }
 
     /**
      * <code>string key_type = 6;</code>
      */
-    public var keyType: kotlin.String
+    var keyType: kotlin.String
       @JvmName("getKeyType")
       get() = _builder.getKeyType()
       @JvmName("setKeyType")
@@ -111,14 +111,14 @@ public object UserEntryKt {
     /**
      * <code>string key_type = 6;</code>
      */
-    public fun clearKeyType() {
+    fun clearKeyType() {
       _builder.clearKeyType()
     }
 
     /**
      * <code>string key_base58 = 7;</code>
      */
-    public var keyBase58: kotlin.String
+    var keyBase58: kotlin.String
       @JvmName("getKeyBase58")
       get() = _builder.getKeyBase58()
       @JvmName("setKeyBase58")
@@ -128,14 +128,14 @@ public object UserEntryKt {
     /**
      * <code>string key_base58 = 7;</code>
      */
-    public fun clearKeyBase58() {
+    fun clearKeyBase58() {
       _builder.clearKeyBase58()
     }
 
     /**
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      */
-    public var connectivity: qaul.rpc.users.UsersOuterClass.Connectivity
+     var connectivity: qaul.rpc.users.UsersOuterClass.Connectivity
       @JvmName("getConnectivity")
       get() = _builder.getConnectivity()
       @JvmName("setConnectivity")
@@ -145,14 +145,14 @@ public object UserEntryKt {
     /**
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      */
-    public fun clearConnectivity() {
+    fun clearConnectivity() {
       _builder.clearConnectivity()
     }
 
     /**
      * <code>bool verified = 9;</code>
      */
-    public var verified: kotlin.Boolean
+    var verified: kotlin.Boolean
       @JvmName("getVerified")
       get() = _builder.getVerified()
       @JvmName("setVerified")
@@ -162,14 +162,14 @@ public object UserEntryKt {
     /**
      * <code>bool verified = 9;</code>
      */
-    public fun clearVerified() {
+    fun clearVerified() {
       _builder.clearVerified()
     }
 
     /**
      * <code>bool blocked = 10;</code>
      */
-    public var blocked: kotlin.Boolean
+    var blocked: kotlin.Boolean
       @JvmName("getBlocked")
       get() = _builder.getBlocked()
       @JvmName("setBlocked")
@@ -179,12 +179,12 @@ public object UserEntryKt {
     /**
      * <code>bool blocked = 10;</code>
      */
-    public fun clearBlocked() {
+    fun clearBlocked() {
       _builder.clearBlocked()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.users.UsersOuterClass.UserEntry.copy(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
+inline fun qaul.rpc.users.UsersOuterClass.UserEntry.copy(block: qaul.rpc.users.UserEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.users.UsersOuterClass.UserEntry =
   qaul.rpc.users.UserEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

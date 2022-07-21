@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatConversationList")
-public inline fun chatConversationList(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
+inline fun chatConversationList(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
   qaul.rpc.chat.ChatConversationListKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatConversationList.newBuilder()).apply { block() }._build()
-public object ChatConversationListKt {
+object ChatConversationListKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatConversationList.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatConversationList.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object ChatConversationListKt {
     /**
      * <code>bytes conversation_id = 1;</code>
      */
-    public var conversationId: com.google.protobuf.ByteString
+    var conversationId: com.google.protobuf.ByteString
       @JvmName("getConversationId")
       get() = _builder.getConversationId()
       @JvmName("setConversationId")
@@ -35,7 +35,7 @@ public object ChatConversationListKt {
     /**
      * <code>bytes conversation_id = 1;</code>
      */
-    public fun clearConversationId() {
+    fun clearConversationId() {
       _builder.clearConversationId()
     }
 
@@ -44,11 +44,11 @@ public object ChatConversationListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class MessageListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class MessageListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      */
-     public val messageList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>
+     val messageList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getMessageListList()
@@ -59,7 +59,7 @@ public object ChatConversationListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addMessageList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.add(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       _builder.addMessageList(value)
     }
     /**
@@ -69,7 +69,7 @@ public object ChatConversationListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignMessageList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       add(value)
     }
     /**
@@ -78,7 +78,7 @@ public object ChatConversationListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllMessageList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
       _builder.addAllMessageList(values)
     }
     /**
@@ -88,7 +88,7 @@ public object ChatConversationListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllMessageList")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.ChatMessage>) {
       addAll(values)
     }
     /**
@@ -98,7 +98,7 @@ public object ChatConversationListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setMessageList")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.ChatMessage) {
       _builder.setMessageList(index, value)
     }
     /**
@@ -106,13 +106,13 @@ public object ChatConversationListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearMessageList")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>.clear() {
       _builder.clearMessageList()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationList.copy(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatConversationList.copy(block: qaul.rpc.chat.ChatConversationListKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatConversationList =
   qaul.rpc.chat.ChatConversationListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

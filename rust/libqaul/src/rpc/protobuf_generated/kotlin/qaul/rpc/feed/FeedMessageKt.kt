@@ -4,15 +4,15 @@
 package qaul.rpc.feed;
 
 @kotlin.jvm.JvmName("-initializefeedMessage")
-public inline fun feedMessage(block: qaul.rpc.feed.FeedMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessage =
+inline fun feedMessage(block: qaul.rpc.feed.FeedMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessage =
   qaul.rpc.feed.FeedMessageKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.FeedMessage.newBuilder()).apply { block() }._build()
-public object FeedMessageKt {
+object FeedMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.feed.FeedOuterClass.FeedMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.feed.FeedOuterClass.FeedMessage.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object FeedMessageKt {
     /**
      * <code>bytes sender_id = 1;</code>
      */
-    public var senderId: com.google.protobuf.ByteString
+    var senderId: com.google.protobuf.ByteString
       @JvmName("getSenderId")
       get() = _builder.getSenderId()
       @JvmName("setSenderId")
@@ -35,7 +35,7 @@ public object FeedMessageKt {
     /**
      * <code>bytes sender_id = 1;</code>
      */
-    public fun clearSenderId() {
+    fun clearSenderId() {
       _builder.clearSenderId()
     }
 
@@ -46,7 +46,7 @@ public object FeedMessageKt {
      *
      * <code>string sender_id_base58 = 2;</code>
      */
-    public var senderIdBase58: kotlin.String
+    var senderIdBase58: kotlin.String
       @JvmName("getSenderIdBase58")
       get() = _builder.getSenderIdBase58()
       @JvmName("setSenderIdBase58")
@@ -60,14 +60,14 @@ public object FeedMessageKt {
      *
      * <code>string sender_id_base58 = 2;</code>
      */
-    public fun clearSenderIdBase58() {
+    fun clearSenderIdBase58() {
       _builder.clearSenderIdBase58()
     }
 
     /**
      * <code>bytes message_id = 3;</code>
      */
-    public var messageId: com.google.protobuf.ByteString
+    var messageId: com.google.protobuf.ByteString
       @JvmName("getMessageId")
       get() = _builder.getMessageId()
       @JvmName("setMessageId")
@@ -77,7 +77,7 @@ public object FeedMessageKt {
     /**
      * <code>bytes message_id = 3;</code>
      */
-    public fun clearMessageId() {
+    fun clearMessageId() {
       _builder.clearMessageId()
     }
 
@@ -88,7 +88,7 @@ public object FeedMessageKt {
      *
      * <code>string message_id_base58 = 4;</code>
      */
-    public var messageIdBase58: kotlin.String
+    var messageIdBase58: kotlin.String
       @JvmName("getMessageIdBase58")
       get() = _builder.getMessageIdBase58()
       @JvmName("setMessageIdBase58")
@@ -102,7 +102,7 @@ public object FeedMessageKt {
      *
      * <code>string message_id_base58 = 4;</code>
      */
-    public fun clearMessageIdBase58() {
+    fun clearMessageIdBase58() {
       _builder.clearMessageIdBase58()
     }
 
@@ -113,7 +113,7 @@ public object FeedMessageKt {
      *
      * <code>string time_sent = 5;</code>
      */
-    public var timeSent: kotlin.String
+    var timeSent: kotlin.String
       @JvmName("getTimeSent")
       get() = _builder.getTimeSent()
       @JvmName("setTimeSent")
@@ -127,14 +127,14 @@ public object FeedMessageKt {
      *
      * <code>string time_sent = 5;</code>
      */
-    public fun clearTimeSent() {
+    fun clearTimeSent() {
       _builder.clearTimeSent()
     }
 
     /**
      * <code>uint64 timestamp_sent = 9;</code>
      */
-    public var timestampSent: kotlin.Long
+    var timestampSent: kotlin.Long
       @JvmName("getTimestampSent")
       get() = _builder.getTimestampSent()
       @JvmName("setTimestampSent")
@@ -144,7 +144,7 @@ public object FeedMessageKt {
     /**
      * <code>uint64 timestamp_sent = 9;</code>
      */
-    public fun clearTimestampSent() {
+    fun clearTimestampSent() {
       _builder.clearTimestampSent()
     }
 
@@ -155,7 +155,7 @@ public object FeedMessageKt {
      *
      * <code>string time_received = 6;</code>
      */
-    public var timeReceived: kotlin.String
+    var timeReceived: kotlin.String
       @JvmName("getTimeReceived")
       get() = _builder.getTimeReceived()
       @JvmName("setTimeReceived")
@@ -169,14 +169,14 @@ public object FeedMessageKt {
      *
      * <code>string time_received = 6;</code>
      */
-    public fun clearTimeReceived() {
+    fun clearTimeReceived() {
       _builder.clearTimeReceived()
     }
 
     /**
      * <code>uint64 timestamp_received = 10;</code>
      */
-    public var timestampReceived: kotlin.Long
+    var timestampReceived: kotlin.Long
       @JvmName("getTimestampReceived")
       get() = _builder.getTimestampReceived()
       @JvmName("setTimestampReceived")
@@ -186,14 +186,14 @@ public object FeedMessageKt {
     /**
      * <code>uint64 timestamp_received = 10;</code>
      */
-    public fun clearTimestampReceived() {
+    fun clearTimestampReceived() {
       _builder.clearTimestampReceived()
     }
 
     /**
      * <code>string content = 7;</code>
      */
-    public var content: kotlin.String
+    var content: kotlin.String
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -203,14 +203,14 @@ public object FeedMessageKt {
     /**
      * <code>string content = 7;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
 
     /**
      * <code>uint64 index = 8;</code>
      */
-    public var index: kotlin.Long
+    var index: kotlin.Long
       @JvmName("getIndex")
       get() = _builder.getIndex()
       @JvmName("setIndex")
@@ -220,12 +220,12 @@ public object FeedMessageKt {
     /**
      * <code>uint64 index = 8;</code>
      */
-    public fun clearIndex() {
+    fun clearIndex() {
       _builder.clearIndex()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.feed.FeedOuterClass.FeedMessage.copy(block: qaul.rpc.feed.FeedMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessage =
+inline fun qaul.rpc.feed.FeedOuterClass.FeedMessage.copy(block: qaul.rpc.feed.FeedMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.FeedMessage =
   qaul.rpc.feed.FeedMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

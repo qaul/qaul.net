@@ -4,15 +4,15 @@
 package qaul.net.router_net_info;
 
 @kotlin.jvm.JvmName("-initializerouterInfoMessage")
-public inline fun routerInfoMessage(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
+inline fun routerInfoMessage(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
   qaul.net.router_net_info.RouterInfoMessageKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.newBuilder()).apply { block() }._build()
-public object RouterInfoMessageKt {
+object RouterInfoMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object RouterInfoMessageKt {
      *
      * <code>bytes node = 1;</code>
      */
-    public var node: com.google.protobuf.ByteString
+    var node: com.google.protobuf.ByteString
       @JvmName("getNode")
       get() = _builder.getNode()
       @JvmName("setNode")
@@ -43,7 +43,7 @@ public object RouterInfoMessageKt {
      *
      * <code>bytes node = 1;</code>
      */
-    public fun clearNode() {
+    fun clearNode() {
       _builder.clearNode()
     }
 
@@ -54,7 +54,7 @@ public object RouterInfoMessageKt {
      *
      * <code>.qaul.net.router_net_info.RoutingInfoTable routes = 2;</code>
      */
-    public var routes: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable
+    var routes: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable
       @JvmName("getRoutes")
       get() = _builder.getRoutes()
       @JvmName("setRoutes")
@@ -68,7 +68,7 @@ public object RouterInfoMessageKt {
      *
      * <code>.qaul.net.router_net_info.RoutingInfoTable routes = 2;</code>
      */
-    public fun clearRoutes() {
+    fun clearRoutes() {
       _builder.clearRoutes()
     }
     /**
@@ -79,7 +79,7 @@ public object RouterInfoMessageKt {
      * <code>.qaul.net.router_net_info.RoutingInfoTable routes = 2;</code>
      * @return Whether the routes field is set.
      */
-    public fun hasRoutes(): kotlin.Boolean {
+    fun hasRoutes(): kotlin.Boolean {
       return _builder.hasRoutes()
     }
 
@@ -90,7 +90,7 @@ public object RouterInfoMessageKt {
      *
      * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
      */
-    public var users: qaul.net.router_net_info.RouterNetInfo.UserInfoTable
+    var users: qaul.net.router_net_info.RouterNetInfo.UserInfoTable
       @JvmName("getUsers")
       get() = _builder.getUsers()
       @JvmName("setUsers")
@@ -104,7 +104,7 @@ public object RouterInfoMessageKt {
      *
      * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
      */
-    public fun clearUsers() {
+    fun clearUsers() {
       _builder.clearUsers()
     }
     /**
@@ -115,8 +115,44 @@ public object RouterInfoMessageKt {
      * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
      * @return Whether the users field is set.
      */
-    public fun hasUsers(): kotlin.Boolean {
+    fun hasUsers(): kotlin.Boolean {
       return _builder.hasUsers()
+    }
+
+    /**
+     * <pre>
+     *Latest Feed ids table
+     * </pre>
+     *
+     * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
+     */
+    var feeds: qaul.net.router_net_info.RouterNetInfo.FeedIdsTable
+      @JvmName("getFeeds")
+      get() = _builder.getFeeds()
+      @JvmName("setFeeds")
+      set(value) {
+        _builder.setFeeds(value)
+      }
+    /**
+     * <pre>
+     *Latest Feed ids table
+     * </pre>
+     *
+     * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
+     */
+    fun clearFeeds() {
+      _builder.clearFeeds()
+    }
+    /**
+     * <pre>
+     *Latest Feed ids table
+     * </pre>
+     *
+     * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
+     * @return Whether the feeds field is set.
+     */
+    fun hasFeeds(): kotlin.Boolean {
+      return _builder.hasFeeds()
     }
 
     /**
@@ -124,9 +160,9 @@ public object RouterInfoMessageKt {
      * timestamp
      * </pre>
      *
-     * <code>uint64 timestamp = 4;</code>
+     * <code>uint64 timestamp = 5;</code>
      */
-    public var timestamp: kotlin.Long
+    var timestamp: kotlin.Long
       @JvmName("getTimestamp")
       get() = _builder.getTimestamp()
       @JvmName("setTimestamp")
@@ -138,15 +174,15 @@ public object RouterInfoMessageKt {
      * timestamp
      * </pre>
      *
-     * <code>uint64 timestamp = 4;</code>
+     * <code>uint64 timestamp = 5;</code>
      */
-    public fun clearTimestamp() {
+    fun clearTimestamp() {
       _builder.clearTimestamp()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.copy(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
+inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.copy(block: qaul.net.router_net_info.RouterInfoMessageKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage =
   qaul.net.router_net_info.RouterInfoMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.routesOrNull: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable?
@@ -154,4 +190,7 @@ val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.routesOrNu
 
 val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.usersOrNull: qaul.net.router_net_info.RouterNetInfo.UserInfoTable?
   get() = if (hasUsers()) getUsers() else null
+
+val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.feedsOrNull: qaul.net.router_net_info.RouterNetInfo.FeedIdsTable?
+  get() = if (hasFeeds()) getFeeds() else null
 

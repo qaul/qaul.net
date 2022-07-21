@@ -24,8 +24,10 @@ namespace qaul {
 namespace sys {
 namespace ble {
 PROTOBUF_CONSTEXPR Ble::Ble(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct BleDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,7 +38,7 @@ struct BleDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDefaultTypeInternal _Ble_default_instance_;
 PROTOBUF_CONSTEXPR BleInfoRequest::BleInfoRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct BleInfoRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleInfoRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -47,8 +49,9 @@ struct BleInfoRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleInfoRequestDefaultTypeInternal _BleInfoRequest_default_instance_;
 PROTOBUF_CONSTEXPR BleInfoResponse::BleInfoResponse(
-    ::_pbi::ConstantInitialized)
-  : device_(nullptr){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.device_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleInfoResponseDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleInfoResponseDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -59,20 +62,21 @@ struct BleInfoResponseDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleInfoResponseDefaultTypeInternal _BleInfoResponse_default_instance_;
 PROTOBUF_CONSTEXPR BleDeviceInfo::BleDeviceInfo(
-    ::_pbi::ConstantInitialized)
-  : id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , name_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , ble_support_(false)
-  , bluetooth_on_(false)
-  , adv_extended_(false)
-  , le_2m_(false)
-  , adv_extended_bytes_(0u)
-  , le_coded_(false)
-  , le_audio_(false)
-  , le_periodic_adv_support_(false)
-  , le_multiple_adv_support_(false)
-  , offload_filter_support_(false)
-  , offload_scan_batching_support_(false){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.ble_support_)*/false
+  , /*decltype(_impl_.bluetooth_on_)*/false
+  , /*decltype(_impl_.adv_extended_)*/false
+  , /*decltype(_impl_.le_2m_)*/false
+  , /*decltype(_impl_.adv_extended_bytes_)*/0u
+  , /*decltype(_impl_.le_coded_)*/false
+  , /*decltype(_impl_.le_audio_)*/false
+  , /*decltype(_impl_.le_periodic_adv_support_)*/false
+  , /*decltype(_impl_.le_multiple_adv_support_)*/false
+  , /*decltype(_impl_.offload_filter_support_)*/false
+  , /*decltype(_impl_.offload_scan_batching_support_)*/false
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDeviceInfoDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDeviceInfoDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -83,10 +87,10 @@ struct BleDeviceInfoDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDeviceInfoDefaultTypeInternal _BleDeviceInfo_default_instance_;
 PROTOBUF_CONSTEXPR BleStartRequest::BleStartRequest(
-    ::_pbi::ConstantInitialized)
-  : qaul_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , power_setting_(0)
-{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.qaul_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.power_setting_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleStartRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleStartRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -97,11 +101,11 @@ struct BleStartRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleStartRequestDefaultTypeInternal _BleStartRequest_default_instance_;
 PROTOBUF_CONSTEXPR BleStartResult::BleStartResult(
-    ::_pbi::ConstantInitialized)
-  : error_message_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , success_(false)
-  , error_reason_(0)
-{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.error_message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.success_)*/false
+  , /*decltype(_impl_.error_reason_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleStartResultDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleStartResultDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -112,7 +116,7 @@ struct BleStartResultDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleStartResultDefaultTypeInternal _BleStartResult_default_instance_;
 PROTOBUF_CONSTEXPR BleStopRequest::BleStopRequest(
-    ::_pbi::ConstantInitialized){}
+    ::_pbi::ConstantInitialized) {}
 struct BleStopRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleStopRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -123,11 +127,11 @@ struct BleStopRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleStopRequestDefaultTypeInternal _BleStopRequest_default_instance_;
 PROTOBUF_CONSTEXPR BleStopResult::BleStopResult(
-    ::_pbi::ConstantInitialized)
-  : error_message_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , success_(false)
-  , error_reason_(0)
-{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.error_message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.success_)*/false
+  , /*decltype(_impl_.error_reason_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleStopResultDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleStopResultDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -138,9 +142,10 @@ struct BleStopResultDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleStopResultDefaultTypeInternal _BleStopResult_default_instance_;
 PROTOBUF_CONSTEXPR BleDeviceDiscovered::BleDeviceDiscovered(
-    ::_pbi::ConstantInitialized)
-  : qaul_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , rssi_(0){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.qaul_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.rssi_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDeviceDiscoveredDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDeviceDiscoveredDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -151,8 +156,9 @@ struct BleDeviceDiscoveredDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDeviceDiscoveredDefaultTypeInternal _BleDeviceDiscovered_default_instance_;
 PROTOBUF_CONSTEXPR BleDeviceUnavailable::BleDeviceUnavailable(
-    ::_pbi::ConstantInitialized)
-  : qaul_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.qaul_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDeviceUnavailableDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDeviceUnavailableDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -163,11 +169,12 @@ struct BleDeviceUnavailableDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDeviceUnavailableDefaultTypeInternal _BleDeviceUnavailable_default_instance_;
 PROTOBUF_CONSTEXPR BleDirectSend::BleDirectSend(
-    ::_pbi::ConstantInitialized)
-  : message_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , receiver_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , sender_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , data_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.receiver_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.sender_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDirectSendDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDirectSendDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -178,10 +185,11 @@ struct BleDirectSendDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDirectSendDefaultTypeInternal _BleDirectSend_default_instance_;
 PROTOBUF_CONSTEXPR BleDirectSendResult::BleDirectSendResult(
-    ::_pbi::ConstantInitialized)
-  : id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , error_message_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , success_(false){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.error_message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.success_)*/false
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDirectSendResultDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDirectSendResultDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -192,9 +200,10 @@ struct BleDirectSendResultDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleDirectSendResultDefaultTypeInternal _BleDirectSendResult_default_instance_;
 PROTOBUF_CONSTEXPR BleDirectReceived::BleDirectReceived(
-    ::_pbi::ConstantInitialized)
-  : from_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , data_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.from_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct BleDirectReceivedDefaultTypeInternal {
   PROTOBUF_CONSTEXPR BleDirectReceivedDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -215,7 +224,7 @@ const uint32_t TableStruct_connections_2fble_2fble_2eproto::offsets[] PROTOBUF_S
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::Ble, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::Ble, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::Ble, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
@@ -229,7 +238,7 @@ const uint32_t TableStruct_connections_2fble_2fble_2eproto::offsets[] PROTOBUF_S
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::Ble, message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::Ble, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleInfoRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -242,43 +251,43 @@ const uint32_t TableStruct_connections_2fble_2fble_2eproto::offsets[] PROTOBUF_S
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleInfoResponse, device_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleInfoResponse, _impl_.device_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, ble_support_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, bluetooth_on_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, adv_extended_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, adv_extended_bytes_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, le_2m_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, le_coded_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, le_audio_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, le_periodic_adv_support_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, le_multiple_adv_support_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, offload_filter_support_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, offload_scan_batching_support_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.ble_support_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.name_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.bluetooth_on_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.adv_extended_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.adv_extended_bytes_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.le_2m_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.le_coded_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.le_audio_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.le_periodic_adv_support_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.le_multiple_adv_support_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.offload_filter_support_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceInfo, _impl_.offload_scan_batching_support_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartRequest, qaul_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartRequest, power_setting_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartRequest, _impl_.qaul_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartRequest, _impl_.power_setting_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, success_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, error_reason_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, error_message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, _impl_.success_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, _impl_.error_reason_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStartResult, _impl_.error_message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -291,51 +300,51 @@ const uint32_t TableStruct_connections_2fble_2fble_2eproto::offsets[] PROTOBUF_S
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, success_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, error_reason_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, error_message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, _impl_.success_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, _impl_.error_reason_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleStopResult, _impl_.error_message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceDiscovered, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceDiscovered, qaul_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceDiscovered, rssi_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceDiscovered, _impl_.qaul_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceDiscovered, _impl_.rssi_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceUnavailable, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceUnavailable, qaul_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDeviceUnavailable, _impl_.qaul_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, message_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, receiver_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, sender_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, data_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, _impl_.message_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, _impl_.receiver_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, _impl_.sender_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSend, _impl_.data_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, success_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, error_message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, _impl_.success_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectSendResult, _impl_.error_message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectReceived, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectReceived, from_),
-  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectReceived, data_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectReceived, _impl_.from_),
+  PROTOBUF_FIELD_OFFSET(::qaul::sys::ble::BleDirectReceived, _impl_.data_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::sys::ble::Ble)},
@@ -486,47 +495,47 @@ class Ble::_Internal {
 
 const ::qaul::sys::ble::BleInfoRequest&
 Ble::_Internal::info_request(const Ble* msg) {
-  return *msg->message_.info_request_;
+  return *msg->_impl_.message_.info_request_;
 }
 const ::qaul::sys::ble::BleInfoResponse&
 Ble::_Internal::info_response(const Ble* msg) {
-  return *msg->message_.info_response_;
+  return *msg->_impl_.message_.info_response_;
 }
 const ::qaul::sys::ble::BleStartRequest&
 Ble::_Internal::start_request(const Ble* msg) {
-  return *msg->message_.start_request_;
+  return *msg->_impl_.message_.start_request_;
 }
 const ::qaul::sys::ble::BleStartResult&
 Ble::_Internal::start_result(const Ble* msg) {
-  return *msg->message_.start_result_;
+  return *msg->_impl_.message_.start_result_;
 }
 const ::qaul::sys::ble::BleStopRequest&
 Ble::_Internal::stop_request(const Ble* msg) {
-  return *msg->message_.stop_request_;
+  return *msg->_impl_.message_.stop_request_;
 }
 const ::qaul::sys::ble::BleStopResult&
 Ble::_Internal::stop_result(const Ble* msg) {
-  return *msg->message_.stop_result_;
+  return *msg->_impl_.message_.stop_result_;
 }
 const ::qaul::sys::ble::BleDeviceDiscovered&
 Ble::_Internal::device_discovered(const Ble* msg) {
-  return *msg->message_.device_discovered_;
+  return *msg->_impl_.message_.device_discovered_;
 }
 const ::qaul::sys::ble::BleDeviceUnavailable&
 Ble::_Internal::device_unavailable(const Ble* msg) {
-  return *msg->message_.device_unavailable_;
+  return *msg->_impl_.message_.device_unavailable_;
 }
 const ::qaul::sys::ble::BleDirectSend&
 Ble::_Internal::direct_send(const Ble* msg) {
-  return *msg->message_.direct_send_;
+  return *msg->_impl_.message_.direct_send_;
 }
 const ::qaul::sys::ble::BleDirectSendResult&
 Ble::_Internal::direct_send_result(const Ble* msg) {
-  return *msg->message_.direct_send_result_;
+  return *msg->_impl_.message_.direct_send_result_;
 }
 const ::qaul::sys::ble::BleDirectReceived&
 Ble::_Internal::direct_received(const Ble* msg) {
-  return *msg->message_.direct_received_;
+  return *msg->_impl_.message_.direct_received_;
 }
 void Ble::set_allocated_info_request(::qaul::sys::ble::BleInfoRequest* info_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -539,7 +548,7 @@ void Ble::set_allocated_info_request(::qaul::sys::ble::BleInfoRequest* info_requ
           message_arena, info_request, submessage_arena);
     }
     set_has_info_request();
-    message_.info_request_ = info_request;
+    _impl_.message_.info_request_ = info_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.info_request)
 }
@@ -554,7 +563,7 @@ void Ble::set_allocated_info_response(::qaul::sys::ble::BleInfoResponse* info_re
           message_arena, info_response, submessage_arena);
     }
     set_has_info_response();
-    message_.info_response_ = info_response;
+    _impl_.message_.info_response_ = info_response;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.info_response)
 }
@@ -569,7 +578,7 @@ void Ble::set_allocated_start_request(::qaul::sys::ble::BleStartRequest* start_r
           message_arena, start_request, submessage_arena);
     }
     set_has_start_request();
-    message_.start_request_ = start_request;
+    _impl_.message_.start_request_ = start_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.start_request)
 }
@@ -584,7 +593,7 @@ void Ble::set_allocated_start_result(::qaul::sys::ble::BleStartResult* start_res
           message_arena, start_result, submessage_arena);
     }
     set_has_start_result();
-    message_.start_result_ = start_result;
+    _impl_.message_.start_result_ = start_result;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.start_result)
 }
@@ -599,7 +608,7 @@ void Ble::set_allocated_stop_request(::qaul::sys::ble::BleStopRequest* stop_requ
           message_arena, stop_request, submessage_arena);
     }
     set_has_stop_request();
-    message_.stop_request_ = stop_request;
+    _impl_.message_.stop_request_ = stop_request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.stop_request)
 }
@@ -614,7 +623,7 @@ void Ble::set_allocated_stop_result(::qaul::sys::ble::BleStopResult* stop_result
           message_arena, stop_result, submessage_arena);
     }
     set_has_stop_result();
-    message_.stop_result_ = stop_result;
+    _impl_.message_.stop_result_ = stop_result;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.stop_result)
 }
@@ -629,7 +638,7 @@ void Ble::set_allocated_device_discovered(::qaul::sys::ble::BleDeviceDiscovered*
           message_arena, device_discovered, submessage_arena);
     }
     set_has_device_discovered();
-    message_.device_discovered_ = device_discovered;
+    _impl_.message_.device_discovered_ = device_discovered;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.device_discovered)
 }
@@ -644,7 +653,7 @@ void Ble::set_allocated_device_unavailable(::qaul::sys::ble::BleDeviceUnavailabl
           message_arena, device_unavailable, submessage_arena);
     }
     set_has_device_unavailable();
-    message_.device_unavailable_ = device_unavailable;
+    _impl_.message_.device_unavailable_ = device_unavailable;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.device_unavailable)
 }
@@ -659,7 +668,7 @@ void Ble::set_allocated_direct_send(::qaul::sys::ble::BleDirectSend* direct_send
           message_arena, direct_send, submessage_arena);
     }
     set_has_direct_send();
-    message_.direct_send_ = direct_send;
+    _impl_.message_.direct_send_ = direct_send;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.direct_send)
 }
@@ -674,7 +683,7 @@ void Ble::set_allocated_direct_send_result(::qaul::sys::ble::BleDirectSendResult
           message_arena, direct_send_result, submessage_arena);
     }
     set_has_direct_send_result();
-    message_.direct_send_result_ = direct_send_result;
+    _impl_.message_.direct_send_result_ = direct_send_result;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.direct_send_result)
 }
@@ -689,63 +698,80 @@ void Ble::set_allocated_direct_received(::qaul::sys::ble::BleDirectReceived* dir
           message_arena, direct_received, submessage_arena);
     }
     set_has_direct_received();
-    message_.direct_received_ = direct_received;
+    _impl_.message_.direct_received_ = direct_received;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.sys.ble.Ble.direct_received)
 }
 Ble::Ble(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.Ble)
 }
 Ble::Ble(const Ble& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Ble* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kInfoRequest: {
-      _internal_mutable_info_request()->::qaul::sys::ble::BleInfoRequest::MergeFrom(from._internal_info_request());
+      _this->_internal_mutable_info_request()->::qaul::sys::ble::BleInfoRequest::MergeFrom(
+          from._internal_info_request());
       break;
     }
     case kInfoResponse: {
-      _internal_mutable_info_response()->::qaul::sys::ble::BleInfoResponse::MergeFrom(from._internal_info_response());
+      _this->_internal_mutable_info_response()->::qaul::sys::ble::BleInfoResponse::MergeFrom(
+          from._internal_info_response());
       break;
     }
     case kStartRequest: {
-      _internal_mutable_start_request()->::qaul::sys::ble::BleStartRequest::MergeFrom(from._internal_start_request());
+      _this->_internal_mutable_start_request()->::qaul::sys::ble::BleStartRequest::MergeFrom(
+          from._internal_start_request());
       break;
     }
     case kStartResult: {
-      _internal_mutable_start_result()->::qaul::sys::ble::BleStartResult::MergeFrom(from._internal_start_result());
+      _this->_internal_mutable_start_result()->::qaul::sys::ble::BleStartResult::MergeFrom(
+          from._internal_start_result());
       break;
     }
     case kStopRequest: {
-      _internal_mutable_stop_request()->::qaul::sys::ble::BleStopRequest::MergeFrom(from._internal_stop_request());
+      _this->_internal_mutable_stop_request()->::qaul::sys::ble::BleStopRequest::MergeFrom(
+          from._internal_stop_request());
       break;
     }
     case kStopResult: {
-      _internal_mutable_stop_result()->::qaul::sys::ble::BleStopResult::MergeFrom(from._internal_stop_result());
+      _this->_internal_mutable_stop_result()->::qaul::sys::ble::BleStopResult::MergeFrom(
+          from._internal_stop_result());
       break;
     }
     case kDeviceDiscovered: {
-      _internal_mutable_device_discovered()->::qaul::sys::ble::BleDeviceDiscovered::MergeFrom(from._internal_device_discovered());
+      _this->_internal_mutable_device_discovered()->::qaul::sys::ble::BleDeviceDiscovered::MergeFrom(
+          from._internal_device_discovered());
       break;
     }
     case kDeviceUnavailable: {
-      _internal_mutable_device_unavailable()->::qaul::sys::ble::BleDeviceUnavailable::MergeFrom(from._internal_device_unavailable());
+      _this->_internal_mutable_device_unavailable()->::qaul::sys::ble::BleDeviceUnavailable::MergeFrom(
+          from._internal_device_unavailable());
       break;
     }
     case kDirectSend: {
-      _internal_mutable_direct_send()->::qaul::sys::ble::BleDirectSend::MergeFrom(from._internal_direct_send());
+      _this->_internal_mutable_direct_send()->::qaul::sys::ble::BleDirectSend::MergeFrom(
+          from._internal_direct_send());
       break;
     }
     case kDirectSendResult: {
-      _internal_mutable_direct_send_result()->::qaul::sys::ble::BleDirectSendResult::MergeFrom(from._internal_direct_send_result());
+      _this->_internal_mutable_direct_send_result()->::qaul::sys::ble::BleDirectSendResult::MergeFrom(
+          from._internal_direct_send_result());
       break;
     }
     case kDirectReceived: {
-      _internal_mutable_direct_received()->::qaul::sys::ble::BleDirectReceived::MergeFrom(from._internal_direct_received());
+      _this->_internal_mutable_direct_received()->::qaul::sys::ble::BleDirectReceived::MergeFrom(
+          from._internal_direct_received());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -755,8 +781,16 @@ Ble::Ble(const Ble& from)
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.Ble)
 }
 
-inline void Ble::SharedCtor() {
-clear_has_message();
+inline void Ble::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Ble::~Ble() {
@@ -776,7 +810,7 @@ inline void Ble::SharedDtor() {
 }
 
 void Ble::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Ble::clear_message() {
@@ -784,67 +818,67 @@ void Ble::clear_message() {
   switch (message_case()) {
     case kInfoRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.info_request_;
+        delete _impl_.message_.info_request_;
       }
       break;
     }
     case kInfoResponse: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.info_response_;
+        delete _impl_.message_.info_response_;
       }
       break;
     }
     case kStartRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.start_request_;
+        delete _impl_.message_.start_request_;
       }
       break;
     }
     case kStartResult: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.start_result_;
+        delete _impl_.message_.start_result_;
       }
       break;
     }
     case kStopRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.stop_request_;
+        delete _impl_.message_.stop_request_;
       }
       break;
     }
     case kStopResult: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.stop_result_;
+        delete _impl_.message_.stop_result_;
       }
       break;
     }
     case kDeviceDiscovered: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.device_discovered_;
+        delete _impl_.message_.device_discovered_;
       }
       break;
     }
     case kDeviceUnavailable: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.device_unavailable_;
+        delete _impl_.message_.device_unavailable_;
       }
       break;
     }
     case kDirectSend: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.direct_send_;
+        delete _impl_.message_.direct_send_;
       }
       break;
     }
     case kDirectSendResult: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.direct_send_result_;
+        delete _impl_.message_.direct_send_result_;
       }
       break;
     }
     case kDirectReceived: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.direct_received_;
+        delete _impl_.message_.direct_received_;
       }
       break;
     }
@@ -852,7 +886,7 @@ void Ble::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -1087,155 +1121,162 @@ size_t Ble::ByteSizeLong() const {
     case kInfoRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.info_request_);
+          *_impl_.message_.info_request_);
       break;
     }
     // .qaul.sys.ble.BleInfoResponse info_response = 2;
     case kInfoResponse: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.info_response_);
+          *_impl_.message_.info_response_);
       break;
     }
     // .qaul.sys.ble.BleStartRequest start_request = 3;
     case kStartRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.start_request_);
+          *_impl_.message_.start_request_);
       break;
     }
     // .qaul.sys.ble.BleStartResult start_result = 4;
     case kStartResult: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.start_result_);
+          *_impl_.message_.start_result_);
       break;
     }
     // .qaul.sys.ble.BleStopRequest stop_request = 5;
     case kStopRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.stop_request_);
+          *_impl_.message_.stop_request_);
       break;
     }
     // .qaul.sys.ble.BleStopResult stop_result = 6;
     case kStopResult: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.stop_result_);
+          *_impl_.message_.stop_result_);
       break;
     }
     // .qaul.sys.ble.BleDeviceDiscovered device_discovered = 7;
     case kDeviceDiscovered: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.device_discovered_);
+          *_impl_.message_.device_discovered_);
       break;
     }
     // .qaul.sys.ble.BleDeviceUnavailable device_unavailable = 8;
     case kDeviceUnavailable: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.device_unavailable_);
+          *_impl_.message_.device_unavailable_);
       break;
     }
     // .qaul.sys.ble.BleDirectSend direct_send = 9;
     case kDirectSend: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.direct_send_);
+          *_impl_.message_.direct_send_);
       break;
     }
     // .qaul.sys.ble.BleDirectSendResult direct_send_result = 10;
     case kDirectSendResult: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.direct_send_result_);
+          *_impl_.message_.direct_send_result_);
       break;
     }
     // .qaul.sys.ble.BleDirectReceived direct_received = 11;
     case kDirectReceived: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.direct_received_);
+          *_impl_.message_.direct_received_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Ble::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Ble::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Ble::GetClassData() const { return &_class_data_; }
 
-void Ble::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Ble *>(to)->MergeFrom(
-      static_cast<const Ble &>(from));
-}
 
-
-void Ble::MergeFrom(const Ble& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.Ble)
-  GOOGLE_DCHECK_NE(&from, this);
+void Ble::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Ble*>(&to_msg);
+  auto& from = static_cast<const Ble&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.Ble)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kInfoRequest: {
-      _internal_mutable_info_request()->::qaul::sys::ble::BleInfoRequest::MergeFrom(from._internal_info_request());
+      _this->_internal_mutable_info_request()->::qaul::sys::ble::BleInfoRequest::MergeFrom(
+          from._internal_info_request());
       break;
     }
     case kInfoResponse: {
-      _internal_mutable_info_response()->::qaul::sys::ble::BleInfoResponse::MergeFrom(from._internal_info_response());
+      _this->_internal_mutable_info_response()->::qaul::sys::ble::BleInfoResponse::MergeFrom(
+          from._internal_info_response());
       break;
     }
     case kStartRequest: {
-      _internal_mutable_start_request()->::qaul::sys::ble::BleStartRequest::MergeFrom(from._internal_start_request());
+      _this->_internal_mutable_start_request()->::qaul::sys::ble::BleStartRequest::MergeFrom(
+          from._internal_start_request());
       break;
     }
     case kStartResult: {
-      _internal_mutable_start_result()->::qaul::sys::ble::BleStartResult::MergeFrom(from._internal_start_result());
+      _this->_internal_mutable_start_result()->::qaul::sys::ble::BleStartResult::MergeFrom(
+          from._internal_start_result());
       break;
     }
     case kStopRequest: {
-      _internal_mutable_stop_request()->::qaul::sys::ble::BleStopRequest::MergeFrom(from._internal_stop_request());
+      _this->_internal_mutable_stop_request()->::qaul::sys::ble::BleStopRequest::MergeFrom(
+          from._internal_stop_request());
       break;
     }
     case kStopResult: {
-      _internal_mutable_stop_result()->::qaul::sys::ble::BleStopResult::MergeFrom(from._internal_stop_result());
+      _this->_internal_mutable_stop_result()->::qaul::sys::ble::BleStopResult::MergeFrom(
+          from._internal_stop_result());
       break;
     }
     case kDeviceDiscovered: {
-      _internal_mutable_device_discovered()->::qaul::sys::ble::BleDeviceDiscovered::MergeFrom(from._internal_device_discovered());
+      _this->_internal_mutable_device_discovered()->::qaul::sys::ble::BleDeviceDiscovered::MergeFrom(
+          from._internal_device_discovered());
       break;
     }
     case kDeviceUnavailable: {
-      _internal_mutable_device_unavailable()->::qaul::sys::ble::BleDeviceUnavailable::MergeFrom(from._internal_device_unavailable());
+      _this->_internal_mutable_device_unavailable()->::qaul::sys::ble::BleDeviceUnavailable::MergeFrom(
+          from._internal_device_unavailable());
       break;
     }
     case kDirectSend: {
-      _internal_mutable_direct_send()->::qaul::sys::ble::BleDirectSend::MergeFrom(from._internal_direct_send());
+      _this->_internal_mutable_direct_send()->::qaul::sys::ble::BleDirectSend::MergeFrom(
+          from._internal_direct_send());
       break;
     }
     case kDirectSendResult: {
-      _internal_mutable_direct_send_result()->::qaul::sys::ble::BleDirectSendResult::MergeFrom(from._internal_direct_send_result());
+      _this->_internal_mutable_direct_send_result()->::qaul::sys::ble::BleDirectSendResult::MergeFrom(
+          from._internal_direct_send_result());
       break;
     }
     case kDirectReceived: {
-      _internal_mutable_direct_received()->::qaul::sys::ble::BleDirectReceived::MergeFrom(from._internal_direct_received());
+      _this->_internal_mutable_direct_received()->::qaul::sys::ble::BleDirectReceived::MergeFrom(
+          from._internal_direct_received());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Ble::CopyFrom(const Ble& from) {
@@ -1252,8 +1293,8 @@ bool Ble::IsInitialized() const {
 void Ble::InternalSwap(Ble* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Ble::GetMetadata() const {
@@ -1275,6 +1316,7 @@ BleInfoRequest::BleInfoRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 BleInfoRequest::BleInfoRequest(const BleInfoRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  BleInfoRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleInfoRequest)
 }
@@ -1310,27 +1352,36 @@ class BleInfoResponse::_Internal {
 
 const ::qaul::sys::ble::BleDeviceInfo&
 BleInfoResponse::_Internal::device(const BleInfoResponse* msg) {
-  return *msg->device_;
+  return *msg->_impl_.device_;
 }
 BleInfoResponse::BleInfoResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleInfoResponse)
 }
 BleInfoResponse::BleInfoResponse(const BleInfoResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleInfoResponse* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.device_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_device()) {
-    device_ = new ::qaul::sys::ble::BleDeviceInfo(*from.device_);
-  } else {
-    device_ = nullptr;
+    _this->_impl_.device_ = new ::qaul::sys::ble::BleDeviceInfo(*from._impl_.device_);
   }
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleInfoResponse)
 }
 
-inline void BleInfoResponse::SharedCtor() {
-device_ = nullptr;
+inline void BleInfoResponse::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.device_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 BleInfoResponse::~BleInfoResponse() {
@@ -1344,11 +1395,11 @@ BleInfoResponse::~BleInfoResponse() {
 
 inline void BleInfoResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  if (this != internal_default_instance()) delete device_;
+  if (this != internal_default_instance()) delete _impl_.device_;
 }
 
 void BleInfoResponse::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleInfoResponse::Clear() {
@@ -1357,10 +1408,10 @@ void BleInfoResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArenaForAllocation() == nullptr && device_ != nullptr) {
-    delete device_;
+  if (GetArenaForAllocation() == nullptr && _impl_.device_ != nullptr) {
+    delete _impl_.device_;
   }
-  device_ = nullptr;
+  _impl_.device_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1434,35 +1485,32 @@ size_t BleInfoResponse::ByteSizeLong() const {
   if (this->_internal_has_device()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *device_);
+        *_impl_.device_);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleInfoResponse::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleInfoResponse::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleInfoResponse::GetClassData() const { return &_class_data_; }
 
-void BleInfoResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleInfoResponse *>(to)->MergeFrom(
-      static_cast<const BleInfoResponse &>(from));
-}
 
-
-void BleInfoResponse::MergeFrom(const BleInfoResponse& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleInfoResponse)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleInfoResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleInfoResponse*>(&to_msg);
+  auto& from = static_cast<const BleInfoResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleInfoResponse)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (from._internal_has_device()) {
-    _internal_mutable_device()->::qaul::sys::ble::BleDeviceInfo::MergeFrom(from._internal_device());
+    _this->_internal_mutable_device()->::qaul::sys::ble::BleDeviceInfo::MergeFrom(
+        from._internal_device());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleInfoResponse::CopyFrom(const BleInfoResponse& from) {
@@ -1479,7 +1527,7 @@ bool BleInfoResponse::IsInitialized() const {
 void BleInfoResponse::InternalSwap(BleInfoResponse* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(device_, other->device_);
+  swap(_impl_.device_, other->_impl_.device_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleInfoResponse::GetMetadata() const {
@@ -1497,47 +1545,79 @@ class BleDeviceInfo::_Internal {
 BleDeviceInfo::BleDeviceInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDeviceInfo)
 }
 BleDeviceInfo::BleDeviceInfo(const BleDeviceInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDeviceInfo* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , decltype(_impl_.name_){}
+    , decltype(_impl_.ble_support_){}
+    , decltype(_impl_.bluetooth_on_){}
+    , decltype(_impl_.adv_extended_){}
+    , decltype(_impl_.le_2m_){}
+    , decltype(_impl_.adv_extended_bytes_){}
+    , decltype(_impl_.le_coded_){}
+    , decltype(_impl_.le_audio_){}
+    , decltype(_impl_.le_periodic_adv_support_){}
+    , decltype(_impl_.le_multiple_adv_support_){}
+    , decltype(_impl_.offload_filter_support_){}
+    , decltype(_impl_.offload_scan_batching_support_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_.InitDefault();
+  _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_.Set("", GetArenaForAllocation());
+    _impl_.id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    id_.Set(from._internal_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), 
+      _this->GetArenaForAllocation());
   }
-  name_.InitDefault();
+  _impl_.name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    name_.Set("", GetArenaForAllocation());
+    _impl_.name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    name_.Set(from._internal_name(), 
-      GetArenaForAllocation());
+    _this->_impl_.name_.Set(from._internal_name(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&ble_support_, &from.ble_support_,
-    static_cast<size_t>(reinterpret_cast<char*>(&offload_scan_batching_support_) -
-    reinterpret_cast<char*>(&ble_support_)) + sizeof(offload_scan_batching_support_));
+  ::memcpy(&_impl_.ble_support_, &from._impl_.ble_support_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.offload_scan_batching_support_) -
+    reinterpret_cast<char*>(&_impl_.ble_support_)) + sizeof(_impl_.offload_scan_batching_support_));
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDeviceInfo)
 }
 
-inline void BleDeviceInfo::SharedCtor() {
-id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-name_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  name_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&ble_support_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&offload_scan_batching_support_) -
-    reinterpret_cast<char*>(&ble_support_)) + sizeof(offload_scan_batching_support_));
+inline void BleDeviceInfo::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , decltype(_impl_.name_){}
+    , decltype(_impl_.ble_support_){false}
+    , decltype(_impl_.bluetooth_on_){false}
+    , decltype(_impl_.adv_extended_){false}
+    , decltype(_impl_.le_2m_){false}
+    , decltype(_impl_.adv_extended_bytes_){0u}
+    , decltype(_impl_.le_coded_){false}
+    , decltype(_impl_.le_audio_){false}
+    , decltype(_impl_.le_periodic_adv_support_){false}
+    , decltype(_impl_.le_multiple_adv_support_){false}
+    , decltype(_impl_.offload_filter_support_){false}
+    , decltype(_impl_.offload_scan_batching_support_){false}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.name_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.name_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDeviceInfo::~BleDeviceInfo() {
@@ -1551,12 +1631,12 @@ BleDeviceInfo::~BleDeviceInfo() {
 
 inline void BleDeviceInfo::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  id_.Destroy();
-  name_.Destroy();
+  _impl_.id_.Destroy();
+  _impl_.name_.Destroy();
 }
 
 void BleDeviceInfo::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDeviceInfo::Clear() {
@@ -1565,11 +1645,11 @@ void BleDeviceInfo::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  id_.ClearToEmpty();
-  name_.ClearToEmpty();
-  ::memset(&ble_support_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&offload_scan_batching_support_) -
-      reinterpret_cast<char*>(&ble_support_)) + sizeof(offload_scan_batching_support_));
+  _impl_.id_.ClearToEmpty();
+  _impl_.name_.ClearToEmpty();
+  ::memset(&_impl_.ble_support_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.offload_scan_batching_support_) -
+      reinterpret_cast<char*>(&_impl_.ble_support_)) + sizeof(_impl_.offload_scan_batching_support_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1582,7 +1662,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool ble_support = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          ble_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.ble_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1610,7 +1690,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool bluetooth_on = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
-          bluetooth_on_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.bluetooth_on_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1618,7 +1698,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool adv_extended = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
-          adv_extended_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.adv_extended_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1626,7 +1706,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // uint32 adv_extended_bytes = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
-          adv_extended_bytes_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.adv_extended_bytes_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1634,7 +1714,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool le_2m = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
-          le_2m_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.le_2m_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1642,7 +1722,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool le_coded = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
-          le_coded_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.le_coded_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1650,7 +1730,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool le_audio = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
-          le_audio_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.le_audio_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1658,7 +1738,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool le_periodic_adv_support = 14;
       case 14:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 112)) {
-          le_periodic_adv_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.le_periodic_adv_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1666,7 +1746,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool le_multiple_adv_support = 15;
       case 15:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 120)) {
-          le_multiple_adv_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.le_multiple_adv_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1674,7 +1754,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool offload_filter_support = 16;
       case 16:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 128)) {
-          offload_filter_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.offload_filter_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1682,7 +1762,7 @@ const char* BleDeviceInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool offload_scan_batching_support = 17;
       case 17:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 136)) {
-          offload_scan_batching_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.offload_scan_batching_support_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1887,68 +1967,64 @@ size_t BleDeviceInfo::ByteSizeLong() const {
     total_size += 2 + 1;
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDeviceInfo::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDeviceInfo::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDeviceInfo::GetClassData() const { return &_class_data_; }
 
-void BleDeviceInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDeviceInfo *>(to)->MergeFrom(
-      static_cast<const BleDeviceInfo &>(from));
-}
 
-
-void BleDeviceInfo::MergeFrom(const BleDeviceInfo& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceInfo)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDeviceInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDeviceInfo*>(&to_msg);
+  auto& from = static_cast<const BleDeviceInfo&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceInfo)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_id().empty()) {
-    _internal_set_id(from._internal_id());
+    _this->_internal_set_id(from._internal_id());
   }
   if (!from._internal_name().empty()) {
-    _internal_set_name(from._internal_name());
+    _this->_internal_set_name(from._internal_name());
   }
   if (from._internal_ble_support() != 0) {
-    _internal_set_ble_support(from._internal_ble_support());
+    _this->_internal_set_ble_support(from._internal_ble_support());
   }
   if (from._internal_bluetooth_on() != 0) {
-    _internal_set_bluetooth_on(from._internal_bluetooth_on());
+    _this->_internal_set_bluetooth_on(from._internal_bluetooth_on());
   }
   if (from._internal_adv_extended() != 0) {
-    _internal_set_adv_extended(from._internal_adv_extended());
+    _this->_internal_set_adv_extended(from._internal_adv_extended());
   }
   if (from._internal_le_2m() != 0) {
-    _internal_set_le_2m(from._internal_le_2m());
+    _this->_internal_set_le_2m(from._internal_le_2m());
   }
   if (from._internal_adv_extended_bytes() != 0) {
-    _internal_set_adv_extended_bytes(from._internal_adv_extended_bytes());
+    _this->_internal_set_adv_extended_bytes(from._internal_adv_extended_bytes());
   }
   if (from._internal_le_coded() != 0) {
-    _internal_set_le_coded(from._internal_le_coded());
+    _this->_internal_set_le_coded(from._internal_le_coded());
   }
   if (from._internal_le_audio() != 0) {
-    _internal_set_le_audio(from._internal_le_audio());
+    _this->_internal_set_le_audio(from._internal_le_audio());
   }
   if (from._internal_le_periodic_adv_support() != 0) {
-    _internal_set_le_periodic_adv_support(from._internal_le_periodic_adv_support());
+    _this->_internal_set_le_periodic_adv_support(from._internal_le_periodic_adv_support());
   }
   if (from._internal_le_multiple_adv_support() != 0) {
-    _internal_set_le_multiple_adv_support(from._internal_le_multiple_adv_support());
+    _this->_internal_set_le_multiple_adv_support(from._internal_le_multiple_adv_support());
   }
   if (from._internal_offload_filter_support() != 0) {
-    _internal_set_offload_filter_support(from._internal_offload_filter_support());
+    _this->_internal_set_offload_filter_support(from._internal_offload_filter_support());
   }
   if (from._internal_offload_scan_batching_support() != 0) {
-    _internal_set_offload_scan_batching_support(from._internal_offload_scan_batching_support());
+    _this->_internal_set_offload_scan_batching_support(from._internal_offload_scan_batching_support());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDeviceInfo::CopyFrom(const BleDeviceInfo& from) {
@@ -1968,19 +2044,19 @@ void BleDeviceInfo::InternalSwap(BleDeviceInfo* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &id_, lhs_arena,
-      &other->id_, rhs_arena
+      &_impl_.id_, lhs_arena,
+      &other->_impl_.id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &name_, lhs_arena,
-      &other->name_, rhs_arena
+      &_impl_.name_, lhs_arena,
+      &other->_impl_.name_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(BleDeviceInfo, offload_scan_batching_support_)
-      + sizeof(BleDeviceInfo::offload_scan_batching_support_)
-      - PROTOBUF_FIELD_OFFSET(BleDeviceInfo, ble_support_)>(
-          reinterpret_cast<char*>(&ble_support_),
-          reinterpret_cast<char*>(&other->ble_support_));
+      PROTOBUF_FIELD_OFFSET(BleDeviceInfo, _impl_.offload_scan_batching_support_)
+      + sizeof(BleDeviceInfo::_impl_.offload_scan_batching_support_)
+      - PROTOBUF_FIELD_OFFSET(BleDeviceInfo, _impl_.ble_support_)>(
+          reinterpret_cast<char*>(&_impl_.ble_support_),
+          reinterpret_cast<char*>(&other->_impl_.ble_support_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleDeviceInfo::GetMetadata() const {
@@ -1998,30 +2074,43 @@ class BleStartRequest::_Internal {
 BleStartRequest::BleStartRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleStartRequest)
 }
 BleStartRequest::BleStartRequest(const BleStartRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleStartRequest* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , decltype(_impl_.power_setting_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  qaul_id_.InitDefault();
+  _impl_.qaul_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    qaul_id_.Set("", GetArenaForAllocation());
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_qaul_id().empty()) {
-    qaul_id_.Set(from._internal_qaul_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.qaul_id_.Set(from._internal_qaul_id(), 
+      _this->GetArenaForAllocation());
   }
-  power_setting_ = from.power_setting_;
+  _this->_impl_.power_setting_ = from._impl_.power_setting_;
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleStartRequest)
 }
 
-inline void BleStartRequest::SharedCtor() {
-qaul_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  qaul_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-power_setting_ = 0;
+inline void BleStartRequest::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , decltype(_impl_.power_setting_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.qaul_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleStartRequest::~BleStartRequest() {
@@ -2035,11 +2124,11 @@ BleStartRequest::~BleStartRequest() {
 
 inline void BleStartRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  qaul_id_.Destroy();
+  _impl_.qaul_id_.Destroy();
 }
 
 void BleStartRequest::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleStartRequest::Clear() {
@@ -2048,8 +2137,8 @@ void BleStartRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  qaul_id_.ClearToEmpty();
-  power_setting_ = 0;
+  _impl_.qaul_id_.ClearToEmpty();
+  _impl_.power_setting_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2148,35 +2237,31 @@ size_t BleStartRequest::ByteSizeLong() const {
       ::_pbi::WireFormatLite::EnumSize(this->_internal_power_setting());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleStartRequest::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleStartRequest::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleStartRequest::GetClassData() const { return &_class_data_; }
 
-void BleStartRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleStartRequest *>(to)->MergeFrom(
-      static_cast<const BleStartRequest &>(from));
-}
 
-
-void BleStartRequest::MergeFrom(const BleStartRequest& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStartRequest)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleStartRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleStartRequest*>(&to_msg);
+  auto& from = static_cast<const BleStartRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStartRequest)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_qaul_id().empty()) {
-    _internal_set_qaul_id(from._internal_qaul_id());
+    _this->_internal_set_qaul_id(from._internal_qaul_id());
   }
   if (from._internal_power_setting() != 0) {
-    _internal_set_power_setting(from._internal_power_setting());
+    _this->_internal_set_power_setting(from._internal_power_setting());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleStartRequest::CopyFrom(const BleStartRequest& from) {
@@ -2196,10 +2281,10 @@ void BleStartRequest::InternalSwap(BleStartRequest* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &qaul_id_, lhs_arena,
-      &other->qaul_id_, rhs_arena
+      &_impl_.qaul_id_, lhs_arena,
+      &other->_impl_.qaul_id_, rhs_arena
   );
-  swap(power_setting_, other->power_setting_);
+  swap(_impl_.power_setting_, other->_impl_.power_setting_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleStartRequest::GetMetadata() const {
@@ -2217,35 +2302,47 @@ class BleStartResult::_Internal {
 BleStartResult::BleStartResult(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleStartResult)
 }
 BleStartResult::BleStartResult(const BleStartResult& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleStartResult* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){}
+    , decltype(_impl_.error_reason_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  error_message_.InitDefault();
+  _impl_.error_message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    error_message_.Set("", GetArenaForAllocation());
+    _impl_.error_message_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_error_message().empty()) {
-    error_message_.Set(from._internal_error_message(), 
-      GetArenaForAllocation());
+    _this->_impl_.error_message_.Set(from._internal_error_message(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&success_, &from.success_,
-    static_cast<size_t>(reinterpret_cast<char*>(&error_reason_) -
-    reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+  ::memcpy(&_impl_.success_, &from._impl_.success_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.error_reason_) -
+    reinterpret_cast<char*>(&_impl_.success_)) + sizeof(_impl_.error_reason_));
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleStartResult)
 }
 
-inline void BleStartResult::SharedCtor() {
-error_message_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  error_message_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&success_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&error_reason_) -
-    reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+inline void BleStartResult::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){false}
+    , decltype(_impl_.error_reason_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.error_message_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.error_message_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleStartResult::~BleStartResult() {
@@ -2259,11 +2356,11 @@ BleStartResult::~BleStartResult() {
 
 inline void BleStartResult::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  error_message_.Destroy();
+  _impl_.error_message_.Destroy();
 }
 
 void BleStartResult::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleStartResult::Clear() {
@@ -2272,10 +2369,10 @@ void BleStartResult::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  error_message_.ClearToEmpty();
-  ::memset(&success_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&error_reason_) -
-      reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+  _impl_.error_message_.ClearToEmpty();
+  ::memset(&_impl_.success_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.error_reason_) -
+      reinterpret_cast<char*>(&_impl_.success_)) + sizeof(_impl_.error_reason_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2288,7 +2385,7 @@ const char* BleStartResult::_InternalParse(const char* ptr, ::_pbi::ParseContext
       // bool success = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2398,38 +2495,34 @@ size_t BleStartResult::ByteSizeLong() const {
       ::_pbi::WireFormatLite::EnumSize(this->_internal_error_reason());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleStartResult::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleStartResult::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleStartResult::GetClassData() const { return &_class_data_; }
 
-void BleStartResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleStartResult *>(to)->MergeFrom(
-      static_cast<const BleStartResult &>(from));
-}
 
-
-void BleStartResult::MergeFrom(const BleStartResult& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStartResult)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleStartResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleStartResult*>(&to_msg);
+  auto& from = static_cast<const BleStartResult&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStartResult)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_error_message().empty()) {
-    _internal_set_error_message(from._internal_error_message());
+    _this->_internal_set_error_message(from._internal_error_message());
   }
   if (from._internal_success() != 0) {
-    _internal_set_success(from._internal_success());
+    _this->_internal_set_success(from._internal_success());
   }
   if (from._internal_error_reason() != 0) {
-    _internal_set_error_reason(from._internal_error_reason());
+    _this->_internal_set_error_reason(from._internal_error_reason());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleStartResult::CopyFrom(const BleStartResult& from) {
@@ -2449,15 +2542,15 @@ void BleStartResult::InternalSwap(BleStartResult* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &error_message_, lhs_arena,
-      &other->error_message_, rhs_arena
+      &_impl_.error_message_, lhs_arena,
+      &other->_impl_.error_message_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(BleStartResult, error_reason_)
-      + sizeof(BleStartResult::error_reason_)
-      - PROTOBUF_FIELD_OFFSET(BleStartResult, success_)>(
-          reinterpret_cast<char*>(&success_),
-          reinterpret_cast<char*>(&other->success_));
+      PROTOBUF_FIELD_OFFSET(BleStartResult, _impl_.error_reason_)
+      + sizeof(BleStartResult::_impl_.error_reason_)
+      - PROTOBUF_FIELD_OFFSET(BleStartResult, _impl_.success_)>(
+          reinterpret_cast<char*>(&_impl_.success_),
+          reinterpret_cast<char*>(&other->_impl_.success_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleStartResult::GetMetadata() const {
@@ -2479,6 +2572,7 @@ BleStopRequest::BleStopRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 BleStopRequest::BleStopRequest(const BleStopRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  BleStopRequest* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleStopRequest)
 }
@@ -2514,35 +2608,47 @@ class BleStopResult::_Internal {
 BleStopResult::BleStopResult(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleStopResult)
 }
 BleStopResult::BleStopResult(const BleStopResult& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleStopResult* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){}
+    , decltype(_impl_.error_reason_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  error_message_.InitDefault();
+  _impl_.error_message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    error_message_.Set("", GetArenaForAllocation());
+    _impl_.error_message_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_error_message().empty()) {
-    error_message_.Set(from._internal_error_message(), 
-      GetArenaForAllocation());
+    _this->_impl_.error_message_.Set(from._internal_error_message(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&success_, &from.success_,
-    static_cast<size_t>(reinterpret_cast<char*>(&error_reason_) -
-    reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+  ::memcpy(&_impl_.success_, &from._impl_.success_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.error_reason_) -
+    reinterpret_cast<char*>(&_impl_.success_)) + sizeof(_impl_.error_reason_));
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleStopResult)
 }
 
-inline void BleStopResult::SharedCtor() {
-error_message_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  error_message_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&success_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&error_reason_) -
-    reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+inline void BleStopResult::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){false}
+    , decltype(_impl_.error_reason_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.error_message_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.error_message_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleStopResult::~BleStopResult() {
@@ -2556,11 +2662,11 @@ BleStopResult::~BleStopResult() {
 
 inline void BleStopResult::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  error_message_.Destroy();
+  _impl_.error_message_.Destroy();
 }
 
 void BleStopResult::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleStopResult::Clear() {
@@ -2569,10 +2675,10 @@ void BleStopResult::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  error_message_.ClearToEmpty();
-  ::memset(&success_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&error_reason_) -
-      reinterpret_cast<char*>(&success_)) + sizeof(error_reason_));
+  _impl_.error_message_.ClearToEmpty();
+  ::memset(&_impl_.success_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.error_reason_) -
+      reinterpret_cast<char*>(&_impl_.success_)) + sizeof(_impl_.error_reason_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2585,7 +2691,7 @@ const char* BleStopResult::_InternalParse(const char* ptr, ::_pbi::ParseContext*
       // bool success = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2695,38 +2801,34 @@ size_t BleStopResult::ByteSizeLong() const {
       ::_pbi::WireFormatLite::EnumSize(this->_internal_error_reason());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleStopResult::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleStopResult::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleStopResult::GetClassData() const { return &_class_data_; }
 
-void BleStopResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleStopResult *>(to)->MergeFrom(
-      static_cast<const BleStopResult &>(from));
-}
 
-
-void BleStopResult::MergeFrom(const BleStopResult& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStopResult)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleStopResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleStopResult*>(&to_msg);
+  auto& from = static_cast<const BleStopResult&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleStopResult)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_error_message().empty()) {
-    _internal_set_error_message(from._internal_error_message());
+    _this->_internal_set_error_message(from._internal_error_message());
   }
   if (from._internal_success() != 0) {
-    _internal_set_success(from._internal_success());
+    _this->_internal_set_success(from._internal_success());
   }
   if (from._internal_error_reason() != 0) {
-    _internal_set_error_reason(from._internal_error_reason());
+    _this->_internal_set_error_reason(from._internal_error_reason());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleStopResult::CopyFrom(const BleStopResult& from) {
@@ -2746,15 +2848,15 @@ void BleStopResult::InternalSwap(BleStopResult* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &error_message_, lhs_arena,
-      &other->error_message_, rhs_arena
+      &_impl_.error_message_, lhs_arena,
+      &other->_impl_.error_message_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(BleStopResult, error_reason_)
-      + sizeof(BleStopResult::error_reason_)
-      - PROTOBUF_FIELD_OFFSET(BleStopResult, success_)>(
-          reinterpret_cast<char*>(&success_),
-          reinterpret_cast<char*>(&other->success_));
+      PROTOBUF_FIELD_OFFSET(BleStopResult, _impl_.error_reason_)
+      + sizeof(BleStopResult::_impl_.error_reason_)
+      - PROTOBUF_FIELD_OFFSET(BleStopResult, _impl_.success_)>(
+          reinterpret_cast<char*>(&_impl_.success_),
+          reinterpret_cast<char*>(&other->_impl_.success_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleStopResult::GetMetadata() const {
@@ -2772,30 +2874,43 @@ class BleDeviceDiscovered::_Internal {
 BleDeviceDiscovered::BleDeviceDiscovered(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDeviceDiscovered)
 }
 BleDeviceDiscovered::BleDeviceDiscovered(const BleDeviceDiscovered& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDeviceDiscovered* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , decltype(_impl_.rssi_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  qaul_id_.InitDefault();
+  _impl_.qaul_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    qaul_id_.Set("", GetArenaForAllocation());
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_qaul_id().empty()) {
-    qaul_id_.Set(from._internal_qaul_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.qaul_id_.Set(from._internal_qaul_id(), 
+      _this->GetArenaForAllocation());
   }
-  rssi_ = from.rssi_;
+  _this->_impl_.rssi_ = from._impl_.rssi_;
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDeviceDiscovered)
 }
 
-inline void BleDeviceDiscovered::SharedCtor() {
-qaul_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  qaul_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-rssi_ = 0;
+inline void BleDeviceDiscovered::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , decltype(_impl_.rssi_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.qaul_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDeviceDiscovered::~BleDeviceDiscovered() {
@@ -2809,11 +2924,11 @@ BleDeviceDiscovered::~BleDeviceDiscovered() {
 
 inline void BleDeviceDiscovered::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  qaul_id_.Destroy();
+  _impl_.qaul_id_.Destroy();
 }
 
 void BleDeviceDiscovered::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDeviceDiscovered::Clear() {
@@ -2822,8 +2937,8 @@ void BleDeviceDiscovered::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  qaul_id_.ClearToEmpty();
-  rssi_ = 0;
+  _impl_.qaul_id_.ClearToEmpty();
+  _impl_.rssi_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2845,7 +2960,7 @@ const char* BleDeviceDiscovered::_InternalParse(const char* ptr, ::_pbi::ParseCo
       // int32 rssi = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          rssi_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.rssi_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2919,35 +3034,31 @@ size_t BleDeviceDiscovered::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_rssi());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDeviceDiscovered::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDeviceDiscovered::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDeviceDiscovered::GetClassData() const { return &_class_data_; }
 
-void BleDeviceDiscovered::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDeviceDiscovered *>(to)->MergeFrom(
-      static_cast<const BleDeviceDiscovered &>(from));
-}
 
-
-void BleDeviceDiscovered::MergeFrom(const BleDeviceDiscovered& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceDiscovered)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDeviceDiscovered::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDeviceDiscovered*>(&to_msg);
+  auto& from = static_cast<const BleDeviceDiscovered&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceDiscovered)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_qaul_id().empty()) {
-    _internal_set_qaul_id(from._internal_qaul_id());
+    _this->_internal_set_qaul_id(from._internal_qaul_id());
   }
   if (from._internal_rssi() != 0) {
-    _internal_set_rssi(from._internal_rssi());
+    _this->_internal_set_rssi(from._internal_rssi());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDeviceDiscovered::CopyFrom(const BleDeviceDiscovered& from) {
@@ -2967,10 +3078,10 @@ void BleDeviceDiscovered::InternalSwap(BleDeviceDiscovered* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &qaul_id_, lhs_arena,
-      &other->qaul_id_, rhs_arena
+      &_impl_.qaul_id_, lhs_arena,
+      &other->_impl_.qaul_id_, rhs_arena
   );
-  swap(rssi_, other->rssi_);
+  swap(_impl_.rssi_, other->_impl_.rssi_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleDeviceDiscovered::GetMetadata() const {
@@ -2988,28 +3099,40 @@ class BleDeviceUnavailable::_Internal {
 BleDeviceUnavailable::BleDeviceUnavailable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDeviceUnavailable)
 }
 BleDeviceUnavailable::BleDeviceUnavailable(const BleDeviceUnavailable& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDeviceUnavailable* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  qaul_id_.InitDefault();
+  _impl_.qaul_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    qaul_id_.Set("", GetArenaForAllocation());
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_qaul_id().empty()) {
-    qaul_id_.Set(from._internal_qaul_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.qaul_id_.Set(from._internal_qaul_id(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDeviceUnavailable)
 }
 
-inline void BleDeviceUnavailable::SharedCtor() {
-qaul_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  qaul_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void BleDeviceUnavailable::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.qaul_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.qaul_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.qaul_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDeviceUnavailable::~BleDeviceUnavailable() {
@@ -3023,11 +3146,11 @@ BleDeviceUnavailable::~BleDeviceUnavailable() {
 
 inline void BleDeviceUnavailable::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  qaul_id_.Destroy();
+  _impl_.qaul_id_.Destroy();
 }
 
 void BleDeviceUnavailable::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDeviceUnavailable::Clear() {
@@ -3036,7 +3159,7 @@ void BleDeviceUnavailable::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  qaul_id_.ClearToEmpty();
+  _impl_.qaul_id_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3113,32 +3236,28 @@ size_t BleDeviceUnavailable::ByteSizeLong() const {
         this->_internal_qaul_id());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDeviceUnavailable::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDeviceUnavailable::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDeviceUnavailable::GetClassData() const { return &_class_data_; }
 
-void BleDeviceUnavailable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDeviceUnavailable *>(to)->MergeFrom(
-      static_cast<const BleDeviceUnavailable &>(from));
-}
 
-
-void BleDeviceUnavailable::MergeFrom(const BleDeviceUnavailable& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceUnavailable)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDeviceUnavailable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDeviceUnavailable*>(&to_msg);
+  auto& from = static_cast<const BleDeviceUnavailable&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDeviceUnavailable)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_qaul_id().empty()) {
-    _internal_set_qaul_id(from._internal_qaul_id());
+    _this->_internal_set_qaul_id(from._internal_qaul_id());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDeviceUnavailable::CopyFrom(const BleDeviceUnavailable& from) {
@@ -3158,8 +3277,8 @@ void BleDeviceUnavailable::InternalSwap(BleDeviceUnavailable* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &qaul_id_, lhs_arena,
-      &other->qaul_id_, rhs_arena
+      &_impl_.qaul_id_, lhs_arena,
+      &other->_impl_.qaul_id_, rhs_arena
   );
 }
 
@@ -3178,64 +3297,82 @@ class BleDirectSend::_Internal {
 BleDirectSend::BleDirectSend(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDirectSend)
 }
 BleDirectSend::BleDirectSend(const BleDirectSend& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDirectSend* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_id_){}
+    , decltype(_impl_.receiver_id_){}
+    , decltype(_impl_.sender_id_){}
+    , decltype(_impl_.data_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  message_id_.InitDefault();
+  _impl_.message_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    message_id_.Set("", GetArenaForAllocation());
+    _impl_.message_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message_id().empty()) {
-    message_id_.Set(from._internal_message_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.message_id_.Set(from._internal_message_id(), 
+      _this->GetArenaForAllocation());
   }
-  receiver_id_.InitDefault();
+  _impl_.receiver_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    receiver_id_.Set("", GetArenaForAllocation());
+    _impl_.receiver_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_receiver_id().empty()) {
-    receiver_id_.Set(from._internal_receiver_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.receiver_id_.Set(from._internal_receiver_id(), 
+      _this->GetArenaForAllocation());
   }
-  sender_id_.InitDefault();
+  _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    sender_id_.Set("", GetArenaForAllocation());
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender_id().empty()) {
-    sender_id_.Set(from._internal_sender_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.sender_id_.Set(from._internal_sender_id(), 
+      _this->GetArenaForAllocation());
   }
-  data_.InitDefault();
+  _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    data_.Set("", GetArenaForAllocation());
+    _impl_.data_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_data().empty()) {
-    data_.Set(from._internal_data(), 
-      GetArenaForAllocation());
+    _this->_impl_.data_.Set(from._internal_data(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDirectSend)
 }
 
-inline void BleDirectSend::SharedCtor() {
-message_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  message_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-receiver_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  receiver_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-sender_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  sender_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-data_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  data_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void BleDirectSend::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_id_){}
+    , decltype(_impl_.receiver_id_){}
+    , decltype(_impl_.sender_id_){}
+    , decltype(_impl_.data_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.message_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.message_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.receiver_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.receiver_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.sender_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.data_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.data_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDirectSend::~BleDirectSend() {
@@ -3249,14 +3386,14 @@ BleDirectSend::~BleDirectSend() {
 
 inline void BleDirectSend::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  message_id_.Destroy();
-  receiver_id_.Destroy();
-  sender_id_.Destroy();
-  data_.Destroy();
+  _impl_.message_id_.Destroy();
+  _impl_.receiver_id_.Destroy();
+  _impl_.sender_id_.Destroy();
+  _impl_.data_.Destroy();
 }
 
 void BleDirectSend::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDirectSend::Clear() {
@@ -3265,10 +3402,10 @@ void BleDirectSend::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  message_id_.ClearToEmpty();
-  receiver_id_.ClearToEmpty();
-  sender_id_.ClearToEmpty();
-  data_.ClearToEmpty();
+  _impl_.message_id_.ClearToEmpty();
+  _impl_.receiver_id_.ClearToEmpty();
+  _impl_.sender_id_.ClearToEmpty();
+  _impl_.data_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3411,41 +3548,37 @@ size_t BleDirectSend::ByteSizeLong() const {
         this->_internal_data());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDirectSend::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDirectSend::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDirectSend::GetClassData() const { return &_class_data_; }
 
-void BleDirectSend::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDirectSend *>(to)->MergeFrom(
-      static_cast<const BleDirectSend &>(from));
-}
 
-
-void BleDirectSend::MergeFrom(const BleDirectSend& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectSend)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDirectSend::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDirectSend*>(&to_msg);
+  auto& from = static_cast<const BleDirectSend&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectSend)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_message_id().empty()) {
-    _internal_set_message_id(from._internal_message_id());
+    _this->_internal_set_message_id(from._internal_message_id());
   }
   if (!from._internal_receiver_id().empty()) {
-    _internal_set_receiver_id(from._internal_receiver_id());
+    _this->_internal_set_receiver_id(from._internal_receiver_id());
   }
   if (!from._internal_sender_id().empty()) {
-    _internal_set_sender_id(from._internal_sender_id());
+    _this->_internal_set_sender_id(from._internal_sender_id());
   }
   if (!from._internal_data().empty()) {
-    _internal_set_data(from._internal_data());
+    _this->_internal_set_data(from._internal_data());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDirectSend::CopyFrom(const BleDirectSend& from) {
@@ -3465,20 +3598,20 @@ void BleDirectSend::InternalSwap(BleDirectSend* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &message_id_, lhs_arena,
-      &other->message_id_, rhs_arena
+      &_impl_.message_id_, lhs_arena,
+      &other->_impl_.message_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &receiver_id_, lhs_arena,
-      &other->receiver_id_, rhs_arena
+      &_impl_.receiver_id_, lhs_arena,
+      &other->_impl_.receiver_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &sender_id_, lhs_arena,
-      &other->sender_id_, rhs_arena
+      &_impl_.sender_id_, lhs_arena,
+      &other->_impl_.sender_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &data_, lhs_arena,
-      &other->data_, rhs_arena
+      &_impl_.data_, lhs_arena,
+      &other->_impl_.data_, rhs_arena
   );
 }
 
@@ -3497,42 +3630,57 @@ class BleDirectSendResult::_Internal {
 BleDirectSendResult::BleDirectSendResult(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDirectSendResult)
 }
 BleDirectSendResult::BleDirectSendResult(const BleDirectSendResult& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDirectSendResult* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_.InitDefault();
+  _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    id_.Set("", GetArenaForAllocation());
+    _impl_.id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    id_.Set(from._internal_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), 
+      _this->GetArenaForAllocation());
   }
-  error_message_.InitDefault();
+  _impl_.error_message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    error_message_.Set("", GetArenaForAllocation());
+    _impl_.error_message_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_error_message().empty()) {
-    error_message_.Set(from._internal_error_message(), 
-      GetArenaForAllocation());
+    _this->_impl_.error_message_.Set(from._internal_error_message(), 
+      _this->GetArenaForAllocation());
   }
-  success_ = from.success_;
+  _this->_impl_.success_ = from._impl_.success_;
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDirectSendResult)
 }
 
-inline void BleDirectSendResult::SharedCtor() {
-id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-error_message_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  error_message_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-success_ = false;
+inline void BleDirectSendResult::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , decltype(_impl_.error_message_){}
+    , decltype(_impl_.success_){false}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.error_message_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.error_message_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDirectSendResult::~BleDirectSendResult() {
@@ -3546,12 +3694,12 @@ BleDirectSendResult::~BleDirectSendResult() {
 
 inline void BleDirectSendResult::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  id_.Destroy();
-  error_message_.Destroy();
+  _impl_.id_.Destroy();
+  _impl_.error_message_.Destroy();
 }
 
 void BleDirectSendResult::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDirectSendResult::Clear() {
@@ -3560,9 +3708,9 @@ void BleDirectSendResult::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  id_.ClearToEmpty();
-  error_message_.ClearToEmpty();
-  success_ = false;
+  _impl_.id_.ClearToEmpty();
+  _impl_.error_message_.ClearToEmpty();
+  _impl_.success_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3584,7 +3732,7 @@ const char* BleDirectSendResult::_InternalParse(const char* ptr, ::_pbi::ParseCo
       // bool success = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3685,38 +3833,34 @@ size_t BleDirectSendResult::ByteSizeLong() const {
     total_size += 1 + 1;
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDirectSendResult::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDirectSendResult::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDirectSendResult::GetClassData() const { return &_class_data_; }
 
-void BleDirectSendResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDirectSendResult *>(to)->MergeFrom(
-      static_cast<const BleDirectSendResult &>(from));
-}
 
-
-void BleDirectSendResult::MergeFrom(const BleDirectSendResult& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectSendResult)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDirectSendResult::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDirectSendResult*>(&to_msg);
+  auto& from = static_cast<const BleDirectSendResult&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectSendResult)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_id().empty()) {
-    _internal_set_id(from._internal_id());
+    _this->_internal_set_id(from._internal_id());
   }
   if (!from._internal_error_message().empty()) {
-    _internal_set_error_message(from._internal_error_message());
+    _this->_internal_set_error_message(from._internal_error_message());
   }
   if (from._internal_success() != 0) {
-    _internal_set_success(from._internal_success());
+    _this->_internal_set_success(from._internal_success());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDirectSendResult::CopyFrom(const BleDirectSendResult& from) {
@@ -3736,14 +3880,14 @@ void BleDirectSendResult::InternalSwap(BleDirectSendResult* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &id_, lhs_arena,
-      &other->id_, rhs_arena
+      &_impl_.id_, lhs_arena,
+      &other->_impl_.id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &error_message_, lhs_arena,
-      &other->error_message_, rhs_arena
+      &_impl_.error_message_, lhs_arena,
+      &other->_impl_.error_message_, rhs_arena
   );
-  swap(success_, other->success_);
+  swap(_impl_.success_, other->_impl_.success_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BleDirectSendResult::GetMetadata() const {
@@ -3761,40 +3905,54 @@ class BleDirectReceived::_Internal {
 BleDirectReceived::BleDirectReceived(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.sys.ble.BleDirectReceived)
 }
 BleDirectReceived::BleDirectReceived(const BleDirectReceived& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BleDirectReceived* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.from_){}
+    , decltype(_impl_.data_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  from_.InitDefault();
+  _impl_.from_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    from_.Set("", GetArenaForAllocation());
+    _impl_.from_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_from().empty()) {
-    from_.Set(from._internal_from(), 
-      GetArenaForAllocation());
+    _this->_impl_.from_.Set(from._internal_from(), 
+      _this->GetArenaForAllocation());
   }
-  data_.InitDefault();
+  _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    data_.Set("", GetArenaForAllocation());
+    _impl_.data_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_data().empty()) {
-    data_.Set(from._internal_data(), 
-      GetArenaForAllocation());
+    _this->_impl_.data_.Set(from._internal_data(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.sys.ble.BleDirectReceived)
 }
 
-inline void BleDirectReceived::SharedCtor() {
-from_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  from_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-data_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  data_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void BleDirectReceived::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.from_){}
+    , decltype(_impl_.data_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.from_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.from_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.data_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.data_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 BleDirectReceived::~BleDirectReceived() {
@@ -3808,12 +3966,12 @@ BleDirectReceived::~BleDirectReceived() {
 
 inline void BleDirectReceived::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  from_.Destroy();
-  data_.Destroy();
+  _impl_.from_.Destroy();
+  _impl_.data_.Destroy();
 }
 
 void BleDirectReceived::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void BleDirectReceived::Clear() {
@@ -3822,8 +3980,8 @@ void BleDirectReceived::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  from_.ClearToEmpty();
-  data_.ClearToEmpty();
+  _impl_.from_.ClearToEmpty();
+  _impl_.data_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3922,35 +4080,31 @@ size_t BleDirectReceived::ByteSizeLong() const {
         this->_internal_data());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BleDirectReceived::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     BleDirectReceived::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BleDirectReceived::GetClassData() const { return &_class_data_; }
 
-void BleDirectReceived::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<BleDirectReceived *>(to)->MergeFrom(
-      static_cast<const BleDirectReceived &>(from));
-}
 
-
-void BleDirectReceived::MergeFrom(const BleDirectReceived& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectReceived)
-  GOOGLE_DCHECK_NE(&from, this);
+void BleDirectReceived::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BleDirectReceived*>(&to_msg);
+  auto& from = static_cast<const BleDirectReceived&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.sys.ble.BleDirectReceived)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_from().empty()) {
-    _internal_set_from(from._internal_from());
+    _this->_internal_set_from(from._internal_from());
   }
   if (!from._internal_data().empty()) {
-    _internal_set_data(from._internal_data());
+    _this->_internal_set_data(from._internal_data());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BleDirectReceived::CopyFrom(const BleDirectReceived& from) {
@@ -3970,12 +4124,12 @@ void BleDirectReceived::InternalSwap(BleDirectReceived* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &from_, lhs_arena,
-      &other->from_, rhs_arena
+      &_impl_.from_, lhs_arena,
+      &other->_impl_.from_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &data_, lhs_arena,
-      &other->data_, rhs_arena
+      &_impl_.data_, lhs_arena,
+      &other->_impl_.data_, rhs_arena
   );
 }
 

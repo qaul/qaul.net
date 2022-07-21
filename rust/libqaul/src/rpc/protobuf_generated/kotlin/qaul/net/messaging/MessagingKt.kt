@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializemessaging")
-public inline fun messaging(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
+inline fun messaging(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
   qaul.net.messaging.MessagingKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Messaging.newBuilder()).apply { block() }._build()
-public object MessagingKt {
+object MessagingKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.Messaging.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Messaging.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object MessagingKt {
     /**
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
-    public var confirmationMessage: qaul.net.messaging.MessagingOuterClass.Confirmation
+    var confirmationMessage: qaul.net.messaging.MessagingOuterClass.Confirmation
       @JvmName("getConfirmationMessage")
       get() = _builder.getConfirmationMessage()
       @JvmName("setConfirmationMessage")
@@ -35,45 +35,21 @@ public object MessagingKt {
     /**
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
-    public fun clearConfirmationMessage() {
+    fun clearConfirmationMessage() {
       _builder.clearConfirmationMessage()
     }
     /**
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return Whether the confirmationMessage field is set.
      */
-    public fun hasConfirmationMessage(): kotlin.Boolean {
+    fun hasConfirmationMessage(): kotlin.Boolean {
       return _builder.hasConfirmationMessage()
     }
 
     /**
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 2;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
-    public var chatMessage: qaul.net.messaging.MessagingOuterClass.ChatMessage
-      @JvmName("getChatMessage")
-      get() = _builder.getChatMessage()
-      @JvmName("setChatMessage")
-      set(value) {
-        _builder.setChatMessage(value)
-      }
-    /**
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 2;</code>
-     */
-    public fun clearChatMessage() {
-      _builder.clearChatMessage()
-    }
-    /**
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 2;</code>
-     * @return Whether the chatMessage field is set.
-     */
-    public fun hasChatMessage(): kotlin.Boolean {
-      return _builder.hasChatMessage()
-    }
-
-    /**
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
-     */
-    public var cryptoService: qaul.net.messaging.MessagingOuterClass.CryptoService
+    var cryptoService: qaul.net.messaging.MessagingOuterClass.CryptoService
       @JvmName("getCryptoService")
       get() = _builder.getCryptoService()
       @JvmName("setCryptoService")
@@ -81,37 +57,88 @@ public object MessagingKt {
         _builder.setCryptoService(value)
       }
     /**
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
-    public fun clearCryptoService() {
+    fun clearCryptoService() {
       _builder.clearCryptoService()
     }
     /**
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return Whether the cryptoService field is set.
      */
-    public fun hasCryptoService(): kotlin.Boolean {
+    fun hasCryptoService(): kotlin.Boolean {
       return _builder.hasCryptoService()
     }
-    public val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
+
+    /**
+     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
+     */
+    var chatMessage: qaul.net.messaging.MessagingOuterClass.ChatMessage
+      @JvmName("getChatMessage")
+      get() = _builder.getChatMessage()
+      @JvmName("setChatMessage")
+      set(value) {
+        _builder.setChatMessage(value)
+      }
+    /**
+     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
+     */
+    fun clearChatMessage() {
+      _builder.clearChatMessage()
+    }
+    /**
+     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
+     * @return Whether the chatMessage field is set.
+     */
+    fun hasChatMessage(): kotlin.Boolean {
+      return _builder.hasChatMessage()
+    }
+
+    /**
+     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
+     */
+    var fileMessage: qaul.net.messaging.MessagingOuterClass.FileMessage
+      @JvmName("getFileMessage")
+      get() = _builder.getFileMessage()
+      @JvmName("setFileMessage")
+      set(value) {
+        _builder.setFileMessage(value)
+      }
+    /**
+     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
+     */
+    fun clearFileMessage() {
+      _builder.clearFileMessage()
+    }
+    /**
+     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
+     * @return Whether the fileMessage field is set.
+     */
+    fun hasFileMessage(): kotlin.Boolean {
+      return _builder.hasFileMessage()
+    }
+    val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.Messaging.copy(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
+inline fun qaul.net.messaging.MessagingOuterClass.Messaging.copy(block: qaul.net.messaging.MessagingKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Messaging =
   qaul.net.messaging.MessagingKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.confirmationMessageOrNull: qaul.net.messaging.MessagingOuterClass.Confirmation?
   get() = if (hasConfirmationMessage()) getConfirmationMessage() else null
 
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNull: qaul.net.messaging.MessagingOuterClass.CryptoService?
+  get() = if (hasCryptoService()) getCryptoService() else null
+
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull: qaul.net.messaging.MessagingOuterClass.ChatMessage?
   get() = if (hasChatMessage()) getChatMessage() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNull: qaul.net.messaging.MessagingOuterClass.CryptoService?
-  get() = if (hasCryptoService()) getCryptoService() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.fileMessageOrNull: qaul.net.messaging.MessagingOuterClass.FileMessage?
+  get() = if (hasFileMessage()) getFileMessage() else null
 

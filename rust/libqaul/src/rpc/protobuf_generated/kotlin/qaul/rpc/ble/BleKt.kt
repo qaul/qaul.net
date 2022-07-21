@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializeble")
-public inline fun ble(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
+inline fun ble(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
   qaul.rpc.ble.BleKt.Dsl._create(qaul.rpc.ble.BleRpc.Ble.newBuilder()).apply { block() }._build()
-public object BleKt {
+object BleKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.Ble.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.Ble.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.InfoRequest info_request = 1;</code>
      */
-    public var infoRequest: qaul.rpc.ble.BleRpc.InfoRequest
+    var infoRequest: qaul.rpc.ble.BleRpc.InfoRequest
       @JvmName("getInfoRequest")
       get() = _builder.getInfoRequest()
       @JvmName("setInfoRequest")
@@ -35,21 +35,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.InfoRequest info_request = 1;</code>
      */
-    public fun clearInfoRequest() {
+    fun clearInfoRequest() {
       _builder.clearInfoRequest()
     }
     /**
      * <code>.qaul.rpc.ble.InfoRequest info_request = 1;</code>
      * @return Whether the infoRequest field is set.
      */
-    public fun hasInfoRequest(): kotlin.Boolean {
+    fun hasInfoRequest(): kotlin.Boolean {
       return _builder.hasInfoRequest()
     }
 
     /**
      * <code>.qaul.rpc.ble.InfoResponse info_response = 2;</code>
      */
-    public var infoResponse: qaul.rpc.ble.BleRpc.InfoResponse
+    var infoResponse: qaul.rpc.ble.BleRpc.InfoResponse
       @JvmName("getInfoResponse")
       get() = _builder.getInfoResponse()
       @JvmName("setInfoResponse")
@@ -59,21 +59,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.InfoResponse info_response = 2;</code>
      */
-    public fun clearInfoResponse() {
+    fun clearInfoResponse() {
       _builder.clearInfoResponse()
     }
     /**
      * <code>.qaul.rpc.ble.InfoResponse info_response = 2;</code>
      * @return Whether the infoResponse field is set.
      */
-    public fun hasInfoResponse(): kotlin.Boolean {
+    fun hasInfoResponse(): kotlin.Boolean {
       return _builder.hasInfoResponse()
     }
 
     /**
      * <code>.qaul.rpc.ble.StartRequest start_request = 3;</code>
      */
-    public var startRequest: qaul.rpc.ble.BleRpc.StartRequest
+    var startRequest: qaul.rpc.ble.BleRpc.StartRequest
       @JvmName("getStartRequest")
       get() = _builder.getStartRequest()
       @JvmName("setStartRequest")
@@ -83,21 +83,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.StartRequest start_request = 3;</code>
      */
-    public fun clearStartRequest() {
+    fun clearStartRequest() {
       _builder.clearStartRequest()
     }
     /**
      * <code>.qaul.rpc.ble.StartRequest start_request = 3;</code>
      * @return Whether the startRequest field is set.
      */
-    public fun hasStartRequest(): kotlin.Boolean {
+    fun hasStartRequest(): kotlin.Boolean {
       return _builder.hasStartRequest()
     }
 
     /**
      * <code>.qaul.rpc.ble.StopRequest stop_request = 4;</code>
      */
-    public var stopRequest: qaul.rpc.ble.BleRpc.StopRequest
+    var stopRequest: qaul.rpc.ble.BleRpc.StopRequest
       @JvmName("getStopRequest")
       get() = _builder.getStopRequest()
       @JvmName("setStopRequest")
@@ -107,21 +107,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.StopRequest stop_request = 4;</code>
      */
-    public fun clearStopRequest() {
+    fun clearStopRequest() {
       _builder.clearStopRequest()
     }
     /**
      * <code>.qaul.rpc.ble.StopRequest stop_request = 4;</code>
      * @return Whether the stopRequest field is set.
      */
-    public fun hasStopRequest(): kotlin.Boolean {
+    fun hasStopRequest(): kotlin.Boolean {
       return _builder.hasStopRequest()
     }
 
     /**
      * <code>.qaul.rpc.ble.DiscoveredRequest discovered_request = 5;</code>
      */
-    public var discoveredRequest: qaul.rpc.ble.BleRpc.DiscoveredRequest
+    var discoveredRequest: qaul.rpc.ble.BleRpc.DiscoveredRequest
       @JvmName("getDiscoveredRequest")
       get() = _builder.getDiscoveredRequest()
       @JvmName("setDiscoveredRequest")
@@ -131,21 +131,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.DiscoveredRequest discovered_request = 5;</code>
      */
-    public fun clearDiscoveredRequest() {
+    fun clearDiscoveredRequest() {
       _builder.clearDiscoveredRequest()
     }
     /**
      * <code>.qaul.rpc.ble.DiscoveredRequest discovered_request = 5;</code>
      * @return Whether the discoveredRequest field is set.
      */
-    public fun hasDiscoveredRequest(): kotlin.Boolean {
+    fun hasDiscoveredRequest(): kotlin.Boolean {
       return _builder.hasDiscoveredRequest()
     }
 
     /**
      * <code>.qaul.rpc.ble.DiscoveredResponse discovered_response = 6;</code>
      */
-    public var discoveredResponse: qaul.rpc.ble.BleRpc.DiscoveredResponse
+    var discoveredResponse: qaul.rpc.ble.BleRpc.DiscoveredResponse
       @JvmName("getDiscoveredResponse")
       get() = _builder.getDiscoveredResponse()
       @JvmName("setDiscoveredResponse")
@@ -155,21 +155,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.DiscoveredResponse discovered_response = 6;</code>
      */
-    public fun clearDiscoveredResponse() {
+    fun clearDiscoveredResponse() {
       _builder.clearDiscoveredResponse()
     }
     /**
      * <code>.qaul.rpc.ble.DiscoveredResponse discovered_response = 6;</code>
      * @return Whether the discoveredResponse field is set.
      */
-    public fun hasDiscoveredResponse(): kotlin.Boolean {
+    fun hasDiscoveredResponse(): kotlin.Boolean {
       return _builder.hasDiscoveredResponse()
     }
 
     /**
      * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
      */
-    public var rightsRequest: qaul.rpc.ble.BleRpc.RightsRequest
+    var rightsRequest: qaul.rpc.ble.BleRpc.RightsRequest
       @JvmName("getRightsRequest")
       get() = _builder.getRightsRequest()
       @JvmName("setRightsRequest")
@@ -179,21 +179,21 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
      */
-    public fun clearRightsRequest() {
+    fun clearRightsRequest() {
       _builder.clearRightsRequest()
     }
     /**
      * <code>.qaul.rpc.ble.RightsRequest rights_request = 7;</code>
      * @return Whether the rightsRequest field is set.
      */
-    public fun hasRightsRequest(): kotlin.Boolean {
+    fun hasRightsRequest(): kotlin.Boolean {
       return _builder.hasRightsRequest()
     }
 
     /**
      * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
      */
-    public var rightsResult: qaul.rpc.ble.BleRpc.RightsResult
+    var rightsResult: qaul.rpc.ble.BleRpc.RightsResult
       @JvmName("getRightsResult")
       get() = _builder.getRightsResult()
       @JvmName("setRightsResult")
@@ -203,27 +203,27 @@ public object BleKt {
     /**
      * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
      */
-    public fun clearRightsResult() {
+    fun clearRightsResult() {
       _builder.clearRightsResult()
     }
     /**
      * <code>.qaul.rpc.ble.RightsResult rights_result = 8;</code>
      * @return Whether the rightsResult field is set.
      */
-    public fun hasRightsResult(): kotlin.Boolean {
+    fun hasRightsResult(): kotlin.Boolean {
       return _builder.hasRightsResult()
     }
-    public val messageCase: qaul.rpc.ble.BleRpc.Ble.MessageCase
+    val messageCase: qaul.rpc.ble.BleRpc.Ble.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.Ble.copy(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
+inline fun qaul.rpc.ble.BleRpc.Ble.copy(block: qaul.rpc.ble.BleKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.Ble =
   qaul.rpc.ble.BleKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.rpc.ble.BleRpc.BleOrBuilder.infoRequestOrNull: qaul.rpc.ble.BleRpc.InfoRequest?

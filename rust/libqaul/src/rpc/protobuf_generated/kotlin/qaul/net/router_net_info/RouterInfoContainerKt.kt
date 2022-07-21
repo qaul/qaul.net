@@ -4,15 +4,15 @@
 package qaul.net.router_net_info;
 
 @kotlin.jvm.JvmName("-initializerouterInfoContainer")
-public inline fun routerInfoContainer(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
+inline fun routerInfoContainer(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
   qaul.net.router_net_info.RouterInfoContainerKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.newBuilder()).apply { block() }._build()
-public object RouterInfoContainerKt {
+object RouterInfoContainerKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object RouterInfoContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public var signature: com.google.protobuf.ByteString
+    var signature: com.google.protobuf.ByteString
       @JvmName("getSignature")
       get() = _builder.getSignature()
       @JvmName("setSignature")
@@ -43,7 +43,7 @@ public object RouterInfoContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public fun clearSignature() {
+    fun clearSignature() {
       _builder.clearSignature()
     }
 
@@ -54,7 +54,7 @@ public object RouterInfoContainerKt {
      *
      * <code>bytes message = 2;</code>
      */
-    public var message: com.google.protobuf.ByteString
+    var message: com.google.protobuf.ByteString
       @JvmName("getMessage")
       get() = _builder.getMessage()
       @JvmName("setMessage")
@@ -68,12 +68,12 @@ public object RouterInfoContainerKt {
      *
      * <code>bytes message = 2;</code>
      */
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.copy(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
+inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer.copy(block: qaul.net.router_net_info.RouterInfoContainerKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer =
   qaul.net.router_net_info.RouterInfoContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

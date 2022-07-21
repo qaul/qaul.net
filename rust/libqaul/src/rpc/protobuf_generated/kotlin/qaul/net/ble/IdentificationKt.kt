@@ -4,15 +4,15 @@
 package qaul.net.ble;
 
 @kotlin.jvm.JvmName("-initializeidentification")
-public inline fun identification(block: qaul.net.ble.IdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.Identification =
+inline fun identification(block: qaul.net.ble.IdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.Identification =
   qaul.net.ble.IdentificationKt.Dsl._create(qaul.net.ble.BleNet.Identification.newBuilder()).apply { block() }._build()
-public object IdentificationKt {
+object IdentificationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.ble.BleNet.Identification.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.ble.BleNet.Identification.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object IdentificationKt {
     /**
      * <code>bool request = 1;</code>
      */
-    public var request: kotlin.Boolean
+    var request: kotlin.Boolean
       @JvmName("getRequest")
       get() = _builder.getRequest()
       @JvmName("setRequest")
@@ -35,14 +35,14 @@ public object IdentificationKt {
     /**
      * <code>bool request = 1;</code>
      */
-    public fun clearRequest() {
+    fun clearRequest() {
       _builder.clearRequest()
     }
 
     /**
      * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
      */
-    public var node: qaul.net.ble.BleNet.NodeIdentification
+    var node: qaul.net.ble.BleNet.NodeIdentification
       @JvmName("getNode")
       get() = _builder.getNode()
       @JvmName("setNode")
@@ -52,20 +52,20 @@ public object IdentificationKt {
     /**
      * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
      */
-    public fun clearNode() {
+    fun clearNode() {
       _builder.clearNode()
     }
     /**
      * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
      * @return Whether the node field is set.
      */
-    public fun hasNode(): kotlin.Boolean {
+    fun hasNode(): kotlin.Boolean {
       return _builder.hasNode()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.ble.BleNet.Identification.copy(block: qaul.net.ble.IdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.Identification =
+inline fun qaul.net.ble.BleNet.Identification.copy(block: qaul.net.ble.IdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.Identification =
   qaul.net.ble.IdentificationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.net.ble.BleNet.IdentificationOrBuilder.nodeOrNull: qaul.net.ble.BleNet.NodeIdentification?

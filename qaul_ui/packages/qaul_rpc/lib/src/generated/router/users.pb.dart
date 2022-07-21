@@ -15,6 +15,7 @@ export 'users.pbenum.dart';
 
 enum Users_Message {
   userRequest, 
+  userOnlineRequest, 
   userList, 
   userUpdate, 
   notSet
@@ -23,27 +24,33 @@ enum Users_Message {
 class Users extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, Users_Message> _Users_MessageByTag = {
     1 : Users_Message.userRequest,
-    2 : Users_Message.userList,
-    3 : Users_Message.userUpdate,
+    2 : Users_Message.userOnlineRequest,
+    3 : Users_Message.userList,
+    4 : Users_Message.userUpdate,
     0 : Users_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Users', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<UserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userRequest', subBuilder: UserRequest.create)
-    ..aOM<UserList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userList', subBuilder: UserList.create)
-    ..aOM<UserEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdate', subBuilder: UserEntry.create)
+    ..aOM<UserOnlineRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userOnlineRequest', subBuilder: UserOnlineRequest.create)
+    ..aOM<UserList>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userList', subBuilder: UserList.create)
+    ..aOM<UserEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdate', subBuilder: UserEntry.create)
     ..hasRequiredFields = false
   ;
 
   Users._() : super();
   factory Users({
     UserRequest? userRequest,
+    UserOnlineRequest? userOnlineRequest,
     UserList? userList,
     UserEntry? userUpdate,
   }) {
     final _result = create();
     if (userRequest != null) {
       _result.userRequest = userRequest;
+    }
+    if (userOnlineRequest != null) {
+      _result.userOnlineRequest = userOnlineRequest;
     }
     if (userList != null) {
       _result.userList = userList;
@@ -89,26 +96,37 @@ class Users extends $pb.GeneratedMessage {
   UserRequest ensureUserRequest() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  UserList get userList => $_getN(1);
+  UserOnlineRequest get userOnlineRequest => $_getN(1);
   @$pb.TagNumber(2)
-  set userList(UserList v) { setField(2, v); }
+  set userOnlineRequest(UserOnlineRequest v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasUserList() => $_has(1);
+  $core.bool hasUserOnlineRequest() => $_has(1);
   @$pb.TagNumber(2)
-  void clearUserList() => clearField(2);
+  void clearUserOnlineRequest() => clearField(2);
   @$pb.TagNumber(2)
-  UserList ensureUserList() => $_ensure(1);
+  UserOnlineRequest ensureUserOnlineRequest() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  UserEntry get userUpdate => $_getN(2);
+  UserList get userList => $_getN(2);
   @$pb.TagNumber(3)
-  set userUpdate(UserEntry v) { setField(3, v); }
+  set userList(UserList v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasUserUpdate() => $_has(2);
+  $core.bool hasUserList() => $_has(2);
   @$pb.TagNumber(3)
-  void clearUserUpdate() => clearField(3);
+  void clearUserList() => clearField(3);
   @$pb.TagNumber(3)
-  UserEntry ensureUserUpdate() => $_ensure(2);
+  UserList ensureUserList() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  UserEntry get userUpdate => $_getN(3);
+  @$pb.TagNumber(4)
+  set userUpdate(UserEntry v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasUserUpdate() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUserUpdate() => clearField(4);
+  @$pb.TagNumber(4)
+  UserEntry ensureUserUpdate() => $_ensure(3);
 }
 
 class UserRequest extends $pb.GeneratedMessage {
@@ -138,6 +156,35 @@ class UserRequest extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static UserRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserRequest>(create);
   static UserRequest? _defaultInstance;
+}
+
+class UserOnlineRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserOnlineRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  UserOnlineRequest._() : super();
+  factory UserOnlineRequest() => create();
+  factory UserOnlineRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserOnlineRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UserOnlineRequest clone() => UserOnlineRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UserOnlineRequest copyWith(void Function(UserOnlineRequest) updates) => super.copyWith((message) => updates(message as UserOnlineRequest)) as UserOnlineRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UserOnlineRequest create() => UserOnlineRequest._();
+  UserOnlineRequest createEmptyInstance() => create();
+  static $pb.PbList<UserOnlineRequest> createRepeated() => $pb.PbList<UserOnlineRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UserOnlineRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserOnlineRequest>(create);
+  static UserOnlineRequest? _defaultInstance;
 }
 
 class UserList extends $pb.GeneratedMessage {

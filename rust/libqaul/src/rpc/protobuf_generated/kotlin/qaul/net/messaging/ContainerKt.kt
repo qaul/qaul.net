@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializecontainer")
-public inline fun container(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
+inline fun container(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
   qaul.net.messaging.ContainerKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.Container.newBuilder()).apply { block() }._build()
-public object ContainerKt {
+object ContainerKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.Container.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.Container.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public var signature: com.google.protobuf.ByteString
+    var signature: com.google.protobuf.ByteString
       @JvmName("getSignature")
       get() = _builder.getSignature()
       @JvmName("setSignature")
@@ -43,7 +43,7 @@ public object ContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public fun clearSignature() {
+    fun clearSignature() {
       _builder.clearSignature()
     }
 
@@ -54,7 +54,7 @@ public object ContainerKt {
      *
      * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
      */
-    public var envelope: qaul.net.messaging.MessagingOuterClass.Envelope
+    var envelope: qaul.net.messaging.MessagingOuterClass.Envelope
       @JvmName("getEnvelope")
       get() = _builder.getEnvelope()
       @JvmName("setEnvelope")
@@ -68,7 +68,7 @@ public object ContainerKt {
      *
      * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
      */
-    public fun clearEnvelope() {
+    fun clearEnvelope() {
       _builder.clearEnvelope()
     }
     /**
@@ -79,13 +79,13 @@ public object ContainerKt {
      * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
      * @return Whether the envelope field is set.
      */
-    public fun hasEnvelope(): kotlin.Boolean {
+    fun hasEnvelope(): kotlin.Boolean {
       return _builder.hasEnvelope()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.Container.copy(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
+inline fun qaul.net.messaging.MessagingOuterClass.Container.copy(block: qaul.net.messaging.ContainerKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.Container =
   qaul.net.messaging.ContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.net.messaging.MessagingOuterClass.ContainerOrBuilder.envelopeOrNull: qaul.net.messaging.MessagingOuterClass.Envelope?

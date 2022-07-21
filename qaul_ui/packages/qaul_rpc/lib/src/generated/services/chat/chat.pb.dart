@@ -221,7 +221,7 @@ class ChatOverview extends $pb.GeneratedMessage {
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..a<$fixnum.Int64>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unread', $pb.PbFieldType.O3)
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$core.List<$core.int>>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageSenderId', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
@@ -233,7 +233,7 @@ class ChatOverview extends $pb.GeneratedMessage {
     $core.String? name,
     $fixnum.Int64? lastMessageAt,
     $core.int? unread,
-    $core.String? content,
+    $core.List<$core.int>? content,
     $core.List<$core.int>? lastMessageSenderId,
   }) {
     final _result = create();
@@ -327,9 +327,9 @@ class ChatOverview extends $pb.GeneratedMessage {
   void clearUnread() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get content => $_getSZ(5);
+  $core.List<$core.int> get content => $_getN(5);
   @$pb.TagNumber(6)
-  set content($core.String v) { $_setString(5, v); }
+  set content($core.List<$core.int> v) { $_setBytes(5, v); }
   @$pb.TagNumber(6)
   $core.bool hasContent() => $_has(5);
   @$pb.TagNumber(6)
@@ -469,7 +469,7 @@ class ChatMessage extends $pb.GeneratedMessage {
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.O3)
     ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sentAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
@@ -481,7 +481,7 @@ class ChatMessage extends $pb.GeneratedMessage {
     $core.int? status,
     $fixnum.Int64? sentAt,
     $fixnum.Int64? receivedAt,
-    $core.String? content,
+    $core.List<$core.int>? content,
   }) {
     final _result = create();
     if (index != null) {
@@ -583,13 +583,243 @@ class ChatMessage extends $pb.GeneratedMessage {
   void clearReceivedAt() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.String get content => $_getSZ(6);
+  $core.List<$core.int> get content => $_getN(6);
   @$pb.TagNumber(7)
-  set content($core.String v) { $_setString(6, v); }
+  set content($core.List<$core.int> v) { $_setBytes(6, v); }
   @$pb.TagNumber(7)
   $core.bool hasContent() => $_has(6);
   @$pb.TagNumber(7)
   void clearContent() => clearField(7);
+}
+
+enum ChatMessageContent_Content {
+  chatContent, 
+  fileContent, 
+  notSet
+}
+
+class ChatMessageContent extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, ChatMessageContent_Content> _ChatMessageContent_ContentByTag = {
+    1 : ChatMessageContent_Content.chatContent,
+    2 : ChatMessageContent_Content.fileContent,
+    0 : ChatMessageContent_Content.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatMessageContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..aOM<ChatContent>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatContent', subBuilder: ChatContent.create)
+    ..aOM<FileShareContent>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileContent', subBuilder: FileShareContent.create)
+    ..hasRequiredFields = false
+  ;
+
+  ChatMessageContent._() : super();
+  factory ChatMessageContent({
+    ChatContent? chatContent,
+    FileShareContent? fileContent,
+  }) {
+    final _result = create();
+    if (chatContent != null) {
+      _result.chatContent = chatContent;
+    }
+    if (fileContent != null) {
+      _result.fileContent = fileContent;
+    }
+    return _result;
+  }
+  factory ChatMessageContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatMessageContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChatMessageContent clone() => ChatMessageContent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChatMessageContent copyWith(void Function(ChatMessageContent) updates) => super.copyWith((message) => updates(message as ChatMessageContent)) as ChatMessageContent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ChatMessageContent create() => ChatMessageContent._();
+  ChatMessageContent createEmptyInstance() => create();
+  static $pb.PbList<ChatMessageContent> createRepeated() => $pb.PbList<ChatMessageContent>();
+  @$core.pragma('dart2js:noInline')
+  static ChatMessageContent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatMessageContent>(create);
+  static ChatMessageContent? _defaultInstance;
+
+  ChatMessageContent_Content whichContent() => _ChatMessageContent_ContentByTag[$_whichOneof(0)]!;
+  void clearContent() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  ChatContent get chatContent => $_getN(0);
+  @$pb.TagNumber(1)
+  set chatContent(ChatContent v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChatContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearChatContent() => clearField(1);
+  @$pb.TagNumber(1)
+  ChatContent ensureChatContent() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  FileShareContent get fileContent => $_getN(1);
+  @$pb.TagNumber(2)
+  set fileContent(FileShareContent v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFileContent() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFileContent() => clearField(2);
+  @$pb.TagNumber(2)
+  FileShareContent ensureFileContent() => $_ensure(1);
+}
+
+class ChatContent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..hasRequiredFields = false
+  ;
+
+  ChatContent._() : super();
+  factory ChatContent({
+    $core.String? content,
+  }) {
+    final _result = create();
+    if (content != null) {
+      _result.content = content;
+    }
+    return _result;
+  }
+  factory ChatContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChatContent clone() => ChatContent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChatContent copyWith(void Function(ChatContent) updates) => super.copyWith((message) => updates(message as ChatContent)) as ChatContent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ChatContent create() => ChatContent._();
+  ChatContent createEmptyInstance() => create();
+  static $pb.PbList<ChatContent> createRepeated() => $pb.PbList<ChatContent>();
+  @$core.pragma('dart2js:noInline')
+  static ChatContent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatContent>(create);
+  static ChatContent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get content => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set content($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContent() => clearField(1);
+}
+
+class FileShareContent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FileShareContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'historyIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileName')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileSize', $pb.PbFieldType.OU3)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileDescr')
+    ..hasRequiredFields = false
+  ;
+
+  FileShareContent._() : super();
+  factory FileShareContent({
+    $fixnum.Int64? historyIndex,
+    $fixnum.Int64? fileId,
+    $core.String? fileName,
+    $core.int? fileSize,
+    $core.String? fileDescr,
+  }) {
+    final _result = create();
+    if (historyIndex != null) {
+      _result.historyIndex = historyIndex;
+    }
+    if (fileId != null) {
+      _result.fileId = fileId;
+    }
+    if (fileName != null) {
+      _result.fileName = fileName;
+    }
+    if (fileSize != null) {
+      _result.fileSize = fileSize;
+    }
+    if (fileDescr != null) {
+      _result.fileDescr = fileDescr;
+    }
+    return _result;
+  }
+  factory FileShareContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FileShareContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FileShareContent clone() => FileShareContent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FileShareContent copyWith(void Function(FileShareContent) updates) => super.copyWith((message) => updates(message as FileShareContent)) as FileShareContent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FileShareContent create() => FileShareContent._();
+  FileShareContent createEmptyInstance() => create();
+  static $pb.PbList<FileShareContent> createRepeated() => $pb.PbList<FileShareContent>();
+  @$core.pragma('dart2js:noInline')
+  static FileShareContent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FileShareContent>(create);
+  static FileShareContent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get historyIndex => $_getI64(0);
+  @$pb.TagNumber(1)
+  set historyIndex($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasHistoryIndex() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearHistoryIndex() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get fileId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set fileId($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFileId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFileId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get fileName => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set fileName($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasFileName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFileName() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get fileSize => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set fileSize($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasFileSize() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearFileSize() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get fileDescr => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set fileDescr($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasFileDescr() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearFileDescr() => clearField(5);
 }
 
 class ChatMessageSend extends $pb.GeneratedMessage {

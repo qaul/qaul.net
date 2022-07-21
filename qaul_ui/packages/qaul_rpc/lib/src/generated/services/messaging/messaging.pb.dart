@@ -205,41 +205,48 @@ class Data extends $pb.GeneratedMessage {
 
 enum Messaging_Message {
   confirmationMessage, 
-  chatMessage, 
   cryptoService, 
+  chatMessage, 
+  fileMessage, 
   notSet
 }
 
 class Messaging extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, Messaging_Message> _Messaging_MessageByTag = {
     1 : Messaging_Message.confirmationMessage,
-    2 : Messaging_Message.chatMessage,
-    3 : Messaging_Message.cryptoService,
+    2 : Messaging_Message.cryptoService,
+    3 : Messaging_Message.chatMessage,
+    4 : Messaging_Message.fileMessage,
     0 : Messaging_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Messaging', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<Confirmation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmationMessage', subBuilder: Confirmation.create)
-    ..aOM<ChatMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
-    ..aOM<CryptoService>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
+    ..aOM<CryptoService>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
+    ..aOM<ChatMessage>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
+    ..aOM<FileMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileMessage', subBuilder: FileMessage.create)
     ..hasRequiredFields = false
   ;
 
   Messaging._() : super();
   factory Messaging({
     Confirmation? confirmationMessage,
-    ChatMessage? chatMessage,
     CryptoService? cryptoService,
+    ChatMessage? chatMessage,
+    FileMessage? fileMessage,
   }) {
     final _result = create();
     if (confirmationMessage != null) {
       _result.confirmationMessage = confirmationMessage;
     }
+    if (cryptoService != null) {
+      _result.cryptoService = cryptoService;
+    }
     if (chatMessage != null) {
       _result.chatMessage = chatMessage;
     }
-    if (cryptoService != null) {
-      _result.cryptoService = cryptoService;
+    if (fileMessage != null) {
+      _result.fileMessage = fileMessage;
     }
     return _result;
   }
@@ -279,26 +286,37 @@ class Messaging extends $pb.GeneratedMessage {
   Confirmation ensureConfirmationMessage() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  ChatMessage get chatMessage => $_getN(1);
+  CryptoService get cryptoService => $_getN(1);
   @$pb.TagNumber(2)
-  set chatMessage(ChatMessage v) { setField(2, v); }
+  set cryptoService(CryptoService v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasChatMessage() => $_has(1);
+  $core.bool hasCryptoService() => $_has(1);
   @$pb.TagNumber(2)
-  void clearChatMessage() => clearField(2);
+  void clearCryptoService() => clearField(2);
   @$pb.TagNumber(2)
-  ChatMessage ensureChatMessage() => $_ensure(1);
+  CryptoService ensureCryptoService() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  CryptoService get cryptoService => $_getN(2);
+  ChatMessage get chatMessage => $_getN(2);
   @$pb.TagNumber(3)
-  set cryptoService(CryptoService v) { setField(3, v); }
+  set chatMessage(ChatMessage v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasCryptoService() => $_has(2);
+  $core.bool hasChatMessage() => $_has(2);
   @$pb.TagNumber(3)
-  void clearCryptoService() => clearField(3);
+  void clearChatMessage() => clearField(3);
   @$pb.TagNumber(3)
-  CryptoService ensureCryptoService() => $_ensure(2);
+  ChatMessage ensureChatMessage() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  FileMessage get fileMessage => $_getN(3);
+  @$pb.TagNumber(4)
+  set fileMessage(FileMessage v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasFileMessage() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearFileMessage() => clearField(4);
+  @$pb.TagNumber(4)
+  FileMessage ensureFileMessage() => $_ensure(3);
 }
 
 class CryptoService extends $pb.GeneratedMessage {
@@ -478,5 +496,52 @@ class ChatMessage extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(3);
   @$pb.TagNumber(4)
   void clearContent() => clearField(4);
+}
+
+class FileMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FileMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  FileMessage._() : super();
+  factory FileMessage({
+    $core.List<$core.int>? content,
+  }) {
+    final _result = create();
+    if (content != null) {
+      _result.content = content;
+    }
+    return _result;
+  }
+  factory FileMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FileMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FileMessage clone() => FileMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FileMessage copyWith(void Function(FileMessage) updates) => super.copyWith((message) => updates(message as FileMessage)) as FileMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FileMessage create() => FileMessage._();
+  FileMessage createEmptyInstance() => create();
+  static $pb.PbList<FileMessage> createRepeated() => $pb.PbList<FileMessage>();
+  @$core.pragma('dart2js:noInline')
+  static FileMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FileMessage>(create);
+  static FileMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get content => $_getN(0);
+  @$pb.TagNumber(1)
+  set content($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContent() => clearField(1);
 }
 

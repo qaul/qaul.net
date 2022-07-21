@@ -4,15 +4,15 @@
 package qaul.rpc.node;
 
 @kotlin.jvm.JvmName("-initializenodeInformation")
-public inline fun nodeInformation(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
+inline fun nodeInformation(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
   qaul.rpc.node.NodeInformationKt.Dsl._create(qaul.rpc.node.NodeOuterClass.NodeInformation.newBuilder()).apply { block() }._build()
-public object NodeInformationKt {
+object NodeInformationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.node.NodeOuterClass.NodeInformation.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.node.NodeOuterClass.NodeInformation.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object NodeInformationKt {
      *
      * <code>string id_base58 = 1;</code>
      */
-    public var idBase58: kotlin.String
+    var idBase58: kotlin.String
       @JvmName("getIdBase58")
       get() = _builder.getIdBase58()
       @JvmName("setIdBase58")
@@ -43,7 +43,7 @@ public object NodeInformationKt {
      *
      * <code>string id_base58 = 1;</code>
      */
-    public fun clearIdBase58() {
+    fun clearIdBase58() {
       _builder.clearIdBase58()
     }
 
@@ -52,7 +52,7 @@ public object NodeInformationKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class AddressesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class AddressesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * all known multi addresses under which 
@@ -62,7 +62,7 @@ public object NodeInformationKt {
      * <code>repeated string addresses = 2;</code>
      * @return A list containing the addresses.
      */
-    public val addresses: com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>
+     val addresses: com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getAddressesList()
@@ -78,7 +78,7 @@ public object NodeInformationKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAddresses")
-    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.add(value: kotlin.String) {
+    fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.add(value: kotlin.String) {
       _builder.addAddresses(value)
     }
     /**
@@ -93,7 +93,7 @@ public object NodeInformationKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAddresses")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(value: kotlin.String) {
+    inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(value: kotlin.String) {
       add(value)
     }
     /**
@@ -107,7 +107,7 @@ public object NodeInformationKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllAddresses")
-    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.addAll(values: kotlin.collections.Iterable<kotlin.String>) {
+    fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.addAll(values: kotlin.collections.Iterable<kotlin.String>) {
       _builder.addAllAddresses(values)
     }
     /**
@@ -122,7 +122,7 @@ public object NodeInformationKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllAddresses")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(values: kotlin.collections.Iterable<kotlin.String>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.plusAssign(values: kotlin.collections.Iterable<kotlin.String>) {
       addAll(values)
     }
     /**
@@ -137,7 +137,7 @@ public object NodeInformationKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setAddresses")
-    public operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.set(index: kotlin.Int, value: kotlin.String) {
+    operator fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.set(index: kotlin.Int, value: kotlin.String) {
       _builder.setAddresses(index, value)
     }/**
      * <pre>
@@ -149,11 +149,11 @@ public object NodeInformationKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearAddresses")
-    public fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<kotlin.String, AddressesProxy>.clear() {
       _builder.clearAddresses()
     }}
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.node.NodeOuterClass.NodeInformation.copy(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
+inline fun qaul.rpc.node.NodeOuterClass.NodeInformation.copy(block: qaul.rpc.node.NodeInformationKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.NodeInformation =
   qaul.rpc.node.NodeInformationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

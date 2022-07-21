@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializestartRequest")
-public inline fun startRequest(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
+inline fun startRequest(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
   qaul.rpc.ble.StartRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.StartRequest.newBuilder()).apply { block() }._build()
-public object StartRequestKt {
+object StartRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.StartRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.StartRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object StartRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.StartRequest.copy(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
+inline fun qaul.rpc.ble.BleRpc.StartRequest.copy(block: qaul.rpc.ble.StartRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.StartRequest =
   qaul.rpc.ble.StartRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

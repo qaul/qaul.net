@@ -4,15 +4,15 @@
 package qaul.rpc.node;
 
 @kotlin.jvm.JvmName("-initializenode")
-public inline fun node(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
+inline fun node(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
   qaul.rpc.node.NodeKt.Dsl._create(qaul.rpc.node.NodeOuterClass.Node.newBuilder()).apply { block() }._build()
-public object NodeKt {
+object NodeKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.node.NodeOuterClass.Node.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.node.NodeOuterClass.Node.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object NodeKt {
      *
      * <code>bool get_node_info = 1;</code>
      */
-    public var getNodeInfo: kotlin.Boolean
+    var getNodeInfo: kotlin.Boolean
       @JvmName("getGetNodeInfo")
       get() = _builder.getGetNodeInfo()
       @JvmName("setGetNodeInfo")
@@ -43,7 +43,7 @@ public object NodeKt {
      *
      * <code>bool get_node_info = 1;</code>
      */
-    public fun clearGetNodeInfo() {
+    fun clearGetNodeInfo() {
       _builder.clearGetNodeInfo()
     }
     /**
@@ -54,7 +54,7 @@ public object NodeKt {
      * <code>bool get_node_info = 1;</code>
      * @return Whether the getNodeInfo field is set.
      */
-    public fun hasGetNodeInfo(): kotlin.Boolean {
+    fun hasGetNodeInfo(): kotlin.Boolean {
       return _builder.hasGetNodeInfo()
     }
 
@@ -65,7 +65,7 @@ public object NodeKt {
      *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
-    public var info: qaul.rpc.node.NodeOuterClass.NodeInformation
+    var info: qaul.rpc.node.NodeOuterClass.NodeInformation
       @JvmName("getInfo")
       get() = _builder.getInfo()
       @JvmName("setInfo")
@@ -79,7 +79,7 @@ public object NodeKt {
      *
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      */
-    public fun clearInfo() {
+    fun clearInfo() {
       _builder.clearInfo()
     }
     /**
@@ -90,20 +90,20 @@ public object NodeKt {
      * <code>.qaul.rpc.node.NodeInformation info = 2;</code>
      * @return Whether the info field is set.
      */
-    public fun hasInfo(): kotlin.Boolean {
+    fun hasInfo(): kotlin.Boolean {
       return _builder.hasInfo()
     }
-    public val messageCase: qaul.rpc.node.NodeOuterClass.Node.MessageCase
+    val messageCase: qaul.rpc.node.NodeOuterClass.Node.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.node.NodeOuterClass.Node.copy(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
+inline fun qaul.rpc.node.NodeOuterClass.Node.copy(block: qaul.rpc.node.NodeKt.Dsl.() -> kotlin.Unit): qaul.rpc.node.NodeOuterClass.Node =
   qaul.rpc.node.NodeKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.rpc.node.NodeOuterClass.NodeOrBuilder.infoOrNull: qaul.rpc.node.NodeOuterClass.NodeInformation?

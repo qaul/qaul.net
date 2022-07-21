@@ -4,15 +4,15 @@
 package qaul.net.feed;
 
 @kotlin.jvm.JvmName("-initializefeedContainer")
-public inline fun feedContainer(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
+inline fun feedContainer(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
   qaul.net.feed.FeedContainerKt.Dsl._create(qaul.net.feed.FeedNet.FeedContainer.newBuilder()).apply { block() }._build()
-public object FeedContainerKt {
+object FeedContainerKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.feed.FeedNet.FeedContainer.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.feed.FeedNet.FeedContainer.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object FeedContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public var signature: com.google.protobuf.ByteString
+    var signature: com.google.protobuf.ByteString
       @JvmName("getSignature")
       get() = _builder.getSignature()
       @JvmName("setSignature")
@@ -43,7 +43,7 @@ public object FeedContainerKt {
      *
      * <code>bytes signature = 1;</code>
      */
-    public fun clearSignature() {
+    fun clearSignature() {
       _builder.clearSignature()
     }
 
@@ -54,7 +54,7 @@ public object FeedContainerKt {
      *
      * <code>bytes message = 2;</code>
      */
-    public var message: com.google.protobuf.ByteString
+    var message: com.google.protobuf.ByteString
       @JvmName("getMessage")
       get() = _builder.getMessage()
       @JvmName("setMessage")
@@ -68,12 +68,12 @@ public object FeedContainerKt {
      *
      * <code>bytes message = 2;</code>
      */
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.feed.FeedNet.FeedContainer.copy(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
+inline fun qaul.net.feed.FeedNet.FeedContainer.copy(block: qaul.net.feed.FeedContainerKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedContainer =
   qaul.net.feed.FeedContainerKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

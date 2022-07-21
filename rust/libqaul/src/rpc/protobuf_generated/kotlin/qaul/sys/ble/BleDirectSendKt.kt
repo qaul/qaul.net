@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDirectSend")
-public inline fun bleDirectSend(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
+inline fun bleDirectSend(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
   qaul.sys.ble.BleDirectSendKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDirectSend.newBuilder()).apply { block() }._build()
-public object BleDirectSendKt {
+object BleDirectSendKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDirectSend.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDirectSend.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes message_id = 1;</code>
      */
-    public var messageId: com.google.protobuf.ByteString
+    var messageId: com.google.protobuf.ByteString
       @JvmName("getMessageId")
       get() = _builder.getMessageId()
       @JvmName("setMessageId")
@@ -43,7 +43,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes message_id = 1;</code>
      */
-    public fun clearMessageId() {
+    fun clearMessageId() {
       _builder.clearMessageId()
     }
 
@@ -54,7 +54,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes receiver_id = 2;</code>
      */
-    public var receiverId: com.google.protobuf.ByteString
+    var receiverId: com.google.protobuf.ByteString
       @JvmName("getReceiverId")
       get() = _builder.getReceiverId()
       @JvmName("setReceiverId")
@@ -68,7 +68,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes receiver_id = 2;</code>
      */
-    public fun clearReceiverId() {
+    fun clearReceiverId() {
       _builder.clearReceiverId()
     }
 
@@ -79,7 +79,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes sender_id = 3;</code>
      */
-    public var senderId: com.google.protobuf.ByteString
+    var senderId: com.google.protobuf.ByteString
       @JvmName("getSenderId")
       get() = _builder.getSenderId()
       @JvmName("setSenderId")
@@ -93,7 +93,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes sender_id = 3;</code>
      */
-    public fun clearSenderId() {
+    fun clearSenderId() {
       _builder.clearSenderId()
     }
 
@@ -104,7 +104,7 @@ public object BleDirectSendKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public var data: com.google.protobuf.ByteString
+    var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -118,12 +118,12 @@ public object BleDirectSendKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public fun clearData() {
+    fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDirectSend.copy(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
+inline fun qaul.sys.ble.BleOuterClass.BleDirectSend.copy(block: qaul.sys.ble.BleDirectSendKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSend =
   qaul.sys.ble.BleDirectSendKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

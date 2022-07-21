@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechat")
-public inline fun chat(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
+inline fun chat(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
   qaul.rpc.chat.ChatKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.Chat.newBuilder()).apply { block() }._build()
-public object ChatKt {
+object ChatKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.Chat.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.Chat.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
      */
-    public var overviewRequest: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest
+    var overviewRequest: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest
       @JvmName("getOverviewRequest")
       get() = _builder.getOverviewRequest()
       @JvmName("setOverviewRequest")
@@ -43,7 +43,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
      */
-    public fun clearOverviewRequest() {
+    fun clearOverviewRequest() {
       _builder.clearOverviewRequest()
     }
     /**
@@ -54,7 +54,7 @@ public object ChatKt {
      * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
      * @return Whether the overviewRequest field is set.
      */
-    public fun hasOverviewRequest(): kotlin.Boolean {
+    fun hasOverviewRequest(): kotlin.Boolean {
       return _builder.hasOverviewRequest()
     }
 
@@ -65,7 +65,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
      */
-    public var overviewList: qaul.rpc.chat.ChatOuterClass.ChatOverviewList
+    var overviewList: qaul.rpc.chat.ChatOuterClass.ChatOverviewList
       @JvmName("getOverviewList")
       get() = _builder.getOverviewList()
       @JvmName("setOverviewList")
@@ -79,7 +79,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
      */
-    public fun clearOverviewList() {
+    fun clearOverviewList() {
       _builder.clearOverviewList()
     }
     /**
@@ -90,7 +90,7 @@ public object ChatKt {
      * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
      * @return Whether the overviewList field is set.
      */
-    public fun hasOverviewList(): kotlin.Boolean {
+    fun hasOverviewList(): kotlin.Boolean {
       return _builder.hasOverviewList()
     }
 
@@ -101,7 +101,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatConversationRequest conversation_request = 3;</code>
      */
-    public var conversationRequest: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest
+    var conversationRequest: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest
       @JvmName("getConversationRequest")
       get() = _builder.getConversationRequest()
       @JvmName("setConversationRequest")
@@ -115,7 +115,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatConversationRequest conversation_request = 3;</code>
      */
-    public fun clearConversationRequest() {
+    fun clearConversationRequest() {
       _builder.clearConversationRequest()
     }
     /**
@@ -126,7 +126,7 @@ public object ChatKt {
      * <code>.qaul.rpc.chat.ChatConversationRequest conversation_request = 3;</code>
      * @return Whether the conversationRequest field is set.
      */
-    public fun hasConversationRequest(): kotlin.Boolean {
+    fun hasConversationRequest(): kotlin.Boolean {
       return _builder.hasConversationRequest()
     }
 
@@ -137,7 +137,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatConversationList conversation_list = 4;</code>
      */
-    public var conversationList: qaul.rpc.chat.ChatOuterClass.ChatConversationList
+    var conversationList: qaul.rpc.chat.ChatOuterClass.ChatConversationList
       @JvmName("getConversationList")
       get() = _builder.getConversationList()
       @JvmName("setConversationList")
@@ -151,7 +151,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatConversationList conversation_list = 4;</code>
      */
-    public fun clearConversationList() {
+    fun clearConversationList() {
       _builder.clearConversationList()
     }
     /**
@@ -162,7 +162,7 @@ public object ChatKt {
      * <code>.qaul.rpc.chat.ChatConversationList conversation_list = 4;</code>
      * @return Whether the conversationList field is set.
      */
-    public fun hasConversationList(): kotlin.Boolean {
+    fun hasConversationList(): kotlin.Boolean {
       return _builder.hasConversationList()
     }
 
@@ -173,7 +173,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatMessageSend send = 5;</code>
      */
-    public var send: qaul.rpc.chat.ChatOuterClass.ChatMessageSend
+    var send: qaul.rpc.chat.ChatOuterClass.ChatMessageSend
       @JvmName("getSend")
       get() = _builder.getSend()
       @JvmName("setSend")
@@ -187,7 +187,7 @@ public object ChatKt {
      *
      * <code>.qaul.rpc.chat.ChatMessageSend send = 5;</code>
      */
-    public fun clearSend() {
+    fun clearSend() {
       _builder.clearSend()
     }
     /**
@@ -198,20 +198,20 @@ public object ChatKt {
      * <code>.qaul.rpc.chat.ChatMessageSend send = 5;</code>
      * @return Whether the send field is set.
      */
-    public fun hasSend(): kotlin.Boolean {
+    fun hasSend(): kotlin.Boolean {
       return _builder.hasSend()
     }
-    public val messageCase: qaul.rpc.chat.ChatOuterClass.Chat.MessageCase
+    val messageCase: qaul.rpc.chat.ChatOuterClass.Chat.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.Chat.copy(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
+inline fun qaul.rpc.chat.ChatOuterClass.Chat.copy(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
   qaul.rpc.chat.ChatKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.overviewRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest?

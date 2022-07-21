@@ -24,8 +24,10 @@ namespace qaul {
 namespace rpc {
 namespace feed {
 PROTOBUF_CONSTEXPR Feed::Feed(
-    ::_pbi::ConstantInitialized)
-  : _oneof_case_{}{}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct FeedDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FeedDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -36,9 +38,10 @@ struct FeedDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedDefaultTypeInternal _Feed_default_instance_;
 PROTOBUF_CONSTEXPR FeedMessageRequest::FeedMessageRequest(
-    ::_pbi::ConstantInitialized)
-  : last_received_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , last_index_(uint64_t{0u}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.last_received_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.last_index_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedMessageRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FeedMessageRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -49,8 +52,9 @@ struct FeedMessageRequestDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageRequestDefaultTypeInternal _FeedMessageRequest_default_instance_;
 PROTOBUF_CONSTEXPR FeedMessageList::FeedMessageList(
-    ::_pbi::ConstantInitialized)
-  : feed_message_(){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.feed_message_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedMessageListDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FeedMessageListDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -61,17 +65,18 @@ struct FeedMessageListDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageListDefaultTypeInternal _FeedMessageList_default_instance_;
 PROTOBUF_CONSTEXPR FeedMessage::FeedMessage(
-    ::_pbi::ConstantInitialized)
-  : sender_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , sender_id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , message_id_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , message_id_base58_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , time_sent_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , time_received_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , index_(uint64_t{0u})
-  , timestamp_sent_(uint64_t{0u})
-  , timestamp_received_(uint64_t{0u}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.sender_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.sender_id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.message_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.message_id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.time_sent_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.time_received_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.content_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.index_)*/uint64_t{0u}
+  , /*decltype(_impl_.timestamp_sent_)*/uint64_t{0u}
+  , /*decltype(_impl_.timestamp_received_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FeedMessageDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -82,8 +87,9 @@ struct FeedMessageDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageDefaultTypeInternal _FeedMessage_default_instance_;
 PROTOBUF_CONSTEXPR SendMessage::SendMessage(
-    ::_pbi::ConstantInitialized)
-  : content_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}){}
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.content_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct SendMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR SendMessageDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -104,51 +110,51 @@ const uint32_t TableStruct_services_2ffeed_2ffeed_2eproto::offsets[] PROTOBUF_SE
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::Feed, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::Feed, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::Feed, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::Feed, message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::Feed, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageRequest, last_received_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageRequest, last_index_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageRequest, _impl_.last_received_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageRequest, _impl_.last_index_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageList, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageList, feed_message_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessageList, _impl_.feed_message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, sender_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, sender_id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, message_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, message_id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, time_sent_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, timestamp_sent_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, time_received_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, timestamp_received_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, content_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, index_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.sender_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.sender_id_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.message_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.message_id_base58_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.time_sent_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.timestamp_sent_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.time_received_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.timestamp_received_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.content_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::FeedMessage, _impl_.index_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::SendMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::SendMessage, content_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::feed::SendMessage, _impl_.content_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::feed::Feed)},
@@ -214,15 +220,15 @@ class Feed::_Internal {
 
 const ::qaul::rpc::feed::FeedMessageList&
 Feed::_Internal::received(const Feed* msg) {
-  return *msg->message_.received_;
+  return *msg->_impl_.message_.received_;
 }
 const ::qaul::rpc::feed::SendMessage&
 Feed::_Internal::send(const Feed* msg) {
-  return *msg->message_.send_;
+  return *msg->_impl_.message_.send_;
 }
 const ::qaul::rpc::feed::FeedMessageRequest&
 Feed::_Internal::request(const Feed* msg) {
-  return *msg->message_.request_;
+  return *msg->_impl_.message_.request_;
 }
 void Feed::set_allocated_received(::qaul::rpc::feed::FeedMessageList* received) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -235,7 +241,7 @@ void Feed::set_allocated_received(::qaul::rpc::feed::FeedMessageList* received) 
           message_arena, received, submessage_arena);
     }
     set_has_received();
-    message_.received_ = received;
+    _impl_.message_.received_ = received;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.feed.Feed.received)
 }
@@ -250,7 +256,7 @@ void Feed::set_allocated_send(::qaul::rpc::feed::SendMessage* send) {
           message_arena, send, submessage_arena);
     }
     set_has_send();
-    message_.send_ = send;
+    _impl_.message_.send_ = send;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.feed.Feed.send)
 }
@@ -265,31 +271,40 @@ void Feed::set_allocated_request(::qaul::rpc::feed::FeedMessageRequest* request)
           message_arena, request, submessage_arena);
     }
     set_has_request();
-    message_.request_ = request;
+    _impl_.message_.request_ = request;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.feed.Feed.request)
 }
 Feed::Feed(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.feed.Feed)
 }
 Feed::Feed(const Feed& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Feed* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   clear_has_message();
   switch (from.message_case()) {
     case kReceived: {
-      _internal_mutable_received()->::qaul::rpc::feed::FeedMessageList::MergeFrom(from._internal_received());
+      _this->_internal_mutable_received()->::qaul::rpc::feed::FeedMessageList::MergeFrom(
+          from._internal_received());
       break;
     }
     case kSend: {
-      _internal_mutable_send()->::qaul::rpc::feed::SendMessage::MergeFrom(from._internal_send());
+      _this->_internal_mutable_send()->::qaul::rpc::feed::SendMessage::MergeFrom(
+          from._internal_send());
       break;
     }
     case kRequest: {
-      _internal_mutable_request()->::qaul::rpc::feed::FeedMessageRequest::MergeFrom(from._internal_request());
+      _this->_internal_mutable_request()->::qaul::rpc::feed::FeedMessageRequest::MergeFrom(
+          from._internal_request());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -299,8 +314,16 @@ Feed::Feed(const Feed& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.feed.Feed)
 }
 
-inline void Feed::SharedCtor() {
-clear_has_message();
+inline void Feed::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , /*decltype(_impl_._oneof_case_)*/{}
+  };
+  clear_has_message();
 }
 
 Feed::~Feed() {
@@ -320,7 +343,7 @@ inline void Feed::SharedDtor() {
 }
 
 void Feed::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void Feed::clear_message() {
@@ -328,19 +351,19 @@ void Feed::clear_message() {
   switch (message_case()) {
     case kReceived: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.received_;
+        delete _impl_.message_.received_;
       }
       break;
     }
     case kSend: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.send_;
+        delete _impl_.message_.send_;
       }
       break;
     }
     case kRequest: {
       if (GetArenaForAllocation() == nullptr) {
-        delete message_.request_;
+        delete _impl_.message_.request_;
       }
       break;
     }
@@ -348,7 +371,7 @@ void Feed::clear_message() {
       break;
     }
   }
-  _oneof_case_[0] = MESSAGE_NOT_SET;
+  _impl_._oneof_case_[0] = MESSAGE_NOT_SET;
 }
 
 
@@ -463,67 +486,66 @@ size_t Feed::ByteSizeLong() const {
     case kReceived: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.received_);
+          *_impl_.message_.received_);
       break;
     }
     // .qaul.rpc.feed.SendMessage send = 2;
     case kSend: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.send_);
+          *_impl_.message_.send_);
       break;
     }
     // .qaul.rpc.feed.FeedMessageRequest request = 3;
     case kRequest: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *message_.request_);
+          *_impl_.message_.request_);
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Feed::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     Feed::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Feed::GetClassData() const { return &_class_data_; }
 
-void Feed::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<Feed *>(to)->MergeFrom(
-      static_cast<const Feed &>(from));
-}
 
-
-void Feed::MergeFrom(const Feed& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.Feed)
-  GOOGLE_DCHECK_NE(&from, this);
+void Feed::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Feed*>(&to_msg);
+  auto& from = static_cast<const Feed&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.Feed)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
     case kReceived: {
-      _internal_mutable_received()->::qaul::rpc::feed::FeedMessageList::MergeFrom(from._internal_received());
+      _this->_internal_mutable_received()->::qaul::rpc::feed::FeedMessageList::MergeFrom(
+          from._internal_received());
       break;
     }
     case kSend: {
-      _internal_mutable_send()->::qaul::rpc::feed::SendMessage::MergeFrom(from._internal_send());
+      _this->_internal_mutable_send()->::qaul::rpc::feed::SendMessage::MergeFrom(
+          from._internal_send());
       break;
     }
     case kRequest: {
-      _internal_mutable_request()->::qaul::rpc::feed::FeedMessageRequest::MergeFrom(from._internal_request());
+      _this->_internal_mutable_request()->::qaul::rpc::feed::FeedMessageRequest::MergeFrom(
+          from._internal_request());
       break;
     }
     case MESSAGE_NOT_SET: {
       break;
     }
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Feed::CopyFrom(const Feed& from) {
@@ -540,8 +562,8 @@ bool Feed::IsInitialized() const {
 void Feed::InternalSwap(Feed* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(message_, other->message_);
-  swap(_oneof_case_[0], other->_oneof_case_[0]);
+  swap(_impl_.message_, other->_impl_.message_);
+  swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Feed::GetMetadata() const {
@@ -559,30 +581,43 @@ class FeedMessageRequest::_Internal {
 FeedMessageRequest::FeedMessageRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.feed.FeedMessageRequest)
 }
 FeedMessageRequest::FeedMessageRequest(const FeedMessageRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FeedMessageRequest* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.last_received_){}
+    , decltype(_impl_.last_index_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  last_received_.InitDefault();
+  _impl_.last_received_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    last_received_.Set("", GetArenaForAllocation());
+    _impl_.last_received_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_last_received().empty()) {
-    last_received_.Set(from._internal_last_received(), 
-      GetArenaForAllocation());
+    _this->_impl_.last_received_.Set(from._internal_last_received(), 
+      _this->GetArenaForAllocation());
   }
-  last_index_ = from.last_index_;
+  _this->_impl_.last_index_ = from._impl_.last_index_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.feed.FeedMessageRequest)
 }
 
-inline void FeedMessageRequest::SharedCtor() {
-last_received_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  last_received_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-last_index_ = uint64_t{0u};
+inline void FeedMessageRequest::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.last_received_){}
+    , decltype(_impl_.last_index_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.last_received_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.last_received_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 FeedMessageRequest::~FeedMessageRequest() {
@@ -596,11 +631,11 @@ FeedMessageRequest::~FeedMessageRequest() {
 
 inline void FeedMessageRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  last_received_.Destroy();
+  _impl_.last_received_.Destroy();
 }
 
 void FeedMessageRequest::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void FeedMessageRequest::Clear() {
@@ -609,8 +644,8 @@ void FeedMessageRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  last_received_.ClearToEmpty();
-  last_index_ = uint64_t{0u};
+  _impl_.last_received_.ClearToEmpty();
+  _impl_.last_index_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -632,7 +667,7 @@ const char* FeedMessageRequest::_InternalParse(const char* ptr, ::_pbi::ParseCon
       // uint64 last_index = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          last_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.last_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -706,35 +741,31 @@ size_t FeedMessageRequest::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_last_index());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FeedMessageRequest::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     FeedMessageRequest::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FeedMessageRequest::GetClassData() const { return &_class_data_; }
 
-void FeedMessageRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<FeedMessageRequest *>(to)->MergeFrom(
-      static_cast<const FeedMessageRequest &>(from));
-}
 
-
-void FeedMessageRequest::MergeFrom(const FeedMessageRequest& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessageRequest)
-  GOOGLE_DCHECK_NE(&from, this);
+void FeedMessageRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FeedMessageRequest*>(&to_msg);
+  auto& from = static_cast<const FeedMessageRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessageRequest)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_last_received().empty()) {
-    _internal_set_last_received(from._internal_last_received());
+    _this->_internal_set_last_received(from._internal_last_received());
   }
   if (from._internal_last_index() != 0) {
-    _internal_set_last_index(from._internal_last_index());
+    _this->_internal_set_last_index(from._internal_last_index());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void FeedMessageRequest::CopyFrom(const FeedMessageRequest& from) {
@@ -754,10 +785,10 @@ void FeedMessageRequest::InternalSwap(FeedMessageRequest* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &last_received_, lhs_arena,
-      &other->last_received_, rhs_arena
+      &_impl_.last_received_, lhs_arena,
+      &other->_impl_.last_received_, rhs_arena
   );
-  swap(last_index_, other->last_index_);
+  swap(_impl_.last_index_, other->_impl_.last_index_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedMessageRequest::GetMetadata() const {
@@ -774,19 +805,29 @@ class FeedMessageList::_Internal {
 
 FeedMessageList::FeedMessageList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  feed_message_(arena) {
-  SharedCtor();
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.feed.FeedMessageList)
 }
 FeedMessageList::FeedMessageList(const FeedMessageList& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      feed_message_(from.feed_message_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FeedMessageList* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.feed_message_){from._impl_.feed_message_}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.feed.FeedMessageList)
 }
 
-inline void FeedMessageList::SharedCtor() {
+inline void FeedMessageList::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.feed_message_){arena}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 FeedMessageList::~FeedMessageList() {
@@ -800,10 +841,11 @@ FeedMessageList::~FeedMessageList() {
 
 inline void FeedMessageList::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.feed_message_.~RepeatedPtrField();
 }
 
 void FeedMessageList::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void FeedMessageList::Clear() {
@@ -812,7 +854,7 @@ void FeedMessageList::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  feed_message_.Clear();
+  _impl_.feed_message_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -890,35 +932,31 @@ size_t FeedMessageList::ByteSizeLong() const {
 
   // repeated .qaul.rpc.feed.FeedMessage feed_message = 1;
   total_size += 1UL * this->_internal_feed_message_size();
-  for (const auto& msg : this->feed_message_) {
+  for (const auto& msg : this->_impl_.feed_message_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FeedMessageList::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     FeedMessageList::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FeedMessageList::GetClassData() const { return &_class_data_; }
 
-void FeedMessageList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<FeedMessageList *>(to)->MergeFrom(
-      static_cast<const FeedMessageList &>(from));
-}
 
-
-void FeedMessageList::MergeFrom(const FeedMessageList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessageList)
-  GOOGLE_DCHECK_NE(&from, this);
+void FeedMessageList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FeedMessageList*>(&to_msg);
+  auto& from = static_cast<const FeedMessageList&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessageList)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  feed_message_.MergeFrom(from.feed_message_);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.feed_message_.MergeFrom(from._impl_.feed_message_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void FeedMessageList::CopyFrom(const FeedMessageList& from) {
@@ -935,7 +973,7 @@ bool FeedMessageList::IsInitialized() const {
 void FeedMessageList::InternalSwap(FeedMessageList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  feed_message_.InternalSwap(&other->feed_message_);
+  _impl_.feed_message_.InternalSwap(&other->_impl_.feed_message_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedMessageList::GetMetadata() const {
@@ -953,107 +991,133 @@ class FeedMessage::_Internal {
 FeedMessage::FeedMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.feed.FeedMessage)
 }
 FeedMessage::FeedMessage(const FeedMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FeedMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.sender_id_){}
+    , decltype(_impl_.sender_id_base58_){}
+    , decltype(_impl_.message_id_){}
+    , decltype(_impl_.message_id_base58_){}
+    , decltype(_impl_.time_sent_){}
+    , decltype(_impl_.time_received_){}
+    , decltype(_impl_.content_){}
+    , decltype(_impl_.index_){}
+    , decltype(_impl_.timestamp_sent_){}
+    , decltype(_impl_.timestamp_received_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  sender_id_.InitDefault();
+  _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    sender_id_.Set("", GetArenaForAllocation());
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender_id().empty()) {
-    sender_id_.Set(from._internal_sender_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.sender_id_.Set(from._internal_sender_id(), 
+      _this->GetArenaForAllocation());
   }
-  sender_id_base58_.InitDefault();
+  _impl_.sender_id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    sender_id_base58_.Set("", GetArenaForAllocation());
+    _impl_.sender_id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender_id_base58().empty()) {
-    sender_id_base58_.Set(from._internal_sender_id_base58(), 
-      GetArenaForAllocation());
+    _this->_impl_.sender_id_base58_.Set(from._internal_sender_id_base58(), 
+      _this->GetArenaForAllocation());
   }
-  message_id_.InitDefault();
+  _impl_.message_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    message_id_.Set("", GetArenaForAllocation());
+    _impl_.message_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message_id().empty()) {
-    message_id_.Set(from._internal_message_id(), 
-      GetArenaForAllocation());
+    _this->_impl_.message_id_.Set(from._internal_message_id(), 
+      _this->GetArenaForAllocation());
   }
-  message_id_base58_.InitDefault();
+  _impl_.message_id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    message_id_base58_.Set("", GetArenaForAllocation());
+    _impl_.message_id_base58_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message_id_base58().empty()) {
-    message_id_base58_.Set(from._internal_message_id_base58(), 
-      GetArenaForAllocation());
+    _this->_impl_.message_id_base58_.Set(from._internal_message_id_base58(), 
+      _this->GetArenaForAllocation());
   }
-  time_sent_.InitDefault();
+  _impl_.time_sent_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    time_sent_.Set("", GetArenaForAllocation());
+    _impl_.time_sent_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_time_sent().empty()) {
-    time_sent_.Set(from._internal_time_sent(), 
-      GetArenaForAllocation());
+    _this->_impl_.time_sent_.Set(from._internal_time_sent(), 
+      _this->GetArenaForAllocation());
   }
-  time_received_.InitDefault();
+  _impl_.time_received_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    time_received_.Set("", GetArenaForAllocation());
+    _impl_.time_received_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_time_received().empty()) {
-    time_received_.Set(from._internal_time_received(), 
-      GetArenaForAllocation());
+    _this->_impl_.time_received_.Set(from._internal_time_received(), 
+      _this->GetArenaForAllocation());
   }
-  content_.InitDefault();
+  _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set("", GetArenaForAllocation());
+    _impl_.content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(from._internal_content(), 
-      GetArenaForAllocation());
+    _this->_impl_.content_.Set(from._internal_content(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&index_, &from.index_,
-    static_cast<size_t>(reinterpret_cast<char*>(&timestamp_received_) -
-    reinterpret_cast<char*>(&index_)) + sizeof(timestamp_received_));
+  ::memcpy(&_impl_.index_, &from._impl_.index_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.timestamp_received_) -
+    reinterpret_cast<char*>(&_impl_.index_)) + sizeof(_impl_.timestamp_received_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.feed.FeedMessage)
 }
 
-inline void FeedMessage::SharedCtor() {
-sender_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  sender_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-sender_id_base58_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  sender_id_base58_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-message_id_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  message_id_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-message_id_base58_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  message_id_base58_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-time_sent_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  time_sent_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-time_received_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  time_received_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-content_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&index_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&timestamp_received_) -
-    reinterpret_cast<char*>(&index_)) + sizeof(timestamp_received_));
+inline void FeedMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.sender_id_){}
+    , decltype(_impl_.sender_id_base58_){}
+    , decltype(_impl_.message_id_){}
+    , decltype(_impl_.message_id_base58_){}
+    , decltype(_impl_.time_sent_){}
+    , decltype(_impl_.time_received_){}
+    , decltype(_impl_.content_){}
+    , decltype(_impl_.index_){uint64_t{0u}}
+    , decltype(_impl_.timestamp_sent_){uint64_t{0u}}
+    , decltype(_impl_.timestamp_received_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.sender_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.sender_id_base58_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.sender_id_base58_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.message_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.message_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.message_id_base58_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.message_id_base58_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.time_sent_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.time_sent_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.time_received_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.time_received_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.content_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.content_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 FeedMessage::~FeedMessage() {
@@ -1067,17 +1131,17 @@ FeedMessage::~FeedMessage() {
 
 inline void FeedMessage::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  sender_id_.Destroy();
-  sender_id_base58_.Destroy();
-  message_id_.Destroy();
-  message_id_base58_.Destroy();
-  time_sent_.Destroy();
-  time_received_.Destroy();
-  content_.Destroy();
+  _impl_.sender_id_.Destroy();
+  _impl_.sender_id_base58_.Destroy();
+  _impl_.message_id_.Destroy();
+  _impl_.message_id_base58_.Destroy();
+  _impl_.time_sent_.Destroy();
+  _impl_.time_received_.Destroy();
+  _impl_.content_.Destroy();
 }
 
 void FeedMessage::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void FeedMessage::Clear() {
@@ -1086,16 +1150,16 @@ void FeedMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  sender_id_.ClearToEmpty();
-  sender_id_base58_.ClearToEmpty();
-  message_id_.ClearToEmpty();
-  message_id_base58_.ClearToEmpty();
-  time_sent_.ClearToEmpty();
-  time_received_.ClearToEmpty();
-  content_.ClearToEmpty();
-  ::memset(&index_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&timestamp_received_) -
-      reinterpret_cast<char*>(&index_)) + sizeof(timestamp_received_));
+  _impl_.sender_id_.ClearToEmpty();
+  _impl_.sender_id_base58_.ClearToEmpty();
+  _impl_.message_id_.ClearToEmpty();
+  _impl_.message_id_base58_.ClearToEmpty();
+  _impl_.time_sent_.ClearToEmpty();
+  _impl_.time_received_.ClearToEmpty();
+  _impl_.content_.ClearToEmpty();
+  ::memset(&_impl_.index_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.timestamp_received_) -
+      reinterpret_cast<char*>(&_impl_.index_)) + sizeof(_impl_.timestamp_received_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1176,7 +1240,7 @@ const char* FeedMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
       // uint64 index = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
-          index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1184,7 +1248,7 @@ const char* FeedMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
       // uint64 timestamp_sent = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
-          timestamp_sent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.timestamp_sent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1192,7 +1256,7 @@ const char* FeedMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
       // uint64 timestamp_received = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 80)) {
-          timestamp_received_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.timestamp_received_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1386,59 +1450,55 @@ size_t FeedMessage::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_timestamp_received());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FeedMessage::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     FeedMessage::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FeedMessage::GetClassData() const { return &_class_data_; }
 
-void FeedMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<FeedMessage *>(to)->MergeFrom(
-      static_cast<const FeedMessage &>(from));
-}
 
-
-void FeedMessage::MergeFrom(const FeedMessage& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessage)
-  GOOGLE_DCHECK_NE(&from, this);
+void FeedMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FeedMessage*>(&to_msg);
+  auto& from = static_cast<const FeedMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.FeedMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_sender_id().empty()) {
-    _internal_set_sender_id(from._internal_sender_id());
+    _this->_internal_set_sender_id(from._internal_sender_id());
   }
   if (!from._internal_sender_id_base58().empty()) {
-    _internal_set_sender_id_base58(from._internal_sender_id_base58());
+    _this->_internal_set_sender_id_base58(from._internal_sender_id_base58());
   }
   if (!from._internal_message_id().empty()) {
-    _internal_set_message_id(from._internal_message_id());
+    _this->_internal_set_message_id(from._internal_message_id());
   }
   if (!from._internal_message_id_base58().empty()) {
-    _internal_set_message_id_base58(from._internal_message_id_base58());
+    _this->_internal_set_message_id_base58(from._internal_message_id_base58());
   }
   if (!from._internal_time_sent().empty()) {
-    _internal_set_time_sent(from._internal_time_sent());
+    _this->_internal_set_time_sent(from._internal_time_sent());
   }
   if (!from._internal_time_received().empty()) {
-    _internal_set_time_received(from._internal_time_received());
+    _this->_internal_set_time_received(from._internal_time_received());
   }
   if (!from._internal_content().empty()) {
-    _internal_set_content(from._internal_content());
+    _this->_internal_set_content(from._internal_content());
   }
   if (from._internal_index() != 0) {
-    _internal_set_index(from._internal_index());
+    _this->_internal_set_index(from._internal_index());
   }
   if (from._internal_timestamp_sent() != 0) {
-    _internal_set_timestamp_sent(from._internal_timestamp_sent());
+    _this->_internal_set_timestamp_sent(from._internal_timestamp_sent());
   }
   if (from._internal_timestamp_received() != 0) {
-    _internal_set_timestamp_received(from._internal_timestamp_received());
+    _this->_internal_set_timestamp_received(from._internal_timestamp_received());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void FeedMessage::CopyFrom(const FeedMessage& from) {
@@ -1458,39 +1518,39 @@ void FeedMessage::InternalSwap(FeedMessage* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &sender_id_, lhs_arena,
-      &other->sender_id_, rhs_arena
+      &_impl_.sender_id_, lhs_arena,
+      &other->_impl_.sender_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &sender_id_base58_, lhs_arena,
-      &other->sender_id_base58_, rhs_arena
+      &_impl_.sender_id_base58_, lhs_arena,
+      &other->_impl_.sender_id_base58_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &message_id_, lhs_arena,
-      &other->message_id_, rhs_arena
+      &_impl_.message_id_, lhs_arena,
+      &other->_impl_.message_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &message_id_base58_, lhs_arena,
-      &other->message_id_base58_, rhs_arena
+      &_impl_.message_id_base58_, lhs_arena,
+      &other->_impl_.message_id_base58_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &time_sent_, lhs_arena,
-      &other->time_sent_, rhs_arena
+      &_impl_.time_sent_, lhs_arena,
+      &other->_impl_.time_sent_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &time_received_, lhs_arena,
-      &other->time_received_, rhs_arena
+      &_impl_.time_received_, lhs_arena,
+      &other->_impl_.time_received_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &content_, lhs_arena,
-      &other->content_, rhs_arena
+      &_impl_.content_, lhs_arena,
+      &other->_impl_.content_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FeedMessage, timestamp_received_)
-      + sizeof(FeedMessage::timestamp_received_)
-      - PROTOBUF_FIELD_OFFSET(FeedMessage, index_)>(
-          reinterpret_cast<char*>(&index_),
-          reinterpret_cast<char*>(&other->index_));
+      PROTOBUF_FIELD_OFFSET(FeedMessage, _impl_.timestamp_received_)
+      + sizeof(FeedMessage::_impl_.timestamp_received_)
+      - PROTOBUF_FIELD_OFFSET(FeedMessage, _impl_.index_)>(
+          reinterpret_cast<char*>(&_impl_.index_),
+          reinterpret_cast<char*>(&other->_impl_.index_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedMessage::GetMetadata() const {
@@ -1508,28 +1568,40 @@ class SendMessage::_Internal {
 SendMessage::SendMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.feed.SendMessage)
 }
 SendMessage::SendMessage(const SendMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SendMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.content_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  content_.InitDefault();
+  _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    content_.Set("", GetArenaForAllocation());
+    _impl_.content_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    content_.Set(from._internal_content(), 
-      GetArenaForAllocation());
+    _this->_impl_.content_.Set(from._internal_content(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.feed.SendMessage)
 }
 
-inline void SendMessage::SharedCtor() {
-content_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  content_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void SendMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.content_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.content_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.content_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 SendMessage::~SendMessage() {
@@ -1543,11 +1615,11 @@ SendMessage::~SendMessage() {
 
 inline void SendMessage::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  content_.Destroy();
+  _impl_.content_.Destroy();
 }
 
 void SendMessage::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void SendMessage::Clear() {
@@ -1556,7 +1628,7 @@ void SendMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  content_.ClearToEmpty();
+  _impl_.content_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1638,32 +1710,28 @@ size_t SendMessage::ByteSizeLong() const {
         this->_internal_content());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SendMessage::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     SendMessage::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SendMessage::GetClassData() const { return &_class_data_; }
 
-void SendMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<SendMessage *>(to)->MergeFrom(
-      static_cast<const SendMessage &>(from));
-}
 
-
-void SendMessage::MergeFrom(const SendMessage& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.SendMessage)
-  GOOGLE_DCHECK_NE(&from, this);
+void SendMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SendMessage*>(&to_msg);
+  auto& from = static_cast<const SendMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.feed.SendMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_content().empty()) {
-    _internal_set_content(from._internal_content());
+    _this->_internal_set_content(from._internal_content());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void SendMessage::CopyFrom(const SendMessage& from) {
@@ -1683,8 +1751,8 @@ void SendMessage::InternalSwap(SendMessage* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &content_, lhs_arena,
-      &other->content_, rhs_arena
+      &_impl_.content_, lhs_arena,
+      &other->_impl_.content_, rhs_arena
   );
 }
 

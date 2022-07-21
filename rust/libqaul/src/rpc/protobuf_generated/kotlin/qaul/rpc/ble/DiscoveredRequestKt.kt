@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializediscoveredRequest")
-public inline fun discoveredRequest(block: qaul.rpc.ble.DiscoveredRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredRequest =
+inline fun discoveredRequest(block: qaul.rpc.ble.DiscoveredRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredRequest =
   qaul.rpc.ble.DiscoveredRequestKt.Dsl._create(qaul.rpc.ble.BleRpc.DiscoveredRequest.newBuilder()).apply { block() }._build()
-public object DiscoveredRequestKt {
+object DiscoveredRequestKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.DiscoveredRequest.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.DiscoveredRequest.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object DiscoveredRequestKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.DiscoveredRequest.copy(block: qaul.rpc.ble.DiscoveredRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredRequest =
+inline fun qaul.rpc.ble.BleRpc.DiscoveredRequest.copy(block: qaul.rpc.ble.DiscoveredRequestKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredRequest =
   qaul.rpc.ble.DiscoveredRequestKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

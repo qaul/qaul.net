@@ -102,14 +102,6 @@ struct Qaul_Net_Messaging_Messaging {
     set {message = .confirmationMessage(newValue)}
   }
 
-  var chatMessage: Qaul_Net_Messaging_ChatMessage {
-    get {
-      if case .chatMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_ChatMessage()
-    }
-    set {message = .chatMessage(newValue)}
-  }
-
   var cryptoService: Qaul_Net_Messaging_CryptoService {
     get {
       if case .cryptoService(let v)? = message {return v}
@@ -118,12 +110,29 @@ struct Qaul_Net_Messaging_Messaging {
     set {message = .cryptoService(newValue)}
   }
 
+  var chatMessage: Qaul_Net_Messaging_ChatMessage {
+    get {
+      if case .chatMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_ChatMessage()
+    }
+    set {message = .chatMessage(newValue)}
+  }
+
+  var fileMessage: Qaul_Net_Messaging_FileMessage {
+    get {
+      if case .fileMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_FileMessage()
+    }
+    set {message = .fileMessage(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
     case confirmationMessage(Qaul_Net_Messaging_Confirmation)
-    case chatMessage(Qaul_Net_Messaging_ChatMessage)
     case cryptoService(Qaul_Net_Messaging_CryptoService)
+    case chatMessage(Qaul_Net_Messaging_ChatMessage)
+    case fileMessage(Qaul_Net_Messaging_FileMessage)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Net_Messaging_Messaging.OneOf_Message, rhs: Qaul_Net_Messaging_Messaging.OneOf_Message) -> Bool {
@@ -135,12 +144,16 @@ struct Qaul_Net_Messaging_Messaging {
         guard case .confirmationMessage(let l) = lhs, case .confirmationMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.cryptoService, .cryptoService): return {
+        guard case .cryptoService(let l) = lhs, case .cryptoService(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       case (.chatMessage, .chatMessage): return {
         guard case .chatMessage(let l) = lhs, case .chatMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.cryptoService, .cryptoService): return {
-        guard case .cryptoService(let l) = lhs, case .cryptoService(let r) = rhs else { preconditionFailure() }
+      case (.fileMessage, .fileMessage): return {
+        guard case .fileMessage(let l) = lhs, case .fileMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -205,6 +218,19 @@ struct Qaul_Net_Messaging_ChatMessage {
 
   /// message
   var content: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// chat message
+struct Qaul_Net_Messaging_FileMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var content: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -343,8 +369,9 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
   static let protoMessageName: String = _protobuf_package + ".Messaging"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "confirmation_message"),
-    2: .standard(proto: "chat_message"),
-    3: .standard(proto: "crypto_service"),
+    2: .standard(proto: "crypto_service"),
+    3: .standard(proto: "chat_message"),
+    4: .standard(proto: "file_message"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -367,6 +394,19 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
         }
       }()
       case 2: try {
+        var v: Qaul_Net_Messaging_CryptoService?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .cryptoService(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .cryptoService(v)
+        }
+      }()
+      case 3: try {
         var v: Qaul_Net_Messaging_ChatMessage?
         var hadOneofValue = false
         if let current = self.message {
@@ -379,17 +419,17 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
           self.message = .chatMessage(v)
         }
       }()
-      case 3: try {
-        var v: Qaul_Net_Messaging_CryptoService?
+      case 4: try {
+        var v: Qaul_Net_Messaging_FileMessage?
         var hadOneofValue = false
         if let current = self.message {
           hadOneofValue = true
-          if case .cryptoService(let m) = current {v = m}
+          if case .fileMessage(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .cryptoService(v)
+          self.message = .fileMessage(v)
         }
       }()
       default: break
@@ -407,13 +447,17 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
       guard case .confirmationMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }()
-    case .chatMessage?: try {
-      guard case .chatMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    }()
     case .cryptoService?: try {
       guard case .cryptoService(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .chatMessage?: try {
+      guard case .chatMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .fileMessage?: try {
+      guard case .fileMessage(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
     case nil: break
     }
@@ -528,6 +572,38 @@ extension Qaul_Net_Messaging_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._
     if lhs.group != rhs.group {return false}
     if lhs.conversationID != rhs.conversationID {return false}
     if lhs.sentAt != rhs.sentAt {return false}
+    if lhs.content != rhs.content {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_FileMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".FileMessage"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.content) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.content.isEmpty {
+      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_FileMessage, rhs: Qaul_Net_Messaging_FileMessage) -> Bool {
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

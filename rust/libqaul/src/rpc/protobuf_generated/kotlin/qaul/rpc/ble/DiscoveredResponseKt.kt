@@ -4,15 +4,15 @@
 package qaul.rpc.ble;
 
 @kotlin.jvm.JvmName("-initializediscoveredResponse")
-public inline fun discoveredResponse(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
+inline fun discoveredResponse(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
   qaul.rpc.ble.DiscoveredResponseKt.Dsl._create(qaul.rpc.ble.BleRpc.DiscoveredResponse.newBuilder()).apply { block() }._build()
-public object DiscoveredResponseKt {
+object DiscoveredResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.ble.BleRpc.DiscoveredResponse.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.ble.BleRpc.DiscoveredResponse.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object DiscoveredResponseKt {
      *
      * <code>uint32 nodes_count = 1;</code>
      */
-    public var nodesCount: kotlin.Int
+    var nodesCount: kotlin.Int
       @JvmName("getNodesCount")
       get() = _builder.getNodesCount()
       @JvmName("setNodesCount")
@@ -43,7 +43,7 @@ public object DiscoveredResponseKt {
      *
      * <code>uint32 nodes_count = 1;</code>
      */
-    public fun clearNodesCount() {
+    fun clearNodesCount() {
       _builder.clearNodesCount()
     }
 
@@ -54,7 +54,7 @@ public object DiscoveredResponseKt {
      *
      * <code>uint32 to_confirm_count = 2;</code>
      */
-    public var toConfirmCount: kotlin.Int
+    var toConfirmCount: kotlin.Int
       @JvmName("getToConfirmCount")
       get() = _builder.getToConfirmCount()
       @JvmName("setToConfirmCount")
@@ -68,12 +68,12 @@ public object DiscoveredResponseKt {
      *
      * <code>uint32 to_confirm_count = 2;</code>
      */
-    public fun clearToConfirmCount() {
+    fun clearToConfirmCount() {
       _builder.clearToConfirmCount()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.ble.BleRpc.DiscoveredResponse.copy(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
+inline fun qaul.rpc.ble.BleRpc.DiscoveredResponse.copy(block: qaul.rpc.ble.DiscoveredResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.ble.BleRpc.DiscoveredResponse =
   qaul.rpc.ble.DiscoveredResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

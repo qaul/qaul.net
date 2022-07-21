@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmName("-initializeroutingTableConnection")
-public inline fun routingTableConnection(block: qaul.rpc.router.RoutingTableConnectionKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableConnection =
+inline fun routingTableConnection(block: qaul.rpc.router.RoutingTableConnectionKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableConnection =
   qaul.rpc.router.RoutingTableConnectionKt.Dsl._create(qaul.rpc.router.RouterOuterClass.RoutingTableConnection.newBuilder()).apply { block() }._build()
-public object RoutingTableConnectionKt {
+object RoutingTableConnectionKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
      */
-    public var module: qaul.rpc.router.RouterOuterClass.ConnectionModule
+     var module: qaul.rpc.router.RouterOuterClass.ConnectionModule
       @JvmName("getModule")
       get() = _builder.getModule()
       @JvmName("setModule")
@@ -43,7 +43,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>.qaul.rpc.router.ConnectionModule module = 2;</code>
      */
-    public fun clearModule() {
+    fun clearModule() {
       _builder.clearModule()
     }
 
@@ -54,7 +54,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>uint32 rtt = 3;</code>
      */
-    public var rtt: kotlin.Int
+    var rtt: kotlin.Int
       @JvmName("getRtt")
       get() = _builder.getRtt()
       @JvmName("setRtt")
@@ -68,7 +68,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>uint32 rtt = 3;</code>
      */
-    public fun clearRtt() {
+    fun clearRtt() {
       _builder.clearRtt()
     }
 
@@ -79,7 +79,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>uint32 hop_count = 5;</code>
      */
-    public var hopCount: kotlin.Int
+    var hopCount: kotlin.Int
       @JvmName("getHopCount")
       get() = _builder.getHopCount()
       @JvmName("setHopCount")
@@ -93,7 +93,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>uint32 hop_count = 5;</code>
      */
-    public fun clearHopCount() {
+    fun clearHopCount() {
       _builder.clearHopCount()
     }
 
@@ -104,7 +104,7 @@ public object RoutingTableConnectionKt {
      *
      * <code>bytes via = 4;</code>
      */
-    public var via: com.google.protobuf.ByteString
+    var via: com.google.protobuf.ByteString
       @JvmName("getVia")
       get() = _builder.getVia()
       @JvmName("setVia")
@@ -118,12 +118,12 @@ public object RoutingTableConnectionKt {
      *
      * <code>bytes via = 4;</code>
      */
-    public fun clearVia() {
+    fun clearVia() {
       _builder.clearVia()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.router.RouterOuterClass.RoutingTableConnection.copy(block: qaul.rpc.router.RoutingTableConnectionKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableConnection =
+inline fun qaul.rpc.router.RouterOuterClass.RoutingTableConnection.copy(block: qaul.rpc.router.RoutingTableConnectionKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableConnection =
   qaul.rpc.router.RoutingTableConnectionKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

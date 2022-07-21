@@ -25,8 +25,9 @@ const Users$json = const {
   '1': 'Users',
   '2': const [
     const {'1': 'user_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserRequest', '9': 0, '10': 'userRequest'},
-    const {'1': 'user_list', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserList', '9': 0, '10': 'userList'},
-    const {'1': 'user_update', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserEntry', '9': 0, '10': 'userUpdate'},
+    const {'1': 'user_online_request', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserOnlineRequest', '9': 0, '10': 'userOnlineRequest'},
+    const {'1': 'user_list', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserList', '9': 0, '10': 'userList'},
+    const {'1': 'user_update', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserEntry', '9': 0, '10': 'userUpdate'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -34,7 +35,7 @@ const Users$json = const {
 };
 
 /// Descriptor for `Users`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List usersDescriptor = $convert.base64Decode('CgVVc2VycxJACgx1c2VyX3JlcXVlc3QYASABKAsyGy5xYXVsLnJwYy51c2Vycy5Vc2VyUmVxdWVzdEgAUgt1c2VyUmVxdWVzdBI3Cgl1c2VyX2xpc3QYAiABKAsyGC5xYXVsLnJwYy51c2Vycy5Vc2VyTGlzdEgAUgh1c2VyTGlzdBI8Cgt1c2VyX3VwZGF0ZRgDIAEoCzIZLnFhdWwucnBjLnVzZXJzLlVzZXJFbnRyeUgAUgp1c2VyVXBkYXRlQgkKB21lc3NhZ2U=');
+final $typed_data.Uint8List usersDescriptor = $convert.base64Decode('CgVVc2VycxJACgx1c2VyX3JlcXVlc3QYASABKAsyGy5xYXVsLnJwYy51c2Vycy5Vc2VyUmVxdWVzdEgAUgt1c2VyUmVxdWVzdBJTChN1c2VyX29ubGluZV9yZXF1ZXN0GAIgASgLMiEucWF1bC5ycGMudXNlcnMuVXNlck9ubGluZVJlcXVlc3RIAFIRdXNlck9ubGluZVJlcXVlc3QSNwoJdXNlcl9saXN0GAMgASgLMhgucWF1bC5ycGMudXNlcnMuVXNlckxpc3RIAFIIdXNlckxpc3QSPAoLdXNlcl91cGRhdGUYBCABKAsyGS5xYXVsLnJwYy51c2Vycy5Vc2VyRW50cnlIAFIKdXNlclVwZGF0ZUIJCgdtZXNzYWdl');
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = const {
   '1': 'UserRequest',
@@ -42,6 +43,13 @@ const UserRequest$json = const {
 
 /// Descriptor for `UserRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List userRequestDescriptor = $convert.base64Decode('CgtVc2VyUmVxdWVzdA==');
+@$core.Deprecated('Use userOnlineRequestDescriptor instead')
+const UserOnlineRequest$json = const {
+  '1': 'UserOnlineRequest',
+};
+
+/// Descriptor for `UserOnlineRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userOnlineRequestDescriptor = $convert.base64Decode('ChFVc2VyT25saW5lUmVxdWVzdA==');
 @$core.Deprecated('Use userListDescriptor instead')
 const UserList$json = const {
   '1': 'UserList',

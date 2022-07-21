@@ -10,6 +10,10 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'router_net_info.pbenum.dart';
+
+export 'router_net_info.pbenum.dart';
+
 class RouterInfoContainer extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RouterInfoContainer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
@@ -74,20 +78,25 @@ class RouterInfoContainer extends $pb.GeneratedMessage {
 class RouterInfoContent extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RouterInfoContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
-    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..e<RouterInfoModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routerInfoModule', $pb.PbFieldType.OE, protoName: 'routerInfoModule', defaultOrMaker: RouterInfoModule.ROUTER_INFO, valueOf: RouterInfoModule.valueOf, enumValues: RouterInfoModule.values)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   RouterInfoContent._() : super();
   factory RouterInfoContent({
     $core.List<$core.int>? id,
+    RouterInfoModule? routerInfoModule,
     $core.List<$core.int>? content,
     $fixnum.Int64? time,
   }) {
     final _result = create();
     if (id != null) {
       _result.id = id;
+    }
+    if (routerInfoModule != null) {
+      _result.routerInfoModule = routerInfoModule;
     }
     if (content != null) {
       _result.content = content;
@@ -128,22 +137,31 @@ class RouterInfoContent extends $pb.GeneratedMessage {
   void clearId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get content => $_getN(1);
+  RouterInfoModule get routerInfoModule => $_getN(1);
   @$pb.TagNumber(2)
-  set content($core.List<$core.int> v) { $_setBytes(1, v); }
+  set routerInfoModule(RouterInfoModule v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasContent() => $_has(1);
+  $core.bool hasRouterInfoModule() => $_has(1);
   @$pb.TagNumber(2)
-  void clearContent() => clearField(2);
+  void clearRouterInfoModule() => clearField(2);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get time => $_getI64(2);
+  $core.List<$core.int> get content => $_getN(2);
   @$pb.TagNumber(3)
-  set time($fixnum.Int64 v) { $_setInt64(2, v); }
+  set content($core.List<$core.int> v) { $_setBytes(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasTime() => $_has(2);
+  $core.bool hasContent() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTime() => clearField(3);
+  void clearContent() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get time => $_getI64(3);
+  @$pb.TagNumber(4)
+  set time($fixnum.Int64 v) { $_setInt64(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTime() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTime() => clearField(4);
 }
 
 class RouterInfoMessage extends $pb.GeneratedMessage {
@@ -151,7 +169,8 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node', $pb.PbFieldType.OY)
     ..aOM<RoutingInfoTable>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routes', subBuilder: RoutingInfoTable.create)
     ..aOM<UserInfoTable>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', subBuilder: UserInfoTable.create)
-    ..a<$fixnum.Int64>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOM<FeedIdsTable>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feeds', subBuilder: FeedIdsTable.create)
+    ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -160,6 +179,7 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
     $core.List<$core.int>? node,
     RoutingInfoTable? routes,
     UserInfoTable? users,
+    FeedIdsTable? feeds,
     $fixnum.Int64? timestamp,
   }) {
     final _result = create();
@@ -171,6 +191,9 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
     }
     if (users != null) {
       _result.users = users;
+    }
+    if (feeds != null) {
+      _result.feeds = feeds;
     }
     if (timestamp != null) {
       _result.timestamp = timestamp;
@@ -230,129 +253,24 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
   UserInfoTable ensureUsers() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $fixnum.Int64 get timestamp => $_getI64(3);
+  FeedIdsTable get feeds => $_getN(3);
   @$pb.TagNumber(4)
-  set timestamp($fixnum.Int64 v) { $_setInt64(3, v); }
+  set feeds(FeedIdsTable v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasTimestamp() => $_has(3);
+  $core.bool hasFeeds() => $_has(3);
   @$pb.TagNumber(4)
-  void clearTimestamp() => clearField(4);
-}
-
-enum Routing_Message {
-  userInfoTable, 
-  userInfo, 
-  routingInfoTable, 
-  routingInfoEntry, 
-  notSet
-}
-
-class Routing extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, Routing_Message> _Routing_MessageByTag = {
-    1 : Routing_Message.userInfoTable,
-    2 : Routing_Message.userInfo,
-    3 : Routing_Message.routingInfoTable,
-    4 : Routing_Message.routingInfoEntry,
-    0 : Routing_Message.notSet
-  };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Routing', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4])
-    ..aOM<UserInfoTable>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userInfoTable', subBuilder: UserInfoTable.create)
-    ..aOM<UserInfo>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userInfo', subBuilder: UserInfo.create)
-    ..aOM<RoutingInfoTable>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingInfoTable', subBuilder: RoutingInfoTable.create)
-    ..aOM<RoutingInfoEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingInfoEntry', subBuilder: RoutingInfoEntry.create)
-    ..hasRequiredFields = false
-  ;
-
-  Routing._() : super();
-  factory Routing({
-    UserInfoTable? userInfoTable,
-    UserInfo? userInfo,
-    RoutingInfoTable? routingInfoTable,
-    RoutingInfoEntry? routingInfoEntry,
-  }) {
-    final _result = create();
-    if (userInfoTable != null) {
-      _result.userInfoTable = userInfoTable;
-    }
-    if (userInfo != null) {
-      _result.userInfo = userInfo;
-    }
-    if (routingInfoTable != null) {
-      _result.routingInfoTable = routingInfoTable;
-    }
-    if (routingInfoEntry != null) {
-      _result.routingInfoEntry = routingInfoEntry;
-    }
-    return _result;
-  }
-  factory Routing.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Routing.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  Routing clone() => Routing()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  Routing copyWith(void Function(Routing) updates) => super.copyWith((message) => updates(message as Routing)) as Routing; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Routing create() => Routing._();
-  Routing createEmptyInstance() => create();
-  static $pb.PbList<Routing> createRepeated() => $pb.PbList<Routing>();
-  @$core.pragma('dart2js:noInline')
-  static Routing getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Routing>(create);
-  static Routing? _defaultInstance;
-
-  Routing_Message whichMessage() => _Routing_MessageByTag[$_whichOneof(0)]!;
-  void clearMessage() => clearField($_whichOneof(0));
-
-  @$pb.TagNumber(1)
-  UserInfoTable get userInfoTable => $_getN(0);
-  @$pb.TagNumber(1)
-  set userInfoTable(UserInfoTable v) { setField(1, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasUserInfoTable() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearUserInfoTable() => clearField(1);
-  @$pb.TagNumber(1)
-  UserInfoTable ensureUserInfoTable() => $_ensure(0);
-
-  @$pb.TagNumber(2)
-  UserInfo get userInfo => $_getN(1);
-  @$pb.TagNumber(2)
-  set userInfo(UserInfo v) { setField(2, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasUserInfo() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUserInfo() => clearField(2);
-  @$pb.TagNumber(2)
-  UserInfo ensureUserInfo() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  RoutingInfoTable get routingInfoTable => $_getN(2);
-  @$pb.TagNumber(3)
-  set routingInfoTable(RoutingInfoTable v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasRoutingInfoTable() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearRoutingInfoTable() => clearField(3);
-  @$pb.TagNumber(3)
-  RoutingInfoTable ensureRoutingInfoTable() => $_ensure(2);
-
+  void clearFeeds() => clearField(4);
   @$pb.TagNumber(4)
-  RoutingInfoEntry get routingInfoEntry => $_getN(3);
-  @$pb.TagNumber(4)
-  set routingInfoEntry(RoutingInfoEntry v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasRoutingInfoEntry() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearRoutingInfoEntry() => clearField(4);
-  @$pb.TagNumber(4)
-  RoutingInfoEntry ensureRoutingInfoEntry() => $_ensure(3);
+  FeedIdsTable ensureFeeds() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get timestamp => $_getI64(4);
+  @$pb.TagNumber(5)
+  set timestamp($fixnum.Int64 v) { $_setInt64(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasTimestamp() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTimestamp() => clearField(5);
 }
 
 class RoutingInfoTable extends $pb.GeneratedMessage {
@@ -401,7 +319,7 @@ class RoutingInfoEntry extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', $pb.PbFieldType.OY)
     ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hc', $pb.PbFieldType.OY)
-    ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pl', $pb.PbFieldType.OF)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pgid', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -410,7 +328,7 @@ class RoutingInfoEntry extends $pb.GeneratedMessage {
     $core.List<$core.int>? user,
     $core.int? rtt,
     $core.List<$core.int>? hc,
-    $core.double? pl,
+    $core.int? pgid,
   }) {
     final _result = create();
     if (user != null) {
@@ -422,8 +340,8 @@ class RoutingInfoEntry extends $pb.GeneratedMessage {
     if (hc != null) {
       _result.hc = hc;
     }
-    if (pl != null) {
-      _result.pl = pl;
+    if (pgid != null) {
+      _result.pgid = pgid;
     }
     return _result;
   }
@@ -475,14 +393,14 @@ class RoutingInfoEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearHc() => clearField(3);
 
-  @$pb.TagNumber(4)
-  $core.double get pl => $_getN(3);
-  @$pb.TagNumber(4)
-  set pl($core.double v) { $_setFloat(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasPl() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearPl() => clearField(4);
+  @$pb.TagNumber(5)
+  $core.int get pgid => $_getIZ(3);
+  @$pb.TagNumber(5)
+  set pgid($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasPgid() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearPgid() => clearField(5);
 }
 
 class UserInfoTable extends $pb.GeneratedMessage {
@@ -599,5 +517,274 @@ class UserInfo extends $pb.GeneratedMessage {
   $core.bool hasName() => $_has(2);
   @$pb.TagNumber(3)
   void clearName() => clearField(3);
+}
+
+class FeedIdsTable extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedIdsTable', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..p<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ids', $pb.PbFieldType.PY)
+    ..hasRequiredFields = false
+  ;
+
+  FeedIdsTable._() : super();
+  factory FeedIdsTable({
+    $core.Iterable<$core.List<$core.int>>? ids,
+  }) {
+    final _result = create();
+    if (ids != null) {
+      _result.ids.addAll(ids);
+    }
+    return _result;
+  }
+  factory FeedIdsTable.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedIdsTable.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FeedIdsTable clone() => FeedIdsTable()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FeedIdsTable copyWith(void Function(FeedIdsTable) updates) => super.copyWith((message) => updates(message as FeedIdsTable)) as FeedIdsTable; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FeedIdsTable create() => FeedIdsTable._();
+  FeedIdsTable createEmptyInstance() => create();
+  static $pb.PbList<FeedIdsTable> createRepeated() => $pb.PbList<FeedIdsTable>();
+  @$core.pragma('dart2js:noInline')
+  static FeedIdsTable getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedIdsTable>(create);
+  static FeedIdsTable? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.List<$core.int>> get ids => $_getList(0);
+}
+
+class FeedRequstMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedRequstMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..aOM<FeedIdsTable>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feeds', subBuilder: FeedIdsTable.create)
+    ..hasRequiredFields = false
+  ;
+
+  FeedRequstMessage._() : super();
+  factory FeedRequstMessage({
+    FeedIdsTable? feeds,
+  }) {
+    final _result = create();
+    if (feeds != null) {
+      _result.feeds = feeds;
+    }
+    return _result;
+  }
+  factory FeedRequstMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedRequstMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FeedRequstMessage clone() => FeedRequstMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FeedRequstMessage copyWith(void Function(FeedRequstMessage) updates) => super.copyWith((message) => updates(message as FeedRequstMessage)) as FeedRequstMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FeedRequstMessage create() => FeedRequstMessage._();
+  FeedRequstMessage createEmptyInstance() => create();
+  static $pb.PbList<FeedRequstMessage> createRepeated() => $pb.PbList<FeedRequstMessage>();
+  @$core.pragma('dart2js:noInline')
+  static FeedRequstMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedRequstMessage>(create);
+  static FeedRequstMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  FeedIdsTable get feeds => $_getN(0);
+  @$pb.TagNumber(1)
+  set feeds(FeedIdsTable v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasFeeds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFeeds() => clearField(1);
+  @$pb.TagNumber(1)
+  FeedIdsTable ensureFeeds() => $_ensure(0);
+}
+
+class FeedResponseMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedResponseMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..aOM<FeedResponseTable>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feeds', subBuilder: FeedResponseTable.create)
+    ..hasRequiredFields = false
+  ;
+
+  FeedResponseMessage._() : super();
+  factory FeedResponseMessage({
+    FeedResponseTable? feeds,
+  }) {
+    final _result = create();
+    if (feeds != null) {
+      _result.feeds = feeds;
+    }
+    return _result;
+  }
+  factory FeedResponseMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedResponseMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FeedResponseMessage clone() => FeedResponseMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FeedResponseMessage copyWith(void Function(FeedResponseMessage) updates) => super.copyWith((message) => updates(message as FeedResponseMessage)) as FeedResponseMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FeedResponseMessage create() => FeedResponseMessage._();
+  FeedResponseMessage createEmptyInstance() => create();
+  static $pb.PbList<FeedResponseMessage> createRepeated() => $pb.PbList<FeedResponseMessage>();
+  @$core.pragma('dart2js:noInline')
+  static FeedResponseMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedResponseMessage>(create);
+  static FeedResponseMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  FeedResponseTable get feeds => $_getN(0);
+  @$pb.TagNumber(1)
+  set feeds(FeedResponseTable v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasFeeds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFeeds() => clearField(1);
+  @$pb.TagNumber(1)
+  FeedResponseTable ensureFeeds() => $_ensure(0);
+}
+
+class FeedResponseTable extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedResponseTable', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..pc<FeedMessage>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messages', $pb.PbFieldType.PM, subBuilder: FeedMessage.create)
+    ..hasRequiredFields = false
+  ;
+
+  FeedResponseTable._() : super();
+  factory FeedResponseTable({
+    $core.Iterable<FeedMessage>? messages,
+  }) {
+    final _result = create();
+    if (messages != null) {
+      _result.messages.addAll(messages);
+    }
+    return _result;
+  }
+  factory FeedResponseTable.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedResponseTable.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FeedResponseTable clone() => FeedResponseTable()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FeedResponseTable copyWith(void Function(FeedResponseTable) updates) => super.copyWith((message) => updates(message as FeedResponseTable)) as FeedResponseTable; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FeedResponseTable create() => FeedResponseTable._();
+  FeedResponseTable createEmptyInstance() => create();
+  static $pb.PbList<FeedResponseTable> createRepeated() => $pb.PbList<FeedResponseTable>();
+  @$core.pragma('dart2js:noInline')
+  static FeedResponseTable getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedResponseTable>(create);
+  static FeedResponseTable? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<FeedMessage> get messages => $_getList(0);
+}
+
+class FeedMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$fixnum.Int64>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
+  FeedMessage._() : super();
+  factory FeedMessage({
+    $core.List<$core.int>? messageId,
+    $core.List<$core.int>? senderId,
+    $core.String? content,
+    $fixnum.Int64? time,
+  }) {
+    final _result = create();
+    if (messageId != null) {
+      _result.messageId = messageId;
+    }
+    if (senderId != null) {
+      _result.senderId = senderId;
+    }
+    if (content != null) {
+      _result.content = content;
+    }
+    if (time != null) {
+      _result.time = time;
+    }
+    return _result;
+  }
+  factory FeedMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FeedMessage clone() => FeedMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FeedMessage copyWith(void Function(FeedMessage) updates) => super.copyWith((message) => updates(message as FeedMessage)) as FeedMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FeedMessage create() => FeedMessage._();
+  FeedMessage createEmptyInstance() => create();
+  static $pb.PbList<FeedMessage> createRepeated() => $pb.PbList<FeedMessage>();
+  @$core.pragma('dart2js:noInline')
+  static FeedMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedMessage>(create);
+  static FeedMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get messageId => $_getN(0);
+  @$pb.TagNumber(1)
+  set messageId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMessageId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMessageId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get senderId => $_getN(1);
+  @$pb.TagNumber(2)
+  set senderId($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasSenderId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSenderId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get content => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set content($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasContent() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearContent() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get time => $_getI64(3);
+  @$pb.TagNumber(4)
+  set time($fixnum.Int64 v) { $_setInt64(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTime() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTime() => clearField(4);
 }
 

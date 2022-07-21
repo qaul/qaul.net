@@ -4,15 +4,15 @@
 package qaul.net.ble;
 
 @kotlin.jvm.JvmName("-initializenodeIdentification")
-public inline fun nodeIdentification(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
+inline fun nodeIdentification(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
   qaul.net.ble.NodeIdentificationKt.Dsl._create(qaul.net.ble.BleNet.NodeIdentification.newBuilder()).apply { block() }._build()
-public object NodeIdentificationKt {
+object NodeIdentificationKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.ble.BleNet.NodeIdentification.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.ble.BleNet.NodeIdentification.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object NodeIdentificationKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public var id: com.google.protobuf.ByteString
+    var id: com.google.protobuf.ByteString
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -43,12 +43,12 @@ public object NodeIdentificationKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public fun clearId() {
+    fun clearId() {
       _builder.clearId()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.ble.BleNet.NodeIdentification.copy(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
+inline fun qaul.net.ble.BleNet.NodeIdentification.copy(block: qaul.net.ble.NodeIdentificationKt.Dsl.() -> kotlin.Unit): qaul.net.ble.BleNet.NodeIdentification =
   qaul.net.ble.NodeIdentificationKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

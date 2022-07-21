@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmName("-initializeconnectionsList")
-public inline fun connectionsList(block: qaul.rpc.router.ConnectionsListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsList =
+inline fun connectionsList(block: qaul.rpc.router.ConnectionsListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsList =
   qaul.rpc.router.ConnectionsListKt.Dsl._create(qaul.rpc.router.RouterOuterClass.ConnectionsList.newBuilder()).apply { block() }._build()
-public object ConnectionsListKt {
+object ConnectionsListKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.ConnectionsList.Builder): Dsl = Dsl(builder)
@@ -27,7 +27,7 @@ public object ConnectionsListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class LanProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class LanProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * users connected via the LAN module
@@ -35,7 +35,7 @@ public object ConnectionsListKt {
      *
      * <code>repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;</code>
      */
-     public val lan: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>
+     val lan: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getLanList()
@@ -50,7 +50,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addLan")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.addLan(value)
     }
     /**
@@ -64,7 +64,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignLan")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       add(value)
     }
     /**
@@ -77,7 +77,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllLan")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       _builder.addAllLan(values)
     }
     /**
@@ -91,7 +91,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllLan")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       addAll(values)
     }
     /**
@@ -105,7 +105,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setLan")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.setLan(index, value)
     }
     /**
@@ -117,7 +117,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearLan")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LanProxy>.clear() {
       _builder.clearLan()
     }
 
@@ -127,7 +127,7 @@ public object ConnectionsListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class InternetProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class InternetProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * users connected via the Internet module
@@ -135,7 +135,7 @@ public object ConnectionsListKt {
      *
      * <code>repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;</code>
      */
-     public val internet: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>
+     val internet: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getInternetList()
@@ -150,7 +150,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addInternet")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.addInternet(value)
     }
     /**
@@ -164,7 +164,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignInternet")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       add(value)
     }
     /**
@@ -177,7 +177,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllInternet")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       _builder.addAllInternet(values)
     }
     /**
@@ -191,7 +191,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllInternet")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       addAll(values)
     }
     /**
@@ -205,7 +205,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setInternet")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.setInternet(index, value)
     }
     /**
@@ -217,7 +217,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearInternet")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, InternetProxy>.clear() {
       _builder.clearInternet()
     }
 
@@ -227,7 +227,7 @@ public object ConnectionsListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class BleProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class BleProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * users connected via the BLE module
@@ -235,7 +235,7 @@ public object ConnectionsListKt {
      *
      * <code>repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;</code>
      */
-     public val ble: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>
+     val ble: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getBleList()
@@ -250,7 +250,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addBle")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.addBle(value)
     }
     /**
@@ -264,7 +264,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignBle")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       add(value)
     }
     /**
@@ -277,7 +277,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllBle")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       _builder.addAllBle(values)
     }
     /**
@@ -291,7 +291,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllBle")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       addAll(values)
     }
     /**
@@ -305,7 +305,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setBle")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.setBle(index, value)
     }
     /**
@@ -317,7 +317,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearBle")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, BleProxy>.clear() {
       _builder.clearBle()
     }
 
@@ -327,7 +327,7 @@ public object ConnectionsListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class LocalProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class LocalProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * users connected locally (on the same node)
@@ -335,7 +335,7 @@ public object ConnectionsListKt {
      *
      * <code>repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;</code>
      */
-     public val local: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>
+     val local: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getLocalList()
@@ -350,7 +350,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addLocal")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.add(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.addLocal(value)
     }
     /**
@@ -364,7 +364,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignLocal")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       add(value)
     }
     /**
@@ -377,7 +377,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllLocal")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       _builder.addAllLocal(values)
     }
     /**
@@ -391,7 +391,7 @@ public object ConnectionsListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllLocal")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry>) {
       addAll(values)
     }
     /**
@@ -405,7 +405,7 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setLocal")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry) {
       _builder.setLocal(index, value)
     }
     /**
@@ -417,13 +417,13 @@ public object ConnectionsListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearLocal")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry, LocalProxy>.clear() {
       _builder.clearLocal()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.router.RouterOuterClass.ConnectionsList.copy(block: qaul.rpc.router.ConnectionsListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsList =
+inline fun qaul.rpc.router.RouterOuterClass.ConnectionsList.copy(block: qaul.rpc.router.ConnectionsListKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.ConnectionsList =
   qaul.rpc.router.ConnectionsListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

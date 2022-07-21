@@ -4,15 +4,15 @@
 package qaul.net.feed;
 
 @kotlin.jvm.JvmName("-initializefeedMessageContent")
-public inline fun feedMessageContent(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
+inline fun feedMessageContent(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
   qaul.net.feed.FeedMessageContentKt.Dsl._create(qaul.net.feed.FeedNet.FeedMessageContent.newBuilder()).apply { block() }._build()
-public object FeedMessageContentKt {
+object FeedMessageContentKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.feed.FeedNet.FeedMessageContent.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.feed.FeedNet.FeedMessageContent.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object FeedMessageContentKt {
      *
      * <code>bytes sender = 1;</code>
      */
-    public var sender: com.google.protobuf.ByteString
+    var sender: com.google.protobuf.ByteString
       @JvmName("getSender")
       get() = _builder.getSender()
       @JvmName("setSender")
@@ -43,7 +43,7 @@ public object FeedMessageContentKt {
      *
      * <code>bytes sender = 1;</code>
      */
-    public fun clearSender() {
+    fun clearSender() {
       _builder.clearSender()
     }
 
@@ -54,7 +54,7 @@ public object FeedMessageContentKt {
      *
      * <code>string content = 2;</code>
      */
-    public var content: kotlin.String
+    var content: kotlin.String
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -68,7 +68,7 @@ public object FeedMessageContentKt {
      *
      * <code>string content = 2;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
 
@@ -79,7 +79,7 @@ public object FeedMessageContentKt {
      *
      * <code>uint64 time = 3;</code>
      */
-    public var time: kotlin.Long
+    var time: kotlin.Long
       @JvmName("getTime")
       get() = _builder.getTime()
       @JvmName("setTime")
@@ -93,12 +93,12 @@ public object FeedMessageContentKt {
      *
      * <code>uint64 time = 3;</code>
      */
-    public fun clearTime() {
+    fun clearTime() {
       _builder.clearTime()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.feed.FeedNet.FeedMessageContent.copy(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
+inline fun qaul.net.feed.FeedNet.FeedMessageContent.copy(block: qaul.net.feed.FeedMessageContentKt.Dsl.() -> kotlin.Unit): qaul.net.feed.FeedNet.FeedMessageContent =
   qaul.net.feed.FeedMessageContentKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

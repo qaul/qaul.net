@@ -4,15 +4,15 @@
 package qaul.rpc.debug;
 
 @kotlin.jvm.JvmName("-initializedebug")
-public inline fun debug(block: qaul.rpc.debug.DebugKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Debug =
+inline fun debug(block: qaul.rpc.debug.DebugKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Debug =
   qaul.rpc.debug.DebugKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.Debug.newBuilder()).apply { block() }._build()
-public object DebugKt {
+object DebugKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.debug.DebugOuterClass.Debug.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.debug.DebugOuterClass.Debug.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.HeartbeatRequest heartbeat_request = 1;</code>
      */
-    public var heartbeatRequest: qaul.rpc.debug.DebugOuterClass.HeartbeatRequest
+    var heartbeatRequest: qaul.rpc.debug.DebugOuterClass.HeartbeatRequest
       @JvmName("getHeartbeatRequest")
       get() = _builder.getHeartbeatRequest()
       @JvmName("setHeartbeatRequest")
@@ -43,7 +43,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.HeartbeatRequest heartbeat_request = 1;</code>
      */
-    public fun clearHeartbeatRequest() {
+    fun clearHeartbeatRequest() {
       _builder.clearHeartbeatRequest()
     }
     /**
@@ -54,7 +54,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.HeartbeatRequest heartbeat_request = 1;</code>
      * @return Whether the heartbeatRequest field is set.
      */
-    public fun hasHeartbeatRequest(): kotlin.Boolean {
+    fun hasHeartbeatRequest(): kotlin.Boolean {
       return _builder.hasHeartbeatRequest()
     }
 
@@ -65,7 +65,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.HeartbeatResponse heartbeat_response = 2;</code>
      */
-    public var heartbeatResponse: qaul.rpc.debug.DebugOuterClass.HeartbeatResponse
+    var heartbeatResponse: qaul.rpc.debug.DebugOuterClass.HeartbeatResponse
       @JvmName("getHeartbeatResponse")
       get() = _builder.getHeartbeatResponse()
       @JvmName("setHeartbeatResponse")
@@ -79,7 +79,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.HeartbeatResponse heartbeat_response = 2;</code>
      */
-    public fun clearHeartbeatResponse() {
+    fun clearHeartbeatResponse() {
       _builder.clearHeartbeatResponse()
     }
     /**
@@ -90,7 +90,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.HeartbeatResponse heartbeat_response = 2;</code>
      * @return Whether the heartbeatResponse field is set.
      */
-    public fun hasHeartbeatResponse(): kotlin.Boolean {
+    fun hasHeartbeatResponse(): kotlin.Boolean {
       return _builder.hasHeartbeatResponse()
     }
 
@@ -101,7 +101,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
      */
-    public var panic: qaul.rpc.debug.DebugOuterClass.Panic
+    var panic: qaul.rpc.debug.DebugOuterClass.Panic
       @JvmName("getPanic")
       get() = _builder.getPanic()
       @JvmName("setPanic")
@@ -115,7 +115,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
      */
-    public fun clearPanic() {
+    fun clearPanic() {
       _builder.clearPanic()
     }
     /**
@@ -126,7 +126,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.Panic panic = 3;</code>
      * @return Whether the panic field is set.
      */
-    public fun hasPanic(): kotlin.Boolean {
+    fun hasPanic(): kotlin.Boolean {
       return _builder.hasPanic()
     }
 
@@ -137,7 +137,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
      */
-    public var logToFile: qaul.rpc.debug.DebugOuterClass.LogToFile
+    var logToFile: qaul.rpc.debug.DebugOuterClass.LogToFile
       @JvmName("getLogToFile")
       get() = _builder.getLogToFile()
       @JvmName("setLogToFile")
@@ -151,7 +151,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
      */
-    public fun clearLogToFile() {
+    fun clearLogToFile() {
       _builder.clearLogToFile()
     }
     /**
@@ -162,7 +162,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.LogToFile log_to_file = 4;</code>
      * @return Whether the logToFile field is set.
      */
-    public fun hasLogToFile(): kotlin.Boolean {
+    fun hasLogToFile(): kotlin.Boolean {
       return _builder.hasLogToFile()
     }
 
@@ -173,7 +173,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
      */
-    public var storagePathRequest: qaul.rpc.debug.DebugOuterClass.StoragePathRequest
+    var storagePathRequest: qaul.rpc.debug.DebugOuterClass.StoragePathRequest
       @JvmName("getStoragePathRequest")
       get() = _builder.getStoragePathRequest()
       @JvmName("setStoragePathRequest")
@@ -187,7 +187,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
      */
-    public fun clearStoragePathRequest() {
+    fun clearStoragePathRequest() {
       _builder.clearStoragePathRequest()
     }
     /**
@@ -198,7 +198,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.StoragePathRequest storage_path_request = 5;</code>
      * @return Whether the storagePathRequest field is set.
      */
-    public fun hasStoragePathRequest(): kotlin.Boolean {
+    fun hasStoragePathRequest(): kotlin.Boolean {
       return _builder.hasStoragePathRequest()
     }
 
@@ -209,7 +209,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
      */
-    public var storagePathResponse: qaul.rpc.debug.DebugOuterClass.StoragePathResponse
+    var storagePathResponse: qaul.rpc.debug.DebugOuterClass.StoragePathResponse
       @JvmName("getStoragePathResponse")
       get() = _builder.getStoragePathResponse()
       @JvmName("setStoragePathResponse")
@@ -223,7 +223,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
      */
-    public fun clearStoragePathResponse() {
+    fun clearStoragePathResponse() {
       _builder.clearStoragePathResponse()
     }
     /**
@@ -234,7 +234,7 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.StoragePathResponse storage_path_response = 6;</code>
      * @return Whether the storagePathResponse field is set.
      */
-    public fun hasStoragePathResponse(): kotlin.Boolean {
+    fun hasStoragePathResponse(): kotlin.Boolean {
       return _builder.hasStoragePathResponse()
     }
 
@@ -245,7 +245,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
      */
-    public var deleteLibqaulLogsRequest: qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest
+    var deleteLibqaulLogsRequest: qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest
       @JvmName("getDeleteLibqaulLogsRequest")
       get() = _builder.getDeleteLibqaulLogsRequest()
       @JvmName("setDeleteLibqaulLogsRequest")
@@ -259,7 +259,7 @@ public object DebugKt {
      *
      * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
      */
-    public fun clearDeleteLibqaulLogsRequest() {
+    fun clearDeleteLibqaulLogsRequest() {
       _builder.clearDeleteLibqaulLogsRequest()
     }
     /**
@@ -270,20 +270,20 @@ public object DebugKt {
      * <code>.qaul.rpc.debug.DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;</code>
      * @return Whether the deleteLibqaulLogsRequest field is set.
      */
-    public fun hasDeleteLibqaulLogsRequest(): kotlin.Boolean {
+    fun hasDeleteLibqaulLogsRequest(): kotlin.Boolean {
       return _builder.hasDeleteLibqaulLogsRequest()
     }
-    public val messageCase: qaul.rpc.debug.DebugOuterClass.Debug.MessageCase
+    val messageCase: qaul.rpc.debug.DebugOuterClass.Debug.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.debug.DebugOuterClass.Debug.copy(block: qaul.rpc.debug.DebugKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Debug =
+inline fun qaul.rpc.debug.DebugOuterClass.Debug.copy(block: qaul.rpc.debug.DebugKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.Debug =
   qaul.rpc.debug.DebugKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.rpc.debug.DebugOuterClass.DebugOrBuilder.heartbeatRequestOrNull: qaul.rpc.debug.DebugOuterClass.HeartbeatRequest?

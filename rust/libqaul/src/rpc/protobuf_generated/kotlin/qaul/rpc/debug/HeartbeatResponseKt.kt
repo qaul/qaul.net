@@ -4,15 +4,15 @@
 package qaul.rpc.debug;
 
 @kotlin.jvm.JvmName("-initializeheartbeatResponse")
-public inline fun heartbeatResponse(block: qaul.rpc.debug.HeartbeatResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatResponse =
+inline fun heartbeatResponse(block: qaul.rpc.debug.HeartbeatResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatResponse =
   qaul.rpc.debug.HeartbeatResponseKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.HeartbeatResponse.newBuilder()).apply { block() }._build()
-public object HeartbeatResponseKt {
+object HeartbeatResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.debug.DebugOuterClass.HeartbeatResponse.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.debug.DebugOuterClass.HeartbeatResponse.Builder): Dsl = Dsl(builder)
@@ -24,6 +24,6 @@ public object HeartbeatResponseKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.debug.DebugOuterClass.HeartbeatResponse.copy(block: qaul.rpc.debug.HeartbeatResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatResponse =
+inline fun qaul.rpc.debug.DebugOuterClass.HeartbeatResponse.copy(block: qaul.rpc.debug.HeartbeatResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.HeartbeatResponse =
   qaul.rpc.debug.HeartbeatResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

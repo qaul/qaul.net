@@ -4,15 +4,15 @@
 package qaul.net.messaging;
 
 @kotlin.jvm.JvmName("-initializechatMessage")
-public inline fun chatMessage(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
+inline fun chatMessage(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
   qaul.net.messaging.ChatMessageKt.Dsl._create(qaul.net.messaging.MessagingOuterClass.ChatMessage.newBuilder()).apply { block() }._build()
-public object ChatMessageKt {
+object ChatMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ChatMessageKt {
      *
      * <code>bool group = 1;</code>
      */
-    public var group: kotlin.Boolean
+    var group: kotlin.Boolean
       @JvmName("getGroup")
       get() = _builder.getGroup()
       @JvmName("setGroup")
@@ -43,7 +43,7 @@ public object ChatMessageKt {
      *
      * <code>bool group = 1;</code>
      */
-    public fun clearGroup() {
+    fun clearGroup() {
       _builder.clearGroup()
     }
 
@@ -55,7 +55,7 @@ public object ChatMessageKt {
      *
      * <code>bytes conversation_id = 2;</code>
      */
-    public var conversationId: com.google.protobuf.ByteString
+    var conversationId: com.google.protobuf.ByteString
       @JvmName("getConversationId")
       get() = _builder.getConversationId()
       @JvmName("setConversationId")
@@ -70,7 +70,7 @@ public object ChatMessageKt {
      *
      * <code>bytes conversation_id = 2;</code>
      */
-    public fun clearConversationId() {
+    fun clearConversationId() {
       _builder.clearConversationId()
     }
 
@@ -81,7 +81,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 sent_at = 3;</code>
      */
-    public var sentAt: kotlin.Long
+    var sentAt: kotlin.Long
       @JvmName("getSentAt")
       get() = _builder.getSentAt()
       @JvmName("setSentAt")
@@ -95,7 +95,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 sent_at = 3;</code>
      */
-    public fun clearSentAt() {
+    fun clearSentAt() {
       _builder.clearSentAt()
     }
 
@@ -106,7 +106,7 @@ public object ChatMessageKt {
      *
      * <code>string content = 4;</code>
      */
-    public var content: kotlin.String
+    var content: kotlin.String
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -120,12 +120,12 @@ public object ChatMessageKt {
      *
      * <code>string content = 4;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.messaging.MessagingOuterClass.ChatMessage.copy(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
+inline fun qaul.net.messaging.MessagingOuterClass.ChatMessage.copy(block: qaul.net.messaging.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.net.messaging.MessagingOuterClass.ChatMessage =
   qaul.net.messaging.ChatMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

@@ -90,6 +90,14 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userRequest(newValue)}
   }
 
+  var userOnlineRequest: Qaul_Rpc_Users_UserOnlineRequest {
+    get {
+      if case .userOnlineRequest(let v)? = message {return v}
+      return Qaul_Rpc_Users_UserOnlineRequest()
+    }
+    set {message = .userOnlineRequest(newValue)}
+  }
+
   var userList: Qaul_Rpc_Users_UserList {
     get {
       if case .userList(let v)? = message {return v}
@@ -110,6 +118,7 @@ struct Qaul_Rpc_Users_Users {
 
   enum OneOf_Message: Equatable {
     case userRequest(Qaul_Rpc_Users_UserRequest)
+    case userOnlineRequest(Qaul_Rpc_Users_UserOnlineRequest)
     case userList(Qaul_Rpc_Users_UserList)
     case userUpdate(Qaul_Rpc_Users_UserEntry)
 
@@ -121,6 +130,10 @@ struct Qaul_Rpc_Users_Users {
       switch (lhs, rhs) {
       case (.userRequest, .userRequest): return {
         guard case .userRequest(let l) = lhs, case .userRequest(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.userOnlineRequest, .userOnlineRequest): return {
+        guard case .userOnlineRequest(let l) = lhs, case .userOnlineRequest(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.userList, .userList): return {
@@ -142,6 +155,17 @@ struct Qaul_Rpc_Users_Users {
 
 /// UI request for some users
 struct Qaul_Rpc_Users_UserRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// UI request for some online users
+struct Qaul_Rpc_Users_UserOnlineRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -210,8 +234,9 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
   static let protoMessageName: String = _protobuf_package + ".Users"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "user_request"),
-    2: .standard(proto: "user_list"),
-    3: .standard(proto: "user_update"),
+    2: .standard(proto: "user_online_request"),
+    3: .standard(proto: "user_list"),
+    4: .standard(proto: "user_update"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -234,6 +259,19 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
         }
       }()
       case 2: try {
+        var v: Qaul_Rpc_Users_UserOnlineRequest?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .userOnlineRequest(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .userOnlineRequest(v)
+        }
+      }()
+      case 3: try {
         var v: Qaul_Rpc_Users_UserList?
         var hadOneofValue = false
         if let current = self.message {
@@ -246,7 +284,7 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
           self.message = .userList(v)
         }
       }()
-      case 3: try {
+      case 4: try {
         var v: Qaul_Rpc_Users_UserEntry?
         var hadOneofValue = false
         if let current = self.message {
@@ -274,13 +312,17 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       guard case .userRequest(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }()
+    case .userOnlineRequest?: try {
+      guard case .userOnlineRequest(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
     case .userList?: try {
       guard case .userList(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     }()
     case .userUpdate?: try {
       guard case .userUpdate(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
     case nil: break
     }
@@ -308,6 +350,25 @@ extension Qaul_Rpc_Users_UserRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
   }
 
   static func ==(lhs: Qaul_Rpc_Users_UserRequest, rhs: Qaul_Rpc_Users_UserRequest) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Users_UserOnlineRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".UserOnlineRequest"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let _ = try decoder.nextFieldNumber() {
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Users_UserOnlineRequest, rhs: Qaul_Rpc_Users_UserOnlineRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

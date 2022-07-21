@@ -4,15 +4,15 @@
 package qaul.rpc.chat;
 
 @kotlin.jvm.JvmName("-initializechatMessage")
-public inline fun chatMessage(block: qaul.rpc.chat.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessage =
+inline fun chatMessage(block: qaul.rpc.chat.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessage =
   qaul.rpc.chat.ChatMessageKt.Dsl._create(qaul.rpc.chat.ChatOuterClass.ChatMessage.newBuilder()).apply { block() }._build()
-public object ChatMessageKt {
+object ChatMessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.chat.ChatOuterClass.ChatMessage.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.chat.ChatOuterClass.ChatMessage.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object ChatMessageKt {
      *
      * <code>uint32 index = 1;</code>
      */
-    public var index: kotlin.Int
+    var index: kotlin.Int
       @JvmName("getIndex")
       get() = _builder.getIndex()
       @JvmName("setIndex")
@@ -43,7 +43,7 @@ public object ChatMessageKt {
      *
      * <code>uint32 index = 1;</code>
      */
-    public fun clearIndex() {
+    fun clearIndex() {
       _builder.clearIndex()
     }
 
@@ -54,7 +54,7 @@ public object ChatMessageKt {
      *
      * <code>bytes sender_id = 2;</code>
      */
-    public var senderId: com.google.protobuf.ByteString
+    var senderId: com.google.protobuf.ByteString
       @JvmName("getSenderId")
       get() = _builder.getSenderId()
       @JvmName("setSenderId")
@@ -68,7 +68,7 @@ public object ChatMessageKt {
      *
      * <code>bytes sender_id = 2;</code>
      */
-    public fun clearSenderId() {
+    fun clearSenderId() {
       _builder.clearSenderId()
     }
 
@@ -79,7 +79,7 @@ public object ChatMessageKt {
      *
      * <code>bytes message_id = 3;</code>
      */
-    public var messageId: com.google.protobuf.ByteString
+    var messageId: com.google.protobuf.ByteString
       @JvmName("getMessageId")
       get() = _builder.getMessageId()
       @JvmName("setMessageId")
@@ -93,7 +93,7 @@ public object ChatMessageKt {
      *
      * <code>bytes message_id = 3;</code>
      */
-    public fun clearMessageId() {
+    fun clearMessageId() {
       _builder.clearMessageId()
     }
 
@@ -107,7 +107,7 @@ public object ChatMessageKt {
      *
      * <code>int32 status = 4;</code>
      */
-    public var status: kotlin.Int
+    var status: kotlin.Int
       @JvmName("getStatus")
       get() = _builder.getStatus()
       @JvmName("setStatus")
@@ -124,7 +124,7 @@ public object ChatMessageKt {
      *
      * <code>int32 status = 4;</code>
      */
-    public fun clearStatus() {
+    fun clearStatus() {
       _builder.clearStatus()
     }
 
@@ -135,7 +135,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 sent_at = 5;</code>
      */
-    public var sentAt: kotlin.Long
+    var sentAt: kotlin.Long
       @JvmName("getSentAt")
       get() = _builder.getSentAt()
       @JvmName("setSentAt")
@@ -149,7 +149,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 sent_at = 5;</code>
      */
-    public fun clearSentAt() {
+    fun clearSentAt() {
       _builder.clearSentAt()
     }
 
@@ -160,7 +160,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 received_at = 6;</code>
      */
-    public var receivedAt: kotlin.Long
+    var receivedAt: kotlin.Long
       @JvmName("getReceivedAt")
       get() = _builder.getReceivedAt()
       @JvmName("setReceivedAt")
@@ -174,7 +174,7 @@ public object ChatMessageKt {
      *
      * <code>uint64 received_at = 6;</code>
      */
-    public fun clearReceivedAt() {
+    fun clearReceivedAt() {
       _builder.clearReceivedAt()
     }
 
@@ -183,9 +183,9 @@ public object ChatMessageKt {
      * content of the message
      * </pre>
      *
-     * <code>string content = 7;</code>
+     * <code>bytes content = 7;</code>
      */
-    public var content: kotlin.String
+    var content: com.google.protobuf.ByteString
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -197,14 +197,14 @@ public object ChatMessageKt {
      * content of the message
      * </pre>
      *
-     * <code>string content = 7;</code>
+     * <code>bytes content = 7;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.chat.ChatOuterClass.ChatMessage.copy(block: qaul.rpc.chat.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessage =
+inline fun qaul.rpc.chat.ChatOuterClass.ChatMessage.copy(block: qaul.rpc.chat.ChatMessageKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.ChatMessage =
   qaul.rpc.chat.ChatMessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

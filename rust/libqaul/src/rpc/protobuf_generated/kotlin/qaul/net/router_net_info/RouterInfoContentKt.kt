@@ -4,15 +4,15 @@
 package qaul.net.router_net_info;
 
 @kotlin.jvm.JvmName("-initializerouterInfoContent")
-public inline fun routerInfoContent(block: qaul.net.router_net_info.RouterInfoContentKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContent =
+inline fun routerInfoContent(block: qaul.net.router_net_info.RouterInfoContentKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContent =
   qaul.net.router_net_info.RouterInfoContentKt.Dsl._create(qaul.net.router_net_info.RouterNetInfo.RouterInfoContent.newBuilder()).apply { block() }._build()
-public object RouterInfoContentKt {
+object RouterInfoContentKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoContent.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.net.router_net_info.RouterNetInfo.RouterInfoContent.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object RouterInfoContentKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public var id: com.google.protobuf.ByteString
+    var id: com.google.protobuf.ByteString
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -43,8 +43,33 @@ public object RouterInfoContentKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public fun clearId() {
+    fun clearId() {
       _builder.clearId()
+    }
+
+    /**
+     * <pre>
+     * RouterInfo Module
+     * </pre>
+     *
+     * <code>.qaul.net.router_net_info.RouterInfoModule routerInfoModule = 2;</code>
+     */
+     var routerInfoModule: qaul.net.router_net_info.RouterNetInfo.RouterInfoModule
+      @JvmName("getRouterInfoModule")
+      get() = _builder.getRouterInfoModule()
+      @JvmName("setRouterInfoModule")
+      set(value) {
+        _builder.setRouterInfoModule(value)
+      }
+    /**
+     * <pre>
+     * RouterInfo Module
+     * </pre>
+     *
+     * <code>.qaul.net.router_net_info.RouterInfoModule routerInfoModule = 2;</code>
+     */
+    fun clearRouterInfoModule() {
+      _builder.clearRouterInfoModule()
     }
 
     /**
@@ -52,9 +77,9 @@ public object RouterInfoContentKt {
      * message content
      * </pre>
      *
-     * <code>bytes content = 2;</code>
+     * <code>bytes content = 3;</code>
      */
-    public var content: com.google.protobuf.ByteString
+    var content: com.google.protobuf.ByteString
       @JvmName("getContent")
       get() = _builder.getContent()
       @JvmName("setContent")
@@ -66,9 +91,9 @@ public object RouterInfoContentKt {
      * message content
      * </pre>
      *
-     * <code>bytes content = 2;</code>
+     * <code>bytes content = 3;</code>
      */
-    public fun clearContent() {
+    fun clearContent() {
       _builder.clearContent()
     }
 
@@ -77,9 +102,9 @@ public object RouterInfoContentKt {
      * timestamp in milli seconds
      * </pre>
      *
-     * <code>uint64 time = 3;</code>
+     * <code>uint64 time = 4;</code>
      */
-    public var time: kotlin.Long
+    var time: kotlin.Long
       @JvmName("getTime")
       get() = _builder.getTime()
       @JvmName("setTime")
@@ -91,14 +116,14 @@ public object RouterInfoContentKt {
      * timestamp in milli seconds
      * </pre>
      *
-     * <code>uint64 time = 3;</code>
+     * <code>uint64 time = 4;</code>
      */
-    public fun clearTime() {
+    fun clearTime() {
       _builder.clearTime()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoContent.copy(block: qaul.net.router_net_info.RouterInfoContentKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContent =
+inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoContent.copy(block: qaul.net.router_net_info.RouterInfoContentKt.Dsl.() -> kotlin.Unit): qaul.net.router_net_info.RouterNetInfo.RouterInfoContent =
   qaul.net.router_net_info.RouterInfoContentKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

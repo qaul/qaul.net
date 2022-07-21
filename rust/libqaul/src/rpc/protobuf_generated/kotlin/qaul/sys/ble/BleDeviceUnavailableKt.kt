@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDeviceUnavailable")
-public inline fun bleDeviceUnavailable(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
+inline fun bleDeviceUnavailable(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
   qaul.sys.ble.BleDeviceUnavailableKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.newBuilder()).apply { block() }._build()
-public object BleDeviceUnavailableKt {
+object BleDeviceUnavailableKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.Builder): Dsl = Dsl(builder)
@@ -30,7 +30,7 @@ public object BleDeviceUnavailableKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public var qaulId: com.google.protobuf.ByteString
+    var qaulId: com.google.protobuf.ByteString
       @JvmName("getQaulId")
       get() = _builder.getQaulId()
       @JvmName("setQaulId")
@@ -45,12 +45,12 @@ public object BleDeviceUnavailableKt {
      *
      * <code>bytes qaul_id = 1;</code>
      */
-    public fun clearQaulId() {
+    fun clearQaulId() {
       _builder.clearQaulId()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.copy(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
+inline fun qaul.sys.ble.BleOuterClass.BleDeviceUnavailable.copy(block: qaul.sys.ble.BleDeviceUnavailableKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDeviceUnavailable =
   qaul.sys.ble.BleDeviceUnavailableKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

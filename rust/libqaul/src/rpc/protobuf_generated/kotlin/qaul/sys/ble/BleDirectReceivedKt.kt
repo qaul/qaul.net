@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDirectReceived")
-public inline fun bleDirectReceived(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
+inline fun bleDirectReceived(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
   qaul.sys.ble.BleDirectReceivedKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDirectReceived.newBuilder()).apply { block() }._build()
-public object BleDirectReceivedKt {
+object BleDirectReceivedKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDirectReceived.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDirectReceived.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleDirectReceivedKt {
      *
      * <code>bytes from = 1;</code>
      */
-    public var from: com.google.protobuf.ByteString
+    var from: com.google.protobuf.ByteString
       @JvmName("getFrom")
       get() = _builder.getFrom()
       @JvmName("setFrom")
@@ -43,7 +43,7 @@ public object BleDirectReceivedKt {
      *
      * <code>bytes from = 1;</code>
      */
-    public fun clearFrom() {
+    fun clearFrom() {
       _builder.clearFrom()
     }
 
@@ -54,7 +54,7 @@ public object BleDirectReceivedKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public var data: com.google.protobuf.ByteString
+    var data: com.google.protobuf.ByteString
       @JvmName("getData")
       get() = _builder.getData()
       @JvmName("setData")
@@ -68,12 +68,12 @@ public object BleDirectReceivedKt {
      *
      * <code>bytes data = 4;</code>
      */
-    public fun clearData() {
+    fun clearData() {
       _builder.clearData()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDirectReceived.copy(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
+inline fun qaul.sys.ble.BleOuterClass.BleDirectReceived.copy(block: qaul.sys.ble.BleDirectReceivedKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectReceived =
   qaul.sys.ble.BleDirectReceivedKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

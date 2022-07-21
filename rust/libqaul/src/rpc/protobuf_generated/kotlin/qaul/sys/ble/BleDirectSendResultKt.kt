@@ -4,15 +4,15 @@
 package qaul.sys.ble;
 
 @kotlin.jvm.JvmName("-initializebleDirectSendResult")
-public inline fun bleDirectSendResult(block: qaul.sys.ble.BleDirectSendResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSendResult =
+inline fun bleDirectSendResult(block: qaul.sys.ble.BleDirectSendResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSendResult =
   qaul.sys.ble.BleDirectSendResultKt.Dsl._create(qaul.sys.ble.BleOuterClass.BleDirectSendResult.newBuilder()).apply { block() }._build()
-public object BleDirectSendResultKt {
+object BleDirectSendResultKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.sys.ble.BleOuterClass.BleDirectSendResult.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.sys.ble.BleOuterClass.BleDirectSendResult.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object BleDirectSendResultKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public var id: com.google.protobuf.ByteString
+    var id: com.google.protobuf.ByteString
       @JvmName("getId")
       get() = _builder.getId()
       @JvmName("setId")
@@ -43,7 +43,7 @@ public object BleDirectSendResultKt {
      *
      * <code>bytes id = 1;</code>
      */
-    public fun clearId() {
+    fun clearId() {
       _builder.clearId()
     }
 
@@ -54,7 +54,7 @@ public object BleDirectSendResultKt {
      *
      * <code>bool success = 2;</code>
      */
-    public var success: kotlin.Boolean
+    var success: kotlin.Boolean
       @JvmName("getSuccess")
       get() = _builder.getSuccess()
       @JvmName("setSuccess")
@@ -68,7 +68,7 @@ public object BleDirectSendResultKt {
      *
      * <code>bool success = 2;</code>
      */
-    public fun clearSuccess() {
+    fun clearSuccess() {
       _builder.clearSuccess()
     }
 
@@ -79,7 +79,7 @@ public object BleDirectSendResultKt {
      *
      * <code>string error_message = 3;</code>
      */
-    public var errorMessage: kotlin.String
+    var errorMessage: kotlin.String
       @JvmName("getErrorMessage")
       get() = _builder.getErrorMessage()
       @JvmName("setErrorMessage")
@@ -93,12 +93,12 @@ public object BleDirectSendResultKt {
      *
      * <code>string error_message = 3;</code>
      */
-    public fun clearErrorMessage() {
+    fun clearErrorMessage() {
       _builder.clearErrorMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.sys.ble.BleOuterClass.BleDirectSendResult.copy(block: qaul.sys.ble.BleDirectSendResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSendResult =
+inline fun qaul.sys.ble.BleOuterClass.BleDirectSendResult.copy(block: qaul.sys.ble.BleDirectSendResultKt.Dsl.() -> kotlin.Unit): qaul.sys.ble.BleOuterClass.BleDirectSendResult =
   qaul.sys.ble.BleDirectSendResultKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

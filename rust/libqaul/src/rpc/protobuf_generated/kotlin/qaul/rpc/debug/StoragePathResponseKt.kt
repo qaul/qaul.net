@@ -4,15 +4,15 @@
 package qaul.rpc.debug;
 
 @kotlin.jvm.JvmName("-initializestoragePathResponse")
-public inline fun storagePathResponse(block: qaul.rpc.debug.StoragePathResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathResponse =
+inline fun storagePathResponse(block: qaul.rpc.debug.StoragePathResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathResponse =
   qaul.rpc.debug.StoragePathResponseKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.StoragePathResponse.newBuilder()).apply { block() }._build()
-public object StoragePathResponseKt {
+object StoragePathResponseKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.debug.DebugOuterClass.StoragePathResponse.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object StoragePathResponseKt {
     /**
      * <code>string storage_path = 1;</code>
      */
-    public var storagePath: kotlin.String
+    var storagePath: kotlin.String
       @JvmName("getStoragePath")
       get() = _builder.getStoragePath()
       @JvmName("setStoragePath")
@@ -35,12 +35,12 @@ public object StoragePathResponseKt {
     /**
      * <code>string storage_path = 1;</code>
      */
-    public fun clearStoragePath() {
+    fun clearStoragePath() {
       _builder.clearStoragePath()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.debug.DebugOuterClass.StoragePathResponse.copy(block: qaul.rpc.debug.StoragePathResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathResponse =
+inline fun qaul.rpc.debug.DebugOuterClass.StoragePathResponse.copy(block: qaul.rpc.debug.StoragePathResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.StoragePathResponse =
   qaul.rpc.debug.StoragePathResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

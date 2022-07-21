@@ -4,15 +4,15 @@
 package qaul.rpc.connections;
 
 @kotlin.jvm.JvmName("-initializeinternetNodesList")
-public inline fun internetNodesList(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
+inline fun internetNodesList(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
   qaul.rpc.connections.InternetNodesListKt.Dsl._create(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.newBuilder()).apply { block() }._build()
-public object InternetNodesListKt {
+object InternetNodesListKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder): Dsl = Dsl(builder)
@@ -31,7 +31,7 @@ public object InternetNodesListKt {
      *
      * <code>.qaul.rpc.connections.Info info = 1;</code>
      */
-    public var info: qaul.rpc.connections.ConnectionsOuterClass.Info
+     var info: qaul.rpc.connections.ConnectionsOuterClass.Info
       @JvmName("getInfo")
       get() = _builder.getInfo()
       @JvmName("setInfo")
@@ -47,7 +47,7 @@ public object InternetNodesListKt {
      *
      * <code>.qaul.rpc.connections.Info info = 1;</code>
      */
-    public fun clearInfo() {
+    fun clearInfo() {
       _builder.clearInfo()
     }
 
@@ -56,7 +56,7 @@ public object InternetNodesListKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class NodesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class NodesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
      * list of all node multiaddresses that
@@ -65,7 +65,7 @@ public object InternetNodesListKt {
      *
      * <code>repeated .qaul.rpc.connections.InternetNodesEntry nodes = 2;</code>
      */
-     public val nodes: com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>
+     val nodes: com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getNodesList()
@@ -81,7 +81,7 @@ public object InternetNodesListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addNodes")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.add(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.add(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       _builder.addNodes(value)
     }
     /**
@@ -96,7 +96,7 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignNodes")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       add(value)
     }
     /**
@@ -110,7 +110,7 @@ public object InternetNodesListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllNodes")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
       _builder.addAllNodes(values)
     }
     /**
@@ -125,7 +125,7 @@ public object InternetNodesListKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllNodes")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>) {
       addAll(values)
     }
     /**
@@ -140,7 +140,7 @@ public object InternetNodesListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setNodes")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.set(index: kotlin.Int, value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.set(index: kotlin.Int, value: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) {
       _builder.setNodes(index, value)
     }
     /**
@@ -153,13 +153,13 @@ public object InternetNodesListKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearNodes")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, NodesProxy>.clear() {
       _builder.clearNodes()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.copy(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
+inline fun qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.copy(block: qaul.rpc.connections.InternetNodesListKt.Dsl.() -> kotlin.Unit): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList =
   qaul.rpc.connections.InternetNodesListKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

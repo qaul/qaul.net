@@ -4,15 +4,15 @@
 package qaul.rpc.feed;
 
 @kotlin.jvm.JvmName("-initializefeed")
-public inline fun feed(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
+inline fun feed(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
   qaul.rpc.feed.FeedKt.Dsl._create(qaul.rpc.feed.FeedOuterClass.Feed.newBuilder()).apply { block() }._build()
-public object FeedKt {
+object FeedKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.feed.FeedOuterClass.Feed.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.feed.FeedOuterClass.Feed.Builder): Dsl = Dsl(builder)
@@ -29,7 +29,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.FeedMessageList received = 1;</code>
      */
-    public var received: qaul.rpc.feed.FeedOuterClass.FeedMessageList
+    var received: qaul.rpc.feed.FeedOuterClass.FeedMessageList
       @JvmName("getReceived")
       get() = _builder.getReceived()
       @JvmName("setReceived")
@@ -43,7 +43,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.FeedMessageList received = 1;</code>
      */
-    public fun clearReceived() {
+    fun clearReceived() {
       _builder.clearReceived()
     }
     /**
@@ -54,7 +54,7 @@ public object FeedKt {
      * <code>.qaul.rpc.feed.FeedMessageList received = 1;</code>
      * @return Whether the received field is set.
      */
-    public fun hasReceived(): kotlin.Boolean {
+    fun hasReceived(): kotlin.Boolean {
       return _builder.hasReceived()
     }
 
@@ -65,7 +65,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.SendMessage send = 2;</code>
      */
-    public var send: qaul.rpc.feed.FeedOuterClass.SendMessage
+    var send: qaul.rpc.feed.FeedOuterClass.SendMessage
       @JvmName("getSend")
       get() = _builder.getSend()
       @JvmName("setSend")
@@ -79,7 +79,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.SendMessage send = 2;</code>
      */
-    public fun clearSend() {
+    fun clearSend() {
       _builder.clearSend()
     }
     /**
@@ -90,7 +90,7 @@ public object FeedKt {
      * <code>.qaul.rpc.feed.SendMessage send = 2;</code>
      * @return Whether the send field is set.
      */
-    public fun hasSend(): kotlin.Boolean {
+    fun hasSend(): kotlin.Boolean {
       return _builder.hasSend()
     }
 
@@ -101,7 +101,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.FeedMessageRequest request = 3;</code>
      */
-    public var request: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest
+    var request: qaul.rpc.feed.FeedOuterClass.FeedMessageRequest
       @JvmName("getRequest")
       get() = _builder.getRequest()
       @JvmName("setRequest")
@@ -115,7 +115,7 @@ public object FeedKt {
      *
      * <code>.qaul.rpc.feed.FeedMessageRequest request = 3;</code>
      */
-    public fun clearRequest() {
+    fun clearRequest() {
       _builder.clearRequest()
     }
     /**
@@ -126,20 +126,20 @@ public object FeedKt {
      * <code>.qaul.rpc.feed.FeedMessageRequest request = 3;</code>
      * @return Whether the request field is set.
      */
-    public fun hasRequest(): kotlin.Boolean {
+    fun hasRequest(): kotlin.Boolean {
       return _builder.hasRequest()
     }
-    public val messageCase: qaul.rpc.feed.FeedOuterClass.Feed.MessageCase
+    val messageCase: qaul.rpc.feed.FeedOuterClass.Feed.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
 
-    public fun clearMessage() {
+    fun clearMessage() {
       _builder.clearMessage()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.feed.FeedOuterClass.Feed.copy(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
+inline fun qaul.rpc.feed.FeedOuterClass.Feed.copy(block: qaul.rpc.feed.FeedKt.Dsl.() -> kotlin.Unit): qaul.rpc.feed.FeedOuterClass.Feed =
   qaul.rpc.feed.FeedKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
 val qaul.rpc.feed.FeedOuterClass.FeedOrBuilder.receivedOrNull: qaul.rpc.feed.FeedOuterClass.FeedMessageList?

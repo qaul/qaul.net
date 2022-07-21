@@ -4,15 +4,15 @@
 package qaul.rpc.debug;
 
 @kotlin.jvm.JvmName("-initializelogToFile")
-public inline fun logToFile(block: qaul.rpc.debug.LogToFileKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.LogToFile =
+inline fun logToFile(block: qaul.rpc.debug.LogToFileKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.LogToFile =
   qaul.rpc.debug.LogToFileKt.Dsl._create(qaul.rpc.debug.DebugOuterClass.LogToFile.newBuilder()).apply { block() }._build()
-public object LogToFileKt {
+object LogToFileKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.debug.DebugOuterClass.LogToFile.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.debug.DebugOuterClass.LogToFile.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object LogToFileKt {
     /**
      * <code>bool enable = 1;</code>
      */
-    public var enable: kotlin.Boolean
+    var enable: kotlin.Boolean
       @JvmName("getEnable")
       get() = _builder.getEnable()
       @JvmName("setEnable")
@@ -35,12 +35,12 @@ public object LogToFileKt {
     /**
      * <code>bool enable = 1;</code>
      */
-    public fun clearEnable() {
+    fun clearEnable() {
       _builder.clearEnable()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.debug.DebugOuterClass.LogToFile.copy(block: qaul.rpc.debug.LogToFileKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.LogToFile =
+inline fun qaul.rpc.debug.DebugOuterClass.LogToFile.copy(block: qaul.rpc.debug.LogToFileKt.Dsl.() -> kotlin.Unit): qaul.rpc.debug.DebugOuterClass.LogToFile =
   qaul.rpc.debug.LogToFileKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 

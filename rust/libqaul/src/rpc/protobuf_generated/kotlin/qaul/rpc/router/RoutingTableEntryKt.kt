@@ -4,15 +4,15 @@
 package qaul.rpc.router;
 
 @kotlin.jvm.JvmName("-initializeroutingTableEntry")
-public inline fun routingTableEntry(block: qaul.rpc.router.RoutingTableEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableEntry =
+inline fun routingTableEntry(block: qaul.rpc.router.RoutingTableEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableEntry =
   qaul.rpc.router.RoutingTableEntryKt.Dsl._create(qaul.rpc.router.RouterOuterClass.RoutingTableEntry.newBuilder()).apply { block() }._build()
-public object RoutingTableEntryKt {
+object RoutingTableEntryKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
-  public class Dsl private constructor(
+  class Dsl private constructor(
     private val _builder: qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder
   ) {
-    public companion object {
+    companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
       internal fun _create(builder: qaul.rpc.router.RouterOuterClass.RoutingTableEntry.Builder): Dsl = Dsl(builder)
@@ -25,7 +25,7 @@ public object RoutingTableEntryKt {
     /**
      * <code>bytes user_id = 1;</code>
      */
-    public var userId: com.google.protobuf.ByteString
+    var userId: com.google.protobuf.ByteString
       @JvmName("getUserId")
       get() = _builder.getUserId()
       @JvmName("setUserId")
@@ -35,7 +35,7 @@ public object RoutingTableEntryKt {
     /**
      * <code>bytes user_id = 1;</code>
      */
-    public fun clearUserId() {
+    fun clearUserId() {
       _builder.clearUserId()
     }
 
@@ -44,11 +44,11 @@ public object RoutingTableEntryKt {
      * generics.
      */
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    public class ConnectionsProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    class ConnectionsProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
      */
-     public val connections: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>
+     val connections: com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getConnectionsList()
@@ -59,7 +59,7 @@ public object RoutingTableEntryKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addConnections")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.add(value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.add(value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
       _builder.addConnections(value)
     }
     /**
@@ -69,7 +69,7 @@ public object RoutingTableEntryKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignConnections")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
       add(value)
     }
     /**
@@ -78,7 +78,7 @@ public object RoutingTableEntryKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllConnections")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>) {
       _builder.addAllConnections(values)
     }
     /**
@@ -88,7 +88,7 @@ public object RoutingTableEntryKt {
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllConnections")
     @Suppress("NOTHING_TO_INLINE")
-    public inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>) {
       addAll(values)
     }
     /**
@@ -98,7 +98,7 @@ public object RoutingTableEntryKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setConnections")
-    public operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.set(index: kotlin.Int, value: qaul.rpc.router.RouterOuterClass.RoutingTableConnection) {
       _builder.setConnections(index, value)
     }
     /**
@@ -106,13 +106,13 @@ public object RoutingTableEntryKt {
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearConnections")
-    public fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection, ConnectionsProxy>.clear() {
       _builder.clearConnections()
     }
 
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun qaul.rpc.router.RouterOuterClass.RoutingTableEntry.copy(block: qaul.rpc.router.RoutingTableEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableEntry =
+inline fun qaul.rpc.router.RouterOuterClass.RoutingTableEntry.copy(block: qaul.rpc.router.RoutingTableEntryKt.Dsl.() -> kotlin.Unit): qaul.rpc.router.RouterOuterClass.RoutingTableEntry =
   qaul.rpc.router.RoutingTableEntryKt.Dsl._create(this.toBuilder()).apply { block() }._build()
 
