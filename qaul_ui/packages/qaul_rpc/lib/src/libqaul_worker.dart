@@ -287,19 +287,24 @@ class LibqaulWorker {
             m.toString(),
             'LibqaulWorker.receiveResponse',
           ),
+          StackTrace.current,
         );
       }
     }
   }
 
   void _processResponse(RpcTranslatorResponse resp) {
-    if (resp.data is List<User>) {
+    if (resp.module == Modules.USERS || resp.module == Modules.ROUTER) {
       final provider = _reader(usersProvider.notifier);
-
-      for (final user in resp.data) {
-        provider.contains(user) ? provider.update(user) : provider.add(user);
+      if (resp.data is List<User>) {
+        for (final user in resp.data) {
+          provider.contains(user) ? provider.update(user) : provider.add(user);
+        }
+        return;
+      } else if (resp.data is User) {
+        if (provider.contains(resp.data)) provider.update(resp.data);
+        return;
       }
-      return;
     }
     if (resp.module == Modules.FEED) {
       if (resp.data != null && resp.data is List<FeedPost>) {
@@ -368,6 +373,7 @@ class LibqaulWorker {
     _log.severe(
       'LibqaulWorker._processResponse($resp)',
       UnhandledRpcMessageException(resp.toString(), '_processResponse'),
+      StackTrace.current,
     );
   }
 }

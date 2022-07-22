@@ -26,8 +26,28 @@ class UsersTranslator extends RpcModuleTranslator {
             .toList();
 
         return RpcTranslatorResponse(type, users);
+      case Users_Message.userUpdate:
+        final userEntry = message.ensureUserUpdate();
+        final user = User(
+          name: userEntry.name,
+          idBase58: userEntry.idBase58,
+          id: Uint8List.fromList(userEntry.id),
+          key: Uint8List.fromList(userEntry.key),
+          keyType: userEntry.keyType,
+          keyBase58: userEntry.keyBase58,
+          isBlocked: userEntry.blocked,
+          isVerified: userEntry.verified,
+          status: _mapFrom(userEntry.connectivity),
+        );
+        return RpcTranslatorResponse(type, user);
       default:
         return super.decodeMessageBytes(data);
     }
+  }
+
+  ConnectionStatus _mapFrom(Connectivity c) {
+    if (c == Connectivity.Online) return ConnectionStatus.online;
+    if (c == Connectivity.Reachable) return ConnectionStatus.reachable;
+    return ConnectionStatus.offline;
   }
 }

@@ -43,7 +43,7 @@ class UnhandledRpcMessageException implements Exception {
 
   @override
   String toString() {
-    String report = "AUnhandledRpcMessageException";
+    String report = "UnhandledRpcMessageException";
     if (message.isNotEmpty) report = "$report: $message";
     Object? source = this.source;
     if (source != null) report = '$report, at $source';
@@ -63,6 +63,7 @@ abstract class RpcModuleTranslator {
     _log.severe(
       'Received libqaul message from module "$type" which could not be translated',
       UnhandledRpcMessageException(type.toString()),
+      StackTrace.current,
     );
     return null;
   }
