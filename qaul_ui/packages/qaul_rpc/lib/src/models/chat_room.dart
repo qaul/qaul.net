@@ -46,7 +46,7 @@ class ChatRoom with EquatableMixin implements Comparable {
         overview.lastMessageAt.toInt(),
       ),
       unreadCount: overview.unread,
-      lastMessagePreview: overview.content,
+      lastMessagePreview: String.fromCharCodes(overview.content),
     );
   }
 
@@ -123,7 +123,7 @@ class Message with EquatableMixin implements Comparable<Message> {
     return Message(
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(m.messageId),
-      content: m.content,
+      content: String.fromCharCodes(m.content),
       index: m.index,
       status: MessageStatus.values[m.status],
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),

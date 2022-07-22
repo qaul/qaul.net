@@ -185,7 +185,7 @@ class LibqaulWorker {
     final msg = Debug(deleteLibqaulLogsRequest: DeleteLibqaulLogsRequest());
     await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
   }
-  
+
   void sendBleInfoRequest() async {
     for (final message in [
       Ble(infoRequest: InfoRequest()).writeToBuffer(),
@@ -281,8 +281,13 @@ class LibqaulWorker {
         final resp = await BleTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else {
-        throw UnhandledRpcMessageException.value(
-            m.toString(), 'LibqaulWorker.receiveResponse');
+        _log.severe(
+          'LibqaulWorker.receiveResponse($m)',
+          UnhandledRpcMessageException(
+            m.toString(),
+            'LibqaulWorker.receiveResponse',
+          ),
+        );
       }
     }
   }
@@ -360,9 +365,9 @@ class LibqaulWorker {
         return;
       }
     }
-
-    _log.severe('_processResponse: UnhandledRpcMessageException($resp)');
-    throw UnhandledRpcMessageException.value(
-        resp.toString(), '_processResponse');
+    _log.severe(
+      'LibqaulWorker._processResponse($resp)',
+      UnhandledRpcMessageException(resp.toString(), '_processResponse'),
+    );
   }
 }

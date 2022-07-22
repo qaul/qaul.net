@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import '../generated/connections/ble/ble_rpc.pb.dart';
@@ -34,28 +35,36 @@ part 'user_accounts_translator.dart';
 part 'users_translator.dart';
 
 class UnhandledRpcMessageException implements Exception {
-  UnhandledRpcMessageException._(this.message);
+  final String message;
 
-  String message;
+  final String? source;
 
-  factory UnhandledRpcMessageException.value(String value, [String? type]) {
-    var m = 'Message: $value';
-    if (type != null) m += ', thrown by runtimeType: $type';
-    return UnhandledRpcMessageException._(m);
-  }
+  const UnhandledRpcMessageException([this.message = "", this.source]);
 
   @override
-  String toString() => 'UnhandledRpcMessageException{message: $message}';
+  String toString() {
+    String report = "AUnhandledRpcMessageException";
+    if (message.isNotEmpty) report = "$report: $message";
+    Object? source = this.source;
+    if (source != null) report = '$report, at $source';
+    return report;
+  }
 }
 
 abstract class RpcModuleTranslator {
+  final _log = Logger('RpcModuleTranslator');
+
   @protected
   Modules get type;
 
   @protected
   @mustCallSuper
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) {
-    throw UnhandledRpcMessageException.value(type.toString());
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+    _log.severe(
+      'Received libqaul message from module "$type" which could not be translated',
+      UnhandledRpcMessageException(type.toString()),
+    );
+    return null;
   }
 }
 
