@@ -15,6 +15,7 @@ use super::chat::Chat;
 use super::debug::Debug;
 use super::ble::Ble;
 use super::fileshare::FileShare;
+use super::groupchat::GroupChat;
 
 /// CLI command analizer and processing
 pub struct Cli {}
@@ -62,6 +63,10 @@ impl Cli {
             // file sharing functions
             cmd if cmd.starts_with("file ") => {
                 FileShare::cli(cmd.strip_prefix("file ").unwrap());
+            },
+            // group chat functions
+            cmd if cmd.starts_with("group ") => {
+                GroupChat::cli(cmd.strip_prefix("group ").unwrap());
             },
             // unknown command
             _ => log::error!("unknown command"),

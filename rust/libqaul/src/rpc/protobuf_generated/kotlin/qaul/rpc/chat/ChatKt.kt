@@ -201,6 +201,78 @@ object ChatKt {
     fun hasSend(): kotlin.Boolean {
       return _builder.hasSend()
     }
+
+    /**
+     * <pre>
+     * request a specific conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupRequest chat_group_request = 6;</code>
+     */
+    var chatGroupRequest: qaul.rpc.chat.ChatOuterClass.ChatGroupRequest
+      @JvmName("getChatGroupRequest")
+      get() = _builder.getChatGroupRequest()
+      @JvmName("setChatGroupRequest")
+      set(value) {
+        _builder.setChatGroupRequest(value)
+      }
+    /**
+     * <pre>
+     * request a specific conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupRequest chat_group_request = 6;</code>
+     */
+    fun clearChatGroupRequest() {
+      _builder.clearChatGroupRequest()
+    }
+    /**
+     * <pre>
+     * request a specific conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupRequest chat_group_request = 6;</code>
+     * @return Whether the chatGroupRequest field is set.
+     */
+    fun hasChatGroupRequest(): kotlin.Boolean {
+      return _builder.hasChatGroupRequest()
+    }
+
+    /**
+     * <pre>
+     * list of a chat conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupList chat_group_list = 7;</code>
+     */
+    var chatGroupList: qaul.rpc.chat.ChatOuterClass.ChatGroupList
+      @JvmName("getChatGroupList")
+      get() = _builder.getChatGroupList()
+      @JvmName("setChatGroupList")
+      set(value) {
+        _builder.setChatGroupList(value)
+      }
+    /**
+     * <pre>
+     * list of a chat conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupList chat_group_list = 7;</code>
+     */
+    fun clearChatGroupList() {
+      _builder.clearChatGroupList()
+    }
+    /**
+     * <pre>
+     * list of a chat conversation
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ChatGroupList chat_group_list = 7;</code>
+     * @return Whether the chatGroupList field is set.
+     */
+    fun hasChatGroupList(): kotlin.Boolean {
+      return _builder.hasChatGroupList()
+    }
     val messageCase: qaul.rpc.chat.ChatOuterClass.Chat.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -228,4 +300,10 @@ val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.conversationListOrNull: qaul.rpc.
 
 val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.sendOrNull: qaul.rpc.chat.ChatOuterClass.ChatMessageSend?
   get() = if (hasSend()) getSend() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.chatGroupRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatGroupRequest?
+  get() = if (hasChatGroupRequest()) getChatGroupRequest() else null
+
+val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.chatGroupListOrNull: qaul.rpc.chat.ChatOuterClass.ChatGroupList?
+  get() = if (hasChatGroupList()) getChatGroupList() else null
 

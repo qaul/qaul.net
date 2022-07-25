@@ -114,6 +114,49 @@ impl Chat {
                     }
                 }
             },
+            // request group chat conversation
+            cmd if cmd.starts_with("group") => {
+                match cmd.strip_prefix("group ") {
+                    Some(command_str) => {
+                        let command_string = command_str.to_string();
+                        let mut iter = command_string.split_whitespace();
+                        let mut conversation_id = Vec::new();
+                        let mut last_index = 0;
+
+                        // convert conversation id from string to binary version
+                        if let Some(conversation_id_str) = iter.next() {
+                            match Self::id_string_to_bin(conversation_id_str.to_string()) {
+                                Ok(id) => {
+                                    conversation_id = id;
+                                },
+                                Err(e) => {
+                                    log::error!("{}", e);
+                                    return;
+                                }
+                            }
+                        }
+
+                        // convert last_received index string to number
+                        if let Some(index_str) = iter.next() {
+                            // option: get last_received
+                            if let Ok(index) = index_str.parse::<u64>() {
+                                last_index = index;
+                            }
+                            else {
+                                log::error!("chat conversation index is not a valid number");
+                                return;
+                            }
+                        }
+                        // request chat conversation
+                        Self::request_group_chat_conversation(conversation_id, last_index);
+                    },
+                    None => {
+                        // request all messages
+                        log::error!("chat conversation command not correctly formatted");
+                    }
+                }
+            },
+
             // unknown command
             _ => log::error!("unknown chat command"),
         }
@@ -200,6 +243,29 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
+    /// Request group chat conversation via rpc
+    /// 
+    /// This provides all chat messages of a specific conversation.
+    /// The conversation is addressed via it's conversation id
+    fn request_group_chat_conversation(group_id: Vec<u8>, last_index: u64) {
+        // create feed list request message
+        let proto_message = proto::Chat {
+            message: Some(proto::chat::Message::ChatGroupRequest(
+                proto::ChatGroupRequest{
+                    group_id,
+                    last_index,
+                }
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+    }
+
     /// Process received RPC message
     /// 
     /// Decodes received protobuf encoded binary RPC message
@@ -233,6 +299,14 @@ impl Chat {
                                             println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
                                             println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
                                             println!("  description: {}", file_content.file_descr);
+                                        },
+                                        Some(proto::chat_message_content::Content::GroupInviteContent(invite_content)) =>{                                            
+                                            println!("  Group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
+                                            println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
+                                        },
+                                        Some(proto::chat_message_content::Content::GroupInviteReplyContent(reply_content)) =>{
+                                            print!("  Reply group invite ");
+                                            println!("      group id: {} Accept: {}", bs58::encode(reply_content.group_id).into_string(), reply_content.accept);
                                         },
                                         _ =>{
                                             log::error!("unknown ChatMessageContent");   
@@ -287,6 +361,32 @@ impl Chat {
                                             println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
                                             println!("  description: {}", file_content.file_descr);
                                         },
+                                        Some(proto::chat_message_content::Content::GroupInviteContent(invite_content)) =>{
+                                            if message.status == 1 {
+                                                println!("  Sent group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
+                                                println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
+                                            }else if message.status == 2{
+                                                println!("  Received group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
+                                                println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
+                                            } 
+                                        },
+                                        Some(proto::chat_message_content::Content::GroupInviteReplyContent(reply_content)) =>{
+                                            if message.status == 1 {
+                                                if reply_content.accept{
+                                                    print!("  Accept group invite ");
+                                                }else{
+                                                    print!("  Decline group invite ");
+                                                }
+                                                println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
+                                            }else if message.status == 2 {
+                                                if reply_content.accept{
+                                                    print!("  Accepted group invite ");
+                                                }else{
+                                                    print!("  Declined group invite ");
+                                                }
+                                                println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
+                                            }
+                                        },
                                         _ =>{
                                             log::error!("unknown ChatMessageContent");   
                                         }
@@ -300,7 +400,41 @@ impl Chat {
                             
                             println!("");
                         }
-                    }
+                    },
+
+                    Some(proto::chat::Message::ChatGroupList(proto_conversation)) => {
+                        // Conversation table
+                        println!("");
+                        println!("Group [ {} ]", bs58::encode(proto_conversation.group_id).into_string()); 
+                        println!("No | Received At | Sender");
+                        println!("  Message Content");
+                        println!("");
+
+                        // print all messages in the feed list
+                        for message in proto_conversation.message_list {
+                            print!{"{} | ", message.index};
+                            print!("{} | ", message.sent_at);
+                            println!("{}", bs58::encode(message.message_id).into_string());
+
+                            match proto::ChatMessageContent::decode(&message.content[..]) {
+                                Ok(chat_message_content) =>{
+                                    match chat_message_content.content{
+                                        Some(proto::chat_message_content::Content::ChatContent(chat_content)) =>{
+                                            println!("  {}", chat_content.content);
+                                        },
+                                        _ =>{
+                                            log::error!("unknown ChatMessageContent");   
+                                        }
+                                    }
+                                },
+                                Err(e) => {
+                                    log::error!("{:?}", e);
+                                },                    
+                            }                            
+                            println!("");
+                        }
+                    },
+
                     _ => {
                         log::error!("unprocessable RPC chat message");
                     },

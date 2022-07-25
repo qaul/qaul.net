@@ -117,6 +117,30 @@ object MessagingKt {
     fun hasFileMessage(): kotlin.Boolean {
       return _builder.hasFileMessage()
     }
+
+    /**
+     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
+     */
+    var groupChatMessage: qaul.net.messaging.MessagingOuterClass.GroupChatMessage
+      @JvmName("getGroupChatMessage")
+      get() = _builder.getGroupChatMessage()
+      @JvmName("setGroupChatMessage")
+      set(value) {
+        _builder.setGroupChatMessage(value)
+      }
+    /**
+     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
+     */
+    fun clearGroupChatMessage() {
+      _builder.clearGroupChatMessage()
+    }
+    /**
+     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
+     * @return Whether the groupChatMessage field is set.
+     */
+    fun hasGroupChatMessage(): kotlin.Boolean {
+      return _builder.hasGroupChatMessage()
+    }
     val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -141,4 +165,7 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull:
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.fileMessageOrNull: qaul.net.messaging.MessagingOuterClass.FileMessage?
   get() = if (hasFileMessage()) getFileMessage() else null
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupChatMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupChatMessage?
+  get() = if (hasGroupChatMessage()) getGroupChatMessage() else null
 

@@ -40,7 +40,7 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -55,6 +55,8 @@ pub mod messaging {
         ChatMessage(super::ChatMessage),
         #[prost(message, tag="4")]
         FileMessage(super::FileMessage),
+        #[prost(message, tag="5")]
+        GroupChatMessage(super::GroupChatMessage),
     }
 }
 /// Crypto Service Message
@@ -100,6 +102,12 @@ pub struct ChatMessage {
 /// chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// chat message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupChatMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }

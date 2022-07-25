@@ -18,6 +18,7 @@ pub mod messaging;
 pub mod chat;
 pub mod crypto;
 pub mod filesharing;
+pub mod groupchat;
 
 /// qaul Services
 pub struct Services {
@@ -33,5 +34,6 @@ impl Services {
         messaging::Messaging::init();
         chat::Chat::init();
         filesharing::FileShare::init();
+        groupchat::GroupChat::init();
     }
 }

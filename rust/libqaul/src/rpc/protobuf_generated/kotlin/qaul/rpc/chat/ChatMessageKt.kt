@@ -49,7 +49,7 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * id of the sending user
+     * id of the sending user or group_id(group flag case)
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -63,7 +63,7 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * id of the sending user
+     * id of the sending user or group_id(group flag case)
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -74,7 +74,7 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * message id
+     * message id or member id
      * </pre>
      *
      * <code>bytes message_id = 3;</code>
@@ -88,7 +88,7 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * message id
+     * message id or member id
      * </pre>
      *
      * <code>bytes message_id = 3;</code>
@@ -105,7 +105,7 @@ object ChatMessageKt {
      * 2 = received
      * </pre>
      *
-     * <code>int32 status = 4;</code>
+     * <code>uint32 status = 4;</code>
      */
     var status: kotlin.Int
       @JvmName("getStatus")
@@ -122,7 +122,7 @@ object ChatMessageKt {
      * 2 = received
      * </pre>
      *
-     * <code>int32 status = 4;</code>
+     * <code>uint32 status = 4;</code>
      */
     fun clearStatus() {
       _builder.clearStatus()
@@ -130,10 +130,60 @@ object ChatMessageKt {
 
     /**
      * <pre>
+     * group 
+     * </pre>
+     *
+     * <code>bool is_group = 5;</code>
+     */
+    var isGroup: kotlin.Boolean
+      @JvmName("getIsGroup")
+      get() = _builder.getIsGroup()
+      @JvmName("setIsGroup")
+      set(value) {
+        _builder.setIsGroup(value)
+      }
+    /**
+     * <pre>
+     * group 
+     * </pre>
+     *
+     * <code>bool is_group = 5;</code>
+     */
+    fun clearIsGroup() {
+      _builder.clearIsGroup()
+    }
+
+    /**
+     * <pre>
+     * conversation id(group_id)
+     * </pre>
+     *
+     * <code>bytes conversation_id = 6;</code>
+     */
+    var conversationId: com.google.protobuf.ByteString
+      @JvmName("getConversationId")
+      get() = _builder.getConversationId()
+      @JvmName("setConversationId")
+      set(value) {
+        _builder.setConversationId(value)
+      }
+    /**
+     * <pre>
+     * conversation id(group_id)
+     * </pre>
+     *
+     * <code>bytes conversation_id = 6;</code>
+     */
+    fun clearConversationId() {
+      _builder.clearConversationId()
+    }
+
+    /**
+     * <pre>
      * time when the message was sent
      * </pre>
      *
-     * <code>uint64 sent_at = 5;</code>
+     * <code>uint64 sent_at = 7;</code>
      */
     var sentAt: kotlin.Long
       @JvmName("getSentAt")
@@ -147,7 +197,7 @@ object ChatMessageKt {
      * time when the message was sent
      * </pre>
      *
-     * <code>uint64 sent_at = 5;</code>
+     * <code>uint64 sent_at = 7;</code>
      */
     fun clearSentAt() {
       _builder.clearSentAt()
@@ -158,7 +208,7 @@ object ChatMessageKt {
      * time when the message was received
      * </pre>
      *
-     * <code>uint64 received_at = 6;</code>
+     * <code>uint64 received_at = 8;</code>
      */
     var receivedAt: kotlin.Long
       @JvmName("getReceivedAt")
@@ -172,7 +222,7 @@ object ChatMessageKt {
      * time when the message was received
      * </pre>
      *
-     * <code>uint64 received_at = 6;</code>
+     * <code>uint64 received_at = 8;</code>
      */
     fun clearReceivedAt() {
       _builder.clearReceivedAt()
@@ -180,10 +230,10 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * content of the message
+     * content of the message    
      * </pre>
      *
-     * <code>bytes content = 7;</code>
+     * <code>bytes content = 9;</code>
      */
     var content: com.google.protobuf.ByteString
       @JvmName("getContent")
@@ -194,10 +244,10 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * content of the message
+     * content of the message    
      * </pre>
      *
-     * <code>bytes content = 7;</code>
+     * <code>bytes content = 9;</code>
      */
     fun clearContent() {
       _builder.clearContent()

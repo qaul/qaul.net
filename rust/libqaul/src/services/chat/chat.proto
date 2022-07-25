@@ -18,6 +18,12 @@ message Chat {
 
         // send a new chat message
         ChatMessageSend send = 5;
+
+        // request a specific conversation
+        ChatGroupRequest chat_group_request = 6;
+        // list of a chat conversation
+        ChatGroupList chat_group_list = 7;
+
     }
 }
 
@@ -65,25 +71,42 @@ message ChatConversationList {
     repeated ChatMessage message_list = 2;
 }
 
+// request messages of a specific group chat conversation
+message ChatGroupRequest {
+    bytes group_id = 1;
+    // send only changes that are newer than the last received
+    uint64 last_index = 2;
+}
+// list of chat messages of a specific group
+message ChatGroupList {
+    bytes group_id = 1;
+    repeated ChatMessage message_list = 2;
+}
+
+
 // a single chat message
 message ChatMessage {
     // message index
     uint32 index = 1;
-    // id of the sending user
+    // id of the sending user or group_id(group flag case)
     bytes sender_id = 2;
-    // message id
-    bytes message_id = 3;
+    // message id or member id
+    bytes message_id = 3;        
     // message status
     // 0 = nothing
     // 1 = sent
     // 2 = received
-    int32 status = 4;
+    uint32 status = 4;
+    // group 
+    bool is_group = 5;
+    // conversation id(group_id)
+    bytes conversation_id = 6;    
     // time when the message was sent
-    uint64 sent_at = 5;
+    uint64 sent_at = 7;
     // time when the message was received
-    uint64 received_at = 6;
-    // content of the message
-    bytes content = 7;
+    uint64 received_at = 8;
+    // content of the message    
+    bytes content = 9;
 }
 
 // chat message content
@@ -93,6 +116,10 @@ message ChatMessageContent{
         ChatContent chat_content = 1;
         // file sharing content
         FileShareContent file_content = 2;
+        // group invite content
+        GroupInviteContent group_invite_content = 3;
+        //group invite reply content
+        GroupInviteReplyContent group_invite_reply_content = 4;
     }
 }
 
@@ -123,4 +150,26 @@ message ChatMessageSend {
     bytes conversation_id = 1;
     // content of the message
     string content = 2;
+}
+
+//Group invite content
+message GroupInviteContent{
+    //Group Id
+    bytes group_id = 1;
+    //Group name
+    string group_name = 2;
+    //created at
+    uint64 created_at = 3;
+    //member count
+    uint32 member_count = 4;
+    //admin id
+    bytes admin_id = 5;
+}
+
+//Group invite reply content
+message GroupInviteReplyContent{
+    //Group Id
+    bytes group_id = 1;
+    //Accept
+    bool accept = 2;
 }

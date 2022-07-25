@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Chat {
     /// message type
-    #[prost(oneof="chat::Message", tags="1, 2, 3, 4, 5")]
+    #[prost(oneof="chat::Message", tags="1, 2, 3, 4, 5, 6, 7")]
     pub message: ::core::option::Option<chat::Message>,
 }
 /// Nested message and enum types in `Chat`.
@@ -25,6 +25,12 @@ pub mod chat {
         /// send a new chat message
         #[prost(message, tag="5")]
         Send(super::ChatMessageSend),
+        /// request a specific conversation
+        #[prost(message, tag="6")]
+        ChatGroupRequest(super::ChatGroupRequest),
+        /// list of a chat conversation
+        #[prost(message, tag="7")]
+        ChatGroupList(super::ChatGroupList),
     }
 }
 /// request for overview list of all conversations
@@ -84,6 +90,23 @@ pub struct ChatConversationList {
     #[prost(message, repeated, tag="2")]
     pub message_list: ::prost::alloc::vec::Vec<ChatMessage>,
 }
+/// request messages of a specific group chat conversation
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatGroupRequest {
+    #[prost(bytes="vec", tag="1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// send only changes that are newer than the last received
+    #[prost(uint64, tag="2")]
+    pub last_index: u64,
+}
+/// list of chat messages of a specific group
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatGroupList {
+    #[prost(bytes="vec", tag="1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, repeated, tag="2")]
+    pub message_list: ::prost::alloc::vec::Vec<ChatMessage>,
+}
 /// a single chat message
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -91,32 +114,38 @@ pub struct ChatMessage {
     /// message index
     #[prost(uint32, tag="1")]
     pub index: u32,
-    /// id of the sending user
+    /// id of the sending user or group_id(group flag case)
     #[prost(bytes="vec", tag="2")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
-    /// message id
+    /// message id or member id
     #[prost(bytes="vec", tag="3")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
     /// message status
     /// 0 = nothing
     /// 1 = sent
     /// 2 = received
-    #[prost(int32, tag="4")]
-    pub status: i32,
+    #[prost(uint32, tag="4")]
+    pub status: u32,
+    /// group 
+    #[prost(bool, tag="5")]
+    pub is_group: bool,
+    /// conversation id(group_id)
+    #[prost(bytes="vec", tag="6")]
+    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
     /// time when the message was sent
-    #[prost(uint64, tag="5")]
+    #[prost(uint64, tag="7")]
     pub sent_at: u64,
     /// time when the message was received
-    #[prost(uint64, tag="6")]
+    #[prost(uint64, tag="8")]
     pub received_at: u64,
-    /// content of the message
-    #[prost(bytes="vec", tag="7")]
+    /// content of the message    
+    #[prost(bytes="vec", tag="9")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// chat message content
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatMessageContent {
-    #[prost(oneof="chat_message_content::Content", tags="1, 2")]
+    #[prost(oneof="chat_message_content::Content", tags="1, 2, 3, 4")]
     pub content: ::core::option::Option<chat_message_content::Content>,
 }
 /// Nested message and enum types in `ChatMessageContent`.
@@ -129,6 +158,12 @@ pub mod chat_message_content {
         /// file sharing content
         #[prost(message, tag="2")]
         FileContent(super::FileShareContent),
+        /// group invite content
+        #[prost(message, tag="3")]
+        GroupInviteContent(super::GroupInviteContent),
+        ///group invite reply content
+        #[prost(message, tag="4")]
+        GroupInviteReplyContent(super::GroupInviteReplyContent),
     }
 }
 ///chat content 
@@ -166,4 +201,33 @@ pub struct ChatMessageSend {
     /// content of the message
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,
+}
+///Group invite content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInviteContent {
+    ///Group Id
+    #[prost(bytes="vec", tag="1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    ///Group name
+    #[prost(string, tag="2")]
+    pub group_name: ::prost::alloc::string::String,
+    ///created at
+    #[prost(uint64, tag="3")]
+    pub created_at: u64,
+    ///member count
+    #[prost(uint32, tag="4")]
+    pub member_count: u32,
+    ///admin id
+    #[prost(bytes="vec", tag="5")]
+    pub admin_id: ::prost::alloc::vec::Vec<u8>,
+}
+///Group invite reply content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInviteReplyContent {
+    ///Group Id
+    #[prost(bytes="vec", tag="1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    ///Accept
+    #[prost(bool, tag="2")]
+    pub accept: bool,
 }

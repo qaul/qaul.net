@@ -1,0 +1,83 @@
+syntax = "proto3";
+package qaul.net.groupchat;
+
+// GroupChat network message container
+message GroupChatContainer {
+    oneof message {
+        // group invite
+        InviteMember invite_member = 1;
+        // reply invite
+        ReplyInvite reply_invite = 2;
+        // group notify
+        GroupNotify notify = 3;
+        // member removed
+        RemovedMember removed = 4;
+        // group chat message
+        GroupchatMessage groupchat_message = 5;
+    }
+}
+
+
+// Invite member
+message InviteMember{
+    // group id
+    bytes group_id = 1;
+    // group name
+    string group_name = 2;
+    // group admin id
+    bytes admin_id = 3;
+    // group created at
+    uint64 created_at = 4;
+    // group member count
+    uint32 members_count = 5;
+}
+
+// Group member
+message Member {
+    //user id
+    bytes user_id = 1;
+    //role
+    uint32 role = 2;
+    //joined at
+    uint64 joined_at = 3;
+    //state 
+    uint32 state = 4;
+}
+
+// Group Notify
+message GroupNotify{
+    // group id
+    bytes group_id = 1;
+    // group name
+    string group_name = 2;
+    //created at
+    uint64 created_at = 3;
+    // creator id
+    bytes creator_id = 4;
+    // updated members
+    repeated Member members = 5;
+}
+
+// Accept Invite
+message ReplyInvite{
+    // group id
+    bytes group_id = 1;
+    // accept true : accept, false: decline
+    bool accept = 2; 
+}
+
+// Removed member 
+message RemovedMember{
+    // group id
+    bytes group_id = 1;
+}
+
+//Group chat message
+message GroupchatMessage{
+    // group id
+    bytes group_id = 1;
+    // content
+    string content = 2;
+    // sent at
+    uint64 sent_at = 3;
+}

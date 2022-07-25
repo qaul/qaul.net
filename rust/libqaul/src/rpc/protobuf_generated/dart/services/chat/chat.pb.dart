@@ -16,6 +16,8 @@ enum Chat_Message {
   conversationRequest, 
   conversationList, 
   send, 
+  chatGroupRequest, 
+  chatGroupList, 
   notSet
 }
 
@@ -26,15 +28,19 @@ class Chat extends $pb.GeneratedMessage {
     3 : Chat_Message.conversationRequest,
     4 : Chat_Message.conversationList,
     5 : Chat_Message.send,
+    6 : Chat_Message.chatGroupRequest,
+    7 : Chat_Message.chatGroupList,
     0 : Chat_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Chat', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7])
     ..aOM<ChatOverviewRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'overviewRequest', subBuilder: ChatOverviewRequest.create)
     ..aOM<ChatOverviewList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'overviewList', subBuilder: ChatOverviewList.create)
     ..aOM<ChatConversationRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationRequest', subBuilder: ChatConversationRequest.create)
     ..aOM<ChatConversationList>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationList', subBuilder: ChatConversationList.create)
     ..aOM<ChatMessageSend>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'send', subBuilder: ChatMessageSend.create)
+    ..aOM<ChatGroupRequest>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatGroupRequest', subBuilder: ChatGroupRequest.create)
+    ..aOM<ChatGroupList>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatGroupList', subBuilder: ChatGroupList.create)
     ..hasRequiredFields = false
   ;
 
@@ -45,6 +51,8 @@ class Chat extends $pb.GeneratedMessage {
     ChatConversationRequest? conversationRequest,
     ChatConversationList? conversationList,
     ChatMessageSend? send,
+    ChatGroupRequest? chatGroupRequest,
+    ChatGroupList? chatGroupList,
   }) {
     final _result = create();
     if (overviewRequest != null) {
@@ -61,6 +69,12 @@ class Chat extends $pb.GeneratedMessage {
     }
     if (send != null) {
       _result.send = send;
+    }
+    if (chatGroupRequest != null) {
+      _result.chatGroupRequest = chatGroupRequest;
+    }
+    if (chatGroupList != null) {
+      _result.chatGroupList = chatGroupList;
     }
     return _result;
   }
@@ -142,6 +156,28 @@ class Chat extends $pb.GeneratedMessage {
   void clearSend() => clearField(5);
   @$pb.TagNumber(5)
   ChatMessageSend ensureSend() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  ChatGroupRequest get chatGroupRequest => $_getN(5);
+  @$pb.TagNumber(6)
+  set chatGroupRequest(ChatGroupRequest v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasChatGroupRequest() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearChatGroupRequest() => clearField(6);
+  @$pb.TagNumber(6)
+  ChatGroupRequest ensureChatGroupRequest() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  ChatGroupList get chatGroupList => $_getN(6);
+  @$pb.TagNumber(7)
+  set chatGroupList(ChatGroupList v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasChatGroupList() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearChatGroupList() => clearField(7);
+  @$pb.TagNumber(7)
+  ChatGroupList ensureChatGroupList() => $_ensure(6);
 }
 
 class ChatOverviewRequest extends $pb.GeneratedMessage {
@@ -461,15 +497,133 @@ class ChatConversationList extends $pb.GeneratedMessage {
   $core.List<ChatMessage> get messageList => $_getList(1);
 }
 
+class ChatGroupRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatGroupRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
+  ChatGroupRequest._() : super();
+  factory ChatGroupRequest({
+    $core.List<$core.int>? groupId,
+    $fixnum.Int64? lastIndex,
+  }) {
+    final _result = create();
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    if (lastIndex != null) {
+      _result.lastIndex = lastIndex;
+    }
+    return _result;
+  }
+  factory ChatGroupRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatGroupRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChatGroupRequest clone() => ChatGroupRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChatGroupRequest copyWith(void Function(ChatGroupRequest) updates) => super.copyWith((message) => updates(message as ChatGroupRequest)) as ChatGroupRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ChatGroupRequest create() => ChatGroupRequest._();
+  ChatGroupRequest createEmptyInstance() => create();
+  static $pb.PbList<ChatGroupRequest> createRepeated() => $pb.PbList<ChatGroupRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ChatGroupRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatGroupRequest>(create);
+  static ChatGroupRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get groupId => $_getN(0);
+  @$pb.TagNumber(1)
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasGroupId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearGroupId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get lastIndex => $_getI64(1);
+  @$pb.TagNumber(2)
+  set lastIndex($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLastIndex() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLastIndex() => clearField(2);
+}
+
+class ChatGroupList extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatGroupList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..pc<ChatMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageList', $pb.PbFieldType.PM, subBuilder: ChatMessage.create)
+    ..hasRequiredFields = false
+  ;
+
+  ChatGroupList._() : super();
+  factory ChatGroupList({
+    $core.List<$core.int>? groupId,
+    $core.Iterable<ChatMessage>? messageList,
+  }) {
+    final _result = create();
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    if (messageList != null) {
+      _result.messageList.addAll(messageList);
+    }
+    return _result;
+  }
+  factory ChatGroupList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatGroupList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ChatGroupList clone() => ChatGroupList()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ChatGroupList copyWith(void Function(ChatGroupList) updates) => super.copyWith((message) => updates(message as ChatGroupList)) as ChatGroupList; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ChatGroupList create() => ChatGroupList._();
+  ChatGroupList createEmptyInstance() => create();
+  static $pb.PbList<ChatGroupList> createRepeated() => $pb.PbList<ChatGroupList>();
+  @$core.pragma('dart2js:noInline')
+  static ChatGroupList getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ChatGroupList>(create);
+  static ChatGroupList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get groupId => $_getN(0);
+  @$pb.TagNumber(1)
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasGroupId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearGroupId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<ChatMessage> get messageList => $_getList(1);
+}
+
 class ChatMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'index', $pb.PbFieldType.OU3)
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.O3)
-    ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sentAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.List<$core.int>>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OU3)
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isGroup')
+    ..a<$core.List<$core.int>>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sentAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.List<$core.int>>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
@@ -479,6 +633,8 @@ class ChatMessage extends $pb.GeneratedMessage {
     $core.List<$core.int>? senderId,
     $core.List<$core.int>? messageId,
     $core.int? status,
+    $core.bool? isGroup,
+    $core.List<$core.int>? conversationId,
     $fixnum.Int64? sentAt,
     $fixnum.Int64? receivedAt,
     $core.List<$core.int>? content,
@@ -495,6 +651,12 @@ class ChatMessage extends $pb.GeneratedMessage {
     }
     if (status != null) {
       _result.status = status;
+    }
+    if (isGroup != null) {
+      _result.isGroup = isGroup;
+    }
+    if (conversationId != null) {
+      _result.conversationId = conversationId;
     }
     if (sentAt != null) {
       _result.sentAt = sentAt;
@@ -558,43 +720,63 @@ class ChatMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.int get status => $_getIZ(3);
   @$pb.TagNumber(4)
-  set status($core.int v) { $_setSignedInt32(3, v); }
+  set status($core.int v) { $_setUnsignedInt32(3, v); }
   @$pb.TagNumber(4)
   $core.bool hasStatus() => $_has(3);
   @$pb.TagNumber(4)
   void clearStatus() => clearField(4);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get sentAt => $_getI64(4);
+  $core.bool get isGroup => $_getBF(4);
   @$pb.TagNumber(5)
-  set sentAt($fixnum.Int64 v) { $_setInt64(4, v); }
+  set isGroup($core.bool v) { $_setBool(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasSentAt() => $_has(4);
+  $core.bool hasIsGroup() => $_has(4);
   @$pb.TagNumber(5)
-  void clearSentAt() => clearField(5);
+  void clearIsGroup() => clearField(5);
 
   @$pb.TagNumber(6)
-  $fixnum.Int64 get receivedAt => $_getI64(5);
+  $core.List<$core.int> get conversationId => $_getN(5);
   @$pb.TagNumber(6)
-  set receivedAt($fixnum.Int64 v) { $_setInt64(5, v); }
+  set conversationId($core.List<$core.int> v) { $_setBytes(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasReceivedAt() => $_has(5);
+  $core.bool hasConversationId() => $_has(5);
   @$pb.TagNumber(6)
-  void clearReceivedAt() => clearField(6);
+  void clearConversationId() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.List<$core.int> get content => $_getN(6);
+  $fixnum.Int64 get sentAt => $_getI64(6);
   @$pb.TagNumber(7)
-  set content($core.List<$core.int> v) { $_setBytes(6, v); }
+  set sentAt($fixnum.Int64 v) { $_setInt64(6, v); }
   @$pb.TagNumber(7)
-  $core.bool hasContent() => $_has(6);
+  $core.bool hasSentAt() => $_has(6);
   @$pb.TagNumber(7)
-  void clearContent() => clearField(7);
+  void clearSentAt() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $fixnum.Int64 get receivedAt => $_getI64(7);
+  @$pb.TagNumber(8)
+  set receivedAt($fixnum.Int64 v) { $_setInt64(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasReceivedAt() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearReceivedAt() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.List<$core.int> get content => $_getN(8);
+  @$pb.TagNumber(9)
+  set content($core.List<$core.int> v) { $_setBytes(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasContent() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearContent() => clearField(9);
 }
 
 enum ChatMessageContent_Content {
   chatContent, 
   fileContent, 
+  groupInviteContent, 
+  groupInviteReplyContent, 
   notSet
 }
 
@@ -602,12 +784,16 @@ class ChatMessageContent extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, ChatMessageContent_Content> _ChatMessageContent_ContentByTag = {
     1 : ChatMessageContent_Content.chatContent,
     2 : ChatMessageContent_Content.fileContent,
+    3 : ChatMessageContent_Content.groupInviteContent,
+    4 : ChatMessageContent_Content.groupInviteReplyContent,
     0 : ChatMessageContent_Content.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatMessageContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..oo(0, [1, 2])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<ChatContent>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatContent', subBuilder: ChatContent.create)
     ..aOM<FileShareContent>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileContent', subBuilder: FileShareContent.create)
+    ..aOM<GroupInviteContent>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInviteContent', subBuilder: GroupInviteContent.create)
+    ..aOM<GroupInviteReplyContent>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInviteReplyContent', subBuilder: GroupInviteReplyContent.create)
     ..hasRequiredFields = false
   ;
 
@@ -615,6 +801,8 @@ class ChatMessageContent extends $pb.GeneratedMessage {
   factory ChatMessageContent({
     ChatContent? chatContent,
     FileShareContent? fileContent,
+    GroupInviteContent? groupInviteContent,
+    GroupInviteReplyContent? groupInviteReplyContent,
   }) {
     final _result = create();
     if (chatContent != null) {
@@ -622,6 +810,12 @@ class ChatMessageContent extends $pb.GeneratedMessage {
     }
     if (fileContent != null) {
       _result.fileContent = fileContent;
+    }
+    if (groupInviteContent != null) {
+      _result.groupInviteContent = groupInviteContent;
+    }
+    if (groupInviteReplyContent != null) {
+      _result.groupInviteReplyContent = groupInviteReplyContent;
     }
     return _result;
   }
@@ -670,6 +864,28 @@ class ChatMessageContent extends $pb.GeneratedMessage {
   void clearFileContent() => clearField(2);
   @$pb.TagNumber(2)
   FileShareContent ensureFileContent() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  GroupInviteContent get groupInviteContent => $_getN(2);
+  @$pb.TagNumber(3)
+  set groupInviteContent(GroupInviteContent v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasGroupInviteContent() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearGroupInviteContent() => clearField(3);
+  @$pb.TagNumber(3)
+  GroupInviteContent ensureGroupInviteContent() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  GroupInviteReplyContent get groupInviteReplyContent => $_getN(3);
+  @$pb.TagNumber(4)
+  set groupInviteReplyContent(GroupInviteReplyContent v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasGroupInviteReplyContent() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearGroupInviteReplyContent() => clearField(4);
+  @$pb.TagNumber(4)
+  GroupInviteReplyContent ensureGroupInviteReplyContent() => $_ensure(3);
 }
 
 class ChatContent extends $pb.GeneratedMessage {
@@ -881,5 +1097,169 @@ class ChatMessageSend extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(1);
   @$pb.TagNumber(2)
   void clearContent() => clearField(2);
+}
+
+class GroupInviteContent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInviteContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupName')
+    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'memberCount', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'adminId', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  GroupInviteContent._() : super();
+  factory GroupInviteContent({
+    $core.List<$core.int>? groupId,
+    $core.String? groupName,
+    $fixnum.Int64? createdAt,
+    $core.int? memberCount,
+    $core.List<$core.int>? adminId,
+  }) {
+    final _result = create();
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    if (groupName != null) {
+      _result.groupName = groupName;
+    }
+    if (createdAt != null) {
+      _result.createdAt = createdAt;
+    }
+    if (memberCount != null) {
+      _result.memberCount = memberCount;
+    }
+    if (adminId != null) {
+      _result.adminId = adminId;
+    }
+    return _result;
+  }
+  factory GroupInviteContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GroupInviteContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GroupInviteContent clone() => GroupInviteContent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GroupInviteContent copyWith(void Function(GroupInviteContent) updates) => super.copyWith((message) => updates(message as GroupInviteContent)) as GroupInviteContent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteContent create() => GroupInviteContent._();
+  GroupInviteContent createEmptyInstance() => create();
+  static $pb.PbList<GroupInviteContent> createRepeated() => $pb.PbList<GroupInviteContent>();
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteContent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupInviteContent>(create);
+  static GroupInviteContent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get groupId => $_getN(0);
+  @$pb.TagNumber(1)
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasGroupId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearGroupId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get groupName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set groupName($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasGroupName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearGroupName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get createdAt => $_getI64(2);
+  @$pb.TagNumber(3)
+  set createdAt($fixnum.Int64 v) { $_setInt64(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCreatedAt() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCreatedAt() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get memberCount => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set memberCount($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasMemberCount() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearMemberCount() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.List<$core.int> get adminId => $_getN(4);
+  @$pb.TagNumber(5)
+  set adminId($core.List<$core.int> v) { $_setBytes(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasAdminId() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearAdminId() => clearField(5);
+}
+
+class GroupInviteReplyContent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInviteReplyContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accept')
+    ..hasRequiredFields = false
+  ;
+
+  GroupInviteReplyContent._() : super();
+  factory GroupInviteReplyContent({
+    $core.List<$core.int>? groupId,
+    $core.bool? accept,
+  }) {
+    final _result = create();
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    if (accept != null) {
+      _result.accept = accept;
+    }
+    return _result;
+  }
+  factory GroupInviteReplyContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GroupInviteReplyContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GroupInviteReplyContent clone() => GroupInviteReplyContent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GroupInviteReplyContent copyWith(void Function(GroupInviteReplyContent) updates) => super.copyWith((message) => updates(message as GroupInviteReplyContent)) as GroupInviteReplyContent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteReplyContent create() => GroupInviteReplyContent._();
+  GroupInviteReplyContent createEmptyInstance() => create();
+  static $pb.PbList<GroupInviteReplyContent> createRepeated() => $pb.PbList<GroupInviteReplyContent>();
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteReplyContent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupInviteReplyContent>(create);
+  static GroupInviteReplyContent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get groupId => $_getN(0);
+  @$pb.TagNumber(1)
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasGroupId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearGroupId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get accept => $_getBF(1);
+  @$pb.TagNumber(2)
+  set accept($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAccept() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAccept() => clearField(2);
 }
 

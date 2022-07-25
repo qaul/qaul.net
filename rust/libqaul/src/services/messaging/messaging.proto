@@ -37,6 +37,7 @@ message Messaging {
         CryptoService crypto_service = 2;
         ChatMessage chat_message = 3;
         FileMessage file_message = 4;
+        GroupChatMessage group_chat_message = 5;
     }
 }
 
@@ -75,5 +76,10 @@ message ChatMessage {
 
 // chat message
 message FileMessage {
+    bytes content = 1;
+}
+
+// chat message
+message GroupChatMessage {
     bytes content = 1;
 }

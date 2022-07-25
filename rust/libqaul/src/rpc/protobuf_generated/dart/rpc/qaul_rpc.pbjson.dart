@@ -24,11 +24,12 @@ const Modules$json = const {
     const {'1': 'CHAT', '2': 9},
     const {'1': 'BLE', '2': 10},
     const {'1': 'FILESHARE', '2': 11},
+    const {'1': 'GROUPCHAT', '2': 12},
   ],
 };
 
 /// Descriptor for `Modules`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAYSDwoLQ09OTkVDVElPTlMQBxIJCgVERUJVRxAIEggKBENIQVQQCRIHCgNCTEUQChINCglGSUxFU0hBUkUQCw==');
+final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAYSDwoLQ09OTkVDVElPTlMQBxIJCgVERUJVRxAIEggKBENIQVQQCRIHCgNCTEUQChINCglGSUxFU0hBUkUQCxINCglHUk9VUENIQVQQDA==');
 @$core.Deprecated('Use qaulRpcDescriptor instead')
 const QaulRpc$json = const {
   '1': 'QaulRpc',

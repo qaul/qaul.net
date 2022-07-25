@@ -1,0 +1,135 @@
+syntax = "proto3";
+package qaul.rpc.groupchat;
+
+// GroupChat service RPC message container
+message GroupChatRpc {
+    // message type
+    oneof message {
+        // group create request
+        GroupCreateRequest group_create_request = 1;
+        // group create response
+        GroupCreateResponse group_create_response = 2;
+        // group rename request
+        GroupRenameRequest group_rename_request = 3;
+        // group invite member request
+        GroupInviteMemberRequest group_invite_member_request = 4;
+        // group remove member request
+        GroupRemoveMemberRequest group_remove_member_request = 5;
+        //group info request
+        GroupInfoRequest group_info_request = 6;
+        //group info response
+        GroupInfoResponse group_info_response = 7;
+        //group reply invite
+        GroupReplyInviteRequest group_reply_invite_request = 8;
+        //group list request
+        GroupListRequest group_list_request = 9;
+        //group list response
+        GroupListResponse group_list_response = 10;
+        //group send message
+        GroupSendRequest group_send_request = 11;
+    }
+}
+
+// Create New Group 
+message GroupCreateRequest {
+    // group name
+    string group_name = 1;
+}
+
+// Group creating response
+message GroupCreateResponse {
+    // group name
+    string group_name = 1;
+    // group id
+    bytes group_id = 2;    
+}
+
+// Group rename request
+message GroupRenameRequest {
+    // group id
+    bytes group_id = 1;
+    // group name
+    string group_name = 2;
+}
+
+
+// Invite member
+message GroupInviteMemberRequest {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+}
+
+// Reply Invite 
+message GroupReplyInviteRequest {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+    // accept
+    bool  accept = 3;  
+}
+
+// Remove member
+message GroupRemoveMemberRequest {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+}
+
+// Group info request
+message GroupInfoRequest {
+    // group id
+    bytes group_id = 1;
+}
+
+// Group member response
+message GroupMember {
+    //user id
+    bytes user_id = 1;
+    //role
+    uint32 role = 2;
+    //joined at
+    uint64 joined_at = 3;
+    //state 
+    uint32 state = 4;
+}
+
+// Group info response
+message GroupInfoResponse {
+    // group id
+    bytes group_id = 1;
+    // group name
+    string group_name = 2;
+    // created at
+    uint64 created_at = 3;
+    //members
+    repeated GroupMember members = 4;
+}
+
+// Group list request
+message GroupListRequest {
+}
+
+// Group info response
+message GroupListResponse {
+    // group list
+    repeated GroupInfoResponse groups = 1;
+}
+
+
+// Group send message
+message GroupSendRequest {
+    // group id
+    bytes group_id = 1;
+    // message
+    string message = 2;
+}
+
+// Group send message
+message GroupConversationRequest {
+    // group id
+    bytes group_id = 1;
+}

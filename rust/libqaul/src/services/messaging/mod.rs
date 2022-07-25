@@ -20,6 +20,7 @@ use super::chat::Chat;
 use super::crypto::Crypto;
 
 use super::filesharing;
+use super::groupchat;
 
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
@@ -314,7 +315,7 @@ impl Messaging {
                                                 confirmation.message_id,
                                                 confirmation.received_at,
                                             );
-                                        }
+                                        },
                                         Some(proto::messaging::Message::ChatMessage(
                                             chat_message,
                                         )) => {
@@ -338,7 +339,7 @@ impl Messaging {
                                                     }
                                                 }
                                             }
-                                        }
+                                        },
                                         Some(proto::messaging::Message::FileMessage(
                                             file_message,
                                         )) => {
@@ -347,7 +348,12 @@ impl Messaging {
                                                 receiver_id,
                                                 file_message.content,
                                             );
-                                        }
+                                        },
+                                        Some(proto::messaging::Message::GroupChatMessage(
+                                            group_chat_message,
+                                        )) => {
+                                            groupchat::GroupChat::net(sender_id, receiver_id, group_chat_message.content, container.signature);
+                                        },                                        
                                         None => {
                                             log::error!(
                                                 "message {} from {} was empty",

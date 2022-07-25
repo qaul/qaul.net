@@ -37,6 +37,7 @@ pub mod rpc_proto { include!("qaul.rpc.chat.rs"); }
 /// mutable state of chat messages
 static CHAT: Storage<RwLock<Chat>> = Storage::new();
 
+
 /// chat references per user account
 #[derive(Clone)]
 pub struct ChatUser {
@@ -67,16 +68,15 @@ impl Chat {
     /// Save a new incoming Message
     /// 
     /// This function saves an incoming chat message in the data base
-    pub fn save_incoming_message(user_id: PeerId, sender_id: PeerId, content: Vec<u8>, sent_at: u64, signature: Vec<u8>, status: i32)-> bool {        
+    pub fn save_incoming_message(user_id: PeerId, sender_id: PeerId, content: Vec<u8>, sent_at: u64, signature: Vec<u8>, status: u32)-> bool {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
 
         // get data base of user account
         let db_ref = Self::get_user_db_ref(user_id);
 
-        // get conversation
         let overview;
-        match Self::update_overview(&db_ref, sender_id.to_bytes(), timestamp, content.clone(), sender_id.to_bytes()) {
+        match Self::update_overview(user_id.clone(), &db_ref, sender_id.to_bytes(), timestamp, content.clone(), sender_id.to_bytes(), false) {
             Ok(chat_overview) => overview = chat_overview,
             Err(e) => {
                 log::error!("{}", e);
@@ -93,6 +93,8 @@ impl Chat {
             sender_id: sender_id.to_bytes(),
             message_id: signature.clone(),
             status,
+            is_group: false,
+            conversation_id: vec![],
             sent_at,
             received_at: timestamp,
             content: content.clone(),
@@ -109,14 +111,78 @@ impl Chat {
         }
 
         //save message id in data base
-        if let Err(e) = db_ref.message_ids.insert(signature, key) {
-            log::error!("Error saving chat messageid to data base: {}", e);
+        if signature.len()> 0{
+            if let Err(e) = db_ref.message_ids.insert(signature, key) {
+                log::error!("Error saving chat messageid to data base: {}", e);
+            }
+    
+            // flush trees to disk
+            if let Err(e) = db_ref.message_ids.flush() {
+                log::error!("Error chat message_ids flush: {}", e);
+            }    
+        }
+
+        true
+    }
+
+
+    /// Save a new incoming Message
+    /// 
+    /// This function saves an incoming chat message in the data base
+    pub fn save_incoming_group_message(user_id: PeerId, sender_id: PeerId, content: Vec<u8>, sent_at: u64, signature: Vec<u8>, group_id: PeerId, status: u32)-> bool {
+        // create timestamp
+        let timestamp = Timestamp::get_timestamp();
+
+        // get data base of user account
+        let db_ref = Self::get_user_db_ref(user_id);
+
+        let overview;
+        match Self::update_overview(user_id.clone(), &db_ref, group_id.to_bytes(), timestamp, content.clone(), sender_id.to_bytes(), true) {
+            Ok(chat_overview) => overview = chat_overview,
+            Err(e) => {
+                log::error!("{}", e);
+                return false;
+            }
+        }
+
+        // create data base key
+        let key = Self::get_db_key(group_id, overview.last_message_index);
+
+        // create chat message
+        let chat_message = rpc_proto::ChatMessage {
+            index: overview.last_message_index,
+            sender_id: sender_id.to_bytes(),
+            message_id: signature.clone(),
+            status,
+            is_group: true,
+            conversation_id: group_id.to_bytes(),
+            sent_at,
+            received_at: timestamp,
+            content: content.clone(),
+        };
+
+        // save message in data base
+        if let Err(e) = db_ref.messages.insert(key.clone(), chat_message) {
+            log::error!("Error saving chat message to data base: {}", e);
         }
 
         // flush trees to disk
-        if let Err(e) = db_ref.message_ids.flush() {
-            log::error!("Error chat message_ids flush: {}", e);
+        if let Err(e) = db_ref.messages.flush() {
+            log::error!("Error chat messages flush: {}", e);
         }
+
+        //save message id in data base
+        // if signature.len()> 0{
+        //     if let Err(e) = db_ref.message_ids.insert(signature, key) {
+        //         log::error!("Error saving chat messageid to data base: {}", e);
+        //     }
+    
+        //     // flush trees to disk
+        //     if let Err(e) = db_ref.message_ids.flush() {
+        //         log::error!("Error chat message_ids flush: {}", e);
+        //     }
+        // }
+
         true
     }
 
@@ -130,6 +196,19 @@ impl Chat {
             )
         };
         Self::save_incoming_message(user_id, sender_id, contents.encode_to_vec(),  message.sent_at, signature, 2)
+    }
+
+    /// Save incoming group chat message
+    pub fn save_incoming_group_chat_message(user_id: PeerId, sender_id: PeerId, content:String, sent_at: u64, group_id: PeerId, signature: Vec<u8>)-> bool {
+        let contents = rpc_proto::ChatMessageContent{
+            content: Some(
+                rpc_proto::chat_message_content::Content::ChatContent(
+                    rpc_proto::ChatContent{content: content.clone()}
+                )
+            )
+        };
+        // group message case , the sender_id = group_id, signature = sender_id
+        Self::save_incoming_group_message(user_id, sender_id, contents.encode_to_vec(),  sent_at, signature, group_id, 2)
     }
 
     /// Save received file message
@@ -149,6 +228,39 @@ impl Chat {
         };
         Self::save_incoming_message(user_id, sender_id, contents.encode_to_vec(),  timestamp::Timestamp::get_timestamp(), vec![], 2)
     }
+
+    /// Save received group invite message
+    pub fn save_incoming_group_invite_message(user_id: PeerId, sender_id: PeerId, group_id: &Vec<u8>, group_name: String, created_at: u64, admin_id: &Vec<u8>, member_count: u32, signature:Vec<u8>)-> bool{
+        let contents = rpc_proto::ChatMessageContent{
+            content: Some(
+                rpc_proto::chat_message_content::Content::GroupInviteContent(
+                    rpc_proto::GroupInviteContent{
+                        group_id: group_id.clone(),
+                        group_name: group_name.clone(),
+                        created_at,
+                        member_count,
+                        admin_id: admin_id.clone()
+                    }
+                )
+            )
+        };
+        Self::save_incoming_message(user_id, sender_id, contents.encode_to_vec(),  timestamp::Timestamp::get_timestamp(), signature, 2)
+    }    
+
+    /// Save received group invite reply message
+    pub fn save_incoming_group_invite_reply_message(user_id: PeerId, sender_id: PeerId, group_id: &Vec<u8>, accept: bool, signature:Vec<u8>)-> bool{
+        let contents = rpc_proto::ChatMessageContent{
+            content: Some(
+                rpc_proto::chat_message_content::Content::GroupInviteReplyContent(
+                    rpc_proto::GroupInviteReplyContent{
+                        group_id: group_id.clone(),
+                        accept,
+                    }
+                )
+            )
+        };
+        Self::save_incoming_message(user_id, sender_id, contents.encode_to_vec(),  timestamp::Timestamp::get_timestamp(), signature, 2)
+    }      
 
     // send the message
     pub fn send(user_account: &UserAccount, chat_message: rpc_proto::ChatMessageSend) -> Result<Vec<u8>, String> {
@@ -185,7 +297,7 @@ impl Chat {
 
 
     // save an outgoing message to the data base
-    fn save_outgoing_message(user_id: PeerId, conversation_id: Vec<u8>, content: Vec<u8>, signature: Vec<u8>, status: i32) {
+    fn save_outgoing_message(user_id: PeerId, conversation_id: Vec<u8>, content: Vec<u8>, signature: Vec<u8>, status: u32) {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
 
@@ -194,7 +306,8 @@ impl Chat {
 
         // get conversation
         let conversation;
-        match Self::update_overview(&db_ref, conversation_id.clone(), timestamp, content.clone(), user_id.to_bytes()) {
+        match Self::update_overview(user_id.clone(), &db_ref, conversation_id.clone(), 
+         timestamp, content.clone(), user_id.to_bytes(), false) {
             Ok(chat_conversation) => conversation = chat_conversation,
             Err(e) => {
                 log::error!("{}", e);
@@ -211,6 +324,8 @@ impl Chat {
             sender_id: user_id.to_bytes(),
             message_id: signature.clone(),
             status,
+            is_group: false,
+            conversation_id: vec![],
             sent_at: timestamp,
             received_at: timestamp,
             content
@@ -227,14 +342,16 @@ impl Chat {
         }
 
         //save message id in data base
-        if let Err(e) = db_ref.message_ids.insert(signature, key) {
-            log::error!("Error saving chat messageid to data base: {}", e);
+        if signature.len() > 0{
+            if let Err(e) = db_ref.message_ids.insert(signature, key) {
+                log::error!("Error saving chat messageid to data base: {}", e);
+            }
+    
+            // flush trees to disk
+            if let Err(e) = db_ref.message_ids.flush() {
+                log::error!("Error chat message_ids flush: {}", e);
+            }    
         }
-
-        // flush trees to disk
-        if let Err(e) = db_ref.message_ids.flush() {
-            log::error!("Error chat message_ids flush: {}", e);
-        }        
     }
     
 
@@ -268,6 +385,37 @@ impl Chat {
         Self::save_outgoing_message(user_id, conversation_id, contents.encode_to_vec(), vec![], 1);
     }
 
+    pub fn save_outgoing_group_invite_message(user_id: PeerId, conversation_id: PeerId, group_id: &Vec<u8>, group_name: String, created_at: u64, admin_id: &Vec<u8>, member_count: u32){
+        let contents = rpc_proto::ChatMessageContent{
+            content: Some(
+                rpc_proto::chat_message_content::Content::GroupInviteContent(
+                    rpc_proto::GroupInviteContent{
+                        group_id: group_id.clone(),
+                        group_name: group_name.clone(),
+                        created_at,
+                        member_count,
+                        admin_id: admin_id.clone()
+                    }
+                )
+            )
+        };
+        Self::save_outgoing_message(user_id, conversation_id.to_bytes(), contents.encode_to_vec(), vec![], 1);
+    }       
+    pub fn save_outgoing_group_invite_reply_message(user_id: PeerId, conversation_id: PeerId, group_id: &Vec<u8>, accept: bool){
+        let contents = rpc_proto::ChatMessageContent{
+            content: Some(
+                rpc_proto::chat_message_content::Content::GroupInviteReplyContent(
+                    rpc_proto::GroupInviteReplyContent{
+                        group_id: group_id.clone(),
+                        accept,
+                    }
+                )
+            )
+        };
+        Self::save_outgoing_message(user_id, conversation_id.to_bytes(), contents.encode_to_vec(), vec![], 1);
+    } 
+
+
     /// updating chat messge status as confirmed
     pub fn update_confirmation(user_id: PeerId, message_id: Vec<u8>, received_at: u64){
         // get data base of user account
@@ -290,7 +438,7 @@ impl Chat {
     }
     
     /// Update the last Message and the Conversation Index of an Overview entry
-    fn update_overview (db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: Vec<u8>, last_message_sender_id: Vec<u8>) -> Result<rpc_proto::ChatOverview, String> {
+    fn update_overview (user_id: PeerId, db_ref: &ChatUser, conversation_id: Vec<u8>, timestamp: u64, content: Vec<u8>, last_message_sender_id: Vec<u8>, b_group: bool) -> Result<rpc_proto::ChatOverview, String> {
         // check if there is an conversation
         let mut overview: rpc_proto::ChatOverview;
         let index;
@@ -314,16 +462,24 @@ impl Chat {
 
                 // get user name from known users
                 let name;
-                if let Ok(user_id) = PeerId::from_bytes(&conversation_id) {
-                    match router::users::Users::get_name(&user_id) {
-                        Some(username) => name = username,
-                        None => {
-                            return Err("User not found".to_string());
-                        }
+                if b_group{
+                    if let Some(group_name) = super::groupchat::GroupChat::get_group_name(user_id.clone(), &conversation_id){
+                        name = group_name.clone();
+                    }else{
+                        return Err("Group not found".to_string());
+                    }
+                }else{
+                    if let Ok(user_id) = PeerId::from_bytes(&conversation_id) {
+                        match router::users::Users::get_name(&user_id) {
+                            Some(username) => name = username,
+                            None => {
+                                return Err("User not found".to_string());
+                            }
+                        }    
+                    }
+                    else {
+                        return Err("Conversation id couln't be converted to PeerId".to_string());
                     }    
-                }
-                else {
-                    return Err("Conversation id couln't be converted to PeerId".to_string());
                 }
                 
                 // create a new conversation
@@ -533,6 +689,30 @@ impl Chat {
                         // send message
                         Rpc::send_message(buf, crate::rpc::proto::Modules::Chat.into(), "".to_string(), Vec::new() );
                     },
+                    Some(rpc_proto::chat::Message::ChatGroupRequest(conversation_request)) => {
+                        // get messages of a conversation from data base
+                        let conversation_list = Self::get_messages(my_user_id, conversation_request.group_id);
+
+                        let chat_group_list = rpc_proto::ChatGroupList{
+                            group_id: conversation_list.conversation_id.clone(),
+                            message_list: conversation_list.message_list
+                        };
+
+                        // pack message
+                        let proto_message = rpc_proto::Chat {
+                            message: Some( 
+                                rpc_proto::chat::Message::ChatGroupList(chat_group_list)
+                            ),
+                        };
+
+                        // encode message
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+
+                        // send message
+                        Rpc::send_message(buf, crate::rpc::proto::Modules::Chat.into(), "".to_string(), Vec::new() );
+                    },
+
                     Some(rpc_proto::chat::Message::Send(message)) => {
                         // print message
                         log::info!("sending chat message: {}", message.content.clone());
