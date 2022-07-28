@@ -75,6 +75,9 @@ extern GroupChatMessageDefaultTypeInternal _GroupChatMessage_default_instance_;
 class Messaging;
 struct MessagingDefaultTypeInternal;
 extern MessagingDefaultTypeInternal _Messaging_default_instance_;
+class RtcMessage;
+struct RtcMessageDefaultTypeInternal;
+extern RtcMessageDefaultTypeInternal _RtcMessage_default_instance_;
 }  // namespace messaging
 }  // namespace net
 }  // namespace qaul
@@ -88,6 +91,7 @@ template<> ::qaul::net::messaging::Envelope* Arena::CreateMaybeMessage<::qaul::n
 template<> ::qaul::net::messaging::FileMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::FileMessage>(Arena*);
 template<> ::qaul::net::messaging::GroupChatMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::GroupChatMessage>(Arena*);
 template<> ::qaul::net::messaging::Messaging* Arena::CreateMaybeMessage<::qaul::net::messaging::Messaging>(Arena*);
+template<> ::qaul::net::messaging::RtcMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::RtcMessage>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace qaul {
 namespace net {
@@ -670,6 +674,7 @@ class Messaging final :
     kChatMessage = 3,
     kFileMessage = 4,
     kGroupChatMessage = 5,
+    kRtcMessage = 6,
     MESSAGE_NOT_SET = 0,
   };
 
@@ -756,6 +761,7 @@ class Messaging final :
     kChatMessageFieldNumber = 3,
     kFileMessageFieldNumber = 4,
     kGroupChatMessageFieldNumber = 5,
+    kRtcMessageFieldNumber = 6,
   };
   // .qaul.net.messaging.Confirmation confirmation_message = 1;
   bool has_confirmation_message() const;
@@ -847,6 +853,24 @@ class Messaging final :
       ::qaul::net::messaging::GroupChatMessage* group_chat_message);
   ::qaul::net::messaging::GroupChatMessage* unsafe_arena_release_group_chat_message();
 
+  // .qaul.net.messaging.RtcMessage rtc_message = 6;
+  bool has_rtc_message() const;
+  private:
+  bool _internal_has_rtc_message() const;
+  public:
+  void clear_rtc_message();
+  const ::qaul::net::messaging::RtcMessage& rtc_message() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::RtcMessage* release_rtc_message();
+  ::qaul::net::messaging::RtcMessage* mutable_rtc_message();
+  void set_allocated_rtc_message(::qaul::net::messaging::RtcMessage* rtc_message);
+  private:
+  const ::qaul::net::messaging::RtcMessage& _internal_rtc_message() const;
+  ::qaul::net::messaging::RtcMessage* _internal_mutable_rtc_message();
+  public:
+  void unsafe_arena_set_allocated_rtc_message(
+      ::qaul::net::messaging::RtcMessage* rtc_message);
+  ::qaul::net::messaging::RtcMessage* unsafe_arena_release_rtc_message();
+
   void clear_message();
   MessageCase message_case() const;
   // @@protoc_insertion_point(class_scope:qaul.net.messaging.Messaging)
@@ -857,6 +881,7 @@ class Messaging final :
   void set_has_chat_message();
   void set_has_file_message();
   void set_has_group_chat_message();
+  void set_has_rtc_message();
 
   inline bool has_message() const;
   inline void clear_has_message();
@@ -873,6 +898,7 @@ class Messaging final :
       ::qaul::net::messaging::ChatMessage* chat_message_;
       ::qaul::net::messaging::FileMessage* file_message_;
       ::qaul::net::messaging::GroupChatMessage* group_chat_message_;
+      ::qaul::net::messaging::RtcMessage* rtc_message_;
     } message_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     uint32_t _oneof_case_[1];
@@ -1660,6 +1686,159 @@ class GroupChatMessage final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
 };
+// -------------------------------------------------------------------
+
+class RtcMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.RtcMessage) */ {
+ public:
+  inline RtcMessage() : RtcMessage(nullptr) {}
+  ~RtcMessage() override;
+  explicit PROTOBUF_CONSTEXPR RtcMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RtcMessage(const RtcMessage& from);
+  RtcMessage(RtcMessage&& from) noexcept
+    : RtcMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline RtcMessage& operator=(const RtcMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RtcMessage& operator=(RtcMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RtcMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RtcMessage* internal_default_instance() {
+    return reinterpret_cast<const RtcMessage*>(
+               &_RtcMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(RtcMessage& a, RtcMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RtcMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RtcMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RtcMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RtcMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RtcMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const RtcMessage& from) {
+    RtcMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RtcMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.RtcMessage";
+  }
+  protected:
+  explicit RtcMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kContentFieldNumber = 1,
+  };
+  // bytes content = 1;
+  void clear_content();
+  const std::string& content() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_content(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_content();
+  PROTOBUF_NODISCARD std::string* release_content();
+  void set_allocated_content(std::string* content);
+  private:
+  const std::string& _internal_content() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_content(const std::string& value);
+  std::string* _internal_mutable_content();
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
 // ===================================================================
 
 
@@ -2403,6 +2582,80 @@ inline ::qaul::net::messaging::GroupChatMessage* Messaging::mutable_group_chat_m
   return _msg;
 }
 
+// .qaul.net.messaging.RtcMessage rtc_message = 6;
+inline bool Messaging::_internal_has_rtc_message() const {
+  return message_case() == kRtcMessage;
+}
+inline bool Messaging::has_rtc_message() const {
+  return _internal_has_rtc_message();
+}
+inline void Messaging::set_has_rtc_message() {
+  _impl_._oneof_case_[0] = kRtcMessage;
+}
+inline void Messaging::clear_rtc_message() {
+  if (_internal_has_rtc_message()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete _impl_.message_.rtc_message_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::messaging::RtcMessage* Messaging::release_rtc_message() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.rtc_message)
+  if (_internal_has_rtc_message()) {
+    clear_has_message();
+    ::qaul::net::messaging::RtcMessage* temp = _impl_.message_.rtc_message_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.message_.rtc_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::messaging::RtcMessage& Messaging::_internal_rtc_message() const {
+  return _internal_has_rtc_message()
+      ? *_impl_.message_.rtc_message_
+      : reinterpret_cast< ::qaul::net::messaging::RtcMessage&>(::qaul::net::messaging::_RtcMessage_default_instance_);
+}
+inline const ::qaul::net::messaging::RtcMessage& Messaging::rtc_message() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.rtc_message)
+  return _internal_rtc_message();
+}
+inline ::qaul::net::messaging::RtcMessage* Messaging::unsafe_arena_release_rtc_message() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.rtc_message)
+  if (_internal_has_rtc_message()) {
+    clear_has_message();
+    ::qaul::net::messaging::RtcMessage* temp = _impl_.message_.rtc_message_;
+    _impl_.message_.rtc_message_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Messaging::unsafe_arena_set_allocated_rtc_message(::qaul::net::messaging::RtcMessage* rtc_message) {
+  clear_message();
+  if (rtc_message) {
+    set_has_rtc_message();
+    _impl_.message_.rtc_message_ = rtc_message;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.rtc_message)
+}
+inline ::qaul::net::messaging::RtcMessage* Messaging::_internal_mutable_rtc_message() {
+  if (!_internal_has_rtc_message()) {
+    clear_message();
+    set_has_rtc_message();
+    _impl_.message_.rtc_message_ = CreateMaybeMessage< ::qaul::net::messaging::RtcMessage >(GetArenaForAllocation());
+  }
+  return _impl_.message_.rtc_message_;
+}
+inline ::qaul::net::messaging::RtcMessage* Messaging::mutable_rtc_message() {
+  ::qaul::net::messaging::RtcMessage* _msg = _internal_mutable_rtc_message();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.rtc_message)
+  return _msg;
+}
+
 inline bool Messaging::has_message() const {
   return message_case() != MESSAGE_NOT_SET;
 }
@@ -2742,9 +2995,65 @@ inline void GroupChatMessage::set_allocated_content(std::string* content) {
   // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.GroupChatMessage.content)
 }
 
+// -------------------------------------------------------------------
+
+// RtcMessage
+
+// bytes content = 1;
+inline void RtcMessage::clear_content() {
+  _impl_.content_.ClearToEmpty();
+}
+inline const std::string& RtcMessage::content() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.RtcMessage.content)
+  return _internal_content();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void RtcMessage::set_content(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.RtcMessage.content)
+}
+inline std::string* RtcMessage::mutable_content() {
+  std::string* _s = _internal_mutable_content();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.RtcMessage.content)
+  return _s;
+}
+inline const std::string& RtcMessage::_internal_content() const {
+  return _impl_.content_.Get();
+}
+inline void RtcMessage::_internal_set_content(const std::string& value) {
+  
+  _impl_.content_.Set(value, GetArenaForAllocation());
+}
+inline std::string* RtcMessage::_internal_mutable_content() {
+  
+  return _impl_.content_.Mutable(GetArenaForAllocation());
+}
+inline std::string* RtcMessage::release_content() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.RtcMessage.content)
+  return _impl_.content_.Release();
+}
+inline void RtcMessage::set_allocated_content(std::string* content) {
+  if (content != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.content_.SetAllocated(content, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.content_.IsDefault()) {
+    _impl_.content_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.RtcMessage.content)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

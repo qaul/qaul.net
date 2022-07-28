@@ -90,6 +90,10 @@ public final class QaulRpcOuterClass {
      * <code>GROUPCHAT = 12;</code>
      */
     GROUPCHAT(12),
+    /**
+     * <code>RTC = 13;</code>
+     */
+    RTC(13),
     UNRECOGNIZED(-1),
     ;
 
@@ -159,6 +163,10 @@ public final class QaulRpcOuterClass {
      * <code>GROUPCHAT = 12;</code>
      */
     public static final int GROUPCHAT_VALUE = 12;
+    /**
+     * <code>RTC = 13;</code>
+     */
+    public static final int RTC_VALUE = 13;
 
 
     public final int getNumber() {
@@ -198,6 +206,7 @@ public final class QaulRpcOuterClass {
         case 10: return BLE;
         case 11: return FILESHARE;
         case 12: return GROUPCHAT;
+        case 13: return RTC;
         default: return null;
       }
     }
@@ -1230,11 +1239,11 @@ public final class QaulRpcOuterClass {
       "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp" +
       "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n" +
       "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat" +
-      "a\030\004 \001(\014*\246\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
+      "a\030\004 \001(\014*\257\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
       "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n" +
       "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005" +
       "DEBUG\020\010\022\010\n\004CHAT\020\t\022\007\n\003BLE\020\n\022\r\n\tFILESHARE\020" +
-      "\013\022\r\n\tGROUPCHAT\020\014b\006proto3"
+      "\013\022\r\n\tGROUPCHAT\020\014\022\007\n\003RTC\020\rb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

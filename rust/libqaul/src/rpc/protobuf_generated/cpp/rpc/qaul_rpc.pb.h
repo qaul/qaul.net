@@ -72,12 +72,13 @@ enum Modules : int {
   BLE = 10,
   FILESHARE = 11,
   GROUPCHAT = 12,
+  RTC = 13,
   Modules_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   Modules_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool Modules_IsValid(int value);
 constexpr Modules Modules_MIN = NONE;
-constexpr Modules Modules_MAX = GROUPCHAT;
+constexpr Modules Modules_MAX = RTC;
 constexpr int Modules_ARRAYSIZE = Modules_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Modules_descriptor();

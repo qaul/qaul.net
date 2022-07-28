@@ -2524,79 +2524,166 @@ public final class MessagingOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return Whether the confirmationMessage field is set.
      */
     boolean hasConfirmationMessage();
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return The confirmationMessage.
      */
     qaul.net.messaging.MessagingOuterClass.Confirmation getConfirmationMessage();
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
     qaul.net.messaging.MessagingOuterClass.ConfirmationOrBuilder getConfirmationMessageOrBuilder();
 
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return Whether the cryptoService field is set.
      */
     boolean hasCryptoService();
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return The cryptoService.
      */
     qaul.net.messaging.MessagingOuterClass.CryptoService getCryptoService();
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
     qaul.net.messaging.MessagingOuterClass.CryptoServiceOrBuilder getCryptoServiceOrBuilder();
 
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      * @return Whether the chatMessage field is set.
      */
     boolean hasChatMessage();
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      * @return The chatMessage.
      */
     qaul.net.messaging.MessagingOuterClass.ChatMessage getChatMessage();
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      */
     qaul.net.messaging.MessagingOuterClass.ChatMessageOrBuilder getChatMessageOrBuilder();
 
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      * @return Whether the fileMessage field is set.
      */
     boolean hasFileMessage();
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      * @return The fileMessage.
      */
     qaul.net.messaging.MessagingOuterClass.FileMessage getFileMessage();
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      */
     qaul.net.messaging.MessagingOuterClass.FileMessageOrBuilder getFileMessageOrBuilder();
 
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      * @return Whether the groupChatMessage field is set.
      */
     boolean hasGroupChatMessage();
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      * @return The groupChatMessage.
      */
     qaul.net.messaging.MessagingOuterClass.GroupChatMessage getGroupChatMessage();
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      */
     qaul.net.messaging.MessagingOuterClass.GroupChatMessageOrBuilder getGroupChatMessageOrBuilder();
+
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     * @return Whether the rtcMessage field is set.
+     */
+    boolean hasRtcMessage();
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     * @return The rtcMessage.
+     */
+    qaul.net.messaging.MessagingOuterClass.RtcMessage getRtcMessage();
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     */
+    qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder getRtcMessageOrBuilder();
 
     public qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase getMessageCase();
   }
@@ -2719,6 +2806,20 @@ public final class MessagingOuterClass {
               messageCase_ = 5;
               break;
             }
+            case 50: {
+              qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder subBuilder = null;
+              if (messageCase_ == 6) {
+                subBuilder = ((qaul.net.messaging.MessagingOuterClass.RtcMessage) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.net.messaging.MessagingOuterClass.RtcMessage.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.net.messaging.MessagingOuterClass.RtcMessage) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 6;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -2763,6 +2864,7 @@ public final class MessagingOuterClass {
       CHAT_MESSAGE(3),
       FILE_MESSAGE(4),
       GROUP_CHAT_MESSAGE(5),
+      RTC_MESSAGE(6),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -2785,6 +2887,7 @@ public final class MessagingOuterClass {
           case 3: return CHAT_MESSAGE;
           case 4: return FILE_MESSAGE;
           case 5: return GROUP_CHAT_MESSAGE;
+          case 6: return RTC_MESSAGE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -2802,6 +2905,10 @@ public final class MessagingOuterClass {
 
     public static final int CONFIRMATION_MESSAGE_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return Whether the confirmationMessage field is set.
      */
@@ -2810,6 +2917,10 @@ public final class MessagingOuterClass {
       return messageCase_ == 1;
     }
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return The confirmationMessage.
      */
@@ -2821,6 +2932,10 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.Confirmation.getDefaultInstance();
     }
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
     @java.lang.Override
@@ -2833,6 +2948,10 @@ public final class MessagingOuterClass {
 
     public static final int CRYPTO_SERVICE_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return Whether the cryptoService field is set.
      */
@@ -2841,6 +2960,10 @@ public final class MessagingOuterClass {
       return messageCase_ == 2;
     }
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return The cryptoService.
      */
@@ -2852,6 +2975,10 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.CryptoService.getDefaultInstance();
     }
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
     @java.lang.Override
@@ -2864,6 +2991,10 @@ public final class MessagingOuterClass {
 
     public static final int CHAT_MESSAGE_FIELD_NUMBER = 3;
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      * @return Whether the chatMessage field is set.
      */
@@ -2872,6 +3003,10 @@ public final class MessagingOuterClass {
       return messageCase_ == 3;
     }
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      * @return The chatMessage.
      */
@@ -2883,6 +3018,10 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.ChatMessage.getDefaultInstance();
     }
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      */
     @java.lang.Override
@@ -2895,6 +3034,10 @@ public final class MessagingOuterClass {
 
     public static final int FILE_MESSAGE_FIELD_NUMBER = 4;
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      * @return Whether the fileMessage field is set.
      */
@@ -2903,6 +3046,10 @@ public final class MessagingOuterClass {
       return messageCase_ == 4;
     }
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      * @return The fileMessage.
      */
@@ -2914,6 +3061,10 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.FileMessage.getDefaultInstance();
     }
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      */
     @java.lang.Override
@@ -2926,6 +3077,10 @@ public final class MessagingOuterClass {
 
     public static final int GROUP_CHAT_MESSAGE_FIELD_NUMBER = 5;
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      * @return Whether the groupChatMessage field is set.
      */
@@ -2934,6 +3089,10 @@ public final class MessagingOuterClass {
       return messageCase_ == 5;
     }
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      * @return The groupChatMessage.
      */
@@ -2945,6 +3104,10 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.GroupChatMessage.getDefaultInstance();
     }
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      */
     @java.lang.Override
@@ -2953,6 +3116,49 @@ public final class MessagingOuterClass {
          return (qaul.net.messaging.MessagingOuterClass.GroupChatMessage) message_;
       }
       return qaul.net.messaging.MessagingOuterClass.GroupChatMessage.getDefaultInstance();
+    }
+
+    public static final int RTC_MESSAGE_FIELD_NUMBER = 6;
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     * @return Whether the rtcMessage field is set.
+     */
+    @java.lang.Override
+    public boolean hasRtcMessage() {
+      return messageCase_ == 6;
+    }
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     * @return The rtcMessage.
+     */
+    @java.lang.Override
+    public qaul.net.messaging.MessagingOuterClass.RtcMessage getRtcMessage() {
+      if (messageCase_ == 6) {
+         return (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_;
+      }
+      return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     */
+    @java.lang.Override
+    public qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder getRtcMessageOrBuilder() {
+      if (messageCase_ == 6) {
+         return (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_;
+      }
+      return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2984,6 +3190,9 @@ public final class MessagingOuterClass {
       if (messageCase_ == 5) {
         output.writeMessage(5, (qaul.net.messaging.MessagingOuterClass.GroupChatMessage) message_);
       }
+      if (messageCase_ == 6) {
+        output.writeMessage(6, (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3012,6 +3221,10 @@ public final class MessagingOuterClass {
       if (messageCase_ == 5) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, (qaul.net.messaging.MessagingOuterClass.GroupChatMessage) message_);
+      }
+      if (messageCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3050,6 +3263,10 @@ public final class MessagingOuterClass {
           if (!getGroupChatMessage()
               .equals(other.getGroupChatMessage())) return false;
           break;
+        case 6:
+          if (!getRtcMessage()
+              .equals(other.getRtcMessage())) return false;
+          break;
         case 0:
         default:
       }
@@ -3084,6 +3301,10 @@ public final class MessagingOuterClass {
         case 5:
           hash = (37 * hash) + GROUP_CHAT_MESSAGE_FIELD_NUMBER;
           hash = (53 * hash) + getGroupChatMessage().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + RTC_MESSAGE_FIELD_NUMBER;
+          hash = (53 * hash) + getRtcMessage().hashCode();
           break;
         case 0:
         default:
@@ -3288,6 +3509,13 @@ public final class MessagingOuterClass {
             result.message_ = groupChatMessageBuilder_.build();
           }
         }
+        if (messageCase_ == 6) {
+          if (rtcMessageBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = rtcMessageBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -3358,6 +3586,10 @@ public final class MessagingOuterClass {
             mergeGroupChatMessage(other.getGroupChatMessage());
             break;
           }
+          case RTC_MESSAGE: {
+            mergeRtcMessage(other.getRtcMessage());
+            break;
+          }
           case MESSAGE_NOT_SET: {
             break;
           }
@@ -3409,6 +3641,10 @@ public final class MessagingOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.Confirmation, qaul.net.messaging.MessagingOuterClass.Confirmation.Builder, qaul.net.messaging.MessagingOuterClass.ConfirmationOrBuilder> confirmationMessageBuilder_;
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        * @return Whether the confirmationMessage field is set.
        */
@@ -3417,6 +3653,10 @@ public final class MessagingOuterClass {
         return messageCase_ == 1;
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        * @return The confirmationMessage.
        */
@@ -3435,6 +3675,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       public Builder setConfirmationMessage(qaul.net.messaging.MessagingOuterClass.Confirmation value) {
@@ -3451,6 +3695,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       public Builder setConfirmationMessage(
@@ -3465,6 +3713,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       public Builder mergeConfirmationMessage(qaul.net.messaging.MessagingOuterClass.Confirmation value) {
@@ -3488,6 +3740,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       public Builder clearConfirmationMessage() {
@@ -3507,12 +3763,20 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.Confirmation.Builder getConfirmationMessageBuilder() {
         return getConfirmationMessageFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       @java.lang.Override
@@ -3527,6 +3791,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * confirm chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -3551,6 +3819,10 @@ public final class MessagingOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.CryptoService, qaul.net.messaging.MessagingOuterClass.CryptoService.Builder, qaul.net.messaging.MessagingOuterClass.CryptoServiceOrBuilder> cryptoServiceBuilder_;
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        * @return Whether the cryptoService field is set.
        */
@@ -3559,6 +3831,10 @@ public final class MessagingOuterClass {
         return messageCase_ == 2;
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        * @return The cryptoService.
        */
@@ -3577,6 +3853,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       public Builder setCryptoService(qaul.net.messaging.MessagingOuterClass.CryptoService value) {
@@ -3593,6 +3873,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       public Builder setCryptoService(
@@ -3607,6 +3891,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       public Builder mergeCryptoService(qaul.net.messaging.MessagingOuterClass.CryptoService value) {
@@ -3630,6 +3918,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       public Builder clearCryptoService() {
@@ -3649,12 +3941,20 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.CryptoService.Builder getCryptoServiceBuilder() {
         return getCryptoServiceFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       @java.lang.Override
@@ -3669,6 +3969,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * crypto service
+       * </pre>
+       *
        * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -3693,6 +3997,10 @@ public final class MessagingOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.ChatMessage, qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder, qaul.net.messaging.MessagingOuterClass.ChatMessageOrBuilder> chatMessageBuilder_;
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        * @return Whether the chatMessage field is set.
        */
@@ -3701,6 +4009,10 @@ public final class MessagingOuterClass {
         return messageCase_ == 3;
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        * @return The chatMessage.
        */
@@ -3719,6 +4031,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       public Builder setChatMessage(qaul.net.messaging.MessagingOuterClass.ChatMessage value) {
@@ -3735,6 +4051,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       public Builder setChatMessage(
@@ -3749,6 +4069,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       public Builder mergeChatMessage(qaul.net.messaging.MessagingOuterClass.ChatMessage value) {
@@ -3772,6 +4096,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       public Builder clearChatMessage() {
@@ -3791,12 +4119,20 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.ChatMessage.Builder getChatMessageBuilder() {
         return getChatMessageFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       @java.lang.Override
@@ -3811,6 +4147,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -3835,6 +4175,10 @@ public final class MessagingOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.FileMessage, qaul.net.messaging.MessagingOuterClass.FileMessage.Builder, qaul.net.messaging.MessagingOuterClass.FileMessageOrBuilder> fileMessageBuilder_;
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        * @return Whether the fileMessage field is set.
        */
@@ -3843,6 +4187,10 @@ public final class MessagingOuterClass {
         return messageCase_ == 4;
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        * @return The fileMessage.
        */
@@ -3861,6 +4209,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       public Builder setFileMessage(qaul.net.messaging.MessagingOuterClass.FileMessage value) {
@@ -3877,6 +4229,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       public Builder setFileMessage(
@@ -3891,6 +4247,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       public Builder mergeFileMessage(qaul.net.messaging.MessagingOuterClass.FileMessage value) {
@@ -3914,6 +4274,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       public Builder clearFileMessage() {
@@ -3933,12 +4297,20 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.FileMessage.Builder getFileMessageBuilder() {
         return getFileMessageFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       @java.lang.Override
@@ -3953,6 +4325,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * file sharing message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -3977,6 +4353,10 @@ public final class MessagingOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.GroupChatMessage, qaul.net.messaging.MessagingOuterClass.GroupChatMessage.Builder, qaul.net.messaging.MessagingOuterClass.GroupChatMessageOrBuilder> groupChatMessageBuilder_;
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        * @return Whether the groupChatMessage field is set.
        */
@@ -3985,6 +4365,10 @@ public final class MessagingOuterClass {
         return messageCase_ == 5;
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        * @return The groupChatMessage.
        */
@@ -4003,6 +4387,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       public Builder setGroupChatMessage(qaul.net.messaging.MessagingOuterClass.GroupChatMessage value) {
@@ -4019,6 +4407,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       public Builder setGroupChatMessage(
@@ -4033,6 +4425,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       public Builder mergeGroupChatMessage(qaul.net.messaging.MessagingOuterClass.GroupChatMessage value) {
@@ -4056,6 +4452,10 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       public Builder clearGroupChatMessage() {
@@ -4075,12 +4475,20 @@ public final class MessagingOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.GroupChatMessage.Builder getGroupChatMessageBuilder() {
         return getGroupChatMessageFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       @java.lang.Override
@@ -4095,6 +4503,10 @@ public final class MessagingOuterClass {
         }
       }
       /**
+       * <pre>
+       * group chat message
+       * </pre>
+       *
        * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -4114,6 +4526,184 @@ public final class MessagingOuterClass {
         messageCase_ = 5;
         onChanged();;
         return groupChatMessageBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.net.messaging.MessagingOuterClass.RtcMessage, qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder, qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder> rtcMessageBuilder_;
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       * @return Whether the rtcMessage field is set.
+       */
+      @java.lang.Override
+      public boolean hasRtcMessage() {
+        return messageCase_ == 6;
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       * @return The rtcMessage.
+       */
+      @java.lang.Override
+      public qaul.net.messaging.MessagingOuterClass.RtcMessage getRtcMessage() {
+        if (rtcMessageBuilder_ == null) {
+          if (messageCase_ == 6) {
+            return (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_;
+          }
+          return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+        } else {
+          if (messageCase_ == 6) {
+            return rtcMessageBuilder_.getMessage();
+          }
+          return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      public Builder setRtcMessage(qaul.net.messaging.MessagingOuterClass.RtcMessage value) {
+        if (rtcMessageBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          rtcMessageBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      public Builder setRtcMessage(
+          qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder builderForValue) {
+        if (rtcMessageBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          rtcMessageBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      public Builder mergeRtcMessage(qaul.net.messaging.MessagingOuterClass.RtcMessage value) {
+        if (rtcMessageBuilder_ == null) {
+          if (messageCase_ == 6 &&
+              message_ != qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance()) {
+            message_ = qaul.net.messaging.MessagingOuterClass.RtcMessage.newBuilder((qaul.net.messaging.MessagingOuterClass.RtcMessage) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 6) {
+            rtcMessageBuilder_.mergeFrom(value);
+          } else {
+            rtcMessageBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      public Builder clearRtcMessage() {
+        if (rtcMessageBuilder_ == null) {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          rtcMessageBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      public qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder getRtcMessageBuilder() {
+        return getRtcMessageFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      @java.lang.Override
+      public qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder getRtcMessageOrBuilder() {
+        if ((messageCase_ == 6) && (rtcMessageBuilder_ != null)) {
+          return rtcMessageBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 6) {
+            return (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_;
+          }
+          return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * rtc message
+       * </pre>
+       *
+       * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.net.messaging.MessagingOuterClass.RtcMessage, qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder, qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder> 
+          getRtcMessageFieldBuilder() {
+        if (rtcMessageBuilder_ == null) {
+          if (!(messageCase_ == 6)) {
+            message_ = qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+          }
+          rtcMessageBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.net.messaging.MessagingOuterClass.RtcMessage, qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder, qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder>(
+                  (qaul.net.messaging.MessagingOuterClass.RtcMessage) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 6;
+        onChanged();;
+        return rtcMessageBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -6128,7 +6718,7 @@ public final class MessagingOuterClass {
   }
   /**
    * <pre>
-   * chat message
+   * file message
    * </pre>
    *
    * Protobuf type {@code qaul.net.messaging.FileMessage}
@@ -6383,7 +6973,7 @@ public final class MessagingOuterClass {
     }
     /**
      * <pre>
-     * chat message
+     * file message
      * </pre>
      *
      * Protobuf type {@code qaul.net.messaging.FileMessage}
@@ -6630,7 +7220,7 @@ public final class MessagingOuterClass {
   }
   /**
    * <pre>
-   * chat message
+   * group chat message
    * </pre>
    *
    * Protobuf type {@code qaul.net.messaging.GroupChatMessage}
@@ -6885,7 +7475,7 @@ public final class MessagingOuterClass {
     }
     /**
      * <pre>
-     * chat message
+     * group chat message
      * </pre>
      *
      * Protobuf type {@code qaul.net.messaging.GroupChatMessage}
@@ -7120,6 +7710,508 @@ public final class MessagingOuterClass {
 
   }
 
+  public interface RtcMessageOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.net.messaging.RtcMessage)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>bytes content = 1;</code>
+     * @return The content.
+     */
+    com.google.protobuf.ByteString getContent();
+  }
+  /**
+   * <pre>
+   * rtc message
+   * </pre>
+   *
+   * Protobuf type {@code qaul.net.messaging.RtcMessage}
+   */
+  public static final class RtcMessage extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.net.messaging.RtcMessage)
+      RtcMessageOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RtcMessage.newBuilder() to construct.
+    private RtcMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RtcMessage() {
+      content_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RtcMessage();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RtcMessage(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              content_ = input.readBytes();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.net.messaging.MessagingOuterClass.RtcMessage.class, qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder.class);
+    }
+
+    public static final int CONTENT_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString content_;
+    /**
+     * <code>bytes content = 1;</code>
+     * @return The content.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getContent() {
+      return content_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!content_.isEmpty()) {
+        output.writeBytes(1, content_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!content_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, content_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.net.messaging.MessagingOuterClass.RtcMessage)) {
+        return super.equals(obj);
+      }
+      qaul.net.messaging.MessagingOuterClass.RtcMessage other = (qaul.net.messaging.MessagingOuterClass.RtcMessage) obj;
+
+      if (!getContent()
+          .equals(other.getContent())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+      hash = (53 * hash) + getContent().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.net.messaging.MessagingOuterClass.RtcMessage prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * Protobuf type {@code qaul.net.messaging.RtcMessage}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.net.messaging.RtcMessage)
+        qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.net.messaging.MessagingOuterClass.RtcMessage.class, qaul.net.messaging.MessagingOuterClass.RtcMessage.Builder.class);
+      }
+
+      // Construct using qaul.net.messaging.MessagingOuterClass.RtcMessage.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        content_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.net.messaging.MessagingOuterClass.RtcMessage getDefaultInstanceForType() {
+        return qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.net.messaging.MessagingOuterClass.RtcMessage build() {
+        qaul.net.messaging.MessagingOuterClass.RtcMessage result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.net.messaging.MessagingOuterClass.RtcMessage buildPartial() {
+        qaul.net.messaging.MessagingOuterClass.RtcMessage result = new qaul.net.messaging.MessagingOuterClass.RtcMessage(this);
+        result.content_ = content_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.net.messaging.MessagingOuterClass.RtcMessage) {
+          return mergeFrom((qaul.net.messaging.MessagingOuterClass.RtcMessage)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.net.messaging.MessagingOuterClass.RtcMessage other) {
+        if (other == qaul.net.messaging.MessagingOuterClass.RtcMessage.getDefaultInstance()) return this;
+        if (other.getContent() != com.google.protobuf.ByteString.EMPTY) {
+          setContent(other.getContent());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.net.messaging.MessagingOuterClass.RtcMessage parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.net.messaging.MessagingOuterClass.RtcMessage) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>bytes content = 1;</code>
+       * @return The content.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getContent() {
+        return content_;
+      }
+      /**
+       * <code>bytes content = 1;</code>
+       * @param value The content to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContent(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        content_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bytes content = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContent() {
+        
+        content_ = getDefaultInstance().getContent();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.net.messaging.RtcMessage)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcMessage)
+    private static final qaul.net.messaging.MessagingOuterClass.RtcMessage DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.net.messaging.MessagingOuterClass.RtcMessage();
+    }
+
+    public static qaul.net.messaging.MessagingOuterClass.RtcMessage getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RtcMessage>
+        PARSER = new com.google.protobuf.AbstractParser<RtcMessage>() {
+      @java.lang.Override
+      public RtcMessage parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RtcMessage(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RtcMessage> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RtcMessage> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.net.messaging.MessagingOuterClass.RtcMessage getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_net_messaging_Container_descriptor;
   private static final 
@@ -7165,6 +8257,11 @@ public final class MessagingOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_net_messaging_GroupChatMessage_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_net_messaging_RtcMessage_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_net_messaging_RtcMessage_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -7180,7 +8277,7 @@ public final class MessagingOuterClass {
       "ssaging.Envelope\"Z\n\010Envelope\022\021\n\tsender_i" +
       "d\030\001 \001(\014\022\023\n\013receiver_id\030\002 \001(\014\022&\n\004data\030\003 \003" +
       "(\0132\030.qaul.net.messaging.Data\"#\n\004Data\022\r\n\005" +
-      "nonce\030\001 \001(\004\022\014\n\004data\030\002 \001(\014\"\313\002\n\tMessaging\022" +
+      "nonce\030\001 \001(\004\022\014\n\004data\030\002 \001(\014\"\202\003\n\tMessaging\022" +
       "@\n\024confirmation_message\030\001 \001(\0132 .qaul.net" +
       ".messaging.ConfirmationH\000\022;\n\016crypto_serv" +
       "ice\030\002 \001(\0132!.qaul.net.messaging.CryptoSer" +
@@ -7188,13 +8285,16 @@ public final class MessagingOuterClass {
       "messaging.ChatMessageH\000\0227\n\014file_message\030" +
       "\004 \001(\0132\037.qaul.net.messaging.FileMessageH\000" +
       "\022B\n\022group_chat_message\030\005 \001(\0132$.qaul.net." +
-      "messaging.GroupChatMessageH\000B\t\n\007message\"" +
-      "\017\n\rCryptoService\"7\n\014Confirmation\022\022\n\nmess" +
-      "age_id\030\001 \001(\014\022\023\n\013received_at\030\002 \001(\004\"W\n\013Cha" +
-      "tMessage\022\r\n\005group\030\001 \001(\010\022\027\n\017conversation_" +
-      "id\030\002 \001(\014\022\017\n\007sent_at\030\003 \001(\004\022\017\n\007content\030\004 \001" +
-      "(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001(\014\"#\n\020Gr" +
-      "oupChatMessage\022\017\n\007content\030\001 \001(\014b\006proto3"
+      "messaging.GroupChatMessageH\000\0225\n\013rtc_mess" +
+      "age\030\006 \001(\0132\036.qaul.net.messaging.RtcMessag" +
+      "eH\000B\t\n\007message\"\017\n\rCryptoService\"7\n\014Confi" +
+      "rmation\022\022\n\nmessage_id\030\001 \001(\014\022\023\n\013received_" +
+      "at\030\002 \001(\004\"W\n\013ChatMessage\022\r\n\005group\030\001 \001(\010\022\027" +
+      "\n\017conversation_id\030\002 \001(\014\022\017\n\007sent_at\030\003 \001(\004" +
+      "\022\017\n\007content\030\004 \001(\t\"\036\n\013FileMessage\022\017\n\007cont" +
+      "ent\030\001 \001(\014\"#\n\020GroupChatMessage\022\017\n\007content" +
+      "\030\001 \001(\014\"\035\n\nRtcMessage\022\017\n\007content\030\001 \001(\014b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7223,7 +8323,7 @@ public final class MessagingOuterClass {
     internal_static_qaul_net_messaging_Messaging_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_messaging_Messaging_descriptor,
-        new java.lang.String[] { "ConfirmationMessage", "CryptoService", "ChatMessage", "FileMessage", "GroupChatMessage", "Message", });
+        new java.lang.String[] { "ConfirmationMessage", "CryptoService", "ChatMessage", "FileMessage", "GroupChatMessage", "RtcMessage", "Message", });
     internal_static_qaul_net_messaging_CryptoService_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_net_messaging_CryptoService_fieldAccessorTable = new
@@ -7253,6 +8353,12 @@ public final class MessagingOuterClass {
     internal_static_qaul_net_messaging_GroupChatMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_messaging_GroupChatMessage_descriptor,
+        new java.lang.String[] { "Content", });
+    internal_static_qaul_net_messaging_RtcMessage_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_qaul_net_messaging_RtcMessage_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_net_messaging_RtcMessage_descriptor,
         new java.lang.String[] { "Content", });
   }
 
