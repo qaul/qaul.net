@@ -23,6 +23,10 @@ object MessagingKt {
     internal fun _build(): qaul.net.messaging.MessagingOuterClass.Messaging = _builder.build()
 
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
     var confirmationMessage: qaul.net.messaging.MessagingOuterClass.Confirmation
@@ -33,12 +37,20 @@ object MessagingKt {
         _builder.setConfirmationMessage(value)
       }
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      */
     fun clearConfirmationMessage() {
       _builder.clearConfirmationMessage()
     }
     /**
+     * <pre>
+     * confirm chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.Confirmation confirmation_message = 1;</code>
      * @return Whether the confirmationMessage field is set.
      */
@@ -47,6 +59,10 @@ object MessagingKt {
     }
 
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
     var cryptoService: qaul.net.messaging.MessagingOuterClass.CryptoService
@@ -57,12 +73,20 @@ object MessagingKt {
         _builder.setCryptoService(value)
       }
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      */
     fun clearCryptoService() {
       _builder.clearCryptoService()
     }
     /**
+     * <pre>
+     * crypto service
+     * </pre>
+     *
      * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
      * @return Whether the cryptoService field is set.
      */
@@ -71,6 +95,10 @@ object MessagingKt {
     }
 
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      */
     var chatMessage: qaul.net.messaging.MessagingOuterClass.ChatMessage
@@ -81,12 +109,20 @@ object MessagingKt {
         _builder.setChatMessage(value)
       }
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      */
     fun clearChatMessage() {
       _builder.clearChatMessage()
     }
     /**
+     * <pre>
+     * chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
      * @return Whether the chatMessage field is set.
      */
@@ -95,6 +131,10 @@ object MessagingKt {
     }
 
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      */
     var fileMessage: qaul.net.messaging.MessagingOuterClass.FileMessage
@@ -105,12 +145,20 @@ object MessagingKt {
         _builder.setFileMessage(value)
       }
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      */
     fun clearFileMessage() {
       _builder.clearFileMessage()
     }
     /**
+     * <pre>
+     * file sharing message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
      * @return Whether the fileMessage field is set.
      */
@@ -119,6 +167,10 @@ object MessagingKt {
     }
 
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      */
     var groupChatMessage: qaul.net.messaging.MessagingOuterClass.GroupChatMessage
@@ -129,17 +181,61 @@ object MessagingKt {
         _builder.setGroupChatMessage(value)
       }
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      */
     fun clearGroupChatMessage() {
       _builder.clearGroupChatMessage()
     }
     /**
+     * <pre>
+     * group chat message
+     * </pre>
+     *
      * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
      * @return Whether the groupChatMessage field is set.
      */
     fun hasGroupChatMessage(): kotlin.Boolean {
       return _builder.hasGroupChatMessage()
+    }
+
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     */
+    var rtcMessage: qaul.net.messaging.MessagingOuterClass.RtcMessage
+      @JvmName("getRtcMessage")
+      get() = _builder.getRtcMessage()
+      @JvmName("setRtcMessage")
+      set(value) {
+        _builder.setRtcMessage(value)
+      }
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     */
+    fun clearRtcMessage() {
+      _builder.clearRtcMessage()
+    }
+    /**
+     * <pre>
+     * rtc message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
+     * @return Whether the rtcMessage field is set.
+     */
+    fun hasRtcMessage(): kotlin.Boolean {
+      return _builder.hasRtcMessage()
     }
     val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
       @JvmName("getMessageCase")
@@ -168,4 +264,7 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.fileMessageOrNull:
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupChatMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupChatMessage?
   get() = if (hasGroupChatMessage()) getGroupChatMessage() else null
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.rtcMessageOrNull: qaul.net.messaging.MessagingOuterClass.RtcMessage?
+  get() = if (hasRtcMessage()) getRtcMessage() else null
 
