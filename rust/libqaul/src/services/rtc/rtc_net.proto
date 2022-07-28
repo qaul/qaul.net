@@ -1,0 +1,63 @@
+syntax = "proto3";
+package qaul.net.rtc;
+
+// RTC network message container
+message RtcContainer {
+    oneof message {
+        // rtc session request
+        RtcSessionRequest rtc_session_request = 1;
+        // rtc session management
+        RtcSessionManagement rtc_session_management = 2;
+        // rtc messasge
+        RtcMessage rtc_message = 3;
+    }
+}
+
+
+// rtc session request
+message RtcSessionRequest{
+    // type
+    uint32 session_type = 1;
+}
+
+// rtc session management
+message RtcSessionManagement{
+    // option (1: accept, 2: deny, 3: end)
+    uint32 option = 1;
+}
+
+// Rtc message
+message RtcMessage{
+    // sequence
+    uint32 sequence = 1; 
+    // content
+    bytes content = 2;
+}
+
+// Rtc contents
+message RtcContent{
+    // content
+    oneof content{
+        // video content
+        RtcVideoContent video_content = 1; 
+        // audio content
+        RtcAudioContent audio_content = 2; 
+        // chat content
+        RtcChatContent chat_content = 3;
+    }
+}
+
+message RtcChatContent{
+    // content
+    string content = 1;
+}
+
+message RtcVideoContent{
+    // content
+    bytes content = 1;
+}
+
+message RtcAudioContent{
+    // content
+    bytes content = 1;
+}

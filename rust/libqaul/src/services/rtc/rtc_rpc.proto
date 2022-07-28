@@ -1,0 +1,83 @@
+syntax = "proto3";
+package qaul.rpc.rtc;
+
+// RTC service RPC message container
+message RtcRpc {
+    // message type
+    oneof message {
+        // rtc session request
+        RtcSessionRequest rtc_session_request = 1;
+        // rtc session response for request
+        RtcSessionResponse rtc_session_response = 2;
+        // rtc session management
+        RtcSessionManagement rtc_session_management = 3;
+        // rtc outgoing
+        RtcOutgoing rtc_outgoing = 4;
+        // rtc incoming
+        RtcIncoming rtc_incoming = 5;
+        // rtc session list request
+        RtcSessionListRequest rtc_session_list_request = 6;
+        // rtc session list response
+        RtcSessionListResponse rtc_session_list_response = 7;
+    }
+}
+
+// rtc session request
+message RtcSessionRequest {
+    // conversation id
+    bytes conversation_id = 1;
+}
+
+// rtc session response
+message RtcSessionResponse {
+    // conversation id
+    bytes conversation_id = 1;
+}
+
+// rtc session management
+message RtcSessionManagement {
+    // conversation id
+    bytes conversation_id = 1;
+    // option
+    uint32 option = 2;
+}
+
+// rtc outgoing
+message RtcOutgoing {
+    // converssation id
+    bytes conversation_id = 1;
+    // content
+    bytes content = 2;
+}
+
+// rtc incoming
+message RtcIncoming {
+    // converssation id
+    bytes conversation_id = 1;
+    // content
+    bytes content = 2;
+}
+
+// rtc sessions
+message RtcSessionListRequest{
+
+}
+
+// rtc session 
+message RtcSession{
+    // conversation Id
+    bytes conversation_id = 1;
+    // session type
+    uint32 session_type = 2;
+    // stste
+    uint32 state = 3;
+    // created at
+    uint64 created_at = 4;
+}
+
+// rtc session list response
+message RtcSessionListResponse{
+    // session list
+    repeated RtcSession sessions = 1;
+}
+

@@ -104,6 +104,9 @@ impl Rpc {
                     Some(proto::Modules::Groupchat) => {                        
                         super::groupchat::GroupChat::rpc(message.data);
                     },
+                    Some(proto::Modules::Rtc) => {   
+                        super::rtc::Rtc::rpc(message.data);
+                    },
                     Some(proto::Modules::None) => {},
                     None => {},
                 }

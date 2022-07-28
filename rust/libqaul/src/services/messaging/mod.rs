@@ -18,9 +18,9 @@ use crate::router;
 use crate::router::table::RoutingTable;
 use super::chat::Chat;
 use super::crypto::Crypto;
-
 use super::filesharing;
 use super::groupchat;
+use super::rtc;
 
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
@@ -353,7 +353,12 @@ impl Messaging {
                                             group_chat_message,
                                         )) => {
                                             groupchat::GroupChat::net(sender_id, receiver_id, group_chat_message.content, container.signature);
-                                        },                                        
+                                        },        
+                                        Some(proto::messaging::Message::RtcMessage(
+                                            rtc_message,
+                                        )) => {
+                                            rtc::Rtc::net(sender_id, receiver_id, rtc_message.content, container.signature);
+                                        },                                                                         
                                         None => {
                                             log::error!(
                                                 "message {} from {} was empty",
