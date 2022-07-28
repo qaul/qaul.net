@@ -444,7 +444,7 @@ impl GroupChat {
                         }
                     },                    
                     _ => {
-                        log::error!("unprocessable RPC file message");
+                        log::error!("unprocessable RPC group chat message");
                     },
                 }    
             },

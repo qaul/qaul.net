@@ -40,23 +40,31 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
 pub mod messaging {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
+        /// confirm chat message
         #[prost(message, tag="1")]
         ConfirmationMessage(super::Confirmation),
+        /// crypto service
         #[prost(message, tag="2")]
         CryptoService(super::CryptoService),
+        /// chat message
         #[prost(message, tag="3")]
         ChatMessage(super::ChatMessage),
+        /// file sharing message
         #[prost(message, tag="4")]
         FileMessage(super::FileMessage),
+        /// group chat message
         #[prost(message, tag="5")]
         GroupChatMessage(super::GroupChatMessage),
+        /// rtc message
+        #[prost(message, tag="6")]
+        RtcMessage(super::RtcMessage),
     }
 }
 /// Crypto Service Message
@@ -99,15 +107,21 @@ pub struct ChatMessage {
     #[prost(string, tag="4")]
     pub content: ::prost::alloc::string::String,
 }
-/// chat message
+/// file message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// chat message
+/// group chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupChatMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// rtc message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RtcMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }

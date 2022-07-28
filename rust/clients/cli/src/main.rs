@@ -28,6 +28,7 @@ mod debug;
 mod ble;
 mod fileshare;
 mod groupchat;
+mod rtc;
 
 use cli::Cli;
 use rpc::Rpc;

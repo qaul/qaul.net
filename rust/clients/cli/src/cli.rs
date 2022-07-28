@@ -16,6 +16,7 @@ use super::debug::Debug;
 use super::ble::Ble;
 use super::fileshare::FileShare;
 use super::groupchat::GroupChat;
+use super::rtc::Rtc;
 
 /// CLI command analizer and processing
 pub struct Cli {}
@@ -67,6 +68,10 @@ impl Cli {
             // group chat functions
             cmd if cmd.starts_with("group ") => {
                 GroupChat::cli(cmd.strip_prefix("group ").unwrap());
+            },
+            // rtc functions
+            cmd if cmd.starts_with("rtc ") => {
+                Rtc::cli(cmd.strip_prefix("rtc ").unwrap());
             },
             // unknown command
             _ => log::error!("unknown command"),
