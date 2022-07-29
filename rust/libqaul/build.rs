@@ -43,8 +43,8 @@ fn main() {
 		"services/feed/feed_net.proto",
 		"services/filesharing/filesharing_net.proto",
 		"services/filesharing/filesharing_rpc.proto",
-		"services/groupchat/groupchat_net.proto",
-		"services/groupchat/groupchat_rpc.proto",
+		"services/group/group_net.proto",
+		"services/group/group_rpc.proto",
 		"services/rtc/rtc_net.proto",
 		"services/rtc/rtc_rpc.proto",
 		"services/chat/chat.proto",
@@ -74,7 +74,7 @@ fn main() {
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.feed.rs"), to.join("qaul.rpc.feed.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.filesharing.rs"), to.join("qaul.rpc.filesharing.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.chat.rs"), to.join("qaul.rpc.chat.rs")).unwrap();
-	fs::copy(Path::new(&out_dir).join("qaul.rpc.groupchat.rs"), to.join("qaul.rpc.groupchat.rs")).unwrap();
+	fs::copy(Path::new(&out_dir).join("qaul.rpc.group.rs"), to.join("qaul.rpc.group.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.rtc.rs"), to.join("qaul.rpc.rtc.rs")).unwrap();	
 	fs::copy(Path::new(&out_dir).join("qaul.rpc.ble.rs"), to.join("qaul.rpc.ble.rs")).unwrap();
 	// system communication
@@ -84,7 +84,7 @@ fn main() {
 	fs::copy(Path::new(&out_dir).join("qaul.net.messaging.rs"), to.join("qaul.net.messaging.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.net.feed.rs"), to.join("qaul.net.feed.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.net.filesharing.rs"), to.join("qaul.net.filesharing.rs")).unwrap();
-	fs::copy(Path::new(&out_dir).join("qaul.net.groupchat.rs"), to.join("qaul.net.groupchat.rs")).unwrap();
+	fs::copy(Path::new(&out_dir).join("qaul.net.group.rs"), to.join("qaul.net.group.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.net.rtc.rs"), to.join("qaul.net.rtc.rs")).unwrap();
 	fs::copy(Path::new(&out_dir).join("qaul.net.ble.rs"), to.join("qaul.net.ble.rs")).unwrap();
 
@@ -100,7 +100,7 @@ fn main() {
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.feed.rs"), Path::new("src/services/feed/qaul.rpc.feed.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.filesharing.rs"), Path::new("src/services/filesharing/qaul.rpc.filesharing.rs")).unwrap();	
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.chat.rs"), Path::new("src/services/chat/qaul.rpc.chat.rs")).unwrap();
-	fs::copy(&Path::new(&out_dir).join("qaul.rpc.groupchat.rs"), Path::new("src/services/groupchat/qaul.rpc.groupchat.rs")).unwrap();
+	fs::copy(&Path::new(&out_dir).join("qaul.rpc.group.rs"), Path::new("src/services/group/qaul.rpc.group.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.rtc.rs"), Path::new("src/services/rtc/qaul.rpc.rtc.rs")).unwrap();	
 	fs::copy(&Path::new(&out_dir).join("qaul.rpc.ble.rs"), Path::new("src/connections/ble/qaul.rpc.ble.rs")).unwrap();
 	// system communication
@@ -110,7 +110,7 @@ fn main() {
 	fs::copy(&Path::new(&out_dir).join("qaul.net.messaging.rs"), Path::new("src/services/messaging/qaul.net.messaging.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.net.feed.rs"), Path::new("src/services/feed/qaul.net.feed.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.net.filesharing.rs"), Path::new("src/services/filesharing/qaul.net.filesharing.rs")).unwrap();	
-	fs::copy(&Path::new(&out_dir).join("qaul.net.groupchat.rs"), Path::new("src/services/groupchat/qaul.net.groupchat.rs")).unwrap();
+	fs::copy(&Path::new(&out_dir).join("qaul.net.group.rs"), Path::new("src/services/group/qaul.net.group.rs")).unwrap();
 	fs::copy(&Path::new(&out_dir).join("qaul.net.rtc.rs"), Path::new("src/services/rtc/qaul.net.rtc.rs")).unwrap();	
 	fs::copy(&Path::new(&out_dir).join("qaul.net.ble.rs"), Path::new("src/connections/ble/qaul.net.ble.rs")).unwrap();
 

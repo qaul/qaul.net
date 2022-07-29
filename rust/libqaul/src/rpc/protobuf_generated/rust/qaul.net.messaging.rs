@@ -61,7 +61,7 @@ pub mod messaging {
         FileMessage(super::FileMessage),
         /// group chat message
         #[prost(message, tag="5")]
-        GroupChatMessage(super::GroupChatMessage),
+        GroupMessage(super::GroupMessage),
         /// rtc message
         #[prost(message, tag="6")]
         RtcMessage(super::RtcMessage),
@@ -115,7 +115,7 @@ pub struct FileMessage {
 }
 /// group chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupChatMessage {
+pub struct GroupMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }

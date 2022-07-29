@@ -101,8 +101,8 @@ impl Rpc {
                     Some(proto::Modules::Fileshare) => {
                         super::fileshare::FileShare::rpc(message.data);
                     },
-                    Some(proto::Modules::Groupchat) => {                        
-                        super::groupchat::GroupChat::rpc(message.data);
+                    Some(proto::Modules::Group) => {                        
+                        super::group::Group::rpc(message.data);
                     },
                     Some(proto::Modules::Rtc) => {   
                         super::rtc::Rtc::rpc(message.data);

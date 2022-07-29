@@ -40,6 +40,6 @@ pub enum Modules {
     Chat = 9,
     Ble = 10,
     Fileshare = 11,
-    Groupchat = 12,
+    Group = 12,
     Rtc = 13,
 }

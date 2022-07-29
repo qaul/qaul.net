@@ -1,8 +1,8 @@
 syntax = "proto3";
-package qaul.rpc.groupchat;
+package qaul.rpc.group;
 
-// GroupChat service RPC message container
-message GroupChatRpc {
+// Group service RPC message container
+message Group {
     // message type
     oneof message {
         // group create request

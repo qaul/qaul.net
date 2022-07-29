@@ -42,7 +42,7 @@ message Messaging {
         // file sharing message
         FileMessage file_message = 4;
         // group chat message
-        GroupChatMessage group_chat_message = 5;
+        GroupMessage group_message = 5;
         // rtc message
         RtcMessage rtc_message = 6;
     }
@@ -87,7 +87,7 @@ message FileMessage {
 }
 
 // group chat message
-message GroupChatMessage {
+message GroupMessage {
     bytes content = 1;
 }
 

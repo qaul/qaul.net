@@ -19,7 +19,7 @@ use crate::router::table::RoutingTable;
 use super::chat::Chat;
 use super::crypto::Crypto;
 use super::filesharing;
-use super::groupchat;
+use super::group;
 use super::rtc;
 
 use crate::storage::database::DataBase;
@@ -349,10 +349,10 @@ impl Messaging {
                                                 file_message.content,
                                             );
                                         },
-                                        Some(proto::messaging::Message::GroupChatMessage(
-                                            group_chat_message,
+                                        Some(proto::messaging::Message::GroupMessage(
+                                            group_message,
                                         )) => {
-                                            groupchat::GroupChat::net(sender_id, receiver_id, group_chat_message.content, container.signature);
+                                            group::Group::net(sender_id, receiver_id, group_message.content, container.signature);
                                         },        
                                         Some(proto::messaging::Message::RtcMessage(
                                             rtc_message,

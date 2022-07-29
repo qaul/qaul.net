@@ -1,12 +1,12 @@
-/// GroupChat service RPC message container
+/// Group service RPC message container
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupChatRpc {
+pub struct Group {
     /// message type
-    #[prost(oneof="group_chat_rpc::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
-    pub message: ::core::option::Option<group_chat_rpc::Message>,
+    #[prost(oneof="group::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
+    pub message: ::core::option::Option<group::Message>,
 }
-/// Nested message and enum types in `GroupChatRpc`.
-pub mod group_chat_rpc {
+/// Nested message and enum types in `Group`.
+pub mod group {
     /// message type
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {

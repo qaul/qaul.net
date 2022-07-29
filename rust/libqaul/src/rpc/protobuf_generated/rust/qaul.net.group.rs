@@ -1,11 +1,11 @@
-/// GroupChat network message container
+/// Group network message container
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupChatContainer {
-    #[prost(oneof="group_chat_container::Message", tags="1, 2, 3, 4, 5")]
-    pub message: ::core::option::Option<group_chat_container::Message>,
+pub struct GroupContainer {
+    #[prost(oneof="group_container::Message", tags="1, 2, 3, 4, 5")]
+    pub message: ::core::option::Option<group_container::Message>,
 }
-/// Nested message and enum types in `GroupChatContainer`.
-pub mod group_chat_container {
+/// Nested message and enum types in `GroupContainer`.
+pub mod group_container {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
         /// group invite
@@ -22,7 +22,7 @@ pub mod group_chat_container {
         Removed(super::RemovedMember),
         /// group chat message
         #[prost(message, tag="5")]
-        GroupchatMessage(super::GroupchatMessage),
+        GroupMessage(super::GroupMessage),
     }
 }
 /// Invite member
@@ -98,7 +98,7 @@ pub struct RemovedMember {
 }
 ///Group chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupchatMessage {
+pub struct GroupMessage {
     /// group id
     #[prost(bytes="vec", tag="1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,

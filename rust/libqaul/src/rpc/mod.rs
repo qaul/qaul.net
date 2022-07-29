@@ -28,7 +28,7 @@ use crate::node::user_accounts::UserAccounts;
 use crate::services::feed::Feed;
 use crate::services::chat::Chat;
 use crate::services::filesharing::FileShare;
-use crate::services::groupchat::GroupChat;
+use crate::services::group::Group;
 use crate::services::rtc::Rtc;
 use debug::Debug;
 
@@ -175,12 +175,12 @@ impl Rpc {
                         log::info!("Message Modules::Fileshare received");
                         FileShare::rpc(message.data, message.user_id);
                     },
-                    Some(Modules::Groupchat) => {
-                        log::info!("Message Modules::Groupchat received");
-                        GroupChat::rpc(message.data, message.user_id);
+                    Some(Modules::Group) => {
+                        log::info!("Message Modules::Group received");
+                        Group::rpc(message.data, message.user_id);
                     },
                     Some(Modules::Rtc) => {
-                        log::info!("Message Modules::Groupchat received");
+                        log::info!("Message Modules::Group received");
                         Rtc::rpc(message.data, message.user_id);
                     },
                     Some(Modules::None) => {

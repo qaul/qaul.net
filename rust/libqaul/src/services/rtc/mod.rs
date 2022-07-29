@@ -1,11 +1,12 @@
 // Copyright (c) 2022 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Qaul GroupChat Service
+//! # Qaul Group Service
 //!
-//! The GroupChat service sends and receives messages and files into group members.
-//! The GroupChat messages carry on the Messaging service
-//! Messaging(GroupChat(GroupChatContainer(...)))
+//! The Group service manages groups and their members.
+//! 
+//! The Group messages are carried on the Messaging service:
+//! Messaging(Group(GroupContainer(...)))
 
 
 
@@ -71,7 +72,7 @@ pub static RTCSESSIONS: Storage<RwLock<RtcSessions>> = Storage::new();
 pub struct Rtc{
 }
 
-/// GroupChat module to process transfer, receive and RPC commands
+/// Group module to process transfer, receive and RPC commands
 impl Rtc {
     /// initialize group chat module
     pub fn init() {

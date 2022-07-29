@@ -1,8 +1,8 @@
 syntax = "proto3";
-package qaul.net.groupchat;
+package qaul.net.group;
 
-// GroupChat network message container
-message GroupChatContainer {
+// Group network message container
+message GroupContainer {
     oneof message {
         // group invite
         InviteMember invite_member = 1;
@@ -13,7 +13,7 @@ message GroupChatContainer {
         // member removed
         RemovedMember removed = 4;
         // group chat message
-        GroupchatMessage groupchat_message = 5;
+        GroupMessage group_message = 5;
     }
 }
 
@@ -73,7 +73,7 @@ message RemovedMember{
 }
 
 //Group chat message
-message GroupchatMessage{
+message GroupMessage{
     // group id
     bytes group_id = 1;
     // content

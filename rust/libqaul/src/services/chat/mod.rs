@@ -463,7 +463,7 @@ impl Chat {
                 // get user name from known users
                 let name;
                 if b_group{
-                    if let Some(group_name) = super::groupchat::GroupChat::get_group_name(user_id.clone(), &conversation_id){
+                    if let Some(group_name) = super::group::Group::get_group_name(user_id.clone(), &conversation_id){
                         name = group_name.clone();
                     }else{
                         return Err("Group not found".to_string());

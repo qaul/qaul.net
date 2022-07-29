@@ -15,7 +15,7 @@ use super::chat::Chat;
 use super::debug::Debug;
 use super::ble::Ble;
 use super::fileshare::FileShare;
-use super::groupchat::GroupChat;
+use super::group::Group;
 use super::rtc::Rtc;
 
 /// CLI command analizer and processing
@@ -65,9 +65,9 @@ impl Cli {
             cmd if cmd.starts_with("file ") => {
                 FileShare::cli(cmd.strip_prefix("file ").unwrap());
             },
-            // group chat functions
+            // group functions
             cmd if cmd.starts_with("group ") => {
-                GroupChat::cli(cmd.strip_prefix("group ").unwrap());
+                Group::cli(cmd.strip_prefix("group ").unwrap());
             },
             // rtc functions
             cmd if cmd.starts_with("rtc ") => {

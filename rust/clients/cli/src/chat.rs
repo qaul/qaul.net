@@ -148,7 +148,7 @@ impl Chat {
                             }
                         }
                         // request chat conversation
-                        Self::request_group_chat_conversation(conversation_id, last_index);
+                        Self::request_group_conversation(conversation_id, last_index);
                     },
                     None => {
                         // request all messages
@@ -247,7 +247,7 @@ impl Chat {
     /// 
     /// This provides all chat messages of a specific conversation.
     /// The conversation is addressed via it's conversation id
-    fn request_group_chat_conversation(group_id: Vec<u8>, last_index: u64) {
+    fn request_group_conversation(group_id: Vec<u8>, last_index: u64) {
         // create feed list request message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::ChatGroupRequest(

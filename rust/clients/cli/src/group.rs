@@ -8,12 +8,12 @@ use super::rpc::Rpc;
 use std::fmt;
 
 /// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.groupchat.rs"); }
+mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs"); }
 
 /// GrouChat module function handling
-pub struct GroupChat {}
+pub struct Group {}
 
-impl GroupChat {
+impl Group {
     /// CLI command interpretation
     /// 
     /// The CLI commands of GrouChat module are processed here
@@ -257,8 +257,8 @@ impl GroupChat {
     /// crete group
     fn create_group(group_name: String) {
         // create group send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupCreateRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupCreateRequest(
                 proto::GroupCreateRequest{
                     group_name: group_name.clone(),
                 }
@@ -270,14 +270,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// rename group
     fn rename_group(group_id: Vec<u8>, group_name: String) {
         // rename group send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupRenameRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupRenameRequest(
                 proto::GroupRenameRequest{
                     group_name: group_name.clone(),
                     group_id: group_id.clone(),
@@ -290,14 +290,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// group info
     fn group_info(group_id: Vec<u8>){
         // group info send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupInfoRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupInfoRequest(
                 proto::GroupInfoRequest{
                     group_id: group_id.clone(),
                 }
@@ -309,14 +309,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// group list
     fn group_list(){
         // group list send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupListRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupListRequest(
                 proto::GroupListRequest{
                 }
             )),
@@ -327,14 +327,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// group invite
     fn invite(group_id: Vec<u8>, user_id: Vec<u8>){
         // group invite send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupInviteMemberRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupInviteMemberRequest(
                 proto::GroupInviteMemberRequest{
                     group_id: group_id.clone(),
                     user_id: user_id.clone(),
@@ -347,14 +347,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// reply invite
     fn reply_invite(group_id: Vec<u8>, user_id: Vec<u8>, accept: bool){
         // group invite send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupReplyInviteRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupReplyInviteRequest(
                 proto::GroupReplyInviteRequest{
                     group_id: group_id.clone(),
                     user_id: user_id.clone(),
@@ -368,14 +368,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// remove member
     fn remove_member(group_id: Vec<u8>, user_id: Vec<u8>){
         // group invite send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupRemoveMemberRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupRemoveMemberRequest(
                 proto::GroupRemoveMemberRequest{
                     group_id: group_id.clone(),
                     user_id: user_id.clone(),
@@ -388,14 +388,14 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
     
     /// send message
     fn send_message(group_id: Vec<u8>, message: String){
         // group invite send message
-        let proto_message = proto::GroupChatRpc {
-            message: Some(proto::group_chat_rpc::Message::GroupSendRequest(
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupSendRequest(
                 proto::GroupSendRequest{
                     group_id: group_id.clone(),
                     message: message.clone(),
@@ -408,7 +408,7 @@ impl GroupChat {
         proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Groupchat.into(), "".to_string());
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), "".to_string());
     }
 
     /// Process received RPC message
@@ -416,16 +416,16 @@ impl GroupChat {
     /// Decodes received protobuf encoded binary RPC message
     /// of the group chat module.
     pub fn rpc(data: Vec<u8>) {
-        match proto::GroupChatRpc::decode(&data[..]) {
+        match proto::Group::decode(&data[..]) {
             Ok(group_chat) => {
                 match group_chat.message {
-                    Some(proto::group_chat_rpc::Message::GroupCreateResponse(create_group_response)) => {
+                    Some(proto::group::Message::GroupCreateResponse(create_group_response)) => {
                         println!("====================================");
                         println!("Group was created or updated");
                         println!("\tid: {}", bs58::encode(create_group_response.group_id).into_string());
                         println!("\tname: {}", create_group_response.group_name.clone());
                     },
-                    Some(proto::group_chat_rpc::Message::GroupInfoResponse(group_info_response)) => {
+                    Some(proto::group::Message::GroupInfoResponse(group_info_response)) => {
                         // group
                         println!("====================================");
                         println!("Group Information");
@@ -434,7 +434,7 @@ impl GroupChat {
                         println!("\tcreated_at: {}", group_info_response.created_at);
                         println!("\tmembers: {}", group_info_response.members.len());
                     },
-                    Some(proto::group_chat_rpc::Message::GroupListResponse(group_list_response)) => {                        
+                    Some(proto::group::Message::GroupListResponse(group_list_response)) => {                        
                         // List groups
                         println!("=============List Of Groups=================");
                         for group in group_list_response.groups{                            

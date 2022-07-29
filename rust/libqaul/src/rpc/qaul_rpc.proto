@@ -37,6 +37,6 @@ enum Modules {
     CHAT = 9;
     BLE = 10;
     FILESHARE=11;    
-    GROUPCHAT=12;
+    GROUP=12;
     RTC=13;
 }

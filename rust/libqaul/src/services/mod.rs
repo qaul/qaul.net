@@ -18,7 +18,7 @@ pub mod messaging;
 pub mod chat;
 pub mod crypto;
 pub mod filesharing;
-pub mod groupchat;
+pub mod group;
 pub mod rtc;
 
 /// qaul Services
@@ -35,7 +35,7 @@ impl Services {
         messaging::Messaging::init();
         chat::Chat::init();
         filesharing::FileShare::init();
-        groupchat::GroupChat::init();
+        group::Group::init();
         rtc::Rtc::init();
     }
 }

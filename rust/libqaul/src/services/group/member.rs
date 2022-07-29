@@ -5,14 +5,14 @@ use libp2p::{
 use prost::Message;
 
 use crate::{node::user_accounts::{UserAccount, UserAccounts}, utilities::timestamp};
-use super::GroupChat;
+use super::Group;
 use super::Chat;
 
 pub struct Member{}
 impl Member{
     /// invite member from rpc command
     pub fn invite(my_user_id: &PeerId, group_id: &Vec<u8>, user_id: &Vec<u8>) ->Result<bool, String>{
-        let groups = GroupChat::get_groups_of_user(my_user_id.clone());
+        let groups = Group::get_groups_of_user(my_user_id.clone());
 
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
@@ -35,8 +35,8 @@ impl Member{
         }
 
         //send invite.
-        let proto_message = super::proto_net::GroupChatContainer {
-            message: Some(super::proto_net::group_chat_container::Message::InviteMember(
+        let proto_message = super::proto_net::GroupContainer {
+            message: Some(super::proto_net::group_container::Message::InviteMember(
                 super::proto_net::InviteMember {
                     group_id: group.id.clone(),
                     group_name: group.name.clone(),
@@ -54,7 +54,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            GroupChat::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
 
             //save invite chat message
             Chat::save_outgoing_group_invite_message(my_user_id.clone(), receiver.clone(), group_id,
@@ -70,8 +70,8 @@ impl Member{
     /// reply to invited message from rpc command
     pub fn reply_invite(my_user_id: &PeerId, group_id: &Vec<u8>, conversation_id: &Vec<u8>, accept: bool) ->Result<bool, String>{
         //send invite.
-        let proto_message = super::proto_net::GroupChatContainer {
-            message: Some(super::proto_net::group_chat_container::Message::ReplyInvite(
+        let proto_message = super::proto_net::GroupContainer {
+            message: Some(super::proto_net::group_container::Message::ReplyInvite(
                 super::proto_net::ReplyInvite {
                     group_id: group_id.clone(),
                     accept
@@ -86,7 +86,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(conversation_id).unwrap();
-            GroupChat::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
 
             //save invite chat message
             Chat::save_outgoing_group_invite_reply_message(my_user_id.clone(), receiver.clone(), 
@@ -100,7 +100,7 @@ impl Member{
 
     /// remove member from rpc command
     pub fn remove(my_user_id: &PeerId, group_id: &Vec<u8>, user_id: &Vec<u8>) ->Result<bool, String>{
-        let groups = GroupChat::get_groups_of_user(my_user_id.clone());
+        let groups = Group::get_groups_of_user(my_user_id.clone());
         let group_idx = groups.group_id_to_index(group_id);
 
         if group_idx == 0{
@@ -122,15 +122,15 @@ impl Member{
             if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group){
                 log::error!("group db updating error {}", error.to_string());                
             }
-            GroupChat::update_groups_of_user(my_user_id.clone(), groups);
+            Group::update_groups_of_user(my_user_id.clone(), groups);
 
         }else{
             return Err("this user is not member of this group".to_string());
         }
 
         //send direct message to removed user
-        let proto_message = super::proto_net::GroupChatContainer {
-            message: Some(super::proto_net::group_chat_container::Message::Removed(
+        let proto_message = super::proto_net::GroupContainer {
+            message: Some(super::proto_net::group_container::Message::Removed(
                 super::proto_net::RemovedMember {
                     group_id: group_id.clone(),
                 },
@@ -144,7 +144,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            GroupChat::send_group_message_through_message(&user_account, receiver, &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver, &message_buff);
         }else{
             return Err("user account has problem".to_string());
         }
@@ -162,7 +162,7 @@ impl Member{
 
     /// process accept invite message from network
     fn on_accpeted_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite, signature: Vec<u8>)->Result<bool, String>{
-        let groups = GroupChat::get_groups_of_user(receiver_id.clone());
+        let groups = Group::get_groups_of_user(receiver_id.clone());
 
         //add new member
         let new_member = super::GroupMember{
@@ -185,7 +185,7 @@ impl Member{
         if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group){
             log::error!("group db updating error {}", error.to_string());            
         }
-        GroupChat::update_groups_of_user(receiver_id.clone(), groups);
+        Group::update_groups_of_user(receiver_id.clone(), groups);
         
         //save chat message
         Chat::save_incoming_group_invite_reply_message(receiver_id.clone(), sender_id.clone(), &resp.group_id, resp.accept, signature);

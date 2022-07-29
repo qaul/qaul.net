@@ -5,14 +5,14 @@ use libp2p::{
 
 use prost::Message;
 use crate::{node::user_accounts::{UserAccounts}, utilities::timestamp};
-use super::GroupChat;
+use super::Group;
 use super::Chat;
 
 pub struct GroupMessage{}
 impl GroupMessage{
     /// send group message from rpc command
     pub fn send(my_user_id: &PeerId, group_id: &Vec<u8>, message: String )  ->Result<bool, String>{
-        let groups = GroupChat::get_groups_of_user(my_user_id.clone());
+        let groups = Group::get_groups_of_user(my_user_id.clone());
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
             return Err("can not find group".to_string());
@@ -28,9 +28,9 @@ impl GroupMessage{
         }
 
         //create group message
-        let proto_message = super::proto_net::GroupChatContainer {
-            message: Some(super::proto_net::group_chat_container::Message::GroupchatMessage(
-                super::proto_net::GroupchatMessage {
+        let proto_message = super::proto_net::GroupContainer {
+            message: Some(super::proto_net::group_container::Message::GroupMessage(
+                super::proto_net::GroupMessage {
                     group_id: group_id.clone(),
                     content: message.clone(),
                     sent_at: timestamp::Timestamp::get_timestamp(),
@@ -49,7 +49,7 @@ impl GroupMessage{
             for user_id in group.members.keys(){
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();                
                 if receiver != *my_user_id{
-                    GroupChat::send_group_message_through_message(&user_account, receiver, &message_buff);
+                    Group::send_group_message_through_message(&user_account, receiver, &message_buff);
                 }                
             }
         }
@@ -63,10 +63,10 @@ impl GroupMessage{
     }
 
     /// process group message from network
-    pub fn on_message(sender_id: &Vec<u8>, receiver_id: &Vec<u8>, chat_message: &super::proto_net::GroupchatMessage, signature: Vec<u8>)  ->Result<bool, String>{        
+    pub fn on_message(sender_id: &Vec<u8>, receiver_id: &Vec<u8>, chat_message: &super::proto_net::GroupMessage, signature: Vec<u8>)  ->Result<bool, String>{        
         let user_id = PeerId::from_bytes(receiver_id).unwrap();
         // check group and member        
-        let groups = GroupChat::get_groups_of_user(user_id);
+        let groups = Group::get_groups_of_user(user_id);
         let group_idx = groups.group_id_to_index(&chat_message.group_id);
         if group_idx == 0{
             return Err("can not find group".to_string());
