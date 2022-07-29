@@ -71,7 +71,7 @@ enum Modules : int {
   CHAT = 9,
   BLE = 10,
   FILESHARE = 11,
-  GROUPCHAT = 12,
+  GROUP = 12,
   RTC = 13,
   Modules_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   Modules_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()

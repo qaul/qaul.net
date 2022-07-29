@@ -171,35 +171,35 @@ object MessagingKt {
      * group chat message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
+     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
      */
-    var groupChatMessage: qaul.net.messaging.MessagingOuterClass.GroupChatMessage
-      @JvmName("getGroupChatMessage")
-      get() = _builder.getGroupChatMessage()
-      @JvmName("setGroupChatMessage")
+    var groupMessage: qaul.net.messaging.MessagingOuterClass.GroupMessage
+      @JvmName("getGroupMessage")
+      get() = _builder.getGroupMessage()
+      @JvmName("setGroupMessage")
       set(value) {
-        _builder.setGroupChatMessage(value)
+        _builder.setGroupMessage(value)
       }
     /**
      * <pre>
      * group chat message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
+     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
      */
-    fun clearGroupChatMessage() {
-      _builder.clearGroupChatMessage()
+    fun clearGroupMessage() {
+      _builder.clearGroupMessage()
     }
     /**
      * <pre>
      * group chat message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupChatMessage group_chat_message = 5;</code>
-     * @return Whether the groupChatMessage field is set.
+     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
+     * @return Whether the groupMessage field is set.
      */
-    fun hasGroupChatMessage(): kotlin.Boolean {
-      return _builder.hasGroupChatMessage()
+    fun hasGroupMessage(): kotlin.Boolean {
+      return _builder.hasGroupMessage()
     }
 
     /**
@@ -262,8 +262,8 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull:
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.fileMessageOrNull: qaul.net.messaging.MessagingOuterClass.FileMessage?
   get() = if (hasFileMessage()) getFileMessage() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupChatMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupChatMessage?
-  get() = if (hasGroupChatMessage()) getGroupChatMessage() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupMessage?
+  get() = if (hasGroupMessage()) getGroupMessage() else null
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.rtcMessageOrNull: qaul.net.messaging.MessagingOuterClass.RtcMessage?
   get() = if (hasRtcMessage()) getRtcMessage() else null

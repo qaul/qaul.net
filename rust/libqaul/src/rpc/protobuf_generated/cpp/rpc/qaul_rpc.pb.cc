@@ -68,15 +68,15 @@ const char descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto[] PROTOBUF_SECTION
   "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp"
   "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n"
   "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat"
-  "a\030\004 \001(\014*\257\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010"
+  "a\030\004 \001(\014*\253\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010"
   "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n"
   "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005"
   "DEBUG\020\010\022\010\n\004CHAT\020\t\022\007\n\003BLE\020\n\022\r\n\tFILESHARE\020"
-  "\013\022\r\n\tGROUPCHAT\020\014\022\007\n\003RTC\020\rb\006proto3"
+  "\013\022\t\n\005GROUP\020\014\022\007\n\003RTC\020\rb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_rpc_2fqaul_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_rpc_2fqaul_5frpc_2eproto = {
-    false, false, 313, descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto,
+    false, false, 309, descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto,
     "rpc/qaul_rpc.proto",
     &descriptor_table_rpc_2fqaul_5frpc_2eproto_once, nullptr, 0, 1,
     schemas, file_default_instances, TableStruct_rpc_2fqaul_5frpc_2eproto::offsets,

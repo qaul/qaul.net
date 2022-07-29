@@ -44,7 +44,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
   case chat // = 9
   case ble // = 10
   case fileshare // = 11
-  case groupchat // = 12
+  case group // = 12
   case rtc // = 13
   case UNRECOGNIZED(Int)
 
@@ -66,7 +66,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case 9: self = .chat
     case 10: self = .ble
     case 11: self = .fileshare
-    case 12: self = .groupchat
+    case 12: self = .group
     case 13: self = .rtc
     default: self = .UNRECOGNIZED(rawValue)
     }
@@ -86,7 +86,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case .chat: return 9
     case .ble: return 10
     case .fileshare: return 11
-    case .groupchat: return 12
+    case .group: return 12
     case .rtc: return 13
     case .UNRECOGNIZED(let i): return i
     }
@@ -111,7 +111,7 @@ extension Qaul_Rpc_Modules: CaseIterable {
     .chat,
     .ble,
     .fileshare,
-    .groupchat,
+    .group,
     .rtc,
   ]
 }
@@ -163,7 +163,7 @@ extension Qaul_Rpc_Modules: SwiftProtobuf._ProtoNameProviding {
     9: .same(proto: "CHAT"),
     10: .same(proto: "BLE"),
     11: .same(proto: "FILESHARE"),
-    12: .same(proto: "GROUPCHAT"),
+    12: .same(proto: "GROUP"),
     13: .same(proto: "RTC"),
   ]
 }

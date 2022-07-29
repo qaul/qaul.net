@@ -131,12 +131,12 @@ struct Qaul_Net_Messaging_Messaging {
   }
 
   /// group chat message
-  var groupChatMessage: Qaul_Net_Messaging_GroupChatMessage {
+  var groupMessage: Qaul_Net_Messaging_GroupMessage {
     get {
-      if case .groupChatMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_GroupChatMessage()
+      if case .groupMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_GroupMessage()
     }
-    set {message = .groupChatMessage(newValue)}
+    set {message = .groupMessage(newValue)}
   }
 
   /// rtc message
@@ -160,7 +160,7 @@ struct Qaul_Net_Messaging_Messaging {
     /// file sharing message
     case fileMessage(Qaul_Net_Messaging_FileMessage)
     /// group chat message
-    case groupChatMessage(Qaul_Net_Messaging_GroupChatMessage)
+    case groupMessage(Qaul_Net_Messaging_GroupMessage)
     /// rtc message
     case rtcMessage(Qaul_Net_Messaging_RtcMessage)
 
@@ -186,8 +186,8 @@ struct Qaul_Net_Messaging_Messaging {
         guard case .fileMessage(let l) = lhs, case .fileMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.groupChatMessage, .groupChatMessage): return {
-        guard case .groupChatMessage(let l) = lhs, case .groupChatMessage(let r) = rhs else { preconditionFailure() }
+      case (.groupMessage, .groupMessage): return {
+        guard case .groupMessage(let l) = lhs, case .groupMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.rtcMessage, .rtcMessage): return {
@@ -276,7 +276,7 @@ struct Qaul_Net_Messaging_FileMessage {
 }
 
 /// group chat message
-struct Qaul_Net_Messaging_GroupChatMessage {
+struct Qaul_Net_Messaging_GroupMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -436,7 +436,7 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
     2: .standard(proto: "crypto_service"),
     3: .standard(proto: "chat_message"),
     4: .standard(proto: "file_message"),
-    5: .standard(proto: "group_chat_message"),
+    5: .standard(proto: "group_message"),
     6: .standard(proto: "rtc_message"),
   ]
 
@@ -499,16 +499,16 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
         }
       }()
       case 5: try {
-        var v: Qaul_Net_Messaging_GroupChatMessage?
+        var v: Qaul_Net_Messaging_GroupMessage?
         var hadOneofValue = false
         if let current = self.message {
           hadOneofValue = true
-          if case .groupChatMessage(let m) = current {v = m}
+          if case .groupMessage(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .groupChatMessage(v)
+          self.message = .groupMessage(v)
         }
       }()
       case 6: try {
@@ -551,8 +551,8 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
       guard case .fileMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
-    case .groupChatMessage?: try {
-      guard case .groupChatMessage(let v)? = self.message else { preconditionFailure() }
+    case .groupMessage?: try {
+      guard case .groupMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case .rtcMessage?: try {
@@ -710,8 +710,8 @@ extension Qaul_Net_Messaging_FileMessage: SwiftProtobuf.Message, SwiftProtobuf._
   }
 }
 
-extension Qaul_Net_Messaging_GroupChatMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GroupChatMessage"
+extension Qaul_Net_Messaging_GroupMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".GroupMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "content"),
   ]
@@ -735,7 +735,7 @@ extension Qaul_Net_Messaging_GroupChatMessage: SwiftProtobuf.Message, SwiftProto
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Net_Messaging_GroupChatMessage, rhs: Qaul_Net_Messaging_GroupChatMessage) -> Bool {
+  static func ==(lhs: Qaul_Net_Messaging_GroupMessage, rhs: Qaul_Net_Messaging_GroupMessage) -> Bool {
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

@@ -208,7 +208,7 @@ enum Messaging_Message {
   cryptoService, 
   chatMessage, 
   fileMessage, 
-  groupChatMessage, 
+  groupMessage, 
   rtcMessage, 
   notSet
 }
@@ -219,7 +219,7 @@ class Messaging extends $pb.GeneratedMessage {
     2 : Messaging_Message.cryptoService,
     3 : Messaging_Message.chatMessage,
     4 : Messaging_Message.fileMessage,
-    5 : Messaging_Message.groupChatMessage,
+    5 : Messaging_Message.groupMessage,
     6 : Messaging_Message.rtcMessage,
     0 : Messaging_Message.notSet
   };
@@ -229,7 +229,7 @@ class Messaging extends $pb.GeneratedMessage {
     ..aOM<CryptoService>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
     ..aOM<ChatMessage>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
     ..aOM<FileMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileMessage', subBuilder: FileMessage.create)
-    ..aOM<GroupChatMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupChatMessage', subBuilder: GroupChatMessage.create)
+    ..aOM<GroupMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupMessage', subBuilder: GroupMessage.create)
     ..aOM<RtcMessage>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtcMessage', subBuilder: RtcMessage.create)
     ..hasRequiredFields = false
   ;
@@ -240,7 +240,7 @@ class Messaging extends $pb.GeneratedMessage {
     CryptoService? cryptoService,
     ChatMessage? chatMessage,
     FileMessage? fileMessage,
-    GroupChatMessage? groupChatMessage,
+    GroupMessage? groupMessage,
     RtcMessage? rtcMessage,
   }) {
     final _result = create();
@@ -256,8 +256,8 @@ class Messaging extends $pb.GeneratedMessage {
     if (fileMessage != null) {
       _result.fileMessage = fileMessage;
     }
-    if (groupChatMessage != null) {
-      _result.groupChatMessage = groupChatMessage;
+    if (groupMessage != null) {
+      _result.groupMessage = groupMessage;
     }
     if (rtcMessage != null) {
       _result.rtcMessage = rtcMessage;
@@ -333,15 +333,15 @@ class Messaging extends $pb.GeneratedMessage {
   FileMessage ensureFileMessage() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  GroupChatMessage get groupChatMessage => $_getN(4);
+  GroupMessage get groupMessage => $_getN(4);
   @$pb.TagNumber(5)
-  set groupChatMessage(GroupChatMessage v) { setField(5, v); }
+  set groupMessage(GroupMessage v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasGroupChatMessage() => $_has(4);
+  $core.bool hasGroupMessage() => $_has(4);
   @$pb.TagNumber(5)
-  void clearGroupChatMessage() => clearField(5);
+  void clearGroupMessage() => clearField(5);
   @$pb.TagNumber(5)
-  GroupChatMessage ensureGroupChatMessage() => $_ensure(4);
+  GroupMessage ensureGroupMessage() => $_ensure(4);
 
   @$pb.TagNumber(6)
   RtcMessage get rtcMessage => $_getN(5);
@@ -581,14 +581,14 @@ class FileMessage extends $pb.GeneratedMessage {
   void clearContent() => clearField(1);
 }
 
-class GroupChatMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupChatMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+class GroupMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
-  GroupChatMessage._() : super();
-  factory GroupChatMessage({
+  GroupMessage._() : super();
+  factory GroupMessage({
     $core.List<$core.int>? content,
   }) {
     final _result = create();
@@ -597,26 +597,26 @@ class GroupChatMessage extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory GroupChatMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GroupChatMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory GroupMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GroupMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  GroupChatMessage clone() => GroupChatMessage()..mergeFromMessage(this);
+  GroupMessage clone() => GroupMessage()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GroupChatMessage copyWith(void Function(GroupChatMessage) updates) => super.copyWith((message) => updates(message as GroupChatMessage)) as GroupChatMessage; // ignore: deprecated_member_use
+  GroupMessage copyWith(void Function(GroupMessage) updates) => super.copyWith((message) => updates(message as GroupMessage)) as GroupMessage; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static GroupChatMessage create() => GroupChatMessage._();
-  GroupChatMessage createEmptyInstance() => create();
-  static $pb.PbList<GroupChatMessage> createRepeated() => $pb.PbList<GroupChatMessage>();
+  static GroupMessage create() => GroupMessage._();
+  GroupMessage createEmptyInstance() => create();
+  static $pb.PbList<GroupMessage> createRepeated() => $pb.PbList<GroupMessage>();
   @$core.pragma('dart2js:noInline')
-  static GroupChatMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupChatMessage>(create);
-  static GroupChatMessage? _defaultInstance;
+  static GroupMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupMessage>(create);
+  static GroupMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.int> get content => $_getN(0);
