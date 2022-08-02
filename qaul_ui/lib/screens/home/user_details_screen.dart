@@ -8,7 +8,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import '../../decorators/disabled_state_decorator.dart';
 import '../../decorators/loading_decorator.dart';
 import '../../widgets/widgets.dart';
-import '../chat/chat.dart';
+import 'tabs/chat/widgets/chat.dart';
 
 class UserDetailsScreen extends HookConsumerWidget {
   const UserDetailsScreen({Key? key, required this.user}) : super(key: key);
