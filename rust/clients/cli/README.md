@@ -50,6 +50,16 @@ The following commands are available:
     * at least one user needs to be created
   * `feed list` - displays all feed messages
     * `feed list {Feed Message ID}` - displays only feed messages newer than {Feed Message ID}
+* group
+  * `group create {Group Name}` - creates a new group
+  * `group list` - list all available groups
+  * `group info {Group ID}` - shows the group information
+  * `group invite {Group ID} {User ID}` - invite a user to a group
+    * `group accept {Group ID} {User ID}` - accept group invitation
+    * `group decline {Group ID} {User ID}` - decline group invitation
+  * `group remove {Group ID} {User ID}` - remove a group member from the group
+  * `group rename {Group ID} {New Name}` - rename a group
+  * `group send {Group ID} {Message Content}` - send a message to a group
 * chat
   * `chat send {Conversation ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Conversation ID}
   * `chat overview` - displays an overview of all conversations and the last messages within them

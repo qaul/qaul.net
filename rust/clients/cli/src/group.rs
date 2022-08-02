@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # FileShare module functions
+//! # Group module functions
 
 use prost::Message;
 use super::rpc::Rpc;
@@ -10,13 +10,13 @@ use std::fmt;
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs"); }
 
-/// GrouChat module function handling
+/// Group module function handling
 pub struct Group {}
 
 impl Group {
     /// CLI command interpretation
     /// 
-    /// The CLI commands of GrouChat module are processed here
+    /// The CLI commands of group module are processed here
     pub fn cli(command: &str) {
         match command {
             // create group
@@ -41,8 +41,8 @@ impl Group {
                         Ok(group_id) => {
                             if let Some(group_name) = iter.next() {
                                 Self::rename_group(group_id, group_name.to_string());
-                            }else{
-                                log::error!("file pathname is not given");
+                            } else {
+                                log::error!("group name is missing");
                             }
                         },
                         Err(e) => {
@@ -208,7 +208,7 @@ impl Group {
                     log::error!("group remove command incorrectly formatted");
                 }
             },
-            // send group mesage
+            // send group message
             cmd if cmd.starts_with("send ") => {
                 let command_string = cmd.strip_prefix("send ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
@@ -254,7 +254,7 @@ impl Group {
         }
     }    
 
-    /// crete group
+    /// create group
     fn create_group(group_name: String) {
         // create group send message
         let proto_message = proto::Group {
@@ -438,7 +438,7 @@ impl Group {
                         // List groups
                         println!("=============List Of Groups=================");
                         for group in group_list_response.groups{                            
-                            println!("gorup id: {}", bs58::encode(group.group_id).into_string());
+                            println!("group id: {}", bs58::encode(group.group_id).into_string());
                             println!("\tname: {}", group.group_name.clone());
                             println!("\tcreated_at: {}, members: {}", group.created_at, group.members.len());
                         }
