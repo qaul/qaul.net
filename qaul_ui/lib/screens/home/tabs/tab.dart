@@ -12,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/locale.dart';
+import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
@@ -23,12 +24,17 @@ import '../../../decorators/search_user_decorator.dart';
 import '../../../providers/providers.dart';
 import '../../../utils.dart';
 import '../../../widgets/widgets.dart';
-import '../../chat/chat.dart';
 import '../user_details_screen.dart';
+import 'chat/widgets/chat.dart';
 
-part 'chat_tab.dart';
+part 'chat/chat_tab.dart';
+
+part 'chat/dialogs/dialogs.dart';
+
 part 'feed_tab.dart';
+
 part 'network_tab.dart';
+
 part 'users_tab.dart';
 
 abstract class BaseTab extends StatefulHookConsumerWidget {

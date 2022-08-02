@@ -68,10 +68,15 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     if (!UserPrefsHelper().chatNotificationsEnabled || _lastMessageIsFromLocalUser(value)) {
       return null;
     }
+    if (value.lastMessagePreview is! TextMessageContent) {
+      _log.info('message of type ${value.lastMessagePreview.runtimeType} received, but no notification was sent');
+      return null;
+    }
+
     return LocalNotification(
       id: value.hashCode,
       title: value.name ?? 'New Message',
-      body: value.lastMessagePreview!,
+      body: (value.lastMessagePreview as TextMessageContent).content,
       payload: 'qaul://chat/${value.idBase58}',
     );
   }

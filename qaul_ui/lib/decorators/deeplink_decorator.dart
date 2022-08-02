@@ -10,7 +10,7 @@ import 'package:uni_links/uni_links.dart' as uni_links;
 
 import '../helpers/navigation_helper.dart';
 import '../providers/providers.dart';
-import '../screens/chat/chat.dart';
+import '../screens/home/tabs/chat/widgets/chat.dart';
 
 class DeepLinkWrapper extends StatefulHookConsumerWidget {
   const DeepLinkWrapper({

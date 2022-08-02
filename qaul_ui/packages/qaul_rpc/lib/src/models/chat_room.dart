@@ -1,11 +1,18 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
+import '../../qaul_rpc.dart';
 import '../generated/services/chat/chat.pb.dart';
-import 'models.dart';
+import '../generated/services/group/group_rpc.pb.dart';
+
+enum ChatRoomUserRole { normal, admin, unknown }
+
+enum InvitationState { sent, received, accepted, unknown }
 
 enum MessageStatus { nothing, sent, received }
 
@@ -20,6 +27,9 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.lastMessagePreview,
     this.messages,
     this.unreadCount = 0,
+    this.isGroupMessage = false,
+    this.createdAt,
+    this.members = const [],
   });
 
   /// The ID of the other user
@@ -29,8 +39,11 @@ class ChatRoom with EquatableMixin implements Comparable {
   final String? name;
   final DateTime? lastMessageTime;
   final int unreadCount;
-  final String? lastMessagePreview;
+  final MessageContent? lastMessagePreview;
   final List<Message>? messages;
+  final bool isGroupMessage;
+  final DateTime? createdAt;
+  final List<ChatRoomUser> members;
 
   factory ChatRoom.blank({required User user, required User otherUser}) {
     return ChatRoom._(conversationId: otherUser.id, name: otherUser.name);
@@ -46,18 +59,48 @@ class ChatRoom with EquatableMixin implements Comparable {
         overview.lastMessageAt.toInt(),
       ),
       unreadCount: overview.unread,
-      lastMessagePreview: String.fromCharCodes(overview.content),
+      lastMessagePreview: MessageContent.fromBuffer(overview.content),
     );
   }
 
   factory ChatRoom.fromConversationList(ChatConversationList conversationList) {
     return ChatRoom._(
       conversationId: Uint8List.fromList(conversationList.conversationId),
-      messages: conversationList.messageList.map((e) => Message.fromChatMessage(e)).toList(),
+      messages: conversationList.messageList
+          .map((e) => Message.fromChatMessage(e))
+          .toList(),
+    );
+  }
+
+  factory ChatRoom.fromChatGroupList(ChatGroupList groupList) {
+    return ChatRoom._(
+      conversationId: Uint8List.fromList(groupList.groupId),
+      messages:
+          groupList.messageList.map((e) => Message.fromChatMessage(e)).toList(),
+      isGroupMessage: true,
+    );
+  }
+
+  factory ChatRoom.fromGroupInfo(GroupInfo g, List<User> users) {
+    final members = <ChatRoomUser>[];
+
+    for (final user in users) {
+      final m = g.members.firstWhereOrNull((m) => m.userId.equals(user.id));
+      if (m == null) continue;
+      members.add(ChatRoomUser.fromUser(user, m));
+    }
+
+    return ChatRoom._(
+      conversationId: g.id,
+      name: g.groupName,
+      createdAt: g.createdAt,
+      members: members,
     );
   }
 
   String get idBase58 => Base58Encode(conversationId);
+
+  bool get isGroupChatRoom => isGroupMessage || members.isNotEmpty;
 
   @override
   int compareTo(dynamic other) {
@@ -82,7 +125,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     String? name,
     DateTime? lastMessageTime,
     int? unreadCount,
-    String? lastMessagePreview,
+    MessageContent? lastMessagePreview,
     List<Message>? messages,
   }) {
     return ChatRoom._(
@@ -95,6 +138,56 @@ class ChatRoom with EquatableMixin implements Comparable {
       messages: messages ?? this.messages,
     );
   }
+}
+
+@immutable
+class ChatRoomUser extends User {
+  ChatRoomUser._(
+    User u, {
+    required this.joinedAt,
+    this.roomId,
+    this.role = ChatRoomUserRole.unknown,
+    this.invitationState = InvitationState.unknown,
+  }) : super(
+          name: u.name,
+          id: u.id,
+          idBase58: u.idBase58,
+          key: u.key,
+          keyType: u.keyType,
+          keyBase58: u.keyBase58,
+          availableTypes: u.availableTypes,
+          isBlocked: u.isBlocked,
+          isVerified: u.isVerified,
+          status: u.status,
+        );
+
+  final Uint8List? roomId;
+  final ChatRoomUserRole role;
+  final DateTime joinedAt;
+  final InvitationState invitationState;
+
+  factory ChatRoomUser.fromUser(User u, GroupMember m, {Uint8List? roomId}) {
+    return ChatRoomUser._(
+      u,
+      roomId: Uint8List.fromList(m.userId),
+      joinedAt: DateTime.fromMillisecondsSinceEpoch(m.joinedAt.toInt()),
+      role: m.role == 0
+          ? ChatRoomUserRole.normal
+          : m.role == 255
+              ? ChatRoomUserRole.admin
+              : ChatRoomUserRole.unknown,
+      invitationState: m.state == 1
+          ? InvitationState.sent
+          : m.state == 2
+              ? InvitationState.received
+              : m.state == 3
+                  ? InvitationState.accepted
+                  : InvitationState.unknown,
+    );
+  }
+
+  @override
+  List<Object?> get props => [name, idBase58, role, roomId];
 }
 
 @immutable
@@ -115,7 +208,7 @@ class Message with EquatableMixin implements Comparable<Message> {
   final MessageStatus status;
   final DateTime sentAt;
   final DateTime receivedAt;
-  final String content;
+  final MessageContent content;
 
   String get messageIdBase58 => Base58Encode(messageId);
 
@@ -123,7 +216,7 @@ class Message with EquatableMixin implements Comparable<Message> {
     return Message(
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(m.messageId),
-      content: String.fromCharCodes(m.content),
+      content: MessageContent.fromBuffer(m.content),
       index: m.index,
       status: MessageStatus.values[m.status],
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
@@ -143,4 +236,96 @@ class Message with EquatableMixin implements Comparable<Message> {
 
   @override
   List<Object?> get props => [senderId, messageId, content];
+}
+
+@immutable
+class GroupInfo extends Equatable {
+  final Uint8List id;
+  final String groupName;
+  final DateTime createdAt;
+  final List<GroupMember> members;
+
+  const GroupInfo({
+    required this.id,
+    required this.groupName,
+    required this.createdAt,
+    required this.members,
+  });
+
+  @override
+  List<Object?> get props => [groupName, createdAt];
+}
+
+abstract class MessageContent extends Equatable {
+  const MessageContent();
+
+  factory MessageContent.fromBuffer(List<int> buffer) {
+    final content = ChatMessageContent.fromBuffer(buffer);
+    switch (content.whichContent()) {
+      case ChatMessageContent_Content.chatContent:
+        return TextMessageContent(content.ensureChatContent().content);
+      case ChatMessageContent_Content.groupInviteContent:
+        final invite = content.ensureGroupInviteContent();
+        return GroupInviteContent(
+          groupId: Uint8List.fromList(invite.groupId),
+          groupName: invite.groupName,
+          createdAt:
+              DateTime.fromMillisecondsSinceEpoch(invite.createdAt.toInt()),
+          numOfMembers: invite.memberCount,
+          adminId: Uint8List.fromList(invite.adminId),
+        );
+      case ChatMessageContent_Content.fileContent:
+      case ChatMessageContent_Content.groupInviteReplyContent:
+      case ChatMessageContent_Content.notSet:
+      default:
+        Logger.root.warning(
+            '(_messageContentFactory) Unmapped content type: ${content.whichContent()}');
+    }
+    throw UnimplementedError('');
+  }
+}
+
+class TextMessageContent extends MessageContent {
+  const TextMessageContent(this.content);
+
+  final String content;
+
+  @override
+  List<Object?> get props => [content];
+}
+
+class GroupInviteContent extends MessageContent {
+  const GroupInviteContent({
+    required this.groupId,
+    required this.groupName,
+    required this.createdAt,
+    required this.numOfMembers,
+    required this.adminId,
+  });
+
+  final Uint8List groupId;
+  final String groupName;
+  final DateTime createdAt;
+  final int numOfMembers;
+  final Uint8List adminId;
+
+  @override
+  List<Object?> get props => [groupName, createdAt];
+
+  GroupInviteContent.fromJson(Map<String, dynamic> json)
+      : groupId = Uint8List.fromList(json['groupId']),
+        groupName = json['groupName'],
+        createdAt = DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
+        numOfMembers = json['numOfMembers'],
+        adminId = Uint8List.fromList(json['adminId']);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'groupId': groupId.toList(),
+      'groupName': groupName,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'numOfMembers': numOfMembers,
+      'adminId': adminId.toList(),
+    };
+  }
 }

@@ -1,4 +1,4 @@
-part of 'tab.dart';
+part of '../tab.dart';
 
 class _Chat extends BaseTab {
   const _Chat({Key? key}) : super(key: key);
@@ -8,6 +8,8 @@ class _Chat extends BaseTab {
 }
 
 class _ChatState extends _BaseTabState<_Chat> {
+  final _log = Logger('BaseTab.chat');
+
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < kTabletBreakpoint;
 
@@ -64,19 +66,24 @@ class _ChatState extends _BaseTabState<_Chat> {
             itemBuilder: (_, i) {
               var theme = Theme.of(context).textTheme;
               final room = filteredRooms[i];
+              if (room.isGroupChatRoom) {
+                throw UnimplementedError('multi person room not implemented');
+              }
+
               final otherUser = users
                   .firstWhereOrNull((u) => u.id.equals(room.conversationId));
 
-              // TODO error handling?
-              if (otherUser == null) return const SizedBox.shrink();
+              if (otherUser == null) {
+                _log.warning('single-person room with unknown otherUser');
+                return const SizedBox.shrink();
+              }
 
               return UserListTile(
                 otherUser,
-                content: Text(
-                  room.lastMessagePreview ?? '',
-                  style: theme.bodyText1,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                content: _contentFromOverview(
+                  room.lastMessagePreview,
+                  theme,
+                  defaultUser: defaultUser,
                 ),
                 trailingMetadata: Row(
                   children: [
@@ -105,13 +112,15 @@ class _ChatState extends _BaseTabState<_Chat> {
       heroTag: 'chatTabFAB',
       tooltip: l18ns.newChatTooltip,
       onPressed: () async {
-        final user = await Navigator.push(
+        final newChat = await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
         );
-        if (user is User) {
-          final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
-          setOpenChat(newRoom, user);
+        if (newChat is User) {
+          final newRoom = ChatRoom.blank(user: defaultUser, otherUser: newChat);
+          setOpenChat(newRoom, newChat);
+        } else if (newChat is GroupInfo) {
+          throw UnimplementedError('Open Group chat');
         }
       },
       child: SvgPicture.asset(
@@ -157,26 +166,37 @@ class _ChatState extends _BaseTabState<_Chat> {
       ),
     );
   }
-}
 
-class _CreateNewRoomDialog extends StatelessWidget {
-  const _CreateNewRoomDialog({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SearchUserDecorator(
-      title: AppLocalizations.of(context)!.newChatTooltip,
-      builder: (_, users) {
-        return ListView.separated(
-          padding: const EdgeInsets.all(8),
-          itemCount: users.length,
-          separatorBuilder: (_, __) => const Divider(height: 12.0),
-          itemBuilder: (context, i) {
-            final usr = users[i];
-            return UserListTile(usr, onTap: () => Navigator.pop(context, usr));
-          },
+  Widget _contentFromOverview(
+    MessageContent? message,
+    TextTheme theme, {
+    required User defaultUser,
+  }) {
+    if (message is TextMessageContent) {
+      return Text(
+        (message).content,
+        style: theme.bodyText1,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else if (message is GroupInviteContent) {
+      if (defaultUser.id.equals(message.adminId)) {
+        return Text(
+          'Invite for group "${message.groupName}" sent',
+          style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         );
-      },
-    );
+      }
+      return Text(
+        'You\'ve received an invite to join the group ${message.groupName}!',
+        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else {
+      _log.info('overview type ${message.runtimeType} has not been rendered');
+      return const SizedBox.shrink();
+    }
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +13,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
-import '../../decorators/cron_task_decorator.dart';
-import '../../widgets/widgets.dart';
+import '../../../../../../decorators/cron_task_decorator.dart';
+import '../../../../../widgets/widgets.dart';
 
 part 'custom_input.dart';
 
@@ -104,6 +106,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       worker.sendMessage(room.conversationId, msg.text);
     }, [UniqueKey()]);
 
+    final replyToGroupInvite = useCallback((
+      Uint8List groupId, {
+      required bool accepted,
+    }) {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.replyToGroupInvite(groupId, accepted: accepted);
+    }, []);
+
     return Scaffold(
       appBar: AppBar(
         leading: DefaultBackButton(
@@ -137,6 +147,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
             ),
+            customMessageBuilder: (message, {required int messageWidth}) {
+              final invite = GroupInviteContent.fromJson(message.metadata!);
+              if (widget.user.id.equals(invite.adminId)) {
+                return Text(
+                  'Invite for group "${invite.groupName}" sent',
+                  style: const TextStyle(fontStyle: FontStyle.italic),
+                );
+              }
+              return SizedBox(
+                width: messageWidth.toDouble(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'You\'ve been invited to join "${invite.groupName}"!',
+                      style: const TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text('· Number of members: ${invite.numOfMembers}'),
+                    Text('· Created at: ${invite.createdAt}'),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => replyToGroupInvite(invite.groupId, accepted: true),
+                          child: const Text('JOIN'),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () => replyToGroupInvite(invite.groupId, accepted: false),
+                          child: const Text('NO, THANKS'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
                 colorGenerationStrategy(otherUser.idBase58),
@@ -151,7 +201,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User _author(Message e) => e.senderId.equals(user.id) ? user : otherUser;
 
-  List<types.TextMessage>? messages(ChatRoom room) {
+  List<types.Message>? messages(ChatRoom room) {
     return room.messages
         ?.sorted()
         .map((e) => e.toInternalMessage(_author(e)))
@@ -184,17 +234,36 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 extension _MessageExtension on Message {
-  types.TextMessage toInternalMessage(User author) {
+  types.Message toInternalMessage(User author) {
+    var mappedStatus = status == MessageStatus.sent
+        ? types.Status.sent
+        : status == MessageStatus.received
+            ? types.Status.delivered
+            : null;
+    if (content is TextMessageContent) {
+      return types.TextMessage(
+        id: messageIdBase58,
+        text: (content as TextMessageContent).content,
+        author: author.toInternalUser(),
+        createdAt: receivedAt.millisecondsSinceEpoch,
+        status: mappedStatus,
+      );
+    } else if (content is GroupInviteContent) {
+      return types.CustomMessage(
+        id: messageIdBase58,
+        author: author.toInternalUser(),
+        createdAt: receivedAt.millisecondsSinceEpoch,
+        status: mappedStatus,
+        metadata: (content as GroupInviteContent).toJson(),
+      );
+    }
+
     return types.TextMessage(
       id: messageIdBase58,
-      text: content,
+      text: 'THIS MESSAGE COULD NOT BE RENDERED. PLEASE CONTACT SUPPORT.',
       author: author.toInternalUser(),
       createdAt: receivedAt.millisecondsSinceEpoch,
-      status: status == MessageStatus.sent
-          ? types.Status.sent
-          : status == MessageStatus.received
-              ? types.Status.delivered
-              : null,
+      status: mappedStatus,
     );
   }
 }

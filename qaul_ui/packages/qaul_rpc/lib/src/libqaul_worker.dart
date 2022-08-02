@@ -20,6 +20,7 @@ import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
+import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
@@ -154,8 +155,11 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.DEBUG, Uint8List(0));
   }
 
+  /// Requests both [ChatOverviewRequest] and [GroupListRequest]
   void getAllChatRooms() async {
-    final msg = Chat(overviewRequest: ChatOverviewRequest());
+    dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
+    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    msg = Group(groupListRequest: GroupListRequest());
     await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
   }
 
@@ -176,6 +180,68 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
   }
 
+  // -------------------
+  // GROUP Requests
+  // -------------------
+  void createGroup(String name) async {
+    assert(name.isNotEmpty);
+    final msg = Group(groupCreateRequest: GroupCreateRequest(groupName: name));
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  void renameGroup(ChatRoom room, String name) async {
+    assert(name.isNotEmpty);
+    final msg = Group(
+      groupRenameRequest:
+          GroupRenameRequest(groupId: room.conversationId.toList(), groupName: name),
+    );
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  void inviteUserToGroup(User user, ChatRoom room) async {
+    final msg = Group(
+      groupInviteMemberRequest: GroupInviteMemberRequest(
+        groupId: room.conversationId.toList(),
+        userId: user.id.toList(),
+      ),
+    );
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  void removeUserFromGroup(User user, ChatRoom room) async {
+    final msg = Group(
+      groupRemoveMemberRequest: GroupRemoveMemberRequest(
+        groupId: room.conversationId.toList(),
+        userId: user.id.toList(),
+      ),
+    );
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  void replyToGroupInvite(Uint8List groupId, {required bool accepted}) async {
+    final user = _reader(defaultUserProvider);
+    assert(user != null);
+    final msg = Group(
+      groupReplyInviteRequest: GroupReplyInviteRequest(
+        groupId: groupId.toList(),
+        userId: user!.id.toList(),
+        accept: accepted,
+      ),
+    );
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  void sendGroupMessage(ChatRoom room, String content) async {
+    final msg = Group(
+      groupSendRequest: GroupSendRequest(
+        groupId: room.conversationId.toList(),
+        message: content,
+      ),
+    );
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  // -------------------
   void setLibqaulLogging(bool enabled) async {
     final msg = Debug(logToFile: LogToFile(enable: enabled));
     await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
@@ -266,6 +332,9 @@ class LibqaulWorker {
       } else if (m.module == Modules.CHAT) {
         final resp = await ChatTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.GROUP) {
+        final resp = await GroupTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.DEBUG) {
         final resp = await DebugTranslator().decodeMessageBytes(m.data);
         if (resp?.data is bool) {
@@ -347,6 +416,31 @@ class LibqaulWorker {
           if (currentRoom != null &&
               currentRoom.conversationId.equals(resp.data.conversationId)) {
             _reader(currentOpenChatRoom.notifier).state = resp.data;
+          }
+          return;
+        }
+      }
+    }
+    if (resp.module == Modules.GROUP) {
+      if (resp.data != null) {
+        final state = _reader(chatRoomsProvider.notifier);
+        final users = _reader(usersProvider);
+        if (resp.data is List<GroupInfo>) {
+          for (final groupInfo in resp.data) {
+            final room = ChatRoom.fromGroupInfo(groupInfo, users);
+            if (!state.contains(room)) {
+              state.add(room);
+            } else {
+              state.update(room);
+            }
+          }
+          return;
+        } else if (resp.data is GroupInfo) {
+          final room = ChatRoom.fromGroupInfo(resp.data, users);
+          if (!state.contains(room)) {
+            state.add(room);
+          } else {
+            state.update(room);
           }
           return;
         }
