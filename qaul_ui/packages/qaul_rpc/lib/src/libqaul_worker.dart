@@ -20,6 +20,7 @@ import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
+import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
@@ -192,8 +193,8 @@ class LibqaulWorker {
   void renameGroup(ChatRoom room, String name) async {
     assert(name.isNotEmpty);
     final msg = Group(
-      groupRenameRequest:
-          GroupRenameRequest(groupId: room.conversationId.toList(), groupName: name),
+      groupRenameRequest: GroupRenameRequest(
+          groupId: room.conversationId.toList(), groupName: name),
     );
     await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
   }
@@ -239,6 +240,30 @@ class LibqaulWorker {
       ),
     );
     await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
+  // -------------------
+  // FILESHARE Requests
+  // -------------------
+  void sendFile({
+    required String pathName,
+    required Uint8List conversationId,
+    required String description,
+  }) async {
+    final msg = FileSharing(
+        sendFileRequest: SendFileRequest(
+      pathName: pathName,
+      conversationId: conversationId.toList(),
+      description: description,
+    ));
+    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
+  }
+
+  void getFileHistory({int? offset, int? limit}) async {
+    final msg = FileSharing(
+      fileHistory: FileHistoryRequest(offset: offset, limit: limit),
+    );
+    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
   }
 
   // -------------------
@@ -342,7 +367,8 @@ class LibqaulWorker {
           _heartbeats.removeFirst();
         }
         if (resp?.data is String) {
-          final path = await findFolderWithFilesOfExtension(Directory(resp!.data), '.log');
+          final path = await findFolderWithFilesOfExtension(
+              Directory(resp!.data), '.log');
           _log.info('libqaul log storage path: $path');
           _reader(libqaulLogsStoragePath.state).state = path;
         }
@@ -458,7 +484,8 @@ class LibqaulWorker {
             discoveredNodes: newStatus.discoveredNodes,
             nodesPendingConfirmation: newStatus.discoveredNodes,
           );
-          _log.finest('BLE Module: merged status with current status. New Status: $newStatus');
+          _log.finest(
+              'BLE Module: merged status with current status. New Status: $newStatus');
         }
         _reader(bleStatusProvider.state).state = newStatus;
         return;

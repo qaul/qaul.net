@@ -275,6 +275,14 @@ abstract class MessageContent extends Equatable {
           adminId: Uint8List.fromList(invite.adminId),
         );
       case ChatMessageContent_Content.fileContent:
+        final fileContent = content.ensureFileContent();
+        return FileShareContent(
+          historyIndex: fileContent.historyIndex.toInt(),
+          fileId: fileContent.fileId.toInt(),
+          fileName: fileContent.fileName,
+          size: fileContent.fileSize,
+          description: fileContent.fileDescr,
+        );
       case ChatMessageContent_Content.groupInviteReplyContent:
       case ChatMessageContent_Content.notSet:
       default:
@@ -328,4 +336,23 @@ class GroupInviteContent extends MessageContent {
       'adminId': adminId.toList(),
     };
   }
+}
+
+class FileShareContent extends MessageContent {
+  const FileShareContent({
+    required this.historyIndex,
+    required this.fileId,
+    required this.fileName,
+    required this.size,
+    required this.description,
+  });
+
+  final int historyIndex;
+  final int fileId;
+  final String fileName;
+  final int size;
+  final String description;
+
+  @override
+  List<Object?> get props => [fileId, fileName];
 }
