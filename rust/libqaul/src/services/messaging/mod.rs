@@ -218,7 +218,7 @@ impl Messaging {
                 // return information
                 return Some((route.node, route.module, data));
             } else {
-                log::error!("No route found to user {}", message.receiver.to_base58());
+                log::trace!("No route found to user {}", message.receiver.to_base58());
 
                 // reschedule if no route is found
                 Self::schedule_message(message.receiver, message.container);
