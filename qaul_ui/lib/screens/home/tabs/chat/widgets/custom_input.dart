@@ -18,9 +18,12 @@ class _CustomInput extends StatefulWidget {
     Key? key,
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
+    this.onAttachmentPressed,
   }) : super(key: key);
 
   final void Function(types.PartialText) onSendPressed;
+
+  final VoidCallback? onAttachmentPressed;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
 
@@ -77,8 +80,10 @@ class _CustomInputState extends State<_CustomInput> {
       child: Shortcuts(
         shortcuts: {
           LogicalKeySet(LogicalKeyboardKey.enter): const SendMessageIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt): const NewLineIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift): const NewLineIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
+              const NewLineIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
+              const NewLineIntent(),
         },
         child: Actions(
           actions: {
@@ -116,8 +121,8 @@ class _CustomInputState extends State<_CustomInput> {
                       child: TextField(
                         controller: _textController,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.chatEmptyMessageHint,
-                        ),
+                            labelText: AppLocalizations.of(context)!
+                                .chatEmptyMessageHint),
                         focusNode: _inputFocusNode,
                         keyboardType: TextInputType.multiline,
                         maxLines: 5,
@@ -126,6 +131,8 @@ class _CustomInputState extends State<_CustomInput> {
                       ),
                     ),
                     const SizedBox(width: 16.0),
+                    if (widget.onAttachmentPressed != null)
+                      _AttachmentButton(onPressed: widget.onAttachmentPressed),
                     Visibility(
                       visible: _sendButtonVisible,
                       child: _CustomSendButton(onPressed: _handleSendPressed),
@@ -142,7 +149,8 @@ class _CustomInputState extends State<_CustomInput> {
 }
 
 class _CustomSendButton extends StatelessWidget {
-  const _CustomSendButton({Key? key, required this.onPressed}) : super(key: key);
+  const _CustomSendButton({Key? key, required this.onPressed})
+      : super(key: key);
 
   final void Function() onPressed;
 
@@ -157,6 +165,28 @@ class _CustomSendButton extends StatelessWidget {
         onPressed: onPressed,
         padding: EdgeInsets.zero,
         tooltip: AppLocalizations.of(context)!.sendTooltip,
+      ),
+    );
+  }
+}
+
+class _AttachmentButton extends StatelessWidget {
+  const _AttachmentButton({Key? key, this.onPressed}) : super(key: key);
+
+  final void Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      margin: const EdgeInsets.only(right: 16),
+      child: IconButton(
+        icon: const Icon(Icons.attach_file),
+        splashRadius: 24,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        tooltip: AppLocalizations.of(context)!.sendFileTooltip,
       ),
     );
   }

@@ -9,6 +9,7 @@
   "cancelDialogButton": "СКАСУВАТИ",
   "backButtonTooltip": "Назад",
   "sendTooltip": "Надіслати",
+  "sendFileTooltip": "Надіслати файл",
 
   "userAccountNavButtonTooltip": "Ваш обліковий запис",
   "feedNavButtonTooltip": "Стрічка",

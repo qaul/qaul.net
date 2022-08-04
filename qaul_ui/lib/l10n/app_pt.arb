@@ -9,6 +9,7 @@
   "cancelDialogButton": "CANCELAR",
   "backButtonTooltip": "Voltar",
   "sendTooltip": "Enviar",
+  "sendFileTooltip": "Send Arquivo",
 
   "userAccountNavButtonTooltip": "Sua conta",
   "feedNavButtonTooltip": "Feed",

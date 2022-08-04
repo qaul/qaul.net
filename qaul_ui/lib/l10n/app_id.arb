@@ -9,6 +9,7 @@
   "cancelDialogButton": "BATAL",
   "backButtonTooltip": "Kembali",
   "sendTooltip": "Kirim",
+  "sendFileTooltip": "Kirim Berkas",
 
   "userAccountNavButtonTooltip": "Akun Anda",
   "feedNavButtonTooltip": "Umpan",
