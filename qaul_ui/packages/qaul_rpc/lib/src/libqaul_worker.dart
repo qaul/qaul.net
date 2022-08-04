@@ -375,6 +375,9 @@ class LibqaulWorker {
       } else if (m.module == Modules.BLE) {
         final resp = await BleTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.FILESHARE) {
+        final resp = await FileSharingTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
       } else {
         _log.severe(
           'LibqaulWorker.receiveResponse($m)',
@@ -488,6 +491,16 @@ class LibqaulWorker {
               'BLE Module: merged status with current status. New Status: $newStatus');
         }
         _reader(bleStatusProvider.state).state = newStatus;
+        return;
+      }
+    }
+    if (resp.module == Modules.FILESHARE) {
+      if (resp.data is List<FileHistoryEntity>) {
+        final provider = _reader(fileHistoryEntitiesProvider.notifier);
+        for (final file in resp.data) {
+          provider.contains(file) ? provider.update(file) : provider.add(file);
+        }
+
         return;
       }
     }

@@ -33,6 +33,7 @@ dependencies:
   # ********
   # UI Dependencies
   # ********
+  file_picker: ^4.6.1
   font_awesome_flutter: ^10.1.0
   # Responsive UI Support => App Wrapper
   responsive_framework: ^0.2.0
@@ -89,6 +90,7 @@ dependencies:
 
   archive: ^3.1.8
   filesize: ^2.0.1
+  path: ^1.8.2
   path_provider: ^2.0.8
   neat_periodic_task: ^2.0.0
   shared_preferences: ^2.0.12

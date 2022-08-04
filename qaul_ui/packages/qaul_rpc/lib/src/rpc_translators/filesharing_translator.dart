@@ -12,7 +12,8 @@ class FileSharingTranslator extends RpcModuleTranslator {
         final entities = message
             .ensureFileHistoryResponse()
             .histories
-            .map((e) => FileHistoryEntity.fromRpcEntry(e));
+            .map((e) => FileHistoryEntity.fromRpcEntry(e))
+            .toList();
         return RpcTranslatorResponse(Modules.FILESHARE, entities);
       default:
         return super.decodeMessageBytes(data);

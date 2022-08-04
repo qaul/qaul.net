@@ -1,7 +1,9 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -10,13 +12,17 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:path/path.dart' hide context, Context;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
+import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../widgets/widgets.dart';
 
 part 'custom_input.dart';
+
+part 'file_sharing.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
@@ -70,6 +76,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User get user => widget.user;
 
   User get otherUser => widget.otherUser;
+
+  Map<String, String> get _overflowMenuOptions => {
+        'showFiles': 'Show All Files',
+      };
+
+  void _handleClick(String value) {
+    switch (value) {
+      case 'showFiles':
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return const _FileHistoryPage();
+        }));
+        break;
+    }
+  }
 
   @override
   void initState() {
@@ -128,7 +148,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         titleSpacing: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+          PopupMenuButton<String>(
+            onSelected: _handleClick,
+            iconSize: 36,
+            splashRadius: 20,
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (BuildContext context) {
+              return _overflowMenuOptions.keys.map((String key) {
+                return PopupMenuItem<String>(
+                  value: key,
+                  child: Text(_overflowMenuOptions[key]!),
+                );
+              }).toList();
+            },
+          ),
         ],
       ),
       body: CronTaskDecorator(
@@ -146,6 +179,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
+              onAttachmentPressed: () async {
+                final result = await FilePicker.platform.pickFiles();
+
+                if (result != null && result.files.single.path != null) {
+                  File file = File(result.files.single.path!);
+
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (_) {
+                      return _SendFileDialog(
+                        file,
+                        room: room,
+                        onSendPressed: (description) {
+                          final worker = ref.read(qaulWorkerProvider);
+                          worker.sendFile(
+                            pathName: file.path,
+                            conversationId: room.conversationId,
+                            description: description.text,
+                          );
+                        },
+                      );
+                    },
+                  );
+                }
+              },
             ),
             customMessageBuilder: (message, {required int messageWidth}) {
               final invite = GroupInviteContent.fromJson(message.metadata!);
@@ -173,12 +231,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () => replyToGroupInvite(invite.groupId, accepted: true),
+                          onPressed: () => replyToGroupInvite(invite.groupId,
+                              accepted: true),
                           child: const Text('JOIN'),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          onPressed: () => replyToGroupInvite(invite.groupId, accepted: false),
+                          onPressed: () => replyToGroupInvite(invite.groupId,
+                              accepted: false),
                           child: const Text('NO, THANKS'),
                         ),
                       ],
@@ -255,6 +315,16 @@ extension _MessageExtension on Message {
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,
         metadata: (content as GroupInviteContent).toJson(),
+      );
+    } else if (content is FileShareContent) {
+      return types.FileMessage(
+        id: messageIdBase58,
+        name: (content as FileShareContent).fileName,
+        size: (content as FileShareContent).size,
+        uri: (content as FileShareContent).fileName,
+        author: author.toInternalUser(),
+        createdAt: receivedAt.millisecondsSinceEpoch,
+        status: mappedStatus,
       );
     }
 
