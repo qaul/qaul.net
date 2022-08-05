@@ -70,7 +70,7 @@ class SearchUserDecorator extends HookConsumerWidget {
           : AppBar(
               title: Text(title!),
               centerTitle: false,
-              leading: const DefaultBackButton(),
+              leading: const IconButtonFactory(),
               bottom: searchBar,
             ),
       body: Consumer(

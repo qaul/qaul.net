@@ -136,7 +136,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: DefaultBackButton(
+        leading: IconButtonFactory(
           onPressed: widget.onBackButtonPressed ?? closeChat,
         ),
         title: Row(

@@ -20,7 +20,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const DefaultBackButton(),
+        leading: const IconButtonFactory(),
         title: Row(
           children: const [
             FaIcon(FontAwesomeIcons.headset),

@@ -23,7 +23,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        leading: const DefaultBackButton(),
+        leading: const IconButtonFactory(),
         title: Row(
           children: [
             const Icon(Icons.settings),

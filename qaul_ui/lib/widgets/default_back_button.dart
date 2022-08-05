@@ -1,8 +1,17 @@
 part of 'widgets.dart';
 
-class DefaultBackButton extends StatelessWidget {
-  const DefaultBackButton({Key? key, this.onPressed}) : super(key: key);
+class IconButtonFactory extends StatelessWidget {
+  const IconButtonFactory({
+    Key? key,
+    this.onPressed,
+    this.icon = Icons.arrow_back_ios_rounded,
+  }) : super(key: key);
   final VoidCallback? onPressed;
+  final IconData icon;
+
+  factory IconButtonFactory.close({Key? key, VoidCallback? onPressed}) {
+    return IconButtonFactory(onPressed: onPressed, icon: Icons.close_rounded);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,8 +19,9 @@ class DefaultBackButton extends StatelessWidget {
     return IconButton(
       splashRadius: 24,
       tooltip: l18ns.backButtonTooltip,
-      icon: const Icon(Icons.arrow_back_ios_rounded),
-      onPressed: onPressed != null ? onPressed! : () => Navigator.maybePop(context),
+      icon: Icon(icon),
+      onPressed:
+          onPressed != null ? onPressed! : () => Navigator.maybePop(context),
     );
   }
 }
