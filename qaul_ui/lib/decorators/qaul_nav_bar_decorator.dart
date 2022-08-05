@@ -46,7 +46,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         Navigator.push(context, MaterialPageRoute(builder: (_) {
           return Scaffold(
             appBar: AppBar(
-              leading: const DefaultBackButton(),
+              leading: const IconButtonFactory(),
               title: Row(
                 children: const [
                   Icon(Icons.language),

@@ -14,7 +14,7 @@ class AboutScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const DefaultBackButton(),
+        leading: const IconButtonFactory(),
         title: Row(
           children: [
             const Icon(Icons.info_outline_rounded),
