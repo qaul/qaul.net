@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';

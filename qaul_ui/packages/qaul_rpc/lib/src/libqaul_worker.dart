@@ -357,9 +357,6 @@ class LibqaulWorker {
       } else if (m.module == Modules.CHAT) {
         final resp = await ChatTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.GROUP) {
-        final resp = await GroupTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.DEBUG) {
         final resp = await DebugTranslator().decodeMessageBytes(m.data);
         if (resp?.data is bool) {

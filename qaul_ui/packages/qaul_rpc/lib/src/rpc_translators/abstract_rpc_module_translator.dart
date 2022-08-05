@@ -15,8 +15,6 @@ import '../generated/rpc/qaul_rpc.pb.dart';
 import '../generated/services/chat/chat.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../generated/services/filesharing/filesharing_rpc.pb.dart';
-import '../generated/services/group/group_rpc.pb.dart';
-import '../models/file_history_entity.dart';
 import '../models/models.dart';
 
 part 'ble_translator.dart';
@@ -30,8 +28,6 @@ part 'debug_translator.dart';
 part 'feed_translator.dart';
 
 part 'filesharing_translator.dart';
-
-part 'group_translator.dart';
 
 part 'node_translator.dart';
 
