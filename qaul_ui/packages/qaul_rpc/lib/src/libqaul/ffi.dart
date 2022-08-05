@@ -45,19 +45,19 @@ class LibqaulFfi {
 
   /// start and initialize libqaul
   start() {
-    StartDesktopFunctionDart _start;
+    StartDesktopFunctionDart start;
     // check what system we are initializing
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       _log.finer("flutter start_desktop libqaul");
       // start libqaul with finding paths to save the configuration files
-      _start =
+      start =
           _lib!.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>('start_desktop');
     } else {
       _log.finer("flutter start libqaul");
       // start libqaul without path to storage location
-      _start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+      start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
     }
-    _start();
+    start();
   }
 
   /// check if libqaul finished initializing
@@ -65,16 +65,16 @@ class LibqaulFfi {
   /// returns 1, when qaul finished initializing
   /// otherwise it returns 0
   int initialized() {
-    final _initialized =
+    final initialized =
         _lib!.lookupFunction<InitializationFinishedRust, InitializationFinishedDart>('initialized');
-    final result = _initialized();
+    final result = initialized();
     return result;
   }
 
   /// hello function
   String hello() {
-    final _hello = _lib!.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
-    final ptr = _hello();
+    final hello = _lib!.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
+    final ptr = hello();
     final helloMessage = ptr.toDartString();
     calloc.free(ptr);
     return helloMessage;
@@ -82,25 +82,25 @@ class LibqaulFfi {
 
   /// Debug function: how many rpc messages have been sent to libqaul
   int checkSendCounter() {
-    final _checkCounter =
+    final checkCounter =
         _lib!.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>('send_rpc_to_libqaul_count');
-    final result = _checkCounter();
+    final result = checkCounter();
     _log.finer("$result RPC messages sent to libqaul");
     return result;
   }
 
   /// Debug function: How many rpc messages are queued by libqaul
   int checkReceiveQueue() {
-    final _checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
+    final checkQueue = _lib!.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
         'receive_rpc_from_libqaul_queued_length');
-    final result = _checkQueue();
+    final result = checkQueue();
     if (result > 0) _log.finer("$result messages queued by libqaul RPC");
     return result;
   }
 
   /// send binary protobuf RPC message to libqaul
   sendRpc(Uint8List message) {
-    final _sendRpcToLibqaul = _lib!
+    final sendRpcToLibqaul = _lib!
         .lookupFunction<SendRpcToLibqaulFunctionRust, SendRpcToLibqaulFunctionDart>(
             'send_rpc_to_libqaul');
 
@@ -116,7 +116,7 @@ class LibqaulFfi {
     // send message
     final messageSize = message.length;
     _log.finer("sendRpc send $messageSize bytes");
-    final result = _sendRpcToLibqaul(bufferPointer, message.length);
+    final result = sendRpcToLibqaul(bufferPointer, message.length);
 
     // free buffer
     malloc.free(bufferPointer);
@@ -140,7 +140,7 @@ class LibqaulFfi {
 
   /// receive binary protobuf RPC message from libqaul
   Uint8List? receiveRpc() {
-    final _receiveRpcFromLibqaul = _lib!
+    final receiveRpcFromLibqaul = _lib!
         .lookupFunction<ReceiveRpcFromLibqaulFunctionRust, ReceiveRpcFromLibqaulFunctionDart>(
             'receive_rpc_from_libqaul');
 
@@ -150,7 +150,7 @@ class LibqaulFfi {
     final bufferPointer = buffer.cast<Uint8>();
 
     // request a new message
-    final result = _receiveRpcFromLibqaul(bufferPointer, bufferSize);
+    final result = receiveRpcFromLibqaul(bufferPointer, bufferSize);
 
     // check if a message was received
     if (result == 0) {

@@ -64,8 +64,9 @@ class UserDetailsScreen extends HookConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.0),
                   ),
+                  disabledForegroundColor: Colors.white.withOpacity(0.38),
+                  disabledBackgroundColor: Colors.white.withOpacity(0.12),
                   textStyle: theme.headline6,
-                  onSurface: Colors.white,
                 ),
               ),
             ),
