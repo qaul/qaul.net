@@ -90,7 +90,7 @@ dependencies:
 
   archive: ^3.1.8
   filesize: ^2.0.1
-  path: ^1.8.2
+  path: ^1.8.1
   path_provider: ^2.0.8
   neat_periodic_task: ^2.0.0
   shared_preferences: ^2.0.12

@@ -20,7 +20,7 @@ dependencies:
   ffi: ^1.1.2
   fixnum: ^1.0.1
   convert: ^3.0.1
-  meta: ^1.8.0
+  meta: ^1.7.0
   protobuf: ^2.0.0
 
   uuid: ^3.0.5
