@@ -7,9 +7,9 @@ message FileSharing {
     oneof message {
         // request for sending file
         SendFileRequest send_file_request = 1;
-        // file histories request
+        // file history request
         FileHistoryRequest file_history = 2;
-        //file histories response
+        // file history response
         FileHistoryResponse file_history_response = 3;
     }
 }

@@ -65,7 +65,7 @@ The following commands are available:
   * `chat overview` - displays an overview of all conversations and the last messages within them
   * `chat conversation {Conversation ID}` - displays all messages of the conversation with the ID {Conversation ID}
 * file sharing
-  * `file send {Conversation ID} {File Path}` - sends a file to the user with the ID {Conversation ID}
+  * `file send {Conversation ID} {File Path} {File Description}` - sends a file to the user with the ID {Conversation ID} and a {File Description} text.
   * `file history 0` - displays the file history for the default user account
 * debug
   * all these commands are for debugging purposes only

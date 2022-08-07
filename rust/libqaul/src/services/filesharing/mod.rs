@@ -365,27 +365,27 @@ impl FileShare {
     }
 
     /// Send the file on the messaging service
-    /// This function is called from RPC coomand (file send convrsation_id file_path_name)
+    /// This function is called from RPC command (file send conversation_id file_path_name)
     pub fn send(
         user_account: &UserAccount,
-        sned_file_req: proto_rpc::SendFileRequest,
+        send_file_req: proto_rpc::SendFileRequest,
     ) -> Result<Vec<u8>, String> {
         // create receiver
         let receiver;
-        match PeerId::from_bytes(&sned_file_req.conversation_id) {
+        match PeerId::from_bytes(&send_file_req.conversation_id) {
             Ok(id) => receiver = id,
             Err(e) => return Err(e.to_string()),
         }
 
         if let Some(_usr) = UserAccounts::get_by_id(receiver.clone()) {
-            //peer id is local user case
+            // receiver is your user account
             log::error!("You cannot send the file to yourself.");
-            return Ok(sned_file_req.conversation_id);
+            return Ok(send_file_req.conversation_id);
         }
 
         let mut file: File;
 
-        match File::open(sned_file_req.path_name.clone()){
+        match File::open(send_file_req.path_name.clone()){
             Ok(f) => {Some(file = f)},
             Err(_e) => {
                 return Err("file open error".to_string());
@@ -397,8 +397,8 @@ impl FileShare {
             return Err("file size is zero".to_string());
         }
 
-        //get file name
-        let path = Path::new(sned_file_req.path_name.as_str());
+        // get file name
+        let path = Path::new(send_file_req.path_name.as_str());
         let mut extension = "".to_string();
 
         if let Some(ext) =
@@ -409,48 +409,48 @@ impl FileShare {
 
         let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
 
-        //get file id (senderid, receiver_id, filename, size)
+        // get file id (senderid, receiver_id, filename, size)
         let key_bytes = Self::get_key_from_vec(
             user_account.id.to_bytes(),
-            sned_file_req.conversation_id.clone(),
-            sned_file_req.path_name.clone(),
+            send_file_req.conversation_id.clone(),
+            send_file_req.path_name.clone(),
             size,
             timestamp::Timestamp::get_timestamp(),
         );
         let file_id = crc::crc64::checksum_iso(&key_bytes);
 
-        //copy file in files folder
-        let path = std::env::current_dir().unwrap(); 
-        let mut path_fies = path.as_path().to_str().unwrap().to_string();
-        if path_fies.chars().last().unwrap() != '/'{
-            path_fies.push_str("/");
+        // copy file into files folder
+        let mut file_path = crate::storage::Storage::get_path();
+        if file_path.chars().last().unwrap() != '/'{
+            file_path.push_str("/");
         }
-        path_fies.push_str(user_account.id.to_base58().as_str());
-        path_fies.push_str("/files/");
+        file_path.push_str(user_account.id.to_base58().as_str());
+        file_path.push_str("/files/");
 
-        if let Err(e) = fs::create_dir_all(path_fies.clone()) {
+        if let Err(e) = fs::create_dir_all(file_path.clone()) {
             log::error!("creating folder error {}", e.to_string());
         }
-        //copy file
-        path_fies.push_str(file_id.to_string().as_str());
+
+        // copy file
+        file_path.push_str(file_id.to_string().as_str());
         if extension.len() > 0{
-            path_fies.push_str(".");
-            path_fies.push_str(&extension.clone().as_str());
+            file_path.push_str(".");
+            file_path.push_str(&extension.clone().as_str());
         }
-        if let Err(e) = fs::copy(sned_file_req.path_name.clone(), path_fies){
+        if let Err(e) = fs::copy(send_file_req.path_name.clone(), file_path){
             log::error!("copy file error {}", e.to_string());            
         }
 
         //create file descriptor and save in storage
         let mut file_info = Self::create_file_share_info(
             &user_account.id.to_bytes(),
-            &sned_file_req.conversation_id.clone(),
+            &send_file_req.conversation_id.clone(),
             file_id,
             size,
             DEF_PACKAGE_SIZE,
         );
         file_info.name = file_name.clone();
-        file_info.descr = sned_file_req.description.clone();
+        file_info.descr = send_file_req.description.clone();
         file_info.extension = extension.clone();
 
         let mut file_share = FILESHARE.get().write().unwrap();
@@ -463,7 +463,7 @@ impl FileShare {
                     file_name: file_name.clone(),
                     file_extension: extension.clone(),
                     file_size: size,
-                    file_descr: sned_file_req.description.clone(),
+                    file_descr: send_file_req.description.clone(),
                     size_per_package: DEF_PACKAGE_SIZE,
                     file_id,
                 },
@@ -478,7 +478,7 @@ impl FileShare {
 
         log::info!("sent file info message!");
 
-        //read file contents and make FileData messages
+        // read file contents and make FileData messages
         let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
         let mut seq: u32 = 0;
@@ -487,7 +487,7 @@ impl FileShare {
             if left_size > DEF_PACKAGE_SIZE {
                 read_size = DEF_PACKAGE_SIZE;
             };
-            //file.by_ref().take(read_size as u64).read(&mut buffer);
+            // file.by_ref().take(read_size as u64).read(&mut buffer);
             if let Err(e) = file.read(&mut buffer) {
                 return Err( e.to_string());
             }
@@ -510,11 +510,12 @@ impl FileShare {
             Self::send_file_message_through_message(user_account, receiver, &message_buf0);
 
             log::info!("sent file pkg message seq={}", seq);
-            //increase seq
+            // increase seq
             seq = seq + 1;
             left_size = left_size - read_size;
         }
-        Ok(sned_file_req.conversation_id)
+
+        Ok(send_file_req.conversation_id)
     }
 
 
@@ -574,36 +575,35 @@ impl FileShare {
     }
 
     /// Check all file data received successfully, and store file if completed
-    /// This function is called whenever receive file messae
+    /// This function is called whenever receive file message
     fn check_complete_and_store(file_receive: &FileShareInfoReceving) -> bool{
-        //check if file receive completed
+        // check if file receive completed
         if !file_receive.info.is_completed() {
             return false;
         }
 
         // check directory
-        let path = std::env::current_dir().unwrap(); 
-        let mut path_fies = path.as_path().to_str().unwrap().to_string();
-        if path_fies.chars().last().unwrap() != '/'{
-            path_fies.push_str("/");
+        let mut file_path = crate::storage::Storage::get_path();
+        if file_path.chars().last().unwrap() != '/'{
+            file_path.push_str("/");
         }
-        path_fies.push_str(bs58::encode(file_receive.info.receiver_id.clone()).into_string().as_str());
-        path_fies.push_str("/files/");
+        file_path.push_str(bs58::encode(file_receive.info.receiver_id.clone()).into_string().as_str());
+        file_path.push_str("/files/");
 
-        if let Err(e) = fs::create_dir_all(path_fies.clone()) {
+        if let Err(e) = fs::create_dir_all(file_path.clone()) {
             log::error!("creating folder error {}", e.to_string());
         }
         
         // write all contents into real file        
         // let mut path = "./files/".to_string();
-        path_fies.push_str(file_receive.info.id.to_string().as_str());
+        file_path.push_str(file_receive.info.id.to_string().as_str());
         if file_receive.info.extension.len() > 0{
-            path_fies.push_str(".");
-            path_fies.push_str(&file_receive.info.extension.as_str());
+            file_path.push_str(".");
+            file_path.push_str(&file_receive.info.extension.as_str());
         }
 
-        log::info!("storing file {}", path_fies.clone());
-        let mut file: File = File::create(path_fies.clone()).unwrap();
+        log::info!("storing file {}", file_path.clone());
+        let mut file: File = File::create(file_path.clone()).unwrap();
 
         for i in 0..file_receive.info.pkg_sent.len() {
             let key: u32 = i as u32;
