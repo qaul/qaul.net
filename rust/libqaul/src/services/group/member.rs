@@ -54,7 +54,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver.clone(), &group.id, &message_buff);
 
             //save invite chat message
             Chat::save_outgoing_group_invite_message(my_user_id.clone(), receiver.clone(), group_id,
@@ -86,7 +86,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(conversation_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver.clone(), &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver.clone(), group_id, &message_buff);
 
             //save invite chat message
             Chat::save_outgoing_group_invite_reply_message(my_user_id.clone(), receiver.clone(), 
@@ -144,7 +144,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver, &message_buff);
+            Group::send_group_message_through_message(&user_account, receiver, group_id, &message_buff);
         }else{
             return Err("user account has problem".to_string());
         }
@@ -153,15 +153,15 @@ impl Member{
     }
 
     /// process group invite message from network
-    pub fn on_be_invited(_user: &UserAccount, sender_id: &PeerId, receiver_id: &PeerId, req: &super::proto_net::InviteMember, signature: Vec<u8>){
+    pub fn on_be_invited(_user: &UserAccount, sender_id: &PeerId, receiver_id: &PeerId, req: &super::proto_net::InviteMember){
         //save chat message
-        Chat::save_incoming_group_invite_message(receiver_id.clone(), sender_id.clone(), 
-            &req.group_id, req.group_name.clone(), req.created_at, 
-            &req.admin_id, req.members_count, signature);
+        // Chat::save_incoming_group_invite_message(receiver_id.clone(), sender_id.clone(), 
+        //     &req.group_id, req.group_name.clone(), req.created_at, 
+        //     &req.admin_id, req.members_count, signature);
     }
 
     /// process accept invite message from network
-    fn on_accpeted_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite, signature: Vec<u8>)->Result<bool, String>{
+    fn on_accpeted_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite)->Result<bool, String>{
         let groups = Group::get_groups_of_user(receiver_id.clone());
 
         //add new member
@@ -170,6 +170,7 @@ impl Member{
             role: 0,
             joined_at: timestamp::Timestamp::get_timestamp(),
             state: 0,
+            last_message_index: 0,
         };
 
         let group_idx = groups.group_id_to_index(&resp.group_id);
@@ -186,26 +187,15 @@ impl Member{
             log::error!("group db updating error {}", error.to_string());            
         }
         Group::update_groups_of_user(receiver_id.clone(), groups);
-        
-        //save chat message
-        Chat::save_incoming_group_invite_reply_message(receiver_id.clone(), sender_id.clone(), &resp.group_id, resp.accept, signature);
         Ok(true)
     }
 
-    /// process decline invite message from network
-    fn on_declined_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite, signature: Vec<u8>)->Result<bool, String>{
-        //save chat message
-        Chat::save_incoming_group_invite_reply_message(receiver_id.clone(), sender_id.clone(), &resp.group_id, resp.accept, signature);
-        Ok(false)
-    }
-
     /// process accept or decline invite message from network
-    pub fn on_reply_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite, signature: Vec<u8>)->Result<bool, String>{
-
+    pub fn on_reply_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite)->Result<bool, String>{
         if resp.accept{
-            Self::on_accpeted_invite(sender_id, receiver_id, resp, signature)
+            Self::on_accpeted_invite(sender_id, receiver_id, resp)
         }else{
-            Self::on_declined_invite(sender_id, receiver_id, resp, signature)
+            Ok(false)
         }
     }
 }
