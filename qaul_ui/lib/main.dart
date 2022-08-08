@@ -77,9 +77,8 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
 
 class Initializer {
   static Future<void> initialize(Reader read) async {
-    await EmailLoggingCoordinator.instance.initialize(reader: read);
-
     await read(qaulWorkerProvider).initialized;
+    await EmailLoggingCoordinator.instance.initialize(reader: read);
 
     await Hive.initFlutter();
     await Hive.openBox(UserPrefsHelper.hiveBoxName);
