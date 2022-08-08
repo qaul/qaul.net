@@ -44,8 +44,8 @@ message ChatOverviewList {
 message ChatOverview {
     // id of the user
     bytes conversation_id = 1;
-    // last message index
-    uint32 last_message_index = 2;
+    // last message id
+    uint64 last_message_index = 2;
     // name of the conversation
     string name = 3;
     // time when last message was sent or received
@@ -86,9 +86,9 @@ message ChatGroupList {
 
 // a single chat message
 message ChatMessage {
-    // message index
-    uint32 index = 1;
-    // id of the sending user or group_id(group flag case)
+    // index
+    uint64 index = 1;
+    // id of the sending user
     bytes sender_id = 2;
     // message id or member id
     bytes message_id = 3;        
@@ -100,7 +100,7 @@ message ChatMessage {
     // group 
     bool is_group = 5;
     // conversation id(group_id)
-    bytes conversation_id = 6;    
+    bytes conversation_id = 6;
     // time when the message was sent
     uint64 sent_at = 7;
     // time when the message was received

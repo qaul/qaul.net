@@ -300,14 +300,14 @@ impl FileShare {
         }
 
 
-        //save chat messge
-        if sent{
-            Chat::save_outgoing_file_message(user_id.clone(), peer_id.to_bytes(), info.name.clone(), 
-                info.size, last_file, info.id, info.descr.clone());
-        }else{
-            Chat::save_incoming_file_message(user_id.clone(), peer_id.clone(), info.name.clone(), 
-                info.size, last_file, info.id, info.descr.clone());
-        }
+        // //save chat messge
+        // if sent{
+        //     Chat::save_outgoing_file_message(user_id.clone(), peer_id.to_bytes(), info.name.clone(), 
+        //         info.size, last_file, info.id, info.descr.clone());
+        // }else{
+        //     Chat::save_incoming_file_message(user_id.clone(), peer_id.clone(), info.name.clone(), 
+        //         info.size, last_file, info.id, info.descr.clone());
+        // }
 
     }
 
@@ -555,21 +555,26 @@ impl FileShare {
 
     /// Send capsuled file message through messaging service
     fn send_file_message_through_message(user_account: &UserAccount, receiver:PeerId, data: &Vec<u8>){
-        let snd_message = proto::Messaging{
-            message: Some(proto::messaging::Message::FileMessage(
-                proto::FileMessage{
-                    content: data.to_vec(),
+        let message_id =  Messaging::generate_message_id(&user_account.id);
+        let send_message = proto::CommonMessage{
+            message_id: message_id.clone(),
+            conversation_id: vec![],
+            sent_at: timestamp::Timestamp::get_timestamp(),
+            payload: Some(proto::common_message::Payload::FileMessage(
+                proto::FileMessage {
+                    content: data.clone(),
                 }
             )),
         };
-        let mut message_buf00 = Vec::with_capacity(snd_message.encoded_len());
-        snd_message
+
+        let mut message_buf00 = Vec::with_capacity(send_message.encoded_len());
+        send_message
             .encode(&mut message_buf00)
             .expect("Vec<u8> provides capacity as needed");
         log::info!("message_buf len {}", message_buf00.len());
 
         // send message via messaging
-        if let Err(e) = Messaging::pack_and_send_message(user_account, receiver, message_buf00) {
+        if let Err(e) = Messaging::pack_and_send_message(user_account, &receiver, &message_buf00, Some(&message_id), true) {
             log::error!("file sending message failed {}", e.to_string());
         }
     }

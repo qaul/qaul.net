@@ -11,6 +11,7 @@ use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs"); }
+mod proto_message { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.messaging.rs"); }
 
 /// chat module function handling
 pub struct Chat {}
@@ -343,50 +344,45 @@ impl Chat {
 
                             print!("{} | ", message.sent_at);
                             println!("{}", bs58::encode(message.sender_id).into_string());
+                            println!(" [{}] {}", bs58::encode(message.message_id).into_string(), message.received_at);
 
-                            if message.message_id.len() > 0{
-                                println!(" [{}] {}", bs58::encode(message.message_id).into_string(), message.received_at);
-                            }else{
-                                println!(" {}", message.received_at);
-                            }                            
-
-                            match proto::ChatMessageContent::decode(&message.content[..]) {
-                                Ok(chat_message_content) =>{
-                                    match chat_message_content.content{
-                                        Some(proto::chat_message_content::Content::ChatContent(chat_content)) =>{
-                                            println!("  {}", chat_content.content);
+                            match proto_message::CommonMessage::decode(&message.content[..]) {
+                                Ok(common) =>{
+                                    match common.payload{
+                                        Some(proto_message::common_message::Payload::ChatMessage(chat_msg)) =>{
+                                            println!("  {}", chat_msg.content);
                                         },
-                                        Some(proto::chat_message_content::Content::FileContent(file_content)) =>{
-                                            println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
-                                            println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
-                                            println!("  description: {}", file_content.file_descr);
+                                        Some(proto_message::common_message::Payload::FileMessage(file_msg)) =>{
+                                            // println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
+                                            // println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
+                                            // println!("  description: {}", file_content.file_descr);
                                         },
-                                        Some(proto::chat_message_content::Content::GroupInviteContent(invite_content)) =>{
-                                            if message.status == 1 {
-                                                println!("  Sent group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
-                                                println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
-                                            }else if message.status == 2{
-                                                println!("  Received group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
-                                                println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
-                                            } 
-                                        },
-                                        Some(proto::chat_message_content::Content::GroupInviteReplyContent(reply_content)) =>{
-                                            if message.status == 1 {
-                                                if reply_content.accept{
-                                                    print!("  Accept group invite ");
-                                                }else{
-                                                    print!("  Decline group invite ");
-                                                }
-                                                println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
-                                            }else if message.status == 2 {
-                                                if reply_content.accept{
-                                                    print!("  Accepted group invite ");
-                                                }else{
-                                                    print!("  Declined group invite ");
-                                                }
-                                                println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
-                                            }
-                                        },
+                                        // Some(proto_message::GroupMessage(invite_content)) =>{
+                                        //     if message.status == 1 {
+                                        //         println!("  Sent group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
+                                        //         println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
+                                        //     }else if message.status == 2{
+                                        //         println!("  Received group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
+                                        //         println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
+                                        //     } 
+                                        // },
+                                        // Some(proto::chat_message_content::Content::GroupInviteReplyContent(reply_content)) =>{
+                                        //     if message.status == 1 {
+                                        //         if reply_content.accept{
+                                        //             print!("  Accept group invite ");
+                                        //         }else{
+                                        //             print!("  Decline group invite ");
+                                        //         }
+                                        //         println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
+                                        //     }else if message.status == 2 {
+                                        //         if reply_content.accept{
+                                        //             print!("  Accepted group invite ");
+                                        //         }else{
+                                        //             print!("  Declined group invite ");
+                                        //         }
+                                        //         println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
+                                        //     }
+                                        // },
                                         _ =>{
                                             log::error!("unknown ChatMessageContent");   
                                         }

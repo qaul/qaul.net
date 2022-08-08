@@ -54,9 +54,9 @@ pub struct ChatOverview {
     /// id of the user
     #[prost(bytes="vec", tag="1")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
-    /// last message index
-    #[prost(uint32, tag="2")]
-    pub last_message_index: u32,
+    /// last message id
+    #[prost(uint64, tag="2")]
+    pub last_message_index: u64,
     /// name of the conversation
     #[prost(string, tag="3")]
     pub name: ::prost::alloc::string::String,
@@ -111,10 +111,10 @@ pub struct ChatGroupList {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatMessage {
-    /// message index
-    #[prost(uint32, tag="1")]
-    pub index: u32,
-    /// id of the sending user or group_id(group flag case)
+    /// index
+    #[prost(uint64, tag="1")]
+    pub index: u64,
+    /// id of the sending user
     #[prost(bytes="vec", tag="2")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
     /// message id or member id

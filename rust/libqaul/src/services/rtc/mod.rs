@@ -25,7 +25,7 @@ use crate::rpc::Rpc;
 
 use super::messaging::proto;
 use super::messaging::Messaging;
-
+use crate::utilities::timestamp;
 
 mod rtc_managing;
 use rtc_managing::RtcManaging;
@@ -106,21 +106,26 @@ impl Rtc {
 
     /// Send capsuled group message through messaging service
     pub fn send_rtc_message_through_message(user_account: &UserAccount, receiver:PeerId, data: &Vec<u8>){
-        let snd_message = proto::Messaging{
-            message: Some(proto::messaging::Message::RtcMessage(
-                proto::RtcMessage{
-                    content: data.to_vec(),
+        let message_id = Messaging::generate_message_id(&user_account.id);
+        let send_message = proto::CommonMessage{
+            message_id: message_id.clone(),
+            conversation_id: vec![],
+            sent_at: timestamp::Timestamp::get_timestamp(),            
+            payload: Some(proto::common_message::Payload::RtcMessage(
+                proto::RtcMessage {
+                    content: data.clone(),
                 }
             )),
         };
-        let mut message_buf00 = Vec::with_capacity(snd_message.encoded_len());
-        snd_message
+
+        let mut message_buf00 = Vec::with_capacity(send_message.encoded_len());
+        send_message
             .encode(&mut message_buf00)
             .expect("Vec<u8> provides capacity as needed");
         log::info!("message_buf len {}", message_buf00.len());
 
         // send message via messaging
-        if let Err(e) = Messaging::pack_and_send_message(user_account, receiver, message_buf00) {
+        if let Err(e) = Messaging::pack_and_send_message(user_account, &receiver, &message_buf00, Some(&message_id), true) {
             log::error!("rtc message sending failed {}", e.to_string());
         }
     }
