@@ -638,7 +638,7 @@ impl Crypto {
         log::info!("message_buf len {}", message_buf.len());
 
         // send message via messaging
-        match Messaging::pack_and_send_message(user_account, receiver, message_buf) {
+        match Messaging::pack_and_send_message(user_account, &receiver, &message_buf, None, false) {
             Ok(_) => {},
             Err(e) => log::error!("{}", e),
         }

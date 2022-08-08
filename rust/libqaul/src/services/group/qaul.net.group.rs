@@ -59,6 +59,9 @@ pub struct Member {
     ///state 
     #[prost(uint32, tag="4")]
     pub state: u32,
+    ///last message index
+    #[prost(uint32, tag="5")]
+    pub last_message_index: u32,
 }
 /// Group Notify
 #[derive(Clone, PartialEq, ::prost::Message)]

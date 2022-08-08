@@ -49,21 +49,15 @@ impl GroupMessage{
             for user_id in group.members.keys(){
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();                
                 if receiver != *my_user_id{
-                    Group::send_group_message_through_message(&user_account, receiver, &message_buff);
+                    Group::send_group_message_through_message(&user_account, receiver, &group.id, &message_buff);
                 }                
             }
         }
-
-        //save into db
-        let grp_id  = PeerId::from_bytes(group_id).unwrap();
-        Chat::save_incoming_group_chat_message(my_user_id.clone(), my_user_id.clone(), 
-            message.clone(), timestamp::Timestamp::get_timestamp(), grp_id, vec![]);
-
         Ok(true)
     }
 
     /// process group message from network
-    pub fn on_message(sender_id: &Vec<u8>, receiver_id: &Vec<u8>, chat_message: &super::proto_net::GroupMessage, signature: Vec<u8>)  ->Result<bool, String>{        
+    pub fn on_message(sender_id: &Vec<u8>, receiver_id: &Vec<u8>, chat_message: &super::proto_net::GroupMessage)  ->Result<bool, String>{
         let user_id = PeerId::from_bytes(receiver_id).unwrap();
         // check group and member        
         let groups = Group::get_groups_of_user(user_id);
@@ -81,11 +75,6 @@ impl GroupMessage{
                 return Err("you are not member in this group".to_string());
             }
         }
-
-        //save group message
-        let sender = PeerId::from_bytes(sender_id).unwrap();
-        let group_id  = PeerId::from_bytes(&chat_message.group_id).unwrap();
-        Chat::save_incoming_group_chat_message(user_id, sender, chat_message.content.clone(), chat_message.sent_at, group_id, signature);
         Ok(true)
     }
 

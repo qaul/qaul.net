@@ -23,6 +23,7 @@ use std::{
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
 use crate::storage::database::DataBase;
+use crate::utilities::timestamp;
 use super::chat::Chat;
 
 use super::messaging::proto;
@@ -87,6 +88,8 @@ pub struct GroupMember {
     pub joined_at: u64,
     // state for future using
     pub state: u8,
+    // last message index
+    pub last_message_index: u32,
 }
 
 /// Structure of Group
@@ -217,22 +220,27 @@ impl Group{
 
 
     /// Send capsuled group message through messaging service
-    pub fn send_group_message_through_message(user_account: &UserAccount, receiver:PeerId, data: &Vec<u8>){
-        let snd_message = proto::Messaging{
-            message: Some(proto::messaging::Message::GroupMessage(
-                proto::GroupMessage{
-                    content: data.to_vec(),
+    pub fn send_group_message_through_message(user_account: &UserAccount, receiver:PeerId, group_id: &Vec<u8>, data: &Vec<u8>){
+        let message_id =  Messaging::generate_message_id(&user_account.id);
+        let send_message = proto::CommonMessage{
+            message_id: message_id.clone(),
+            conversation_id: group_id.clone(),
+            sent_at: timestamp::Timestamp::get_timestamp(),            
+            payload: Some(proto::common_message::Payload::GroupMessage(
+                proto::GroupMessage {
+                    content: data.clone(),
                 }
             )),
         };
-        let mut message_buf00 = Vec::with_capacity(snd_message.encoded_len());
-        snd_message
+
+        let mut message_buf00 = Vec::with_capacity(send_message.encoded_len());
+        send_message
             .encode(&mut message_buf00)
             .expect("Vec<u8> provides capacity as needed");
         log::info!("message_buf len {}", message_buf00.len());
 
         // send message via messaging
-        if let Err(e) = Messaging::pack_and_send_message(user_account, receiver, message_buf00) {
+        if let Err(e) = Messaging::pack_and_send_message(user_account, &receiver, &message_buf00, Some(&message_id), true) {
             log::error!("group message sending failed {}", e.to_string());
         }
     }
@@ -256,6 +264,7 @@ impl Group{
                 role: m.role as u32,
                 state: m.state as u32,
                 joined_at: m.joined_at,
+                last_message_index: m.last_message_index,
             });
         }
 
@@ -281,7 +290,7 @@ impl Group{
             for user_id in group.members.keys(){
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
                 if receiver != *my_user_id{
-                    Self::send_group_message_through_message(&user_account, receiver, &message_buff);
+                    Self::send_group_message_through_message(&user_account, receiver, &group.id, &message_buff);
                 }                
             }
         }
@@ -289,10 +298,10 @@ impl Group{
     }
 
     /// Process incoming NET messages for group chat module
-    pub fn net(sender_id: PeerId, receiver_id: PeerId, data: Vec<u8>, signature: Vec<u8>){
+    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>){
         //check receiver id is in users list
         let user;
-        match UserAccounts::get_by_id(receiver_id) {
+        match UserAccounts::get_by_id(receiver_id.clone()) {
             Some(usr) => {
                 user = usr;
             }
@@ -307,14 +316,14 @@ impl Group{
                 match messaging.message{
                     Some(proto_net::group_container::Message::InviteMember(invite_member)) => {
                         log::info!("group::on_receive_invite");
-                        Member::on_be_invited(&user, &sender_id, &receiver_id, &invite_member, signature);
+                        Member::on_be_invited(&user, &sender_id, &receiver_id, &invite_member);
                     },
                     Some(proto_net::group_container::Message::Removed(_removed)) => {
                         log::info!("group::on_removed");
                     },
                     Some(proto_net::group_container::Message::ReplyInvite(reply_invite)) => {
                         log::info!("group::on_answered for invite");
-                        if let Err(error) =  Member::on_reply_invite(&sender_id, &receiver_id, &reply_invite, signature){
+                        if let Err(error) =  Member::on_reply_invite(&sender_id, &receiver_id, &reply_invite){
                             log::error!("group on_reply_invite error {}", error);
                         }else {
                             if reply_invite.accept{
@@ -328,7 +337,7 @@ impl Group{
                     },
                     Some(proto_net::group_container::Message::GroupMessage(chat_message)) => {
                         log::info!("group::on_received_chat_message");
-                        if let Err(error) = GroupMessage::on_message(&sender_id.to_bytes(), &receiver_id.to_bytes(), &chat_message, signature){
+                        if let Err(error) = GroupMessage::on_message(&sender_id.to_bytes(), &receiver_id.to_bytes(), &chat_message){
                             log::error!("GroupMessage::on_message {}", error.to_string());
                         }
                     },

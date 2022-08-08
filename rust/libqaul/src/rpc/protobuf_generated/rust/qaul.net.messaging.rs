@@ -22,12 +22,36 @@ pub struct Envelope {
     /// the qaul ID of the receiver
     #[prost(bytes="vec", tag="2")]
     pub receiver_id: ::prost::alloc::vec::Vec<u8>,
-    /// encrypted message data
-    #[prost(message, repeated, tag="3")]
-    pub data: ::prost::alloc::vec::Vec<Data>,
+    /// payload
+    #[prost(bytes="vec", tag="3")]
+    pub payload: ::prost::alloc::vec::Vec<u8>,
+}
+/// envelop payload
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct EnvelopPayload {
+    #[prost(oneof="envelop_payload::Payload", tags="1, 2")]
+    pub payload: ::core::option::Option<envelop_payload::Payload>,
+}
+/// Nested message and enum types in `EnvelopPayload`.
+pub mod envelop_payload {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Payload {
+        /// encrypted message data
+        #[prost(message, tag="1")]
+        Encrypted(super::Encrypted),
+        /// DTN message
+        #[prost(bytes, tag="2")]
+        Dtn(::prost::alloc::vec::Vec<u8>),
+    }
 }
 /// encrypted message data
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Encrypted {
+    ///repeated Data data = 1;
+    #[prost(bytes="vec", tag="1")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
+}
+/// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Data {
     /// message nonce for encryption
@@ -40,7 +64,7 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5, 6")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -53,18 +77,12 @@ pub mod messaging {
         /// crypto service
         #[prost(message, tag="2")]
         CryptoService(super::CryptoService),
-        /// chat message
+        /// rtc stream 
         #[prost(message, tag="3")]
-        ChatMessage(super::ChatMessage),
-        /// file sharing message
+        RtcStreamMessage(super::RtcStreamMessage),
+        /// common message
         #[prost(message, tag="4")]
-        FileMessage(super::FileMessage),
-        /// group chat message
-        #[prost(message, tag="5")]
-        GroupMessage(super::GroupMessage),
-        /// rtc message
-        #[prost(message, tag="6")]
-        RtcMessage(super::RtcMessage),
+        CommonMessage(super::CommonMessage),
     }
 }
 /// Crypto Service Message
@@ -84,27 +102,52 @@ pub struct CryptoService {
 pub struct Confirmation {
     /// message ID
     #[prost(bytes="vec", tag="1")]
-    pub message_id: ::prost::alloc::vec::Vec<u8>,
+    pub signature: ::prost::alloc::vec::Vec<u8>,
     /// receveived at timestamp
     #[prost(uint64, tag="2")]
     pub received_at: u64,
 }
-/// chat message
+/// common message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CommonMessage {
+    /// message ID
+    #[prost(bytes="vec", tag="1")]
+    pub message_id: ::prost::alloc::vec::Vec<u8>,
+    /// conversation id
+    #[prost(bytes="vec", tag="2")]
+    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    /// conversation id
+    #[prost(uint64, tag="3")]
+    pub sent_at: u64,
+    /// payload
+    #[prost(oneof="common_message::Payload", tags="4, 5, 6, 7")]
+    pub payload: ::core::option::Option<common_message::Payload>,
+}
+/// Nested message and enum types in `CommonMessage`.
+pub mod common_message {
+    /// payload
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Payload {
+        /// chat message
+        #[prost(message, tag="4")]
+        ChatMessage(super::ChatMessage),
+        /// file message
+        #[prost(message, tag="5")]
+        FileMessage(super::FileMessage),
+        /// group message
+        #[prost(message, tag="6")]
+        GroupMessage(super::GroupMessage),
+        /// rtc message
+        #[prost(message, tag="7")]
+        RtcMessage(super::RtcMessage),
+    }
+}
+/// chat content
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatMessage {
-    /// group chat
-    #[prost(bool, tag="1")]
-    pub group: bool,
-    /// conversation id 
-    /// (only for group chat messages)
-    #[prost(bytes="vec", tag="2")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
-    /// sent timestamp
-    #[prost(uint64, tag="3")]
-    pub sent_at: u64,
-    /// message
-    #[prost(string, tag="4")]
+    /// content
+    #[prost(string, tag="1")]
     pub content: ::prost::alloc::string::String,
 }
 /// file message
@@ -113,15 +156,75 @@ pub struct FileMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// group chat message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupMessage {
-    #[prost(bytes="vec", tag="1")]
-    pub content: ::prost::alloc::vec::Vec<u8>,
-}
 /// rtc message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// rtc stream mesasge
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RtcStreamMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// group message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// DTN message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Dtn {
+    #[prost(oneof="dtn::Message", tags="1, 2")]
+    pub message: ::core::option::Option<dtn::Message>,
+}
+/// Nested message and enum types in `Dtn`.
+pub mod dtn {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Message {
+        /// message container
+        #[prost(bytes, tag="1")]
+        Container(::prost::alloc::vec::Vec<u8>),
+        /// message received response
+        #[prost(message, tag="2")]
+        Response(super::DtnResponse),
+    }
+}
+/// DTN response
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnResponse {
+    /// the type of the message
+    #[prost(enumeration="dtn_response::Type", tag="1")]
+    pub r#type: i32,
+    /// message signature reference
+    #[prost(bytes="vec", tag="2")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+    /// reason of rejection
+    #[prost(enumeration="dtn_response::Reason", tag="3")]
+    pub reason: i32,
+}
+/// Nested message and enum types in `DtnResponse`.
+pub mod dtn_response {
+    /// the enum definition of the type
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+    #[repr(i32)]
+    pub enum Type {
+        /// the message was accepted for storage
+        Accepted = 0,
+        /// the message was rejected
+        Rejected = 1,
+    }
+    /// the enum definition of the rejection reason
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+    #[repr(i32)]
+    pub enum Reason {
+        /// this user is not accepted
+        UserNotAccepted = 0,
+        /// overall quota reached
+        OverallQuota = 1,
+        /// user quota reached
+        UserQuota = 2,
+    }
 }
