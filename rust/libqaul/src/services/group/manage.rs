@@ -24,6 +24,7 @@ impl Manage{
             role: 255, //admin
             joined_at: timestamp::Timestamp::get_timestamp(),
             state: 1,
+            last_message_index: 0,
             }
         );
 
@@ -163,6 +164,7 @@ impl Manage{
                 role: m.role as u8,
                 joined_at: m.joined_at,
                 state: m.state as u8,
+                last_message_index: m.last_message_index,
             });
         }
 

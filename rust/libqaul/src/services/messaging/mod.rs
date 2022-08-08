@@ -10,20 +10,24 @@ use crate::connections::ConnectionModule;
 use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
-use std::collections::VecDeque;
+use std::collections::{VecDeque, BTreeMap};
 use std::sync::RwLock;
 
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router;
 use crate::router::table::RoutingTable;
+
 use super::chat::Chat;
 use super::crypto::Crypto;
 use super::filesharing;
 use super::group;
 use super::rtc;
 
+mod process;
+use process::MessagingProcess;
+
 use crate::storage::database::DataBase;
-use crate::utilities::timestamp::Timestamp;
+use crate::utilities::timestamp::{Timestamp, self};
 use qaul_messaging::QaulMessagingReceived;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
@@ -33,6 +37,23 @@ use sled_extensions::{bincode::Tree, DbExt};
 pub mod proto {
     include!("qaul.net.messaging.rs");
 }
+
+/// mutable state of messages id for generate uniq id
+pub static MESSAGEIDS: Storage<RwLock<MessageIds>> = Storage::new();
+
+/// MessagId Structure
+pub struct MessageId {
+    timestamp: u64,
+    last_index: u32,
+}
+
+/// MessageIds structure 
+pub struct MessageIds {
+    /// sender => mesage id
+    pub ids: BTreeMap<Vec<u8>, MessageId>,
+}
+
+
 
 /// mutable state of messages, scheduled for sending
 pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
@@ -46,11 +67,32 @@ pub struct ScheduledMessage {
     container: proto::Container,
 }
 
+
+/// mutable state of messages, scheduled for sending
+pub static UNCONFIRMED: Storage<RwLock<UnConfirmedMessages>> = Storage::new();
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
+pub struct UnConfirmedMessage{
+    pub receiver_id: Vec<u8>,
+    pub message_id: Vec<u8>,
+    pub container: Vec<u8>,
+    pub last_sent: u64,
+    pub retry: u32,
+}
+pub struct UnConfirmedMessages {
+    /// signature => UnConfirmedMessage
+    pub unconfirmed: Tree<UnConfirmedMessage>,
+}
+
+
+
 /// Qaul Messaging Structure
 pub struct Messaging {
     /// ring buffer of messages scheduled for sending
     pub to_send: VecDeque<ScheduledMessage>,
 }
+
+
 
 /// Qaul Failed Message Structure
 #[derive(Serialize, Deserialize, Clone)]
@@ -68,9 +110,62 @@ pub struct FailedMessaging {
     pub tree: Tree<FailedMessage>,
 }
 
+
+pub struct ConversationId{
+    pub id: Vec<u8>
+}
+impl ConversationId{
+    pub fn from_bytes(id: &Vec<u8>)->Result<ConversationId, String>{
+        if id.len() == 16{
+            Ok(
+                ConversationId{
+                    id: id.clone()
+                } 
+            )
+        }else{
+            Err("invalid length".to_string())
+        }
+    }
+
+    pub fn from_peers(user_id0: &PeerId, user_id1: &PeerId)->Result<ConversationId, String>{
+        let crc_0 = crc::crc64::checksum_iso(&user_id0.to_bytes());
+        let crc_1 = crc::crc64::checksum_iso(&user_id1.to_bytes());
+
+        let mut buf = crc_0.to_be_bytes().to_vec();
+        let mut buf1 = crc_1.to_be_bytes().to_vec();
+
+        if crc_0 < crc_1{
+            buf.append(&mut buf1);
+            Self::from_bytes(&buf)
+        }else{
+            buf1.append(&mut buf);
+            Self::from_bytes(&buf1)
+        }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.id.clone()
+    }
+    pub fn to_base58(&self) -> String {
+        bs58::encode(self.to_bytes()).into_string()
+    }
+    pub fn is_equal(&self, inst: &ConversationId)->bool{
+        log::error!("is_eq={}, {}", self.to_base58() , inst.to_base58());
+        self.to_base58() == inst.to_base58()
+    }
+
+}
+
+
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
+        
+        let message_ids = MessageIds{
+            ids: BTreeMap::new()
+        };
+        MESSAGEIDS.set(RwLock::new(message_ids));
+
         let messaging = Messaging {
             to_send: VecDeque::new(),
         };
@@ -80,7 +175,56 @@ impl Messaging {
         let tree: Tree<FailedMessage> = db.open_bincode_tree("failed_messages").unwrap();
         let failed_messaging = FailedMessaging { tree: tree };
         FAILEDMESSAGING.set(RwLock::new(failed_messaging));
+
+        // open trees
+        let unconfirmed: Tree<UnConfirmedMessage> = db.open_bincode_tree("unconfirmed").unwrap();
+        let unconfirmed_messages = UnConfirmedMessages { unconfirmed };
+        UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
+
+
+    pub fn generate_message_id(sender_id: &PeerId) -> Vec<u8>{
+
+        let timestamp = timestamp::Timestamp::get_timestamp();
+        // determine index
+        let mut index: u32 = 0;
+        let mut message_ids = MESSAGEIDS.get().write().unwrap();
+        match  message_ids.ids.get_mut(&sender_id.to_bytes()){
+            Some(mut id)=>{
+                if id.timestamp==timestamp{
+                    index = id.last_index + 1;
+                }
+                id.timestamp = timestamp;
+                id.last_index = index;
+            },
+            _ =>{ 
+                message_ids.ids.insert(sender_id.to_bytes(), MessageId{timestamp, last_index :0});
+            }
+        }
+
+        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
+        let mut buff = sender_crc.to_be_bytes().to_vec();
+        let mut time_bytes = timestamp.to_be_bytes().to_vec();
+        let mut index_bytes = index.to_be_bytes().to_vec();
+
+        buff.append(&mut time_bytes);
+        buff.append(&mut index_bytes);
+        buff
+    }
+
+    pub fn generate_group_message_id(group_id: &Vec<u8>, sender_id: &PeerId, index: u32) -> Vec<u8>{
+
+        let group_crc = crc::crc64::checksum_iso(group_id);
+        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
+        let mut buff0 = group_crc.to_be_bytes().to_vec();
+        let mut buff = sender_crc.to_be_bytes().to_vec();
+        let mut index_bytes = index.to_be_bytes().to_vec();
+
+        buff0.append(&mut buff);
+        buff0.append(&mut index_bytes);
+        buff0
+    }    
+
 
     // // create DB key from conversation ID, timestamp
     // fn get_db_key_from_vec(conversation_id: Vec<u8>, timestamp: u64) -> Vec<u8> {
@@ -121,35 +265,98 @@ impl Messaging {
     //     }        
     // }
 
+    fn save_unconfirmed_message(message_id: &Vec<u8>, receiver: &PeerId, container: &proto::Container){
+        let new_entry = UnConfirmedMessage{
+            receiver_id: receiver.to_bytes(),
+            container: container.encode_to_vec(),
+            last_sent: Timestamp::get_timestamp(),
+            message_id: message_id.clone(),
+            retry: 0,
+        };
+        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+
+        //
+        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), new_entry){
+            log::error!("{}", e);
+        }
+        // flush
+        if let Err(e) = unconfirmed.unconfirmed.flush() {
+            log::error!("Error unconfirmed table flush: {}", e);
+        }
+    }
+
+    // process confirmation message and return (sender_id, message_id)
+    pub fn on_confirmed_message(signature: &Vec<u8>)->Option<Vec<u8>>{
+        
+        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+
+        // remove unconfirmed from DB
+        match unconfirmed.unconfirmed.remove(signature){
+            Ok(v) =>{
+                if let Err(e) = unconfirmed.unconfirmed.flush() {
+                    log::error!("Error unconfirmed table flush: {}", e);
+                }
+
+                match v{
+                    Some(unconfirmed) =>{
+                        return Some(unconfirmed.message_id.clone());
+                    },
+                    _ => {}
+                }
+            },
+            Err(e) =>{
+                log::error!("{}", e);
+            }
+        }
+        None
+    }
+
     /// pack, sign and schedule a message for sending
     pub fn pack_and_send_message(
         user_account: &UserAccount,
-        receiver: PeerId,
-        data: Vec<u8>,
+        receiver: &PeerId,
+        data: &Vec<u8>,
+        message_id: Option<&Vec<u8>>,
+        is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
-        // encrypt data
-        // TODO: slize data to 64K
-        let (encryption_result, nonce) = Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
+        // // encrypt data
+        // // TODO: slize data to 64K
+        // let (encryption_result, nonce) = Crypto::encrypt(data.clone(), user_account.to_owned(), receiver.clone());
 
-        let mut encrypted: Vec<proto::Data> = Vec::new();
-        match encryption_result {
-            Some(encrypted_chunk) => {
-                let data_message = proto::Data{ nonce, data: encrypted_chunk };
+        // let mut encrypted: Vec<proto::Data> = Vec::new();
+        // match encryption_result {
+        //     Some(encrypted_chunk) => {
+        //         let data_message = proto::Data{ nonce, data: encrypted_chunk };
 
-                log::info!("data len: {}", data_message.encoded_len());
+        //         log::info!("data len: {}", data_message.encoded_len());
 
-                encrypted.push(data_message);
-            },
-            None => return Err("Encryption error occurred".to_string()),
-        }
+        //         encrypted.push(data_message);
+        //     },
+        //     None => return Err("Encryption error occurred".to_string()),
+        // }
 
-        log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+        // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+
+        let envelop_payload = proto::EnvelopPayload{
+            payload: Some(proto::envelop_payload::Payload::Encrypted(
+                proto::Encrypted{data: data.clone()}
+            ))
+        };
+
+        // let payload = proto::Encrypted{data: data.clone()};
+
+        // let mut message_buf = Vec::with_capacity(payload.encoded_len());
+        // payload
+        //     .encode(&mut message_buf)
+        //     .expect("Vec<u8> provides capacity as needed");
 
         // create envelope
         let envelope = proto::Envelope {
             sender_id: user_account.id.to_bytes(),
             receiver_id: receiver.to_bytes(),
-            data: encrypted,
+            //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
+            //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
+            payload: envelop_payload.encode_to_vec()
         };
 
         // debug
@@ -169,8 +376,13 @@ impl Messaging {
                 envelope: Some(envelope),
             };
 
+            // in common message case, save into unconfirmed table
+            if is_common_message{
+                Self::save_unconfirmed_message(message_id.unwrap(), receiver, &container);
+            }
+
             // schedule message for sending
-            Self::schedule_message(receiver, container);
+            Self::schedule_message(receiver.clone(), container);
 
             // return signature
             Ok(signature)
@@ -229,12 +441,12 @@ impl Messaging {
     }
 
     /// TODO: send received confirmation message
-    fn _send_confirmation(
-        user_id: PeerId,
-        sender_id: PeerId,
-        message_id: Vec<u8>,
+    pub fn send_confirmation(
+        user_id: &PeerId,
+        receiver_id: &PeerId,
+        signature: &Vec<u8>,
     ) -> Result<Vec<u8>, String> {
-        if let Some(user) = UserAccounts::get_by_id(user_id) {
+        if let Some(user) = UserAccounts::get_by_id(user_id.clone()) {
             // // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
@@ -242,7 +454,7 @@ impl Messaging {
             let send_message = proto::Messaging {
                 message: Some(proto::messaging::Message::ConfirmationMessage(
                     proto::Confirmation {
-                        message_id: message_id,
+                        signature: signature.clone(),
                         received_at: timestamp,
                     },
                 )),
@@ -255,147 +467,9 @@ impl Messaging {
                 .expect("Vec<u8> provides capacity as needed");
 
             // // send message via messaging
-            Self::pack_and_send_message(&user, sender_id, message_buf)
+            Self::pack_and_send_message(&user, receiver_id, &message_buf, None, false)
         } else {
             return Err("invalid user_id".to_string());
-        }
-    }
-
-    /// process received message
-    pub fn process_received_message(container: proto::Container) {
-        // check if there is a message envelope
-        if let Some(envelope) = container.envelope {
-            if let Ok(sender_id) = PeerId::from_bytes(&envelope.sender_id) {
-                // get sender key
-                if let Some(key) = router::users::Users::get_pub_key(&sender_id) {
-                    // encode envelope
-                    let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-                    envelope
-                        .encode(&mut envelope_buf)
-                        .expect("Vec<u8> provides capacity as needed");
-
-                    // verify message
-                    let verified = key.verify(&envelope_buf, &container.signature);
-                    if verified {
-                        // to whom is it sent
-                        if let Ok(receiver_id) = PeerId::from_bytes(&envelope.receiver_id) {
-                            log::info!("messaging envelope.data len = {}", envelope.data.len());
-
-                            // decrypt data
-                            let mut decrypted: Vec<u8> = Vec::new();
-                            for data_message in envelope.data {
-                                if let Some(mut decrypted_chunk) = Crypto::decrypt(data_message.data, data_message.nonce, receiver_id, sender_id.clone()) {
-                                    decrypted.append(&mut decrypted_chunk);
-                                }
-                                else {
-                                    log::error!("decryption error");
-                                    return;
-                                }
-                            }
-
-                            // decode data
-                            match proto::Messaging::decode(&decrypted[..]) {
-                                Ok(messaging) => {
-                                    match messaging.message {
-                                        Some(proto::messaging::Message::CryptoService(_crypto_service_message)) => {
-                                            // implement crypto re-keying here in the future
-                                        },
-                                        Some(proto::messaging::Message::ConfirmationMessage(
-                                            confirmation,
-                                        )) => {
-                                            log::error!(
-                                                "chat confirmation message: {}",
-                                                bs58::encode(confirmation.message_id.clone())
-                                                    .into_string()
-                                            );
-                                            // confirm successful send of chat message
-                                            // TODO: send confirmation message
-                                            Chat::update_confirmation(
-                                                receiver_id,
-                                                confirmation.message_id,
-                                                confirmation.received_at,
-                                            );
-                                        },
-                                        Some(proto::messaging::Message::ChatMessage(
-                                            chat_message,
-                                        )) => {
-                                            log::error!("chat message: {}", chat_message.content);
-                                            // send data to chat
-                                            if Chat::save_incoming_chat_message(receiver_id, sender_id, chat_message, container.signature.clone()) == true{
-                                                //send confirm message
-                                                match Self::_send_confirmation(
-                                                    receiver_id,
-                                                    sender_id,
-                                                    container.signature.clone(),
-                                                ) {
-                                                    Ok(_) => {
-                                                        log::error!("Outgoing chat confirmation message id=: {}", bs58::encode(container.signature.clone()).into_string())
-                                                    }
-                                                    Err(e) => {
-                                                        log::error!(
-                                                            "Outgoing chat message error: {}",
-                                                            e
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        Some(proto::messaging::Message::FileMessage(
-                                            file_message,
-                                        )) => {
-                                            filesharing::FileShare::on_receive_message(
-                                                sender_id,
-                                                receiver_id,
-                                                file_message.content,
-                                            );
-                                        },
-                                        Some(proto::messaging::Message::GroupMessage(
-                                            group_message,
-                                        )) => {
-                                            group::Group::net(sender_id, receiver_id, group_message.content, container.signature);
-                                        },        
-                                        Some(proto::messaging::Message::RtcMessage(
-                                            rtc_message,
-                                        )) => {
-                                            rtc::Rtc::net(sender_id, receiver_id, rtc_message.content, container.signature);
-                                        },                                                                         
-                                        None => {
-                                            log::error!(
-                                                "message {} from {} was empty",
-                                                bs58::encode(container.signature).into_string(),
-                                                sender_id.to_base58()
-                                            )
-                                        }
-                                    }
-                                }
-                                Err(e) => {
-                                    log::error!(
-                                        "Error decoding Messaging Message {} from {} to {}: {}",
-                                        bs58::encode(container.signature).into_string(),
-                                        sender_id.to_base58(),
-                                        receiver_id.to_base58(),
-                                        e
-                                    );
-                                }
-                            }
-                        } else {
-                            log::error!(
-                                "receiver ID of message {} from {} not valid",
-                                bs58::encode(container.signature).into_string(),
-                                sender_id.to_base58()
-                            );
-                        }
-                    } else {
-                        log::error!("verification failed");
-                    }
-                } else {
-                    log::error!("No key found for user {}", sender_id.to_base58());
-                }
-            } else {
-                log::error!("Error retrieving PeerId");
-            }
-        } else {
-            log::error!("No Envelope in Message Container");
         }
     }
 
@@ -410,7 +484,7 @@ impl Messaging {
                             // check if message is local user account
                             if UserAccounts::is_account(receiver_id) {
                                 // save message
-                                Self::process_received_message(container);
+                                MessagingProcess::process_received_message(container);
                             } else {
                                 // schedule it for further sending otherwise
                                 Self::schedule_message(receiver_id, container);

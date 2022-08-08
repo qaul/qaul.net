@@ -18,8 +18,25 @@ message Envelope {
     bytes sender_id = 1;
     // the qaul ID of the receiver
     bytes receiver_id = 2;
-    // encrypted message data
-    repeated Data data = 3;
+    // payload
+    bytes payload = 3;
+}
+
+// envelop payload
+message EnvelopPayload{
+    oneof payload {
+        // encrypted message data
+        Encrypted encrypted = 1;
+        // DTN message
+        bytes dtn = 2;
+    }
+}
+
+
+// encrypted message data
+message Encrypted {
+    //repeated Data data = 1;
+    bytes data = 1;
 }
 
 // encrypted message data
@@ -31,20 +48,16 @@ message Data {
 }
 
 // messaging unified message
-message Messaging {
+message Messaging {   
     oneof message {
         // confirm chat message
         Confirmation confirmation_message = 1;
         // crypto service
         CryptoService crypto_service = 2;
-        // chat message
-        ChatMessage chat_message = 3;
-        // file sharing message
-        FileMessage file_message = 4;
-        // group chat message
-        GroupMessage group_message = 5;
-        // rtc message
-        RtcMessage rtc_message = 6;
+        // rtc stream 
+        RtcStreamMessage rtc_stream_message = 3;
+        // common message
+        CommonMessage common_message = 4;
     }
 }
 
@@ -63,22 +76,40 @@ message CryptoService {
 // to confirm the receive.
 message Confirmation {
     // message ID
-    bytes message_id = 1;
+    bytes signature = 1;
     // receveived at timestamp
     uint64 received_at = 2;
 }
 
-// chat message
-message ChatMessage {
-    // group chat
-    bool group = 1;
-    // conversation id 
-    // (only for group chat messages)
+
+// common message
+message CommonMessage{
+    // message ID
+    bytes message_id = 1;
+
+    // conversation id
     bytes conversation_id = 2;
-    // sent timestamp
+
+    // conversation id
     uint64 sent_at = 3;
-    // message
-    string content = 4;
+    
+    // payload
+    oneof payload {
+        // chat message
+        ChatMessage chat_message = 4;
+        // file message
+        FileMessage file_message = 5;
+        // group message
+        GroupMessage group_message = 6;
+        // rtc message
+        RtcMessage rtc_message = 7;
+    }
+}
+
+// chat content
+message ChatMessage {
+    // content
+    string content = 1;
 }
 
 // file message
@@ -86,12 +117,54 @@ message FileMessage {
     bytes content = 1;
 }
 
-// group chat message
+// rtc message
+message RtcMessage {
+    bytes content = 1;
+}
+// rtc stream mesasge
+message RtcStreamMessage {
+    bytes content = 1;
+}
+
+
+// group message
 message GroupMessage {
     bytes content = 1;
 }
 
-// rtc message
-message RtcMessage {
-    bytes content = 1;
+
+// DTN message
+message Dtn {
+    oneof message {
+        // message container
+        bytes container = 1;
+        // message received response
+        DtnResponse response = 2;
+    }
+}
+
+// DTN response
+message DtnResponse {
+    // the enum definition of the type
+    enum Type {
+        // the message was accepted for storage
+        ACCEPTED = 0;
+        // the message was rejected
+        REJECTED = 1;
+    }
+    // the type of the message
+    Type type = 1;
+    // message signature reference
+    bytes signature = 2;
+    // the enum definition of the rejection reason
+    enum Reason {
+        // this user is not accepted
+        USER_NOT_ACCEPTED = 0;
+        // overall quota reached
+        OVERALL_QUOTA = 1;
+        // user quota reached
+        USER_QUOTA = 2;
+    }
+    // reason of rejection
+    Reason reason = 3;
 }
