@@ -16,8 +16,13 @@ use libqaul;
 #[async_std::main]
 async fn main() {
     // TODO: make configuration file location configurable
+
+    // get current working directory
+    let path = std::env::current_dir().unwrap(); 
+    let storage_path = path.as_path().to_str().unwrap().to_string();
+
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start("".to_string());
+    libqaul::api::start(storage_path);
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {

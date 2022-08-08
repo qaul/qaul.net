@@ -12,6 +12,7 @@ use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
 use state::Storage;
+use std::path::Path;
 use std::time::Duration;
 use std::fs::File;
 use filetime::FileTime;
@@ -78,29 +79,27 @@ pub async fn start(storage_path: String) -> () {
     let libqaul_rpc_receive = Rpc::init();
     let libqaul_sys_receive = Sys::init();
 
-    let storage_p = storage_path.clone();
     // initialize storage module.
     // This will initialize configuration & data base
-    storage::Storage::init(storage_path);
+    storage::Storage::init(storage_path.clone());
 
     // --- initialize logger ---
     // prepare logger path
     // the path of the log file follows the following naming convention:
-    // errror_234324232.log
-    let logger_path: String;
-    if storage_p.len() == 0{
-        logger_path = "./logs/".to_string();
-    }else{
-        logger_path = storage_p + "/logs/";
-    }
-    let cur_time_as_ms = Timestamp::get_timestamp();
-    let logger_file = logger_path.clone() + "error_" + cur_time_as_ms.to_string().as_str() + ".log";
+    // error_234324232.log
+    let path = Path::new(&storage_path);
+    let log_path = path.join("logs");
 
-    // create log directory
-    std::fs::create_dir_all(logger_path.clone()).unwrap();
+    // create log directory if missing
+    std::fs::create_dir_all(&log_path).unwrap();
+
+    // create log file name
+    let log_file_name: String = "error_".to_string() + Timestamp::get_timestamp().to_string().as_str() + ".log";
+    let log_file_path = log_path.join(log_file_name);
+
 
     // maintain log files
-    let paths = std::fs::read_dir(logger_path.clone()).unwrap();
+    let paths = std::fs::read_dir(log_path).unwrap();
     // --- logger init-end ---
 
     let mut logfiles: BTreeMap<i64, String> = BTreeMap::new();
@@ -128,7 +127,7 @@ pub async fn start(storage_path: String) -> () {
     #[cfg(target_os = "android")]
     {
         let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(Level::Info)));
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
 
@@ -136,7 +135,7 @@ pub async fn start(storage_path: String) -> () {
     #[cfg(target_os = "ios")]
     {
         let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, log::LevelFilter::Info).build());
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
 
@@ -165,11 +164,12 @@ pub async fn start(storage_path: String) -> () {
         }
 
         let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(logger_file).unwrap()));
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
         multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
     }
 
-    log::error!("this is test");
+    log::error!("test log to ensure that logging is working");
+
     // initialize node & user accounts
     Node::init();
 

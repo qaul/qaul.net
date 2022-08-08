@@ -38,6 +38,11 @@ impl Storage {
     } 
 
     /// get data storage path
+    /// 
+    /// This will return the absolute path to the storage folder 
+    /// as a string, without a trailing slash.
+    ///
+    /// e.g. on Linux: /home/USERNAME/.config/qaul
     pub fn get_path() -> String {
         STORAGE_PATH.get().clone()
     }

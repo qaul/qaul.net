@@ -13,10 +13,10 @@ pub mod file_sharing {
         /// request for sending file
         #[prost(message, tag="1")]
         SendFileRequest(super::SendFileRequest),
-        /// file histories request
+        /// file history request
         #[prost(message, tag="2")]
         FileHistory(super::FileHistoryRequest),
-        ///file histories response
+        /// file history response
         #[prost(message, tag="3")]
         FileHistoryResponse(super::FileHistoryResponse),
     }

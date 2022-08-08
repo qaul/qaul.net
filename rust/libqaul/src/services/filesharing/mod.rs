@@ -576,33 +576,34 @@ impl FileShare {
 
     /// Check all file data received successfully, and store file if completed
     /// This function is called whenever receive file message
-    fn check_complete_and_store(file_receive: &FileShareInfoReceving) -> bool{
+    fn check_complete_and_store(file_receive: &FileShareInfoReceving) -> bool {
         // check if file receive completed
         if !file_receive.info.is_completed() {
             return false;
         }
 
         // check directory
-        let mut file_path = crate::storage::Storage::get_path();
-        if file_path.chars().last().unwrap() != '/'{
-            file_path.push_str("/");
-        }
-        file_path.push_str(bs58::encode(file_receive.info.receiver_id.clone()).into_string().as_str());
-        file_path.push_str("/files/");
+        let storage_path_string = crate::storage::Storage::get_path();
+        let storage_path = Path::new(&storage_path_string);
+        let user_storage_path = storage_path.join(bs58::encode(file_receive.info.receiver_id.clone()).into_string());
+        let files_storage_path = user_storage_path.join("files");
 
-        if let Err(e) = fs::create_dir_all(file_path.clone()) {
+        // create files directory if it doesn't exist yet
+        if let Err(e) = fs::create_dir_all(files_storage_path.clone()) {
             log::error!("creating folder error {}", e.to_string());
         }
         
-        // write all contents into real file        
-        // let mut path = "./files/".to_string();
-        file_path.push_str(file_receive.info.id.to_string().as_str());
-        if file_receive.info.extension.len() > 0{
-            file_path.push_str(".");
-            file_path.push_str(&file_receive.info.extension.as_str());
+        // create file name
+        let mut file_name = file_receive.info.id.to_string();
+        if file_receive.info.extension.len() > 0 {
+            file_name.push_str(".");
+            file_name.push_str(&file_receive.info.extension.as_str());
         }
 
-        log::info!("storing file {}", file_path.clone());
+        // create file path
+        let file_path = files_storage_path.join(file_name);
+
+        log::info!("save file {:?}", file_path);
         let mut file: File = File::create(file_path.clone()).unwrap();
 
         for i in 0..file_receive.info.pkg_sent.len() {
@@ -613,10 +614,12 @@ impl FileShare {
                 }
             }    
         }
+
         if let Err(e) = file.flush(){
             log::error!("file storing failed {}", e.to_string());
             return false;
         }
+
         true
     }
 
