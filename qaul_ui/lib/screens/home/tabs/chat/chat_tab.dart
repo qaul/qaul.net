@@ -194,6 +194,13 @@ class _ChatState extends _BaseTabState<_Chat> {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
+    } else if (message is FileShareContent) {
+      return Text(
+        '${message.fileName} · ${filesize(message.size)}',
+        maxLines: 2,
+        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        overflow: TextOverflow.ellipsis,
+      );
     } else {
       _log.info('overview type ${message.runtimeType} has not been rendered');
       return const SizedBox.shrink();
