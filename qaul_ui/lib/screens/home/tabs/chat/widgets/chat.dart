@@ -15,6 +15,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
@@ -206,6 +207,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 }
               },
             ),
+            onMessageTap: (context, message) async {
+              if (message is! types.FileMessage) return;
+              if (await canLaunchUrl(Uri.file(message.uri))) {
+                launchUrl(Uri.file(message.uri));
+              }
+            },
             customMessageBuilder: (message, {required int messageWidth}) {
               final invite = GroupInviteContent.fromJson(message.metadata!);
               if (widget.user.id.equals(invite.adminId)) {
@@ -265,7 +272,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   List<types.Message>? messages(ChatRoom room) {
     return room.messages
         ?.sorted()
-        .map((e) => e.toInternalMessage(_author(e)))
+        .map((e) => e.toInternalMessage(_author(e), ref.read))
         .toList();
   }
 
@@ -295,7 +302,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 extension _MessageExtension on Message {
-  types.Message toInternalMessage(User author) {
+  types.Message toInternalMessage(User author, Reader read) {
     var mappedStatus = status == MessageStatus.sent
         ? types.Status.sent
         : status == MessageStatus.received
@@ -322,7 +329,7 @@ extension _MessageExtension on Message {
         id: messageIdBase58,
         name: (content as FileShareContent).fileName,
         size: (content as FileShareContent).size,
-        uri: (content as FileShareContent).fileName,
+        uri: (content as FileShareContent).filePath(read),
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,

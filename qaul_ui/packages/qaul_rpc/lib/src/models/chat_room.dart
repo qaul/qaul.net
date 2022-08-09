@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 
 import '../../qaul_rpc.dart';
@@ -278,7 +279,7 @@ abstract class MessageContent extends Equatable {
         final fileContent = content.ensureFileContent();
         return FileShareContent(
           historyIndex: fileContent.historyIndex.toInt(),
-          fileId: fileContent.fileId.toInt(),
+          fileId: fileContent.fileId.toStringUnsigned(),
           fileName: fileContent.fileName,
           size: fileContent.fileSize,
           description: fileContent.fileDescr,
@@ -348,11 +349,19 @@ class FileShareContent extends MessageContent {
   });
 
   final int historyIndex;
-  final int fileId;
+  final String fileId;
   final String fileName;
   final int size;
   final String description;
 
   @override
   List<Object?> get props => [fileId, fileName];
+
+  String filePath(Reader read) {
+    var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
+    var uuid = read(defaultUserProvider)!.idBase58;
+    var ext = fileName.split('.').last;
+
+    return '$storagePath/$uuid/files/$fileId.$ext';
+  }
 }
