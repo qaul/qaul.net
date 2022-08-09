@@ -37,7 +37,14 @@ class _LogStorageManager {
 
   Future _createLogsFolder() async {
     final path = await _storeDirectory;
-    await Directory.fromUri(Uri.parse(path)).create(recursive: true);
+    Directory directory;
+    if (Platform.isWindows) {
+      directory = Directory.fromUri(Uri.directory(path, windows: true));
+    } else {
+      directory = Directory.fromUri(Uri.parse(path));
+    }
+    if (await directory.exists()) return;
+    await directory.create(recursive: true);
   }
 
   // ***************************************************************************
@@ -52,6 +59,7 @@ class _LogStorageManager {
     final dir = (Platform.isAndroid)
         ? (await getExternalStorageDirectory())!.path
         : (await getApplicationSupportDirectory()).path;
+    if (Platform.isWindows) return '$dir\\Logs';
     return '$dir/Logs';
   }
 

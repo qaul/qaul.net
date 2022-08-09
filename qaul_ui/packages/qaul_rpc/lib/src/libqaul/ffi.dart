@@ -36,8 +36,8 @@ class LibqaulFfi {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open('liblibqaul.dylib');
     } else if (Platform.isWindows) {
-      // find the library in the rust target build folder
-      _lib = DynamicLibrary.open(Platform.script.resolve('libqaul.dll').toFilePath());
+      var lib = Platform.script.resolve('libqaul.dll').toFilePath(windows: true);
+      _lib = DynamicLibrary.open(lib);
     } else {
       throw ('Platform ${Platform.operatingSystem} not implemented yet OR is not supported by FFI.');
     }
