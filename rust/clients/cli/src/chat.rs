@@ -12,6 +12,7 @@ use std::fmt;
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs"); }
 mod proto_message { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.messaging.rs"); }
+mod proto_group { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.group.rs"); }
 
 /// chat module function handling
 pub struct Chat {}
@@ -88,8 +89,15 @@ impl Chat {
                                     conversation_id = id;
                                 },
                                 Err(e) => {
-                                    log::error!("{}", e);
-                                    return;
+                                    match Self::uuid_string_to_bin(conversation_id_str.to_string()){
+                                        Ok(id) => {
+                                            conversation_id = id;
+                                        },
+                                        _ =>{
+                                            log::error!("invalid converstion id");
+                                            return;        
+                                        }        
+                                    }
                                 }
                             }
                         }
@@ -176,6 +184,18 @@ impl Chat {
             Err(e) => {
                 let err = fmt::format(format_args!("{}", e));
                 Err(err)
+            }
+        }
+    }
+
+    /// Convert Conversation ID from String to Binary
+    fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {            
+        match uuid::Uuid::parse_str(id_str.as_str()) {
+            Ok(id)=>{
+                Ok(id.as_bytes().to_vec())
+            },
+            _=>{
+                Err("invalid group id".to_string())
             }
         }
     }
@@ -352,39 +372,48 @@ impl Chat {
                                         Some(proto_message::common_message::Payload::ChatMessage(chat_msg)) =>{
                                             println!("  {}", chat_msg.content);
                                         },
-                                        Some(proto_message::common_message::Payload::FileMessage(file_msg)) =>{
-                                            // println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
-                                            // println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
-                                            // println!("  description: {}", file_content.file_descr);
+                                        // Some(proto_message::common_message::Payload::FileMessage(file_msg)) =>{
+                                        //     // println!("  {}, {} bytes", file_content.file_name, file_content.file_size);
+                                        //     // println!("  index: {}, id: {}", file_content.history_index, file_content.file_id);
+                                        //     // println!("  description: {}", file_content.file_descr);
+                                        // },
+                                        Some(proto_message::common_message::Payload::GroupMessage(group_msg)) =>{
+                                            if let Ok(msg) = proto_group::GroupContainer::decode(&group_msg.content[..]){
+                                                match msg.message{
+                                                    Some(proto_group::group_container::Message::InviteMember(invite)) =>{
+                                                        let group_id = uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
+                                                        if message.status == 1{
+                                                            print!(" Sent");
+                                                        }else {
+                                                            print!(" Received");
+                                                        }                                                        
+                                                        println!(" group invite group id: {}, Name: {}", group_id.to_string(), invite.group_name);
+                                                        println!("      Created at: {}, Members: {}", invite.created_at, invite.members_count);
+                                                    },
+                                                    Some(proto_group::group_container::Message::ReplyInvite(reply_invite)) =>{
+                                                        let group_id = uuid::Uuid::from_bytes(reply_invite.group_id.try_into().unwrap());
+                                                        if message.status <= 1 {
+                                                            print!("  Sent ");
+                                                        }else{
+                                                            print!("  Received ");
+                                                        }
+                                                        if reply_invite.accept{
+                                                            print!("  group accept ");
+                                                        }else{
+                                                            print!("  group decline ");
+                                                        }
+                                                        println!("      group id: {}", group_id.to_string());
+                                                    },
+                                                    Some(proto_group::group_container::Message::Removed(removed)) =>{
+
+                                                    },
+                                                    _ =>{}
+                                                }
+                                            }                                           
+                                            
                                         },
-                                        // Some(proto_message::GroupMessage(invite_content)) =>{
-                                        //     if message.status == 1 {
-                                        //         println!("  Sent group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
-                                        //         println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
-                                        //     }else if message.status == 2{
-                                        //         println!("  Received group invite group id: {}, Name: {}", bs58::encode(invite_content.group_id).into_string(), invite_content.group_name);
-                                        //         println!("      Created at: {}, Members: {}", invite_content.created_at, invite_content.member_count);    
-                                        //     } 
-                                        // },
-                                        // Some(proto::chat_message_content::Content::GroupInviteReplyContent(reply_content)) =>{
-                                        //     if message.status == 1 {
-                                        //         if reply_content.accept{
-                                        //             print!("  Accept group invite ");
-                                        //         }else{
-                                        //             print!("  Decline group invite ");
-                                        //         }
-                                        //         println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
-                                        //     }else if message.status == 2 {
-                                        //         if reply_content.accept{
-                                        //             print!("  Accepted group invite ");
-                                        //         }else{
-                                        //             print!("  Declined group invite ");
-                                        //         }
-                                        //         println!("      group id: {}", bs58::encode(reply_content.group_id).into_string());
-                                        //     }
-                                        // },
                                         _ =>{
-                                            log::error!("unknown ChatMessageContent");   
+                                            log::error!("unknown ChatMessageContent"); 
                                         }
                                     }
                                 },
