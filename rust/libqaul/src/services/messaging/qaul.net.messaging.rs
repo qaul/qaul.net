@@ -64,7 +64,7 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -80,8 +80,11 @@ pub mod messaging {
         /// rtc stream 
         #[prost(message, tag="3")]
         RtcStreamMessage(super::RtcStreamMessage),
-        /// common message
+        /// group notify
         #[prost(message, tag="4")]
+        GroupNotifyMessage(super::GroupNotifyMessage),
+        /// common message
+        #[prost(message, tag="5")]
         CommonMessage(super::CommonMessage),
     }
 }
@@ -171,6 +174,12 @@ pub struct RtcStreamMessage {
 /// group message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// group notify message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupNotifyMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
