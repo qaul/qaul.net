@@ -7,8 +7,10 @@ use prost::Message;
 use super::rpc::Rpc;
 use std::fmt;
 
+
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs"); }
+
 
 /// GrouChat module function handling
 pub struct Group {}
@@ -37,7 +39,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(group_name) = iter.next() {
                                 Self::rename_group(group_id, group_name.to_string());
@@ -61,7 +63,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             Self::group_info(group_id);
                         },
@@ -86,7 +88,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
@@ -118,7 +120,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
@@ -150,7 +152,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
@@ -182,7 +184,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
@@ -214,7 +216,7 @@ impl Group {
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
-                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(message_str) = iter.next() {
                                 Self::send_message(group_id, message_str.to_string());
@@ -253,6 +255,18 @@ impl Group {
             }
         }
     }    
+
+   /// Convert Conversation ID from String to Binary
+   fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {            
+        match uuid::Uuid::parse_str(id_str.as_str()) {
+            Ok(id)=>{
+                Ok(id.as_bytes().to_vec())
+            },
+            _=>{
+                Err("invalid group id".to_string())
+            }
+        }
+    }     
 
     /// crete group
     fn create_group(group_name: String) {
@@ -422,14 +436,16 @@ impl Group {
                     Some(proto::group::Message::GroupCreateResponse(create_group_response)) => {
                         println!("====================================");
                         println!("Group was created or updated");
-                        println!("\tid: {}", bs58::encode(create_group_response.group_id).into_string());
+                        let group_id = uuid::Uuid::from_bytes(create_group_response.group_id.try_into().unwrap());
+                        println!("\tid: {}", group_id.to_string());
                         println!("\tname: {}", create_group_response.group_name.clone());
                     },
                     Some(proto::group::Message::GroupInfoResponse(group_info_response)) => {
                         // group
                         println!("====================================");
                         println!("Group Information");
-                        println!("\tid: {}", bs58::encode(group_info_response.group_id).into_string());
+                        let group_id = uuid::Uuid::from_bytes(group_info_response.group_id.try_into().unwrap());
+                        println!("\tid: {}", group_id.to_string());
                         println!("\tname: {}", group_info_response.group_name.clone());
                         println!("\tcreated_at: {}", group_info_response.created_at);
                         println!("\tmembers: {}", group_info_response.members.len());
@@ -438,7 +454,8 @@ impl Group {
                         // List groups
                         println!("=============List Of Groups=================");
                         for group in group_list_response.groups{                            
-                            println!("gorup id: {}", bs58::encode(group.group_id).into_string());
+                            let group_id = uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
+                            println!("id: {}", group_id.to_string());    
                             println!("\tname: {}", group.group_name.clone());
                             println!("\tcreated_at: {}, members: {}", group.created_at, group.members.len());
                         }

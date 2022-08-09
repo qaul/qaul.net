@@ -1,11 +1,10 @@
 //use bs58::decode;
 use libp2p::{
-    identity::{ed25519, Keypair},
     PeerId,
 };
 
 use crate::utilities::timestamp;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, str::FromStr};
 
 use super::Group;
 
@@ -13,9 +12,7 @@ pub struct Manage{}
 impl Manage{
     /// create new group from rpc command
     pub fn create_new_group(user_id: &PeerId, name: String) -> Vec<u8>{
-        let keys_ed25519 = ed25519::Keypair::generate();
-        let keys = Keypair::Ed25519(keys_ed25519);
-        let id = PeerId::from(keys.public());                
+        let id = uuid::Uuid::new_v4().as_bytes().to_vec();
 
         let mut members = BTreeMap::new();
         members.insert(user_id.to_bytes(), 
@@ -29,14 +26,14 @@ impl Manage{
         );
 
         let new_group = super::Group{
-            id: id.to_bytes(),
+            id: id.clone(),
             name,
             created_at: timestamp::Timestamp::get_timestamp(),
             creator_id: user_id.to_bytes(),
             members, 
         };
 
-        let mut groups = Group::get_groups_of_user(user_id.clone());
+        let mut groups = Group::get_groups_of_user(user_id);
 
 
         let key = groups.last_group + 1;
@@ -44,17 +41,21 @@ impl Manage{
         if let Err(error) = groups.db_ref.insert(&key.to_be_bytes(), new_group){
             log::error!("group db updating error {}", error.to_string());            
         }
+        if let Err(error) = groups.db_ref.flush(){
+            log::error!("group db flush error {}", error.to_string());
+        }
+
         //add new id
         groups.last_group = key;
-        groups.group_ids.insert(id.to_bytes(), key);
-        Group::update_groups_of_user(user_id.clone(), groups);
+        groups.group_ids.insert(id.clone(), key);
+        Group::update_groups_of_user(user_id, groups);
 
-        return id.to_bytes();
+        return id.clone();
     }
 
     /// remove group from rpc command
     pub fn rename_group(user_id: &PeerId, group_id: &Vec<u8>, name: String) ->Result<Vec<u8>, String>{
-        let groups = Group::get_groups_of_user(user_id.clone());
+        let groups = Group::get_groups_of_user(user_id);
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
             return Err("can not find group".to_string());
@@ -80,7 +81,7 @@ impl Manage{
 
     /// get group information from rpc command
     pub fn group_info(user_id: &PeerId, group_id: &Vec<u8>) ->Result<super::proto_rpc::GroupInfoResponse, String>{
-        let groups = Group::get_groups_of_user(user_id.clone());
+        let groups = Group::get_groups_of_user(user_id);
 
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
@@ -110,7 +111,7 @@ impl Manage{
     
     /// get group list from rpc command
     pub fn group_list(user_id: &PeerId) ->super::proto_rpc::GroupListResponse{        
-        let groups = Group::get_groups_of_user(user_id.clone());
+        let groups = Group::get_groups_of_user(user_id);
 
         let mut res =  super::proto_rpc::GroupListResponse{
             groups: vec![],
@@ -147,7 +148,7 @@ impl Manage{
     /// process group notify message from network
     pub fn on_group_notify(_sender_id: &Vec<u8>, receiver_id: &Vec<u8>, notify: &super::proto_net::GroupNotify){
         let user_id = PeerId::from_bytes(receiver_id).unwrap();
-        let mut groups = Group::get_groups_of_user(user_id);
+        let mut groups = Group::get_groups_of_user(&user_id);
 
         let mut group_idx = groups.group_id_to_index(&notify.group_id);        
 
@@ -178,7 +179,7 @@ impl Manage{
         if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group){
             log::error!("group db updating error {}", error.to_string());
         }
-        Group::update_groups_of_user(user_id.clone(), groups);
+        Group::update_groups_of_user(&user_id, groups);
 
     }
 

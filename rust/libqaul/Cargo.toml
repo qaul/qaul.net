@@ -41,7 +41,7 @@ jni = "0.19"
 serde_yaml = "0.8"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
-uuid = { version = "0.8.2", features = ["v4"] }
+uuid = { version = "1.1.2", features = ["v4"] }
 ed25519-dalek = "1.0.1"
 x25519-dalek = "1.2.0"
 curve25519-dalek = "3.2.0"

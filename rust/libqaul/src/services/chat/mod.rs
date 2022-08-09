@@ -142,8 +142,16 @@ impl Chat {
     }
 
 
+    // send message
+    pub fn send(user_account: &UserAccount, receiver: &PeerId, common_message:&proto::CommonMessage) -> Result<Vec<u8>, String> {
+        let send_message = proto::Messaging {
+            message: Some(proto::messaging::Message::CommonMessage(common_message.clone()))
+        };
+        Messaging::pack_and_send_message(user_account, &receiver, &send_message.encode_to_vec(), Some(&common_message.message_id), true)
+    }
+
     // send the message
-    pub fn send(user_account: &UserAccount, chat_message: rpc_proto::ChatMessageSend) -> Result<Vec<u8>, String> {
+    pub fn send_to_peer(user_account: &UserAccount, chat_message: rpc_proto::ChatMessageSend) -> Result<Vec<u8>, String> {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
         
@@ -155,10 +163,8 @@ impl Chat {
         }
 
         let conversation_id = messaging::ConversationId::from_peers(&user_account.id, &receiver).unwrap();
-
         let message_id = Messaging::generate_message_id(&user_account.id);
 
-        log::error!("send msg_id={}, conversation_id={}", bs58::encode(message_id.clone()).into_string(), conversation_id.to_base58());
         // pack message
         let common_message = proto::CommonMessage{
             message_id: message_id.clone(),
@@ -166,21 +172,16 @@ impl Chat {
             sent_at: timestamp,
             payload: Some(proto::common_message::Payload::ChatMessage(
                         proto::ChatMessage {
-                            content: chat_message.content,
+                            content: chat_message.content.clone(),
                         }
                     ))
-        };        
-        let send_message = proto::Messaging {
-            message: Some(proto::messaging::Message::CommonMessage(common_message.clone()))
         };
-        
-        
-        log::error!("sender={}, receiver={}", user_account.id.to_base58(), receiver.to_base58());
+
         // send message via messaging
-        match Messaging::pack_and_send_message(user_account, &receiver, &send_message.encode_to_vec(), Some(&message_id), true){
+        match Self::send(user_account, &receiver, &common_message){
             Ok(signature)=>{
                 // save 
-                Self::save_outgoing_message(&user_account.id, &receiver, &conversation_id, &message_id, &common_message.encode_to_vec(), &signature, 1);
+                Self::save_outgoing_message(&user_account.id, &receiver, &conversation_id, &message_id, &common_message.encode_to_vec(), 0);
                 Ok(signature)
             },
             Err(err)=>{
@@ -191,11 +192,11 @@ impl Chat {
 
 
     // save an outgoing message to the data base
-    fn save_outgoing_message(user_id: &PeerId, receiver_id: &PeerId, 
-        conversation_id: &messaging::ConversationId, message_id: &Vec<u8>, 
-        content: &Vec<u8>, signature: &Vec<u8>, status: u32) {
+    pub fn save_outgoing_message(user_id: &PeerId, receiver_id: &PeerId,
+        conversation_id: &messaging::ConversationId, message_id: &Vec<u8>,
+        content: &Vec<u8>, status: u32) {
         // // create timestamp
-        let timestamp = Timestamp::get_timestamp();        
+        let timestamp = Timestamp::get_timestamp();
 
         // // get data base of user account
         let db_ref = Self::get_user_db_ref(user_id.clone());
@@ -228,7 +229,7 @@ impl Chat {
         let message = rpc_proto::ChatMessage {
             index: overview.last_message_index,
             sender_id: user_id.to_bytes(),
-            message_id: signature.clone(),
+            message_id: message_id.clone(),
             status,
             is_group,
             conversation_id: conversation_id.to_bytes(),
@@ -325,7 +326,7 @@ impl Chat {
         let db_ref = Self::get_user_db_ref(user_id.clone());
         if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
             if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap(){
-                chat_msg.status = 2;
+                chat_msg.status = 1;
                 chat_msg.received_at = received_at;
 
                 // save message in data base
@@ -369,7 +370,7 @@ impl Chat {
                 // get user name from known users
                 let name;
                 if b_group{
-                    if let Some(group_name) = super::group::Group::get_group_name(user_id.clone(), &conversation_id){
+                    if let Some(group_name) = super::group::Group::get_group_name(user_id, &conversation_id){
                         name = group_name.clone();
                     }else{
                         return Err("Group not found".to_string());
@@ -636,7 +637,7 @@ impl Chat {
                         }
 
                         // send the message
-                        match Self::send( &user_account, message.clone() ) {
+                        match Self::send_to_peer( &user_account, message.clone() ) {
                             Ok(signature) => {
                                 // save the message to data base
                                 Self::save_outgoing_chat_message(user_account.id, message.conversation_id, message.content, signature);
