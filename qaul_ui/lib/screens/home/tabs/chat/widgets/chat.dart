@@ -13,6 +13,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mime/mime.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -209,8 +210,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             onMessageTap: (context, message) async {
               if (message is! types.FileMessage) return;
-              if (await canLaunchUrl(Uri.file(message.uri))) {
-                launchUrl(Uri.file(message.uri));
+
+              final file = Uri.file(message.uri);
+              final parentDirectory = File.fromUri(file).parent.uri;
+
+              for (final uri in [file, parentDirectory]) {
+                if (await canLaunchUrl(uri)) {
+                  launchUrl(uri);
+                  return;
+                }
               }
             },
             customMessageBuilder: (message, {required int messageWidth}) {
@@ -325,11 +333,26 @@ extension _MessageExtension on Message {
         metadata: (content as GroupInviteContent).toJson(),
       );
     } else if (content is FileShareContent) {
+      var filePath = (content as FileShareContent).filePath(read);
+
+      String? mimeStr = lookupMimeType(filePath);
+      if (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr)) {
+        return types.ImageMessage(
+          id: messageIdBase58,
+          author: author.toInternalUser(),
+          createdAt: receivedAt.millisecondsSinceEpoch,
+          status: mappedStatus,
+          uri: filePath,
+          size: (content as FileShareContent).size,
+          name: (content as FileShareContent).fileName,
+        );
+      }
+
       return types.FileMessage(
         id: messageIdBase58,
         name: (content as FileShareContent).fileName,
         size: (content as FileShareContent).size,
-        uri: (content as FileShareContent).filePath(read),
+        uri: filePath,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,
