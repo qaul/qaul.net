@@ -36,13 +36,16 @@ class EmailLoggingCoordinator {
   String get _supportEmail => 'debug@qaul.net';
 
   Future<void> initialize({Reader? reader}) async {
-    _storageManager.initialize();
-
-    await _initializeEnabledStatus(reader: reader);
-
     _reportLogMessages();
+
+    _storageManager.initialize();
     _reportErrorsCaughtByFlutterFramework();
     await _reportUncaughtErrorsOfTheIsolate();
+
+    if (reader != null) {
+      await reader(qaulWorkerProvider).initialized;
+      await _initializeEnabledStatus(reader: reader);
+    }
   }
 
   // ***************************************************************************
