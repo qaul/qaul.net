@@ -357,11 +357,12 @@ class FileShareContent extends MessageContent {
   @override
   List<Object?> get props => [fileId, fileName];
 
+  String get extension => fileName.split('.').last;
+
   String filePath(Reader read) {
     var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
     var uuid = read(defaultUserProvider)!.idBase58;
-    var ext = fileName.split('.').last;
 
-    return '$storagePath/$uuid/files/$fileId.$ext';
+    return '$storagePath/$uuid/files/$fileId.$extension';
   }
 }
