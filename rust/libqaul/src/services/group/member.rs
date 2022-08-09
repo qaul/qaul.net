@@ -12,7 +12,7 @@ pub struct Member{}
 impl Member{
     /// invite member from rpc command
     pub fn invite(my_user_id: &PeerId, group_id: &Vec<u8>, user_id: &Vec<u8>) ->Result<bool, String>{
-        let groups = Group::get_groups_of_user(my_user_id.clone());
+        let groups = Group::get_groups_of_user(my_user_id);
 
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
@@ -47,19 +47,9 @@ impl Member{
             )),
         };
 
-        let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
-
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver.clone(), &group.id, &message_buff);
-
-            //save invite chat message
-            Chat::save_outgoing_group_invite_message(my_user_id.clone(), receiver.clone(), group_id,
-                group.name.clone(), group.created_at, &my_user_id.to_bytes(), group.members.len() as u32);
-
+            Group::send_group_message_through_message(&user_account, &receiver, &proto_message.encode_to_vec());
         }else{
             return Err("user account problem".to_string());
         }
@@ -86,7 +76,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(conversation_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver.clone(), group_id, &message_buff);
+            Group::send_group_message_through_message(&user_account, &receiver, &message_buff);
 
             //save invite chat message
             Chat::save_outgoing_group_invite_reply_message(my_user_id.clone(), receiver.clone(), 
@@ -100,7 +90,7 @@ impl Member{
 
     /// remove member from rpc command
     pub fn remove(my_user_id: &PeerId, group_id: &Vec<u8>, user_id: &Vec<u8>) ->Result<bool, String>{
-        let groups = Group::get_groups_of_user(my_user_id.clone());
+        let groups = Group::get_groups_of_user(my_user_id);
         let group_idx = groups.group_id_to_index(group_id);
 
         if group_idx == 0{
@@ -122,7 +112,7 @@ impl Member{
             if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group){
                 log::error!("group db updating error {}", error.to_string());                
             }
-            Group::update_groups_of_user(my_user_id.clone(), groups);
+            Group::update_groups_of_user(my_user_id, groups);
 
         }else{
             return Err("this user is not member of this group".to_string());
@@ -144,7 +134,7 @@ impl Member{
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             let receiver = PeerId::from_bytes(user_id).unwrap();
-            Group::send_group_message_through_message(&user_account, receiver, group_id, &message_buff);
+            Group::send_group_message_through_message(&user_account, &receiver, &message_buff);
         }else{
             return Err("user account has problem".to_string());
         }
@@ -162,7 +152,7 @@ impl Member{
 
     /// process accept invite message from network
     fn on_accpeted_invite(sender_id: &PeerId, receiver_id: &PeerId, resp: &super::proto_net::ReplyInvite)->Result<bool, String>{
-        let groups = Group::get_groups_of_user(receiver_id.clone());
+        let groups = Group::get_groups_of_user(receiver_id);
 
         //add new member
         let new_member = super::GroupMember{
@@ -186,7 +176,7 @@ impl Member{
         if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group){
             log::error!("group db updating error {}", error.to_string());            
         }
-        Group::update_groups_of_user(receiver_id.clone(), groups);
+        Group::update_groups_of_user(receiver_id, groups);
         Ok(true)
     }
 

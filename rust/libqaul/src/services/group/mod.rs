@@ -26,7 +26,7 @@ use crate::storage::database::DataBase;
 use crate::utilities::timestamp;
 use super::chat::Chat;
 
-use super::messaging::proto;
+use super::messaging::{proto, self};
 use super::messaging::Messaging;
 
 mod member;
@@ -126,13 +126,8 @@ impl Group{
     }
 
     /// get group name
-    pub fn get_group_name(user_id: PeerId, group_id: &Vec<u8>) -> Option<String>{
-        let groups_of_user = GROUPSOFUSER.get().read().unwrap();
-        if !groups_of_user.groups_of_user.contains_key(&user_id.to_bytes()){
-            return None;
-        }
-
-        let groups = groups_of_user.groups_of_user.get(&user_id.to_bytes()).unwrap();
+    pub fn get_group_name(user_id: &PeerId, group_id: &Vec<u8>) -> Option<String>{
+        let groups = Self::get_groups_of_user(user_id);
         let idx = groups.group_id_to_index(group_id);
         if idx == 0{
             return None;
@@ -151,13 +146,13 @@ impl Group{
     }
 
     /// update user's groups
-    pub fn update_groups_of_user(user_id: PeerId, groups: Groups){
+    pub fn update_groups_of_user(user_id: &PeerId, groups: Groups){
         let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
         groups_of_user.groups_of_user.insert(user_id.to_bytes(), groups);
     }
 
     /// get user's groups
-    pub fn get_groups_of_user(user_id: PeerId) ->Groups{
+    pub fn get_groups_of_user(user_id: &PeerId) ->Groups{
         let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
         if !groups_of_user.groups_of_user.contains_key(&user_id.to_bytes()){
             let new_groups_of_user = Self::create_groups_of_user(user_id);
@@ -168,8 +163,8 @@ impl Group{
     }
 
     /// create new user's groups from DB
-    fn create_groups_of_user(user_id: PeerId) -> Groups{
-        let db = DataBase::get_user_db(user_id);
+    fn create_groups_of_user(user_id: &PeerId) -> Groups{
+        let db = DataBase::get_user_db(user_id.clone());
         let tree: Tree<Group> = db.open_bincode_tree("groups").unwrap();
 
         // // get last key
@@ -220,11 +215,12 @@ impl Group{
 
 
     /// Send capsuled group message through messaging service
-    pub fn send_group_message_through_message(user_account: &UserAccount, receiver:PeerId, group_id: &Vec<u8>, data: &Vec<u8>){
+    pub fn send_group_message_through_message(user_account: &UserAccount, receiver:&PeerId, data: &Vec<u8>){
         let message_id =  Messaging::generate_message_id(&user_account.id);
-        let send_message = proto::CommonMessage{
+        let conversation_id = messaging::ConversationId::from_peers(&user_account.id, &receiver).unwrap();
+        let common_message = proto::CommonMessage{
             message_id: message_id.clone(),
-            conversation_id: group_id.clone(),
+            conversation_id: conversation_id.to_bytes(),
             sent_at: timestamp::Timestamp::get_timestamp(),            
             payload: Some(proto::common_message::Payload::GroupMessage(
                 proto::GroupMessage {
@@ -233,21 +229,26 @@ impl Group{
             )),
         };
 
-        let mut message_buf00 = Vec::with_capacity(send_message.encoded_len());
-        send_message
-            .encode(&mut message_buf00)
-            .expect("Vec<u8> provides capacity as needed");
-        log::info!("message_buf len {}", message_buf00.len());
+        let send_message = proto::Messaging {
+            message: Some(proto::messaging::Message::CommonMessage(common_message.clone()))
+        };
 
         // send message via messaging
-        if let Err(e) = Messaging::pack_and_send_message(user_account, &receiver, &message_buf00, Some(&message_id), true) {
-            log::error!("group message sending failed {}", e.to_string());
+        match Messaging::pack_and_send_message(user_account, &receiver, &send_message.encode_to_vec(), Some(&message_id), true){
+            Ok(signature)=>{
+                // save                 
+                Chat::save_outgoing_message(&user_account.id, &receiver, &conversation_id, &message_id, &common_message.encode_to_vec(), 0);
+            },
+            Err(err)=>{
+                log::error!("group message sending failed {}", err);
+            }
         }
+
     }
 
     /// BroadCast group updated to all members
     fn post_group_update(my_user_id: &PeerId, group_id: &Vec<u8>){
-        let groups = Self::get_groups_of_user(my_user_id.clone());
+        let groups = Self::get_groups_of_user(my_user_id);
 
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0{
@@ -268,33 +269,46 @@ impl Group{
             });
         }
 
-        let proto_message = proto_net::GroupContainer {
-            message: Some(proto_net::group_container::Message::Notify(
-                proto_net::GroupNotify {
-                    group_id: group_id.clone(),
-                    group_name: group.name.clone(),
-                    created_at: group.created_at,
-                    creator_id: group.creator_id.clone(),
-                    members,
-                },
-            )),
+        let notify = proto_net::GroupNotify {
+            group_id: group_id.clone(),
+            group_name: group.name.clone(),
+            created_at: group.created_at,
+            creator_id: group.creator_id.clone(),
+            members,
+        };    
+
+        let send_message = proto::Messaging {
+            message: Some(proto::messaging::Message::GroupNotifyMessage(
+                proto::GroupNotifyMessage{
+                    content: notify.encode_to_vec(),
+                }
+            ))
         };
-
-        let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
-
+        
         //broad cast to all group members
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id){
             for user_id in group.members.keys(){
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
                 if receiver != *my_user_id{
-                    Self::send_group_message_through_message(&user_account, receiver, &group.id, &message_buff);
-                }                
+                    if let Err(error) = Messaging::pack_and_send_message(&user_account, &receiver, &send_message.encode_to_vec(), None, false){
+                        log::error!("send group notify error {}", error);
+                    }
+                }
             }
         }
 
+    }
+
+    /// Process group notify message from network
+    pub fn on_notify(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>){
+        match proto_net::GroupNotify::decode(&data[..]){
+            Ok(notify)=>{
+                manage::Manage::on_group_notify(&sender_id.to_bytes(), &receiver_id.to_bytes(), &notify);                
+            },
+            _=>{
+                log::error!("invalid group notify message");
+            }
+        }
     }
 
     /// Process incoming NET messages for group chat module
@@ -328,22 +342,12 @@ impl Group{
                         }else {
                             if reply_invite.accept{
                                 Self::post_group_update(&user.id, &reply_invite.group_id);
-                            }                            
-                        }
-                    },
-                    Some(proto_net::group_container::Message::Notify(notify)) => {
-                        log::info!("group::on_notify");
-                        Manage::on_group_notify(&sender_id.to_bytes(), &receiver_id.to_bytes(), &notify);
-                    },
-                    Some(proto_net::group_container::Message::GroupMessage(chat_message)) => {
-                        log::info!("group::on_received_chat_message");
-                        if let Err(error) = GroupMessage::on_message(&sender_id.to_bytes(), &receiver_id.to_bytes(), &chat_message){
-                            log::error!("GroupMessage::on_message {}", error.to_string());
+                            }
                         }
                     },
                     None => {
                         log::error!("file share message from {} was empty", sender_id.to_base58())
-                    },                    
+                    },
                 }
             },
             Err(e) => {

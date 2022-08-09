@@ -56,8 +56,10 @@ message Messaging {
         CryptoService crypto_service = 2;
         // rtc stream 
         RtcStreamMessage rtc_stream_message = 3;
+        // group notify
+        GroupNotifyMessage group_notify_message = 4;
         // common message
-        CommonMessage common_message = 4;
+        CommonMessage common_message = 5;
     }
 }
 
@@ -129,6 +131,11 @@ message RtcStreamMessage {
 
 // group message
 message GroupMessage {
+    bytes content = 1;
+}
+
+// group notify message
+message GroupNotifyMessage {
     bytes content = 1;
 }
 
