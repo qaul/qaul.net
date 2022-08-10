@@ -1,30 +1,71 @@
 #!/usr/bin/env bash
 
-# build libqaul on linux for android
-# you heed to have the ANDROID_NDK_HOME environment variable set.
+#-----------------------------------------------------------------NoticeStart-
+# Utilities
+#
+# Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+# This software is published under the AGPLv3 license.
+#-----------------------------------------------------------------NoticeEnd---
+#
+# build_libqaul_android
+#
+# Compiles the rust jniLibs in either 'release' or 'debug' mode.
+# WARNING: you heed to have the ANDROID_NDK_HOME environment variable set.
+# Note: please run this script from the rust/libqaul path
+#
+# == Usage ==
+# 1. To compile in debug mode:
+#   sh build_libqaul_android.sh
+#
+# 2. To compile in release mode:
+#   sh build_libqaul_android.sh release
 
-# set build variables
-## default android library location
-libName=liblibqaul.so
-buildType=debug
+# Initialize variables
+mode=${1:-debug}
+release="false"
+buildType="debug"
 buildTypeCargo=
-#buildType=release
-#buildTypeCargo=--release
+if [ "$mode" == "release" ]; then
+  release="true"
+  buildType="release"
+  buildTypeCargo=--release
+fi
 
-# Linker variables
-AARCH64_LINKER=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang
-ARMV7_LINKER=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang
-I686_LINKER=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android26-clang
-X86_64_LINKER=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang
+libName=liblibqaul.so
 
-# Set Path to all NDK binaries for some of the additional packages such as 'ring'
-export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+echo "Compiling libqaul in release mode: $release"
+echo ""
 
-# Build
+# 0. Check if the required environment variable exists
+if [ "$ANDROID_NDK_HOME" = "" ] || [ "$(find "$ANDROID_NDK_HOME" -type d)" == "" ]; then
+  echo "could not find required 'ANDROID_NDK_HOME' environment variable" >&2
+  exit 1
+fi
+
+# 1. Add required targets
+rustup target add \
+  aarch64-linux-android \
+  armv7-linux-androideabi \
+  i686-linux-android \
+  x86_64-linux-android
+
+# 2. Define linker variables
+PREBUILT_BINARIES="$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" -type d -maxdepth 1 -mindepth 1)/bin"
+echo "Using prebuilt binaries found in '$PREBUILT_BINARIES'"
+
+AARCH64_LINKER="$PREBUILT_BINARIES/aarch64-linux-android26-clang"
+ARMV7_LINKER="$PREBUILT_BINARIES/armv7a-linux-androideabi26-clang"
+I686_LINKER="$PREBUILT_BINARIES/i686-linux-android26-clang"
+X86_64_LINKER="$PREBUILT_BINARIES/x86_64-linux-android26-clang"
+
+# 3. Set Path to all NDK binaries for some of the additional packages such as 'ring'
+export PATH="$PREBUILT_BINARIES:$PATH"
+
+# 4. Build
 CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$AARCH64_LINKER cargo build --target=aarch64-linux-android ${buildTypeCargo}
 CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$ARMV7_LINKER cargo build --target=armv7-linux-androideabi ${buildTypeCargo}
 CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$I686_LINKER cargo build --target=i686-linux-android ${buildTypeCargo}
-CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$X86_64_LINKER cargo build --target=x86_64-linux-android ${buildTypeCargo}
+AR=llvm-ar CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$X86_64_LINKER cargo build --target=x86_64-linux-android ${buildTypeCargo}
 
 # Copy to flutter shared library location for android
 jniLibs=../../android/libqaul/src/main/jniLibs
