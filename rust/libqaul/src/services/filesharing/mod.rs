@@ -927,7 +927,7 @@ impl FileShare {
                     },
                     Some(proto_rpc::file_sharing::Message::FileHistory(history_req)) => {
                         let user_account = UserAccounts::get_by_id(my_user_id).unwrap();
-                        log::error!("lib->file->history");
+                        log::info!("lib->file->history");
                         let (total, list) = Self::file_history(&user_account, &history_req);
 
                         let mut histories: Vec<proto_rpc::FileHistoryEntry> = vec![];
