@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Group {
     /// message type
-    #[prost(oneof="group::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11")]
+    #[prost(oneof="group::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
     pub message: ::core::option::Option<group::Message>,
 }
 /// Nested message and enum types in `Group`.
@@ -40,9 +40,6 @@ pub mod group {
         ///group list response
         #[prost(message, tag="10")]
         GroupListResponse(super::GroupListResponse),
-        ///group send message
-        #[prost(message, tag="11")]
-        GroupSendRequest(super::GroupSendRequest),
     }
 }
 /// Create New Group 
@@ -157,21 +154,4 @@ pub struct GroupListResponse {
     /// group list
     #[prost(message, repeated, tag="1")]
     pub groups: ::prost::alloc::vec::Vec<GroupInfoResponse>,
-}
-/// Group send message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupSendRequest {
-    /// group id
-    #[prost(bytes="vec", tag="1")]
-    pub group_id: ::prost::alloc::vec::Vec<u8>,
-    /// message
-    #[prost(string, tag="2")]
-    pub message: ::prost::alloc::string::String,
-}
-/// Group send message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupConversationRequest {
-    /// group id
-    #[prost(bytes="vec", tag="1")]
-    pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
