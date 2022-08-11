@@ -109,6 +109,7 @@ impl MessagingProcess {
                 // save incomming message
                 chat::Chat::save_incoming_message(receiver_id, sender_id, 
                     &common.encode_to_vec(), common.sent_at, &conversation_id, &common.message_id, 2);
+                group::GroupMessage::on_message(sender_id, receiver_id, &conversation_id.to_bytes(), &common.message_id);
                 
                 // send confirm message
                 super::Messaging::send_confirmation(receiver_id, sender_id, signature);

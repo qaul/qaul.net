@@ -95,6 +95,8 @@ message GroupMember {
     uint64 joined_at = 3;
     //state 
     uint32 state = 4;
+    //last message index 
+    uint32 last_message_index = 5;
 }
 
 // Group info response
