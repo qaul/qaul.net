@@ -10,6 +10,68 @@ use super::Group;
 
 pub struct Manage{}
 impl Manage{
+
+    pub fn create_new_direct_chat_group(user_id: &PeerId, peer_id: &PeerId) -> Vec<u8>{
+
+        let conversation_id = super::messaging::ConversationId::from_peers(user_id, peer_id).unwrap();
+        let group_id = &conversation_id.to_bytes();
+
+        let groups = Group::get_groups_of_user(user_id);
+        let group_idx = groups.group_id_to_index(group_id);
+        if group_idx > 0{
+            return group_id.clone();
+        }
+
+        let mut members = BTreeMap::new();
+        members.insert(user_id.to_bytes(), 
+            super::GroupMember{
+            user_id: user_id.to_bytes(),
+            role: 255, //admin
+            joined_at: timestamp::Timestamp::get_timestamp(),
+            state: 1,
+            last_message_index: 0,
+            }
+        );
+        members.insert(peer_id.to_bytes(), 
+            super::GroupMember{
+            user_id: peer_id.to_bytes(),
+            role: 255, //admin
+            joined_at: timestamp::Timestamp::get_timestamp(),
+            state: 1,
+            last_message_index: 0,
+            }
+        );
+
+        let new_group = super::Group{
+            id: group_id.clone(),
+            name: "".to_string(),
+            is_direct_chat: true,
+            created_at: timestamp::Timestamp::get_timestamp(),
+            creator_id: user_id.to_bytes(),
+            members, 
+        };
+        let mut groups = Group::get_groups_of_user(user_id);
+
+
+        let key = groups.last_group + 1;
+        //db save
+        if let Err(error) = groups.db_ref.insert(&key.to_be_bytes(), new_group){
+            log::error!("group db updating error {}", error.to_string());            
+        }
+        if let Err(error) = groups.db_ref.flush(){
+            log::error!("group db flush error {}", error.to_string());
+        }
+
+        //add new id
+        groups.last_group = key;
+        groups.group_ids.insert(group_id.clone(), key);
+        Group::update_groups_of_user(user_id, groups);
+
+        return group_id.clone();
+    }
+
+
+    
     /// create new group from rpc command
     pub fn create_new_group(user_id: &PeerId, name: String) -> Vec<u8>{
         let id = uuid::Uuid::new_v4().as_bytes().to_vec();
@@ -28,6 +90,7 @@ impl Manage{
         let new_group = super::Group{
             id: id.clone(),
             name,
+            is_direct_chat: false,
             created_at: timestamp::Timestamp::get_timestamp(),
             creator_id: user_id.to_bytes(),
             members, 
@@ -96,6 +159,7 @@ impl Manage{
                 role: m.role as u32,
                 joined_at: m.joined_at,
                 state: m.state as u32,
+                last_message_index: m.last_message_index,
             };
             members.push(member);
         }
@@ -127,6 +191,7 @@ impl Manage{
                             role: m.role as u32,
                             joined_at: m.joined_at,
                             state: m.state as u32,
+                            last_message_index: m.last_message_index,
                         };
                         members.push(member);
                     }
@@ -172,6 +237,7 @@ impl Manage{
         let group = super::Group{
             id: notify.group_id.clone(),
             name: notify.group_name.clone(),
+            is_direct_chat: false,
             created_at: notify.created_at,
             creator_id: notify.creator_id.clone(),
             members,
