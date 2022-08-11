@@ -124,10 +124,10 @@ impl Chat {
             sender_id: sender_id.to_bytes(),
             message_id: message_id.clone(),
             status,
-            is_group,
             conversation_id: conversation_id.to_bytes(),
             sent_at,
             received_at: timestamp,
+            content_type: 0,
             content: content.clone(),
         };
 
@@ -331,10 +331,10 @@ impl Chat {
             sender_id: user_id.to_bytes(),
             message_id: message_id.clone(),
             status,
-            is_group,
             conversation_id: conversation_id.to_bytes(),
             sent_at: timestamp,
             received_at: timestamp,
+            content_type: 0,
             content: content.clone(),
         };
 
