@@ -14,7 +14,6 @@ use std::sync::RwLock;
 
 use super::messaging;
 use super::messaging::proto;
-use super::messaging::ConversationId;
 use super::messaging::Messaging;
 use crate::connections::{internet::Internet, lan::Lan};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -67,6 +66,7 @@ impl Chat {
     pub fn save_incoming_message(
         user_id: &PeerId,
         sender_id: &PeerId,
+        content_type: i32,
         content: &Vec<u8>,
         sent_at: u64,
         conversation_id: &messaging::ConversationId,
@@ -103,6 +103,7 @@ impl Chat {
             &db_ref,
             &conversation_id.to_bytes(),
             timestamp,
+            content_type,
             content,
             &sender_id.to_bytes(),
             is_group,
@@ -255,7 +256,8 @@ impl Chat {
             my_user_id,
             &conversation_id,
             &message_id,
-            &common_message.encode_to_vec(),
+            rpc_proto::ContentType::Chat.try_into().unwrap(),
+            &message.encode_to_vec(),
             0,
         );
 
@@ -284,6 +286,7 @@ impl Chat {
         receiver_id: &PeerId,
         conversation_id: &messaging::ConversationId,
         message_id: &Vec<u8>,
+        content_type: i32,
         content: &Vec<u8>,
         status: u32,
     ) {
@@ -310,6 +313,7 @@ impl Chat {
             &db_ref,
             &conversation_id.to_bytes(),
             timestamp,
+            content_type,
             content,
             &user_id.to_bytes(),
             is_group,
@@ -472,6 +476,7 @@ impl Chat {
         db_ref: &ChatUser,
         conversation_id: &Vec<u8>,
         timestamp: u64,
+        content_type: i32,
         content: &Vec<u8>,
         last_message_sender_id: &Vec<u8>,
         b_group: bool,
@@ -489,6 +494,7 @@ impl Chat {
                 overview.last_message_at = timestamp;
                 overview.unread = overview.unread + 1;
                 overview.content = content.clone();
+                overview.content_type = content_type;
                 overview.last_message_sender_id = last_message_sender_id.clone();
             }
             // conversation does not exist yet            unconfirmed: chat_user.unconfirmed.clone(),
@@ -519,6 +525,7 @@ impl Chat {
                     name,
                     last_message_at: timestamp,
                     unread: 1,
+                    content_type,
                     content: content.clone(),
                     last_message_sender_id: last_message_sender_id.clone(),
                 };
