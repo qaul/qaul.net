@@ -79,14 +79,14 @@ message ChatMessage {
     // 1 = sent
     // 2 = received
     uint32 status = 4;
-    // group 
-    bool is_group = 5;
-    // conversation id(group_id)
-    bytes conversation_id = 6;
+    // conversation id
+    bytes conversation_id = 5;
     // time when the message was sent
-    uint64 sent_at = 7;
+    uint64 sent_at = 6;
     // time when the message was received
-    uint64 received_at = 8;
+    uint64 received_at = 7;
+    // content type
+    uint32 content_type = 8;
     // content of the message    
     bytes content = 9;
 }

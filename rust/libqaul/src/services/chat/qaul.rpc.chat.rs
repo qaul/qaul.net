@@ -103,18 +103,18 @@ pub struct ChatMessage {
     /// 2 = received
     #[prost(uint32, tag="4")]
     pub status: u32,
-    /// group 
-    #[prost(bool, tag="5")]
-    pub is_group: bool,
-    /// conversation id(group_id)
-    #[prost(bytes="vec", tag="6")]
+    /// conversation id
+    #[prost(bytes="vec", tag="5")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
     /// time when the message was sent
-    #[prost(uint64, tag="7")]
+    #[prost(uint64, tag="6")]
     pub sent_at: u64,
     /// time when the message was received
-    #[prost(uint64, tag="8")]
+    #[prost(uint64, tag="7")]
     pub received_at: u64,
+    /// content type
+    #[prost(uint32, tag="8")]
+    pub content_type: u32,
     /// content of the message    
     #[prost(bytes="vec", tag="9")]
     pub content: ::prost::alloc::vec::Vec<u8>,
