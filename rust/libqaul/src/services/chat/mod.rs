@@ -746,36 +746,6 @@ impl Chat {
                         );
                         // send messageproto::Container, "".to_string(), Vec::new() );
                     }
-                    Some(rpc_proto::chat::Message::ChatGroupRequest(conversation_request)) => {
-                        // get messages of a conversation from data base
-                        let conversation_list =
-                            Self::get_messages(my_user_id, conversation_request.group_id);
-
-                        let chat_group_list = rpc_proto::ChatGroupList {
-                            group_id: conversation_list.conversation_id.clone(),
-                            message_list: conversation_list.message_list,
-                        };
-
-                        // pack message
-                        let proto_message = rpc_proto::Chat {
-                            message: Some(rpc_proto::chat::Message::ChatGroupList(chat_group_list)),
-                        };
-
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
-                        // send message
-                        Rpc::send_message(
-                            buf,
-                            crate::rpc::proto::Modules::Chat.into(),
-                            "".to_string(),
-                            Vec::new(),
-                        );
-                    }
-
                     Some(rpc_proto::chat::Message::Send(message)) => {
                         // print message
                         log::info!("sending chat message: {}", message.content.clone());
