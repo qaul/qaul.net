@@ -31,24 +31,32 @@ impl Chat {
 
                 if let Some(conversation_id_str) = iter.next() {
                     // convert conversation id from string to binary version
+                    let mut conversation_id=vec![];
                     match Self::id_string_to_bin(conversation_id_str.to_string()) {
-                        Ok(conversation_id) => {
-                            // get message string
-                            if let Some(message) = command_string.strip_prefix(conversation_id_str) {
-                                // send message
-                                Self::send_chat_message(conversation_id, message.to_string().trim().to_string());
-                                println!("chat message sent [{}] {}", conversation_id_str, message);
-                                return;
-                            }
-                            else {
-                                log::error!("prefix '{}' not found", conversation_id_str);
-                                return;
-                            }
+                        Ok(v) => {
+                            conversation_id = v.clone();                        
                         },
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
+                        _ =>{
+                            match Self::uuid_string_to_bin(conversation_id_str.to_string()){
+                                Ok(v)=>{
+                                    conversation_id = v.clone();
+                                },
+                                _=>{
+                                    log::error!("invalid conversation id format");
+                                }
+                            }
                         }
+                    }
+                    // get message string
+                    if let Some(message) = command_string.strip_prefix(conversation_id_str) {
+                        // send message
+                        Self::send_chat_message(conversation_id, message.to_string().trim().to_string());
+                        println!("chat message sent [{}] {}", conversation_id_str, message);
+                        return;
+                    }
+                    else {
+                        log::error!("prefix '{}' not found", conversation_id_str);
+                        return;
                     }
                 }
                 else {
