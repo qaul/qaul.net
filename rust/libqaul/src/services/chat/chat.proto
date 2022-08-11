@@ -46,10 +46,12 @@ message ChatOverview {
     uint64 last_message_at = 4;
     // unread messages
     int32 unread = 5;
+    // content type
+    ContentType content_type = 6;
     // preview text of the last message
-    bytes content = 6;
+    bytes content = 7;
     // sender of the last message
-    bytes last_message_sender_id = 7;
+    bytes last_message_sender_id = 8;
 }
 
 // request messages of a specific chat conversation
@@ -63,6 +65,21 @@ message ChatConversationRequest {
 message ChatConversationList {
     bytes conversation_id = 1;
     repeated ChatMessage message_list = 2;
+}
+
+// Content Type
+//
+// These power settings relate to the android
+// power modes.
+enum ContentType {
+    // chat
+    chat = 0;
+    // group
+    group = 1;
+    // file
+    file = 2;
+    // rtc
+    rtc = 4;
 }
 
 
@@ -86,7 +103,7 @@ message ChatMessage {
     // time when the message was received
     uint64 received_at = 7;
     // content type
-    uint32 content_type = 8;
+    ContentType content_type = 8;
     // content of the message    
     bytes content = 9;
 }

@@ -60,11 +60,14 @@ pub struct ChatOverview {
     /// unread messages
     #[prost(int32, tag="5")]
     pub unread: i32,
+    /// content type
+    #[prost(enumeration="ContentType", tag="6")]
+    pub content_type: i32,
     /// preview text of the last message
-    #[prost(bytes="vec", tag="6")]
+    #[prost(bytes="vec", tag="7")]
     pub content: ::prost::alloc::vec::Vec<u8>,
     /// sender of the last message
-    #[prost(bytes="vec", tag="7")]
+    #[prost(bytes="vec", tag="8")]
     pub last_message_sender_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// request messages of a specific chat conversation
@@ -113,8 +116,8 @@ pub struct ChatMessage {
     #[prost(uint64, tag="7")]
     pub received_at: u64,
     /// content type
-    #[prost(uint32, tag="8")]
-    pub content_type: u32,
+    #[prost(enumeration="ContentType", tag="8")]
+    pub content_type: i32,
     /// content of the message    
     #[prost(bytes="vec", tag="9")]
     pub content: ::prost::alloc::vec::Vec<u8>,
@@ -128,4 +131,20 @@ pub struct ChatMessageSend {
     /// content of the message
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,
+}
+/// Content Type
+///
+/// These power settings relate to the android
+/// power modes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ContentType {
+    /// chat
+    Chat = 0,
+    /// group
+    Group = 1,
+    /// file
+    File = 2,
+    /// rtc
+    Rtc = 4,
 }

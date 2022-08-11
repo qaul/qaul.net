@@ -25,8 +25,6 @@ message Group {
         GroupListRequest group_list_request = 9;
         //group list response
         GroupListResponse group_list_response = 10;
-        //group send message
-        GroupSendRequest group_send_request = 11;
     }
 }
 
@@ -121,17 +119,3 @@ message GroupListResponse {
     repeated GroupInfoResponse groups = 1;
 }
 
-
-// Group send message
-message GroupSendRequest {
-    // group id
-    bytes group_id = 1;
-    // message
-    string message = 2;
-}
-
-// Group send message
-message GroupConversationRequest {
-    // group id
-    bytes group_id = 1;
-}
