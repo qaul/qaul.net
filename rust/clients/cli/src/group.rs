@@ -256,7 +256,7 @@ impl Group {
     }    
 
    /// Convert Conversation ID from String to Binary
-   fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {            
+   fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id)=>{
                 Ok(id.as_bytes().to_vec())
@@ -265,7 +265,7 @@ impl Group {
                 Err("invalid group id".to_string())
             }
         }
-    }     
+    }
 
     /// create group
     fn create_group(group_name: String) {
@@ -457,6 +457,9 @@ impl Group {
                             println!("id: {}", group_id.to_string());    
                             println!("\tname: {}", group.group_name.clone());
                             println!("\tcreated_at: {}, members: {}", group.created_at, group.members.len());
+                            for member in group.members{
+                                println!("\t\t id: {}, sent: {}", bs58::encode(member.user_id.clone()).into_string(), member.last_message_index);
+                            }
                         }
                     },                    
                     _ => {
