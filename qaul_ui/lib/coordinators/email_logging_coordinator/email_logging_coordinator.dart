@@ -207,7 +207,7 @@ ${stack ?? 'Not available'}
       body: await _buildDesktopEmail(libqaulAttachments: libqaulAttachments),
       subject: 'Customer Feedback - Error/Exception Logs',
     );
-    await launch('$mailtoLink');
+    await launchUrl(Uri.parse('$mailtoLink'));
   }
 
   Future<String> _buildDesktopEmail(
