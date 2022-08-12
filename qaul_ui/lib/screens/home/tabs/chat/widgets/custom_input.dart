@@ -19,13 +19,16 @@ class _CustomInput extends StatefulWidget {
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
     this.onAttachmentPressed,
+    this.initialText,
   }) : super(key: key);
 
   final void Function(types.PartialText) onSendPressed;
 
-  final VoidCallback? onAttachmentPressed;
+  final Function({types.PartialText? text})? onAttachmentPressed;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
+
+  final String? initialText;
 
   @override
   _CustomInputState createState() => _CustomInputState();
@@ -35,11 +38,13 @@ class _CustomInput extends StatefulWidget {
 class _CustomInputState extends State<_CustomInput> {
   final _inputFocusNode = FocusNode();
   bool _sendButtonVisible = false;
-  final _textController = TextEditingController();
+  late final TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
+
+    _textController = TextEditingController(text: widget.initialText);
 
     if (widget.sendButtonVisibilityMode == SendButtonVisibilityMode.editing) {
       _sendButtonVisible = _textController.text.trim() != '';
@@ -63,6 +68,20 @@ class _CustomInputState extends State<_CustomInput> {
       widget.onSendPressed(_partialText);
       _textController.clear();
     }
+  }
+
+  void _handleAttachmentPressed() {
+    if (widget.onAttachmentPressed == null) return;
+
+    final trimmedText = _textController.text.trim();
+    if (trimmedText == '') {
+      widget.onAttachmentPressed!();
+      return;
+    }
+
+    final _partialText = types.PartialText(text: trimmedText);
+    widget.onAttachmentPressed!(text: _partialText);
+    _textController.clear();
   }
 
   void _handleTextControllerChange() {
@@ -132,7 +151,7 @@ class _CustomInputState extends State<_CustomInput> {
                     ),
                     const SizedBox(width: 16.0),
                     if (widget.onAttachmentPressed != null)
-                      _AttachmentButton(onPressed: widget.onAttachmentPressed),
+                      _AttachmentButton(onPressed: _handleAttachmentPressed),
                     Visibility(
                       visible: _sendButtonVisible,
                       child: _CustomSendButton(onPressed: _handleSendPressed),
