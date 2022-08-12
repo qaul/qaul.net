@@ -36,7 +36,7 @@ pub struct RouterInfoMessage {
     /// Users information table
     #[prost(message, optional, tag="3")]
     pub users: ::core::option::Option<UserInfoTable>,
-    ///Latest Feed ids table
+    /// Latest Feed ids table
     #[prost(message, optional, tag="4")]
     pub feeds: ::core::option::Option<FeedIdsTable>,
     /// timestamp
@@ -52,22 +52,23 @@ pub struct RoutingInfoTable {
 /// Routing structures to send over the network
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RoutingInfoEntry {
-    //// user id
+    /// user id
     #[prost(bytes="vec", tag="1")]
     pub user: ::prost::alloc::vec::Vec<u8>,
-    //// round trip time
+    /// round trip time
     #[prost(uint32, tag="2")]
     pub rtt: u32,
-    //// hop count
+    /// hop count
     #[prost(bytes="vec", tag="3")]
     pub hc: ::prost::alloc::vec::Vec<u8>,
-    //// propagation id
+    /// propagation id
     #[prost(uint32, tag="5")]
     pub pgid: u32,
 }
 /// User information table
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserInfoTable {
+    /// user info
     #[prost(message, repeated, tag="1")]
     pub info: ::prost::alloc::vec::Vec<UserInfo>,
 }
@@ -84,43 +85,48 @@ pub struct UserInfo {
     #[prost(string, tag="3")]
     pub name: ::prost::alloc::string::String,
 }
-///Feed ids table
+/// List of feed ID's
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedIdsTable {
+    /// feed id
     #[prost(bytes="vec", repeated, tag="1")]
     pub ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
-/// Router information message
+/// Feed request message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FeedRequstMessage {
-    ///Feed ids table
+pub struct FeedRequestMessage {
+    /// Feed ids table
     #[prost(message, optional, tag="1")]
     pub feeds: ::core::option::Option<FeedIdsTable>,
 }
+/// Feed response message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedResponseMessage {
-    ///Feed ids table
+    /// Feed table
     #[prost(message, optional, tag="1")]
     pub feeds: ::core::option::Option<FeedResponseTable>,
 }
-///Feed ids table
+/// Feed response table
+/// containing the feed messages for response
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedResponseTable {
+    /// feed messages
     #[prost(message, repeated, tag="1")]
     pub messages: ::prost::alloc::vec::Vec<FeedMessage>,
 }
+/// Feed Message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedMessage {
-    //// message id 
+    /// message id
     #[prost(bytes="vec", tag="1")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
-    //// sender id 
+    /// sender id
     #[prost(bytes="vec", tag="2")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
-    //// message content
+    /// message content
     #[prost(string, tag="3")]
     pub content: ::prost::alloc::string::String,
-    //// timestamp in milli seconds
+    /// timestamp in milli seconds
     #[prost(uint64, tag="4")]
     pub time: u64,
 }
@@ -128,7 +134,10 @@ pub struct FeedMessage {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum RouterInfoModule {
+    /// Message is a common RouterInfoMessage
     RouterInfo = 0,
+    /// Message is a FeedRequestMessage
     FeedRequest = 1,
+    /// Message is a FeedResponseMessage
     FeedResponse = 2,
 }

@@ -1,13 +1,6 @@
 syntax = "proto3";
 package qaul.net.router_net_info;
 
-// RouterInfoModule
-enum RouterInfoModule {
-    ROUTER_INFO = 0;
-    FEED_REQUEST = 1;
-    FEED_RESPONSE = 2;
-}
-
 // Router information Container
 message RouterInfoContainer {
     // signature
@@ -28,6 +21,15 @@ message RouterInfoContent {
     uint64 time = 4;
 }
 
+// RouterInfoModule
+enum RouterInfoModule {
+    // Message is a common RouterInfoMessage
+    ROUTER_INFO = 0;
+    // Message is a FeedRequestMessage
+    FEED_REQUEST = 1;
+    // Message is a FeedResponseMessage
+    FEED_RESPONSE = 2;
+}
 
 // Router information message
 message RouterInfoMessage {
@@ -37,7 +39,7 @@ message RouterInfoMessage {
     RoutingInfoTable routes = 2;
     // Users information table
     UserInfoTable users = 3;
-    //Latest Feed ids table
+    // Latest Feed ids table
     FeedIdsTable feeds = 4;
     // timestamp
     uint64 timestamp = 5;
@@ -50,18 +52,19 @@ message RoutingInfoTable {
 
 // Routing structures to send over the network
 message RoutingInfoEntry {
-    /// user id
+    // user id
     bytes user = 1;
-    /// round trip time
+    // round trip time
     uint32 rtt = 2;
-    /// hop count
+    // hop count
     bytes hc = 3;
-    /// propagation id
+    // propagation id
     uint32 pgid = 5;
 }
 
 // User information table
 message UserInfoTable {
+    // user info
     repeated UserInfo info = 1;
 }
 
@@ -75,34 +78,39 @@ message UserInfo {
     string name = 3;
 }
 
-//Feed ids table
+// List of feed ID's
 message FeedIdsTable {
+    // feed id
     repeated bytes ids = 1;
 }
 
-// Router information message
-message FeedRequstMessage {
-    //Feed ids table
+// Feed request message
+message FeedRequestMessage {
+    // Feed ids table
     FeedIdsTable feeds = 1;
 }
 
+// Feed response message
 message FeedResponseMessage {
-    //Feed ids table
+    // Feed table
     FeedResponseTable feeds = 1;
 }
 
-//Feed ids table
+// Feed response table
+// containing the feed messages for response
 message FeedResponseTable {
+    // feed messages
     repeated FeedMessage messages = 1;
 }
 
+// Feed Message
 message FeedMessage {
-    /// message id 
+    // message id
     bytes message_id = 1;
-    /// sender id 
+    // sender id
     bytes sender_id = 2;
-    /// message content
+    // message content
     string content = 3;
-    /// timestamp in milli seconds
+    // timestamp in milli seconds
     uint64 time = 4;
 }

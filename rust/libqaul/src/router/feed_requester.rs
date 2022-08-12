@@ -1,28 +1,34 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! The flooder floods messages via floodsub/Gossipsub to the network.
-//! It contains a ring buffer of messages to process.
-//! 
-//! It sends the messages of the feed service.
-//! 
-//! Most messages are repostings from incoming floods on some interface,
-//! that need to be flooded via the other interfaces.
+//! Feed Requester
+//!
+//! As feed messages flooded in the entire network.
+//! In case a user joins the network newly or a feed message
+//! was missed, the latest feed id's are synchronized via the
+//! qaul router info service.
+//!
+//! With each routing information the last feed messages are
+//! advertised and can be requested from the sending node.
 
-
-use state::Storage;
-use std::sync::RwLock;
-use std::collections::VecDeque;
 use libp2p::PeerId;
+use state::Storage;
+use std::collections::VecDeque;
+use std::sync::RwLock;
 
-// mutable state of feed messages
+/// mutable state of feed requester
 pub static FEEDREQUESTER: Storage<RwLock<FeedRequester>> = Storage::new();
 
+/// mutable state of the feed responser
+pub static FEEDRESPONSER: Storage<RwLock<FeedResponser>> = Storage::new();
+
+/// Feed Request Structure
 pub struct FeedRequest {
     pub neighbour_id: PeerId,
     pub feed_ids: Vec<Vec<u8>>,
 }
 
+/// Feed Requester Module
 pub struct FeedRequester {
     pub to_send: VecDeque<FeedRequest>,
 }
@@ -30,7 +36,9 @@ pub struct FeedRequester {
 impl FeedRequester {
     /// Initialize the flooder and create the ring buffer.
     pub fn init() {
-        let feed_requester = FeedRequester { to_send: VecDeque::new() };
+        let feed_requester = FeedRequester {
+            to_send: VecDeque::new(),
+        };
         FEEDREQUESTER.set(RwLock::new(feed_requester));
     }
 
@@ -47,13 +55,13 @@ impl FeedRequester {
     }
 }
 
-
-pub static FEEDRESPONSER: Storage<RwLock<FeedResponser>> = Storage::new();
+/// Feed Response Structure
 pub struct FeedResponse {
     pub neighbour_id: PeerId,
     pub feeds: Vec<(Vec<u8>, Vec<u8>, String, u64)>,
 }
 
+/// Feed Responder
 pub struct FeedResponser {
     pub to_send: VecDeque<FeedResponse>,
 }
@@ -61,7 +69,9 @@ pub struct FeedResponser {
 impl FeedResponser {
     /// Initialize the flooder and create the ring buffer.
     pub fn init() {
-        let feed_responser = FeedResponser { to_send: VecDeque::new() };
+        let feed_responser = FeedResponser {
+            to_send: VecDeque::new(),
+        };
         FEEDRESPONSER.set(RwLock::new(feed_responser));
     }
 
@@ -71,8 +81,13 @@ impl FeedResponser {
             neighbour_id: neighbour_id.clone(),
             feeds: vec![],
         };
-        for (message_id, sender_id, content, time) in feeds{
-            msg.feeds.push((message_id.clone(), sender_id.clone(), content.clone(), *time));
+        for (message_id, sender_id, content, time) in feeds {
+            msg.feeds.push((
+                message_id.clone(),
+                sender_id.clone(),
+                content.clone(),
+                *time,
+            ));
         }
 
         // add it to sending queue
