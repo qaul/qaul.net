@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
-    show Chat, DefaultChatTheme, SendButtonVisibilityMode;
+    show Chat, DefaultChatTheme, SendButtonVisibilityMode, ChatTheme;
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,6 +25,8 @@ import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../widgets/widgets.dart';
 
 part 'custom_input.dart';
+
+part 'file_message_widget.dart';
 
 part 'file_sharing.dart';
 
@@ -222,6 +225,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 }
               }
             },
+            fileMessageBuilder: (message, {required int messageWidth}) {
+              return SizedBox(
+                width: messageWidth.toDouble(),
+                child: FileMessageWidget(
+                  message: message,
+                  isDefaultUser: message.author.id == user.idBase58,
+                ),
+              );
+            },
             customMessageBuilder: (message, {required int messageWidth}) {
               final invite = GroupInviteContent.fromJson(message.metadata!);
               if (widget.user.id.equals(invite.adminId)) {
@@ -357,6 +369,9 @@ extension _MessageExtension on Message {
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,
+        metadata: {
+          'description': (content as FileShareContent).description,
+        },
       );
     }
 
