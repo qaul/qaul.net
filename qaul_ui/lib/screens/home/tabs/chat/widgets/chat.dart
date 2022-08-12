@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
-    show Chat, DefaultChatTheme, SendButtonVisibilityMode, ChatTheme;
+    show Chat, DefaultChatTheme, SendButtonVisibilityMode;
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
