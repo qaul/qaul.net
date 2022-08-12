@@ -10,7 +10,7 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
 use state::Storage;
-use std::{collections::HashMap, sync::RwLock, time::SystemTime};
+use std::{collections::HashMap, sync::RwLock};
 
 use super::info::RouterInfo;
 use super::proto;
@@ -54,7 +54,7 @@ pub struct Neighbour {
     /// round trip time in micro seconds
     rtt: u32,
     /// when was this node last seen
-    updated_at: SystemTime,
+    updated_at: u64,
 }
 
 impl Neighbours {
@@ -104,14 +104,14 @@ impl Neighbours {
         let node_option = neighbours.nodes.get_mut(&node_id);
         if let Some(node) = node_option {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
-            node.updated_at = SystemTime::now();
+            node.updated_at = Timestamp::get_timestamp();
         } else {
             log::info!("add node {:?} to neighbours table", node_id);
             neighbours.nodes.insert(
                 node_id,
                 Neighbour {
                     rtt,
-                    updated_at: SystemTime::now(),
+                    updated_at: Timestamp::get_timestamp(),
                 },
             );
 
