@@ -6,9 +6,11 @@ class _SendFileDialog extends HookConsumerWidget {
     Key? key,
     required this.room,
     required this.onSendPressed,
+    this.partialMessage,
   }) : super(key: key);
   final File file;
   final ChatRoom room;
+  final String? partialMessage;
   final Function(types.PartialText) onSendPressed;
 
   @override
@@ -38,6 +40,7 @@ class _SendFileDialog extends HookConsumerWidget {
         ),
         const SizedBox(height: 8),
         _CustomInput(
+          initialText: partialMessage,
           onSendPressed: (desc) {
             final worker = ref.read(qaulWorkerProvider);
             worker.sendFile(

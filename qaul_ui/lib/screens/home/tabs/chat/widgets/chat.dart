@@ -182,7 +182,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
-              onAttachmentPressed: () async {
+              onAttachmentPressed: ({types.PartialText? text}) async {
                 final result = await FilePicker.platform.pickFiles();
 
                 if (result != null && result.files.single.path != null) {
@@ -194,6 +194,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       return _SendFileDialog(
                         file,
                         room: room,
+                        partialMessage: text?.text,
                         onSendPressed: (description) {
                           final worker = ref.read(qaulWorkerProvider);
                           worker.sendFile(
