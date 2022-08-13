@@ -37,7 +37,7 @@ echo "Compiling libqaul in release mode: $release"
 echo ""
 
 # 0. Check if the required environment variable exists
-if [ "$ANDROID_NDK_HOME" = "" ] || [ "$(find "$ANDROID_NDK_HOME" -type d)" == "" ]; then
+if [ "$ANDROID_NDK_HOME" = "" ] || [ "$(find "$ANDROID_NDK_HOME" -type d)" == "" ] && [ "$(find "$ANDROID_NDK_HOME" -type l)" == "" ]; then
   echo "could not find required 'ANDROID_NDK_HOME' environment variable" >&2
   exit 1
 fi
@@ -50,7 +50,7 @@ rustup target add \
   x86_64-linux-android
 
 # 2. Define linker variables
-PREBUILT_BINARIES="$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" -type d -maxdepth 1 -mindepth 1)/bin"
+PREBUILT_BINARIES="$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" -maxdepth 1 -mindepth 1 -type d )/bin"
 echo "Using prebuilt binaries found in '$PREBUILT_BINARIES'"
 
 AARCH64_LINKER="$PREBUILT_BINARIES/aarch64-linux-android26-clang"
