@@ -19,12 +19,15 @@ class _CustomInput extends StatefulWidget {
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
     this.onAttachmentPressed,
+    this.onPickImagePressed,
     this.initialText,
   }) : super(key: key);
 
   final void Function(types.PartialText) onSendPressed;
 
   final Function({types.PartialText? text})? onAttachmentPressed;
+
+  final Function({types.PartialText? text})? onPickImagePressed;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
 
@@ -70,17 +73,17 @@ class _CustomInputState extends State<_CustomInput> {
     }
   }
 
-  void _handleAttachmentPressed() {
-    if (widget.onAttachmentPressed == null) return;
+  void _sendFilePressed(Function({types.PartialText? text})? callback) {
+    if (callback == null) return;
 
     final trimmedText = _textController.text.trim();
     if (trimmedText == '') {
-      widget.onAttachmentPressed!();
+      callback();
       return;
     }
 
     final _partialText = types.PartialText(text: trimmedText);
-    widget.onAttachmentPressed!(text: _partialText);
+    callback(text: _partialText);
     _textController.clear();
   }
 
@@ -151,7 +154,16 @@ class _CustomInputState extends State<_CustomInput> {
                     ),
                     const SizedBox(width: 16.0),
                     if (widget.onAttachmentPressed != null)
-                      _AttachmentButton(onPressed: _handleAttachmentPressed),
+                      _AttachmentButton(
+                        onPressed: () =>
+                            _sendFilePressed(widget.onAttachmentPressed),
+                      ),
+                    if (widget.onPickImagePressed != null)
+                      _AttachmentButton(
+                        icon: Icons.add_photo_alternate,
+                        onPressed: () =>
+                            _sendFilePressed(widget.onPickImagePressed),
+                      ),
                     Visibility(
                       visible: _sendButtonVisible,
                       child: _CustomSendButton(onPressed: _handleSendPressed),
@@ -190,9 +202,15 @@ class _CustomSendButton extends StatelessWidget {
 }
 
 class _AttachmentButton extends StatelessWidget {
-  const _AttachmentButton({Key? key, this.onPressed}) : super(key: key);
+  const _AttachmentButton({
+    Key? key,
+    this.onPressed,
+    this.icon = Icons.attach_file,
+  }) : super(key: key);
 
   final void Function()? onPressed;
+
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +219,7 @@ class _AttachmentButton extends StatelessWidget {
       height: 24,
       margin: const EdgeInsets.only(right: 16),
       child: IconButton(
-        icon: const Icon(Icons.attach_file),
+        icon: Icon(icon),
         splashRadius: 24,
         onPressed: onPressed,
         padding: EdgeInsets.zero,

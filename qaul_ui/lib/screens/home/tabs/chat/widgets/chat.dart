@@ -15,6 +15,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -217,6 +218,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   );
                 }
               },
+              onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
+                  ? null
+                  : ({types.PartialText? text}) async {
+                      final result = await ImagePicker()
+                          .pickImage(source: ImageSource.camera);
+
+                      if (result != null) {
+                        File file = File(result.path);
+
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) {
+                            return _SendFileDialog(
+                              file,
+                              room: room,
+                              partialMessage: text?.text,
+                              onSendPressed: (description) {
+                                final worker = ref.read(qaulWorkerProvider);
+                                worker.sendFile(
+                                  pathName: file.path,
+                                  conversationId: room.conversationId,
+                                  description: description.text,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }
+                    },
             ),
             onMessageTap: (context, message) async {
               if (message is! types.FileMessage) return;
