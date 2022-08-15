@@ -58,7 +58,7 @@ dependencies:
 
 
   bubble: ^1.2.1
-  flutter_chat_ui: ^1.5.1
+  flutter_chat_ui: ^1.6.4
 
   ## *******
   ## Desktop dependencies
