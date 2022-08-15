@@ -238,6 +238,27 @@ impl Neighbours {
         None
     }
 
+    /// Search for a neighbour by it's q8id (8 Byte qaul ID)
+    ///
+    /// Returns node if it exists in the data base,
+    /// otherwise it returns None.
+    pub fn _node_from_q8id(small_id: Vec<u8>) -> Option<Node> {
+        // create search key
+        let prefix = QaulId::q8id_to_search_prefix(small_id);
+
+        // get data base tree
+        let tree = NODES.get();
+
+        // search for key
+        let mut result = tree.scan_prefix(prefix);
+
+        if let Some(Ok((_key, node))) = result.next() {
+            return Some(node);
+        }
+
+        None
+    }
+
     /// Get a list of all neighbours that are only connected via BLE module
     ///
     /// This function is used to decide to which nodes we need to send the
