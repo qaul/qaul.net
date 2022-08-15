@@ -24,12 +24,18 @@ class _SendFileDialog extends HookConsumerWidget {
             const SizedBox(width: 20),
             const Icon(Icons.insert_drive_file_outlined, size: 40),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(filesize(file.lengthSync())),
-                Text(basename(file.path)),
-              ],
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(filesize(file.lengthSync())),
+                  Text(
+                    basename(file.path),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
             const Expanded(child: SizedBox()),
             Padding(
