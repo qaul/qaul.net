@@ -17,7 +17,7 @@ dependencies:
   collection: ^1.15.0
   logging: ^1.0.2
 
-  ffi: ^1.1.2
+  ffi: ^2.0.1
   fixnum: ^1.0.1
   convert: ^3.0.1
   meta: ^1.7.0

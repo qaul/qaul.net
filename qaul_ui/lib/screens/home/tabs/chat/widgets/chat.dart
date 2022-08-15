@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
@@ -219,8 +220,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             onMessageTap: (context, message) async {
               if (message is! types.FileMessage) return;
+              if (Platform.isIOS || Platform.isAndroid) {
+                OpenFile.open(message.uri);
+                return;
+              }
 
               final file = Uri.file(message.uri);
+
               final parentDirectory = File.fromUri(file).parent.uri;
 
               for (final uri in [file, parentDirectory]) {

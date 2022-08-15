@@ -33,14 +33,14 @@ dependencies:
   # ********
   # UI Dependencies
   # ********
-  file_picker: ^4.6.1
+  file_picker: ^5.0.1
   font_awesome_flutter: ^10.1.0
   # Responsive UI Support => App Wrapper
   responsive_framework: ^0.2.0
   # Dynamic Theme Control => dark, light mode & so on
   adaptive_theme: ^3.0.0
   # SVG-support
-  flutter_svg: ^0.23.0+1
+  flutter_svg: ^1.1.3
   # Notification bubbles on icons
   badges: ^2.0.1
   # Dynamic Network View
@@ -73,6 +73,9 @@ dependencies:
   # *******
   # Business Logic Dependencies
   # *******
+  # TODO: Check if new package is available for this requirement
+  better_open_file: ^3.6.3
+
   collection: ^1.15.0
   equatable: ^2.0.3
   flutter_hooks: ^0.18.4
@@ -96,7 +99,7 @@ dependencies:
   neat_periodic_task: ^2.0.0
   shared_preferences: ^2.0.12
 
-  device_info_plus: ^3.2.4
+  device_info_plus: ^4.1.2
   package_info_plus: ^1.3.0
 
   mailto: ^2.0.0
