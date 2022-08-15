@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
-    show Chat, DefaultChatTheme, SendButtonVisibilityMode;
+    show Chat, DefaultChatTheme, InputOptions, SendButtonVisibilityMode;
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -23,12 +23,15 @@ import 'package:utils/utils.dart';
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../widgets/widgets.dart';
+import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
 
 part 'file_message_widget.dart';
 
 part 'file_sharing.dart';
+
+part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
@@ -180,7 +183,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             user: user.toInternalUser(),
             messages: messages(room) ?? [],
             onSendPressed: sendMessage,
-            sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+            inputOptions: const InputOptions(
+              sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+            ),
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -232,6 +237,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   message: message,
                   isDefaultUser: message.author.id == user.idBase58,
                 ),
+              );
+            },
+            imageMessageBuilder: (message, {required int messageWidth}) {
+              return ImageMessageWidget(
+                message: message,
+                messageWidth: messageWidth,
+                isDefaultUser: message.author.id == user.idBase58,
               );
             },
             customMessageBuilder: (message, {required int messageWidth}) {
@@ -305,8 +317,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Builder(builder: (context) {
       return Bubble(
         child: child,
-        color: user.toInternalUser().id != message.author.id ||
-                message.type == types.MessageType.image
+        color: user.toInternalUser().id != message.author.id
             ? const Color(0xfff5f5f7)
             : Colors.lightBlue.shade700,
         margin: nextMessageInGroup
@@ -358,6 +369,9 @@ extension _MessageExtension on Message {
           uri: filePath,
           size: (content as FileShareContent).size,
           name: (content as FileShareContent).fileName,
+          metadata: {
+            'description': (content as FileShareContent).description,
+          },
         );
       }
 

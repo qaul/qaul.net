@@ -357,14 +357,14 @@ packages:
       name: flutter_chat_types
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.2"
+    version: "3.4.5"
   flutter_chat_ui:
     dependency: "direct main"
     description:
       name: flutter_chat_ui
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.5"
+    version: "1.6.4"
   flutter_driver:
     dependency: transitive
     description: flutter
@@ -397,7 +397,7 @@ packages:
       name: flutter_link_previewer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.6.2"
+    version: "3.0.1"
   flutter_linkify:
     dependency: transitive
     description:
@@ -445,6 +445,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.9"
+  flutter_parsed_text:
+    dependency: transitive
+    description:
+      name: flutter_parsed_text
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -618,7 +625,7 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.4.0"
+    version: "4.6.0"
   linkify:
     dependency: transitive
     description:
@@ -849,7 +856,7 @@ packages:
       name: photo_view
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.0"
+    version: "0.14.0"
   platform:
     dependency: transitive
     description:
@@ -1233,6 +1240,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.2"
+  visibility_detector:
+    dependency: transitive
+    description:
+      name: visibility_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.3"
   vm_service:
     dependency: transitive
     description:
