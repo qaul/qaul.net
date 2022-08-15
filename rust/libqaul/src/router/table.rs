@@ -2,24 +2,25 @@
 // This software is published under the AGPLv3 license.
 
 //! # Global Routing Table
-//! 
+//!
 //! This file contains the global routing table
-//! 
+//!
 //! * contains all currently reachable users.
 //! * There is an entry for each user over which connection modules
 //!   it can be reached. Each connection module only contains
 //!   information of the best node.
 
 use libp2p::PeerId;
-use state::Storage;
 use prost::Message;
-use std::sync::RwLock;
+use state::Storage;
 use std::collections::HashMap;
+use std::sync::RwLock;
 
-use crate::connections::ConnectionModule;
 use super::proto;
-use crate::rpc::Rpc;
+use crate::connections::ConnectionModule;
 use crate::router::router_net_proto;
+use crate::rpc::Rpc;
+use crate::utilities::qaul_id::QaulId;
 
 /// mutable state of table
 static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
@@ -27,16 +28,16 @@ static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
 /// table entry per user
 #[derive(Debug, Clone)]
 pub struct RoutingUserEntry {
-    /// user id
-    pub id: PeerId,
+    /// user q8id, 8 Byte qaul user id
+    pub id: Vec<u8>,
     /// propagation id
     pub pgid: u32,
     /// propagation id update time
     pub pgid_update: u64,
     /// shortest hop count for user within this propagation id
     pub pgid_update_hc: u8,
-    //online time    
-    pub online_time: u64,    
+    //online time
+    pub online_time: u64,
     /// best routing entry per connection module
     pub connections: Vec<RoutingConnectionEntry>,
 }
@@ -62,11 +63,12 @@ pub struct RoutingConnectionEntry {
 }
 
 /// Global Routing Table Implementation
-/// 
+///
 /// This is the table to turn to when checking where to send
 /// a package.
 pub struct RoutingTable {
-    pub table: HashMap<PeerId, RoutingUserEntry>
+    /// routing table key is a users q8id
+    pub table: HashMap<Vec<u8>, RoutingUserEntry>,
 }
 
 impl RoutingTable {
@@ -74,7 +76,9 @@ impl RoutingTable {
     /// Creates global routing table and saves it to state.
     pub fn init() {
         // create global routing table and save it to state
-        let table = RoutingTable { table: HashMap::new() };
+        let table = RoutingTable {
+            table: HashMap::new(),
+        };
         ROUTINGTABLE.set(RwLock::new(table));
     }
 
@@ -86,10 +90,11 @@ impl RoutingTable {
 
     /// Create routing information for a specific neighbour node,
     /// to be sent to this neighbour node.
-    pub fn create_routing_info( neighbour: PeerId, last_sent: u64 ) -> router_net_proto::RoutingInfoTable {
-        let mut table = router_net_proto::RoutingInfoTable {
-            entry: Vec::new()
-        };        
+    pub fn create_routing_info(
+        neighbour: PeerId,
+        last_sent: u64,
+    ) -> router_net_proto::RoutingInfoTable {
+        let mut table = router_net_proto::RoutingInfoTable { entry: Vec::new() };
 
         // get access to routing table
         let routing_table = ROUTINGTABLE.get().read().unwrap();
@@ -102,18 +107,18 @@ impl RoutingTable {
 
             // choose best link quality
             let mut min_conn = user.connections[0].clone();
-            for i in 0..user.connections.len(){
-                if user.connections[i].lq < min_conn.lq{
+            for i in 0..user.connections.len() {
+                if user.connections[i].lq < min_conn.lq {
                     min_conn = user.connections[i].clone();
                 }
             }
 
-            if neighbour != min_conn.node && min_conn.last_update >= last_sent{
+            if neighbour != min_conn.node && min_conn.last_update >= last_sent {
                 let mut hc = Vec::new();
                 hc.push(min_conn.hc);
 
                 let table_entry = router_net_proto::RoutingInfoEntry {
-                    user: user_id.to_bytes(),
+                    user: user_id.to_owned(),
                     rtt: min_conn.rtt,
                     hc,
                     pgid: user.pgid,
@@ -127,9 +132,8 @@ impl RoutingTable {
 
     /// Create routing information for a specific neighbour node,
     /// to be sent to this neighbour node.
-    pub fn get_online_user_ids(last_sent: u64 ) -> Vec<PeerId> {
-
-        let mut user_ids: Vec<PeerId> = vec![];
+    pub fn get_online_user_ids(last_sent: u64) -> Vec<Vec<u8>> {
+        let mut user_ids: Vec<Vec<u8>> = vec![];
 
         // get access to routing table
         let routing_table = ROUTINGTABLE.get().read().unwrap();
@@ -154,7 +158,7 @@ impl RoutingTable {
         // loop through all user table entries
         for (id, entry) in &routing_table.table {
             let mut table_entry = proto::RoutingTableEntry {
-                user_id: id.to_bytes(),
+                user_id: id.to_owned(),
                 connections: Vec::new(),
             };
 
@@ -171,14 +175,12 @@ impl RoutingTable {
                 }
 
                 // create entry
-                table_entry.connections.push(
-                    proto::RoutingTableConnection {
-                        module,
-                        rtt: connection.rtt,
-                        hop_count: connection.hc as u32,
-                        via: connection.node.to_bytes(),
-                    }
-                );
+                table_entry.connections.push(proto::RoutingTableConnection {
+                    module,
+                    rtt: connection.rtt,
+                    hop_count: connection.hc as u32,
+                    via: connection.node.to_bytes(),
+                });
             }
 
             // add user entry to table list
@@ -190,32 +192,42 @@ impl RoutingTable {
             message: Some(proto::router::Message::RoutingTable(
                 proto::RoutingTableList {
                     routing_table: table_list,
-                }
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, crate::rpc::proto::Modules::Router.into(), "".to_string(), Vec::new());
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Router.into(),
+            "".to_string(),
+            Vec::new(),
+        );
     }
 
     /// Get the routing connection entry for a specific user
-    /// 
+    ///
     /// The connection entry for the provided user_id contains
     /// the neighbour id as well as the connection module via
     /// which to send the packages.
-    /// 
+    ///
     /// It selects the best route according to the rank_routing_connection function.
-    /// 
+    ///
     pub fn get_route_to_user(user_id: PeerId) -> Option<RoutingConnectionEntry> {
         // get routing table state
         let routing_table = ROUTINGTABLE.get().read().unwrap();
 
+        // get q8id for qaul user
+        let user_q8id = QaulId::to_q8id(user_id);
+
         // find user
-        if let Some(user_entry) = routing_table.table.get(&user_id) {
+        if let Some(user_entry) = routing_table.table.get(&user_q8id) {
             let mut compare: Option<&RoutingConnectionEntry> = None;
 
             //log::error!("found user entry connections = {}", user_entry.connections.len());
@@ -227,7 +239,7 @@ impl RoutingTable {
                         if Self::compare_connections(current, connection) {
                             compare = Some(connection);
                         }
-                    },
+                    }
                     None => compare = Some(connection),
                 }
             }
@@ -242,15 +254,15 @@ impl RoutingTable {
     }
 
     /// Compare two routing connections and decides which one is better
-    /// 
-    /// This function decides which connection to favour based on the 
+    ///
+    /// This function decides which connection to favour based on the
     /// rank_routing_connection function
-    /// 
+    ///
     /// Return values:
-    /// 
+    ///
     /// * returns true, when the new connection is better
     /// * returns false, when the current connection is better
-    /// 
+    ///
     fn compare_connections(current: &RoutingConnectionEntry, new: &RoutingConnectionEntry) -> bool {
         let current_value = Self::rank_routing_connection(current);
         let new_value = Self::rank_routing_connection(new);
@@ -258,17 +270,17 @@ impl RoutingTable {
         if current_value < new_value {
             return true;
         }
-        
+
         false
     }
 
     /// give a ranking to the routing connection
-    /// 
+    ///
     /// This function decides which connection to favour based on the following qualities:
-    /// 
-    /// * Hierarchy of connection modules in the following order: 
+    ///
+    /// * Hierarchy of connection modules in the following order:
     ///   Local, LAN, Internet, BLE, None
-    /// 
+    ///
     fn rank_routing_connection(connection: &RoutingConnectionEntry) -> u8 {
         match connection.module {
             ConnectionModule::None => return 0,

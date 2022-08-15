@@ -1,26 +1,21 @@
 syntax = "proto3";
 package qaul.rpc.users;
 
-
 // users rpc message container
 message Users {
     oneof message {
-        UserRequest user_request = 1;
-        UserOnlineRequest user_online_request = 2;        
-        UserList user_list = 3;
-        UserEntry user_update = 4;
+        UserRequest user_request              = 1;
+        UserOnlineRequest user_online_request = 2;
+        UserList user_list                    = 3;
+        UserEntry user_update                 = 4;
     }
 }
 
 // UI request for some users
-message UserRequest {
-
-}
+message UserRequest {}
 
 // UI request for some online users
-message UserOnlineRequest {
-
-}
+message UserOnlineRequest {}
 
 // user list
 message UserList {
@@ -29,14 +24,21 @@ message UserList {
 
 // user entry
 message UserEntry {
+    // user name
     string name = 1;
+    // user ID (38 Byte PeerID)
     bytes id = 2;
-    string id_base58 = 4;
-    bytes key = 5; // protobuf encoded public key
-    string key_type = 6;
+    // direct chat conversation ID
+    //
+    // this is a predictable 16 bytes UUID
+    bytes conversation_id = 3;
+    // base58 string of public key
     string key_base58 = 7;
+    // reachability of the user: online | reachable | offline
     Connectivity connectivity = 8;
+    // user has been verified
     bool verified = 9;
+    // user is blocked
     bool blocked = 10;
 }
 
@@ -45,7 +47,7 @@ enum Connectivity {
     // The user is actively connected to the node
     // and reachable for synchronous communication.
     Online = 0;
-    // The node which hosts the user account is online 
+    // The node which hosts the user account is online
     // but the user is not actively connected to it.
     // Messages can sent and will reach the node.
     Reachable = 1;
