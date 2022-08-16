@@ -65,13 +65,6 @@ class _UsersState extends _BaseTabState<_Users> {
                       trailingIcon: (user.isVerified ?? false)
                           ? const Icon(Icons.verified_user)
                           : const SizedBox(),
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => UserDetailsScreen(user: user)),
-                        );
-                        refreshUsers();
-                      },
                     ),
                   );
                 },
