@@ -20,9 +20,11 @@ class _FeedState extends _BaseTabState<_Feed> {
     final messages = ref.watch(feedMessagesProvider);
     final defaultUser = ref.watch(defaultUserProvider);
 
-    final blockedIds = users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
-    final filteredMessages =
-        messages.where((m) => !blockedIds.contains(m.senderIdBase58 ?? '')).toList();
+    final blockedIds =
+        users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
+    final filteredMessages = messages
+        .where((m) => !blockedIds.contains(m.senderIdBase58 ?? ''))
+        .toList();
 
     final refreshFeed = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
@@ -37,7 +39,8 @@ class _FeedState extends _BaseTabState<_Feed> {
         heroTag: 'feedTabFAB',
         tooltip: l18ns!.createFeedPostTooltip,
         onPressed: () async {
-          await Navigator.push(context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+          await Navigator.push(
+              context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
           await Future.delayed(const Duration(milliseconds: 2000));
           await refreshFeed();
         },
@@ -76,17 +79,8 @@ class _FeedState extends _BaseTabState<_Feed> {
                     sentAt,
                     style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                   ),
-                  onTap: (author.idBase58 == (defaultUser?.idBase58 ?? ''))
-                      ? null
-                      : () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => UserDetailsScreen(user: author),
-                            ),
-                          );
-                          refreshFeed();
-                        },
+                  allowTapRouteToUserDetailsScreen:
+                      (author.idBase58 != (defaultUser?.idBase58 ?? '')),
                 );
               },
             ),

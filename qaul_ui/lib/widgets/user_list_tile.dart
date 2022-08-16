@@ -9,6 +9,7 @@ class UserListTile extends StatelessWidget {
     this.trailingMetadata,
     this.onTap,
     this.isThreeLine = false,
+    this.allowTapRouteToUserDetailsScreen = true,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         super(key: key);
   final User user;
@@ -24,7 +25,14 @@ class UserListTile extends StatelessWidget {
   /// Right, Baseline-aligned with username (usually a Text).
   final Widget? trailingMetadata;
 
+  /// Override the behavior of tapping this tile, regardless of the value of [allowTapRouteToUserDetailsScreen]
   final VoidCallback? onTap;
+
+  /// If set to [true], when [onTap] is [null], tapping on the [UserListTile]
+  /// will open the [UserDetailsScreen] for this [user].
+  ///
+  /// Set to [false] to disable this behavior.
+  final bool allowTapRouteToUserDetailsScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +57,14 @@ class UserListTile extends StatelessWidget {
           );
 
     return ListTile(
-      onTap: onTap,
+      onTap: onTap ??
+          (!allowTapRouteToUserDetailsScreen
+              ? null
+              : () async => await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => UserDetailsScreen(user: user)),
+                  )),
       title: title,
       subtitle: content,
       trailing: trailingIcon,
