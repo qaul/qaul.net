@@ -11,3 +11,15 @@ integration-test:
 	@ID=$$(flutter devices | grep ios | cut -d "•" -f 2 | xargs); \
 	applesimutils --byId "$$ID" --bundle net.qaul.app --setPermissions notifications=YES; \
 	flutter test integration_test -d "$$ID" --dart-define=testing_mode=true #--update-goldens
+
+# -----------------------
+
+.PHONY: sort-dependencies
+sort-dependencies:
+	@docker run --rm -v $(shell pwd):"/qaul" python:latest /bin/bash -c 'sleep 5; pip install pyyaml && python ./qaul/bin/sort_pubspec_deps.py'
+	@echo ""
+
+.PHONY: unused-dependency-check
+unused-dependency-check:
+	@docker run --rm -v $(shell pwd):"/qaul" python:latest /bin/bash -c 'sleep 5; pip install pyyaml && python ./qaul/bin/check_unused_deps.py'
+	@echo ""
