@@ -426,7 +426,58 @@ impl Group {
                             create_group_response.group_id.try_into().unwrap(),
                         );
                         println!("\tid: {}", group_id.to_string());
-                        println!("\tname: {}", create_group_response.group_name.clone());
+                    }
+                    Some(proto::group::Message::GroupRenameResponse(rename_group_response)) => {
+                        let result = rename_group_response.result.unwrap();
+                        println!("====================================");
+                        println!("Group Reanme status: {}", result.status);
+                        let group_id = uuid::Uuid::from_bytes(
+                            rename_group_response.group_id.try_into().unwrap(),
+                        );
+                        println!("\tid: {}", group_id.to_string());
+                        if !result.status {
+                            println!("\terror: {}", result.message);
+                        }
+                    }
+                    Some(proto::group::Message::GroupInviteMemberResponse(
+                        invite_group_response,
+                    )) => {
+                        let result = invite_group_response.result.unwrap();
+                        println!("====================================");
+                        println!("Group Invite status: {}", result.status);
+                        let group_id = uuid::Uuid::from_bytes(
+                            invite_group_response.group_id.try_into().unwrap(),
+                        );
+                        println!("\tid: {}", group_id.to_string());
+                        if !result.status {
+                            println!("\terror: {}", result.message);
+                        }
+                    }
+                    Some(proto::group::Message::GroupReplyInviteResponse(reply_group_response)) => {
+                        let result = reply_group_response.result.unwrap();
+                        println!("====================================");
+                        println!("Reply Group Invite status: {}", result.status);
+                        let group_id = uuid::Uuid::from_bytes(
+                            reply_group_response.group_id.try_into().unwrap(),
+                        );
+                        println!("\tid: {}", group_id.to_string());
+                        if !result.status {
+                            println!("\terror: {}", result.message);
+                        }
+                    }
+                    Some(proto::group::Message::GroupRemoveMemberResponse(
+                        remove_member_response,
+                    )) => {
+                        let result = remove_member_response.result.unwrap();
+                        println!("====================================");
+                        println!("Group Remove Member status: {}", result.status);
+                        let group_id = uuid::Uuid::from_bytes(
+                            remove_member_response.group_id.try_into().unwrap(),
+                        );
+                        println!("\tid: {}", group_id.to_string());
+                        if !result.status {
+                            println!("\terror: {}", result.message);
+                        }
                     }
                     Some(proto::group::Message::GroupInfoResponse(group_info_response)) => {
                         // group
