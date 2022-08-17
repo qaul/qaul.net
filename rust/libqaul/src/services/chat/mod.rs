@@ -60,6 +60,70 @@ impl Chat {
         CHAT.set(RwLock::new(chat));
     }
 
+    /// check if messages exists
+    pub fn is_messages_exist(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> bool {
+        // get data base of user account
+        let db_ref = Self::get_user_db_ref(user_id.clone());
+        for id in message_ids {
+            if !db_ref.message_ids.contains_key(id).unwrap() {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// get messages by ids
+    pub fn get_messages_by_id(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> Vec<(i32, Vec<u8>)> {
+        let mut res: Vec<(i32, Vec<u8>)> = vec![];
+
+        let db_ref = Self::get_user_db_ref(user_id.clone());
+        for id in message_ids {
+            match db_ref.message_ids.get(id) {
+                Ok(opt_key) => {
+                    if let Some(db_key) = opt_key {
+                        match db_ref.messages.get(&db_key) {
+                            Ok(opt_msg) => {
+                                if let Some(msg) = opt_msg {
+                                    res.push((msg.content_type, msg.content.clone()));
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+        res
+    }
+
+    /// remove messages by ids
+    pub fn remove_messages(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) {
+        let db_ref = Self::get_user_db_ref(user_id.clone());
+        for id in message_ids {
+            match db_ref.message_ids.get(id) {
+                Ok(opt_key) => {
+                    if let Some(db_key) = opt_key {
+                        if let Err(_e) = db_ref.messages.remove(&db_key) {
+                            log::error!("remove message error!");
+                        }
+                    }
+                    if let Err(_e) = db_ref.message_ids.remove(id) {
+                        log::error!("remove message id error!");
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if let Err(_e) = db_ref.messages.flush() {
+            log::error!("message storing error!");
+        }
+        if let Err(_e) = db_ref.message_ids.flush() {
+            log::error!("message ids storing error!");
+        }
+    }
+
     /// Save a new incoming Message
     ///
     /// This function saves an incoming chat message in the data base
@@ -128,7 +192,7 @@ impl Chat {
             conversation_id: conversation_id.to_bytes(),
             sent_at,
             received_at: timestamp,
-            content_type: 0,
+            content_type: content_type,
             content: content.clone(),
         };
 
@@ -180,7 +244,7 @@ impl Chat {
         user_account: &UserAccount,
         chat_message: rpc_proto::ChatMessageSend,
     ) -> Result<bool, String> {
-        let mut conversation_id;
+        let conversation_id;
         //direct chat messge case.
         if chat_message.conversation_id.len() > 16 {
             // create new room if no exist
@@ -305,6 +369,13 @@ impl Chat {
         let is_group = !(conversation_id
             .is_equal(&messaging::ConversationId::from_peers(user_id, receiver_id).unwrap()));
 
+        // if direct chat, check group exist
+        if !is_group {
+            if !group::Group::is_group_exist(user_id, &conversation_id.to_bytes()) {
+                group::Manage::create_new_direct_chat_group(user_id, receiver_id);
+            }
+        }
+
         // get overview
         let overview;
         match Self::update_overview(
@@ -338,7 +409,7 @@ impl Chat {
             conversation_id: conversation_id.to_bytes(),
             sent_at: timestamp,
             received_at: timestamp,
-            content_type: 0,
+            content_type,
             content: content.clone(),
         };
 
@@ -360,92 +431,6 @@ impl Chat {
         if let Err(e) = db_ref.message_ids.flush() {
             log::error!("Error chat message_ids flush: {}", e);
         }
-    }
-
-    // save an outgoing chat message to the data base
-    fn save_outgoing_chat_message(
-        user_id: PeerId,
-        conversation_id: Vec<u8>,
-        content: String,
-        signature: Vec<u8>,
-    ) {
-        // let contents = rpc_proto::ChatMessageContent{
-        //     content: Some(
-        //         rpc_proto::chat_message_content::Content::ChatContent(
-        //             rpc_proto::ChatContent{content}
-        //         )
-        //     )
-        // };
-        // Self::save_outgoing_message(user_id, conversation_id, contents.encode_to_vec(), signature, 0)
-    }
-
-    // save a sent file message to the data base
-    pub fn save_outgoing_file_message(
-        user_id: PeerId,
-        conversation_id: Vec<u8>,
-        file_name: String,
-        file_size: u32,
-        history_index: u64,
-        file_id: u64,
-        file_descr: String,
-    ) {
-        // let contents = rpc_proto::ChatMessageContent{
-        //     content: Some(
-        //         rpc_proto::chat_message_content::Content::FileContent(
-        //             rpc_proto::FileShareContent{
-        //                 history_index,
-        //                 file_id,
-        //                 file_name,
-        //                 file_size,
-        //                 file_descr,
-        //             }
-        //         )
-        //     )
-        // };
-        // Self::save_outgoing_message(user_id, conversation_id, contents.encode_to_vec(), vec![], 1);
-    }
-
-    pub fn save_outgoing_group_invite_message(
-        user_id: PeerId,
-        conversation_id: PeerId,
-        group_id: &Vec<u8>,
-        group_name: String,
-        created_at: u64,
-        admin_id: &Vec<u8>,
-        member_count: u32,
-    ) {
-        // let contents = rpc_proto::ChatMessageContent{
-        //     content: Some(
-        //         rpc_proto::chat_message_content::Content::GroupInviteContent(
-        //             rpc_proto::GroupInviteContent{
-        //                 group_id: group_id.clone(),
-        //                 group_name: group_name.clone(),
-        //                 created_at,
-        //                 member_count,
-        //                 admin_id: admin_id.clone()
-        //             }
-        //         )
-        //     )
-        // };
-        // Self::save_outgoing_message(user_id, conversation_id.to_bytes(), contents.encode_to_vec(), vec![], 1);
-    }
-    pub fn save_outgoing_group_invite_reply_message(
-        user_id: PeerId,
-        conversation_id: PeerId,
-        group_id: &Vec<u8>,
-        accept: bool,
-    ) {
-        // let contents = rpc_proto::ChatMessageContent{
-        //     content: Some(
-        //         rpc_proto::chat_message_content::Content::GroupInviteReplyContent(
-        //             rpc_proto::GroupInviteReplyContent{
-        //                 group_id: group_id.clone(),
-        //                 accept,
-        //             }
-        //         )
-        //     )
-        // };
-        // Self::save_outgoing_message(user_id, conversation_id.to_bytes(), contents.encode_to_vec(), vec![], 1);
     }
 
     /// updating chat messge status as confirmed

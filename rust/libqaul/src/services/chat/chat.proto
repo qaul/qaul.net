@@ -74,11 +74,11 @@ message ChatConversationList {
 enum ContentType {
     // chat
     chat = 0;
-    // group
+    // group management 
     group = 1;
     // file
     file = 2;
-    // rtc
+    // rtc management
     rtc = 4;
 }
 

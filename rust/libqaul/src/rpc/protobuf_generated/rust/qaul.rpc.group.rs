@@ -140,8 +140,11 @@ pub struct GroupInfoResponse {
     /// created at
     #[prost(uint64, tag="3")]
     pub created_at: u64,
+    /// is direct chat
+    #[prost(bool, tag="4")]
+    pub is_direct_chat: bool,
     ///members
-    #[prost(message, repeated, tag="4")]
+    #[prost(message, repeated, tag="5")]
     pub members: ::prost::alloc::vec::Vec<GroupMember>,
 }
 /// Group list request

@@ -48,11 +48,11 @@ message FileHistoryEntry{
     // time
     uint64 time = 6;
 
-    // sent/recv
-    bool sent = 7;
+    // sender id
+    string sender_id = 7;
 
-    // peer id
-    string peer_id = 8;
+    // group id
+    string group_id = 8;
 }
 
 // File History Response

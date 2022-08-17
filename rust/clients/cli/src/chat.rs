@@ -19,6 +19,9 @@ mod proto_message {
 mod proto_group {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.group.rs");
 }
+mod proto_file {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.filesharing.rs");
+}
 
 /// chat module function handling
 pub struct Chat {}
@@ -100,7 +103,7 @@ impl Chat {
                                 Ok(id) => {
                                     conversation_id = id;
                                 }
-                                Err(e) => {
+                                Err(_e) => {
                                     match Self::uuid_string_to_bin(conversation_id_str.to_string())
                                     {
                                         Ok(id) => {
@@ -232,23 +235,47 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
-    fn display_content(status: u32, content_type: i32, content: &Vec<u8>) {
+    fn analyze_content(
+        status: u32,
+        content_type: i32,
+        content: &Vec<u8>,
+    ) -> Result<Vec<String>, String> {
+        let mut res: Vec<String> = vec![];
         let tp;
         match proto::ContentType::from_i32(content_type) {
             Some(v) => tp = v,
             _ => {
-                print!(" unknown content type {}", content_type);
-                return;
+                return Err("".to_string());
             }
         }
 
         match tp {
             proto::ContentType::Chat => {
                 if let Ok(v) = String::decode(&content[..]) {
-                    println!("\t{}", v);
+                    res.push(v.clone());
+                    return Ok(res);
                 }
             }
-            proto::ContentType::File => {}
+            proto::ContentType::File => {
+                if let Ok(v) = proto_file::FileSharingContainer::decode(&content[..]) {
+                    match v.message {
+                        Some(proto_file::file_sharing_container::Message::FileInfo(file_info)) => {
+                            res.push(
+                                "file transfer id: ".to_string()
+                                    + file_info.file_id.to_string().as_str(),
+                            );
+                            res.push(
+                                " name: ".to_string()
+                                    + file_info.file_name.as_str()
+                                    + " size: "
+                                    + file_info.file_size.to_string().as_str(),
+                            );
+                            return Ok(res);
+                        }
+                        _ => {}
+                    }
+                }
+            }
             proto::ContentType::Group => {
                 if let Ok(v) = proto_group::GroupContainer::decode(&content[..]) {
                     match v.message {
@@ -256,43 +283,48 @@ impl Chat {
                             let group_id =
                                 uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
                             if status <= 1 {
-                                print!(" Sent");
+                                res.push(
+                                    "Sent group invite group id: ".to_string()
+                                        + group_id.to_string().as_str(),
+                                );
                             } else {
-                                print!(" Received");
+                                res.push(
+                                    "Received group invite group id: ".to_string()
+                                        + group_id.to_string().as_str(),
+                                );
                             }
-                            println!(
-                                " group invite group id: {}, Name: {}",
-                                group_id.to_string(),
-                                invite.group_name
+                            res.push(
+                                "name: ".to_string()
+                                    + invite.group_name.as_str()
+                                    + " members: "
+                                    + invite.members_count.to_string().as_str(),
                             );
-                            println!(
-                                "      Created at: {}, Members: {}",
-                                invite.created_at, invite.members_count
-                            );
+                            return Ok(res);
                         }
                         Some(proto_group::group_container::Message::ReplyInvite(reply_invite)) => {
                             let group_id =
                                 uuid::Uuid::from_bytes(reply_invite.group_id.try_into().unwrap());
                             if status <= 1 {
-                                print!("  Sent ");
+                                res.push(
+                                    "Sent group accept group id: ".to_string()
+                                        + group_id.to_string().as_str(),
+                                );
                             } else {
-                                print!("  Received ");
+                                res.push(
+                                    "Received group accept group id: ".to_string()
+                                        + group_id.to_string().as_str(),
+                                );
                             }
-                            if reply_invite.accept {
-                                print!("  group accept ");
-                            } else {
-                                print!("  group decline ");
-                            }
-                            println!("      group id: {}", group_id.to_string());
+                            return Ok(res);
                         }
-                        Some(proto_group::group_container::Message::Removed(removed)) => {}
+                        Some(proto_group::group_container::Message::Removed(_removed)) => {}
                         _ => {}
                     }
                 }
             }
             proto::ContentType::Rtc => {}
-            _ => {}
         }
+        Err("".to_string())
     }
 
     /// Process received RPC message
@@ -318,7 +350,13 @@ impl Chat {
                             print!("  {} | ", message.unread);
                             print!("{} | ", message.last_message_index);
                             print!("{} | ", message.last_message_at);
-                            Self::display_content(1, message.content_type, &message.content);
+                            if let Ok(ss) =
+                                Self::analyze_content(1, message.content_type, &message.content)
+                            {
+                                for s in ss {
+                                    println!("\t{}", s);
+                                }
+                            }
                             println!("");
                         }
                     }
@@ -337,29 +375,32 @@ impl Chat {
 
                         // print all messages in the feed list
                         for message in proto_conversation.message_list {
-                            print! {"{} | ", message.index};
-
-                            match message.status {
-                                0 => print!(".. | "),
-                                1 => print!("✓. | "),
-                                2 => print!("✓✓ | "),
-                                _ => print!("   | "),
-                            }
-
-                            print!("{} | ", message.sent_at);
-                            println!("{}", bs58::encode(message.sender_id).into_string());
-                            println!(
-                                " [{}] {}",
-                                bs58::encode(message.message_id).into_string(),
-                                message.received_at
-                            );
-
-                            Self::display_content(
+                            if let Ok(ss) = Self::analyze_content(
                                 message.status,
                                 message.content_type,
                                 &message.content,
-                            );
-                            println!("");
+                            ) {
+                                print! {"{} | ", message.index};
+                                match message.status {
+                                    0 => print!(".. | "),
+                                    1 => print!("✓. | "),
+                                    2 => print!("✓✓ | "),
+                                    _ => print!("   | "),
+                                }
+
+                                print!("{} | ", message.sent_at);
+                                println!("{}", bs58::encode(message.sender_id).into_string());
+                                println!(
+                                    " [{}] {}",
+                                    bs58::encode(message.message_id).into_string(),
+                                    message.received_at
+                                );
+
+                                for s in ss {
+                                    println!("\t{}", s);
+                                }
+                                println!("");
+                            }
                         }
                     }
 
