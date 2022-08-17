@@ -11,24 +11,44 @@ message Group {
         GroupCreateResponse group_create_response = 2;
         // group rename request
         GroupRenameRequest group_rename_request = 3;
+        // group rename response
+        GroupRenameResponse group_rename_response = 4;
         // group invite member request
-        GroupInviteMemberRequest group_invite_member_request = 4;
+        GroupInviteMemberRequest group_invite_member_request = 5;
+        // group invite member response
+        GroupInviteMemberResponse group_invite_member_response = 6;
+
         // group remove member request
-        GroupRemoveMemberRequest group_remove_member_request = 5;
+        GroupRemoveMemberRequest group_remove_member_request = 7;
+        // group remove member response
+        GroupRemoveMemberResponse group_remove_member_response = 8;
+
         //group info request
-        GroupInfoRequest group_info_request = 6;
+        GroupInfoRequest group_info_request = 9;
         //group info response
-        GroupInfoResponse group_info_response = 7;
-        //group reply invite
-        GroupReplyInviteRequest group_reply_invite_request = 8;
+        GroupInfoResponse group_info_response = 10;
+
+        //group reply invite request
+        GroupReplyInviteRequest group_reply_invite_request = 11;
+        //group reply invite response
+        GroupReplyInviteResponse group_reply_invite_response = 12;
+
         //group list request
-        GroupListRequest group_list_request = 9;
+        GroupListRequest group_list_request = 13;
         //group list response
-        GroupListResponse group_list_response = 10;
+        GroupListResponse group_list_response = 14;
     }
 }
 
-// Create New Group 
+// Group Result
+message GroupResult {
+    // status
+    bool status = 1;
+    // message
+    string message = 2;
+}
+
+// Create New Group
 message GroupCreateRequest {
     // group name
     string group_name = 1;
@@ -36,10 +56,10 @@ message GroupCreateRequest {
 
 // Group creating response
 message GroupCreateResponse {
-    // group name
-    string group_name = 1;
     // group id
-    bytes group_id = 2;    
+    bytes group_id = 1;
+    // result 
+    GroupResult result = 2;
 }
 
 // Group rename request
@@ -50,6 +70,15 @@ message GroupRenameRequest {
     string group_name = 2;
 }
 
+// Group rename response
+message GroupRenameResponse {
+    // group id
+    bytes group_id = 1;
+    // group name
+    string group_name = 2;
+    // result 
+    GroupResult result = 3;
+}
 
 // Invite member
 message GroupInviteMemberRequest {
@@ -57,6 +86,16 @@ message GroupInviteMemberRequest {
     bytes group_id = 1;
     // user id
     bytes user_id = 2;
+}
+
+// Invite member response
+message GroupInviteMemberResponse {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+    // result 
+    GroupResult result = 3;
 }
 
 // Reply Invite 
@@ -69,12 +108,33 @@ message GroupReplyInviteRequest {
     bool  accept = 3;  
 }
 
+// Reply Invite Response
+message GroupReplyInviteResponse {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+    // result 
+    GroupResult result = 3;
+}
+
+
 // Remove member
 message GroupRemoveMemberRequest {
     // group id
     bytes group_id = 1;
     // user id
     bytes user_id = 2;
+}
+
+// Remove member
+message GroupRemoveMemberResponse {
+    // group id
+    bytes group_id = 1;
+    // user id
+    bytes user_id = 2;
+    // result 
+    GroupResult result = 3;
 }
 
 // Group info request
@@ -107,7 +167,7 @@ message GroupInfoResponse {
     uint64 created_at = 3;
     // is direct chat
     bool is_direct_chat = 4;
-    //members
+    // members
     repeated GroupMember members = 5;
 }
 
