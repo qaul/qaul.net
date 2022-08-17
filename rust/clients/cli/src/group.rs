@@ -24,10 +24,10 @@ impl Group {
             // create group
             cmd if cmd.starts_with("create ") => {
                 let command_string = cmd.strip_prefix("create ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
+                let group_name = command_string.trim().to_string();
 
-                if let Some(group_name) = iter.next() {
-                    Self::create_group(group_name.to_string());
+                if group_name.len() > 0 {
+                    Self::create_group(group_name.clone());
                 } else {
                     log::error!("group create command incorrectly formatted");
                 }
@@ -40,7 +40,14 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            if let Some(group_name) = iter.next() {
+                            let group_name = command_string
+                                .strip_prefix(group_id_str.clone())
+                                .unwrap()
+                                .to_string()
+                                .trim()
+                                .to_string();
+
+                            if group_name.len() > 0 {
                                 Self::rename_group(group_id, group_name.to_string());
                             } else {
                                 log::error!("group name is missing");
