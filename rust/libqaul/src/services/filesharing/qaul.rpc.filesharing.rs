@@ -65,12 +65,12 @@ pub struct FileHistoryEntry {
     /// time
     #[prost(uint64, tag="6")]
     pub time: u64,
-    /// sent/recv
-    #[prost(bool, tag="7")]
-    pub sent: bool,
-    /// peer id
+    /// sender id
+    #[prost(string, tag="7")]
+    pub sender_id: ::prost::alloc::string::String,
+    /// group id
     #[prost(string, tag="8")]
-    pub peer_id: ::prost::alloc::string::String,
+    pub group_id: ::prost::alloc::string::String,
 }
 /// File History Response
 #[derive(Clone, PartialEq, ::prost::Message)]

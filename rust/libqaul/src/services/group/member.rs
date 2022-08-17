@@ -2,7 +2,6 @@
 use libp2p::PeerId;
 use prost::Message;
 
-use super::Chat;
 use super::Group;
 use crate::{
     node::user_accounts::{UserAccount, UserAccounts},
@@ -15,8 +14,9 @@ impl Member {
     pub fn invite(
         my_user_id: &PeerId,
         group_id: &Vec<u8>,
-        user_id: &Vec<u8>,
+        user_id: &PeerId,
     ) -> Result<bool, String> {
+        //check group
         let groups = Group::get_groups_of_user(my_user_id);
 
         let group_idx = groups.group_id_to_index(group_id);
@@ -44,7 +44,7 @@ impl Member {
         }
 
         //check user
-        if let Some(_member) = group.get_member(user_id) {
+        if let Some(_member) = group.get_member(&user_id.to_bytes()) {
             return Err("user is already member in this group".to_string());
         }
 
@@ -62,10 +62,9 @@ impl Member {
         };
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(user_id).unwrap();
             Group::send_group_message_through_message(
                 &user_account,
-                &receiver,
+                user_id,
                 &proto_message.encode_to_vec(),
             );
         } else {
@@ -78,10 +77,18 @@ impl Member {
     pub fn reply_invite(
         my_user_id: &PeerId,
         group_id: &Vec<u8>,
-        conversation_id: &Vec<u8>,
+        user_id: &PeerId,
         accept: bool,
     ) -> Result<bool, String> {
-        //send invite.
+        //if already has not direct chat room, it's not allowed
+        //check if already has direct chat room
+        let conversation_id =
+            super::messaging::ConversationId::from_peers(my_user_id, user_id).unwrap();
+        if !Group::is_group_exist(my_user_id, &conversation_id.to_bytes()) {
+            return Err("you have not been received group invite meesage".to_string());
+        }
+
+        //send reply.
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::ReplyInvite(
                 super::proto_net::ReplyInvite {
@@ -91,21 +98,11 @@ impl Member {
             )),
         };
 
-        let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
-
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(conversation_id).unwrap();
-            Group::send_group_message_through_message(&user_account, &receiver, &message_buff);
-
-            //save invite chat message
-            Chat::save_outgoing_group_invite_reply_message(
-                my_user_id.clone(),
-                receiver.clone(),
-                group_id,
-                accept,
+            Group::send_group_message_through_message(
+                &user_account,
+                &user_id,
+                &proto_message.encode_to_vec(),
             );
         } else {
             return Err("user account problem".to_string());
@@ -117,7 +114,7 @@ impl Member {
     pub fn remove(
         my_user_id: &PeerId,
         group_id: &Vec<u8>,
-        user_id: &Vec<u8>,
+        user_id: &PeerId,
     ) -> Result<bool, String> {
         let groups = Group::get_groups_of_user(my_user_id);
         let group_idx = groups.group_id_to_index(group_id);
@@ -144,15 +141,22 @@ impl Member {
             return Err("you are not member in this group".to_string());
         }
 
-        if let Some(_member) = group.get_member(&user_id) {
+        if let Some(_member) = group.get_member(&user_id.to_bytes()) {
             // remove member
-            group.members.remove(user_id);
+            group.members.remove(&user_id.to_bytes());
             if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group) {
                 log::error!("group db updating error {}", error.to_string());
             }
             Group::update_groups_of_user(my_user_id, groups);
         } else {
             return Err("this user is not member of this group".to_string());
+        }
+
+        //check if already has direct chat room
+        let conversation_id =
+            super::messaging::ConversationId::from_peers(my_user_id, user_id).unwrap();
+        if !Group::is_group_exist(my_user_id, &conversation_id.to_bytes()) {
+            super::Manage::create_new_direct_chat_group(my_user_id, user_id);
         }
 
         //send direct message to removed user
@@ -164,14 +168,12 @@ impl Member {
             )),
         };
 
-        let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
-
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(user_id).unwrap();
-            Group::send_group_message_through_message(&user_account, &receiver, &message_buff);
+            Group::send_group_message_through_message(
+                &user_account,
+                user_id,
+                &proto_message.encode_to_vec(),
+            );
         } else {
             return Err("user account has problem".to_string());
         }
@@ -182,9 +184,9 @@ impl Member {
     /// process group invite message from network
     pub fn on_be_invited(
         _user: &UserAccount,
-        sender_id: &PeerId,
-        receiver_id: &PeerId,
-        req: &super::proto_net::InviteMember,
+        _sender_id: &PeerId,
+        _receiver_id: &PeerId,
+        _req: &super::proto_net::InviteMember,
     ) {
         //save chat message
         // Chat::save_incoming_group_invite_message(receiver_id.clone(), sender_id.clone(),
@@ -225,6 +227,13 @@ impl Member {
             return Err("direct chat room does not allow accept invite".to_string());
         }
 
+        //check if already has direct chat room
+        let conversation_id =
+            super::messaging::ConversationId::from_peers(sender_id, receiver_id).unwrap();
+        if !Group::is_group_exist(receiver_id, &conversation_id.to_bytes()) {
+            return Err("you have not sent invite".to_string());
+        }
+
         if group.members.contains_key(&sender_id.to_bytes()) {
             return Err("member already exists".to_string());
         }
@@ -233,6 +242,7 @@ impl Member {
             log::error!("group db updating error {}", error.to_string());
         }
         Group::update_groups_of_user(receiver_id, groups);
+
         Ok(true)
     }
 

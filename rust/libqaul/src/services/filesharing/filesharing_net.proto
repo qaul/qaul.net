@@ -6,71 +6,40 @@ message FileSharingContainer {
     oneof message {
         FileSharingInfo file_info = 1;
         FileSharingData file_data = 2;
-        FileSharingConfirmation confirmation = 3;
-        FileSharingConfirmationFileInfo confirmation_info = 4;
-        FileSharingCompleted completed = 5;
-        FileSharingCanceled canceled = 6;
     }
 }
 
 // FileSharing Message Content
 message FileSharingInfo {
+    // file id
+    uint64 file_id = 1;
+
     // file name
-    string file_name = 1;
+    string file_name = 2;
 
     // file extension
-    string file_extension = 2;
+    string file_extension = 3;
     // file size
-    uint32 file_size = 3;
+    uint32 file_size = 4;
 
     // file description
-    string file_descr = 4;
+    string file_descr = 5;
 
-    // size per package 
-    uint32 size_per_package = 5;
+    // start index
+    uint32 start_index = 6;
 
-    // file id
-    uint64  file_id = 6;
+    // message count
+    uint32 message_count = 7;
 }
 
 // FileSharing Data Message
 message FileSharingData{    
-    // file id
-    uint64  file_id = 1;
-    // package sequence
-    uint32 sequence = 2;
+    // start index
+    uint32 start_index = 1;
 
-    // file size
-    uint32 file_size = 3;
-    // size per package 
-    uint32 size_per_package = 4;
+    // message count
+    uint32 message_count = 2;
 
     // package data
-    bytes data = 6;
-}
-
-// File Sharing Confirmation File Info Message
-message FileSharingConfirmationFileInfo{
-    // file id
-    uint64  file_id = 1;
-}
-
-// File Sharing Confirmation Message
-message FileSharingConfirmation{    
-    // file id
-    uint64  file_id = 1;
-    // package sequence
-    uint32 sequence = 2;
-}
-
-// File Sharing Completed Message
-message FileSharingCompleted{
-    // file id
-    uint64  file_id = 1;
-}
-
-// File Sharing Cancled Message
-message FileSharingCanceled{
-    // file id
-    uint64  file_id = 1;
+    bytes data = 3;
 }
