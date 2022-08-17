@@ -363,10 +363,11 @@ impl Chat {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
                         println!("");
-                        println!(
-                            "Conversation [ {} ]",
-                            bs58::encode(proto_conversation.conversation_id).into_string()
+                        let conversation_id = uuid::Uuid::from_bytes(
+                            proto_conversation.conversation_id.try_into().unwrap(),
                         );
+
+                        println!("Conversation [ {} ]", conversation_id.to_string());
                         println!("");
                         println!("No. | Status | Sent At | Sender ID");
                         println!("  [Message ID] Received At");

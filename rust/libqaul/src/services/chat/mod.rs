@@ -599,7 +599,7 @@ impl Chat {
         }
 
         rpc_proto::ChatConversationList {
-            conversation_id,
+            conversation_id: conversation_id0.clone(),
             message_list,
         }
     }
