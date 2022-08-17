@@ -568,58 +568,55 @@ impl Group {
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupCreateResponse(
                                 proto_rpc::GroupCreateResponse {
-                                    group_name: group_create_req.group_name.clone(),
                                     group_id: id,
+                                    result: Some(proto_rpc::GroupResult {
+                                        status: true,
+                                        message: "".to_string(),
+                                    }),
                                 },
                             )),
                         };
 
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
                         // send message
                         Rpc::send_message(
-                            buf,
+                            proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             "".to_string(),
                             Vec::new(),
                         );
                     }
                     Some(proto_rpc::group::Message::GroupRenameRequest(group_rename_req)) => {
+                        let mut status = true;
+                        let mut message: String = "".to_string();
                         if let Err(err) = Manage::rename_group(
                             &my_user_id,
                             &group_rename_req.group_id,
                             group_rename_req.group_name.clone(),
                         ) {
-                            log::error!("Rename group error, {}", err);
-                        } else {
-                            let proto_message = proto_rpc::Group {
-                                message: Some(proto_rpc::group::Message::GroupCreateResponse(
-                                    proto_rpc::GroupCreateResponse {
-                                        group_name: group_rename_req.group_name.clone(),
-                                        group_id: group_rename_req.group_id.clone(),
-                                    },
-                                )),
-                            };
+                            status = false;
+                            message = err.clone();
+                        }
 
-                            // encode message
-                            let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                            proto_message
-                                .encode(&mut buf)
-                                .expect("Vec<u8> provides capacity as needed");
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupRenameResponse(
+                                proto_rpc::GroupRenameResponse {
+                                    group_id: group_rename_req.group_id.clone(),
+                                    group_name: group_rename_req.group_name.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                },
+                            )),
+                        };
 
-                            // send message
-                            Rpc::send_message(
-                                buf,
-                                crate::rpc::proto::Modules::Group.into(),
-                                "".to_string(),
-                                Vec::new(),
-                            );
+                        // send message
+                        Rpc::send_message(
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            "".to_string(),
+                            Vec::new(),
+                        );
 
-                            //post updates
+                        //post updates
+                        if status {
                             Self::post_group_update(&my_user_id, &group_rename_req.group_id);
                         }
                     }
@@ -631,15 +628,10 @@ impl Group {
                                         res,
                                     )),
                                 };
-                                // encode message
-                                let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                                proto_message
-                                    .encode(&mut buf)
-                                    .expect("Vec<u8> provides capacity as needed");
 
                                 // send message
                                 Rpc::send_message(
-                                    buf,
+                                    proto_message.encode_to_vec(),
                                     crate::rpc::proto::Modules::Group.into(),
                                     "".to_string(),
                                     Vec::new(),
@@ -655,48 +647,110 @@ impl Group {
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
                         };
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
                         // send message
                         Rpc::send_message(
-                            buf,
+                            proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             "".to_string(),
                             Vec::new(),
                         );
                     }
                     Some(proto_rpc::group::Message::GroupInviteMemberRequest(invite_req)) => {
+                        let mut status = true;
+                        let mut message: String = "".to_string();
                         if let Err(err) = Member::invite(
                             &my_user_id,
                             &invite_req.group_id,
                             &PeerId::from_bytes(&invite_req.user_id).unwrap(),
                         ) {
+                            status = false;
+                            message = err.clone();
                             log::error!("Get group info error, {}", err);
                         }
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupInviteMemberResponse(
+                                proto_rpc::GroupInviteMemberResponse {
+                                    group_id: invite_req.group_id.clone(),
+                                    user_id: invite_req.user_id.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                },
+                            )),
+                        };
+
+                        // send message
+                        Rpc::send_message(
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            "".to_string(),
+                            Vec::new(),
+                        );
                     }
                     Some(proto_rpc::group::Message::GroupReplyInviteRequest(reply_req)) => {
+                        let mut status = true;
+                        let mut message: String = "".to_string();
+
                         if let Err(err) = Member::reply_invite(
                             &my_user_id,
                             &reply_req.group_id,
                             &PeerId::from_bytes(&reply_req.user_id).unwrap(),
                             reply_req.accept,
                         ) {
+                            status = false;
+                            message = err.clone();
                             log::error!("Get group info error, {}", err);
                         }
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupReplyInviteResponse(
+                                proto_rpc::GroupReplyInviteResponse {
+                                    group_id: reply_req.group_id.clone(),
+                                    user_id: reply_req.user_id.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                },
+                            )),
+                        };
+
+                        // send message
+                        Rpc::send_message(
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            "".to_string(),
+                            Vec::new(),
+                        );
                     }
 
                     Some(proto_rpc::group::Message::GroupRemoveMemberRequest(remove_req)) => {
+                        let mut status = true;
+                        let mut message: String = "".to_string();
+
                         if let Err(err) = Member::remove(
                             &my_user_id,
                             &remove_req.group_id,
                             &PeerId::from_bytes(&remove_req.user_id).unwrap(),
                         ) {
+                            status = false;
+                            message = err.clone();
                             log::error!("Get group info error, {}", err);
-                        } else {
+                        }
+
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupRemoveMemberResponse(
+                                proto_rpc::GroupRemoveMemberResponse {
+                                    group_id: remove_req.group_id.clone(),
+                                    user_id: remove_req.user_id.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                },
+                            )),
+                        };
+
+                        // send message
+                        Rpc::send_message(
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            "".to_string(),
+                            Vec::new(),
+                        );
+
+                        if status {
                             Self::post_group_update(&my_user_id, &remove_req.group_id);
                         }
                     }
