@@ -5,28 +5,16 @@
 //!
 //! The messaging service is used for sending, receiving and
 
-use crate::connections::ConnectionModule;
 use libp2p::PeerId;
 use prost::Message;
-use state::Storage;
-use std::collections::{BTreeMap, VecDeque};
-use std::sync::RwLock;
 
-use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router;
-use crate::router::table::RoutingTable;
 
 use crate::services::chat;
 use crate::services::crypto::Crypto;
 use crate::services::filesharing;
 use crate::services::group;
 use crate::services::rtc;
-
-use crate::storage::database::DataBase;
-use crate::utilities::timestamp::{self, Timestamp};
-use qaul_messaging::QaulMessagingReceived;
-use serde::{Deserialize, Serialize};
-use sled_extensions::{bincode::Tree, DbExt};
 
 use super::ConversationId;
 
@@ -66,8 +54,8 @@ impl MessagingProcess {
                     chat::Chat::update_confirmation(receiver_id, &msg_id, confirm.received_at);
                 }
             }
-            Some(super::proto::messaging::Message::CryptoService(crypto)) => {}
-            Some(super::proto::messaging::Message::RtcStreamMessage(rtc_stream)) => {}
+            Some(super::proto::messaging::Message::CryptoService(_crypto)) => {}
+            Some(super::proto::messaging::Message::RtcStreamMessage(_rtc_stream)) => {}
             Some(super::proto::messaging::Message::GroupNotifyMessage(group_notify)) => {
                 group::Group::on_notify(sender_id, receiver_id, &group_notify.content);
             }
@@ -114,6 +102,12 @@ impl MessagingProcess {
                             &common.message_id,
                             2,
                         );
+                        filesharing::FileShare::net(
+                            &sender_id,
+                            &receiver_id,
+                            &common.conversation_id,
+                            &file_message.content,
+                        );
                     }
                     Some(super::proto::common_message::Payload::GroupMessage(
                         ref group_message,
@@ -154,16 +148,23 @@ impl MessagingProcess {
                     sender_id.to_base58(),
                     receiver_id.to_base58()
                 );
-                // save incomming message
-                group::GroupMessage::on_message(
+
+                //update group status
+                if let Err(e) = group::GroupMessage::on_message(
                     sender_id,
                     receiver_id,
                     &conversation_id.to_bytes(),
                     &common.message_id,
-                );
+                ) {
+                    log::error!("group stattus processing error {}", e);
+                }
 
                 // send confirm message
-                super::Messaging::send_confirmation(receiver_id, sender_id, signature);
+                if let Err(e) =
+                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                {
+                    log::error!("send confirmation failed {}", e);
+                }
             }
             _ => {
                 log::error!("process_direct_message: unknown message type");
@@ -255,7 +256,7 @@ impl MessagingProcess {
                             &container.signature,
                         );
                     }
-                    Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {}
+                    Some(super::proto::envelop_payload::Payload::Dtn(_dtn)) => {}
                     _ => {
                         log::error!("unknown envelop payload");
                         return;

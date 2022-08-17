@@ -448,6 +448,7 @@ impl Group {
                                 uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
                             println!("id: {}", group_id.to_string());
                             println!("\tname: {}", group.group_name.clone());
+                            println!("\tis_direct_chat: {}", group.is_direct_chat);
                             println!(
                                 "\tcreated_at: {}, members: {}",
                                 group.created_at,

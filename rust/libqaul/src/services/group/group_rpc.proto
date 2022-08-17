@@ -105,8 +105,10 @@ message GroupInfoResponse {
     string group_name = 2;
     // created at
     uint64 created_at = 3;
+    // is direct chat
+    bool is_direct_chat = 4;
     //members
-    repeated GroupMember members = 4;
+    repeated GroupMember members = 5;
 }
 
 // Group list request

@@ -1,11 +1,7 @@
 //use bs58::decode;
 use libp2p::PeerId;
 
-use super::proto;
-use super::Chat;
 use super::Group;
-use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
-use prost::Message;
 
 pub struct GroupMessage {}
 impl GroupMessage {

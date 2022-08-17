@@ -141,10 +141,10 @@ pub struct ChatMessageSend {
 pub enum ContentType {
     /// chat
     Chat = 0,
-    /// group
+    /// group management 
     Group = 1,
     /// file
     File = 2,
-    /// rtc
+    /// rtc management
     Rtc = 4,
 }

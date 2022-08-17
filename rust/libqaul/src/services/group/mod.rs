@@ -185,8 +185,13 @@ impl Group {
                 Some(mut group) => {
                     group.members.insert(member.user_id.clone(), member.clone());
                     // update DB
-                    user_groups.db_ref.insert(&idx.to_be_bytes(), group);
-                    user_groups.db_ref.flush();
+                    if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group) {
+                        log::error!("group db updating error");
+                    }
+
+                    if let Err(_e) = user_groups.db_ref.flush() {
+                        log::error!("group db flush error");
+                    }
                 }
                 _ => {}
             }
@@ -223,7 +228,12 @@ impl Group {
                 Some(mut group) => {
                     group.name = name.clone();
                     // update DB
-                    user_groups.db_ref.insert(&idx.to_be_bytes(), group);
+                    if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group) {
+                        log::error!("group db updating error");
+                    }
+                    if let Err(_e) = user_groups.db_ref.flush() {
+                        log::error!("group db flush error");
+                    }
                 }
                 _ => {}
             }
@@ -332,12 +342,39 @@ impl Group {
         receiver: &PeerId,
         data: &Vec<u8>,
     ) {
-        let message_id = Messaging::generate_message_id(&user_account.id);
-        let conversation_id =
-            messaging::ConversationId::from_peers(&user_account.id, &receiver).unwrap();
+        // create direct chat room
+        let group_id = messaging::ConversationId::from_peers(&user_account.id, &receiver).unwrap();
+        if !Self::is_group_exist(&user_account.id, &group_id.to_bytes()) {
+            Manage::create_new_direct_chat_group(&user_account.id, &receiver);
+        }
+
+        //get last index
+        let group;
+        match Self::get_group(&user_account.id, &group_id.to_bytes()) {
+            Ok(v) => {
+                group = v;
+            }
+            Err(_error) => {
+                return;
+            }
+        }
+
+        let mut my_member;
+        match group.get_member(&user_account.id.to_bytes()) {
+            Some(v) => {
+                my_member = v.clone();
+            }
+            _ => {
+                return;
+            }
+        }
+
+        let last_index = my_member.last_message_index + 1;
+        let message_id =
+            Messaging::generate_group_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
-            conversation_id: conversation_id.to_bytes(),
+            conversation_id: group.id.clone(),
             sent_at: timestamp::Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::GroupMessage(
                 proto::GroupMessage {
@@ -360,17 +397,20 @@ impl Group {
             Some(&message_id),
             true,
         ) {
-            Ok(signature) => {
+            Ok(_) => {
                 // save
                 Chat::save_outgoing_message(
                     &user_account.id,
                     &receiver,
-                    &conversation_id,
+                    &group_id,
                     &message_id,
                     chat::rpc_proto::ContentType::Group.try_into().unwrap(),
                     data,
                     0,
                 );
+                //update member state
+                my_member.last_message_index = last_index;
+                Self::update_group_member(&user_account.id, &group_id.to_bytes(), &my_member);
             }
             Err(err) => {
                 log::error!("group message sending failed {}", err);
@@ -382,10 +422,13 @@ impl Group {
     fn post_group_update(my_user_id: &PeerId, group_id: &Vec<u8>) {
         let groups = Self::get_groups_of_user(my_user_id);
 
+        log::error!("post_group_update!");
         let group_idx = groups.group_id_to_index(group_id);
         if group_idx == 0 {
             return;
         }
+
+        log::error!("post_group_update111!");
 
         let group = groups
             .db_ref
@@ -627,9 +670,11 @@ impl Group {
                         );
                     }
                     Some(proto_rpc::group::Message::GroupInviteMemberRequest(invite_req)) => {
-                        if let Err(err) =
-                            Member::invite(&my_user_id, &invite_req.group_id, &invite_req.user_id)
-                        {
+                        if let Err(err) = Member::invite(
+                            &my_user_id,
+                            &invite_req.group_id,
+                            &PeerId::from_bytes(&invite_req.user_id).unwrap(),
+                        ) {
                             log::error!("Get group info error, {}", err);
                         }
                     }
@@ -637,7 +682,7 @@ impl Group {
                         if let Err(err) = Member::reply_invite(
                             &my_user_id,
                             &reply_req.group_id,
-                            &reply_req.user_id,
+                            &PeerId::from_bytes(&reply_req.user_id).unwrap(),
                             reply_req.accept,
                         ) {
                             log::error!("Get group info error, {}", err);
@@ -645,9 +690,11 @@ impl Group {
                     }
 
                     Some(proto_rpc::group::Message::GroupRemoveMemberRequest(remove_req)) => {
-                        if let Err(err) =
-                            Member::remove(&my_user_id, &remove_req.group_id, &remove_req.user_id)
-                        {
+                        if let Err(err) = Member::remove(
+                            &my_user_id,
+                            &remove_req.group_id,
+                            &PeerId::from_bytes(&remove_req.user_id).unwrap(),
+                        ) {
                             log::error!("Get group info error, {}", err);
                         } else {
                             Self::post_group_update(&my_user_id, &remove_req.group_id);

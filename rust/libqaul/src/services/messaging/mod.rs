@@ -10,24 +10,20 @@ use crate::connections::ConnectionModule;
 use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
-use std::collections::{VecDeque, BTreeMap};
+use std::collections::{BTreeMap, VecDeque};
 use std::sync::RwLock;
 
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::router;
+
 use crate::router::table::RoutingTable;
 
-use super::chat::Chat;
 use super::crypto::Crypto;
-use super::filesharing;
-use super::group;
-use super::rtc;
 
 mod process;
 use process::MessagingProcess;
 
 use crate::storage::database::DataBase;
-use crate::utilities::timestamp::{Timestamp, self};
+use crate::utilities::timestamp::{self, Timestamp};
 use qaul_messaging::QaulMessagingReceived;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
@@ -47,13 +43,11 @@ pub struct MessageId {
     last_index: u32,
 }
 
-/// MessageIds structure 
+/// MessageIds structure
 pub struct MessageIds {
     /// sender => mesage id
     pub ids: BTreeMap<Vec<u8>, MessageId>,
 }
-
-
 
 /// mutable state of messages, scheduled for sending
 pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
@@ -67,12 +61,10 @@ pub struct ScheduledMessage {
     container: proto::Container,
 }
 
-
 /// mutable state of messages, scheduled for sending
 pub static UNCONFIRMED: Storage<RwLock<UnConfirmedMessages>> = Storage::new();
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone)]
-pub struct UnConfirmedMessage{
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
+pub struct UnConfirmedMessage {
     pub receiver_id: Vec<u8>,
     pub message_id: Vec<u8>,
     pub container: Vec<u8>,
@@ -84,15 +76,11 @@ pub struct UnConfirmedMessages {
     pub unconfirmed: Tree<UnConfirmedMessage>,
 }
 
-
-
 /// Qaul Messaging Structure
 pub struct Messaging {
     /// ring buffer of messages scheduled for sending
     pub to_send: VecDeque<ScheduledMessage>,
 }
-
-
 
 /// Qaul Failed Message Structure
 #[derive(Serialize, Deserialize, Clone)]
@@ -110,34 +98,29 @@ pub struct FailedMessaging {
     pub tree: Tree<FailedMessage>,
 }
 
-
-pub struct ConversationId{
-    pub id: Vec<u8>
+pub struct ConversationId {
+    pub id: Vec<u8>,
 }
-impl ConversationId{
-    pub fn from_bytes(id: &Vec<u8>)->Result<ConversationId, String>{
-        if id.len() == 16{
-            Ok(
-                ConversationId{
-                    id: id.clone()
-                } 
-            )
-        }else{
+impl ConversationId {
+    pub fn from_bytes(id: &Vec<u8>) -> Result<ConversationId, String> {
+        if id.len() == 16 {
+            Ok(ConversationId { id: id.clone() })
+        } else {
             Err("invalid length".to_string())
         }
     }
 
-    pub fn from_peers(user_id0: &PeerId, user_id1: &PeerId)->Result<ConversationId, String>{
+    pub fn from_peers(user_id0: &PeerId, user_id1: &PeerId) -> Result<ConversationId, String> {
         let crc_0 = crc::crc64::checksum_iso(&user_id0.to_bytes());
         let crc_1 = crc::crc64::checksum_iso(&user_id1.to_bytes());
 
         let mut buf = crc_0.to_be_bytes().to_vec();
         let mut buf1 = crc_1.to_be_bytes().to_vec();
 
-        if crc_0 < crc_1{
+        if crc_0 < crc_1 {
             buf.append(&mut buf1);
             Self::from_bytes(&buf)
-        }else{
+        } else {
             buf1.append(&mut buf);
             Self::from_bytes(&buf1)
         }
@@ -149,20 +132,17 @@ impl ConversationId{
     pub fn to_base58(&self) -> String {
         bs58::encode(self.to_bytes()).into_string()
     }
-    pub fn is_equal(&self, inst: &ConversationId)->bool{
-        log::error!("is_eq={}, {}", self.to_base58() , inst.to_base58());
+    pub fn is_equal(&self, inst: &ConversationId) -> bool {
+        log::error!("is_eq={}, {}", self.to_base58(), inst.to_base58());
         self.to_base58() == inst.to_base58()
     }
-
 }
-
 
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
-        
-        let message_ids = MessageIds{
-            ids: BTreeMap::new()
+        let message_ids = MessageIds {
+            ids: BTreeMap::new(),
         };
         MESSAGEIDS.set(RwLock::new(message_ids));
 
@@ -182,23 +162,27 @@ impl Messaging {
         UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
 
-
-    pub fn generate_message_id(sender_id: &PeerId) -> Vec<u8>{
-
+    pub fn generate_message_id(sender_id: &PeerId) -> Vec<u8> {
         let timestamp = timestamp::Timestamp::get_timestamp();
         // determine index
         let mut index: u32 = 0;
         let mut message_ids = MESSAGEIDS.get().write().unwrap();
-        match  message_ids.ids.get_mut(&sender_id.to_bytes()){
-            Some(mut id)=>{
-                if id.timestamp==timestamp{
+        match message_ids.ids.get_mut(&sender_id.to_bytes()) {
+            Some(mut id) => {
+                if id.timestamp == timestamp {
                     index = id.last_index + 1;
                 }
                 id.timestamp = timestamp;
                 id.last_index = index;
-            },
-            _ =>{ 
-                message_ids.ids.insert(sender_id.to_bytes(), MessageId{timestamp, last_index :0});
+            }
+            _ => {
+                message_ids.ids.insert(
+                    sender_id.to_bytes(),
+                    MessageId {
+                        timestamp,
+                        last_index: 0,
+                    },
+                );
             }
         }
 
@@ -212,8 +196,11 @@ impl Messaging {
         buff
     }
 
-    pub fn generate_group_message_id(group_id: &Vec<u8>, sender_id: &PeerId, index: u32) -> Vec<u8>{
-
+    pub fn generate_group_message_id(
+        group_id: &Vec<u8>,
+        sender_id: &PeerId,
+        index: u32,
+    ) -> Vec<u8> {
         let group_crc = crc::crc64::checksum_iso(group_id);
         let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
         let mut buff0 = group_crc.to_be_bytes().to_vec();
@@ -223,13 +210,12 @@ impl Messaging {
         buff0.append(&mut buff);
         buff0.append(&mut index_bytes);
         buff0
-    }    
-
+    }
 
     // // create DB key from conversation ID, timestamp
     // fn get_db_key_from_vec(conversation_id: Vec<u8>, timestamp: u64) -> Vec<u8> {
     //     let mut timestamp_bytes = timestamp.to_be_bytes().to_vec();
-    //     let mut userid_bytes = timestamp.to_be_bytes().to_vec();        
+    //     let mut userid_bytes = timestamp.to_be_bytes().to_vec();
     //     let mut key_bytes = conversation_id;
 
     //     userid_bytes.append(&mut key_bytes);
@@ -237,7 +223,7 @@ impl Messaging {
     //     userid_bytes
     // }
 
-    // /// save failed message 
+    // /// save failed message
     // pub fn save_failed_outgoing_message(user_id: PeerId, conversation_id: PeerId, contents: String){
     //     let timestamp = Timestamp::get_timestamp();
     //     let key = Self::get_db_key_from_vec(conversation_id.to_bytes(), timestamp);
@@ -262,11 +248,15 @@ impl Messaging {
     //     // flush trees to disk
     //     if let Err(e) = failed_meesaging.tree.flush() {
     //         log::error!("Error failed chat messages flush: {}", e);
-    //     }        
+    //     }
     // }
 
-    fn save_unconfirmed_message(message_id: &Vec<u8>, receiver: &PeerId, container: &proto::Container){
-        let new_entry = UnConfirmedMessage{
+    fn save_unconfirmed_message(
+        message_id: &Vec<u8>,
+        receiver: &PeerId,
+        container: &proto::Container,
+    ) {
+        let new_entry = UnConfirmedMessage {
             receiver_id: receiver.to_bytes(),
             container: container.encode_to_vec(),
             last_sent: Timestamp::get_timestamp(),
@@ -276,7 +266,10 @@ impl Messaging {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
         //
-        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), new_entry){
+        if let Err(e) = unconfirmed
+            .unconfirmed
+            .insert(container.signature.clone(), new_entry)
+        {
             log::error!("{}", e);
         }
         // flush
@@ -286,25 +279,24 @@ impl Messaging {
     }
 
     // process confirmation message and return (sender_id, message_id)
-    pub fn on_confirmed_message(signature: &Vec<u8>)->Option<Vec<u8>>{
-        
+    pub fn on_confirmed_message(signature: &Vec<u8>) -> Option<Vec<u8>> {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
         // remove unconfirmed from DB
-        match unconfirmed.unconfirmed.remove(signature){
-            Ok(v) =>{
+        match unconfirmed.unconfirmed.remove(signature) {
+            Ok(v) => {
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
                     log::error!("Error unconfirmed table flush: {}", e);
                 }
 
-                match v{
-                    Some(unconfirmed) =>{
+                match v {
+                    Some(unconfirmed) => {
                         return Some(unconfirmed.message_id.clone());
-                    },
+                    }
                     _ => {}
                 }
-            },
-            Err(e) =>{
+            }
+            Err(e) => {
                 log::error!("{}", e);
             }
         }
@@ -337,10 +329,10 @@ impl Messaging {
 
         // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
 
-        let envelop_payload = proto::EnvelopPayload{
+        let envelop_payload = proto::EnvelopPayload {
             payload: Some(proto::envelop_payload::Payload::Encrypted(
-                proto::Encrypted{data: data.clone()}
-            ))
+                proto::Encrypted { data: data.clone() },
+            )),
         };
 
         // let payload = proto::Encrypted{data: data.clone()};
@@ -356,7 +348,7 @@ impl Messaging {
             receiver_id: receiver.to_bytes(),
             //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
             //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
-            payload: envelop_payload.encode_to_vec()
+            payload: envelop_payload.encode_to_vec(),
         };
 
         // debug
@@ -377,7 +369,7 @@ impl Messaging {
             };
 
             // in common message case, save into unconfirmed table
-            if is_common_message{
+            if is_common_message {
                 Self::save_unconfirmed_message(message_id.unwrap(), receiver, &container);
             }
 
