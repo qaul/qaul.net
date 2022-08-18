@@ -79,7 +79,22 @@ enum ContentType {
     // file
     file = 2;
     // rtc management
-    rtc = 4;
+    rtc = 3;
+    // group event
+    group_event = 4;
+}
+
+
+enum MessageStatus {
+    // message not sent yet
+    SENDING = 0;
+    // message sent
+    SENT = 1;
+    // message received
+    RECEIVED = 2;
+    // all group members received the message successfully
+    // this option is only used for groups with more then 2 members
+    RECEIVED_BY_ALL = 3;
 }
 
 
@@ -92,10 +107,7 @@ message ChatMessage {
     // message id or member id
     bytes message_id = 3;        
     // message status
-    // 0 = nothing
-    // 1 = sent
-    // 2 = received
-    uint32 status = 4;
+    MessageStatus status = 4;
     // conversation id
     bytes conversation_id = 5;
     // time when the message was sent

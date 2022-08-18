@@ -236,7 +236,7 @@ impl Chat {
     }
 
     fn analyze_content(
-        status: u32,
+        status: proto::MessageStatus,
         content_type: i32,
         content: &Vec<u8>,
     ) -> Result<Vec<String>, String> {
@@ -282,7 +282,9 @@ impl Chat {
                         Some(proto_group::group_container::Message::InviteMember(invite)) => {
                             let group_id =
                                 uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
-                            if status <= 1 {
+                            if status == proto::MessageStatus::Sending
+                                || status == proto::MessageStatus::Sent
+                            {
                                 res.push(
                                     "Sent group invite group id: ".to_string()
                                         + group_id.to_string().as_str(),
@@ -304,7 +306,9 @@ impl Chat {
                         Some(proto_group::group_container::Message::ReplyInvite(reply_invite)) => {
                             let group_id =
                                 uuid::Uuid::from_bytes(reply_invite.group_id.try_into().unwrap());
-                            if status <= 1 {
+                            if status == proto::MessageStatus::Sending
+                                || status == proto::MessageStatus::Sent
+                            {
                                 res.push(
                                     "Sent group accept group id: ".to_string()
                                         + group_id.to_string().as_str(),
@@ -322,6 +326,7 @@ impl Chat {
                     }
                 }
             }
+            proto::ContentType::GroupEvent => {}
             proto::ContentType::Rtc => {}
         }
         Err("".to_string())
@@ -350,9 +355,11 @@ impl Chat {
                             print!("  {} | ", message.unread);
                             print!("{} | ", message.last_message_index);
                             print!("{} | ", message.last_message_at);
-                            if let Ok(ss) =
-                                Self::analyze_content(1, message.content_type, &message.content)
-                            {
+                            if let Ok(ss) = Self::analyze_content(
+                                proto::MessageStatus::Sent,
+                                message.content_type,
+                                &message.content,
+                            ) {
                                 for s in ss {
                                     println!("\t{}", s);
                                 }
@@ -377,7 +384,7 @@ impl Chat {
                         // print all messages in the feed list
                         for message in proto_conversation.message_list {
                             if let Ok(ss) = Self::analyze_content(
-                                message.status,
+                                proto::MessageStatus::from_i32(message.status).unwrap(),
                                 message.content_type,
                                 &message.content,
                             ) {

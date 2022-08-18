@@ -88,7 +88,7 @@ impl MessagingProcess {
                             common.sent_at,
                             &conversation_id,
                             &common.message_id,
-                            2,
+                            chat::rpc_proto::MessageStatus::Received,
                         );
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
@@ -100,7 +100,7 @@ impl MessagingProcess {
                             common.sent_at,
                             &conversation_id,
                             &common.message_id,
-                            2,
+                            chat::rpc_proto::MessageStatus::Received,
                         );
                         filesharing::FileShare::net(
                             &sender_id,
@@ -122,7 +122,7 @@ impl MessagingProcess {
                             common.sent_at,
                             &conversation_id,
                             &common.message_id,
-                            2,
+                            chat::rpc_proto::MessageStatus::Received,
                         );
                     }
                     Some(super::proto::common_message::Payload::RtcMessage(ref rtc_message)) => {
@@ -134,7 +134,7 @@ impl MessagingProcess {
                             common.sent_at,
                             &conversation_id,
                             &common.message_id,
-                            2,
+                            chat::rpc_proto::MessageStatus::Received,
                         );
                     }
                     _ => {

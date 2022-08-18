@@ -135,7 +135,7 @@ impl Chat {
         sent_at: u64,
         conversation_id: &messaging::ConversationId,
         message_id: &Vec<u8>,
-        status: u32,
+        status: rpc_proto::MessageStatus,
     ) -> bool {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
@@ -188,7 +188,7 @@ impl Chat {
             index: overview.last_message_index,
             sender_id: sender_id.to_bytes(),
             message_id: message_id.clone(),
-            status,
+            status: status.try_into().unwrap(),
             conversation_id: conversation_id.to_bytes(),
             sent_at,
             received_at: timestamp,
@@ -322,7 +322,7 @@ impl Chat {
             &message_id,
             rpc_proto::ContentType::Chat.try_into().unwrap(),
             &message.encode_to_vec(),
-            0,
+            rpc_proto::MessageStatus::Sending,
         );
 
         //broad cast to all group members
@@ -352,7 +352,7 @@ impl Chat {
         message_id: &Vec<u8>,
         content_type: i32,
         content: &Vec<u8>,
-        status: u32,
+        status: rpc_proto::MessageStatus,
     ) {
         // // create timestamp
         let timestamp = Timestamp::get_timestamp();
@@ -405,7 +405,7 @@ impl Chat {
             index: overview.last_message_index,
             sender_id: user_id.to_bytes(),
             message_id: message_id.clone(),
-            status,
+            status: status.try_into().unwrap(),
             conversation_id: conversation_id.to_bytes(),
             sent_at: timestamp,
             received_at: timestamp,
