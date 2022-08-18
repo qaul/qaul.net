@@ -116,7 +116,7 @@ message ChatMessage {
     uint64 received_at = 7;
     // content type
     ContentType content_type = 8;
-    // content of the message    
+    // content of the message
     bytes content = 9;
 }
 
@@ -128,3 +128,22 @@ message ChatMessageSend {
     string content = 2;
 }
 
+
+// the possible group event types
+enum GroupEventType {
+  // default value, undefined message
+  // delete this message
+  NONE = 0;
+  // user joined group
+  GROUP_JOINED = 1;
+  // user left group
+  GROUP_LEFT = 2;
+}
+
+// the info message
+message GroupEvent {
+  // message type
+  GroupEventType event_type = 1;
+  // user ID of user joined or left
+  bytes user_id = 2;
+}
