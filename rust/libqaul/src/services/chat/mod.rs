@@ -124,6 +124,82 @@ impl Chat {
         }
     }
 
+    /// Save events
+    ///
+    /// This function records some events in the data base
+    pub fn save_event(
+        user_id: &PeerId,
+        sender_id: &PeerId,
+        content_type: i32,
+        content: &Vec<u8>,
+        conversation_id: &messaging::ConversationId,
+    ) -> bool {
+        // create timestamp
+        let timestamp = Timestamp::get_timestamp();
+
+        // get data base of user account
+        let db_ref = Self::get_user_db_ref(user_id.clone());
+
+        // check if group message
+        let is_group = !(conversation_id
+            .is_equal(&messaging::ConversationId::from_peers(user_id, sender_id).unwrap()));
+
+        // if direct chat, check group exist
+        if !is_group {
+            if !group::Group::is_group_exist(user_id, &conversation_id.to_bytes()) {
+                group::Manage::create_new_direct_chat_group(user_id, sender_id);
+            }
+        }
+
+        log::error!("save incomeming is_group={}", is_group);
+        let overview;
+        match Self::update_overview(
+            user_id,
+            sender_id,
+            &db_ref,
+            &conversation_id.to_bytes(),
+            timestamp,
+            content_type,
+            content,
+            &sender_id.to_bytes(),
+            is_group,
+        ) {
+            Ok(chat_overview) => overview = chat_overview,
+            Err(e) => {
+                log::error!("{}", e);
+                return false;
+            }
+        }
+
+        // create data base key
+        let db_key =
+            Self::get_db_key_from_vec(&conversation_id.to_bytes(), overview.last_message_index);
+
+        // create chat message
+        let chat_message = rpc_proto::ChatMessage {
+            index: overview.last_message_index,
+            sender_id: sender_id.to_bytes(),
+            message_id: vec![],
+            status: 0,
+            conversation_id: conversation_id.to_bytes(),
+            sent_at: timestamp,
+            received_at: timestamp,
+            content_type,
+            content: content.clone(),
+        };
+
+        // save message in data base
+        if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message) {
+            log::error!("Error saving chat message to data base: {}", e);
+        }
+        // flush trees to disk
+        if let Err(e) = db_ref.messages.flush() {
+            log::error!("Error chat messages flush: {}", e);
+        }
+
+        true
+    }
+
     /// Save a new incoming Message
     ///
     /// This function saves an incoming chat message in the data base

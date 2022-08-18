@@ -115,7 +115,7 @@ pub struct ChatMessage {
     /// content type
     #[prost(enumeration="ContentType", tag="8")]
     pub content_type: i32,
-    /// content of the message    
+    /// content of the message
     #[prost(bytes="vec", tag="9")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
@@ -128,6 +128,16 @@ pub struct ChatMessageSend {
     /// content of the message
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,
+}
+/// the info message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupEvent {
+    /// message type
+    #[prost(enumeration="GroupEventType", tag="1")]
+    pub event_type: i32,
+    /// user ID of user joined or left
+    #[prost(bytes="vec", tag="2")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Content Type
 ///
@@ -159,4 +169,16 @@ pub enum MessageStatus {
     /// all group members received the message successfully
     /// this option is only used for groups with more then 2 members
     ReceivedByAll = 3,
+}
+/// the possible group event types
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum GroupEventType {
+    /// default value, undefined message
+    /// delete this message
+    None = 0,
+    /// user joined group
+    GroupJoined = 1,
+    /// user left group
+    GroupLeft = 2,
 }
