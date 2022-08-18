@@ -476,7 +476,7 @@ impl FileShare {
                     &message_id,
                     chat::rpc_proto::ContentType::File.try_into().unwrap(),
                     &msg.encode_to_vec(),
-                    0,
+                    chat::rpc_proto::MessageStatus::Sending,
                 );
                 stored_info = true;
             }
