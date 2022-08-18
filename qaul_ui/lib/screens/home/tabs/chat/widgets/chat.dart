@@ -103,15 +103,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(currentOpenChatRoom.notifier).state = room;
-      ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final room = ref.watch(currentOpenChatRoom);
 
