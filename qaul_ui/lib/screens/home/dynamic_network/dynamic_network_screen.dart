@@ -4,13 +4,14 @@ import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/body_component.dart';
 import 'package:flame_forge2d/contact_callbacks.dart';
 import 'package:flame_forge2d/forge2d_game.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' hide Draggable;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Draggable;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:forge2d/forge2d.dart';
@@ -51,7 +52,7 @@ class DynamicNetworkScreen extends HookConsumerWidget {
   }
 }
 
-class _DynamicNetworkGameEngine extends Forge2DGame with HasTappables {
+class _DynamicNetworkGameEngine extends Forge2DGame with HasTappables, HasDraggables {
   _DynamicNetworkGameEngine({required this.root}) : super(gravity: Vector2(0, 0));
   final NetworkNode root;
 
@@ -137,7 +138,7 @@ class _NudgeSiblingsAndNephewsCallback
   void end(_NetworkNodeComponent a, _NetworkNodeComponent b, Contact contact) {}
 }
 
-class _NetworkNodeComponent extends BodyComponent with Tappable {
+class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
   _NetworkNodeComponent(
     this.node,
     this._position, {
@@ -147,7 +148,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
     this.ballParent,
     this.openBottomSheetOnTap = true,
   }) {
-    // Painted manually on render()
+    // Node is painted manually on render()
     paint = Paint()..color = Colors.transparent;
   }
 
@@ -163,6 +164,11 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
   final _NetworkNodeComponent? ballParent;
 
   final _noise = OpenSimplex2S(math.Random().nextInt(255));
+
+  async.Timer? _timer;
+
+  MouseJoint? mouseJoint;
+  late Body groundBody;
 
   double get x => body.position.x;
 
@@ -193,16 +199,24 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
     return 0.015 * math.sqrt(math.pow(radius / 2 - x, 2) + math.pow(radius / 2 - y, 2));
   }
 
+  void restartTimer() {
+    if (_timer != null) return;
+    _timer = async.Timer.periodic(
+      const Duration(milliseconds: 100),
+          (t) => addNoise(t.tick),
+    );
+  }
+
+  // **************************
+  // BodyComponent methods
+  // **************************
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    if (ballParent != null) restartTimer();
 
-    if (ballParent != null) {
-      async.Timer.periodic(
-        const Duration(milliseconds: 100),
-        (t) => addNoise(t.tick),
-      );
-    }
+    groundBody = world.createBody(BodyDef());
+
     var i = 0;
     for (final child in node.children ?? {}) {
       var numberOfChildren = (node.children!.length);
@@ -229,17 +243,6 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
       gameRef.add(component);
     }
-  }
-
-  @override
-  bool onTapDown(_) {
-    if (openBottomSheetOnTap && gameRef.buildContext != null) {
-      Scaffold.of(gameRef.buildContext!).showBottomSheet(
-        (context) => _NetworkNodeInfoBottomSheet(node: node),
-        backgroundColor: Colors.transparent,
-      );
-    }
-    return false;
   }
 
   @override
@@ -279,7 +282,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
 
       jointDef.collideConnected = true;
       jointDef.dampingRatio = .2;
-      jointDef.frequencyHz = 1.0;
+      jointDef.frequencyHz = 0;
 
       world.createJoint(DistanceJoint(jointDef));
     }
@@ -319,5 +322,69 @@ class _NetworkNodeComponent extends BodyComponent with Tappable {
     );
     tp.layout();
     tp.paint(canvas, Offset.zero - tp.size.center(Offset.zero));
+  }
+
+  // **************************
+  // Tappable methods
+  // **************************
+  @override
+  bool onTapDown(_) {
+    if (openBottomSheetOnTap && gameRef.buildContext != null) {
+      Scaffold.of(gameRef.buildContext!).showBottomSheet(
+            (context) => _NetworkNodeInfoBottomSheet(node: node),
+        backgroundColor: Colors.transparent,
+      );
+    }
+    return false;
+  }
+
+  // **************************
+  // Draggable methods
+  // **************************
+  @override
+  bool onDragStart(DragStartInfo info) {
+    if (ballParent != null) return true;
+
+    _timer?.cancel();
+    return false;
+  }
+
+  @override
+  bool onDragUpdate(DragUpdateInfo info) {
+    if (ballParent != null) return true;
+
+    final mouseJointDef = MouseJointDef()
+      ..maxForce = 3000 * body.mass * 10
+      ..dampingRatio = 0.1
+      ..frequencyHz = 5
+      ..target.setFrom(body.position)
+      ..collideConnected = false
+      ..bodyA = groundBody
+      ..bodyB = body;
+
+    if (mouseJoint == null) {
+      mouseJoint = MouseJoint(mouseJointDef);
+      world.createJoint(mouseJoint!);
+    }
+    mouseJoint?.setTarget(info.eventPosition.game);
+    return false;
+  }
+
+  @override
+  bool onDragEnd(DragEndInfo info) {
+    if (ballParent != null || mouseJoint == null) return true;
+
+    world.destroyJoint(mouseJoint!);
+    mouseJoint = null;
+    restartTimer();
+    return false;
+  }
+
+  @override
+  bool onDragCancel() {
+    if (ballParent != null) return true;
+
+    restartTimer();
+    return false;
   }
 }
