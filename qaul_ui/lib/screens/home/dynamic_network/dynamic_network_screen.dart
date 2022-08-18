@@ -6,15 +6,12 @@ import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame_forge2d/body_component.dart';
-import 'package:flame_forge2d/contact_callbacks.dart';
-import 'package:flame_forge2d/forge2d_game.dart';
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart' hide Draggable;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Draggable;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:forge2d/forge2d.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intersperse/intersperse.dart';
 import 'package:open_simplex_2/open_simplex_2.dart';
@@ -52,8 +49,10 @@ class DynamicNetworkScreen extends HookConsumerWidget {
   }
 }
 
-class _DynamicNetworkGameEngine extends Forge2DGame with HasTappables, HasDraggables {
-  _DynamicNetworkGameEngine({required this.root}) : super(gravity: Vector2(0, 0));
+class _DynamicNetworkGameEngine extends Forge2DGame
+    with HasTappables, HasDraggables {
+  _DynamicNetworkGameEngine({required this.root})
+      : super(gravity: Vector2(0, 0));
   final NetworkNode root;
 
   @override
@@ -119,15 +118,19 @@ class _Wall extends BodyComponent {
 class _NudgeSiblingsAndNephewsCallback
     extends ContactCallback<_NetworkNodeComponent, _NetworkNodeComponent> {
   @override
-  void begin(_NetworkNodeComponent a, _NetworkNodeComponent b, Contact contact) {
+  void begin(
+      _NetworkNodeComponent a, _NetworkNodeComponent b, Contact contact) {
     var nodesInSameLevel = a.level == b.level;
     var aHitsParentSibling = a.level == b.level + 1 && a.ballParent != b;
     if (nodesInSameLevel || aHitsParentSibling) {
-      final dist = contact.bodyA.position.distanceToSquared(contact.bodyB.position);
+      final dist =
+          contact.bodyA.position.distanceToSquared(contact.bodyB.position);
       final overlap = 0.5 * (dist - a.radius - b.radius);
 
-      final x = a.body.position.x - (overlap * (a.body.position.x - b.body.position.x) / dist);
-      final y = a.body.position.y - (overlap * (a.body.position.y - b.body.position.y) / dist);
+      final x = a.body.position.x -
+          (overlap * (a.body.position.x - b.body.position.x) / dist);
+      final y = a.body.position.y -
+          (overlap * (a.body.position.y - b.body.position.y) / dist);
 
       contact.bodyA.applyForce(Vector2(x, y));
       contact.bodyB.applyForce(Vector2(-x, -y));
@@ -196,14 +199,15 @@ class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
   }
 
   double offset(double x, double y) {
-    return 0.015 * math.sqrt(math.pow(radius / 2 - x, 2) + math.pow(radius / 2 - y, 2));
+    return 0.015 *
+        math.sqrt(math.pow(radius / 2 - x, 2) + math.pow(radius / 2 - y, 2));
   }
 
   void restartTimer() {
     if (_timer != null) return;
     _timer = async.Timer.periodic(
       const Duration(milliseconds: 100),
-          (t) => addNoise(t.tick),
+      (t) => addNoise(t.tick),
     );
   }
 
@@ -214,6 +218,8 @@ class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
   Future<void> onLoad() async {
     await super.onLoad();
     if (ballParent != null) restartTimer();
+
+    body.setFixedRotation(true);
 
     groundBody = world.createBody(BodyDef());
 
@@ -285,6 +291,18 @@ class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
       jointDef.frequencyHz = 0;
 
       world.createJoint(DistanceJoint(jointDef));
+    } else {
+      final center = gameRef.screenToWorld(gameRef.size * camera.zoom / 2);
+      final fixedPoint =
+          world.createBody(BodyDef(type: BodyType.static, position: center));
+
+      final jointDef = RopeJointDef()
+        ..maxLength = 20.0
+        ..collideConnected = false
+        ..bodyA = fixedPoint
+        ..bodyB = body;
+
+      world.createJoint(RopeJoint(jointDef));
     }
 
     return body;
@@ -331,7 +349,7 @@ class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
   bool onTapDown(_) {
     if (openBottomSheetOnTap && gameRef.buildContext != null) {
       Scaffold.of(gameRef.buildContext!).showBottomSheet(
-            (context) => _NetworkNodeInfoBottomSheet(node: node),
+        (context) => _NetworkNodeInfoBottomSheet(node: node),
         backgroundColor: Colors.transparent,
       );
     }
