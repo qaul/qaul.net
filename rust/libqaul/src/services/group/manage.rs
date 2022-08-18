@@ -4,6 +4,7 @@ use libp2p::PeerId;
 use crate::utilities::timestamp;
 use std::collections::BTreeMap;
 
+use super::chat;
 use super::Group;
 
 pub struct Manage {}
@@ -232,15 +233,32 @@ impl Manage {
         let mut groups = Group::get_groups_of_user(&user_id);
 
         let mut group_idx = groups.group_id_to_index(&notify.group_id);
+        let mut first_join = false;
+        let mut orign_members: BTreeMap<Vec<u8>, bool> = BTreeMap::new();
+        let mut new_members: Vec<Vec<u8>> = vec![];
 
         if group_idx == 0 {
             group_idx = groups.last_group + 1;
             groups.last_group = group_idx;
             groups.group_ids.insert(notify.group_id.clone(), group_idx);
+            first_join = true;
+        } else {
+            // get all origin members
+            if let Ok(grp_opt) = groups.db_ref.get(&group_idx.to_be_bytes().to_vec()) {
+                for (member_id, member) in &grp_opt.unwrap().members {
+                    orign_members.insert(member_id.clone(), true);
+                }
+            }
         }
 
         let mut members: BTreeMap<Vec<u8>, super::GroupMember> = BTreeMap::new();
         for m in &notify.members {
+            if orign_members.contains_key(&m.user_id) {
+                orign_members.remove(&m.user_id);
+            } else {
+                new_members.push(m.user_id.clone());
+            }
+
             members.insert(
                 m.user_id.clone(),
                 super::GroupMember {
@@ -261,9 +279,20 @@ impl Manage {
             creator_id: notify.creator_id.clone(),
             members,
         };
+
         if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group) {
             log::error!("group db updating error {}", error.to_string());
         }
         Group::update_groups_of_user(&user_id, groups);
+
+        if first_join {
+            let event = chat::rpc_proto::GroupEvent {
+                event_type: chat::rpc_proto::GroupEventType::GroupJoined
+                    .try_into()
+                    .unwrap(),
+                user_id: receiver_id.clone(),
+            };
+        } else {
+        }
     }
 }
