@@ -101,11 +101,8 @@ pub struct ChatMessage {
     #[prost(bytes="vec", tag="3")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
     /// message status
-    /// 0 = nothing
-    /// 1 = sent
-    /// 2 = received
-    #[prost(uint32, tag="4")]
-    pub status: u32,
+    #[prost(enumeration="MessageStatus", tag="4")]
+    pub status: i32,
     /// conversation id
     #[prost(bytes="vec", tag="5")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
@@ -146,5 +143,20 @@ pub enum ContentType {
     /// file
     File = 2,
     /// rtc management
-    Rtc = 4,
+    Rtc = 3,
+    /// group event
+    GroupEvent = 4,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum MessageStatus {
+    /// message not sent yet
+    Sending = 0,
+    /// message sent
+    Sent = 1,
+    /// message received
+    Received = 2,
+    /// all group members received the message successfully
+    /// this option is only used for groups with more then 2 members
+    ReceivedByAll = 3,
 }

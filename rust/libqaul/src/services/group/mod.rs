@@ -406,7 +406,7 @@ impl Group {
                     &message_id,
                     chat::rpc_proto::ContentType::Group.try_into().unwrap(),
                     data,
-                    0,
+                    chat::rpc_proto::MessageStatus::Sending,
                 );
                 //update member state
                 my_member.last_message_index = last_index;
