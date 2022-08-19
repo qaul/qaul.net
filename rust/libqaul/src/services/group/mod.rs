@@ -50,6 +50,8 @@ pub static GROUPSOFUSER: Storage<RwLock<GroupsOfUser>> = Storage::new();
 pub struct Groups {
     //DB reference
     pub db_ref: Tree<Group>,
+    //DB invited ref
+    pub invited_ref: Tree<GroupInvited>,
     // last group index
     pub last_group: u64,
     // id mapping group_id => index in DB
@@ -76,13 +78,30 @@ pub struct GroupMember {
     // user id
     pub user_id: Vec<u8>,
     // role = 0 => member, 255 => admin
-    pub role: u8,
+    pub role: i32,
     // joined at
     pub joined_at: u64,
     // state for future using
-    pub state: u8,
+    pub state: i32,
     // last message index
     pub last_message_index: u32,
+}
+
+/// Structure of Group
+#[derive(Serialize, Deserialize, Clone)]
+pub struct GroupInvited {
+    // group id
+    pub id: Vec<u8>,
+    // sender id
+    pub sender_id: Vec<u8>,
+    // recevied at
+    pub received_at: u64,
+    // recevied at
+    pub created_at: u64,
+    // group name
+    pub name: String,
+    // group member count
+    pub member_count: u32,
 }
 
 /// Structure of Group
@@ -198,6 +217,23 @@ impl Group {
         }
     }
 
+    /// update group member
+    pub fn update_group(user_id: &PeerId, group: &Group) {
+        let user_groups = Self::get_groups_of_user(user_id);
+        let idx = user_groups.group_id_to_index(&group.id);
+        if idx == 0 {
+            return;
+        }
+
+        if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group.clone()) {
+            log::error!("group db updating error");
+        }
+
+        if let Err(_e) = user_groups.db_ref.flush() {
+            log::error!("group db flush error");
+        }
+    }
+
     /// get group name
     pub fn get_group_name(user_id: &PeerId, group_id: &Vec<u8>) -> Option<String> {
         let groups = Self::get_groups_of_user(user_id);
@@ -289,6 +325,7 @@ impl Group {
     fn create_groups_of_user(user_id: &PeerId) -> Groups {
         let db = DataBase::get_user_db(user_id.clone());
         let tree: Tree<Group> = db.open_bincode_tree("groups").unwrap();
+        let invited: Tree<GroupInvited> = db.open_bincode_tree("group_invited").unwrap();
 
         // // get last key
         let last_group: u64;
@@ -330,6 +367,7 @@ impl Group {
 
         let groups = Groups {
             db_ref: tree,
+            invited_ref: invited,
             last_group,
             group_ids: ids,
         };
@@ -439,13 +477,15 @@ impl Group {
         //create group notify messge and post to all members
         let mut members: Vec<proto_net::Member> = vec![];
         for m in group.members.values() {
-            members.push(proto_net::Member {
-                user_id: m.user_id.clone(),
-                role: m.role as u32,
-                state: m.state as u32,
-                joined_at: m.joined_at,
-                last_message_index: m.last_message_index,
-            });
+            if m.state > 0 {
+                members.push(proto_net::Member {
+                    user_id: m.user_id.clone(),
+                    role: m.role,
+                    state: m.state,
+                    joined_at: m.joined_at,
+                    last_message_index: m.last_message_index,
+                });
+            }
         }
 
         let notify = proto_net::GroupNotify {
@@ -517,7 +557,7 @@ impl Group {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::group_container::Message::InviteMember(invite_member)) => {
                     log::info!("group::on_receive_invite");
-                    Member::on_be_invited(&user, &sender_id, &receiver_id, &invite_member);
+                    Member::on_be_invited(&sender_id, &receiver_id, &invite_member);
                 }
                 Some(proto_net::group_container::Message::Removed(_removed)) => {
                     log::info!("group::on_removed");
@@ -646,6 +686,19 @@ impl Group {
                         let list = Manage::group_list(&my_user_id);
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
+                        };
+                        // send message
+                        Rpc::send_message(
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            "".to_string(),
+                            Vec::new(),
+                        );
+                    }
+                    Some(proto_rpc::group::Message::GroupInvitedRequest(_group_invited_req)) => {
+                        let invited = Manage::invited_list(&my_user_id);
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupInvitedResponse(invited)),
                         };
                         // send message
                         Rpc::send_message(

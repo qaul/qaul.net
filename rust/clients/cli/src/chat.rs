@@ -326,7 +326,27 @@ impl Chat {
                     }
                 }
             }
-            proto::ContentType::GroupEvent => {}
+            proto::ContentType::GroupEvent => {
+                if let Ok(v) = proto::GroupEvent::decode(&content[..]) {
+                    match proto::GroupEventType::from_i32(v.event_type).unwrap() {
+                        proto::GroupEventType::GroupJoined => {
+                            res.push(
+                                "New user joined group, user id: ".to_string()
+                                    + bs58::encode(v.user_id).into_string().as_str(),
+                            );
+                            return Ok(res);
+                        }
+                        proto::GroupEventType::GroupLeft => {
+                            res.push(
+                                "User left group, user id: ".to_string()
+                                    + bs58::encode(v.user_id).into_string().as_str(),
+                            );
+                            return Ok(res);
+                        }
+                        _ => {}
+                    }
+                }
+            }
             proto::ContentType::Rtc => {}
         }
         Err("".to_string())

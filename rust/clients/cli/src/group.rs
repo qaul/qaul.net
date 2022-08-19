@@ -86,6 +86,10 @@ impl Group {
                 //let command_string = cmd.strip_prefix("list ").unwrap().to_string();
                 Self::group_list();
             }
+            // group list
+            cmd if cmd.starts_with("invited") => {
+                Self::group_invited();
+            }
             // group invite
             cmd if cmd.starts_with("invite ") => {
                 let command_string = cmd.strip_prefix("invite ").unwrap().to_string();
@@ -339,6 +343,23 @@ impl Group {
         );
     }
 
+    /// group invited
+    fn group_invited() {
+        // group list send message
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupInvitedRequest(
+                proto::GroupInvitedRequest {},
+            )),
+        };
+
+        // send message
+        Rpc::send_message(
+            proto_message.encode_to_vec(),
+            super::rpc::proto::Modules::Group.into(),
+            "".to_string(),
+        );
+    }
+
     /// group invite
     fn invite(group_id: Vec<u8>, user_id: Vec<u8>) {
         // group invite send message
@@ -513,12 +534,50 @@ impl Group {
                                 group.members.len()
                             );
                             for member in group.members {
-                                println!(
-                                    "\t\t id: {}, sent: {}",
-                                    bs58::encode(member.user_id.clone()).into_string(),
-                                    member.last_message_index
+                                print!(
+                                    "\t\t id: {} , state: ",
+                                    bs58::encode(member.user_id.clone()).into_string()
                                 );
+                                match proto::GroupMemberState::from_i32(member.state).unwrap() {
+                                    proto::GroupMemberState::Invited => {
+                                        print!("invited , role: ");
+                                    }
+                                    proto::GroupMemberState::Activated => {
+                                        print!("activated , role: ");
+                                    }
+                                    _ => {
+                                        print!("unknown , role: ");
+                                    }
+                                }
+
+                                match proto::GroupMemberRole::from_i32(member.role).unwrap() {
+                                    proto::GroupMemberRole::User => {
+                                        println!("user , sent: {}", member.last_message_index);
+                                    }
+                                    proto::GroupMemberRole::Admin => {
+                                        println!("admin , sent: {}", member.last_message_index);
+                                    }
+                                    _ => {
+                                        println!("unknown , sent: {}", member.last_message_index);
+                                    }
+                                }
                             }
+                        }
+                    }
+                    Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
+                        // List groups
+                        println!("=============List Of Invited=================");
+                        for invite in group_invited_response.invited {
+                            let group_id =
+                                uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
+                            println!("id: {}", group_id.to_string());
+                            println!("\tname: {}", invite.group_name.clone());
+                            println!("\tsender: {}", bs58::encode(invite.sender_id).into_string());
+                            println!("\treceived at: {}", invite.received_at);
+                            println!(
+                                "\tcreated_at: {}, members: {}",
+                                invite.received_at, invite.member_count
+                            );
                         }
                     }
                     _ => {
