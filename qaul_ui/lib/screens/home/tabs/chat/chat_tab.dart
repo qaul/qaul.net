@@ -41,14 +41,6 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final currentOpenChat = useState<Widget?>(null);
     final setOpenChat = useCallback((ChatRoom room, User otherUser) {
-      var isSameRoom = ref
-          .read(currentOpenChatRoom)
-          ?.conversationId
-          .equals(room.conversationId);
-      if (isSameRoom ?? false) return;
-
-      ref.read(currentOpenChatRoom.notifier).state = room;
-      ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
       if (MediaQuery.of(context).size.width < kTabletBreakpoint) {
         openChat(room,
             context: context, user: defaultUser, otherUser: otherUser);
