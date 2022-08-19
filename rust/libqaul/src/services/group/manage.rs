@@ -1,6 +1,8 @@
 //use bs58::decode;
 use libp2p::PeerId;
+use prost::Message;
 
+use crate::services::messaging;
 use crate::utilities::timestamp;
 use std::collections::BTreeMap;
 
@@ -25,9 +27,11 @@ impl Manage {
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
-                role: 255, //admin
+                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
-                state: 1,
+                state: super::proto_rpc::GroupMemberState::Activated
+                    .try_into()
+                    .unwrap(),
                 last_message_index: 0,
             },
         );
@@ -35,9 +39,11 @@ impl Manage {
             peer_id.to_bytes(),
             super::GroupMember {
                 user_id: peer_id.to_bytes(),
-                role: 255, //admin
+                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
-                state: 1,
+                state: super::proto_rpc::GroupMemberState::Activated
+                    .try_into()
+                    .unwrap(),
                 last_message_index: 0,
             },
         );
@@ -78,9 +84,11 @@ impl Manage {
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
-                role: 255, //admin
+                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
-                state: 1,
+                state: super::proto_rpc::GroupMemberState::Activated
+                    .try_into()
+                    .unwrap(),
                 last_message_index: 0,
             },
         );
@@ -168,9 +176,9 @@ impl Manage {
         for m in group.members.values() {
             let member = super::proto_rpc::GroupMember {
                 user_id: m.user_id.clone(),
-                role: m.role as u32,
+                role: m.role,
                 joined_at: m.joined_at,
-                state: m.state as u32,
+                state: m.state,
                 last_message_index: m.last_message_index,
             };
             members.push(member);
@@ -199,9 +207,9 @@ impl Manage {
                     for m in group.members.values() {
                         let member = super::proto_rpc::GroupMember {
                             user_id: m.user_id.clone(),
-                            role: m.role as u32,
+                            role: m.role,
                             joined_at: m.joined_at,
-                            state: m.state as u32,
+                            state: m.state,
                             last_message_index: m.last_message_index,
                         };
                         members.push(member);
@@ -222,9 +230,34 @@ impl Manage {
         res
     }
 
+    /// get group list from rpc command
+    pub fn invited_list(user_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
+        let groups = Group::get_groups_of_user(user_id);
+
+        let mut res = super::proto_rpc::GroupInvitedResponse { invited: vec![] };
+
+        for entry in groups.invited_ref.iter() {
+            match entry {
+                Ok((_, invite)) => {
+                    let invited = super::proto_rpc::GroupInvited {
+                        group_id: invite.id.clone(),
+                        sender_id: invite.sender_id.clone(),
+                        received_at: invite.received_at,
+                        group_name: invite.name.clone(),
+                        created_at: invite.created_at,
+                        member_count: invite.member_count,
+                    };
+                    res.invited.push(invited);
+                }
+                _ => {}
+            }
+        }
+        res
+    }
+
     /// process group notify message from network
     pub fn on_group_notify(
-        _sender_id: &Vec<u8>,
+        sender_id: &Vec<u8>,
         receiver_id: &Vec<u8>,
         notify: &super::proto_net::GroupNotify,
     ) {
@@ -263,9 +296,9 @@ impl Manage {
                 m.user_id.clone(),
                 super::GroupMember {
                     user_id: m.user_id.clone(),
-                    role: m.role as u8,
+                    role: m.role,
                     joined_at: m.joined_at,
-                    state: m.state as u8,
+                    state: m.state,
                     last_message_index: m.last_message_index,
                 },
             );
@@ -285,6 +318,11 @@ impl Manage {
         }
         Group::update_groups_of_user(&user_id, groups);
 
+        // save events
+        let user_id = PeerId::from_bytes(&receiver_id).unwrap();
+        let snd_id = PeerId::from_bytes(&sender_id).unwrap();
+        let converstion_id = messaging::ConversationId::from_bytes(&notify.group_id).unwrap();
+
         if first_join {
             let event = chat::rpc_proto::GroupEvent {
                 event_type: chat::rpc_proto::GroupEventType::GroupJoined
@@ -292,7 +330,45 @@ impl Manage {
                     .unwrap(),
                 user_id: receiver_id.clone(),
             };
+            chat::Chat::save_event(
+                &user_id,
+                &snd_id,
+                chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+                &event.encode_to_vec(),
+                &converstion_id,
+            );
         } else {
+            for new_member in &new_members {
+                let event = chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::GroupJoined
+                        .try_into()
+                        .unwrap(),
+                    user_id: new_member.clone(),
+                };
+                chat::Chat::save_event(
+                    &user_id,
+                    &snd_id,
+                    chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+                    &event.encode_to_vec(),
+                    &converstion_id,
+                );
+            }
+
+            for left_member in orign_members.keys() {
+                let event = chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::GroupLeft
+                        .try_into()
+                        .unwrap(),
+                    user_id: left_member.clone(),
+                };
+                chat::Chat::save_event(
+                    &user_id,
+                    &snd_id,
+                    chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+                    &event.encode_to_vec(),
+                    &converstion_id,
+                );
+            }
         }
     }
 }

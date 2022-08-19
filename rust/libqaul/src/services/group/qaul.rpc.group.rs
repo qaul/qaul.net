@@ -2,7 +2,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Group {
     /// message type
-    #[prost(oneof="group::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14")]
+    #[prost(oneof="group::Message", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16")]
     pub message: ::core::option::Option<group::Message>,
 }
 /// Nested message and enum types in `Group`.
@@ -52,6 +52,12 @@ pub mod group {
         ///group list response
         #[prost(message, tag="14")]
         GroupListResponse(super::GroupListResponse),
+        /// group invited
+        #[prost(message, tag="15")]
+        GroupInvitedRequest(super::GroupInvitedRequest),
+        /// group invited response
+        #[prost(message, tag="16")]
+        GroupInvitedResponse(super::GroupInvitedResponse),
     }
 }
 /// Group Result
@@ -190,14 +196,14 @@ pub struct GroupMember {
     #[prost(bytes="vec", tag="1")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
     ///role
-    #[prost(uint32, tag="2")]
-    pub role: u32,
+    #[prost(enumeration="GroupMemberRole", tag="2")]
+    pub role: i32,
     ///joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
     ///state 
-    #[prost(uint32, tag="4")]
-    pub state: u32,
+    #[prost(enumeration="GroupMemberState", tag="4")]
+    pub state: i32,
     ///last message index 
     #[prost(uint32, tag="5")]
     pub last_message_index: u32,
@@ -231,4 +237,54 @@ pub struct GroupListResponse {
     /// group list
     #[prost(message, repeated, tag="1")]
     pub groups: ::prost::alloc::vec::Vec<GroupInfoResponse>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInvited {
+    /// group id
+    #[prost(bytes="vec", tag="1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// sender id
+    #[prost(bytes="vec", tag="2")]
+    pub sender_id: ::prost::alloc::vec::Vec<u8>,
+    /// received at
+    #[prost(uint64, tag="3")]
+    pub received_at: u64,
+    /// group name
+    #[prost(string, tag="4")]
+    pub group_name: ::prost::alloc::string::String,
+    /// created at
+    #[prost(uint64, tag="5")]
+    pub created_at: u64,
+    /// member count
+    #[prost(uint32, tag="6")]
+    pub member_count: u32,
+}
+/// Group list request
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInvitedRequest {
+}
+/// Group info response
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInvitedResponse {
+    /// invited list
+    #[prost(message, repeated, tag="1")]
+    pub invited: ::prost::alloc::vec::Vec<GroupInvited>,
+}
+/// Group member state
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum GroupMemberState {
+    //// invited
+    Invited = 0,
+    //// activated
+    Activated = 1,
+}
+/// Group member role
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum GroupMemberRole {
+    //// user
+    User = 0,
+    //// admin
+    Admin = 255,
 }
