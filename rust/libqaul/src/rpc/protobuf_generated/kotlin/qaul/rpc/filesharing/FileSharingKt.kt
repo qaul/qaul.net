@@ -60,7 +60,7 @@ object FileSharingKt {
 
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -74,7 +74,7 @@ object FileSharingKt {
       }
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -84,7 +84,7 @@ object FileSharingKt {
     }
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -96,7 +96,7 @@ object FileSharingKt {
 
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -110,7 +110,7 @@ object FileSharingKt {
       }
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -120,7 +120,7 @@ object FileSharingKt {
     }
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>

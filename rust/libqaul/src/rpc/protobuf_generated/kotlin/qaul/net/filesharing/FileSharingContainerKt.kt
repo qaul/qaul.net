@@ -69,102 +69,6 @@ object FileSharingContainerKt {
     fun hasFileData(): kotlin.Boolean {
       return _builder.hasFileData()
     }
-
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmation confirmation = 3;</code>
-     */
-    var confirmation: qaul.net.filesharing.FilesharingNet.FileSharingConfirmation
-      @JvmName("getConfirmation")
-      get() = _builder.getConfirmation()
-      @JvmName("setConfirmation")
-      set(value) {
-        _builder.setConfirmation(value)
-      }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmation confirmation = 3;</code>
-     */
-    fun clearConfirmation() {
-      _builder.clearConfirmation()
-    }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmation confirmation = 3;</code>
-     * @return Whether the confirmation field is set.
-     */
-    fun hasConfirmation(): kotlin.Boolean {
-      return _builder.hasConfirmation()
-    }
-
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;</code>
-     */
-    var confirmationInfo: qaul.net.filesharing.FilesharingNet.FileSharingConfirmationFileInfo
-      @JvmName("getConfirmationInfo")
-      get() = _builder.getConfirmationInfo()
-      @JvmName("setConfirmationInfo")
-      set(value) {
-        _builder.setConfirmationInfo(value)
-      }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;</code>
-     */
-    fun clearConfirmationInfo() {
-      _builder.clearConfirmationInfo()
-    }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;</code>
-     * @return Whether the confirmationInfo field is set.
-     */
-    fun hasConfirmationInfo(): kotlin.Boolean {
-      return _builder.hasConfirmationInfo()
-    }
-
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCompleted completed = 5;</code>
-     */
-    var completed: qaul.net.filesharing.FilesharingNet.FileSharingCompleted
-      @JvmName("getCompleted")
-      get() = _builder.getCompleted()
-      @JvmName("setCompleted")
-      set(value) {
-        _builder.setCompleted(value)
-      }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCompleted completed = 5;</code>
-     */
-    fun clearCompleted() {
-      _builder.clearCompleted()
-    }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCompleted completed = 5;</code>
-     * @return Whether the completed field is set.
-     */
-    fun hasCompleted(): kotlin.Boolean {
-      return _builder.hasCompleted()
-    }
-
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCanceled canceled = 6;</code>
-     */
-    var canceled: qaul.net.filesharing.FilesharingNet.FileSharingCanceled
-      @JvmName("getCanceled")
-      get() = _builder.getCanceled()
-      @JvmName("setCanceled")
-      set(value) {
-        _builder.setCanceled(value)
-      }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCanceled canceled = 6;</code>
-     */
-    fun clearCanceled() {
-      _builder.clearCanceled()
-    }
-    /**
-     * <code>.qaul.net.filesharing.FileSharingCanceled canceled = 6;</code>
-     * @return Whether the canceled field is set.
-     */
-    fun hasCanceled(): kotlin.Boolean {
-      return _builder.hasCanceled()
-    }
     val messageCase: qaul.net.filesharing.FilesharingNet.FileSharingContainer.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -183,16 +87,4 @@ val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.fileInfoOr
 
 val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.fileDataOrNull: qaul.net.filesharing.FilesharingNet.FileSharingData?
   get() = if (hasFileData()) getFileData() else null
-
-val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.confirmationOrNull: qaul.net.filesharing.FilesharingNet.FileSharingConfirmation?
-  get() = if (hasConfirmation()) getConfirmation() else null
-
-val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.confirmationInfoOrNull: qaul.net.filesharing.FilesharingNet.FileSharingConfirmationFileInfo?
-  get() = if (hasConfirmationInfo()) getConfirmationInfo() else null
-
-val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.completedOrNull: qaul.net.filesharing.FilesharingNet.FileSharingCompleted?
-  get() = if (hasCompleted()) getCompleted() else null
-
-val qaul.net.filesharing.FilesharingNet.FileSharingContainerOrBuilder.canceledOrNull: qaul.net.filesharing.FilesharingNet.FileSharingCanceled?
-  get() = if (hasCanceled()) getCanceled() else null
 

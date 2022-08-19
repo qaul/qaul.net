@@ -73,104 +73,29 @@ object EnvelopeKt {
     }
 
     /**
-     * An uninstantiable, behaviorless type to represent the field in
-     * generics.
-     */
-    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
-    class DataProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
-    /**
      * <pre>
-     * encrypted message data
+     * payload
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
+     * <code>bytes payload = 3;</code>
      */
-     val data: com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>
-      @kotlin.jvm.JvmSynthetic
-      get() = com.google.protobuf.kotlin.DslList(
-        _builder.getDataList()
-      )
+    var payload: com.google.protobuf.ByteString
+      @JvmName("getPayload")
+      get() = _builder.getPayload()
+      @JvmName("setPayload")
+      set(value) {
+        _builder.setPayload(value)
+      }
     /**
      * <pre>
-     * encrypted message data
+     * payload
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     * @param value The data to add.
+     * <code>bytes payload = 3;</code>
      */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("addData")
-    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.add(value: qaul.net.messaging.MessagingOuterClass.Data) {
-      _builder.addData(value)
+    fun clearPayload() {
+      _builder.clearPayload()
     }
-    /**
-     * <pre>
-     * encrypted message data
-     * </pre>
-     *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     * @param value The data to add.
-     */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("plusAssignData")
-    @Suppress("NOTHING_TO_INLINE")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(value: qaul.net.messaging.MessagingOuterClass.Data) {
-      add(value)
-    }
-    /**
-     * <pre>
-     * encrypted message data
-     * </pre>
-     *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     * @param values The data to add.
-     */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("addAllData")
-    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
-      _builder.addAllData(values)
-    }
-    /**
-     * <pre>
-     * encrypted message data
-     * </pre>
-     *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     * @param values The data to add.
-     */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("plusAssignAllData")
-    @Suppress("NOTHING_TO_INLINE")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
-      addAll(values)
-    }
-    /**
-     * <pre>
-     * encrypted message data
-     * </pre>
-     *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     * @param index The index to set the value at.
-     * @param value The data to set.
-     */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("setData")
-    operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.set(index: kotlin.Int, value: qaul.net.messaging.MessagingOuterClass.Data) {
-      _builder.setData(index, value)
-    }
-    /**
-     * <pre>
-     * encrypted message data
-     * </pre>
-     *
-     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
-     */
-    @kotlin.jvm.JvmSynthetic
-    @kotlin.jvm.JvmName("clearData")
-    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.clear() {
-      _builder.clearData()
-    }
-
   }
 }
 @kotlin.jvm.JvmSynthetic

@@ -61,8 +61,79 @@ struct Qaul_Net_Messaging_Envelope {
   /// the qaul ID of the receiver
   var receiverID: Data = Data()
 
+  /// payload
+  var payload: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// envelop payload
+struct Qaul_Net_Messaging_EnvelopPayload {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var payload: Qaul_Net_Messaging_EnvelopPayload.OneOf_Payload? = nil
+
   /// encrypted message data
-  var data: [Qaul_Net_Messaging_Data] = []
+  var encrypted: Qaul_Net_Messaging_Encrypted {
+    get {
+      if case .encrypted(let v)? = payload {return v}
+      return Qaul_Net_Messaging_Encrypted()
+    }
+    set {payload = .encrypted(newValue)}
+  }
+
+  /// DTN message
+  var dtn: Data {
+    get {
+      if case .dtn(let v)? = payload {return v}
+      return Data()
+    }
+    set {payload = .dtn(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Payload: Equatable {
+    /// encrypted message data
+    case encrypted(Qaul_Net_Messaging_Encrypted)
+    /// DTN message
+    case dtn(Data)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Qaul_Net_Messaging_EnvelopPayload.OneOf_Payload, rhs: Qaul_Net_Messaging_EnvelopPayload.OneOf_Payload) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.encrypted, .encrypted): return {
+        guard case .encrypted(let l) = lhs, case .encrypted(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.dtn, .dtn): return {
+        guard case .dtn(let l) = lhs, case .dtn(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
+/// encrypted message data
+struct Qaul_Net_Messaging_Encrypted {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  ///repeated Data data = 1;
+  var data: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -112,40 +183,31 @@ struct Qaul_Net_Messaging_Messaging {
     set {message = .cryptoService(newValue)}
   }
 
-  /// chat message
-  var chatMessage: Qaul_Net_Messaging_ChatMessage {
+  /// rtc stream 
+  var rtcStreamMessage: Qaul_Net_Messaging_RtcStreamMessage {
     get {
-      if case .chatMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_ChatMessage()
+      if case .rtcStreamMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_RtcStreamMessage()
     }
-    set {message = .chatMessage(newValue)}
+    set {message = .rtcStreamMessage(newValue)}
   }
 
-  /// file sharing message
-  var fileMessage: Qaul_Net_Messaging_FileMessage {
+  /// group notify
+  var groupNotifyMessage: Qaul_Net_Messaging_GroupNotifyMessage {
     get {
-      if case .fileMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_FileMessage()
+      if case .groupNotifyMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_GroupNotifyMessage()
     }
-    set {message = .fileMessage(newValue)}
+    set {message = .groupNotifyMessage(newValue)}
   }
 
-  /// group chat message
-  var groupMessage: Qaul_Net_Messaging_GroupMessage {
+  /// common message
+  var commonMessage: Qaul_Net_Messaging_CommonMessage {
     get {
-      if case .groupMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_GroupMessage()
+      if case .commonMessage(let v)? = message {return v}
+      return Qaul_Net_Messaging_CommonMessage()
     }
-    set {message = .groupMessage(newValue)}
-  }
-
-  /// rtc message
-  var rtcMessage: Qaul_Net_Messaging_RtcMessage {
-    get {
-      if case .rtcMessage(let v)? = message {return v}
-      return Qaul_Net_Messaging_RtcMessage()
-    }
-    set {message = .rtcMessage(newValue)}
+    set {message = .commonMessage(newValue)}
   }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -155,14 +217,12 @@ struct Qaul_Net_Messaging_Messaging {
     case confirmationMessage(Qaul_Net_Messaging_Confirmation)
     /// crypto service
     case cryptoService(Qaul_Net_Messaging_CryptoService)
-    /// chat message
-    case chatMessage(Qaul_Net_Messaging_ChatMessage)
-    /// file sharing message
-    case fileMessage(Qaul_Net_Messaging_FileMessage)
-    /// group chat message
-    case groupMessage(Qaul_Net_Messaging_GroupMessage)
-    /// rtc message
-    case rtcMessage(Qaul_Net_Messaging_RtcMessage)
+    /// rtc stream 
+    case rtcStreamMessage(Qaul_Net_Messaging_RtcStreamMessage)
+    /// group notify
+    case groupNotifyMessage(Qaul_Net_Messaging_GroupNotifyMessage)
+    /// common message
+    case commonMessage(Qaul_Net_Messaging_CommonMessage)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Net_Messaging_Messaging.OneOf_Message, rhs: Qaul_Net_Messaging_Messaging.OneOf_Message) -> Bool {
@@ -178,20 +238,16 @@ struct Qaul_Net_Messaging_Messaging {
         guard case .cryptoService(let l) = lhs, case .cryptoService(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.chatMessage, .chatMessage): return {
-        guard case .chatMessage(let l) = lhs, case .chatMessage(let r) = rhs else { preconditionFailure() }
+      case (.rtcStreamMessage, .rtcStreamMessage): return {
+        guard case .rtcStreamMessage(let l) = lhs, case .rtcStreamMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.fileMessage, .fileMessage): return {
-        guard case .fileMessage(let l) = lhs, case .fileMessage(let r) = rhs else { preconditionFailure() }
+      case (.groupNotifyMessage, .groupNotifyMessage): return {
+        guard case .groupNotifyMessage(let l) = lhs, case .groupNotifyMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.groupMessage, .groupMessage): return {
-        guard case .groupMessage(let l) = lhs, case .groupMessage(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.rtcMessage, .rtcMessage): return {
-        guard case .rtcMessage(let l) = lhs, case .rtcMessage(let r) = rhs else { preconditionFailure() }
+      case (.commonMessage, .commonMessage): return {
+        guard case .commonMessage(let l) = lhs, case .commonMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -228,7 +284,7 @@ struct Qaul_Net_Messaging_Confirmation {
   // methods supported on all messages.
 
   /// message ID
-  var messageID: Data = Data()
+  var signature: Data = Data()
 
   /// receveived at timestamp
   var receivedAt: UInt64 = 0
@@ -238,23 +294,111 @@ struct Qaul_Net_Messaging_Confirmation {
   init() {}
 }
 
-/// chat message
+/// common message
+struct Qaul_Net_Messaging_CommonMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// message ID
+  var messageID: Data = Data()
+
+  /// conversation id
+  var conversationID: Data = Data()
+
+  /// conversation id
+  var sentAt: UInt64 = 0
+
+  /// payload
+  var payload: Qaul_Net_Messaging_CommonMessage.OneOf_Payload? = nil
+
+  /// chat message
+  var chatMessage: Qaul_Net_Messaging_ChatMessage {
+    get {
+      if case .chatMessage(let v)? = payload {return v}
+      return Qaul_Net_Messaging_ChatMessage()
+    }
+    set {payload = .chatMessage(newValue)}
+  }
+
+  /// file message
+  var fileMessage: Qaul_Net_Messaging_FileMessage {
+    get {
+      if case .fileMessage(let v)? = payload {return v}
+      return Qaul_Net_Messaging_FileMessage()
+    }
+    set {payload = .fileMessage(newValue)}
+  }
+
+  /// group message
+  var groupMessage: Qaul_Net_Messaging_GroupMessage {
+    get {
+      if case .groupMessage(let v)? = payload {return v}
+      return Qaul_Net_Messaging_GroupMessage()
+    }
+    set {payload = .groupMessage(newValue)}
+  }
+
+  /// rtc message
+  var rtcMessage: Qaul_Net_Messaging_RtcMessage {
+    get {
+      if case .rtcMessage(let v)? = payload {return v}
+      return Qaul_Net_Messaging_RtcMessage()
+    }
+    set {payload = .rtcMessage(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  /// payload
+  enum OneOf_Payload: Equatable {
+    /// chat message
+    case chatMessage(Qaul_Net_Messaging_ChatMessage)
+    /// file message
+    case fileMessage(Qaul_Net_Messaging_FileMessage)
+    /// group message
+    case groupMessage(Qaul_Net_Messaging_GroupMessage)
+    /// rtc message
+    case rtcMessage(Qaul_Net_Messaging_RtcMessage)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Qaul_Net_Messaging_CommonMessage.OneOf_Payload, rhs: Qaul_Net_Messaging_CommonMessage.OneOf_Payload) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.chatMessage, .chatMessage): return {
+        guard case .chatMessage(let l) = lhs, case .chatMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.fileMessage, .fileMessage): return {
+        guard case .fileMessage(let l) = lhs, case .fileMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.groupMessage, .groupMessage): return {
+        guard case .groupMessage(let l) = lhs, case .groupMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.rtcMessage, .rtcMessage): return {
+        guard case .rtcMessage(let l) = lhs, case .rtcMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
+/// chat content
 struct Qaul_Net_Messaging_ChatMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// group chat
-  var group: Bool = false
-
-  /// conversation id 
-  /// (only for group chat messages)
-  var conversationID: Data = Data()
-
-  /// sent timestamp
-  var sentAt: UInt64 = 0
-
-  /// message
+  /// content
   var content: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -264,19 +408,6 @@ struct Qaul_Net_Messaging_ChatMessage {
 
 /// file message
 struct Qaul_Net_Messaging_FileMessage {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var content: Data = Data()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// group chat message
-struct Qaul_Net_Messaging_GroupMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -300,6 +431,214 @@ struct Qaul_Net_Messaging_RtcMessage {
 
   init() {}
 }
+
+/// rtc stream mesasge
+struct Qaul_Net_Messaging_RtcStreamMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var content: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// group message
+struct Qaul_Net_Messaging_GroupMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var content: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// group notify message
+struct Qaul_Net_Messaging_GroupNotifyMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var content: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// DTN message
+struct Qaul_Net_Messaging_Dtn {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var message: Qaul_Net_Messaging_Dtn.OneOf_Message? = nil
+
+  /// message container
+  var container: Data {
+    get {
+      if case .container(let v)? = message {return v}
+      return Data()
+    }
+    set {message = .container(newValue)}
+  }
+
+  /// message received response
+  var response: Qaul_Net_Messaging_DtnResponse {
+    get {
+      if case .response(let v)? = message {return v}
+      return Qaul_Net_Messaging_DtnResponse()
+    }
+    set {message = .response(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Message: Equatable {
+    /// message container
+    case container(Data)
+    /// message received response
+    case response(Qaul_Net_Messaging_DtnResponse)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Qaul_Net_Messaging_Dtn.OneOf_Message, rhs: Qaul_Net_Messaging_Dtn.OneOf_Message) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.container, .container): return {
+        guard case .container(let l) = lhs, case .container(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.response, .response): return {
+        guard case .response(let l) = lhs, case .response(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
+/// DTN response
+struct Qaul_Net_Messaging_DtnResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the type of the message
+  var type: Qaul_Net_Messaging_DtnResponse.TypeEnum = .accepted
+
+  /// message signature reference
+  var signature: Data = Data()
+
+  /// reason of rejection
+  var reason: Qaul_Net_Messaging_DtnResponse.Reason = .userNotAccepted
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  /// the enum definition of the type
+  enum TypeEnum: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+
+    /// the message was accepted for storage
+    case accepted // = 0
+
+    /// the message was rejected
+    case rejected // = 1
+    case UNRECOGNIZED(Int)
+
+    init() {
+      self = .accepted
+    }
+
+    init?(rawValue: Int) {
+      switch rawValue {
+      case 0: self = .accepted
+      case 1: self = .rejected
+      default: self = .UNRECOGNIZED(rawValue)
+      }
+    }
+
+    var rawValue: Int {
+      switch self {
+      case .accepted: return 0
+      case .rejected: return 1
+      case .UNRECOGNIZED(let i): return i
+      }
+    }
+
+  }
+
+  /// the enum definition of the rejection reason
+  enum Reason: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+
+    /// this user is not accepted
+    case userNotAccepted // = 0
+
+    /// overall quota reached
+    case overallQuota // = 1
+
+    /// user quota reached
+    case userQuota // = 2
+    case UNRECOGNIZED(Int)
+
+    init() {
+      self = .userNotAccepted
+    }
+
+    init?(rawValue: Int) {
+      switch rawValue {
+      case 0: self = .userNotAccepted
+      case 1: self = .overallQuota
+      case 2: self = .userQuota
+      default: self = .UNRECOGNIZED(rawValue)
+      }
+    }
+
+    var rawValue: Int {
+      switch self {
+      case .userNotAccepted: return 0
+      case .overallQuota: return 1
+      case .userQuota: return 2
+      case .UNRECOGNIZED(let i): return i
+      }
+    }
+
+  }
+
+  init() {}
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Net_Messaging_DtnResponse.TypeEnum: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Net_Messaging_DtnResponse.TypeEnum] = [
+    .accepted,
+    .rejected,
+  ]
+}
+
+extension Qaul_Net_Messaging_DtnResponse.Reason: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Net_Messaging_DtnResponse.Reason] = [
+    .userNotAccepted,
+    .overallQuota,
+    .userQuota,
+  ]
+}
+
+#endif  // swift(>=4.2)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
@@ -352,7 +691,7 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "sender_id"),
     2: .standard(proto: "receiver_id"),
-    3: .same(proto: "data"),
+    3: .same(proto: "payload"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -363,7 +702,7 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.senderID) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.receiverID) }()
-      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.data) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.payload) }()
       default: break
       }
     }
@@ -376,8 +715,8 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
     if !self.receiverID.isEmpty {
       try visitor.visitSingularBytesField(value: self.receiverID, fieldNumber: 2)
     }
-    if !self.data.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.data, fieldNumber: 3)
+    if !self.payload.isEmpty {
+      try visitor.visitSingularBytesField(value: self.payload, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -385,6 +724,103 @@ extension Qaul_Net_Messaging_Envelope: SwiftProtobuf.Message, SwiftProtobuf._Mes
   static func ==(lhs: Qaul_Net_Messaging_Envelope, rhs: Qaul_Net_Messaging_Envelope) -> Bool {
     if lhs.senderID != rhs.senderID {return false}
     if lhs.receiverID != rhs.receiverID {return false}
+    if lhs.payload != rhs.payload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_EnvelopPayload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".EnvelopPayload"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "encrypted"),
+    2: .same(proto: "dtn"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Qaul_Net_Messaging_Encrypted?
+        var hadOneofValue = false
+        if let current = self.payload {
+          hadOneofValue = true
+          if case .encrypted(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.payload = .encrypted(v)
+        }
+      }()
+      case 2: try {
+        var v: Data?
+        try decoder.decodeSingularBytesField(value: &v)
+        if let v = v {
+          if self.payload != nil {try decoder.handleConflictingOneOf()}
+          self.payload = .dtn(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.payload {
+    case .encrypted?: try {
+      guard case .encrypted(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .dtn?: try {
+      guard case .dtn(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularBytesField(value: v, fieldNumber: 2)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_EnvelopPayload, rhs: Qaul_Net_Messaging_EnvelopPayload) -> Bool {
+    if lhs.payload != rhs.payload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_Encrypted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Encrypted"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "data"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.data) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.data.isEmpty {
+      try visitor.visitSingularBytesField(value: self.data, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_Encrypted, rhs: Qaul_Net_Messaging_Encrypted) -> Bool {
     if lhs.data != rhs.data {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -434,10 +870,9 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "confirmation_message"),
     2: .standard(proto: "crypto_service"),
-    3: .standard(proto: "chat_message"),
-    4: .standard(proto: "file_message"),
-    5: .standard(proto: "group_message"),
-    6: .standard(proto: "rtc_message"),
+    3: .standard(proto: "rtc_stream_message"),
+    4: .standard(proto: "group_notify_message"),
+    5: .standard(proto: "common_message"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -473,55 +908,42 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
         }
       }()
       case 3: try {
-        var v: Qaul_Net_Messaging_ChatMessage?
+        var v: Qaul_Net_Messaging_RtcStreamMessage?
         var hadOneofValue = false
         if let current = self.message {
           hadOneofValue = true
-          if case .chatMessage(let m) = current {v = m}
+          if case .rtcStreamMessage(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .chatMessage(v)
+          self.message = .rtcStreamMessage(v)
         }
       }()
       case 4: try {
-        var v: Qaul_Net_Messaging_FileMessage?
+        var v: Qaul_Net_Messaging_GroupNotifyMessage?
         var hadOneofValue = false
         if let current = self.message {
           hadOneofValue = true
-          if case .fileMessage(let m) = current {v = m}
+          if case .groupNotifyMessage(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .fileMessage(v)
+          self.message = .groupNotifyMessage(v)
         }
       }()
       case 5: try {
-        var v: Qaul_Net_Messaging_GroupMessage?
+        var v: Qaul_Net_Messaging_CommonMessage?
         var hadOneofValue = false
         if let current = self.message {
           hadOneofValue = true
-          if case .groupMessage(let m) = current {v = m}
+          if case .commonMessage(let m) = current {v = m}
         }
         try decoder.decodeSingularMessageField(value: &v)
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .groupMessage(v)
-        }
-      }()
-      case 6: try {
-        var v: Qaul_Net_Messaging_RtcMessage?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .rtcMessage(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .rtcMessage(v)
+          self.message = .commonMessage(v)
         }
       }()
       default: break
@@ -543,21 +965,17 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
       guard case .cryptoService(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
-    case .chatMessage?: try {
-      guard case .chatMessage(let v)? = self.message else { preconditionFailure() }
+    case .rtcStreamMessage?: try {
+      guard case .rtcStreamMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     }()
-    case .fileMessage?: try {
-      guard case .fileMessage(let v)? = self.message else { preconditionFailure() }
+    case .groupNotifyMessage?: try {
+      guard case .groupNotifyMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
-    case .groupMessage?: try {
-      guard case .groupMessage(let v)? = self.message else { preconditionFailure() }
+    case .commonMessage?: try {
+      guard case .commonMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    }()
-    case .rtcMessage?: try {
-      guard case .rtcMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     }()
     case nil: break
     }
@@ -593,7 +1011,7 @@ extension Qaul_Net_Messaging_CryptoService: SwiftProtobuf.Message, SwiftProtobuf
 extension Qaul_Net_Messaging_Confirmation: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Confirmation"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "message_id"),
+    1: .same(proto: "signature"),
     2: .standard(proto: "received_at"),
   ]
 
@@ -603,7 +1021,7 @@ extension Qaul_Net_Messaging_Confirmation: SwiftProtobuf.Message, SwiftProtobuf.
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self.messageID) }()
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.signature) }()
       case 2: try { try decoder.decodeSingularUInt64Field(value: &self.receivedAt) }()
       default: break
       }
@@ -611,8 +1029,8 @@ extension Qaul_Net_Messaging_Confirmation: SwiftProtobuf.Message, SwiftProtobuf.
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.messageID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.messageID, fieldNumber: 1)
+    if !self.signature.isEmpty {
+      try visitor.visitSingularBytesField(value: self.signature, fieldNumber: 1)
     }
     if self.receivedAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.receivedAt, fieldNumber: 2)
@@ -621,20 +1039,23 @@ extension Qaul_Net_Messaging_Confirmation: SwiftProtobuf.Message, SwiftProtobuf.
   }
 
   static func ==(lhs: Qaul_Net_Messaging_Confirmation, rhs: Qaul_Net_Messaging_Confirmation) -> Bool {
-    if lhs.messageID != rhs.messageID {return false}
+    if lhs.signature != rhs.signature {return false}
     if lhs.receivedAt != rhs.receivedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Qaul_Net_Messaging_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ChatMessage"
+extension Qaul_Net_Messaging_CommonMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CommonMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "group"),
+    1: .standard(proto: "message_id"),
     2: .standard(proto: "conversation_id"),
     3: .standard(proto: "sent_at"),
-    4: .same(proto: "content"),
+    4: .standard(proto: "chat_message"),
+    5: .standard(proto: "file_message"),
+    6: .standard(proto: "group_message"),
+    7: .standard(proto: "rtc_message"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -643,18 +1064,73 @@ extension Qaul_Net_Messaging_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBoolField(value: &self.group) }()
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.messageID) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.sentAt) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.content) }()
+      case 4: try {
+        var v: Qaul_Net_Messaging_ChatMessage?
+        var hadOneofValue = false
+        if let current = self.payload {
+          hadOneofValue = true
+          if case .chatMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.payload = .chatMessage(v)
+        }
+      }()
+      case 5: try {
+        var v: Qaul_Net_Messaging_FileMessage?
+        var hadOneofValue = false
+        if let current = self.payload {
+          hadOneofValue = true
+          if case .fileMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.payload = .fileMessage(v)
+        }
+      }()
+      case 6: try {
+        var v: Qaul_Net_Messaging_GroupMessage?
+        var hadOneofValue = false
+        if let current = self.payload {
+          hadOneofValue = true
+          if case .groupMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.payload = .groupMessage(v)
+        }
+      }()
+      case 7: try {
+        var v: Qaul_Net_Messaging_RtcMessage?
+        var hadOneofValue = false
+        if let current = self.payload {
+          hadOneofValue = true
+          if case .rtcMessage(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.payload = .rtcMessage(v)
+        }
+      }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.group != false {
-      try visitor.visitSingularBoolField(value: self.group, fieldNumber: 1)
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.messageID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.messageID, fieldNumber: 1)
     }
     if !self.conversationID.isEmpty {
       try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 2)
@@ -662,16 +1138,64 @@ extension Qaul_Net_Messaging_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._
     if self.sentAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.sentAt, fieldNumber: 3)
     }
+    switch self.payload {
+    case .chatMessage?: try {
+      guard case .chatMessage(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .fileMessage?: try {
+      guard case .fileMessage(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }()
+    case .groupMessage?: try {
+      guard case .groupMessage(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    }()
+    case .rtcMessage?: try {
+      guard case .rtcMessage(let v)? = self.payload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_CommonMessage, rhs: Qaul_Net_Messaging_CommonMessage) -> Bool {
+    if lhs.messageID != rhs.messageID {return false}
+    if lhs.conversationID != rhs.conversationID {return false}
+    if lhs.sentAt != rhs.sentAt {return false}
+    if lhs.payload != rhs.payload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ChatMessage"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.content) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.content.isEmpty {
-      try visitor.visitSingularStringField(value: self.content, fieldNumber: 4)
+      try visitor.visitSingularStringField(value: self.content, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Messaging_ChatMessage, rhs: Qaul_Net_Messaging_ChatMessage) -> Bool {
-    if lhs.group != rhs.group {return false}
-    if lhs.conversationID != rhs.conversationID {return false}
-    if lhs.sentAt != rhs.sentAt {return false}
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -710,6 +1234,70 @@ extension Qaul_Net_Messaging_FileMessage: SwiftProtobuf.Message, SwiftProtobuf._
   }
 }
 
+extension Qaul_Net_Messaging_RtcMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RtcMessage"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.content) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.content.isEmpty {
+      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_RtcMessage, rhs: Qaul_Net_Messaging_RtcMessage) -> Bool {
+    if lhs.content != rhs.content {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_RtcStreamMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RtcStreamMessage"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.content) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.content.isEmpty {
+      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_RtcStreamMessage, rhs: Qaul_Net_Messaging_RtcStreamMessage) -> Bool {
+    if lhs.content != rhs.content {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Qaul_Net_Messaging_GroupMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GroupMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -742,8 +1330,8 @@ extension Qaul_Net_Messaging_GroupMessage: SwiftProtobuf.Message, SwiftProtobuf.
   }
 }
 
-extension Qaul_Net_Messaging_RtcMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".RtcMessage"
+extension Qaul_Net_Messaging_GroupNotifyMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".GroupNotifyMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "content"),
   ]
@@ -767,9 +1355,133 @@ extension Qaul_Net_Messaging_RtcMessage: SwiftProtobuf.Message, SwiftProtobuf._M
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Net_Messaging_RtcMessage, rhs: Qaul_Net_Messaging_RtcMessage) -> Bool {
+  static func ==(lhs: Qaul_Net_Messaging_GroupNotifyMessage, rhs: Qaul_Net_Messaging_GroupNotifyMessage) -> Bool {
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
+}
+
+extension Qaul_Net_Messaging_Dtn: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Dtn"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "container"),
+    2: .same(proto: "response"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Data?
+        try decoder.decodeSingularBytesField(value: &v)
+        if let v = v {
+          if self.message != nil {try decoder.handleConflictingOneOf()}
+          self.message = .container(v)
+        }
+      }()
+      case 2: try {
+        var v: Qaul_Net_Messaging_DtnResponse?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .response(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .response(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.message {
+    case .container?: try {
+      guard case .container(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularBytesField(value: v, fieldNumber: 1)
+    }()
+    case .response?: try {
+      guard case .response(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_Dtn, rhs: Qaul_Net_Messaging_Dtn) -> Bool {
+    if lhs.message != rhs.message {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_DtnResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".DtnResponse"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "type"),
+    2: .same(proto: "signature"),
+    3: .same(proto: "reason"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.type) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.signature) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.reason) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.type != .accepted {
+      try visitor.visitSingularEnumField(value: self.type, fieldNumber: 1)
+    }
+    if !self.signature.isEmpty {
+      try visitor.visitSingularBytesField(value: self.signature, fieldNumber: 2)
+    }
+    if self.reason != .userNotAccepted {
+      try visitor.visitSingularEnumField(value: self.reason, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_Messaging_DtnResponse, rhs: Qaul_Net_Messaging_DtnResponse) -> Bool {
+    if lhs.type != rhs.type {return false}
+    if lhs.signature != rhs.signature {return false}
+    if lhs.reason != rhs.reason {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_Messaging_DtnResponse.TypeEnum: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "ACCEPTED"),
+    1: .same(proto: "REJECTED"),
+  ]
+}
+
+extension Qaul_Net_Messaging_DtnResponse.Reason: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "USER_NOT_ACCEPTED"),
+    1: .same(proto: "OVERALL_QUOTA"),
+    2: .same(proto: "USER_QUOTA"),
+  ]
 }

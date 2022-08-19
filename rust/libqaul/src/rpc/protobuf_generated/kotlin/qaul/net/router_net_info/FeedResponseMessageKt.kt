@@ -24,7 +24,7 @@ object FeedResponseMessageKt {
 
     /**
      * <pre>
-     *Feed ids table
+     * Feed table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedResponseTable feeds = 1;</code>
@@ -38,7 +38,7 @@ object FeedResponseMessageKt {
       }
     /**
      * <pre>
-     *Feed ids table
+     * Feed table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedResponseTable feeds = 1;</code>
@@ -48,7 +48,7 @@ object FeedResponseMessageKt {
     }
     /**
      * <pre>
-     *Feed ids table
+     * Feed table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedResponseTable feeds = 1;</code>

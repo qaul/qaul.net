@@ -29,6 +29,10 @@ object FeedResponseTableKt {
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
     class MessagesProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      */
      val messages: com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.FeedMessage, MessagesProxy>
@@ -37,6 +41,10 @@ object FeedResponseTableKt {
         _builder.getMessagesList()
       )
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      * @param value The messages to add.
      */
@@ -46,6 +54,10 @@ object FeedResponseTableKt {
       _builder.addMessages(value)
     }
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      * @param value The messages to add.
      */
@@ -56,6 +68,10 @@ object FeedResponseTableKt {
       add(value)
     }
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      * @param values The messages to add.
      */
@@ -65,6 +81,10 @@ object FeedResponseTableKt {
       _builder.addAllMessages(values)
     }
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      * @param values The messages to add.
      */
@@ -75,6 +95,10 @@ object FeedResponseTableKt {
       addAll(values)
     }
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      * @param index The index to set the value at.
      * @param value The messages to set.
@@ -85,6 +109,10 @@ object FeedResponseTableKt {
       _builder.setMessages(index, value)
     }
     /**
+     * <pre>
+     * feed messages
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.FeedMessage messages = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic

@@ -3,7 +3,7 @@
 //  source: router/router_net_info.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -560,14 +560,14 @@ class FeedIdsTable extends $pb.GeneratedMessage {
   $core.List<$core.List<$core.int>> get ids => $_getList(0);
 }
 
-class FeedRequstMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedRequstMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+class FeedRequestMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedRequestMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
     ..aOM<FeedIdsTable>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feeds', subBuilder: FeedIdsTable.create)
     ..hasRequiredFields = false
   ;
 
-  FeedRequstMessage._() : super();
-  factory FeedRequstMessage({
+  FeedRequestMessage._() : super();
+  factory FeedRequestMessage({
     FeedIdsTable? feeds,
   }) {
     final _result = create();
@@ -576,26 +576,26 @@ class FeedRequstMessage extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory FeedRequstMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FeedRequstMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory FeedRequestMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedRequestMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  FeedRequstMessage clone() => FeedRequstMessage()..mergeFromMessage(this);
+  FeedRequestMessage clone() => FeedRequestMessage()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedRequstMessage copyWith(void Function(FeedRequstMessage) updates) => super.copyWith((message) => updates(message as FeedRequstMessage)) as FeedRequstMessage; // ignore: deprecated_member_use
+  FeedRequestMessage copyWith(void Function(FeedRequestMessage) updates) => super.copyWith((message) => updates(message as FeedRequestMessage)) as FeedRequestMessage; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static FeedRequstMessage create() => FeedRequstMessage._();
-  FeedRequstMessage createEmptyInstance() => create();
-  static $pb.PbList<FeedRequstMessage> createRepeated() => $pb.PbList<FeedRequstMessage>();
+  static FeedRequestMessage create() => FeedRequestMessage._();
+  FeedRequestMessage createEmptyInstance() => create();
+  static $pb.PbList<FeedRequestMessage> createRepeated() => $pb.PbList<FeedRequestMessage>();
   @$core.pragma('dart2js:noInline')
-  static FeedRequstMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedRequstMessage>(create);
-  static FeedRequstMessage? _defaultInstance;
+  static FeedRequestMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedRequestMessage>(create);
+  static FeedRequestMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
   FeedIdsTable get feeds => $_getN(0);

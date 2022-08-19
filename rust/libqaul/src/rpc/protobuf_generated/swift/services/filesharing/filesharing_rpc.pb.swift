@@ -38,7 +38,7 @@ struct Qaul_Rpc_Filesharing_FileSharing {
     set {message = .sendFileRequest(newValue)}
   }
 
-  /// file histories request
+  /// file history request
   var fileHistory: Qaul_Rpc_Filesharing_FileHistoryRequest {
     get {
       if case .fileHistory(let v)? = message {return v}
@@ -47,7 +47,7 @@ struct Qaul_Rpc_Filesharing_FileSharing {
     set {message = .fileHistory(newValue)}
   }
 
-  ///file histories response
+  /// file history response
   var fileHistoryResponse: Qaul_Rpc_Filesharing_FileHistoryResponse {
     get {
       if case .fileHistoryResponse(let v)? = message {return v}
@@ -62,9 +62,9 @@ struct Qaul_Rpc_Filesharing_FileSharing {
   enum OneOf_Message: Equatable {
     /// request for sending file
     case sendFileRequest(Qaul_Rpc_Filesharing_SendFileRequest)
-    /// file histories request
+    /// file history request
     case fileHistory(Qaul_Rpc_Filesharing_FileHistoryRequest)
-    ///file histories response
+    /// file history response
     case fileHistoryResponse(Qaul_Rpc_Filesharing_FileHistoryResponse)
 
   #if !swift(>=4.1)
@@ -155,11 +155,11 @@ struct Qaul_Rpc_Filesharing_FileHistoryEntry {
   /// time
   var time: UInt64 = 0
 
-  /// sent/recv
-  var sent: Bool = false
+  /// sender id
+  var senderID: String = String()
 
-  /// peer id
-  var peerID: String = String()
+  /// group id
+  var groupID: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -372,8 +372,8 @@ extension Qaul_Rpc_Filesharing_FileHistoryEntry: SwiftProtobuf.Message, SwiftPro
     4: .standard(proto: "file_size"),
     5: .standard(proto: "file_descr"),
     6: .same(proto: "time"),
-    7: .same(proto: "sent"),
-    8: .standard(proto: "peer_id"),
+    7: .standard(proto: "sender_id"),
+    8: .standard(proto: "group_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -388,8 +388,8 @@ extension Qaul_Rpc_Filesharing_FileHistoryEntry: SwiftProtobuf.Message, SwiftPro
       case 4: try { try decoder.decodeSingularUInt32Field(value: &self.fileSize) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.fileDescr) }()
       case 6: try { try decoder.decodeSingularUInt64Field(value: &self.time) }()
-      case 7: try { try decoder.decodeSingularBoolField(value: &self.sent) }()
-      case 8: try { try decoder.decodeSingularStringField(value: &self.peerID) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.senderID) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.groupID) }()
       default: break
       }
     }
@@ -414,11 +414,11 @@ extension Qaul_Rpc_Filesharing_FileHistoryEntry: SwiftProtobuf.Message, SwiftPro
     if self.time != 0 {
       try visitor.visitSingularUInt64Field(value: self.time, fieldNumber: 6)
     }
-    if self.sent != false {
-      try visitor.visitSingularBoolField(value: self.sent, fieldNumber: 7)
+    if !self.senderID.isEmpty {
+      try visitor.visitSingularStringField(value: self.senderID, fieldNumber: 7)
     }
-    if !self.peerID.isEmpty {
-      try visitor.visitSingularStringField(value: self.peerID, fieldNumber: 8)
+    if !self.groupID.isEmpty {
+      try visitor.visitSingularStringField(value: self.groupID, fieldNumber: 8)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -430,8 +430,8 @@ extension Qaul_Rpc_Filesharing_FileHistoryEntry: SwiftProtobuf.Message, SwiftPro
     if lhs.fileSize != rhs.fileSize {return false}
     if lhs.fileDescr != rhs.fileDescr {return false}
     if lhs.time != rhs.time {return false}
-    if lhs.sent != rhs.sent {return false}
-    if lhs.peerID != rhs.peerID {return false}
+    if lhs.senderID != rhs.senderID {return false}
+    if lhs.groupID != rhs.groupID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

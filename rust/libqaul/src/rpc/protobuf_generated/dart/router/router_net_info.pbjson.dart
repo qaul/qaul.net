@@ -3,7 +3,7 @@
 //  source: router/router_net_info.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
@@ -113,16 +113,16 @@ const FeedIdsTable$json = const {
 
 /// Descriptor for `FeedIdsTable`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List feedIdsTableDescriptor = $convert.base64Decode('CgxGZWVkSWRzVGFibGUSEAoDaWRzGAEgAygMUgNpZHM=');
-@$core.Deprecated('Use feedRequstMessageDescriptor instead')
-const FeedRequstMessage$json = const {
-  '1': 'FeedRequstMessage',
+@$core.Deprecated('Use feedRequestMessageDescriptor instead')
+const FeedRequestMessage$json = const {
+  '1': 'FeedRequestMessage',
   '2': const [
     const {'1': 'feeds', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.FeedIdsTable', '10': 'feeds'},
   ],
 };
 
-/// Descriptor for `FeedRequstMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List feedRequstMessageDescriptor = $convert.base64Decode('ChFGZWVkUmVxdXN0TWVzc2FnZRI8CgVmZWVkcxgBIAEoCzImLnFhdWwubmV0LnJvdXRlcl9uZXRfaW5mby5GZWVkSWRzVGFibGVSBWZlZWRz');
+/// Descriptor for `FeedRequestMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List feedRequestMessageDescriptor = $convert.base64Decode('ChJGZWVkUmVxdWVzdE1lc3NhZ2USPAoFZmVlZHMYASABKAsyJi5xYXVsLm5ldC5yb3V0ZXJfbmV0X2luZm8uRmVlZElkc1RhYmxlUgVmZWVkcw==');
 @$core.Deprecated('Use feedResponseMessageDescriptor instead')
 const FeedResponseMessage$json = const {
   '1': 'FeedResponseMessage',

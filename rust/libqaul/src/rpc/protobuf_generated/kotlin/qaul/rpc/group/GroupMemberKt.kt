@@ -52,9 +52,9 @@ object GroupMemberKt {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
      */
-    var role: kotlin.Int
+     var role: qaul.rpc.group.GroupRpc.GroupMemberRole
       @JvmName("getRole")
       get() = _builder.getRole()
       @JvmName("setRole")
@@ -66,7 +66,7 @@ object GroupMemberKt {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
      */
     fun clearRole() {
       _builder.clearRole()
@@ -102,9 +102,9 @@ object GroupMemberKt {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
      */
-    var state: kotlin.Int
+     var state: qaul.rpc.group.GroupRpc.GroupMemberState
       @JvmName("getState")
       get() = _builder.getState()
       @JvmName("setState")
@@ -116,10 +116,35 @@ object GroupMemberKt {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
      */
     fun clearState() {
       _builder.clearState()
+    }
+
+    /**
+     * <pre>
+     *last message index 
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     */
+    var lastMessageIndex: kotlin.Int
+      @JvmName("getLastMessageIndex")
+      get() = _builder.getLastMessageIndex()
+      @JvmName("setLastMessageIndex")
+      set(value) {
+        _builder.setLastMessageIndex(value)
+      }
+    /**
+     * <pre>
+     *last message index 
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     */
+    fun clearLastMessageIndex() {
+      _builder.clearLastMessageIndex()
     }
   }
 }

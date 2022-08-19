@@ -132,10 +132,46 @@ object GroupKt {
 
     /**
      * <pre>
+     * group rename response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRenameResponse group_rename_response = 4;</code>
+     */
+    var groupRenameResponse: qaul.rpc.group.GroupRpc.GroupRenameResponse
+      @JvmName("getGroupRenameResponse")
+      get() = _builder.getGroupRenameResponse()
+      @JvmName("setGroupRenameResponse")
+      set(value) {
+        _builder.setGroupRenameResponse(value)
+      }
+    /**
+     * <pre>
+     * group rename response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRenameResponse group_rename_response = 4;</code>
+     */
+    fun clearGroupRenameResponse() {
+      _builder.clearGroupRenameResponse()
+    }
+    /**
+     * <pre>
+     * group rename response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRenameResponse group_rename_response = 4;</code>
+     * @return Whether the groupRenameResponse field is set.
+     */
+    fun hasGroupRenameResponse(): kotlin.Boolean {
+      return _builder.hasGroupRenameResponse()
+    }
+
+    /**
+     * <pre>
      * group invite member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 4;</code>
+     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 5;</code>
      */
     var groupInviteMemberRequest: qaul.rpc.group.GroupRpc.GroupInviteMemberRequest
       @JvmName("getGroupInviteMemberRequest")
@@ -149,7 +185,7 @@ object GroupKt {
      * group invite member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 4;</code>
+     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 5;</code>
      */
     fun clearGroupInviteMemberRequest() {
       _builder.clearGroupInviteMemberRequest()
@@ -159,7 +195,7 @@ object GroupKt {
      * group invite member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 4;</code>
+     * <code>.qaul.rpc.group.GroupInviteMemberRequest group_invite_member_request = 5;</code>
      * @return Whether the groupInviteMemberRequest field is set.
      */
     fun hasGroupInviteMemberRequest(): kotlin.Boolean {
@@ -168,10 +204,46 @@ object GroupKt {
 
     /**
      * <pre>
+     * group invite member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInviteMemberResponse group_invite_member_response = 6;</code>
+     */
+    var groupInviteMemberResponse: qaul.rpc.group.GroupRpc.GroupInviteMemberResponse
+      @JvmName("getGroupInviteMemberResponse")
+      get() = _builder.getGroupInviteMemberResponse()
+      @JvmName("setGroupInviteMemberResponse")
+      set(value) {
+        _builder.setGroupInviteMemberResponse(value)
+      }
+    /**
+     * <pre>
+     * group invite member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInviteMemberResponse group_invite_member_response = 6;</code>
+     */
+    fun clearGroupInviteMemberResponse() {
+      _builder.clearGroupInviteMemberResponse()
+    }
+    /**
+     * <pre>
+     * group invite member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInviteMemberResponse group_invite_member_response = 6;</code>
+     * @return Whether the groupInviteMemberResponse field is set.
+     */
+    fun hasGroupInviteMemberResponse(): kotlin.Boolean {
+      return _builder.hasGroupInviteMemberResponse()
+    }
+
+    /**
+     * <pre>
      * group remove member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 5;</code>
+     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 7;</code>
      */
     var groupRemoveMemberRequest: qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest
       @JvmName("getGroupRemoveMemberRequest")
@@ -185,7 +257,7 @@ object GroupKt {
      * group remove member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 5;</code>
+     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 7;</code>
      */
     fun clearGroupRemoveMemberRequest() {
       _builder.clearGroupRemoveMemberRequest()
@@ -195,7 +267,7 @@ object GroupKt {
      * group remove member request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 5;</code>
+     * <code>.qaul.rpc.group.GroupRemoveMemberRequest group_remove_member_request = 7;</code>
      * @return Whether the groupRemoveMemberRequest field is set.
      */
     fun hasGroupRemoveMemberRequest(): kotlin.Boolean {
@@ -204,10 +276,46 @@ object GroupKt {
 
     /**
      * <pre>
+     * group remove member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRemoveMemberResponse group_remove_member_response = 8;</code>
+     */
+    var groupRemoveMemberResponse: qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse
+      @JvmName("getGroupRemoveMemberResponse")
+      get() = _builder.getGroupRemoveMemberResponse()
+      @JvmName("setGroupRemoveMemberResponse")
+      set(value) {
+        _builder.setGroupRemoveMemberResponse(value)
+      }
+    /**
+     * <pre>
+     * group remove member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRemoveMemberResponse group_remove_member_response = 8;</code>
+     */
+    fun clearGroupRemoveMemberResponse() {
+      _builder.clearGroupRemoveMemberResponse()
+    }
+    /**
+     * <pre>
+     * group remove member response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupRemoveMemberResponse group_remove_member_response = 8;</code>
+     * @return Whether the groupRemoveMemberResponse field is set.
+     */
+    fun hasGroupRemoveMemberResponse(): kotlin.Boolean {
+      return _builder.hasGroupRemoveMemberResponse()
+    }
+
+    /**
+     * <pre>
      *group info request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 6;</code>
+     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
      */
     var groupInfoRequest: qaul.rpc.group.GroupRpc.GroupInfoRequest
       @JvmName("getGroupInfoRequest")
@@ -221,7 +329,7 @@ object GroupKt {
      *group info request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 6;</code>
+     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
      */
     fun clearGroupInfoRequest() {
       _builder.clearGroupInfoRequest()
@@ -231,7 +339,7 @@ object GroupKt {
      *group info request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 6;</code>
+     * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
      * @return Whether the groupInfoRequest field is set.
      */
     fun hasGroupInfoRequest(): kotlin.Boolean {
@@ -243,7 +351,7 @@ object GroupKt {
      *group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 7;</code>
+     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
      */
     var groupInfoResponse: qaul.rpc.group.GroupRpc.GroupInfoResponse
       @JvmName("getGroupInfoResponse")
@@ -257,7 +365,7 @@ object GroupKt {
      *group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 7;</code>
+     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
      */
     fun clearGroupInfoResponse() {
       _builder.clearGroupInfoResponse()
@@ -267,7 +375,7 @@ object GroupKt {
      *group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 7;</code>
+     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
      * @return Whether the groupInfoResponse field is set.
      */
     fun hasGroupInfoResponse(): kotlin.Boolean {
@@ -276,10 +384,10 @@ object GroupKt {
 
     /**
      * <pre>
-     *group reply invite
+     *group reply invite request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 8;</code>
+     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
      */
     var groupReplyInviteRequest: qaul.rpc.group.GroupRpc.GroupReplyInviteRequest
       @JvmName("getGroupReplyInviteRequest")
@@ -290,20 +398,20 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group reply invite
+     *group reply invite request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 8;</code>
+     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
      */
     fun clearGroupReplyInviteRequest() {
       _builder.clearGroupReplyInviteRequest()
     }
     /**
      * <pre>
-     *group reply invite
+     *group reply invite request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 8;</code>
+     * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
      * @return Whether the groupReplyInviteRequest field is set.
      */
     fun hasGroupReplyInviteRequest(): kotlin.Boolean {
@@ -312,10 +420,46 @@ object GroupKt {
 
     /**
      * <pre>
+     *group reply invite response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
+     */
+    var groupReplyInviteResponse: qaul.rpc.group.GroupRpc.GroupReplyInviteResponse
+      @JvmName("getGroupReplyInviteResponse")
+      get() = _builder.getGroupReplyInviteResponse()
+      @JvmName("setGroupReplyInviteResponse")
+      set(value) {
+        _builder.setGroupReplyInviteResponse(value)
+      }
+    /**
+     * <pre>
+     *group reply invite response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
+     */
+    fun clearGroupReplyInviteResponse() {
+      _builder.clearGroupReplyInviteResponse()
+    }
+    /**
+     * <pre>
+     *group reply invite response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
+     * @return Whether the groupReplyInviteResponse field is set.
+     */
+    fun hasGroupReplyInviteResponse(): kotlin.Boolean {
+      return _builder.hasGroupReplyInviteResponse()
+    }
+
+    /**
+     * <pre>
      *group list request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 9;</code>
+     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
      */
     var groupListRequest: qaul.rpc.group.GroupRpc.GroupListRequest
       @JvmName("getGroupListRequest")
@@ -329,7 +473,7 @@ object GroupKt {
      *group list request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 9;</code>
+     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
      */
     fun clearGroupListRequest() {
       _builder.clearGroupListRequest()
@@ -339,7 +483,7 @@ object GroupKt {
      *group list request
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 9;</code>
+     * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
      * @return Whether the groupListRequest field is set.
      */
     fun hasGroupListRequest(): kotlin.Boolean {
@@ -351,7 +495,7 @@ object GroupKt {
      *group list response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
      */
     var groupListResponse: qaul.rpc.group.GroupRpc.GroupListResponse
       @JvmName("getGroupListResponse")
@@ -365,7 +509,7 @@ object GroupKt {
      *group list response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
      */
     fun clearGroupListResponse() {
       _builder.clearGroupListResponse()
@@ -375,7 +519,7 @@ object GroupKt {
      *group list response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
      * @return Whether the groupListResponse field is set.
      */
     fun hasGroupListResponse(): kotlin.Boolean {
@@ -384,38 +528,74 @@ object GroupKt {
 
     /**
      * <pre>
-     *group send message
+     * group invited
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupSendRequest group_send_request = 11;</code>
+     * <code>.qaul.rpc.group.GroupInvitedRequest group_invited_request = 15;</code>
      */
-    var groupSendRequest: qaul.rpc.group.GroupRpc.GroupSendRequest
-      @JvmName("getGroupSendRequest")
-      get() = _builder.getGroupSendRequest()
-      @JvmName("setGroupSendRequest")
+    var groupInvitedRequest: qaul.rpc.group.GroupRpc.GroupInvitedRequest
+      @JvmName("getGroupInvitedRequest")
+      get() = _builder.getGroupInvitedRequest()
+      @JvmName("setGroupInvitedRequest")
       set(value) {
-        _builder.setGroupSendRequest(value)
+        _builder.setGroupInvitedRequest(value)
       }
     /**
      * <pre>
-     *group send message
+     * group invited
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupSendRequest group_send_request = 11;</code>
+     * <code>.qaul.rpc.group.GroupInvitedRequest group_invited_request = 15;</code>
      */
-    fun clearGroupSendRequest() {
-      _builder.clearGroupSendRequest()
+    fun clearGroupInvitedRequest() {
+      _builder.clearGroupInvitedRequest()
     }
     /**
      * <pre>
-     *group send message
+     * group invited
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupSendRequest group_send_request = 11;</code>
-     * @return Whether the groupSendRequest field is set.
+     * <code>.qaul.rpc.group.GroupInvitedRequest group_invited_request = 15;</code>
+     * @return Whether the groupInvitedRequest field is set.
      */
-    fun hasGroupSendRequest(): kotlin.Boolean {
-      return _builder.hasGroupSendRequest()
+    fun hasGroupInvitedRequest(): kotlin.Boolean {
+      return _builder.hasGroupInvitedRequest()
+    }
+
+    /**
+     * <pre>
+     * group invited response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInvitedResponse group_invited_response = 16;</code>
+     */
+    var groupInvitedResponse: qaul.rpc.group.GroupRpc.GroupInvitedResponse
+      @JvmName("getGroupInvitedResponse")
+      get() = _builder.getGroupInvitedResponse()
+      @JvmName("setGroupInvitedResponse")
+      set(value) {
+        _builder.setGroupInvitedResponse(value)
+      }
+    /**
+     * <pre>
+     * group invited response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInvitedResponse group_invited_response = 16;</code>
+     */
+    fun clearGroupInvitedResponse() {
+      _builder.clearGroupInvitedResponse()
+    }
+    /**
+     * <pre>
+     * group invited response
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupInvitedResponse group_invited_response = 16;</code>
+     * @return Whether the groupInvitedResponse field is set.
+     */
+    fun hasGroupInvitedResponse(): kotlin.Boolean {
+      return _builder.hasGroupInvitedResponse()
     }
     val messageCase: qaul.rpc.group.GroupRpc.Group.MessageCase
       @JvmName("getMessageCase")
@@ -439,11 +619,20 @@ val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupCreateResponseOrNull: qaul.rpc.g
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupRenameRequestOrNull: qaul.rpc.group.GroupRpc.GroupRenameRequest?
   get() = if (hasGroupRenameRequest()) getGroupRenameRequest() else null
 
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupRenameResponseOrNull: qaul.rpc.group.GroupRpc.GroupRenameResponse?
+  get() = if (hasGroupRenameResponse()) getGroupRenameResponse() else null
+
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInviteMemberRequestOrNull: qaul.rpc.group.GroupRpc.GroupInviteMemberRequest?
   get() = if (hasGroupInviteMemberRequest()) getGroupInviteMemberRequest() else null
 
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInviteMemberResponseOrNull: qaul.rpc.group.GroupRpc.GroupInviteMemberResponse?
+  get() = if (hasGroupInviteMemberResponse()) getGroupInviteMemberResponse() else null
+
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupRemoveMemberRequestOrNull: qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest?
   get() = if (hasGroupRemoveMemberRequest()) getGroupRemoveMemberRequest() else null
+
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupRemoveMemberResponseOrNull: qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse?
+  get() = if (hasGroupRemoveMemberResponse()) getGroupRemoveMemberResponse() else null
 
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInfoRequestOrNull: qaul.rpc.group.GroupRpc.GroupInfoRequest?
   get() = if (hasGroupInfoRequest()) getGroupInfoRequest() else null
@@ -454,12 +643,18 @@ val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInfoResponseOrNull: qaul.rpc.gro
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupReplyInviteRequestOrNull: qaul.rpc.group.GroupRpc.GroupReplyInviteRequest?
   get() = if (hasGroupReplyInviteRequest()) getGroupReplyInviteRequest() else null
 
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupReplyInviteResponseOrNull: qaul.rpc.group.GroupRpc.GroupReplyInviteResponse?
+  get() = if (hasGroupReplyInviteResponse()) getGroupReplyInviteResponse() else null
+
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupListRequestOrNull: qaul.rpc.group.GroupRpc.GroupListRequest?
   get() = if (hasGroupListRequest()) getGroupListRequest() else null
 
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupListResponseOrNull: qaul.rpc.group.GroupRpc.GroupListResponse?
   get() = if (hasGroupListResponse()) getGroupListResponse() else null
 
-val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupSendRequestOrNull: qaul.rpc.group.GroupRpc.GroupSendRequest?
-  get() = if (hasGroupSendRequest()) getGroupSendRequest() else null
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInvitedRequestOrNull: qaul.rpc.group.GroupRpc.GroupInvitedRequest?
+  get() = if (hasGroupInvitedRequest()) getGroupInvitedRequest() else null
+
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInvitedResponseOrNull: qaul.rpc.group.GroupRpc.GroupInvitedResponse?
+  get() = if (hasGroupInvitedResponse()) getGroupInvitedResponse() else null
 

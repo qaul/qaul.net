@@ -23,8 +23,14 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// RouterInfoModule
 enum Qaul_Net_RouterNetInfo_RouterInfoModule: SwiftProtobuf.Enum {
   typealias RawValue = Int
+
+  /// Message is a common RouterInfoMessage
   case routerInfo // = 0
+
+  /// Message is a FeedRequestMessage
   case feedRequest // = 1
+
+  /// Message is a FeedResponseMessage
   case feedResponse // = 2
   case UNRECOGNIZED(Int)
 
@@ -134,7 +140,7 @@ struct Qaul_Net_RouterNetInfo_RouterInfoMessage {
   /// Clears the value of `users`. Subsequent reads from it will return its default value.
   mutating func clearUsers() {self._users = nil}
 
-  ///Latest Feed ids table
+  /// Latest Feed ids table
   var feeds: Qaul_Net_RouterNetInfo_FeedIdsTable {
     get {return _feeds ?? Qaul_Net_RouterNetInfo_FeedIdsTable()}
     set {_feeds = newValue}
@@ -175,16 +181,16 @@ struct Qaul_Net_RouterNetInfo_RoutingInfoEntry {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  //// user id
+  /// user id
   var user: Data = Data()
 
-  //// round trip time
+  /// round trip time
   var rtt: UInt32 = 0
 
-  //// hop count
+  /// hop count
   var hc: Data = Data()
 
-  //// propagation id
+  /// propagation id
   var pgid: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -198,6 +204,7 @@ struct Qaul_Net_RouterNetInfo_UserInfoTable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// user info
   var info: [Qaul_Net_RouterNetInfo_UserInfo] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -225,12 +232,13 @@ struct Qaul_Net_RouterNetInfo_UserInfo {
   init() {}
 }
 
-///Feed ids table
+/// List of feed ID's
 struct Qaul_Net_RouterNetInfo_FeedIdsTable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// feed id
   var ids: [Data] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -238,13 +246,13 @@ struct Qaul_Net_RouterNetInfo_FeedIdsTable {
   init() {}
 }
 
-/// Router information message
-struct Qaul_Net_RouterNetInfo_FeedRequstMessage {
+/// Feed request message
+struct Qaul_Net_RouterNetInfo_FeedRequestMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  ///Feed ids table
+  /// Feed ids table
   var feeds: Qaul_Net_RouterNetInfo_FeedIdsTable {
     get {return _feeds ?? Qaul_Net_RouterNetInfo_FeedIdsTable()}
     set {_feeds = newValue}
@@ -261,12 +269,13 @@ struct Qaul_Net_RouterNetInfo_FeedRequstMessage {
   fileprivate var _feeds: Qaul_Net_RouterNetInfo_FeedIdsTable? = nil
 }
 
+/// Feed response message
 struct Qaul_Net_RouterNetInfo_FeedResponseMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  ///Feed ids table
+  /// Feed table
   var feeds: Qaul_Net_RouterNetInfo_FeedResponseTable {
     get {return _feeds ?? Qaul_Net_RouterNetInfo_FeedResponseTable()}
     set {_feeds = newValue}
@@ -283,12 +292,14 @@ struct Qaul_Net_RouterNetInfo_FeedResponseMessage {
   fileprivate var _feeds: Qaul_Net_RouterNetInfo_FeedResponseTable? = nil
 }
 
-///Feed ids table
+/// Feed response table
+/// containing the feed messages for response
 struct Qaul_Net_RouterNetInfo_FeedResponseTable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// feed messages
   var messages: [Qaul_Net_RouterNetInfo_FeedMessage] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -296,21 +307,22 @@ struct Qaul_Net_RouterNetInfo_FeedResponseTable {
   init() {}
 }
 
+/// Feed Message
 struct Qaul_Net_RouterNetInfo_FeedMessage {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  //// message id 
+  /// message id
   var messageID: Data = Data()
 
-  //// sender id 
+  /// sender id
   var senderID: Data = Data()
 
-  //// message content
+  /// message content
   var content: String = String()
 
-  //// timestamp in milli seconds
+  /// timestamp in milli seconds
   var time: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -668,8 +680,8 @@ extension Qaul_Net_RouterNetInfo_FeedIdsTable: SwiftProtobuf.Message, SwiftProto
   }
 }
 
-extension Qaul_Net_RouterNetInfo_FeedRequstMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FeedRequstMessage"
+extension Qaul_Net_RouterNetInfo_FeedRequestMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".FeedRequestMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "feeds"),
   ]
@@ -697,7 +709,7 @@ extension Qaul_Net_RouterNetInfo_FeedRequstMessage: SwiftProtobuf.Message, Swift
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Net_RouterNetInfo_FeedRequstMessage, rhs: Qaul_Net_RouterNetInfo_FeedRequstMessage) -> Bool {
+  static func ==(lhs: Qaul_Net_RouterNetInfo_FeedRequestMessage, rhs: Qaul_Net_RouterNetInfo_FeedRequestMessage) -> Bool {
     if lhs._feeds != rhs._feeds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

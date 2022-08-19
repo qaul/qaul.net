@@ -42,9 +42,10 @@ PROTOBUF_CONSTEXPR FileSharingInfo::FileSharingInfo(
     /*decltype(_impl_.file_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.file_extension_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.file_descr_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_size_)*/0u
-  , /*decltype(_impl_.size_per_package_)*/0u
   , /*decltype(_impl_.file_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.file_size_)*/0u
+  , /*decltype(_impl_.start_index_)*/0u
+  , /*decltype(_impl_.message_count_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FileSharingInfoDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FileSharingInfoDefaultTypeInternal()
@@ -58,10 +59,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR FileSharingData::FileSharingData(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_.sequence_)*/0u
-  , /*decltype(_impl_.file_size_)*/0u
-  , /*decltype(_impl_.size_per_package_)*/0u
+  , /*decltype(_impl_.start_index_)*/0u
+  , /*decltype(_impl_.message_count_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FileSharingDataDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FileSharingDataDefaultTypeInternal()
@@ -72,63 +71,10 @@ struct FileSharingDataDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileSharingDataDefaultTypeInternal _FileSharingData_default_instance_;
-PROTOBUF_CONSTEXPR FileSharingConfirmationFileInfo::FileSharingConfirmationFileInfo(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct FileSharingConfirmationFileInfoDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FileSharingConfirmationFileInfoDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FileSharingConfirmationFileInfoDefaultTypeInternal() {}
-  union {
-    FileSharingConfirmationFileInfo _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileSharingConfirmationFileInfoDefaultTypeInternal _FileSharingConfirmationFileInfo_default_instance_;
-PROTOBUF_CONSTEXPR FileSharingConfirmation::FileSharingConfirmation(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_.sequence_)*/0u
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct FileSharingConfirmationDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FileSharingConfirmationDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FileSharingConfirmationDefaultTypeInternal() {}
-  union {
-    FileSharingConfirmation _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileSharingConfirmationDefaultTypeInternal _FileSharingConfirmation_default_instance_;
-PROTOBUF_CONSTEXPR FileSharingCompleted::FileSharingCompleted(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct FileSharingCompletedDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FileSharingCompletedDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FileSharingCompletedDefaultTypeInternal() {}
-  union {
-    FileSharingCompleted _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileSharingCompletedDefaultTypeInternal _FileSharingCompleted_default_instance_;
-PROTOBUF_CONSTEXPR FileSharingCanceled::FileSharingCanceled(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct FileSharingCanceledDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FileSharingCanceledDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FileSharingCanceledDefaultTypeInternal() {}
-  union {
-    FileSharingCanceled _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileSharingCanceledDefaultTypeInternal _FileSharingCanceled_default_instance_;
 }  // namespace filesharing
 }  // namespace net
 }  // namespace qaul
-static ::_pb::Metadata file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[7];
+static ::_pb::Metadata file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[3];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2ffilesharing_2ffilesharing_5fnet_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2ffilesharing_2ffilesharing_5fnet_2eproto = nullptr;
 
@@ -141,10 +87,6 @@ const uint32_t TableStruct_services_2ffilesharing_2ffilesharing_5fnet_2eproto::o
   ~0u,  // no _inlined_string_donated_
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingContainer, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _internal_metadata_),
@@ -152,105 +94,54 @@ const uint32_t TableStruct_services_2ffilesharing_2ffilesharing_5fnet_2eproto::o
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_name_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_extension_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_size_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_descr_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.size_per_package_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.file_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.start_index_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingInfo, _impl_.message_count_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.file_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.sequence_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.file_size_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.size_per_package_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.start_index_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.message_count_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingData, _impl_.data_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingConfirmationFileInfo, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingConfirmationFileInfo, _impl_.file_id_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingConfirmation, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingConfirmation, _impl_.file_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingConfirmation, _impl_.sequence_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingCompleted, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingCompleted, _impl_.file_id_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingCanceled, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::filesharing::FileSharingCanceled, _impl_.file_id_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::net::filesharing::FileSharingContainer)},
-  { 13, -1, -1, sizeof(::qaul::net::filesharing::FileSharingInfo)},
-  { 25, -1, -1, sizeof(::qaul::net::filesharing::FileSharingData)},
-  { 36, -1, -1, sizeof(::qaul::net::filesharing::FileSharingConfirmationFileInfo)},
-  { 43, -1, -1, sizeof(::qaul::net::filesharing::FileSharingConfirmation)},
-  { 51, -1, -1, sizeof(::qaul::net::filesharing::FileSharingCompleted)},
-  { 58, -1, -1, sizeof(::qaul::net::filesharing::FileSharingCanceled)},
+  { 9, -1, -1, sizeof(::qaul::net::filesharing::FileSharingInfo)},
+  { 22, -1, -1, sizeof(::qaul::net::filesharing::FileSharingData)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::net::filesharing::_FileSharingContainer_default_instance_._instance,
   &::qaul::net::filesharing::_FileSharingInfo_default_instance_._instance,
   &::qaul::net::filesharing::_FileSharingData_default_instance_._instance,
-  &::qaul::net::filesharing::_FileSharingConfirmationFileInfo_default_instance_._instance,
-  &::qaul::net::filesharing::_FileSharingConfirmation_default_instance_._instance,
-  &::qaul::net::filesharing::_FileSharingCompleted_default_instance_._instance,
-  &::qaul::net::filesharing::_FileSharingCanceled_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n*services/filesharing/filesharing_net.p"
-  "roto\022\024qaul.net.filesharing\"\264\003\n\024FileShari"
+  "roto\022\024qaul.net.filesharing\"\231\001\n\024FileShari"
   "ngContainer\022:\n\tfile_info\030\001 \001(\0132%.qaul.ne"
   "t.filesharing.FileSharingInfoH\000\022:\n\tfile_"
   "data\030\002 \001(\0132%.qaul.net.filesharing.FileSh"
-  "aringDataH\000\022E\n\014confirmation\030\003 \001(\0132-.qaul"
-  ".net.filesharing.FileSharingConfirmation"
-  "H\000\022R\n\021confirmation_info\030\004 \001(\01325.qaul.net"
-  ".filesharing.FileSharingConfirmationFile"
-  "InfoH\000\022\?\n\tcompleted\030\005 \001(\0132*.qaul.net.fil"
-  "esharing.FileSharingCompletedH\000\022=\n\010cance"
-  "led\030\006 \001(\0132).qaul.net.filesharing.FileSha"
-  "ringCanceledH\000B\t\n\007message\"\216\001\n\017FileSharin"
-  "gInfo\022\021\n\tfile_name\030\001 \001(\t\022\026\n\016file_extensi"
-  "on\030\002 \001(\t\022\021\n\tfile_size\030\003 \001(\r\022\022\n\nfile_desc"
-  "r\030\004 \001(\t\022\030\n\020size_per_package\030\005 \001(\r\022\017\n\007fil"
-  "e_id\030\006 \001(\004\"o\n\017FileSharingData\022\017\n\007file_id"
-  "\030\001 \001(\004\022\020\n\010sequence\030\002 \001(\r\022\021\n\tfile_size\030\003 "
-  "\001(\r\022\030\n\020size_per_package\030\004 \001(\r\022\014\n\004data\030\006 "
-  "\001(\014\"2\n\037FileSharingConfirmationFileInfo\022\017"
-  "\n\007file_id\030\001 \001(\004\"<\n\027FileSharingConfirmati"
-  "on\022\017\n\007file_id\030\001 \001(\004\022\020\n\010sequence\030\002 \001(\r\"\'\n"
-  "\024FileSharingCompleted\022\017\n\007file_id\030\001 \001(\004\"&"
-  "\n\023FileSharingCanceled\022\017\n\007file_id\030\001 \001(\004b\006"
-  "proto3"
+  "aringDataH\000B\t\n\007message\"\240\001\n\017FileSharingIn"
+  "fo\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_name\030\002 \001(\t\022\026"
+  "\n\016file_extension\030\003 \001(\t\022\021\n\tfile_size\030\004 \001("
+  "\r\022\022\n\nfile_descr\030\005 \001(\t\022\023\n\013start_index\030\006 \001"
+  "(\r\022\025\n\rmessage_count\030\007 \001(\r\"K\n\017FileSharing"
+  "Data\022\023\n\013start_index\030\001 \001(\r\022\025\n\rmessage_cou"
+  "nt\030\002 \001(\r\022\014\n\004data\030\003 \001(\014b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto = {
-    false, false, 966, descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5fnet_2eproto,
+    false, false, 470, descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5fnet_2eproto,
     "services/filesharing/filesharing_net.proto",
-    &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once, nullptr, 0, 7,
+    &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once, nullptr, 0, 3,
     schemas, file_default_instances, TableStruct_services_2ffilesharing_2ffilesharing_5fnet_2eproto::offsets,
     file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto, file_level_enum_descriptors_services_2ffilesharing_2ffilesharing_5fnet_2eproto,
     file_level_service_descriptors_services_2ffilesharing_2ffilesharing_5fnet_2eproto,
@@ -271,10 +162,6 @@ class FileSharingContainer::_Internal {
  public:
   static const ::qaul::net::filesharing::FileSharingInfo& file_info(const FileSharingContainer* msg);
   static const ::qaul::net::filesharing::FileSharingData& file_data(const FileSharingContainer* msg);
-  static const ::qaul::net::filesharing::FileSharingConfirmation& confirmation(const FileSharingContainer* msg);
-  static const ::qaul::net::filesharing::FileSharingConfirmationFileInfo& confirmation_info(const FileSharingContainer* msg);
-  static const ::qaul::net::filesharing::FileSharingCompleted& completed(const FileSharingContainer* msg);
-  static const ::qaul::net::filesharing::FileSharingCanceled& canceled(const FileSharingContainer* msg);
 };
 
 const ::qaul::net::filesharing::FileSharingInfo&
@@ -284,22 +171,6 @@ FileSharingContainer::_Internal::file_info(const FileSharingContainer* msg) {
 const ::qaul::net::filesharing::FileSharingData&
 FileSharingContainer::_Internal::file_data(const FileSharingContainer* msg) {
   return *msg->_impl_.message_.file_data_;
-}
-const ::qaul::net::filesharing::FileSharingConfirmation&
-FileSharingContainer::_Internal::confirmation(const FileSharingContainer* msg) {
-  return *msg->_impl_.message_.confirmation_;
-}
-const ::qaul::net::filesharing::FileSharingConfirmationFileInfo&
-FileSharingContainer::_Internal::confirmation_info(const FileSharingContainer* msg) {
-  return *msg->_impl_.message_.confirmation_info_;
-}
-const ::qaul::net::filesharing::FileSharingCompleted&
-FileSharingContainer::_Internal::completed(const FileSharingContainer* msg) {
-  return *msg->_impl_.message_.completed_;
-}
-const ::qaul::net::filesharing::FileSharingCanceled&
-FileSharingContainer::_Internal::canceled(const FileSharingContainer* msg) {
-  return *msg->_impl_.message_.canceled_;
 }
 void FileSharingContainer::set_allocated_file_info(::qaul::net::filesharing::FileSharingInfo* file_info) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -331,66 +202,6 @@ void FileSharingContainer::set_allocated_file_data(::qaul::net::filesharing::Fil
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.net.filesharing.FileSharingContainer.file_data)
 }
-void FileSharingContainer::set_allocated_confirmation(::qaul::net::filesharing::FileSharingConfirmation* confirmation) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  clear_message();
-  if (confirmation) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(confirmation);
-    if (message_arena != submessage_arena) {
-      confirmation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, confirmation, submessage_arena);
-    }
-    set_has_confirmation();
-    _impl_.message_.confirmation_ = confirmation;
-  }
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.filesharing.FileSharingContainer.confirmation)
-}
-void FileSharingContainer::set_allocated_confirmation_info(::qaul::net::filesharing::FileSharingConfirmationFileInfo* confirmation_info) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  clear_message();
-  if (confirmation_info) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(confirmation_info);
-    if (message_arena != submessage_arena) {
-      confirmation_info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, confirmation_info, submessage_arena);
-    }
-    set_has_confirmation_info();
-    _impl_.message_.confirmation_info_ = confirmation_info;
-  }
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.filesharing.FileSharingContainer.confirmation_info)
-}
-void FileSharingContainer::set_allocated_completed(::qaul::net::filesharing::FileSharingCompleted* completed) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  clear_message();
-  if (completed) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(completed);
-    if (message_arena != submessage_arena) {
-      completed = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, completed, submessage_arena);
-    }
-    set_has_completed();
-    _impl_.message_.completed_ = completed;
-  }
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.filesharing.FileSharingContainer.completed)
-}
-void FileSharingContainer::set_allocated_canceled(::qaul::net::filesharing::FileSharingCanceled* canceled) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  clear_message();
-  if (canceled) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(canceled);
-    if (message_arena != submessage_arena) {
-      canceled = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, canceled, submessage_arena);
-    }
-    set_has_canceled();
-    _impl_.message_.canceled_ = canceled;
-  }
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.filesharing.FileSharingContainer.canceled)
-}
 FileSharingContainer::FileSharingContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -416,26 +227,6 @@ FileSharingContainer::FileSharingContainer(const FileSharingContainer& from)
     case kFileData: {
       _this->_internal_mutable_file_data()->::qaul::net::filesharing::FileSharingData::MergeFrom(
           from._internal_file_data());
-      break;
-    }
-    case kConfirmation: {
-      _this->_internal_mutable_confirmation()->::qaul::net::filesharing::FileSharingConfirmation::MergeFrom(
-          from._internal_confirmation());
-      break;
-    }
-    case kConfirmationInfo: {
-      _this->_internal_mutable_confirmation_info()->::qaul::net::filesharing::FileSharingConfirmationFileInfo::MergeFrom(
-          from._internal_confirmation_info());
-      break;
-    }
-    case kCompleted: {
-      _this->_internal_mutable_completed()->::qaul::net::filesharing::FileSharingCompleted::MergeFrom(
-          from._internal_completed());
-      break;
-    }
-    case kCanceled: {
-      _this->_internal_mutable_canceled()->::qaul::net::filesharing::FileSharingCanceled::MergeFrom(
-          from._internal_canceled());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -492,30 +283,6 @@ void FileSharingContainer::clear_message() {
       }
       break;
     }
-    case kConfirmation: {
-      if (GetArenaForAllocation() == nullptr) {
-        delete _impl_.message_.confirmation_;
-      }
-      break;
-    }
-    case kConfirmationInfo: {
-      if (GetArenaForAllocation() == nullptr) {
-        delete _impl_.message_.confirmation_info_;
-      }
-      break;
-    }
-    case kCompleted: {
-      if (GetArenaForAllocation() == nullptr) {
-        delete _impl_.message_.completed_;
-      }
-      break;
-    }
-    case kCanceled: {
-      if (GetArenaForAllocation() == nullptr) {
-        delete _impl_.message_.canceled_;
-      }
-      break;
-    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -552,38 +319,6 @@ const char* FileSharingContainer::_InternalParse(const char* ptr, ::_pbi::ParseC
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_file_data(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // .qaul.net.filesharing.FileSharingConfirmation confirmation = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          ptr = ctx->ParseMessage(_internal_mutable_confirmation(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // .qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          ptr = ctx->ParseMessage(_internal_mutable_confirmation_info(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // .qaul.net.filesharing.FileSharingCompleted completed = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
-          ptr = ctx->ParseMessage(_internal_mutable_completed(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // .qaul.net.filesharing.FileSharingCanceled canceled = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
-          ptr = ctx->ParseMessage(_internal_mutable_canceled(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -631,34 +366,6 @@ uint8_t* FileSharingContainer::_InternalSerialize(
         _Internal::file_data(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.net.filesharing.FileSharingConfirmation confirmation = 3;
-  if (_internal_has_confirmation()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::confirmation(this),
-        _Internal::confirmation(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;
-  if (_internal_has_confirmation_info()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::confirmation_info(this),
-        _Internal::confirmation_info(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.net.filesharing.FileSharingCompleted completed = 5;
-  if (_internal_has_completed()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::completed(this),
-        _Internal::completed(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.net.filesharing.FileSharingCanceled canceled = 6;
-  if (_internal_has_canceled()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, _Internal::canceled(this),
-        _Internal::canceled(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -688,34 +395,6 @@ size_t FileSharingContainer::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.message_.file_data_);
-      break;
-    }
-    // .qaul.net.filesharing.FileSharingConfirmation confirmation = 3;
-    case kConfirmation: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.message_.confirmation_);
-      break;
-    }
-    // .qaul.net.filesharing.FileSharingConfirmationFileInfo confirmation_info = 4;
-    case kConfirmationInfo: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.message_.confirmation_info_);
-      break;
-    }
-    // .qaul.net.filesharing.FileSharingCompleted completed = 5;
-    case kCompleted: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.message_.completed_);
-      break;
-    }
-    // .qaul.net.filesharing.FileSharingCanceled canceled = 6;
-    case kCanceled: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.message_.canceled_);
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -749,26 +428,6 @@ void FileSharingContainer::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, c
     case kFileData: {
       _this->_internal_mutable_file_data()->::qaul::net::filesharing::FileSharingData::MergeFrom(
           from._internal_file_data());
-      break;
-    }
-    case kConfirmation: {
-      _this->_internal_mutable_confirmation()->::qaul::net::filesharing::FileSharingConfirmation::MergeFrom(
-          from._internal_confirmation());
-      break;
-    }
-    case kConfirmationInfo: {
-      _this->_internal_mutable_confirmation_info()->::qaul::net::filesharing::FileSharingConfirmationFileInfo::MergeFrom(
-          from._internal_confirmation_info());
-      break;
-    }
-    case kCompleted: {
-      _this->_internal_mutable_completed()->::qaul::net::filesharing::FileSharingCompleted::MergeFrom(
-          from._internal_completed());
-      break;
-    }
-    case kCanceled: {
-      _this->_internal_mutable_canceled()->::qaul::net::filesharing::FileSharingCanceled::MergeFrom(
-          from._internal_canceled());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -821,9 +480,10 @@ FileSharingInfo::FileSharingInfo(const FileSharingInfo& from)
       decltype(_impl_.file_name_){}
     , decltype(_impl_.file_extension_){}
     , decltype(_impl_.file_descr_){}
-    , decltype(_impl_.file_size_){}
-    , decltype(_impl_.size_per_package_){}
     , decltype(_impl_.file_id_){}
+    , decltype(_impl_.file_size_){}
+    , decltype(_impl_.start_index_){}
+    , decltype(_impl_.message_count_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -851,9 +511,9 @@ FileSharingInfo::FileSharingInfo(const FileSharingInfo& from)
     _this->_impl_.file_descr_.Set(from._internal_file_descr(), 
       _this->GetArenaForAllocation());
   }
-  ::memcpy(&_impl_.file_size_, &from._impl_.file_size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.file_id_) -
-    reinterpret_cast<char*>(&_impl_.file_size_)) + sizeof(_impl_.file_id_));
+  ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.message_count_) -
+    reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.message_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingInfo)
 }
 
@@ -865,9 +525,10 @@ inline void FileSharingInfo::SharedCtor(
       decltype(_impl_.file_name_){}
     , decltype(_impl_.file_extension_){}
     , decltype(_impl_.file_descr_){}
-    , decltype(_impl_.file_size_){0u}
-    , decltype(_impl_.size_per_package_){0u}
     , decltype(_impl_.file_id_){uint64_t{0u}}
+    , decltype(_impl_.file_size_){0u}
+    , decltype(_impl_.start_index_){0u}
+    , decltype(_impl_.message_count_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.file_name_.InitDefault();
@@ -913,9 +574,9 @@ void FileSharingInfo::Clear() {
   _impl_.file_name_.ClearToEmpty();
   _impl_.file_extension_.ClearToEmpty();
   _impl_.file_descr_.ClearToEmpty();
-  ::memset(&_impl_.file_size_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.file_id_) -
-      reinterpret_cast<char*>(&_impl_.file_size_)) + sizeof(_impl_.file_id_));
+  ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.message_count_) -
+      reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.message_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -925,9 +586,17 @@ const char* FileSharingInfo::_InternalParse(const char* ptr, ::_pbi::ParseContex
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string file_name = 1;
+      // uint64 file_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string file_name = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_file_name();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -935,9 +604,9 @@ const char* FileSharingInfo::_InternalParse(const char* ptr, ::_pbi::ParseContex
         } else
           goto handle_unusual;
         continue;
-      // string file_extension = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+      // string file_extension = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_file_extension();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -945,17 +614,17 @@ const char* FileSharingInfo::_InternalParse(const char* ptr, ::_pbi::ParseContex
         } else
           goto handle_unusual;
         continue;
-      // uint32 file_size = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+      // uint32 file_size = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
           _impl_.file_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // string file_descr = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+      // string file_descr = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_file_descr();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -963,18 +632,18 @@ const char* FileSharingInfo::_InternalParse(const char* ptr, ::_pbi::ParseContex
         } else
           goto handle_unusual;
         continue;
-      // uint32 size_per_package = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
-          _impl_.size_per_package_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+      // uint32 start_index = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _impl_.start_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // uint64 file_id = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+      // uint32 message_count = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+          _impl_.message_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1008,52 +677,58 @@ uint8_t* FileSharingInfo::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string file_name = 1;
+  // uint64 file_id = 1;
+  if (this->_internal_file_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
+  }
+
+  // string file_name = 2;
   if (!this->_internal_file_name().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_file_name().data(), static_cast<int>(this->_internal_file_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "qaul.net.filesharing.FileSharingInfo.file_name");
     target = stream->WriteStringMaybeAliased(
-        1, this->_internal_file_name(), target);
+        2, this->_internal_file_name(), target);
   }
 
-  // string file_extension = 2;
+  // string file_extension = 3;
   if (!this->_internal_file_extension().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_file_extension().data(), static_cast<int>(this->_internal_file_extension().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "qaul.net.filesharing.FileSharingInfo.file_extension");
     target = stream->WriteStringMaybeAliased(
-        2, this->_internal_file_extension(), target);
+        3, this->_internal_file_extension(), target);
   }
 
-  // uint32 file_size = 3;
+  // uint32 file_size = 4;
   if (this->_internal_file_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_file_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_file_size(), target);
   }
 
-  // string file_descr = 4;
+  // string file_descr = 5;
   if (!this->_internal_file_descr().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_file_descr().data(), static_cast<int>(this->_internal_file_descr().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "qaul.net.filesharing.FileSharingInfo.file_descr");
     target = stream->WriteStringMaybeAliased(
-        4, this->_internal_file_descr(), target);
+        5, this->_internal_file_descr(), target);
   }
 
-  // uint32 size_per_package = 5;
-  if (this->_internal_size_per_package() != 0) {
+  // uint32 start_index = 6;
+  if (this->_internal_start_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_size_per_package(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(6, this->_internal_start_index(), target);
   }
 
-  // uint64 file_id = 6;
-  if (this->_internal_file_id() != 0) {
+  // uint32 message_count = 7;
+  if (this->_internal_message_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(6, this->_internal_file_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(7, this->_internal_message_count(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1072,40 +747,45 @@ size_t FileSharingInfo::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string file_name = 1;
+  // string file_name = 2;
   if (!this->_internal_file_name().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_file_name());
   }
 
-  // string file_extension = 2;
+  // string file_extension = 3;
   if (!this->_internal_file_extension().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_file_extension());
   }
 
-  // string file_descr = 4;
+  // string file_descr = 5;
   if (!this->_internal_file_descr().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_file_descr());
   }
 
-  // uint32 file_size = 3;
+  // uint64 file_id = 1;
+  if (this->_internal_file_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
+  }
+
+  // uint32 file_size = 4;
   if (this->_internal_file_size() != 0) {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_file_size());
   }
 
-  // uint32 size_per_package = 5;
-  if (this->_internal_size_per_package() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_size_per_package());
+  // uint32 start_index = 6;
+  if (this->_internal_start_index() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_start_index());
   }
 
-  // uint64 file_id = 6;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
+  // uint32 message_count = 7;
+  if (this->_internal_message_count() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_message_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1135,14 +815,17 @@ void FileSharingInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   if (!from._internal_file_descr().empty()) {
     _this->_internal_set_file_descr(from._internal_file_descr());
   }
+  if (from._internal_file_id() != 0) {
+    _this->_internal_set_file_id(from._internal_file_id());
+  }
   if (from._internal_file_size() != 0) {
     _this->_internal_set_file_size(from._internal_file_size());
   }
-  if (from._internal_size_per_package() != 0) {
-    _this->_internal_set_size_per_package(from._internal_size_per_package());
+  if (from._internal_start_index() != 0) {
+    _this->_internal_set_start_index(from._internal_start_index());
   }
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
+  if (from._internal_message_count() != 0) {
+    _this->_internal_set_message_count(from._internal_message_count());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1176,11 +859,11 @@ void FileSharingInfo::InternalSwap(FileSharingInfo* other) {
       &other->_impl_.file_descr_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FileSharingInfo, _impl_.file_id_)
-      + sizeof(FileSharingInfo::_impl_.file_id_)
-      - PROTOBUF_FIELD_OFFSET(FileSharingInfo, _impl_.file_size_)>(
-          reinterpret_cast<char*>(&_impl_.file_size_),
-          reinterpret_cast<char*>(&other->_impl_.file_size_));
+      PROTOBUF_FIELD_OFFSET(FileSharingInfo, _impl_.message_count_)
+      + sizeof(FileSharingInfo::_impl_.message_count_)
+      - PROTOBUF_FIELD_OFFSET(FileSharingInfo, _impl_.file_id_)>(
+          reinterpret_cast<char*>(&_impl_.file_id_),
+          reinterpret_cast<char*>(&other->_impl_.file_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FileSharingInfo::GetMetadata() const {
@@ -1206,10 +889,8 @@ FileSharingData::FileSharingData(const FileSharingData& from)
   FileSharingData* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.data_){}
-    , decltype(_impl_.file_id_){}
-    , decltype(_impl_.sequence_){}
-    , decltype(_impl_.file_size_){}
-    , decltype(_impl_.size_per_package_){}
+    , decltype(_impl_.start_index_){}
+    , decltype(_impl_.message_count_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -1221,9 +902,9 @@ FileSharingData::FileSharingData(const FileSharingData& from)
     _this->_impl_.data_.Set(from._internal_data(), 
       _this->GetArenaForAllocation());
   }
-  ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.size_per_package_) -
-    reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.size_per_package_));
+  ::memcpy(&_impl_.start_index_, &from._impl_.start_index_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.message_count_) -
+    reinterpret_cast<char*>(&_impl_.start_index_)) + sizeof(_impl_.message_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingData)
 }
 
@@ -1233,10 +914,8 @@ inline void FileSharingData::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.data_){}
-    , decltype(_impl_.file_id_){uint64_t{0u}}
-    , decltype(_impl_.sequence_){0u}
-    , decltype(_impl_.file_size_){0u}
-    , decltype(_impl_.size_per_package_){0u}
+    , decltype(_impl_.start_index_){0u}
+    , decltype(_impl_.message_count_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.data_.InitDefault();
@@ -1270,9 +949,9 @@ void FileSharingData::Clear() {
   (void) cached_has_bits;
 
   _impl_.data_.ClearToEmpty();
-  ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.size_per_package_) -
-      reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.size_per_package_));
+  ::memset(&_impl_.start_index_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.message_count_) -
+      reinterpret_cast<char*>(&_impl_.start_index_)) + sizeof(_impl_.message_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1282,41 +961,25 @@ const char* FileSharingData::_InternalParse(const char* ptr, ::_pbi::ParseContex
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // uint64 file_id = 1;
+      // uint32 start_index = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _impl_.start_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // uint32 sequence = 2;
+      // uint32 message_count = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          _impl_.sequence_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _impl_.message_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // uint32 file_size = 3;
+      // bytes data = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
-          _impl_.file_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // uint32 size_per_package = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
-          _impl_.size_per_package_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // bytes data = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_data();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -1352,34 +1015,22 @@ uint8_t* FileSharingData::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
+  // uint32 start_index = 1;
+  if (this->_internal_start_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_start_index(), target);
   }
 
-  // uint32 sequence = 2;
-  if (this->_internal_sequence() != 0) {
+  // uint32 message_count = 2;
+  if (this->_internal_message_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_sequence(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_message_count(), target);
   }
 
-  // uint32 file_size = 3;
-  if (this->_internal_file_size() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_file_size(), target);
-  }
-
-  // uint32 size_per_package = 4;
-  if (this->_internal_size_per_package() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_size_per_package(), target);
-  }
-
-  // bytes data = 6;
+  // bytes data = 3;
   if (!this->_internal_data().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        6, this->_internal_data(), target);
+        3, this->_internal_data(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1398,31 +1049,21 @@ size_t FileSharingData::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // bytes data = 6;
+  // bytes data = 3;
   if (!this->_internal_data().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_data());
   }
 
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
+  // uint32 start_index = 1;
+  if (this->_internal_start_index() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_start_index());
   }
 
-  // uint32 sequence = 2;
-  if (this->_internal_sequence() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_sequence());
-  }
-
-  // uint32 file_size = 3;
-  if (this->_internal_file_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_file_size());
-  }
-
-  // uint32 size_per_package = 4;
-  if (this->_internal_size_per_package() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_size_per_package());
+  // uint32 message_count = 2;
+  if (this->_internal_message_count() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_message_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1446,17 +1087,11 @@ void FileSharingData::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   if (!from._internal_data().empty()) {
     _this->_internal_set_data(from._internal_data());
   }
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
+  if (from._internal_start_index() != 0) {
+    _this->_internal_set_start_index(from._internal_start_index());
   }
-  if (from._internal_sequence() != 0) {
-    _this->_internal_set_sequence(from._internal_sequence());
-  }
-  if (from._internal_file_size() != 0) {
-    _this->_internal_set_file_size(from._internal_file_size());
-  }
-  if (from._internal_size_per_package() != 0) {
-    _this->_internal_set_size_per_package(from._internal_size_per_package());
+  if (from._internal_message_count() != 0) {
+    _this->_internal_set_message_count(from._internal_message_count());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1482,762 +1117,17 @@ void FileSharingData::InternalSwap(FileSharingData* other) {
       &other->_impl_.data_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FileSharingData, _impl_.size_per_package_)
-      + sizeof(FileSharingData::_impl_.size_per_package_)
-      - PROTOBUF_FIELD_OFFSET(FileSharingData, _impl_.file_id_)>(
-          reinterpret_cast<char*>(&_impl_.file_id_),
-          reinterpret_cast<char*>(&other->_impl_.file_id_));
+      PROTOBUF_FIELD_OFFSET(FileSharingData, _impl_.message_count_)
+      + sizeof(FileSharingData::_impl_.message_count_)
+      - PROTOBUF_FIELD_OFFSET(FileSharingData, _impl_.start_index_)>(
+          reinterpret_cast<char*>(&_impl_.start_index_),
+          reinterpret_cast<char*>(&other->_impl_.start_index_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FileSharingData::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_getter, &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once,
       file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[2]);
-}
-
-// ===================================================================
-
-class FileSharingConfirmationFileInfo::_Internal {
- public:
-};
-
-FileSharingConfirmationFileInfo::FileSharingConfirmationFileInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-}
-FileSharingConfirmationFileInfo::FileSharingConfirmationFileInfo(const FileSharingConfirmationFileInfo& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FileSharingConfirmationFileInfo* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _this->_impl_.file_id_ = from._impl_.file_id_;
-  // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-}
-
-inline void FileSharingConfirmationFileInfo::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){uint64_t{0u}}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-}
-
-FileSharingConfirmationFileInfo::~FileSharingConfirmationFileInfo() {
-  // @@protoc_insertion_point(destructor:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FileSharingConfirmationFileInfo::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-}
-
-void FileSharingConfirmationFileInfo::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FileSharingConfirmationFileInfo::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.file_id_ = uint64_t{0u};
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FileSharingConfirmationFileInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // uint64 file_id = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FileSharingConfirmationFileInfo::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  return target;
-}
-
-size_t FileSharingConfirmationFileInfo::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FileSharingConfirmationFileInfo::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FileSharingConfirmationFileInfo::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FileSharingConfirmationFileInfo::GetClassData() const { return &_class_data_; }
-
-
-void FileSharingConfirmationFileInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FileSharingConfirmationFileInfo*>(&to_msg);
-  auto& from = static_cast<const FileSharingConfirmationFileInfo&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FileSharingConfirmationFileInfo::CopyFrom(const FileSharingConfirmationFileInfo& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.filesharing.FileSharingConfirmationFileInfo)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FileSharingConfirmationFileInfo::IsInitialized() const {
-  return true;
-}
-
-void FileSharingConfirmationFileInfo::InternalSwap(FileSharingConfirmationFileInfo* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.file_id_, other->_impl_.file_id_);
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FileSharingConfirmationFileInfo::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_getter, &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once,
-      file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[3]);
-}
-
-// ===================================================================
-
-class FileSharingConfirmation::_Internal {
- public:
-};
-
-FileSharingConfirmation::FileSharingConfirmation(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.filesharing.FileSharingConfirmation)
-}
-FileSharingConfirmation::FileSharingConfirmation(const FileSharingConfirmation& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FileSharingConfirmation* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){}
-    , decltype(_impl_.sequence_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.sequence_) -
-    reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.sequence_));
-  // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingConfirmation)
-}
-
-inline void FileSharingConfirmation::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){uint64_t{0u}}
-    , decltype(_impl_.sequence_){0u}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-}
-
-FileSharingConfirmation::~FileSharingConfirmation() {
-  // @@protoc_insertion_point(destructor:qaul.net.filesharing.FileSharingConfirmation)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FileSharingConfirmation::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-}
-
-void FileSharingConfirmation::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FileSharingConfirmation::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.filesharing.FileSharingConfirmation)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.sequence_) -
-      reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.sequence_));
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FileSharingConfirmation::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // uint64 file_id = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // uint32 sequence = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          _impl_.sequence_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FileSharingConfirmation::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.filesharing.FileSharingConfirmation)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
-  }
-
-  // uint32 sequence = 2;
-  if (this->_internal_sequence() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_sequence(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.filesharing.FileSharingConfirmation)
-  return target;
-}
-
-size_t FileSharingConfirmation::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.filesharing.FileSharingConfirmation)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
-  }
-
-  // uint32 sequence = 2;
-  if (this->_internal_sequence() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_sequence());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FileSharingConfirmation::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FileSharingConfirmation::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FileSharingConfirmation::GetClassData() const { return &_class_data_; }
-
-
-void FileSharingConfirmation::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FileSharingConfirmation*>(&to_msg);
-  auto& from = static_cast<const FileSharingConfirmation&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.filesharing.FileSharingConfirmation)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
-  }
-  if (from._internal_sequence() != 0) {
-    _this->_internal_set_sequence(from._internal_sequence());
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FileSharingConfirmation::CopyFrom(const FileSharingConfirmation& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.filesharing.FileSharingConfirmation)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FileSharingConfirmation::IsInitialized() const {
-  return true;
-}
-
-void FileSharingConfirmation::InternalSwap(FileSharingConfirmation* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FileSharingConfirmation, _impl_.sequence_)
-      + sizeof(FileSharingConfirmation::_impl_.sequence_)
-      - PROTOBUF_FIELD_OFFSET(FileSharingConfirmation, _impl_.file_id_)>(
-          reinterpret_cast<char*>(&_impl_.file_id_),
-          reinterpret_cast<char*>(&other->_impl_.file_id_));
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FileSharingConfirmation::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_getter, &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once,
-      file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[4]);
-}
-
-// ===================================================================
-
-class FileSharingCompleted::_Internal {
- public:
-};
-
-FileSharingCompleted::FileSharingCompleted(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.filesharing.FileSharingCompleted)
-}
-FileSharingCompleted::FileSharingCompleted(const FileSharingCompleted& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FileSharingCompleted* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _this->_impl_.file_id_ = from._impl_.file_id_;
-  // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingCompleted)
-}
-
-inline void FileSharingCompleted::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){uint64_t{0u}}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-}
-
-FileSharingCompleted::~FileSharingCompleted() {
-  // @@protoc_insertion_point(destructor:qaul.net.filesharing.FileSharingCompleted)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FileSharingCompleted::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-}
-
-void FileSharingCompleted::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FileSharingCompleted::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.filesharing.FileSharingCompleted)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.file_id_ = uint64_t{0u};
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FileSharingCompleted::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // uint64 file_id = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FileSharingCompleted::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.filesharing.FileSharingCompleted)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.filesharing.FileSharingCompleted)
-  return target;
-}
-
-size_t FileSharingCompleted::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.filesharing.FileSharingCompleted)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FileSharingCompleted::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FileSharingCompleted::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FileSharingCompleted::GetClassData() const { return &_class_data_; }
-
-
-void FileSharingCompleted::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FileSharingCompleted*>(&to_msg);
-  auto& from = static_cast<const FileSharingCompleted&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.filesharing.FileSharingCompleted)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FileSharingCompleted::CopyFrom(const FileSharingCompleted& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.filesharing.FileSharingCompleted)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FileSharingCompleted::IsInitialized() const {
-  return true;
-}
-
-void FileSharingCompleted::InternalSwap(FileSharingCompleted* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.file_id_, other->_impl_.file_id_);
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FileSharingCompleted::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_getter, &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once,
-      file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[5]);
-}
-
-// ===================================================================
-
-class FileSharingCanceled::_Internal {
- public:
-};
-
-FileSharingCanceled::FileSharingCanceled(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.filesharing.FileSharingCanceled)
-}
-FileSharingCanceled::FileSharingCanceled(const FileSharingCanceled& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FileSharingCanceled* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _this->_impl_.file_id_ = from._impl_.file_id_;
-  // @@protoc_insertion_point(copy_constructor:qaul.net.filesharing.FileSharingCanceled)
-}
-
-inline void FileSharingCanceled::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.file_id_){uint64_t{0u}}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-}
-
-FileSharingCanceled::~FileSharingCanceled() {
-  // @@protoc_insertion_point(destructor:qaul.net.filesharing.FileSharingCanceled)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FileSharingCanceled::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-}
-
-void FileSharingCanceled::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FileSharingCanceled::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.filesharing.FileSharingCanceled)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.file_id_ = uint64_t{0u};
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FileSharingCanceled::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // uint64 file_id = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FileSharingCanceled::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.filesharing.FileSharingCanceled)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.filesharing.FileSharingCanceled)
-  return target;
-}
-
-size_t FileSharingCanceled::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.filesharing.FileSharingCanceled)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // uint64 file_id = 1;
-  if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FileSharingCanceled::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FileSharingCanceled::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FileSharingCanceled::GetClassData() const { return &_class_data_; }
-
-
-void FileSharingCanceled::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FileSharingCanceled*>(&to_msg);
-  auto& from = static_cast<const FileSharingCanceled&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.filesharing.FileSharingCanceled)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_file_id() != 0) {
-    _this->_internal_set_file_id(from._internal_file_id());
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FileSharingCanceled::CopyFrom(const FileSharingCanceled& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.filesharing.FileSharingCanceled)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FileSharingCanceled::IsInitialized() const {
-  return true;
-}
-
-void FileSharingCanceled::InternalSwap(FileSharingCanceled* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.file_id_, other->_impl_.file_id_);
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FileSharingCanceled::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_getter, &descriptor_table_services_2ffilesharing_2ffilesharing_5fnet_2eproto_once,
-      file_level_metadata_services_2ffilesharing_2ffilesharing_5fnet_2eproto[6]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -2256,22 +1146,6 @@ Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingInfo >(Arena* ar
 template<> PROTOBUF_NOINLINE ::qaul::net::filesharing::FileSharingData*
 Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingData >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::filesharing::FileSharingData >(arena);
-}
-template<> PROTOBUF_NOINLINE ::qaul::net::filesharing::FileSharingConfirmationFileInfo*
-Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingConfirmationFileInfo >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::filesharing::FileSharingConfirmationFileInfo >(arena);
-}
-template<> PROTOBUF_NOINLINE ::qaul::net::filesharing::FileSharingConfirmation*
-Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingConfirmation >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::filesharing::FileSharingConfirmation >(arena);
-}
-template<> PROTOBUF_NOINLINE ::qaul::net::filesharing::FileSharingCompleted*
-Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingCompleted >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::filesharing::FileSharingCompleted >(arena);
-}
-template<> PROTOBUF_NOINLINE ::qaul::net::filesharing::FileSharingCanceled*
-Arena::CreateMaybeMessage< ::qaul::net::filesharing::FileSharingCanceled >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::filesharing::FileSharingCanceled >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

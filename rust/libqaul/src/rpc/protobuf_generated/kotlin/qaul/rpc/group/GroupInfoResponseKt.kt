@@ -98,6 +98,31 @@ object GroupInfoResponseKt {
     }
 
     /**
+     * <pre>
+     * is direct chat
+     * </pre>
+     *
+     * <code>bool is_direct_chat = 4;</code>
+     */
+    var isDirectChat: kotlin.Boolean
+      @JvmName("getIsDirectChat")
+      get() = _builder.getIsDirectChat()
+      @JvmName("setIsDirectChat")
+      set(value) {
+        _builder.setIsDirectChat(value)
+      }
+    /**
+     * <pre>
+     * is direct chat
+     * </pre>
+     *
+     * <code>bool is_direct_chat = 4;</code>
+     */
+    fun clearIsDirectChat() {
+      _builder.clearIsDirectChat()
+    }
+
+    /**
      * An uninstantiable, behaviorless type to represent the field in
      * generics.
      */
@@ -105,10 +130,10 @@ object GroupInfoResponseKt {
     class MembersProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      */
      val members: com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupMember, MembersProxy>
       @kotlin.jvm.JvmSynthetic
@@ -117,10 +142,10 @@ object GroupInfoResponseKt {
       )
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      * @param value The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -130,10 +155,10 @@ object GroupInfoResponseKt {
     }
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      * @param value The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -144,10 +169,10 @@ object GroupInfoResponseKt {
     }
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      * @param values The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -157,10 +182,10 @@ object GroupInfoResponseKt {
     }
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      * @param values The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -171,10 +196,10 @@ object GroupInfoResponseKt {
     }
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      * @param index The index to set the value at.
      * @param value The members to set.
      */
@@ -185,10 +210,10 @@ object GroupInfoResponseKt {
     }
     /**
      * <pre>
-     *members
+     * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 4;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearMembers")
