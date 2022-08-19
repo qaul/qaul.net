@@ -545,9 +545,6 @@ impl Group {
                                     proto::GroupMemberState::Activated => {
                                         print!("activated , role: ");
                                     }
-                                    _ => {
-                                        print!("unknown , role: ");
-                                    }
                                 }
 
                                 match proto::GroupMemberRole::from_i32(member.role).unwrap() {
@@ -556,9 +553,6 @@ impl Group {
                                     }
                                     proto::GroupMemberRole::Admin => {
                                         println!("admin , sent: {}", member.last_message_index);
-                                    }
-                                    _ => {
-                                        println!("unknown , sent: {}", member.last_message_index);
                                     }
                                 }
                             }
