@@ -102,6 +102,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  void _scheduleUpdateCurrentOpenChat() =>
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(currentOpenChatRoom.notifier).state = room;
+        ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
+      });
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleUpdateCurrentOpenChat();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.room == room) return;
+    _scheduleUpdateCurrentOpenChat();
+  }
+
   @override
   Widget build(BuildContext context) {
     final room = ref.watch(currentOpenChatRoom);
@@ -139,7 +158,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButtonFactory(
-          onPressed: widget.onBackButtonPressed ?? closeChat,
+          onPressed: () {
+            ref.read(currentOpenChatRoom.notifier).state = null;
+            widget.onBackButtonPressed == null
+                ? closeChat()
+                : widget.onBackButtonPressed!();
+          },
         ),
         title: Row(
           children: [
