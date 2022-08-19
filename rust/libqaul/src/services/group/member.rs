@@ -5,10 +5,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::Group;
-use crate::{
-    node::user_accounts::{UserAccount, UserAccounts},
-    utilities::timestamp,
-};
+use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
 pub struct Member {}
 impl Member {
@@ -278,7 +275,7 @@ impl Member {
             return Err("can not find group".to_string());
         }
 
-        let mut group = groups
+        let group = groups
             .db_ref
             .get(&group_idx.to_be_bytes())
             .unwrap()

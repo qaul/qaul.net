@@ -278,7 +278,7 @@ impl Manage {
         } else {
             // get all origin members
             if let Ok(grp_opt) = groups.db_ref.get(&group_idx.to_be_bytes().to_vec()) {
-                for (member_id, member) in &grp_opt.unwrap().members {
+                for (member_id, _member) in &grp_opt.unwrap().members {
                     orign_members.insert(member_id.clone(), true);
                 }
             }
