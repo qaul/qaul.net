@@ -45,14 +45,14 @@ pub struct Member {
     #[prost(bytes="vec", tag="1")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
     ///role
-    #[prost(uint32, tag="2")]
-    pub role: u32,
+    #[prost(int32, tag="2")]
+    pub role: i32,
     ///joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
     ///state 
-    #[prost(uint32, tag="4")]
-    pub state: u32,
+    #[prost(int32, tag="4")]
+    pub state: i32,
     ///last message index
     #[prost(uint32, tag="5")]
     pub last_message_index: u32,

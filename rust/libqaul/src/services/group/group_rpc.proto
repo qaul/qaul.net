@@ -37,6 +37,11 @@ message Group {
         GroupListRequest group_list_request = 13;
         //group list response
         GroupListResponse group_list_response = 14;
+
+        // group invited
+        GroupInvitedRequest group_invited_request = 15;
+        // group invited response
+        GroupInvitedResponse group_invited_response = 16;
     }
 }
 
@@ -143,16 +148,34 @@ message GroupInfoRequest {
     bytes group_id = 1;
 }
 
+
+// Group member state
+enum GroupMemberState {
+    /// invited
+    Invited = 0;
+    /// activated
+    Activated = 1;
+}
+
+// Group member role
+enum GroupMemberRole {
+    /// user
+    User = 0;
+    /// admin
+    Admin = 255;
+}
+
+
 // Group member response
 message GroupMember {
     //user id
     bytes user_id = 1;
     //role
-    uint32 role = 2;
+    GroupMemberRole role = 2;
     //joined at
     uint64 joined_at = 3;
     //state 
-    uint32 state = 4;
+    GroupMemberState state = 4;
     //last message index 
     uint32 last_message_index = 5;
 }
@@ -180,4 +203,30 @@ message GroupListResponse {
     // group list
     repeated GroupInfoResponse groups = 1;
 }
+
+message GroupInvited{
+    // group id
+    bytes group_id = 1;
+    // sender id
+    bytes sender_id = 2;
+    // received at
+    uint64 received_at = 3;
+    // group name
+    string group_name = 4;
+    // created at
+    uint64 created_at = 5;
+    // member count
+    uint32 member_count = 6;
+}
+
+// Group list request
+message GroupInvitedRequest {
+}
+
+// Group info response
+message GroupInvitedResponse {
+    // invited list
+    repeated GroupInvited invited = 1;
+}
+
 

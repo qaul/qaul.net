@@ -100,7 +100,7 @@ message CommonMessage{
         // chat message
         ChatMessage chat_message = 4;
         // file message
-        FileMessage file_message = 5;
+        FileMessage file_message = 5;                
         // group message
         GroupMessage group_message = 6;
         // rtc message

@@ -81,7 +81,7 @@ enum ContentType {
     // rtc management
     rtc = 3;
     // group event
-    group_event = 4;
+    group_event = 4;    
 }
 
 
