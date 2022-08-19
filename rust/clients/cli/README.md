@@ -55,6 +55,7 @@ The following commands are available:
   * `group list` - list all available groups
   * `group info {Group ID}` - shows the group information
   * `group invite {Group ID} {User ID}` - invite a user to a group
+    * `group invited` - list received pending invitations
     * `group accept {Group ID} {User ID}` - accept group invitation
     * `group decline {Group ID} {User ID}` - decline group invitation
   * `group remove {Group ID} {User ID}` - remove a group member from the group
