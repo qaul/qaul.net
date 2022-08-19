@@ -146,7 +146,7 @@ impl Group {
     }
 
     /// member exist
-    pub fn is_group_member_exist(
+    pub fn _is_group_member_exist(
         user_id: &PeerId,
         group_id: &Vec<u8>,
         member_id: &Vec<u8>,
@@ -169,7 +169,7 @@ impl Group {
     }
 
     /// get group member    
-    pub fn get_group_member(
+    pub fn _get_group_member(
         user_id: &PeerId,
         group_id: &Vec<u8>,
         member_id: &Vec<u8>,
@@ -217,7 +217,7 @@ impl Group {
         }
     }
 
-    /// update group member
+    /// update group
     pub fn update_group(user_id: &PeerId, group: &Group) {
         let user_groups = Self::get_groups_of_user(user_id);
         let idx = user_groups.group_id_to_index(&group.id);
