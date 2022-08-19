@@ -137,14 +137,16 @@ inline bool ChatContentType_Parse(
 enum MessageStatus : int {
   SENDING = 0,
   SENT = 1,
-  RECEIVED = 2,
-  RECEIVED_BY_ALL = 3,
+  CONFIRMED = 2,
+  CONFIRMED_BY_ALL = 3,
+  RECEIVING = 4,
+  RECEIVED = 5,
   MessageStatus_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   MessageStatus_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool MessageStatus_IsValid(int value);
 constexpr MessageStatus MessageStatus_MIN = SENDING;
-constexpr MessageStatus MessageStatus_MAX = RECEIVED_BY_ALL;
+constexpr MessageStatus MessageStatus_MAX = RECEIVED;
 constexpr int MessageStatus_ARRAYSIZE = MessageStatus_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MessageStatus_descriptor();

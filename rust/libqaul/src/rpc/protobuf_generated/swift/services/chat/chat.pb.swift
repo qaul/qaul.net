@@ -98,15 +98,21 @@ enum Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf.Enum {
   /// this state is used for receiving files too
   case sending // = 0
 
-  /// message sent
+  /// message successfully sent to another node
   case sent // = 1
 
-  /// message received
-  case received // = 2
+  /// reciption has been confirmed
+  case confirmed // = 2
 
-  /// all group members received the message successfully
-  /// this option is only used for groups with more then 2 members
-  case receivedByAll // = 3
+  /// all group members confirmed that they received
+  /// the message
+  case confirmedByAll // = 3
+
+  /// message receiving
+  case receiving // = 4
+
+  /// message received
+  case received // = 5
   case UNRECOGNIZED(Int)
 
   init() {
@@ -117,8 +123,10 @@ enum Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf.Enum {
     switch rawValue {
     case 0: self = .sending
     case 1: self = .sent
-    case 2: self = .received
-    case 3: self = .receivedByAll
+    case 2: self = .confirmed
+    case 3: self = .confirmedByAll
+    case 4: self = .receiving
+    case 5: self = .received
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -127,8 +135,10 @@ enum Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf.Enum {
     switch self {
     case .sending: return 0
     case .sent: return 1
-    case .received: return 2
-    case .receivedByAll: return 3
+    case .confirmed: return 2
+    case .confirmedByAll: return 3
+    case .receiving: return 4
+    case .received: return 5
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -142,8 +152,10 @@ extension Qaul_Rpc_Chat_MessageStatus: CaseIterable {
   static var allCases: [Qaul_Rpc_Chat_MessageStatus] = [
     .sending,
     .sent,
+    .confirmed,
+    .confirmedByAll,
+    .receiving,
     .received,
-    .receivedByAll,
   ]
 }
 
@@ -567,8 +579,10 @@ extension Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "SENDING"),
     1: .same(proto: "SENT"),
-    2: .same(proto: "RECEIVED"),
-    3: .same(proto: "RECEIVED_BY_ALL"),
+    2: .same(proto: "CONFIRMED"),
+    3: .same(proto: "CONFIRMED_BY_ALL"),
+    4: .same(proto: "RECEIVING"),
+    5: .same(proto: "RECEIVED"),
   ]
 }
 
