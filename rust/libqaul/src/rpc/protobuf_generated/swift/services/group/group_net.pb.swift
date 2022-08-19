@@ -46,15 +46,6 @@ struct Qaul_Net_Group_GroupContainer {
     set {message = .replyInvite(newValue)}
   }
 
-  /// group notify
-  var notify: Qaul_Net_Group_GroupNotify {
-    get {
-      if case .notify(let v)? = message {return v}
-      return Qaul_Net_Group_GroupNotify()
-    }
-    set {message = .notify(newValue)}
-  }
-
   /// member removed
   var removed: Qaul_Net_Group_RemovedMember {
     get {
@@ -64,15 +55,6 @@ struct Qaul_Net_Group_GroupContainer {
     set {message = .removed(newValue)}
   }
 
-  /// group chat message
-  var groupMessage: Qaul_Net_Group_GroupMessage {
-    get {
-      if case .groupMessage(let v)? = message {return v}
-      return Qaul_Net_Group_GroupMessage()
-    }
-    set {message = .groupMessage(newValue)}
-  }
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
@@ -80,12 +62,8 @@ struct Qaul_Net_Group_GroupContainer {
     case inviteMember(Qaul_Net_Group_InviteMember)
     /// reply invite
     case replyInvite(Qaul_Net_Group_ReplyInvite)
-    /// group notify
-    case notify(Qaul_Net_Group_GroupNotify)
     /// member removed
     case removed(Qaul_Net_Group_RemovedMember)
-    /// group chat message
-    case groupMessage(Qaul_Net_Group_GroupMessage)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Net_Group_GroupContainer.OneOf_Message, rhs: Qaul_Net_Group_GroupContainer.OneOf_Message) -> Bool {
@@ -101,16 +79,8 @@ struct Qaul_Net_Group_GroupContainer {
         guard case .replyInvite(let l) = lhs, case .replyInvite(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
-      case (.notify, .notify): return {
-        guard case .notify(let l) = lhs, case .notify(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
       case (.removed, .removed): return {
         guard case .removed(let l) = lhs, case .removed(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.groupMessage, .groupMessage): return {
-        guard case .groupMessage(let l) = lhs, case .groupMessage(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -158,13 +128,16 @@ struct Qaul_Net_Group_Member {
   var userID: Data = Data()
 
   ///role
-  var role: UInt32 = 0
+  var role: Int32 = 0
 
   ///joined at
   var joinedAt: UInt64 = 0
 
   ///state 
-  var state: UInt32 = 0
+  var state: Int32 = 0
+
+  ///last message index
+  var lastMessageIndex: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -228,26 +201,6 @@ struct Qaul_Net_Group_RemovedMember {
   init() {}
 }
 
-///Group chat message
-struct Qaul_Net_Group_GroupMessage {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// group id
-  var groupID: Data = Data()
-
-  /// content
-  var content: String = String()
-
-  /// sent at
-  var sentAt: UInt64 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.net.group"
@@ -257,9 +210,7 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "invite_member"),
     2: .standard(proto: "reply_invite"),
-    3: .same(proto: "notify"),
     4: .same(proto: "removed"),
-    5: .standard(proto: "group_message"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -294,19 +245,6 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
           self.message = .replyInvite(v)
         }
       }()
-      case 3: try {
-        var v: Qaul_Net_Group_GroupNotify?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .notify(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .notify(v)
-        }
-      }()
       case 4: try {
         var v: Qaul_Net_Group_RemovedMember?
         var hadOneofValue = false
@@ -318,19 +256,6 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
         if let v = v {
           if hadOneofValue {try decoder.handleConflictingOneOf()}
           self.message = .removed(v)
-        }
-      }()
-      case 5: try {
-        var v: Qaul_Net_Group_GroupMessage?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .groupMessage(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .groupMessage(v)
         }
       }()
       default: break
@@ -352,17 +277,9 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
       guard case .replyInvite(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
-    case .notify?: try {
-      guard case .notify(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    }()
     case .removed?: try {
       guard case .removed(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    }()
-    case .groupMessage?: try {
-      guard case .groupMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case nil: break
     }
@@ -439,6 +356,7 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     2: .same(proto: "role"),
     3: .standard(proto: "joined_at"),
     4: .same(proto: "state"),
+    5: .standard(proto: "last_message_index"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -448,9 +366,10 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.userID) }()
-      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.role) }()
+      case 2: try { try decoder.decodeSingularInt32Field(value: &self.role) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.joinedAt) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.state) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self.state) }()
+      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.lastMessageIndex) }()
       default: break
       }
     }
@@ -461,13 +380,16 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
       try visitor.visitSingularBytesField(value: self.userID, fieldNumber: 1)
     }
     if self.role != 0 {
-      try visitor.visitSingularUInt32Field(value: self.role, fieldNumber: 2)
+      try visitor.visitSingularInt32Field(value: self.role, fieldNumber: 2)
     }
     if self.joinedAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.joinedAt, fieldNumber: 3)
     }
     if self.state != 0 {
-      try visitor.visitSingularUInt32Field(value: self.state, fieldNumber: 4)
+      try visitor.visitSingularInt32Field(value: self.state, fieldNumber: 4)
+    }
+    if self.lastMessageIndex != 0 {
+      try visitor.visitSingularUInt32Field(value: self.lastMessageIndex, fieldNumber: 5)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -477,6 +399,7 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     if lhs.role != rhs.role {return false}
     if lhs.joinedAt != rhs.joinedAt {return false}
     if lhs.state != rhs.state {return false}
+    if lhs.lastMessageIndex != rhs.lastMessageIndex {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -603,50 +526,6 @@ extension Qaul_Net_Group_RemovedMember: SwiftProtobuf.Message, SwiftProtobuf._Me
 
   static func ==(lhs: Qaul_Net_Group_RemovedMember, rhs: Qaul_Net_Group_RemovedMember) -> Bool {
     if lhs.groupID != rhs.groupID {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Net_Group_GroupMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GroupMessage"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "group_id"),
-    2: .same(proto: "content"),
-    3: .standard(proto: "sent_at"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.content) }()
-      case 3: try { try decoder.decodeSingularUInt64Field(value: &self.sentAt) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.groupID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.groupID, fieldNumber: 1)
-    }
-    if !self.content.isEmpty {
-      try visitor.visitSingularStringField(value: self.content, fieldNumber: 2)
-    }
-    if self.sentAt != 0 {
-      try visitor.visitSingularUInt64Field(value: self.sentAt, fieldNumber: 3)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Net_Group_GroupMessage, rhs: Qaul_Net_Group_GroupMessage) -> Bool {
-    if lhs.groupID != rhs.groupID {return false}
-    if lhs.content != rhs.content {return false}
-    if lhs.sentAt != rhs.sentAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

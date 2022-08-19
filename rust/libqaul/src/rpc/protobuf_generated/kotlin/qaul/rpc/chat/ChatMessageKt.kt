@@ -24,12 +24,12 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * message index
+     * index
      * </pre>
      *
-     * <code>uint32 index = 1;</code>
+     * <code>uint64 index = 1;</code>
      */
-    var index: kotlin.Int
+    var index: kotlin.Long
       @JvmName("getIndex")
       get() = _builder.getIndex()
       @JvmName("setIndex")
@@ -38,10 +38,10 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * message index
+     * index
      * </pre>
      *
-     * <code>uint32 index = 1;</code>
+     * <code>uint64 index = 1;</code>
      */
     fun clearIndex() {
       _builder.clearIndex()
@@ -49,7 +49,7 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * id of the sending user or group_id(group flag case)
+     * id of the sending user
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -63,7 +63,7 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * id of the sending user or group_id(group flag case)
+     * id of the sending user
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -100,14 +100,11 @@ object ChatMessageKt {
     /**
      * <pre>
      * message status
-     * 0 = nothing
-     * 1 = sent
-     * 2 = received
      * </pre>
      *
-     * <code>uint32 status = 4;</code>
+     * <code>.qaul.rpc.chat.MessageStatus status = 4;</code>
      */
-    var status: kotlin.Int
+     var status: qaul.rpc.chat.ChatOuterClass.MessageStatus
       @JvmName("getStatus")
       get() = _builder.getStatus()
       @JvmName("setStatus")
@@ -117,12 +114,9 @@ object ChatMessageKt {
     /**
      * <pre>
      * message status
-     * 0 = nothing
-     * 1 = sent
-     * 2 = received
      * </pre>
      *
-     * <code>uint32 status = 4;</code>
+     * <code>.qaul.rpc.chat.MessageStatus status = 4;</code>
      */
     fun clearStatus() {
       _builder.clearStatus()
@@ -130,35 +124,10 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * group 
+     * conversation id
      * </pre>
      *
-     * <code>bool is_group = 5;</code>
-     */
-    var isGroup: kotlin.Boolean
-      @JvmName("getIsGroup")
-      get() = _builder.getIsGroup()
-      @JvmName("setIsGroup")
-      set(value) {
-        _builder.setIsGroup(value)
-      }
-    /**
-     * <pre>
-     * group 
-     * </pre>
-     *
-     * <code>bool is_group = 5;</code>
-     */
-    fun clearIsGroup() {
-      _builder.clearIsGroup()
-    }
-
-    /**
-     * <pre>
-     * conversation id(group_id)
-     * </pre>
-     *
-     * <code>bytes conversation_id = 6;</code>
+     * <code>bytes conversation_id = 5;</code>
      */
     var conversationId: com.google.protobuf.ByteString
       @JvmName("getConversationId")
@@ -169,10 +138,10 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * conversation id(group_id)
+     * conversation id
      * </pre>
      *
-     * <code>bytes conversation_id = 6;</code>
+     * <code>bytes conversation_id = 5;</code>
      */
     fun clearConversationId() {
       _builder.clearConversationId()
@@ -183,7 +152,7 @@ object ChatMessageKt {
      * time when the message was sent
      * </pre>
      *
-     * <code>uint64 sent_at = 7;</code>
+     * <code>uint64 sent_at = 6;</code>
      */
     var sentAt: kotlin.Long
       @JvmName("getSentAt")
@@ -197,7 +166,7 @@ object ChatMessageKt {
      * time when the message was sent
      * </pre>
      *
-     * <code>uint64 sent_at = 7;</code>
+     * <code>uint64 sent_at = 6;</code>
      */
     fun clearSentAt() {
       _builder.clearSentAt()
@@ -208,7 +177,7 @@ object ChatMessageKt {
      * time when the message was received
      * </pre>
      *
-     * <code>uint64 received_at = 8;</code>
+     * <code>uint64 received_at = 7;</code>
      */
     var receivedAt: kotlin.Long
       @JvmName("getReceivedAt")
@@ -222,7 +191,7 @@ object ChatMessageKt {
      * time when the message was received
      * </pre>
      *
-     * <code>uint64 received_at = 8;</code>
+     * <code>uint64 received_at = 7;</code>
      */
     fun clearReceivedAt() {
       _builder.clearReceivedAt()
@@ -230,7 +199,32 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * content of the message    
+     * content type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     */
+     var contentType: qaul.rpc.chat.ChatOuterClass.ContentType
+      @JvmName("getContentType")
+      get() = _builder.getContentType()
+      @JvmName("setContentType")
+      set(value) {
+        _builder.setContentType(value)
+      }
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     */
+    fun clearContentType() {
+      _builder.clearContentType()
+    }
+
+    /**
+     * <pre>
+     * content of the message
      * </pre>
      *
      * <code>bytes content = 9;</code>
@@ -244,7 +238,7 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * content of the message    
+     * content of the message
      * </pre>
      *
      * <code>bytes content = 9;</code>

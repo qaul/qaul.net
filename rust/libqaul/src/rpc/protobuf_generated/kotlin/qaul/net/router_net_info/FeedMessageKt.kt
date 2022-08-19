@@ -24,7 +24,7 @@ object FeedMessageKt {
 
     /**
      * <pre>
-     *&#47; message id 
+     * message id
      * </pre>
      *
      * <code>bytes message_id = 1;</code>
@@ -38,7 +38,7 @@ object FeedMessageKt {
       }
     /**
      * <pre>
-     *&#47; message id 
+     * message id
      * </pre>
      *
      * <code>bytes message_id = 1;</code>
@@ -49,7 +49,7 @@ object FeedMessageKt {
 
     /**
      * <pre>
-     *&#47; sender id 
+     * sender id
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -63,7 +63,7 @@ object FeedMessageKt {
       }
     /**
      * <pre>
-     *&#47; sender id 
+     * sender id
      * </pre>
      *
      * <code>bytes sender_id = 2;</code>
@@ -74,7 +74,7 @@ object FeedMessageKt {
 
     /**
      * <pre>
-     *&#47; message content
+     * message content
      * </pre>
      *
      * <code>string content = 3;</code>
@@ -88,7 +88,7 @@ object FeedMessageKt {
       }
     /**
      * <pre>
-     *&#47; message content
+     * message content
      * </pre>
      *
      * <code>string content = 3;</code>
@@ -99,7 +99,7 @@ object FeedMessageKt {
 
     /**
      * <pre>
-     *&#47; timestamp in milli seconds
+     * timestamp in milli seconds
      * </pre>
      *
      * <code>uint64 time = 4;</code>
@@ -113,7 +113,7 @@ object FeedMessageKt {
       }
     /**
      * <pre>
-     *&#47; timestamp in milli seconds
+     * timestamp in milli seconds
      * </pre>
      *
      * <code>uint64 time = 4;</code>

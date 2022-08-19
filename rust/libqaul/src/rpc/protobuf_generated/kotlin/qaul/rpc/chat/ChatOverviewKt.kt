@@ -49,12 +49,12 @@ object ChatOverviewKt {
 
     /**
      * <pre>
-     * last message index
+     * last message id
      * </pre>
      *
-     * <code>uint32 last_message_index = 2;</code>
+     * <code>uint64 last_message_index = 2;</code>
      */
-    var lastMessageIndex: kotlin.Int
+    var lastMessageIndex: kotlin.Long
       @JvmName("getLastMessageIndex")
       get() = _builder.getLastMessageIndex()
       @JvmName("setLastMessageIndex")
@@ -63,10 +63,10 @@ object ChatOverviewKt {
       }
     /**
      * <pre>
-     * last message index
+     * last message id
      * </pre>
      *
-     * <code>uint32 last_message_index = 2;</code>
+     * <code>uint64 last_message_index = 2;</code>
      */
     fun clearLastMessageIndex() {
       _builder.clearLastMessageIndex()
@@ -149,10 +149,35 @@ object ChatOverviewKt {
 
     /**
      * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     */
+     var contentType: qaul.rpc.chat.ChatOuterClass.ContentType
+      @JvmName("getContentType")
+      get() = _builder.getContentType()
+      @JvmName("setContentType")
+      set(value) {
+        _builder.setContentType(value)
+      }
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     */
+    fun clearContentType() {
+      _builder.clearContentType()
+    }
+
+    /**
+     * <pre>
      * preview text of the last message
      * </pre>
      *
-     * <code>bytes content = 6;</code>
+     * <code>bytes content = 7;</code>
      */
     var content: com.google.protobuf.ByteString
       @JvmName("getContent")
@@ -166,7 +191,7 @@ object ChatOverviewKt {
      * preview text of the last message
      * </pre>
      *
-     * <code>bytes content = 6;</code>
+     * <code>bytes content = 7;</code>
      */
     fun clearContent() {
       _builder.clearContent()
@@ -177,7 +202,7 @@ object ChatOverviewKt {
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 7;</code>
+     * <code>bytes last_message_sender_id = 8;</code>
      */
     var lastMessageSenderId: com.google.protobuf.ByteString
       @JvmName("getLastMessageSenderId")
@@ -191,7 +216,7 @@ object ChatOverviewKt {
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 7;</code>
+     * <code>bytes last_message_sender_id = 8;</code>
      */
     fun clearLastMessageSenderId() {
       _builder.clearLastMessageSenderId()

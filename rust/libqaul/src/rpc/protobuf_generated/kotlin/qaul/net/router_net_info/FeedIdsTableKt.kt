@@ -29,6 +29,10 @@ object FeedIdsTableKt {
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
     class IdsProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      */
      val ids: com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>
@@ -37,6 +41,10 @@ object FeedIdsTableKt {
         _builder.getIdsList()
       )
     /**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      * @param value The ids to add.
      */
@@ -45,6 +53,10 @@ object FeedIdsTableKt {
     fun com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>.add(value: com.google.protobuf.ByteString) {
       _builder.addIds(value)
     }/**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      * @param value The ids to add.
      */
@@ -54,6 +66,10 @@ object FeedIdsTableKt {
     inline operator fun com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>.plusAssign(value: com.google.protobuf.ByteString) {
       add(value)
     }/**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      * @param values The ids to add.
      */
@@ -62,6 +78,10 @@ object FeedIdsTableKt {
     fun com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>.addAll(values: kotlin.collections.Iterable<com.google.protobuf.ByteString>) {
       _builder.addAllIds(values)
     }/**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      * @param values The ids to add.
      */
@@ -71,6 +91,10 @@ object FeedIdsTableKt {
     inline operator fun com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>.plusAssign(values: kotlin.collections.Iterable<com.google.protobuf.ByteString>) {
       addAll(values)
     }/**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      * @param index The index to set the value at.
      * @param value The ids to set.
@@ -80,6 +104,10 @@ object FeedIdsTableKt {
     operator fun com.google.protobuf.kotlin.DslList<com.google.protobuf.ByteString, IdsProxy>.set(index: kotlin.Int, value: com.google.protobuf.ByteString) {
       _builder.setIds(index, value)
     }/**
+     * <pre>
+     * feed id
+     * </pre>
+     *
      * <code>repeated bytes ids = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic

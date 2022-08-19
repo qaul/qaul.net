@@ -47,7 +47,7 @@ public final class FilesharingRpc {
 
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -56,7 +56,7 @@ public final class FilesharingRpc {
     boolean hasFileHistory();
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -65,7 +65,7 @@ public final class FilesharingRpc {
     qaul.rpc.filesharing.FilesharingRpc.FileHistoryRequest getFileHistory();
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -74,7 +74,7 @@ public final class FilesharingRpc {
 
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -83,7 +83,7 @@ public final class FilesharingRpc {
     boolean hasFileHistoryResponse();
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -92,7 +92,7 @@ public final class FilesharingRpc {
     qaul.rpc.filesharing.FilesharingRpc.FileHistoryResponse getFileHistoryResponse();
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -315,7 +315,7 @@ public final class FilesharingRpc {
     public static final int FILE_HISTORY_FIELD_NUMBER = 2;
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -327,7 +327,7 @@ public final class FilesharingRpc {
     }
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -342,7 +342,7 @@ public final class FilesharingRpc {
     }
     /**
      * <pre>
-     * file histories request
+     * file history request
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -358,7 +358,7 @@ public final class FilesharingRpc {
     public static final int FILE_HISTORY_RESPONSE_FIELD_NUMBER = 3;
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -370,7 +370,7 @@ public final class FilesharingRpc {
     }
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -385,7 +385,7 @@ public final class FilesharingRpc {
     }
     /**
      * <pre>
-     *file histories response
+     * file history response
      * </pre>
      *
      * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -979,7 +979,7 @@ public final class FilesharingRpc {
           qaul.rpc.filesharing.FilesharingRpc.FileHistoryRequest, qaul.rpc.filesharing.FilesharingRpc.FileHistoryRequest.Builder, qaul.rpc.filesharing.FilesharingRpc.FileHistoryRequestOrBuilder> fileHistoryBuilder_;
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -991,7 +991,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1013,7 +1013,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1033,7 +1033,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1051,7 +1051,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1078,7 +1078,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1101,7 +1101,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1111,7 +1111,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1129,7 +1129,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * file histories request
+       * file history request
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryRequest file_history = 2;</code>
@@ -1157,7 +1157,7 @@ public final class FilesharingRpc {
           qaul.rpc.filesharing.FilesharingRpc.FileHistoryResponse, qaul.rpc.filesharing.FilesharingRpc.FileHistoryResponse.Builder, qaul.rpc.filesharing.FilesharingRpc.FileHistoryResponseOrBuilder> fileHistoryResponseBuilder_;
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1169,7 +1169,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1191,7 +1191,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1211,7 +1211,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1229,7 +1229,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1256,7 +1256,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1279,7 +1279,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1289,7 +1289,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -1307,7 +1307,7 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       *file histories response
+       * file history response
        * </pre>
        *
        * <code>.qaul.rpc.filesharing.FileHistoryResponse file_history_response = 3;</code>
@@ -2981,33 +2981,43 @@ public final class FilesharingRpc {
 
     /**
      * <pre>
-     * sent/recv
+     * sender id
      * </pre>
      *
-     * <code>bool sent = 7;</code>
-     * @return The sent.
+     * <code>string sender_id = 7;</code>
+     * @return The senderId.
      */
-    boolean getSent();
+    java.lang.String getSenderId();
+    /**
+     * <pre>
+     * sender id
+     * </pre>
+     *
+     * <code>string sender_id = 7;</code>
+     * @return The bytes for senderId.
+     */
+    com.google.protobuf.ByteString
+        getSenderIdBytes();
 
     /**
      * <pre>
-     * peer id
+     * group id
      * </pre>
      *
-     * <code>string peer_id = 8;</code>
-     * @return The peerId.
+     * <code>string group_id = 8;</code>
+     * @return The groupId.
      */
-    java.lang.String getPeerId();
+    java.lang.String getGroupId();
     /**
      * <pre>
-     * peer id
+     * group id
      * </pre>
      *
-     * <code>string peer_id = 8;</code>
-     * @return The bytes for peerId.
+     * <code>string group_id = 8;</code>
+     * @return The bytes for groupId.
      */
     com.google.protobuf.ByteString
-        getPeerIdBytes();
+        getGroupIdBytes();
   }
   /**
    * <pre>
@@ -3029,7 +3039,8 @@ public final class FilesharingRpc {
       fileName_ = "";
       fileExt_ = "";
       fileDescr_ = "";
-      peerId_ = "";
+      senderId_ = "";
+      groupId_ = "";
     }
 
     @java.lang.Override
@@ -3095,15 +3106,16 @@ public final class FilesharingRpc {
               time_ = input.readUInt64();
               break;
             }
-            case 56: {
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-              sent_ = input.readBool();
+              senderId_ = s;
               break;
             }
             case 66: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              peerId_ = s;
+              groupId_ = s;
               break;
             }
             default: {
@@ -3323,61 +3335,92 @@ public final class FilesharingRpc {
       return time_;
     }
 
-    public static final int SENT_FIELD_NUMBER = 7;
-    private boolean sent_;
+    public static final int SENDER_ID_FIELD_NUMBER = 7;
+    private volatile java.lang.Object senderId_;
     /**
      * <pre>
-     * sent/recv
+     * sender id
      * </pre>
      *
-     * <code>bool sent = 7;</code>
-     * @return The sent.
+     * <code>string sender_id = 7;</code>
+     * @return The senderId.
      */
     @java.lang.Override
-    public boolean getSent() {
-      return sent_;
-    }
-
-    public static final int PEER_ID_FIELD_NUMBER = 8;
-    private volatile java.lang.Object peerId_;
-    /**
-     * <pre>
-     * peer id
-     * </pre>
-     *
-     * <code>string peer_id = 8;</code>
-     * @return The peerId.
-     */
-    @java.lang.Override
-    public java.lang.String getPeerId() {
-      java.lang.Object ref = peerId_;
+    public java.lang.String getSenderId() {
+      java.lang.Object ref = senderId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        peerId_ = s;
+        senderId_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * peer id
+     * sender id
      * </pre>
      *
-     * <code>string peer_id = 8;</code>
-     * @return The bytes for peerId.
+     * <code>string sender_id = 7;</code>
+     * @return The bytes for senderId.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getPeerIdBytes() {
-      java.lang.Object ref = peerId_;
+        getSenderIdBytes() {
+      java.lang.Object ref = senderId_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        peerId_ = b;
+        senderId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int GROUP_ID_FIELD_NUMBER = 8;
+    private volatile java.lang.Object groupId_;
+    /**
+     * <pre>
+     * group id
+     * </pre>
+     *
+     * <code>string group_id = 8;</code>
+     * @return The groupId.
+     */
+    @java.lang.Override
+    public java.lang.String getGroupId() {
+      java.lang.Object ref = groupId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        groupId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * group id
+     * </pre>
+     *
+     * <code>string group_id = 8;</code>
+     * @return The bytes for groupId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getGroupIdBytes() {
+      java.lang.Object ref = groupId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        groupId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -3416,11 +3459,11 @@ public final class FilesharingRpc {
       if (time_ != 0L) {
         output.writeUInt64(6, time_);
       }
-      if (sent_ != false) {
-        output.writeBool(7, sent_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(senderId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, senderId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(peerId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, peerId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(groupId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, groupId_);
       }
       unknownFields.writeTo(output);
     }
@@ -3452,12 +3495,11 @@ public final class FilesharingRpc {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(6, time_);
       }
-      if (sent_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(7, sent_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(senderId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, senderId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(peerId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, peerId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(groupId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, groupId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3486,10 +3528,10 @@ public final class FilesharingRpc {
           .equals(other.getFileDescr())) return false;
       if (getTime()
           != other.getTime()) return false;
-      if (getSent()
-          != other.getSent()) return false;
-      if (!getPeerId()
-          .equals(other.getPeerId())) return false;
+      if (!getSenderId()
+          .equals(other.getSenderId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3515,11 +3557,10 @@ public final class FilesharingRpc {
       hash = (37 * hash) + TIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTime());
-      hash = (37 * hash) + SENT_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getSent());
-      hash = (37 * hash) + PEER_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getPeerId().hashCode();
+      hash = (37 * hash) + SENDER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getSenderId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3669,9 +3710,9 @@ public final class FilesharingRpc {
 
         time_ = 0L;
 
-        sent_ = false;
+        senderId_ = "";
 
-        peerId_ = "";
+        groupId_ = "";
 
         return this;
       }
@@ -3705,8 +3746,8 @@ public final class FilesharingRpc {
         result.fileSize_ = fileSize_;
         result.fileDescr_ = fileDescr_;
         result.time_ = time_;
-        result.sent_ = sent_;
-        result.peerId_ = peerId_;
+        result.senderId_ = senderId_;
+        result.groupId_ = groupId_;
         onBuilt();
         return result;
       }
@@ -3776,11 +3817,12 @@ public final class FilesharingRpc {
         if (other.getTime() != 0L) {
           setTime(other.getTime());
         }
-        if (other.getSent() != false) {
-          setSent(other.getSent());
+        if (!other.getSenderId().isEmpty()) {
+          senderId_ = other.senderId_;
+          onChanged();
         }
-        if (!other.getPeerId().isEmpty()) {
-          peerId_ = other.peerId_;
+        if (!other.getGroupId().isEmpty()) {
+          groupId_ = other.groupId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -4229,65 +4271,22 @@ public final class FilesharingRpc {
         return this;
       }
 
-      private boolean sent_ ;
+      private java.lang.Object senderId_ = "";
       /**
        * <pre>
-       * sent/recv
+       * sender id
        * </pre>
        *
-       * <code>bool sent = 7;</code>
-       * @return The sent.
+       * <code>string sender_id = 7;</code>
+       * @return The senderId.
        */
-      @java.lang.Override
-      public boolean getSent() {
-        return sent_;
-      }
-      /**
-       * <pre>
-       * sent/recv
-       * </pre>
-       *
-       * <code>bool sent = 7;</code>
-       * @param value The sent to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSent(boolean value) {
-        
-        sent_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * sent/recv
-       * </pre>
-       *
-       * <code>bool sent = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSent() {
-        
-        sent_ = false;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object peerId_ = "";
-      /**
-       * <pre>
-       * peer id
-       * </pre>
-       *
-       * <code>string peer_id = 8;</code>
-       * @return The peerId.
-       */
-      public java.lang.String getPeerId() {
-        java.lang.Object ref = peerId_;
+      public java.lang.String getSenderId() {
+        java.lang.Object ref = senderId_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          peerId_ = s;
+          senderId_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -4295,20 +4294,20 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * peer id
+       * sender id
        * </pre>
        *
-       * <code>string peer_id = 8;</code>
-       * @return The bytes for peerId.
+       * <code>string sender_id = 7;</code>
+       * @return The bytes for senderId.
        */
       public com.google.protobuf.ByteString
-          getPeerIdBytes() {
-        java.lang.Object ref = peerId_;
+          getSenderIdBytes() {
+        java.lang.Object ref = senderId_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          peerId_ = b;
+          senderId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -4316,54 +4315,150 @@ public final class FilesharingRpc {
       }
       /**
        * <pre>
-       * peer id
+       * sender id
        * </pre>
        *
-       * <code>string peer_id = 8;</code>
-       * @param value The peerId to set.
+       * <code>string sender_id = 7;</code>
+       * @param value The senderId to set.
        * @return This builder for chaining.
        */
-      public Builder setPeerId(
+      public Builder setSenderId(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        peerId_ = value;
+        senderId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * peer id
+       * sender id
        * </pre>
        *
-       * <code>string peer_id = 8;</code>
+       * <code>string sender_id = 7;</code>
        * @return This builder for chaining.
        */
-      public Builder clearPeerId() {
+      public Builder clearSenderId() {
         
-        peerId_ = getDefaultInstance().getPeerId();
+        senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * peer id
+       * sender id
        * </pre>
        *
-       * <code>string peer_id = 8;</code>
-       * @param value The bytes for peerId to set.
+       * <code>string sender_id = 7;</code>
+       * @param value The bytes for senderId to set.
        * @return This builder for chaining.
        */
-      public Builder setPeerIdBytes(
+      public Builder setSenderIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
         
-        peerId_ = value;
+        senderId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object groupId_ = "";
+      /**
+       * <pre>
+       * group id
+       * </pre>
+       *
+       * <code>string group_id = 8;</code>
+       * @return The groupId.
+       */
+      public java.lang.String getGroupId() {
+        java.lang.Object ref = groupId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          groupId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * group id
+       * </pre>
+       *
+       * <code>string group_id = 8;</code>
+       * @return The bytes for groupId.
+       */
+      public com.google.protobuf.ByteString
+          getGroupIdBytes() {
+        java.lang.Object ref = groupId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          groupId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * group id
+       * </pre>
+       *
+       * <code>string group_id = 8;</code>
+       * @param value The groupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGroupId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        groupId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group id
+       * </pre>
+       *
+       * <code>string group_id = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearGroupId() {
+        
+        groupId_ = getDefaultInstance().getGroupId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group id
+       * </pre>
+       *
+       * <code>string group_id = 8;</code>
+       * @param value The bytes for groupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGroupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        groupId_ = value;
         onChanged();
         return this;
       }
@@ -5651,14 +5746,14 @@ public final class FilesharingRpc {
       "st\022\021\n\tpath_name\030\001 \001(\t\022\027\n\017conversation_id" +
       "\030\002 \001(\014\022\023\n\013description\030\003 \001(\t\"3\n\022FileHisto" +
       "ryRequest\022\016\n\006offset\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r" +
-      "\"\234\001\n\020FileHistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021" +
+      "\"\242\001\n\020FileHistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021" +
       "\n\tfile_name\030\002 \001(\t\022\020\n\010file_ext\030\003 \001(\t\022\021\n\tf" +
       "ile_size\030\004 \001(\r\022\022\n\nfile_descr\030\005 \001(\t\022\014\n\004ti" +
-      "me\030\006 \001(\004\022\014\n\004sent\030\007 \001(\010\022\017\n\007peer_id\030\010 \001(\t\"" +
-      "~\n\023FileHistoryResponse\022\016\n\006offset\030\001 \001(\r\022\r" +
-      "\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0229\n\thistorie" +
-      "s\030\004 \003(\0132&.qaul.rpc.filesharing.FileHisto" +
-      "ryEntryb\006proto3"
+      "me\030\006 \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_id\030" +
+      "\010 \001(\t\"~\n\023FileHistoryResponse\022\016\n\006offset\030\001" +
+      " \001(\r\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0229\n\thi" +
+      "stories\030\004 \003(\0132&.qaul.rpc.filesharing.Fil" +
+      "eHistoryEntryb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5687,7 +5782,7 @@ public final class FilesharingRpc {
     internal_static_qaul_rpc_filesharing_FileHistoryEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_filesharing_FileHistoryEntry_descriptor,
-        new java.lang.String[] { "FileId", "FileName", "FileExt", "FileSize", "FileDescr", "Time", "Sent", "PeerId", });
+        new java.lang.String[] { "FileId", "FileName", "FileExt", "FileSize", "FileDescr", "Time", "SenderId", "GroupId", });
     internal_static_qaul_rpc_filesharing_FileHistoryResponse_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_filesharing_FileHistoryResponse_fieldAccessorTable = new

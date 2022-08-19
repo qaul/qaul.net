@@ -96,146 +96,110 @@ object MessagingKt {
 
     /**
      * <pre>
-     * chat message
+     * rtc stream 
      * </pre>
      *
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
      */
-    var chatMessage: qaul.net.messaging.MessagingOuterClass.ChatMessage
-      @JvmName("getChatMessage")
-      get() = _builder.getChatMessage()
-      @JvmName("setChatMessage")
+    var rtcStreamMessage: qaul.net.messaging.MessagingOuterClass.RtcStreamMessage
+      @JvmName("getRtcStreamMessage")
+      get() = _builder.getRtcStreamMessage()
+      @JvmName("setRtcStreamMessage")
       set(value) {
-        _builder.setChatMessage(value)
+        _builder.setRtcStreamMessage(value)
       }
     /**
      * <pre>
-     * chat message
+     * rtc stream 
      * </pre>
      *
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
      */
-    fun clearChatMessage() {
-      _builder.clearChatMessage()
+    fun clearRtcStreamMessage() {
+      _builder.clearRtcStreamMessage()
     }
     /**
      * <pre>
-     * chat message
+     * rtc stream 
      * </pre>
      *
-     * <code>.qaul.net.messaging.ChatMessage chat_message = 3;</code>
-     * @return Whether the chatMessage field is set.
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
+     * @return Whether the rtcStreamMessage field is set.
      */
-    fun hasChatMessage(): kotlin.Boolean {
-      return _builder.hasChatMessage()
+    fun hasRtcStreamMessage(): kotlin.Boolean {
+      return _builder.hasRtcStreamMessage()
     }
 
     /**
      * <pre>
-     * file sharing message
+     * group notify
      * </pre>
      *
-     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
      */
-    var fileMessage: qaul.net.messaging.MessagingOuterClass.FileMessage
-      @JvmName("getFileMessage")
-      get() = _builder.getFileMessage()
-      @JvmName("setFileMessage")
+    var groupNotifyMessage: qaul.net.messaging.MessagingOuterClass.GroupNotifyMessage
+      @JvmName("getGroupNotifyMessage")
+      get() = _builder.getGroupNotifyMessage()
+      @JvmName("setGroupNotifyMessage")
       set(value) {
-        _builder.setFileMessage(value)
+        _builder.setGroupNotifyMessage(value)
       }
     /**
      * <pre>
-     * file sharing message
+     * group notify
      * </pre>
      *
-     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
      */
-    fun clearFileMessage() {
-      _builder.clearFileMessage()
+    fun clearGroupNotifyMessage() {
+      _builder.clearGroupNotifyMessage()
     }
     /**
      * <pre>
-     * file sharing message
+     * group notify
      * </pre>
      *
-     * <code>.qaul.net.messaging.FileMessage file_message = 4;</code>
-     * @return Whether the fileMessage field is set.
+     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
+     * @return Whether the groupNotifyMessage field is set.
      */
-    fun hasFileMessage(): kotlin.Boolean {
-      return _builder.hasFileMessage()
+    fun hasGroupNotifyMessage(): kotlin.Boolean {
+      return _builder.hasGroupNotifyMessage()
     }
 
     /**
      * <pre>
-     * group chat message
+     * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
+     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
      */
-    var groupMessage: qaul.net.messaging.MessagingOuterClass.GroupMessage
-      @JvmName("getGroupMessage")
-      get() = _builder.getGroupMessage()
-      @JvmName("setGroupMessage")
+    var commonMessage: qaul.net.messaging.MessagingOuterClass.CommonMessage
+      @JvmName("getCommonMessage")
+      get() = _builder.getCommonMessage()
+      @JvmName("setCommonMessage")
       set(value) {
-        _builder.setGroupMessage(value)
+        _builder.setCommonMessage(value)
       }
     /**
      * <pre>
-     * group chat message
+     * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
+     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
      */
-    fun clearGroupMessage() {
-      _builder.clearGroupMessage()
+    fun clearCommonMessage() {
+      _builder.clearCommonMessage()
     }
     /**
      * <pre>
-     * group chat message
+     * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupMessage group_message = 5;</code>
-     * @return Whether the groupMessage field is set.
+     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
+     * @return Whether the commonMessage field is set.
      */
-    fun hasGroupMessage(): kotlin.Boolean {
-      return _builder.hasGroupMessage()
-    }
-
-    /**
-     * <pre>
-     * rtc message
-     * </pre>
-     *
-     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
-     */
-    var rtcMessage: qaul.net.messaging.MessagingOuterClass.RtcMessage
-      @JvmName("getRtcMessage")
-      get() = _builder.getRtcMessage()
-      @JvmName("setRtcMessage")
-      set(value) {
-        _builder.setRtcMessage(value)
-      }
-    /**
-     * <pre>
-     * rtc message
-     * </pre>
-     *
-     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
-     */
-    fun clearRtcMessage() {
-      _builder.clearRtcMessage()
-    }
-    /**
-     * <pre>
-     * rtc message
-     * </pre>
-     *
-     * <code>.qaul.net.messaging.RtcMessage rtc_message = 6;</code>
-     * @return Whether the rtcMessage field is set.
-     */
-    fun hasRtcMessage(): kotlin.Boolean {
-      return _builder.hasRtcMessage()
+    fun hasCommonMessage(): kotlin.Boolean {
+      return _builder.hasCommonMessage()
     }
     val messageCase: qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase
       @JvmName("getMessageCase")
@@ -256,15 +220,12 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.confirmationMessag
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNull: qaul.net.messaging.MessagingOuterClass.CryptoService?
   get() = if (hasCryptoService()) getCryptoService() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.chatMessageOrNull: qaul.net.messaging.MessagingOuterClass.ChatMessage?
-  get() = if (hasChatMessage()) getChatMessage() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.rtcStreamMessageOrNull: qaul.net.messaging.MessagingOuterClass.RtcStreamMessage?
+  get() = if (hasRtcStreamMessage()) getRtcStreamMessage() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.fileMessageOrNull: qaul.net.messaging.MessagingOuterClass.FileMessage?
-  get() = if (hasFileMessage()) getFileMessage() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupNotifyMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupNotifyMessage?
+  get() = if (hasGroupNotifyMessage()) getGroupNotifyMessage() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupMessage?
-  get() = if (hasGroupMessage()) getGroupMessage() else null
-
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.rtcMessageOrNull: qaul.net.messaging.MessagingOuterClass.RtcMessage?
-  get() = if (hasRtcMessage()) getRtcMessage() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.commonMessageOrNull: qaul.net.messaging.MessagingOuterClass.CommonMessage?
+  get() = if (hasCommonMessage()) getCommonMessage() else null
 

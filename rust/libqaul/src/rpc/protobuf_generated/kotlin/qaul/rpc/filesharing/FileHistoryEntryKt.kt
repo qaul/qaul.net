@@ -174,52 +174,52 @@ object FileHistoryEntryKt {
 
     /**
      * <pre>
-     * sent/recv
+     * sender id
      * </pre>
      *
-     * <code>bool sent = 7;</code>
+     * <code>string sender_id = 7;</code>
      */
-    var sent: kotlin.Boolean
-      @JvmName("getSent")
-      get() = _builder.getSent()
-      @JvmName("setSent")
+    var senderId: kotlin.String
+      @JvmName("getSenderId")
+      get() = _builder.getSenderId()
+      @JvmName("setSenderId")
       set(value) {
-        _builder.setSent(value)
+        _builder.setSenderId(value)
       }
     /**
      * <pre>
-     * sent/recv
+     * sender id
      * </pre>
      *
-     * <code>bool sent = 7;</code>
+     * <code>string sender_id = 7;</code>
      */
-    fun clearSent() {
-      _builder.clearSent()
+    fun clearSenderId() {
+      _builder.clearSenderId()
     }
 
     /**
      * <pre>
-     * peer id
+     * group id
      * </pre>
      *
-     * <code>string peer_id = 8;</code>
+     * <code>string group_id = 8;</code>
      */
-    var peerId: kotlin.String
-      @JvmName("getPeerId")
-      get() = _builder.getPeerId()
-      @JvmName("setPeerId")
+    var groupId: kotlin.String
+      @JvmName("getGroupId")
+      get() = _builder.getGroupId()
+      @JvmName("setGroupId")
       set(value) {
-        _builder.setPeerId(value)
+        _builder.setGroupId(value)
       }
     /**
      * <pre>
-     * peer id
+     * group id
      * </pre>
      *
-     * <code>string peer_id = 8;</code>
+     * <code>string group_id = 8;</code>
      */
-    fun clearPeerId() {
-      _builder.clearPeerId()
+    fun clearGroupId() {
+      _builder.clearGroupId()
     }
   }
 }

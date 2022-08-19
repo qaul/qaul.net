@@ -24,7 +24,7 @@ object RoutingInfoEntryKt {
 
     /**
      * <pre>
-     *&#47; user id
+     * user id
      * </pre>
      *
      * <code>bytes user = 1;</code>
@@ -38,7 +38,7 @@ object RoutingInfoEntryKt {
       }
     /**
      * <pre>
-     *&#47; user id
+     * user id
      * </pre>
      *
      * <code>bytes user = 1;</code>
@@ -49,7 +49,7 @@ object RoutingInfoEntryKt {
 
     /**
      * <pre>
-     *&#47; round trip time
+     * round trip time
      * </pre>
      *
      * <code>uint32 rtt = 2;</code>
@@ -63,7 +63,7 @@ object RoutingInfoEntryKt {
       }
     /**
      * <pre>
-     *&#47; round trip time
+     * round trip time
      * </pre>
      *
      * <code>uint32 rtt = 2;</code>
@@ -74,7 +74,7 @@ object RoutingInfoEntryKt {
 
     /**
      * <pre>
-     *&#47; hop count
+     * hop count
      * </pre>
      *
      * <code>bytes hc = 3;</code>
@@ -88,7 +88,7 @@ object RoutingInfoEntryKt {
       }
     /**
      * <pre>
-     *&#47; hop count
+     * hop count
      * </pre>
      *
      * <code>bytes hc = 3;</code>
@@ -99,7 +99,7 @@ object RoutingInfoEntryKt {
 
     /**
      * <pre>
-     *&#47; propagation id
+     * propagation id
      * </pre>
      *
      * <code>uint32 pgid = 5;</code>
@@ -113,7 +113,7 @@ object RoutingInfoEntryKt {
       }
     /**
      * <pre>
-     *&#47; propagation id
+     * propagation id
      * </pre>
      *
      * <code>uint32 pgid = 5;</code>

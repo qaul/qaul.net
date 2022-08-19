@@ -24,135 +24,10 @@ object FileSharingInfoKt {
 
     /**
      * <pre>
-     * file name
-     * </pre>
-     *
-     * <code>string file_name = 1;</code>
-     */
-    var fileName: kotlin.String
-      @JvmName("getFileName")
-      get() = _builder.getFileName()
-      @JvmName("setFileName")
-      set(value) {
-        _builder.setFileName(value)
-      }
-    /**
-     * <pre>
-     * file name
-     * </pre>
-     *
-     * <code>string file_name = 1;</code>
-     */
-    fun clearFileName() {
-      _builder.clearFileName()
-    }
-
-    /**
-     * <pre>
-     * file extension
-     * </pre>
-     *
-     * <code>string file_extension = 2;</code>
-     */
-    var fileExtension: kotlin.String
-      @JvmName("getFileExtension")
-      get() = _builder.getFileExtension()
-      @JvmName("setFileExtension")
-      set(value) {
-        _builder.setFileExtension(value)
-      }
-    /**
-     * <pre>
-     * file extension
-     * </pre>
-     *
-     * <code>string file_extension = 2;</code>
-     */
-    fun clearFileExtension() {
-      _builder.clearFileExtension()
-    }
-
-    /**
-     * <pre>
-     * file size
-     * </pre>
-     *
-     * <code>uint32 file_size = 3;</code>
-     */
-    var fileSize: kotlin.Int
-      @JvmName("getFileSize")
-      get() = _builder.getFileSize()
-      @JvmName("setFileSize")
-      set(value) {
-        _builder.setFileSize(value)
-      }
-    /**
-     * <pre>
-     * file size
-     * </pre>
-     *
-     * <code>uint32 file_size = 3;</code>
-     */
-    fun clearFileSize() {
-      _builder.clearFileSize()
-    }
-
-    /**
-     * <pre>
-     * file description
-     * </pre>
-     *
-     * <code>string file_descr = 4;</code>
-     */
-    var fileDescr: kotlin.String
-      @JvmName("getFileDescr")
-      get() = _builder.getFileDescr()
-      @JvmName("setFileDescr")
-      set(value) {
-        _builder.setFileDescr(value)
-      }
-    /**
-     * <pre>
-     * file description
-     * </pre>
-     *
-     * <code>string file_descr = 4;</code>
-     */
-    fun clearFileDescr() {
-      _builder.clearFileDescr()
-    }
-
-    /**
-     * <pre>
-     * size per package 
-     * </pre>
-     *
-     * <code>uint32 size_per_package = 5;</code>
-     */
-    var sizePerPackage: kotlin.Int
-      @JvmName("getSizePerPackage")
-      get() = _builder.getSizePerPackage()
-      @JvmName("setSizePerPackage")
-      set(value) {
-        _builder.setSizePerPackage(value)
-      }
-    /**
-     * <pre>
-     * size per package 
-     * </pre>
-     *
-     * <code>uint32 size_per_package = 5;</code>
-     */
-    fun clearSizePerPackage() {
-      _builder.clearSizePerPackage()
-    }
-
-    /**
-     * <pre>
      * file id
      * </pre>
      *
-     * <code>uint64 file_id = 6;</code>
+     * <code>uint64 file_id = 1;</code>
      */
     var fileId: kotlin.Long
       @JvmName("getFileId")
@@ -166,10 +41,160 @@ object FileSharingInfoKt {
      * file id
      * </pre>
      *
-     * <code>uint64 file_id = 6;</code>
+     * <code>uint64 file_id = 1;</code>
      */
     fun clearFileId() {
       _builder.clearFileId()
+    }
+
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     */
+    var fileName: kotlin.String
+      @JvmName("getFileName")
+      get() = _builder.getFileName()
+      @JvmName("setFileName")
+      set(value) {
+        _builder.setFileName(value)
+      }
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     */
+    fun clearFileName() {
+      _builder.clearFileName()
+    }
+
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     */
+    var fileExtension: kotlin.String
+      @JvmName("getFileExtension")
+      get() = _builder.getFileExtension()
+      @JvmName("setFileExtension")
+      set(value) {
+        _builder.setFileExtension(value)
+      }
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     */
+    fun clearFileExtension() {
+      _builder.clearFileExtension()
+    }
+
+    /**
+     * <pre>
+     * file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     */
+    var fileSize: kotlin.Int
+      @JvmName("getFileSize")
+      get() = _builder.getFileSize()
+      @JvmName("setFileSize")
+      set(value) {
+        _builder.setFileSize(value)
+      }
+    /**
+     * <pre>
+     * file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     */
+    fun clearFileSize() {
+      _builder.clearFileSize()
+    }
+
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     */
+    var fileDescr: kotlin.String
+      @JvmName("getFileDescr")
+      get() = _builder.getFileDescr()
+      @JvmName("setFileDescr")
+      set(value) {
+        _builder.setFileDescr(value)
+      }
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_descr = 5;</code>
+     */
+    fun clearFileDescr() {
+      _builder.clearFileDescr()
+    }
+
+    /**
+     * <pre>
+     * start index
+     * </pre>
+     *
+     * <code>uint32 start_index = 6;</code>
+     */
+    var startIndex: kotlin.Int
+      @JvmName("getStartIndex")
+      get() = _builder.getStartIndex()
+      @JvmName("setStartIndex")
+      set(value) {
+        _builder.setStartIndex(value)
+      }
+    /**
+     * <pre>
+     * start index
+     * </pre>
+     *
+     * <code>uint32 start_index = 6;</code>
+     */
+    fun clearStartIndex() {
+      _builder.clearStartIndex()
+    }
+
+    /**
+     * <pre>
+     * message count
+     * </pre>
+     *
+     * <code>uint32 message_count = 7;</code>
+     */
+    var messageCount: kotlin.Int
+      @JvmName("getMessageCount")
+      get() = _builder.getMessageCount()
+      @JvmName("setMessageCount")
+      set(value) {
+        _builder.setMessageCount(value)
+      }
+    /**
+     * <pre>
+     * message count
+     * </pre>
+     *
+     * <code>uint32 message_count = 7;</code>
+     */
+    fun clearMessageCount() {
+      _builder.clearMessageCount()
     }
   }
 }

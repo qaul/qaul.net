@@ -71,11 +71,11 @@ PROTOBUF_CONSTEXPR FileHistoryEntry::FileHistoryEntry(
     /*decltype(_impl_.file_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.file_ext_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.file_descr_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.peer_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.sender_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_.file_size_)*/0u
-  , /*decltype(_impl_.sent_)*/false
   , /*decltype(_impl_.time_)*/uint64_t{0u}
+  , /*decltype(_impl_.file_size_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FileHistoryEntryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR FileHistoryEntryDefaultTypeInternal()
@@ -149,8 +149,8 @@ const uint32_t TableStruct_services_2ffilesharing_2ffilesharing_5frpc_2eproto::o
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.file_size_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.file_descr_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.time_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.sent_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.peer_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.sender_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryEntry, _impl_.group_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::filesharing::FileHistoryResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -190,18 +190,18 @@ const char descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5frpc_
   "st\022\021\n\tpath_name\030\001 \001(\t\022\027\n\017conversation_id"
   "\030\002 \001(\014\022\023\n\013description\030\003 \001(\t\"3\n\022FileHisto"
   "ryRequest\022\016\n\006offset\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r"
-  "\"\234\001\n\020FileHistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021"
+  "\"\242\001\n\020FileHistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021"
   "\n\tfile_name\030\002 \001(\t\022\020\n\010file_ext\030\003 \001(\t\022\021\n\tf"
   "ile_size\030\004 \001(\r\022\022\n\nfile_descr\030\005 \001(\t\022\014\n\004ti"
-  "me\030\006 \001(\004\022\014\n\004sent\030\007 \001(\010\022\017\n\007peer_id\030\010 \001(\t\""
-  "~\n\023FileHistoryResponse\022\016\n\006offset\030\001 \001(\r\022\r"
-  "\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0229\n\thistorie"
-  "s\030\004 \003(\0132&.qaul.rpc.filesharing.FileHisto"
-  "ryEntryb\006proto3"
+  "me\030\006 \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_id\030"
+  "\010 \001(\t\"~\n\023FileHistoryResponse\022\016\n\006offset\030\001"
+  " \001(\r\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0229\n\thi"
+  "stories\030\004 \003(\0132&.qaul.rpc.filesharing.Fil"
+  "eHistoryEntryb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2ffilesharing_2ffilesharing_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2ffilesharing_2ffilesharing_5frpc_2eproto = {
-    false, false, 735, descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5frpc_2eproto,
+    false, false, 741, descriptor_table_protodef_services_2ffilesharing_2ffilesharing_5frpc_2eproto,
     "services/filesharing/filesharing_rpc.proto",
     &descriptor_table_services_2ffilesharing_2ffilesharing_5frpc_2eproto_once, nullptr, 0, 5,
     schemas, file_default_instances, TableStruct_services_2ffilesharing_2ffilesharing_5frpc_2eproto::offsets,
@@ -1109,11 +1109,11 @@ FileHistoryEntry::FileHistoryEntry(const FileHistoryEntry& from)
       decltype(_impl_.file_name_){}
     , decltype(_impl_.file_ext_){}
     , decltype(_impl_.file_descr_){}
-    , decltype(_impl_.peer_id_){}
+    , decltype(_impl_.sender_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.file_id_){}
-    , decltype(_impl_.file_size_){}
-    , decltype(_impl_.sent_){}
     , decltype(_impl_.time_){}
+    , decltype(_impl_.file_size_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -1141,17 +1141,25 @@ FileHistoryEntry::FileHistoryEntry(const FileHistoryEntry& from)
     _this->_impl_.file_descr_.Set(from._internal_file_descr(), 
       _this->GetArenaForAllocation());
   }
-  _impl_.peer_id_.InitDefault();
+  _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.peer_id_.Set("", GetArenaForAllocation());
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_peer_id().empty()) {
-    _this->_impl_.peer_id_.Set(from._internal_peer_id(), 
+  if (!from._internal_sender_id().empty()) {
+    _this->_impl_.sender_id_.Set(from._internal_sender_id(), 
+      _this->GetArenaForAllocation());
+  }
+  _impl_.group_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.group_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_group_id().empty()) {
+    _this->_impl_.group_id_.Set(from._internal_group_id(), 
       _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.time_) -
-    reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.time_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.file_size_) -
+    reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.file_size_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.filesharing.FileHistoryEntry)
 }
 
@@ -1163,11 +1171,11 @@ inline void FileHistoryEntry::SharedCtor(
       decltype(_impl_.file_name_){}
     , decltype(_impl_.file_ext_){}
     , decltype(_impl_.file_descr_){}
-    , decltype(_impl_.peer_id_){}
+    , decltype(_impl_.sender_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.file_id_){uint64_t{0u}}
-    , decltype(_impl_.file_size_){0u}
-    , decltype(_impl_.sent_){false}
     , decltype(_impl_.time_){uint64_t{0u}}
+    , decltype(_impl_.file_size_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.file_name_.InitDefault();
@@ -1182,9 +1190,13 @@ inline void FileHistoryEntry::SharedCtor(
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.file_descr_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.peer_id_.InitDefault();
+  _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.peer_id_.Set("", GetArenaForAllocation());
+    _impl_.sender_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.group_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
@@ -1202,7 +1214,8 @@ inline void FileHistoryEntry::SharedDtor() {
   _impl_.file_name_.Destroy();
   _impl_.file_ext_.Destroy();
   _impl_.file_descr_.Destroy();
-  _impl_.peer_id_.Destroy();
+  _impl_.sender_id_.Destroy();
+  _impl_.group_id_.Destroy();
 }
 
 void FileHistoryEntry::SetCachedSize(int size) const {
@@ -1218,10 +1231,11 @@ void FileHistoryEntry::Clear() {
   _impl_.file_name_.ClearToEmpty();
   _impl_.file_ext_.ClearToEmpty();
   _impl_.file_descr_.ClearToEmpty();
-  _impl_.peer_id_.ClearToEmpty();
+  _impl_.sender_id_.ClearToEmpty();
+  _impl_.group_id_.ClearToEmpty();
   ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.time_) -
-      reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.time_));
+      reinterpret_cast<char*>(&_impl_.file_size_) -
+      reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.file_size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1285,21 +1299,23 @@ const char* FileHistoryEntry::_InternalParse(const char* ptr, ::_pbi::ParseConte
         } else
           goto handle_unusual;
         continue;
-      // bool sent = 7;
+      // string sender_id = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
-          _impl_.sent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          auto str = _internal_mutable_sender_id();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.filesharing.FileHistoryEntry.sender_id"));
         } else
           goto handle_unusual;
         continue;
-      // string peer_id = 8;
+      // string group_id = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
-          auto str = _internal_mutable_peer_id();
+          auto str = _internal_mutable_group_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.filesharing.FileHistoryEntry.peer_id"));
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.filesharing.FileHistoryEntry.group_id"));
         } else
           goto handle_unusual;
         continue;
@@ -1380,20 +1396,24 @@ uint8_t* FileHistoryEntry::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteUInt64ToArray(6, this->_internal_time(), target);
   }
 
-  // bool sent = 7;
-  if (this->_internal_sent() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_sent(), target);
+  // string sender_id = 7;
+  if (!this->_internal_sender_id().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_sender_id().data(), static_cast<int>(this->_internal_sender_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "qaul.rpc.filesharing.FileHistoryEntry.sender_id");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_sender_id(), target);
   }
 
-  // string peer_id = 8;
-  if (!this->_internal_peer_id().empty()) {
+  // string group_id = 8;
+  if (!this->_internal_group_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_peer_id().data(), static_cast<int>(this->_internal_peer_id().length()),
+      this->_internal_group_id().data(), static_cast<int>(this->_internal_group_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.filesharing.FileHistoryEntry.peer_id");
+      "qaul.rpc.filesharing.FileHistoryEntry.group_id");
     target = stream->WriteStringMaybeAliased(
-        8, this->_internal_peer_id(), target);
+        8, this->_internal_group_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1433,11 +1453,18 @@ size_t FileHistoryEntry::ByteSizeLong() const {
         this->_internal_file_descr());
   }
 
-  // string peer_id = 8;
-  if (!this->_internal_peer_id().empty()) {
+  // string sender_id = 7;
+  if (!this->_internal_sender_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_peer_id());
+        this->_internal_sender_id());
+  }
+
+  // string group_id = 8;
+  if (!this->_internal_group_id().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_group_id());
   }
 
   // uint64 file_id = 1;
@@ -1445,19 +1472,14 @@ size_t FileHistoryEntry::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
   }
 
-  // uint32 file_size = 4;
-  if (this->_internal_file_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_file_size());
-  }
-
-  // bool sent = 7;
-  if (this->_internal_sent() != 0) {
-    total_size += 1 + 1;
-  }
-
   // uint64 time = 6;
   if (this->_internal_time() != 0) {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_time());
+  }
+
+  // uint32 file_size = 4;
+  if (this->_internal_file_size() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_file_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1487,20 +1509,20 @@ void FileHistoryEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const
   if (!from._internal_file_descr().empty()) {
     _this->_internal_set_file_descr(from._internal_file_descr());
   }
-  if (!from._internal_peer_id().empty()) {
-    _this->_internal_set_peer_id(from._internal_peer_id());
+  if (!from._internal_sender_id().empty()) {
+    _this->_internal_set_sender_id(from._internal_sender_id());
+  }
+  if (!from._internal_group_id().empty()) {
+    _this->_internal_set_group_id(from._internal_group_id());
   }
   if (from._internal_file_id() != 0) {
     _this->_internal_set_file_id(from._internal_file_id());
   }
-  if (from._internal_file_size() != 0) {
-    _this->_internal_set_file_size(from._internal_file_size());
-  }
-  if (from._internal_sent() != 0) {
-    _this->_internal_set_sent(from._internal_sent());
-  }
   if (from._internal_time() != 0) {
     _this->_internal_set_time(from._internal_time());
+  }
+  if (from._internal_file_size() != 0) {
+    _this->_internal_set_file_size(from._internal_file_size());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1534,12 +1556,16 @@ void FileHistoryEntry::InternalSwap(FileHistoryEntry* other) {
       &other->_impl_.file_descr_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.peer_id_, lhs_arena,
-      &other->_impl_.peer_id_, rhs_arena
+      &_impl_.sender_id_, lhs_arena,
+      &other->_impl_.sender_id_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.group_id_, lhs_arena,
+      &other->_impl_.group_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FileHistoryEntry, _impl_.time_)
-      + sizeof(FileHistoryEntry::_impl_.time_)
+      PROTOBUF_FIELD_OFFSET(FileHistoryEntry, _impl_.file_size_)
+      + sizeof(FileHistoryEntry::_impl_.file_size_)
       - PROTOBUF_FIELD_OFFSET(FileHistoryEntry, _impl_.file_id_)>(
           reinterpret_cast<char*>(&_impl_.file_id_),
           reinterpret_cast<char*>(&other->_impl_.file_id_));

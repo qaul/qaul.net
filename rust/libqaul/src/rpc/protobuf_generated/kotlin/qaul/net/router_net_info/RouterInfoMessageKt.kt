@@ -121,7 +121,7 @@ object RouterInfoMessageKt {
 
     /**
      * <pre>
-     *Latest Feed ids table
+     * Latest Feed ids table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
@@ -135,7 +135,7 @@ object RouterInfoMessageKt {
       }
     /**
      * <pre>
-     *Latest Feed ids table
+     * Latest Feed ids table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
@@ -145,7 +145,7 @@ object RouterInfoMessageKt {
     }
     /**
      * <pre>
-     *Latest Feed ids table
+     * Latest Feed ids table
      * </pre>
      *
      * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>

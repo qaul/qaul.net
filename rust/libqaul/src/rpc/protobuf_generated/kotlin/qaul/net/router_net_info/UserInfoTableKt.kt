@@ -29,6 +29,10 @@ object UserInfoTableKt {
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
     class InfoProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      */
      val info: com.google.protobuf.kotlin.DslList<qaul.net.router_net_info.RouterNetInfo.UserInfo, InfoProxy>
@@ -37,6 +41,10 @@ object UserInfoTableKt {
         _builder.getInfoList()
       )
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param value The info to add.
      */
@@ -46,6 +54,10 @@ object UserInfoTableKt {
       _builder.addInfo(value)
     }
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param value The info to add.
      */
@@ -56,6 +68,10 @@ object UserInfoTableKt {
       add(value)
     }
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param values The info to add.
      */
@@ -65,6 +81,10 @@ object UserInfoTableKt {
       _builder.addAllInfo(values)
     }
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param values The info to add.
      */
@@ -75,6 +95,10 @@ object UserInfoTableKt {
       addAll(values)
     }
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      * @param index The index to set the value at.
      * @param value The info to set.
@@ -85,6 +109,10 @@ object UserInfoTableKt {
       _builder.setInfo(index, value)
     }
     /**
+     * <pre>
+     * user info
+     * </pre>
+     *
      * <code>repeated .qaul.net.router_net_info.UserInfo info = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
