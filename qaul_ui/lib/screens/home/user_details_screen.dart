@@ -38,6 +38,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                     Navigator.pop(context);
                     openChat(
                       newRoom,
+                      ref: ref,
                       context: context,
                       user: defaultUser,
                       otherUser: user,

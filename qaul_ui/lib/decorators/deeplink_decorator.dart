@@ -71,11 +71,11 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   }
 
   void _navigateToChat(String id) {
-    final defaultUser = ref.read(defaultUserProvider)!;
+    final usr = ref.read(defaultUserProvider)!;
     final otherUser = _userWithId(id);
     final room = _roomWithId(id);
     if (otherUser == null || room == null) return;
-    openChat(room, context: context, user: defaultUser, otherUser: otherUser);
+    openChat(room, ref: ref, context: context, user: usr, otherUser: otherUser);
   }
 
   bool _reachedHomeScreen(r) => r.settings.name == NavigationHelper.home;

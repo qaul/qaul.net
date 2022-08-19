@@ -24,7 +24,10 @@ import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../decorators/empty_state_text_decorator.dart';
+import '../../../../../providers/providers.dart';
+import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
+import '../current_open_chat_notifier.dart';
 import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
@@ -39,19 +42,26 @@ typedef OnSendPressed = void Function(String rawText);
 
 Future<void> openChat(
   ChatRoom room, {
+  required WidgetRef ref,
   required BuildContext context,
   required User user,
   required User otherUser,
-  VoidCallback? onBackButtonPressed,
-}) {
-  return Navigator.push(
+}) async {
+  ref.read(uiOpenChatProvider.notifier).setCurrent(room);
+
+  bool isMobile = MediaQuery.of(context).size.width < kTabletBreakpoint;
+  if (!isMobile) {
+    ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
+    return;
+  }
+
+  await Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => ChatScreen(
         room,
         user,
         otherUser,
-        onBackButtonPressed,
       ),
     ),
   );
@@ -61,8 +71,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
   const ChatScreen(
     this.room,
     this.user,
-    this.otherUser,
-    this.onBackButtonPressed, {
+    this.otherUser, {
     Key? key,
   }) : super(key: key);
 
@@ -74,9 +83,6 @@ class ChatScreen extends StatefulHookConsumerWidget {
   /// Someone the default user is having a conversation with
   final User otherUser;
 
-  /// If null, back button will pop the current route.
-  final VoidCallback? onBackButtonPressed;
-
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -87,6 +93,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User get user => widget.user;
 
   User get otherUser => widget.otherUser;
+
+  bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < kTabletBreakpoint;
 
   Map<String, String> get _overflowMenuOptions => {
         'showFiles': 'Show All Files',
@@ -139,7 +148,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final closeChat = useCallback(() {
       ref.read(currentOpenChatRoom.notifier).state = null;
-      Navigator.pop(context);
+      ref.read(uiOpenChatProvider.notifier).close();
+      if (isMobile(context)) Navigator.pop(context);
     }, []);
 
     final sendMessage = useCallback((types.PartialText msg) {
@@ -160,9 +170,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         leading: IconButtonFactory(
           onPressed: () {
             ref.read(currentOpenChatRoom.notifier).state = null;
-            widget.onBackButtonPressed == null
-                ? closeChat()
-                : widget.onBackButtonPressed!();
+            closeChat();
           },
         ),
         title: Row(
