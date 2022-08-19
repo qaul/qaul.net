@@ -24,35 +24,10 @@ object GroupCreateResponseKt {
 
     /**
      * <pre>
-     * group name
-     * </pre>
-     *
-     * <code>string group_name = 1;</code>
-     */
-    var groupName: kotlin.String
-      @JvmName("getGroupName")
-      get() = _builder.getGroupName()
-      @JvmName("setGroupName")
-      set(value) {
-        _builder.setGroupName(value)
-      }
-    /**
-     * <pre>
-     * group name
-     * </pre>
-     *
-     * <code>string group_name = 1;</code>
-     */
-    fun clearGroupName() {
-      _builder.clearGroupName()
-    }
-
-    /**
-     * <pre>
      * group id
      * </pre>
      *
-     * <code>bytes group_id = 2;</code>
+     * <code>bytes group_id = 1;</code>
      */
     var groupId: com.google.protobuf.ByteString
       @JvmName("getGroupId")
@@ -66,14 +41,53 @@ object GroupCreateResponseKt {
      * group id
      * </pre>
      *
-     * <code>bytes group_id = 2;</code>
+     * <code>bytes group_id = 1;</code>
      */
     fun clearGroupId() {
       _builder.clearGroupId()
+    }
+
+    /**
+     * <pre>
+     * result 
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupResult result = 2;</code>
+     */
+    var result: qaul.rpc.group.GroupRpc.GroupResult
+      @JvmName("getResult")
+      get() = _builder.getResult()
+      @JvmName("setResult")
+      set(value) {
+        _builder.setResult(value)
+      }
+    /**
+     * <pre>
+     * result 
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupResult result = 2;</code>
+     */
+    fun clearResult() {
+      _builder.clearResult()
+    }
+    /**
+     * <pre>
+     * result 
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupResult result = 2;</code>
+     * @return Whether the result field is set.
+     */
+    fun hasResult(): kotlin.Boolean {
+      return _builder.hasResult()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
 inline fun qaul.rpc.group.GroupRpc.GroupCreateResponse.copy(block: qaul.rpc.group.GroupCreateResponseKt.Dsl.() -> kotlin.Unit): qaul.rpc.group.GroupRpc.GroupCreateResponse =
   qaul.rpc.group.GroupCreateResponseKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.group.GroupRpc.GroupCreateResponseOrBuilder.resultOrNull: qaul.rpc.group.GroupRpc.GroupResult?
+  get() = if (hasResult()) getResult() else null
 

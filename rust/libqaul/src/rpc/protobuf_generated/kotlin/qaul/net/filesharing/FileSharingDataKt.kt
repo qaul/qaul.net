@@ -24,102 +24,52 @@ object FileSharingDataKt {
 
     /**
      * <pre>
-     * file id
+     * start index
      * </pre>
      *
-     * <code>uint64 file_id = 1;</code>
+     * <code>uint32 start_index = 1;</code>
      */
-    var fileId: kotlin.Long
-      @JvmName("getFileId")
-      get() = _builder.getFileId()
-      @JvmName("setFileId")
+    var startIndex: kotlin.Int
+      @JvmName("getStartIndex")
+      get() = _builder.getStartIndex()
+      @JvmName("setStartIndex")
       set(value) {
-        _builder.setFileId(value)
+        _builder.setStartIndex(value)
       }
     /**
      * <pre>
-     * file id
+     * start index
      * </pre>
      *
-     * <code>uint64 file_id = 1;</code>
+     * <code>uint32 start_index = 1;</code>
      */
-    fun clearFileId() {
-      _builder.clearFileId()
+    fun clearStartIndex() {
+      _builder.clearStartIndex()
     }
 
     /**
      * <pre>
-     * package sequence
+     * message count
      * </pre>
      *
-     * <code>uint32 sequence = 2;</code>
+     * <code>uint32 message_count = 2;</code>
      */
-    var sequence: kotlin.Int
-      @JvmName("getSequence")
-      get() = _builder.getSequence()
-      @JvmName("setSequence")
+    var messageCount: kotlin.Int
+      @JvmName("getMessageCount")
+      get() = _builder.getMessageCount()
+      @JvmName("setMessageCount")
       set(value) {
-        _builder.setSequence(value)
+        _builder.setMessageCount(value)
       }
     /**
      * <pre>
-     * package sequence
+     * message count
      * </pre>
      *
-     * <code>uint32 sequence = 2;</code>
+     * <code>uint32 message_count = 2;</code>
      */
-    fun clearSequence() {
-      _builder.clearSequence()
-    }
-
-    /**
-     * <pre>
-     * file size
-     * </pre>
-     *
-     * <code>uint32 file_size = 3;</code>
-     */
-    var fileSize: kotlin.Int
-      @JvmName("getFileSize")
-      get() = _builder.getFileSize()
-      @JvmName("setFileSize")
-      set(value) {
-        _builder.setFileSize(value)
-      }
-    /**
-     * <pre>
-     * file size
-     * </pre>
-     *
-     * <code>uint32 file_size = 3;</code>
-     */
-    fun clearFileSize() {
-      _builder.clearFileSize()
-    }
-
-    /**
-     * <pre>
-     * size per package 
-     * </pre>
-     *
-     * <code>uint32 size_per_package = 4;</code>
-     */
-    var sizePerPackage: kotlin.Int
-      @JvmName("getSizePerPackage")
-      get() = _builder.getSizePerPackage()
-      @JvmName("setSizePerPackage")
-      set(value) {
-        _builder.setSizePerPackage(value)
-      }
-    /**
-     * <pre>
-     * size per package 
-     * </pre>
-     *
-     * <code>uint32 size_per_package = 4;</code>
-     */
-    fun clearSizePerPackage() {
-      _builder.clearSizePerPackage()
+    fun clearMessageCount() {
+      _builder.clearMessageCount()
     }
 
     /**
@@ -127,7 +77,7 @@ object FileSharingDataKt {
      * package data
      * </pre>
      *
-     * <code>bytes data = 6;</code>
+     * <code>bytes data = 3;</code>
      */
     var data: com.google.protobuf.ByteString
       @JvmName("getData")
@@ -141,7 +91,7 @@ object FileSharingDataKt {
      * package data
      * </pre>
      *
-     * <code>bytes data = 6;</code>
+     * <code>bytes data = 3;</code>
      */
     fun clearData() {
       _builder.clearData()

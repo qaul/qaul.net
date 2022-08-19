@@ -3,7 +3,7 @@
 //  source: services/filesharing/filesharing_rpc.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -252,8 +252,8 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileSize', $pb.PbFieldType.OU3)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileDescr')
     ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sent')
-    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerId')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId')
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId')
     ..hasRequiredFields = false
   ;
 
@@ -265,8 +265,8 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
     $core.int? fileSize,
     $core.String? fileDescr,
     $fixnum.Int64? time,
-    $core.bool? sent,
-    $core.String? peerId,
+    $core.String? senderId,
+    $core.String? groupId,
   }) {
     final _result = create();
     if (fileId != null) {
@@ -287,11 +287,11 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
     if (time != null) {
       _result.time = time;
     }
-    if (sent != null) {
-      _result.sent = sent;
+    if (senderId != null) {
+      _result.senderId = senderId;
     }
-    if (peerId != null) {
-      _result.peerId = peerId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     return _result;
   }
@@ -371,22 +371,22 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
   void clearTime() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.bool get sent => $_getBF(6);
+  $core.String get senderId => $_getSZ(6);
   @$pb.TagNumber(7)
-  set sent($core.bool v) { $_setBool(6, v); }
+  set senderId($core.String v) { $_setString(6, v); }
   @$pb.TagNumber(7)
-  $core.bool hasSent() => $_has(6);
+  $core.bool hasSenderId() => $_has(6);
   @$pb.TagNumber(7)
-  void clearSent() => clearField(7);
+  void clearSenderId() => clearField(7);
 
   @$pb.TagNumber(8)
-  $core.String get peerId => $_getSZ(7);
+  $core.String get groupId => $_getSZ(7);
   @$pb.TagNumber(8)
-  set peerId($core.String v) { $_setString(7, v); }
+  set groupId($core.String v) { $_setString(7, v); }
   @$pb.TagNumber(8)
-  $core.bool hasPeerId() => $_has(7);
+  $core.bool hasGroupId() => $_has(7);
   @$pb.TagNumber(8)
-  void clearPeerId() => clearField(8);
+  void clearGroupId() => clearField(8);
 }
 
 class FileHistoryResponse extends $pb.GeneratedMessage {

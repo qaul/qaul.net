@@ -24,87 +24,10 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * group chat
+     * content
      * </pre>
      *
-     * <code>bool group = 1;</code>
-     */
-    var group: kotlin.Boolean
-      @JvmName("getGroup")
-      get() = _builder.getGroup()
-      @JvmName("setGroup")
-      set(value) {
-        _builder.setGroup(value)
-      }
-    /**
-     * <pre>
-     * group chat
-     * </pre>
-     *
-     * <code>bool group = 1;</code>
-     */
-    fun clearGroup() {
-      _builder.clearGroup()
-    }
-
-    /**
-     * <pre>
-     * conversation id 
-     * (only for group chat messages)
-     * </pre>
-     *
-     * <code>bytes conversation_id = 2;</code>
-     */
-    var conversationId: com.google.protobuf.ByteString
-      @JvmName("getConversationId")
-      get() = _builder.getConversationId()
-      @JvmName("setConversationId")
-      set(value) {
-        _builder.setConversationId(value)
-      }
-    /**
-     * <pre>
-     * conversation id 
-     * (only for group chat messages)
-     * </pre>
-     *
-     * <code>bytes conversation_id = 2;</code>
-     */
-    fun clearConversationId() {
-      _builder.clearConversationId()
-    }
-
-    /**
-     * <pre>
-     * sent timestamp
-     * </pre>
-     *
-     * <code>uint64 sent_at = 3;</code>
-     */
-    var sentAt: kotlin.Long
-      @JvmName("getSentAt")
-      get() = _builder.getSentAt()
-      @JvmName("setSentAt")
-      set(value) {
-        _builder.setSentAt(value)
-      }
-    /**
-     * <pre>
-     * sent timestamp
-     * </pre>
-     *
-     * <code>uint64 sent_at = 3;</code>
-     */
-    fun clearSentAt() {
-      _builder.clearSentAt()
-    }
-
-    /**
-     * <pre>
-     * message
-     * </pre>
-     *
-     * <code>string content = 4;</code>
+     * <code>string content = 1;</code>
      */
     var content: kotlin.String
       @JvmName("getContent")
@@ -115,10 +38,10 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * message
+     * content
      * </pre>
      *
-     * <code>string content = 4;</code>
+     * <code>string content = 1;</code>
      */
     fun clearContent() {
       _builder.clearContent()

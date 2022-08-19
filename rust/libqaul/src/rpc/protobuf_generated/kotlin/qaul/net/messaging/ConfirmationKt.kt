@@ -27,24 +27,24 @@ object ConfirmationKt {
      * message ID
      * </pre>
      *
-     * <code>bytes message_id = 1;</code>
+     * <code>bytes signature = 1;</code>
      */
-    var messageId: com.google.protobuf.ByteString
-      @JvmName("getMessageId")
-      get() = _builder.getMessageId()
-      @JvmName("setMessageId")
+    var signature: com.google.protobuf.ByteString
+      @JvmName("getSignature")
+      get() = _builder.getSignature()
+      @JvmName("setSignature")
       set(value) {
-        _builder.setMessageId(value)
+        _builder.setSignature(value)
       }
     /**
      * <pre>
      * message ID
      * </pre>
      *
-     * <code>bytes message_id = 1;</code>
+     * <code>bytes signature = 1;</code>
      */
-    fun clearMessageId() {
-      _builder.clearMessageId()
+    fun clearSignature() {
+      _builder.clearSignature()
     }
 
     /**

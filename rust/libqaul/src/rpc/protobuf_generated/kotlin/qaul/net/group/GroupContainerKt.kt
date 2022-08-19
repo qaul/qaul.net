@@ -96,42 +96,6 @@ object GroupContainerKt {
 
     /**
      * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     */
-    var notify: qaul.net.group.GroupNet.GroupNotify
-      @JvmName("getNotify")
-      get() = _builder.getNotify()
-      @JvmName("setNotify")
-      set(value) {
-        _builder.setNotify(value)
-      }
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     */
-    fun clearNotify() {
-      _builder.clearNotify()
-    }
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     * @return Whether the notify field is set.
-     */
-    fun hasNotify(): kotlin.Boolean {
-      return _builder.hasNotify()
-    }
-
-    /**
-     * <pre>
      * member removed
      * </pre>
      *
@@ -165,42 +129,6 @@ object GroupContainerKt {
     fun hasRemoved(): kotlin.Boolean {
       return _builder.hasRemoved()
     }
-
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     */
-    var groupMessage: qaul.net.group.GroupNet.GroupMessage
-      @JvmName("getGroupMessage")
-      get() = _builder.getGroupMessage()
-      @JvmName("setGroupMessage")
-      set(value) {
-        _builder.setGroupMessage(value)
-      }
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     */
-    fun clearGroupMessage() {
-      _builder.clearGroupMessage()
-    }
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     * @return Whether the groupMessage field is set.
-     */
-    fun hasGroupMessage(): kotlin.Boolean {
-      return _builder.hasGroupMessage()
-    }
     val messageCase: qaul.net.group.GroupNet.GroupContainer.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -220,12 +148,6 @@ val qaul.net.group.GroupNet.GroupContainerOrBuilder.inviteMemberOrNull: qaul.net
 val qaul.net.group.GroupNet.GroupContainerOrBuilder.replyInviteOrNull: qaul.net.group.GroupNet.ReplyInvite?
   get() = if (hasReplyInvite()) getReplyInvite() else null
 
-val qaul.net.group.GroupNet.GroupContainerOrBuilder.notifyOrNull: qaul.net.group.GroupNet.GroupNotify?
-  get() = if (hasNotify()) getNotify() else null
-
 val qaul.net.group.GroupNet.GroupContainerOrBuilder.removedOrNull: qaul.net.group.GroupNet.RemovedMember?
   get() = if (hasRemoved()) getRemoved() else null
-
-val qaul.net.group.GroupNet.GroupContainerOrBuilder.groupMessageOrNull: qaul.net.group.GroupNet.GroupMessage?
-  get() = if (hasGroupMessage()) getGroupMessage() else null
 

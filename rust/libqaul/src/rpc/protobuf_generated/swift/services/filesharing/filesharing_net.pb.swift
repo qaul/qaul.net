@@ -44,47 +44,11 @@ struct Qaul_Net_Filesharing_FileSharingContainer {
     set {message = .fileData(newValue)}
   }
 
-  var confirmation: Qaul_Net_Filesharing_FileSharingConfirmation {
-    get {
-      if case .confirmation(let v)? = message {return v}
-      return Qaul_Net_Filesharing_FileSharingConfirmation()
-    }
-    set {message = .confirmation(newValue)}
-  }
-
-  var confirmationInfo: Qaul_Net_Filesharing_FileSharingConfirmationFileInfo {
-    get {
-      if case .confirmationInfo(let v)? = message {return v}
-      return Qaul_Net_Filesharing_FileSharingConfirmationFileInfo()
-    }
-    set {message = .confirmationInfo(newValue)}
-  }
-
-  var completed: Qaul_Net_Filesharing_FileSharingCompleted {
-    get {
-      if case .completed(let v)? = message {return v}
-      return Qaul_Net_Filesharing_FileSharingCompleted()
-    }
-    set {message = .completed(newValue)}
-  }
-
-  var canceled: Qaul_Net_Filesharing_FileSharingCanceled {
-    get {
-      if case .canceled(let v)? = message {return v}
-      return Qaul_Net_Filesharing_FileSharingCanceled()
-    }
-    set {message = .canceled(newValue)}
-  }
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
     case fileInfo(Qaul_Net_Filesharing_FileSharingInfo)
     case fileData(Qaul_Net_Filesharing_FileSharingData)
-    case confirmation(Qaul_Net_Filesharing_FileSharingConfirmation)
-    case confirmationInfo(Qaul_Net_Filesharing_FileSharingConfirmationFileInfo)
-    case completed(Qaul_Net_Filesharing_FileSharingCompleted)
-    case canceled(Qaul_Net_Filesharing_FileSharingCanceled)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Net_Filesharing_FileSharingContainer.OneOf_Message, rhs: Qaul_Net_Filesharing_FileSharingContainer.OneOf_Message) -> Bool {
@@ -98,22 +62,6 @@ struct Qaul_Net_Filesharing_FileSharingContainer {
       }()
       case (.fileData, .fileData): return {
         guard case .fileData(let l) = lhs, case .fileData(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.confirmation, .confirmation): return {
-        guard case .confirmation(let l) = lhs, case .confirmation(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.confirmationInfo, .confirmationInfo): return {
-        guard case .confirmationInfo(let l) = lhs, case .confirmationInfo(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.completed, .completed): return {
-        guard case .completed(let l) = lhs, case .completed(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.canceled, .canceled): return {
-        guard case .canceled(let l) = lhs, case .canceled(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -131,6 +79,9 @@ struct Qaul_Net_Filesharing_FileSharingInfo {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// file id
+  var fileID: UInt64 = 0
+
   /// file name
   var fileName: String = String()
 
@@ -143,11 +94,11 @@ struct Qaul_Net_Filesharing_FileSharingInfo {
   /// file description
   var fileDescr: String = String()
 
-  /// size per package 
-  var sizePerPackage: UInt32 = 0
+  /// start index
+  var startIndex: UInt32 = 0
 
-  /// file id
-  var fileID: UInt64 = 0
+  /// message count
+  var messageCount: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -160,79 +111,14 @@ struct Qaul_Net_Filesharing_FileSharingData {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// file id
-  var fileID: UInt64 = 0
+  /// start index
+  var startIndex: UInt32 = 0
 
-  /// package sequence
-  var sequence: UInt32 = 0
-
-  /// file size
-  var fileSize: UInt32 = 0
-
-  /// size per package 
-  var sizePerPackage: UInt32 = 0
+  /// message count
+  var messageCount: UInt32 = 0
 
   /// package data
   var data: Data = Data()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// File Sharing Confirmation File Info Message
-struct Qaul_Net_Filesharing_FileSharingConfirmationFileInfo {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// file id
-  var fileID: UInt64 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// File Sharing Confirmation Message
-struct Qaul_Net_Filesharing_FileSharingConfirmation {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// file id
-  var fileID: UInt64 = 0
-
-  /// package sequence
-  var sequence: UInt32 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// File Sharing Completed Message
-struct Qaul_Net_Filesharing_FileSharingCompleted {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// file id
-  var fileID: UInt64 = 0
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// File Sharing Cancled Message
-struct Qaul_Net_Filesharing_FileSharingCanceled {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// file id
-  var fileID: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -248,10 +134,6 @@ extension Qaul_Net_Filesharing_FileSharingContainer: SwiftProtobuf.Message, Swif
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "file_info"),
     2: .standard(proto: "file_data"),
-    3: .same(proto: "confirmation"),
-    4: .standard(proto: "confirmation_info"),
-    5: .same(proto: "completed"),
-    6: .same(proto: "canceled"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -286,58 +168,6 @@ extension Qaul_Net_Filesharing_FileSharingContainer: SwiftProtobuf.Message, Swif
           self.message = .fileData(v)
         }
       }()
-      case 3: try {
-        var v: Qaul_Net_Filesharing_FileSharingConfirmation?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .confirmation(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .confirmation(v)
-        }
-      }()
-      case 4: try {
-        var v: Qaul_Net_Filesharing_FileSharingConfirmationFileInfo?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .confirmationInfo(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .confirmationInfo(v)
-        }
-      }()
-      case 5: try {
-        var v: Qaul_Net_Filesharing_FileSharingCompleted?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .completed(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .completed(v)
-        }
-      }()
-      case 6: try {
-        var v: Qaul_Net_Filesharing_FileSharingCanceled?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .canceled(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .canceled(v)
-        }
-      }()
       default: break
       }
     }
@@ -357,22 +187,6 @@ extension Qaul_Net_Filesharing_FileSharingContainer: SwiftProtobuf.Message, Swif
       guard case .fileData(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
-    case .confirmation?: try {
-      guard case .confirmation(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    }()
-    case .confirmationInfo?: try {
-      guard case .confirmationInfo(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    }()
-    case .completed?: try {
-      guard case .completed(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    }()
-    case .canceled?: try {
-      guard case .canceled(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
-    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -388,12 +202,13 @@ extension Qaul_Net_Filesharing_FileSharingContainer: SwiftProtobuf.Message, Swif
 extension Qaul_Net_Filesharing_FileSharingInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".FileSharingInfo"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_name"),
-    2: .standard(proto: "file_extension"),
-    3: .standard(proto: "file_size"),
-    4: .standard(proto: "file_descr"),
-    5: .standard(proto: "size_per_package"),
-    6: .standard(proto: "file_id"),
+    1: .standard(proto: "file_id"),
+    2: .standard(proto: "file_name"),
+    3: .standard(proto: "file_extension"),
+    4: .standard(proto: "file_size"),
+    5: .standard(proto: "file_descr"),
+    6: .standard(proto: "start_index"),
+    7: .standard(proto: "message_count"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -402,46 +217,51 @@ extension Qaul_Net_Filesharing_FileSharingInfo: SwiftProtobuf.Message, SwiftProt
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.fileName) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.fileExtension) }()
-      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.fileSize) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.fileDescr) }()
-      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.sizePerPackage) }()
-      case 6: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
+      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.fileName) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.fileExtension) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.fileSize) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.fileDescr) }()
+      case 6: try { try decoder.decodeSingularUInt32Field(value: &self.startIndex) }()
+      case 7: try { try decoder.decodeSingularUInt32Field(value: &self.messageCount) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.fileID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
+    }
     if !self.fileName.isEmpty {
-      try visitor.visitSingularStringField(value: self.fileName, fieldNumber: 1)
+      try visitor.visitSingularStringField(value: self.fileName, fieldNumber: 2)
     }
     if !self.fileExtension.isEmpty {
-      try visitor.visitSingularStringField(value: self.fileExtension, fieldNumber: 2)
+      try visitor.visitSingularStringField(value: self.fileExtension, fieldNumber: 3)
     }
     if self.fileSize != 0 {
-      try visitor.visitSingularUInt32Field(value: self.fileSize, fieldNumber: 3)
+      try visitor.visitSingularUInt32Field(value: self.fileSize, fieldNumber: 4)
     }
     if !self.fileDescr.isEmpty {
-      try visitor.visitSingularStringField(value: self.fileDescr, fieldNumber: 4)
+      try visitor.visitSingularStringField(value: self.fileDescr, fieldNumber: 5)
     }
-    if self.sizePerPackage != 0 {
-      try visitor.visitSingularUInt32Field(value: self.sizePerPackage, fieldNumber: 5)
+    if self.startIndex != 0 {
+      try visitor.visitSingularUInt32Field(value: self.startIndex, fieldNumber: 6)
     }
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 6)
+    if self.messageCount != 0 {
+      try visitor.visitSingularUInt32Field(value: self.messageCount, fieldNumber: 7)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Filesharing_FileSharingInfo, rhs: Qaul_Net_Filesharing_FileSharingInfo) -> Bool {
+    if lhs.fileID != rhs.fileID {return false}
     if lhs.fileName != rhs.fileName {return false}
     if lhs.fileExtension != rhs.fileExtension {return false}
     if lhs.fileSize != rhs.fileSize {return false}
     if lhs.fileDescr != rhs.fileDescr {return false}
-    if lhs.sizePerPackage != rhs.sizePerPackage {return false}
-    if lhs.fileID != rhs.fileID {return false}
+    if lhs.startIndex != rhs.startIndex {return false}
+    if lhs.messageCount != rhs.messageCount {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -450,11 +270,9 @@ extension Qaul_Net_Filesharing_FileSharingInfo: SwiftProtobuf.Message, SwiftProt
 extension Qaul_Net_Filesharing_FileSharingData: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".FileSharingData"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_id"),
-    2: .same(proto: "sequence"),
-    3: .standard(proto: "file_size"),
-    4: .standard(proto: "size_per_package"),
-    6: .same(proto: "data"),
+    1: .standard(proto: "start_index"),
+    2: .standard(proto: "message_count"),
+    3: .same(proto: "data"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -463,175 +281,31 @@ extension Qaul_Net_Filesharing_FileSharingData: SwiftProtobuf.Message, SwiftProt
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
-      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.sequence) }()
-      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.fileSize) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.sizePerPackage) }()
-      case 6: try { try decoder.decodeSingularBytesField(value: &self.data) }()
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.startIndex) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.messageCount) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.data) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
+    if self.startIndex != 0 {
+      try visitor.visitSingularUInt32Field(value: self.startIndex, fieldNumber: 1)
     }
-    if self.sequence != 0 {
-      try visitor.visitSingularUInt32Field(value: self.sequence, fieldNumber: 2)
-    }
-    if self.fileSize != 0 {
-      try visitor.visitSingularUInt32Field(value: self.fileSize, fieldNumber: 3)
-    }
-    if self.sizePerPackage != 0 {
-      try visitor.visitSingularUInt32Field(value: self.sizePerPackage, fieldNumber: 4)
+    if self.messageCount != 0 {
+      try visitor.visitSingularUInt32Field(value: self.messageCount, fieldNumber: 2)
     }
     if !self.data.isEmpty {
-      try visitor.visitSingularBytesField(value: self.data, fieldNumber: 6)
+      try visitor.visitSingularBytesField(value: self.data, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Filesharing_FileSharingData, rhs: Qaul_Net_Filesharing_FileSharingData) -> Bool {
-    if lhs.fileID != rhs.fileID {return false}
-    if lhs.sequence != rhs.sequence {return false}
-    if lhs.fileSize != rhs.fileSize {return false}
-    if lhs.sizePerPackage != rhs.sizePerPackage {return false}
+    if lhs.startIndex != rhs.startIndex {return false}
+    if lhs.messageCount != rhs.messageCount {return false}
     if lhs.data != rhs.data {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Net_Filesharing_FileSharingConfirmationFileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FileSharingConfirmationFileInfo"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_id"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Net_Filesharing_FileSharingConfirmationFileInfo, rhs: Qaul_Net_Filesharing_FileSharingConfirmationFileInfo) -> Bool {
-    if lhs.fileID != rhs.fileID {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Net_Filesharing_FileSharingConfirmation: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FileSharingConfirmation"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_id"),
-    2: .same(proto: "sequence"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
-      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.sequence) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
-    }
-    if self.sequence != 0 {
-      try visitor.visitSingularUInt32Field(value: self.sequence, fieldNumber: 2)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Net_Filesharing_FileSharingConfirmation, rhs: Qaul_Net_Filesharing_FileSharingConfirmation) -> Bool {
-    if lhs.fileID != rhs.fileID {return false}
-    if lhs.sequence != rhs.sequence {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Net_Filesharing_FileSharingCompleted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FileSharingCompleted"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_id"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Net_Filesharing_FileSharingCompleted, rhs: Qaul_Net_Filesharing_FileSharingCompleted) -> Bool {
-    if lhs.fileID != rhs.fileID {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Net_Filesharing_FileSharingCanceled: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FileSharingCanceled"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_id"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt64Field(value: &self.fileID) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.fileID != 0 {
-      try visitor.visitSingularUInt64Field(value: self.fileID, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Net_Filesharing_FileSharingCanceled, rhs: Qaul_Net_Filesharing_FileSharingCanceled) -> Bool {
-    if lhs.fileID != rhs.fileID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

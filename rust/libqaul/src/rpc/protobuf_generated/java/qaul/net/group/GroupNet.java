@@ -74,33 +74,6 @@ public final class GroupNet {
 
     /**
      * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     * @return Whether the notify field is set.
-     */
-    boolean hasNotify();
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     * @return The notify.
-     */
-    qaul.net.group.GroupNet.GroupNotify getNotify();
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     */
-    qaul.net.group.GroupNet.GroupNotifyOrBuilder getNotifyOrBuilder();
-
-    /**
-     * <pre>
      * member removed
      * </pre>
      *
@@ -125,33 +98,6 @@ public final class GroupNet {
      * <code>.qaul.net.group.RemovedMember removed = 4;</code>
      */
     qaul.net.group.GroupNet.RemovedMemberOrBuilder getRemovedOrBuilder();
-
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     * @return Whether the groupMessage field is set.
-     */
-    boolean hasGroupMessage();
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     * @return The groupMessage.
-     */
-    qaul.net.group.GroupNet.GroupMessage getGroupMessage();
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     */
-    qaul.net.group.GroupNet.GroupMessageOrBuilder getGroupMessageOrBuilder();
 
     public qaul.net.group.GroupNet.GroupContainer.MessageCase getMessageCase();
   }
@@ -232,20 +178,6 @@ public final class GroupNet {
               messageCase_ = 2;
               break;
             }
-            case 26: {
-              qaul.net.group.GroupNet.GroupNotify.Builder subBuilder = null;
-              if (messageCase_ == 3) {
-                subBuilder = ((qaul.net.group.GroupNet.GroupNotify) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.net.group.GroupNet.GroupNotify.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.net.group.GroupNet.GroupNotify) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 3;
-              break;
-            }
             case 34: {
               qaul.net.group.GroupNet.RemovedMember.Builder subBuilder = null;
               if (messageCase_ == 4) {
@@ -258,20 +190,6 @@ public final class GroupNet {
                 message_ = subBuilder.buildPartial();
               }
               messageCase_ = 4;
-              break;
-            }
-            case 42: {
-              qaul.net.group.GroupNet.GroupMessage.Builder subBuilder = null;
-              if (messageCase_ == 5) {
-                subBuilder = ((qaul.net.group.GroupNet.GroupMessage) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.net.group.GroupNet.GroupMessage.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.net.group.GroupNet.GroupMessage) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 5;
               break;
             }
             default: {
@@ -315,9 +233,7 @@ public final class GroupNet {
             com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       INVITE_MEMBER(1),
       REPLY_INVITE(2),
-      NOTIFY(3),
       REMOVED(4),
-      GROUP_MESSAGE(5),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -337,9 +253,7 @@ public final class GroupNet {
         switch (value) {
           case 1: return INVITE_MEMBER;
           case 2: return REPLY_INVITE;
-          case 3: return NOTIFY;
           case 4: return REMOVED;
-          case 5: return GROUP_MESSAGE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -441,49 +355,6 @@ public final class GroupNet {
       return qaul.net.group.GroupNet.ReplyInvite.getDefaultInstance();
     }
 
-    public static final int NOTIFY_FIELD_NUMBER = 3;
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     * @return Whether the notify field is set.
-     */
-    @java.lang.Override
-    public boolean hasNotify() {
-      return messageCase_ == 3;
-    }
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     * @return The notify.
-     */
-    @java.lang.Override
-    public qaul.net.group.GroupNet.GroupNotify getNotify() {
-      if (messageCase_ == 3) {
-         return (qaul.net.group.GroupNet.GroupNotify) message_;
-      }
-      return qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-    }
-    /**
-     * <pre>
-     * group notify
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-     */
-    @java.lang.Override
-    public qaul.net.group.GroupNet.GroupNotifyOrBuilder getNotifyOrBuilder() {
-      if (messageCase_ == 3) {
-         return (qaul.net.group.GroupNet.GroupNotify) message_;
-      }
-      return qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-    }
-
     public static final int REMOVED_FIELD_NUMBER = 4;
     /**
      * <pre>
@@ -527,49 +398,6 @@ public final class GroupNet {
       return qaul.net.group.GroupNet.RemovedMember.getDefaultInstance();
     }
 
-    public static final int GROUP_MESSAGE_FIELD_NUMBER = 5;
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     * @return Whether the groupMessage field is set.
-     */
-    @java.lang.Override
-    public boolean hasGroupMessage() {
-      return messageCase_ == 5;
-    }
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     * @return The groupMessage.
-     */
-    @java.lang.Override
-    public qaul.net.group.GroupNet.GroupMessage getGroupMessage() {
-      if (messageCase_ == 5) {
-         return (qaul.net.group.GroupNet.GroupMessage) message_;
-      }
-      return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-    }
-    /**
-     * <pre>
-     * group chat message
-     * </pre>
-     *
-     * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-     */
-    @java.lang.Override
-    public qaul.net.group.GroupNet.GroupMessageOrBuilder getGroupMessageOrBuilder() {
-      if (messageCase_ == 5) {
-         return (qaul.net.group.GroupNet.GroupMessage) message_;
-      }
-      return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -590,14 +418,8 @@ public final class GroupNet {
       if (messageCase_ == 2) {
         output.writeMessage(2, (qaul.net.group.GroupNet.ReplyInvite) message_);
       }
-      if (messageCase_ == 3) {
-        output.writeMessage(3, (qaul.net.group.GroupNet.GroupNotify) message_);
-      }
       if (messageCase_ == 4) {
         output.writeMessage(4, (qaul.net.group.GroupNet.RemovedMember) message_);
-      }
-      if (messageCase_ == 5) {
-        output.writeMessage(5, (qaul.net.group.GroupNet.GroupMessage) message_);
       }
       unknownFields.writeTo(output);
     }
@@ -616,17 +438,9 @@ public final class GroupNet {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, (qaul.net.group.GroupNet.ReplyInvite) message_);
       }
-      if (messageCase_ == 3) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, (qaul.net.group.GroupNet.GroupNotify) message_);
-      }
       if (messageCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (qaul.net.group.GroupNet.RemovedMember) message_);
-      }
-      if (messageCase_ == 5) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, (qaul.net.group.GroupNet.GroupMessage) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -653,17 +467,9 @@ public final class GroupNet {
           if (!getReplyInvite()
               .equals(other.getReplyInvite())) return false;
           break;
-        case 3:
-          if (!getNotify()
-              .equals(other.getNotify())) return false;
-          break;
         case 4:
           if (!getRemoved()
               .equals(other.getRemoved())) return false;
-          break;
-        case 5:
-          if (!getGroupMessage()
-              .equals(other.getGroupMessage())) return false;
           break;
         case 0:
         default:
@@ -688,17 +494,9 @@ public final class GroupNet {
           hash = (37 * hash) + REPLY_INVITE_FIELD_NUMBER;
           hash = (53 * hash) + getReplyInvite().hashCode();
           break;
-        case 3:
-          hash = (37 * hash) + NOTIFY_FIELD_NUMBER;
-          hash = (53 * hash) + getNotify().hashCode();
-          break;
         case 4:
           hash = (37 * hash) + REMOVED_FIELD_NUMBER;
           hash = (53 * hash) + getRemoved().hashCode();
-          break;
-        case 5:
-          hash = (37 * hash) + GROUP_MESSAGE_FIELD_NUMBER;
-          hash = (53 * hash) + getGroupMessage().hashCode();
           break;
         case 0:
         default:
@@ -882,25 +680,11 @@ public final class GroupNet {
             result.message_ = replyInviteBuilder_.build();
           }
         }
-        if (messageCase_ == 3) {
-          if (notifyBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = notifyBuilder_.build();
-          }
-        }
         if (messageCase_ == 4) {
           if (removedBuilder_ == null) {
             result.message_ = message_;
           } else {
             result.message_ = removedBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (groupMessageBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupMessageBuilder_.build();
           }
         }
         result.messageCase_ = messageCase_;
@@ -961,16 +745,8 @@ public final class GroupNet {
             mergeReplyInvite(other.getReplyInvite());
             break;
           }
-          case NOTIFY: {
-            mergeNotify(other.getNotify());
-            break;
-          }
           case REMOVED: {
             mergeRemoved(other.getRemoved());
-            break;
-          }
-          case GROUP_MESSAGE: {
-            mergeGroupMessage(other.getGroupMessage());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -1378,184 +1154,6 @@ public final class GroupNet {
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.group.GroupNet.GroupNotify, qaul.net.group.GroupNet.GroupNotify.Builder, qaul.net.group.GroupNet.GroupNotifyOrBuilder> notifyBuilder_;
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       * @return Whether the notify field is set.
-       */
-      @java.lang.Override
-      public boolean hasNotify() {
-        return messageCase_ == 3;
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       * @return The notify.
-       */
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupNotify getNotify() {
-        if (notifyBuilder_ == null) {
-          if (messageCase_ == 3) {
-            return (qaul.net.group.GroupNet.GroupNotify) message_;
-          }
-          return qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-        } else {
-          if (messageCase_ == 3) {
-            return notifyBuilder_.getMessage();
-          }
-          return qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-        }
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      public Builder setNotify(qaul.net.group.GroupNet.GroupNotify value) {
-        if (notifyBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          message_ = value;
-          onChanged();
-        } else {
-          notifyBuilder_.setMessage(value);
-        }
-        messageCase_ = 3;
-        return this;
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      public Builder setNotify(
-          qaul.net.group.GroupNet.GroupNotify.Builder builderForValue) {
-        if (notifyBuilder_ == null) {
-          message_ = builderForValue.build();
-          onChanged();
-        } else {
-          notifyBuilder_.setMessage(builderForValue.build());
-        }
-        messageCase_ = 3;
-        return this;
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      public Builder mergeNotify(qaul.net.group.GroupNet.GroupNotify value) {
-        if (notifyBuilder_ == null) {
-          if (messageCase_ == 3 &&
-              message_ != qaul.net.group.GroupNet.GroupNotify.getDefaultInstance()) {
-            message_ = qaul.net.group.GroupNet.GroupNotify.newBuilder((qaul.net.group.GroupNet.GroupNotify) message_)
-                .mergeFrom(value).buildPartial();
-          } else {
-            message_ = value;
-          }
-          onChanged();
-        } else {
-          if (messageCase_ == 3) {
-            notifyBuilder_.mergeFrom(value);
-          } else {
-            notifyBuilder_.setMessage(value);
-          }
-        }
-        messageCase_ = 3;
-        return this;
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      public Builder clearNotify() {
-        if (notifyBuilder_ == null) {
-          if (messageCase_ == 3) {
-            messageCase_ = 0;
-            message_ = null;
-            onChanged();
-          }
-        } else {
-          if (messageCase_ == 3) {
-            messageCase_ = 0;
-            message_ = null;
-          }
-          notifyBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      public qaul.net.group.GroupNet.GroupNotify.Builder getNotifyBuilder() {
-        return getNotifyFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupNotifyOrBuilder getNotifyOrBuilder() {
-        if ((messageCase_ == 3) && (notifyBuilder_ != null)) {
-          return notifyBuilder_.getMessageOrBuilder();
-        } else {
-          if (messageCase_ == 3) {
-            return (qaul.net.group.GroupNet.GroupNotify) message_;
-          }
-          return qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-        }
-      }
-      /**
-       * <pre>
-       * group notify
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupNotify notify = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.group.GroupNet.GroupNotify, qaul.net.group.GroupNet.GroupNotify.Builder, qaul.net.group.GroupNet.GroupNotifyOrBuilder> 
-          getNotifyFieldBuilder() {
-        if (notifyBuilder_ == null) {
-          if (!(messageCase_ == 3)) {
-            message_ = qaul.net.group.GroupNet.GroupNotify.getDefaultInstance();
-          }
-          notifyBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.net.group.GroupNet.GroupNotify, qaul.net.group.GroupNet.GroupNotify.Builder, qaul.net.group.GroupNet.GroupNotifyOrBuilder>(
-                  (qaul.net.group.GroupNet.GroupNotify) message_,
-                  getParentForChildren(),
-                  isClean());
-          message_ = null;
-        }
-        messageCase_ = 3;
-        onChanged();;
-        return notifyBuilder_;
-      }
-
-      private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.group.GroupNet.RemovedMember, qaul.net.group.GroupNet.RemovedMember.Builder, qaul.net.group.GroupNet.RemovedMemberOrBuilder> removedBuilder_;
       /**
        * <pre>
@@ -1731,184 +1329,6 @@ public final class GroupNet {
         messageCase_ = 4;
         onChanged();;
         return removedBuilder_;
-      }
-
-      private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.group.GroupNet.GroupMessage, qaul.net.group.GroupNet.GroupMessage.Builder, qaul.net.group.GroupNet.GroupMessageOrBuilder> groupMessageBuilder_;
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       * @return Whether the groupMessage field is set.
-       */
-      @java.lang.Override
-      public boolean hasGroupMessage() {
-        return messageCase_ == 5;
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       * @return The groupMessage.
-       */
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupMessage getGroupMessage() {
-        if (groupMessageBuilder_ == null) {
-          if (messageCase_ == 5) {
-            return (qaul.net.group.GroupNet.GroupMessage) message_;
-          }
-          return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-        } else {
-          if (messageCase_ == 5) {
-            return groupMessageBuilder_.getMessage();
-          }
-          return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-        }
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      public Builder setGroupMessage(qaul.net.group.GroupNet.GroupMessage value) {
-        if (groupMessageBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          message_ = value;
-          onChanged();
-        } else {
-          groupMessageBuilder_.setMessage(value);
-        }
-        messageCase_ = 5;
-        return this;
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      public Builder setGroupMessage(
-          qaul.net.group.GroupNet.GroupMessage.Builder builderForValue) {
-        if (groupMessageBuilder_ == null) {
-          message_ = builderForValue.build();
-          onChanged();
-        } else {
-          groupMessageBuilder_.setMessage(builderForValue.build());
-        }
-        messageCase_ = 5;
-        return this;
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      public Builder mergeGroupMessage(qaul.net.group.GroupNet.GroupMessage value) {
-        if (groupMessageBuilder_ == null) {
-          if (messageCase_ == 5 &&
-              message_ != qaul.net.group.GroupNet.GroupMessage.getDefaultInstance()) {
-            message_ = qaul.net.group.GroupNet.GroupMessage.newBuilder((qaul.net.group.GroupNet.GroupMessage) message_)
-                .mergeFrom(value).buildPartial();
-          } else {
-            message_ = value;
-          }
-          onChanged();
-        } else {
-          if (messageCase_ == 5) {
-            groupMessageBuilder_.mergeFrom(value);
-          } else {
-            groupMessageBuilder_.setMessage(value);
-          }
-        }
-        messageCase_ = 5;
-        return this;
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      public Builder clearGroupMessage() {
-        if (groupMessageBuilder_ == null) {
-          if (messageCase_ == 5) {
-            messageCase_ = 0;
-            message_ = null;
-            onChanged();
-          }
-        } else {
-          if (messageCase_ == 5) {
-            messageCase_ = 0;
-            message_ = null;
-          }
-          groupMessageBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      public qaul.net.group.GroupNet.GroupMessage.Builder getGroupMessageBuilder() {
-        return getGroupMessageFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupMessageOrBuilder getGroupMessageOrBuilder() {
-        if ((messageCase_ == 5) && (groupMessageBuilder_ != null)) {
-          return groupMessageBuilder_.getMessageOrBuilder();
-        } else {
-          if (messageCase_ == 5) {
-            return (qaul.net.group.GroupNet.GroupMessage) message_;
-          }
-          return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-        }
-      }
-      /**
-       * <pre>
-       * group chat message
-       * </pre>
-       *
-       * <code>.qaul.net.group.GroupMessage group_message = 5;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.group.GroupNet.GroupMessage, qaul.net.group.GroupNet.GroupMessage.Builder, qaul.net.group.GroupNet.GroupMessageOrBuilder> 
-          getGroupMessageFieldBuilder() {
-        if (groupMessageBuilder_ == null) {
-          if (!(messageCase_ == 5)) {
-            message_ = qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-          }
-          groupMessageBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.net.group.GroupNet.GroupMessage, qaul.net.group.GroupNet.GroupMessage.Builder, qaul.net.group.GroupNet.GroupMessageOrBuilder>(
-                  (qaul.net.group.GroupNet.GroupMessage) message_,
-                  getParentForChildren(),
-                  isClean());
-          message_ = null;
-        }
-        messageCase_ = 5;
-        onChanged();;
-        return groupMessageBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -2965,7 +2385,7 @@ public final class GroupNet {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>int32 role = 2;</code>
      * @return The role.
      */
     int getRole();
@@ -2985,10 +2405,20 @@ public final class GroupNet {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>int32 state = 4;</code>
      * @return The state.
      */
     int getState();
+
+    /**
+     * <pre>
+     *last message index
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     * @return The lastMessageIndex.
+     */
+    int getLastMessageIndex();
   }
   /**
    * <pre>
@@ -3047,7 +2477,7 @@ public final class GroupNet {
             }
             case 16: {
 
-              role_ = input.readUInt32();
+              role_ = input.readInt32();
               break;
             }
             case 24: {
@@ -3057,7 +2487,12 @@ public final class GroupNet {
             }
             case 32: {
 
-              state_ = input.readUInt32();
+              state_ = input.readInt32();
+              break;
+            }
+            case 40: {
+
+              lastMessageIndex_ = input.readUInt32();
               break;
             }
             default: {
@@ -3116,7 +2551,7 @@ public final class GroupNet {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>int32 role = 2;</code>
      * @return The role.
      */
     @java.lang.Override
@@ -3146,12 +2581,27 @@ public final class GroupNet {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>int32 state = 4;</code>
      * @return The state.
      */
     @java.lang.Override
     public int getState() {
       return state_;
+    }
+
+    public static final int LAST_MESSAGE_INDEX_FIELD_NUMBER = 5;
+    private int lastMessageIndex_;
+    /**
+     * <pre>
+     *last message index
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     * @return The lastMessageIndex.
+     */
+    @java.lang.Override
+    public int getLastMessageIndex() {
+      return lastMessageIndex_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -3172,13 +2622,16 @@ public final class GroupNet {
         output.writeBytes(1, userId_);
       }
       if (role_ != 0) {
-        output.writeUInt32(2, role_);
+        output.writeInt32(2, role_);
       }
       if (joinedAt_ != 0L) {
         output.writeUInt64(3, joinedAt_);
       }
       if (state_ != 0) {
-        output.writeUInt32(4, state_);
+        output.writeInt32(4, state_);
+      }
+      if (lastMessageIndex_ != 0) {
+        output.writeUInt32(5, lastMessageIndex_);
       }
       unknownFields.writeTo(output);
     }
@@ -3195,7 +2648,7 @@ public final class GroupNet {
       }
       if (role_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, role_);
+          .computeInt32Size(2, role_);
       }
       if (joinedAt_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -3203,7 +2656,11 @@ public final class GroupNet {
       }
       if (state_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(4, state_);
+          .computeInt32Size(4, state_);
+      }
+      if (lastMessageIndex_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, lastMessageIndex_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3228,6 +2685,8 @@ public final class GroupNet {
           != other.getJoinedAt()) return false;
       if (getState()
           != other.getState()) return false;
+      if (getLastMessageIndex()
+          != other.getLastMessageIndex()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3248,6 +2707,8 @@ public final class GroupNet {
           getJoinedAt());
       hash = (37 * hash) + STATE_FIELD_NUMBER;
       hash = (53 * hash) + getState();
+      hash = (37 * hash) + LAST_MESSAGE_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getLastMessageIndex();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3393,6 +2854,8 @@ public final class GroupNet {
 
         state_ = 0;
 
+        lastMessageIndex_ = 0;
+
         return this;
       }
 
@@ -3423,6 +2886,7 @@ public final class GroupNet {
         result.role_ = role_;
         result.joinedAt_ = joinedAt_;
         result.state_ = state_;
+        result.lastMessageIndex_ = lastMessageIndex_;
         onBuilt();
         return result;
       }
@@ -3482,6 +2946,9 @@ public final class GroupNet {
         }
         if (other.getState() != 0) {
           setState(other.getState());
+        }
+        if (other.getLastMessageIndex() != 0) {
+          setLastMessageIndex(other.getLastMessageIndex());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3564,7 +3031,7 @@ public final class GroupNet {
        *role
        * </pre>
        *
-       * <code>uint32 role = 2;</code>
+       * <code>int32 role = 2;</code>
        * @return The role.
        */
       @java.lang.Override
@@ -3576,7 +3043,7 @@ public final class GroupNet {
        *role
        * </pre>
        *
-       * <code>uint32 role = 2;</code>
+       * <code>int32 role = 2;</code>
        * @param value The role to set.
        * @return This builder for chaining.
        */
@@ -3591,7 +3058,7 @@ public final class GroupNet {
        *role
        * </pre>
        *
-       * <code>uint32 role = 2;</code>
+       * <code>int32 role = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearRole() {
@@ -3650,7 +3117,7 @@ public final class GroupNet {
        *state 
        * </pre>
        *
-       * <code>uint32 state = 4;</code>
+       * <code>int32 state = 4;</code>
        * @return The state.
        */
       @java.lang.Override
@@ -3662,7 +3129,7 @@ public final class GroupNet {
        *state 
        * </pre>
        *
-       * <code>uint32 state = 4;</code>
+       * <code>int32 state = 4;</code>
        * @param value The state to set.
        * @return This builder for chaining.
        */
@@ -3677,12 +3144,55 @@ public final class GroupNet {
        *state 
        * </pre>
        *
-       * <code>uint32 state = 4;</code>
+       * <code>int32 state = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearState() {
         
         state_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int lastMessageIndex_ ;
+      /**
+       * <pre>
+       *last message index
+       * </pre>
+       *
+       * <code>uint32 last_message_index = 5;</code>
+       * @return The lastMessageIndex.
+       */
+      @java.lang.Override
+      public int getLastMessageIndex() {
+        return lastMessageIndex_;
+      }
+      /**
+       * <pre>
+       *last message index
+       * </pre>
+       *
+       * <code>uint32 last_message_index = 5;</code>
+       * @param value The lastMessageIndex to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastMessageIndex(int value) {
+        
+        lastMessageIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *last message index
+       * </pre>
+       *
+       * <code>uint32 last_message_index = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastMessageIndex() {
+        
+        lastMessageIndex_ = 0;
         onChanged();
         return this;
       }
@@ -6254,805 +5764,6 @@ public final class GroupNet {
 
   }
 
-  public interface GroupMessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.net.group.GroupMessage)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     * @return The groupId.
-     */
-    com.google.protobuf.ByteString getGroupId();
-
-    /**
-     * <pre>
-     * content
-     * </pre>
-     *
-     * <code>string content = 2;</code>
-     * @return The content.
-     */
-    java.lang.String getContent();
-    /**
-     * <pre>
-     * content
-     * </pre>
-     *
-     * <code>string content = 2;</code>
-     * @return The bytes for content.
-     */
-    com.google.protobuf.ByteString
-        getContentBytes();
-
-    /**
-     * <pre>
-     * sent at
-     * </pre>
-     *
-     * <code>uint64 sent_at = 3;</code>
-     * @return The sentAt.
-     */
-    long getSentAt();
-  }
-  /**
-   * <pre>
-   *Group chat message
-   * </pre>
-   *
-   * Protobuf type {@code qaul.net.group.GroupMessage}
-   */
-  public static final class GroupMessage extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.net.group.GroupMessage)
-      GroupMessageOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GroupMessage.newBuilder() to construct.
-    private GroupMessage(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GroupMessage() {
-      groupId_ = com.google.protobuf.ByteString.EMPTY;
-      content_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GroupMessage();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private GroupMessage(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-
-              groupId_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              content_ = s;
-              break;
-            }
-            case 24: {
-
-              sentAt_ = input.readUInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return qaul.net.group.GroupNet.internal_static_qaul_net_group_GroupMessage_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return qaul.net.group.GroupNet.internal_static_qaul_net_group_GroupMessage_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              qaul.net.group.GroupNet.GroupMessage.class, qaul.net.group.GroupNet.GroupMessage.Builder.class);
-    }
-
-    public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
-    /**
-     * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     * @return The groupId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getGroupId() {
-      return groupId_;
-    }
-
-    public static final int CONTENT_FIELD_NUMBER = 2;
-    private volatile java.lang.Object content_;
-    /**
-     * <pre>
-     * content
-     * </pre>
-     *
-     * <code>string content = 2;</code>
-     * @return The content.
-     */
-    @java.lang.Override
-    public java.lang.String getContent() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        content_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * content
-     * </pre>
-     *
-     * <code>string content = 2;</code>
-     * @return The bytes for content.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getContentBytes() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        content_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SENT_AT_FIELD_NUMBER = 3;
-    private long sentAt_;
-    /**
-     * <pre>
-     * sent at
-     * </pre>
-     *
-     * <code>uint64 sent_at = 3;</code>
-     * @return The sentAt.
-     */
-    @java.lang.Override
-    public long getSentAt() {
-      return sentAt_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (!groupId_.isEmpty()) {
-        output.writeBytes(1, groupId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, content_);
-      }
-      if (sentAt_ != 0L) {
-        output.writeUInt64(3, sentAt_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (!groupId_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, groupId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, content_);
-      }
-      if (sentAt_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(3, sentAt_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof qaul.net.group.GroupNet.GroupMessage)) {
-        return super.equals(obj);
-      }
-      qaul.net.group.GroupNet.GroupMessage other = (qaul.net.group.GroupNet.GroupMessage) obj;
-
-      if (!getGroupId()
-          .equals(other.getGroupId())) return false;
-      if (!getContent()
-          .equals(other.getContent())) return false;
-      if (getSentAt()
-          != other.getSentAt()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getGroupId().hashCode();
-      hash = (37 * hash) + CONTENT_FIELD_NUMBER;
-      hash = (53 * hash) + getContent().hashCode();
-      hash = (37 * hash) + SENT_AT_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getSentAt());
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static qaul.net.group.GroupNet.GroupMessage parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(qaul.net.group.GroupNet.GroupMessage prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     *Group chat message
-     * </pre>
-     *
-     * Protobuf type {@code qaul.net.group.GroupMessage}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.net.group.GroupMessage)
-        qaul.net.group.GroupNet.GroupMessageOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return qaul.net.group.GroupNet.internal_static_qaul_net_group_GroupMessage_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return qaul.net.group.GroupNet.internal_static_qaul_net_group_GroupMessage_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                qaul.net.group.GroupNet.GroupMessage.class, qaul.net.group.GroupNet.GroupMessage.Builder.class);
-      }
-
-      // Construct using qaul.net.group.GroupNet.GroupMessage.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        groupId_ = com.google.protobuf.ByteString.EMPTY;
-
-        content_ = "";
-
-        sentAt_ = 0L;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return qaul.net.group.GroupNet.internal_static_qaul_net_group_GroupMessage_descriptor;
-      }
-
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupMessage getDefaultInstanceForType() {
-        return qaul.net.group.GroupNet.GroupMessage.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupMessage build() {
-        qaul.net.group.GroupNet.GroupMessage result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public qaul.net.group.GroupNet.GroupMessage buildPartial() {
-        qaul.net.group.GroupNet.GroupMessage result = new qaul.net.group.GroupNet.GroupMessage(this);
-        result.groupId_ = groupId_;
-        result.content_ = content_;
-        result.sentAt_ = sentAt_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.net.group.GroupNet.GroupMessage) {
-          return mergeFrom((qaul.net.group.GroupNet.GroupMessage)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(qaul.net.group.GroupNet.GroupMessage other) {
-        if (other == qaul.net.group.GroupNet.GroupMessage.getDefaultInstance()) return this;
-        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
-          setGroupId(other.getGroupId());
-        }
-        if (!other.getContent().isEmpty()) {
-          content_ = other.content_;
-          onChanged();
-        }
-        if (other.getSentAt() != 0L) {
-          setSentAt(other.getSentAt());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        qaul.net.group.GroupNet.GroupMessage parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.net.group.GroupNet.GroupMessage) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @return The groupId.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getGroupId() {
-        return groupId_;
-      }
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @param value The groupId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        groupId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearGroupId() {
-        
-        groupId_ = getDefaultInstance().getGroupId();
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object content_ = "";
-      /**
-       * <pre>
-       * content
-       * </pre>
-       *
-       * <code>string content = 2;</code>
-       * @return The content.
-       */
-      public java.lang.String getContent() {
-        java.lang.Object ref = content_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          content_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * content
-       * </pre>
-       *
-       * <code>string content = 2;</code>
-       * @return The bytes for content.
-       */
-      public com.google.protobuf.ByteString
-          getContentBytes() {
-        java.lang.Object ref = content_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          content_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * content
-       * </pre>
-       *
-       * <code>string content = 2;</code>
-       * @param value The content to set.
-       * @return This builder for chaining.
-       */
-      public Builder setContent(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        content_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * content
-       * </pre>
-       *
-       * <code>string content = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearContent() {
-        
-        content_ = getDefaultInstance().getContent();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * content
-       * </pre>
-       *
-       * <code>string content = 2;</code>
-       * @param value The bytes for content to set.
-       * @return This builder for chaining.
-       */
-      public Builder setContentBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        content_ = value;
-        onChanged();
-        return this;
-      }
-
-      private long sentAt_ ;
-      /**
-       * <pre>
-       * sent at
-       * </pre>
-       *
-       * <code>uint64 sent_at = 3;</code>
-       * @return The sentAt.
-       */
-      @java.lang.Override
-      public long getSentAt() {
-        return sentAt_;
-      }
-      /**
-       * <pre>
-       * sent at
-       * </pre>
-       *
-       * <code>uint64 sent_at = 3;</code>
-       * @param value The sentAt to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSentAt(long value) {
-        
-        sentAt_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * sent at
-       * </pre>
-       *
-       * <code>uint64 sent_at = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSentAt() {
-        
-        sentAt_ = 0L;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:qaul.net.group.GroupMessage)
-    }
-
-    // @@protoc_insertion_point(class_scope:qaul.net.group.GroupMessage)
-    private static final qaul.net.group.GroupNet.GroupMessage DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new qaul.net.group.GroupNet.GroupMessage();
-    }
-
-    public static qaul.net.group.GroupNet.GroupMessage getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GroupMessage>
-        PARSER = new com.google.protobuf.AbstractParser<GroupMessage>() {
-      @java.lang.Override
-      public GroupMessage parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GroupMessage(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<GroupMessage> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GroupMessage> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public qaul.net.group.GroupNet.GroupMessage getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_net_group_GroupContainer_descriptor;
   private static final 
@@ -7083,11 +5794,6 @@ public final class GroupNet {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_net_group_RemovedMember_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_net_group_GroupMessage_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_net_group_GroupMessage_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -7098,26 +5804,23 @@ public final class GroupNet {
   static {
     java.lang.String[] descriptorData = {
       "\n\036services/group/group_net.proto\022\016qaul.n" +
-      "et.group\"\237\002\n\016GroupContainer\0225\n\rinvite_me" +
+      "et.group\"\271\001\n\016GroupContainer\0225\n\rinvite_me" +
       "mber\030\001 \001(\0132\034.qaul.net.group.InviteMember" +
       "H\000\0223\n\014reply_invite\030\002 \001(\0132\033.qaul.net.grou" +
-      "p.ReplyInviteH\000\022-\n\006notify\030\003 \001(\0132\033.qaul.n" +
-      "et.group.GroupNotifyH\000\0220\n\007removed\030\004 \001(\0132" +
-      "\035.qaul.net.group.RemovedMemberH\000\0225\n\rgrou" +
-      "p_message\030\005 \001(\0132\034.qaul.net.group.GroupMe" +
-      "ssageH\000B\t\n\007message\"q\n\014InviteMember\022\020\n\010gr" +
-      "oup_id\030\001 \001(\014\022\022\n\ngroup_name\030\002 \001(\t\022\020\n\010admi" +
-      "n_id\030\003 \001(\014\022\022\n\ncreated_at\030\004 \001(\004\022\025\n\rmember" +
-      "s_count\030\005 \001(\r\"I\n\006Member\022\017\n\007user_id\030\001 \001(\014" +
-      "\022\014\n\004role\030\002 \001(\r\022\021\n\tjoined_at\030\003 \001(\004\022\r\n\005sta" +
-      "te\030\004 \001(\r\"\204\001\n\013GroupNotify\022\020\n\010group_id\030\001 \001" +
-      "(\014\022\022\n\ngroup_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001" +
-      "(\004\022\022\n\ncreator_id\030\004 \001(\014\022\'\n\007members\030\005 \003(\0132" +
-      "\026.qaul.net.group.Member\"/\n\013ReplyInvite\022\020" +
-      "\n\010group_id\030\001 \001(\014\022\016\n\006accept\030\002 \001(\010\"!\n\rRemo" +
-      "vedMember\022\020\n\010group_id\030\001 \001(\014\"B\n\014GroupMess" +
-      "age\022\020\n\010group_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\t\022\017" +
-      "\n\007sent_at\030\003 \001(\004b\006proto3"
+      "p.ReplyInviteH\000\0220\n\007removed\030\004 \001(\0132\035.qaul." +
+      "net.group.RemovedMemberH\000B\t\n\007message\"q\n\014" +
+      "InviteMember\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup_" +
+      "name\030\002 \001(\t\022\020\n\010admin_id\030\003 \001(\014\022\022\n\ncreated_" +
+      "at\030\004 \001(\004\022\025\n\rmembers_count\030\005 \001(\r\"e\n\006Membe" +
+      "r\022\017\n\007user_id\030\001 \001(\014\022\014\n\004role\030\002 \001(\005\022\021\n\tjoin" +
+      "ed_at\030\003 \001(\004\022\r\n\005state\030\004 \001(\005\022\032\n\022last_messa" +
+      "ge_index\030\005 \001(\r\"\204\001\n\013GroupNotify\022\020\n\010group_" +
+      "id\030\001 \001(\014\022\022\n\ngroup_name\030\002 \001(\t\022\022\n\ncreated_" +
+      "at\030\003 \001(\004\022\022\n\ncreator_id\030\004 \001(\014\022\'\n\007members\030" +
+      "\005 \003(\0132\026.qaul.net.group.Member\"/\n\013ReplyIn" +
+      "vite\022\020\n\010group_id\030\001 \001(\014\022\016\n\006accept\030\002 \001(\010\"!" +
+      "\n\rRemovedMember\022\020\n\010group_id\030\001 \001(\014b\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7128,7 +5831,7 @@ public final class GroupNet {
     internal_static_qaul_net_group_GroupContainer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_group_GroupContainer_descriptor,
-        new java.lang.String[] { "InviteMember", "ReplyInvite", "Notify", "Removed", "GroupMessage", "Message", });
+        new java.lang.String[] { "InviteMember", "ReplyInvite", "Removed", "Message", });
     internal_static_qaul_net_group_InviteMember_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_net_group_InviteMember_fieldAccessorTable = new
@@ -7140,7 +5843,7 @@ public final class GroupNet {
     internal_static_qaul_net_group_Member_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_group_Member_descriptor,
-        new java.lang.String[] { "UserId", "Role", "JoinedAt", "State", });
+        new java.lang.String[] { "UserId", "Role", "JoinedAt", "State", "LastMessageIndex", });
     internal_static_qaul_net_group_GroupNotify_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_qaul_net_group_GroupNotify_fieldAccessorTable = new
@@ -7159,12 +5862,6 @@ public final class GroupNet {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_group_RemovedMember_descriptor,
         new java.lang.String[] { "GroupId", });
-    internal_static_qaul_net_group_GroupMessage_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_qaul_net_group_GroupMessage_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_net_group_GroupMessage_descriptor,
-        new java.lang.String[] { "GroupId", "Content", "SentAt", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

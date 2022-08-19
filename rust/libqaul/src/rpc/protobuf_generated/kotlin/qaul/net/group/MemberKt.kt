@@ -52,7 +52,7 @@ object MemberKt {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>int32 role = 2;</code>
      */
     var role: kotlin.Int
       @JvmName("getRole")
@@ -66,7 +66,7 @@ object MemberKt {
      *role
      * </pre>
      *
-     * <code>uint32 role = 2;</code>
+     * <code>int32 role = 2;</code>
      */
     fun clearRole() {
       _builder.clearRole()
@@ -102,7 +102,7 @@ object MemberKt {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>int32 state = 4;</code>
      */
     var state: kotlin.Int
       @JvmName("getState")
@@ -116,10 +116,35 @@ object MemberKt {
      *state 
      * </pre>
      *
-     * <code>uint32 state = 4;</code>
+     * <code>int32 state = 4;</code>
      */
     fun clearState() {
       _builder.clearState()
+    }
+
+    /**
+     * <pre>
+     *last message index
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     */
+    var lastMessageIndex: kotlin.Int
+      @JvmName("getLastMessageIndex")
+      get() = _builder.getLastMessageIndex()
+      @JvmName("setLastMessageIndex")
+      set(value) {
+        _builder.setLastMessageIndex(value)
+      }
+    /**
+     * <pre>
+     *last message index
+     * </pre>
+     *
+     * <code>uint32 last_message_index = 5;</code>
+     */
+    fun clearLastMessageIndex() {
+      _builder.clearLastMessageIndex()
     }
   }
 }
