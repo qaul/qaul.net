@@ -221,7 +221,7 @@ public final class ChatOuterClass {
     SENDING(0),
     /**
      * <pre>
-     * message sent
+     * message successfully sent to another node
      * </pre>
      *
      * <code>SENT = 1;</code>
@@ -229,21 +229,37 @@ public final class ChatOuterClass {
     SENT(1),
     /**
      * <pre>
+     * reciption has been confirmed
+     * </pre>
+     *
+     * <code>CONFIRMED = 2;</code>
+     */
+    CONFIRMED(2),
+    /**
+     * <pre>
+     * all group members confirmed that they received
+     * the message
+     * </pre>
+     *
+     * <code>CONFIRMED_BY_ALL = 3;</code>
+     */
+    CONFIRMED_BY_ALL(3),
+    /**
+     * <pre>
+     * message receiving
+     * </pre>
+     *
+     * <code>RECEIVING = 4;</code>
+     */
+    RECEIVING(4),
+    /**
+     * <pre>
      * message received
      * </pre>
      *
-     * <code>RECEIVED = 2;</code>
+     * <code>RECEIVED = 5;</code>
      */
-    RECEIVED(2),
-    /**
-     * <pre>
-     * all group members received the message successfully
-     * this option is only used for groups with more then 2 members
-     * </pre>
-     *
-     * <code>RECEIVED_BY_ALL = 3;</code>
-     */
-    RECEIVED_BY_ALL(3),
+    RECEIVED(5),
     UNRECOGNIZED(-1),
     ;
 
@@ -258,7 +274,7 @@ public final class ChatOuterClass {
     public static final int SENDING_VALUE = 0;
     /**
      * <pre>
-     * message sent
+     * message successfully sent to another node
      * </pre>
      *
      * <code>SENT = 1;</code>
@@ -266,21 +282,37 @@ public final class ChatOuterClass {
     public static final int SENT_VALUE = 1;
     /**
      * <pre>
+     * reciption has been confirmed
+     * </pre>
+     *
+     * <code>CONFIRMED = 2;</code>
+     */
+    public static final int CONFIRMED_VALUE = 2;
+    /**
+     * <pre>
+     * all group members confirmed that they received
+     * the message
+     * </pre>
+     *
+     * <code>CONFIRMED_BY_ALL = 3;</code>
+     */
+    public static final int CONFIRMED_BY_ALL_VALUE = 3;
+    /**
+     * <pre>
+     * message receiving
+     * </pre>
+     *
+     * <code>RECEIVING = 4;</code>
+     */
+    public static final int RECEIVING_VALUE = 4;
+    /**
+     * <pre>
      * message received
      * </pre>
      *
-     * <code>RECEIVED = 2;</code>
+     * <code>RECEIVED = 5;</code>
      */
-    public static final int RECEIVED_VALUE = 2;
-    /**
-     * <pre>
-     * all group members received the message successfully
-     * this option is only used for groups with more then 2 members
-     * </pre>
-     *
-     * <code>RECEIVED_BY_ALL = 3;</code>
-     */
-    public static final int RECEIVED_BY_ALL_VALUE = 3;
+    public static final int RECEIVED_VALUE = 5;
 
 
     public final int getNumber() {
@@ -309,8 +341,10 @@ public final class ChatOuterClass {
       switch (value) {
         case 0: return SENDING;
         case 1: return SENT;
-        case 2: return RECEIVED;
-        case 3: return RECEIVED_BY_ALL;
+        case 2: return CONFIRMED;
+        case 3: return CONFIRMED_BY_ALL;
+        case 4: return RECEIVING;
+        case 5: return RECEIVED;
         default: return null;
       }
     }
@@ -12355,11 +12389,12 @@ public final class ChatOuterClass {
       "er_id\030\002 \001(\014\";\n\017ChatMessageSend\022\027\n\017conver" +
       "sation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\t*C\n\017Chat" +
       "ContentType\022\010\n\004NONE\020\000\022\010\n\004CHAT\020\001\022\010\n\004FILE\020" +
-      "\002\022\t\n\005GROUP\020\003\022\007\n\003RTC\020\004*I\n\rMessageStatus\022\013" +
-      "\n\007SENDING\020\000\022\010\n\004SENT\020\001\022\014\n\010RECEIVED\020\002\022\023\n\017R" +
-      "ECEIVED_BY_ALL\020\003*L\n\016GroupEventType\022\013\n\007DE" +
-      "FAULT\020\000\022\013\n\007INVITED\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT" +
-      "\020\003\022\n\n\006CLOSED\020\004b\006proto3"
+      "\002\022\t\n\005GROUP\020\003\022\007\n\003RTC\020\004*h\n\rMessageStatus\022\013" +
+      "\n\007SENDING\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020" +
+      "CONFIRMED_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010REC" +
+      "EIVED\020\005*L\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013" +
+      "\n\007INVITED\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\n\n\006CLO" +
+      "SED\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

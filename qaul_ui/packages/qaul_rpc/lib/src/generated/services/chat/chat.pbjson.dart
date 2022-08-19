@@ -28,13 +28,15 @@ const MessageStatus$json = const {
   '2': const [
     const {'1': 'SENDING', '2': 0},
     const {'1': 'SENT', '2': 1},
-    const {'1': 'RECEIVED', '2': 2},
-    const {'1': 'RECEIVED_BY_ALL', '2': 3},
+    const {'1': 'CONFIRMED', '2': 2},
+    const {'1': 'CONFIRMED_BY_ALL', '2': 3},
+    const {'1': 'RECEIVING', '2': 4},
+    const {'1': 'RECEIVED', '2': 5},
   ],
 };
 
 /// Descriptor for `MessageStatus`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List messageStatusDescriptor = $convert.base64Decode('Cg1NZXNzYWdlU3RhdHVzEgsKB1NFTkRJTkcQABIICgRTRU5UEAESDAoIUkVDRUlWRUQQAhITCg9SRUNFSVZFRF9CWV9BTEwQAw==');
+final $typed_data.Uint8List messageStatusDescriptor = $convert.base64Decode('Cg1NZXNzYWdlU3RhdHVzEgsKB1NFTkRJTkcQABIICgRTRU5UEAESDQoJQ09ORklSTUVEEAISFAoQQ09ORklSTUVEX0JZX0FMTBADEg0KCVJFQ0VJVklORxAEEgwKCFJFQ0VJVkVEEAU=');
 @$core.Deprecated('Use groupEventTypeDescriptor instead')
 const GroupEventType$json = const {
   '1': 'GroupEventType',

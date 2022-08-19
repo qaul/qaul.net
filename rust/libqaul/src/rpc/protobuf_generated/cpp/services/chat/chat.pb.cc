@@ -396,15 +396,16 @@ const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_S
   "er_id\030\002 \001(\014\";\n\017ChatMessageSend\022\027\n\017conver"
   "sation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\t*C\n\017Chat"
   "ContentType\022\010\n\004NONE\020\000\022\010\n\004CHAT\020\001\022\010\n\004FILE\020"
-  "\002\022\t\n\005GROUP\020\003\022\007\n\003RTC\020\004*I\n\rMessageStatus\022\013"
-  "\n\007SENDING\020\000\022\010\n\004SENT\020\001\022\014\n\010RECEIVED\020\002\022\023\n\017R"
-  "ECEIVED_BY_ALL\020\003*L\n\016GroupEventType\022\013\n\007DE"
-  "FAULT\020\000\022\013\n\007INVITED\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT"
-  "\020\003\022\n\n\006CLOSED\020\004b\006proto3"
+  "\002\022\t\n\005GROUP\020\003\022\007\n\003RTC\020\004*h\n\rMessageStatus\022\013"
+  "\n\007SENDING\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020"
+  "CONFIRMED_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010REC"
+  "EIVED\020\005*L\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013"
+  "\n\007INVITED\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\n\n\006CLO"
+  "SED\020\004b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
-    false, false, 1782, descriptor_table_protodef_services_2fchat_2fchat_2eproto,
+    false, false, 1813, descriptor_table_protodef_services_2fchat_2fchat_2eproto,
     "services/chat/chat.proto",
     &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 12,
     schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
@@ -447,6 +448,8 @@ bool MessageStatus_IsValid(int value) {
     case 1:
     case 2:
     case 3:
+    case 4:
+    case 5:
       return true;
     default:
       return false;

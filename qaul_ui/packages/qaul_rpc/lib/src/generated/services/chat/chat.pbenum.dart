@@ -33,14 +33,18 @@ class ChatContentType extends $pb.ProtobufEnum {
 class MessageStatus extends $pb.ProtobufEnum {
   static const MessageStatus SENDING = MessageStatus._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENDING');
   static const MessageStatus SENT = MessageStatus._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENT');
-  static const MessageStatus RECEIVED = MessageStatus._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RECEIVED');
-  static const MessageStatus RECEIVED_BY_ALL = MessageStatus._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RECEIVED_BY_ALL');
+  static const MessageStatus CONFIRMED = MessageStatus._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONFIRMED');
+  static const MessageStatus CONFIRMED_BY_ALL = MessageStatus._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONFIRMED_BY_ALL');
+  static const MessageStatus RECEIVING = MessageStatus._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RECEIVING');
+  static const MessageStatus RECEIVED = MessageStatus._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RECEIVED');
 
   static const $core.List<MessageStatus> values = <MessageStatus> [
     SENDING,
     SENT,
+    CONFIRMED,
+    CONFIRMED_BY_ALL,
+    RECEIVING,
     RECEIVED,
-    RECEIVED_BY_ALL,
   ];
 
   static final $core.Map<$core.int, MessageStatus> _byValue = $pb.ProtobufEnum.initByValue(values);
