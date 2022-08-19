@@ -39,14 +39,43 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final l18ns = AppLocalizations.of(context);
 
-    final currentOpenChat = useState<Widget?>(null);
+    final mobile = isMobile(context); // MediaQuery on HookState.init throws
+    final chatWidget = useState<Widget?>(null);
+    final currentOpenChat = ref.watch(uiOpenChatProvider);
+    useEffect(() {
+      if (mobile) return () {}; // should never require this function
+      if (currentOpenChat == null) {
+        chatWidget.value = null;
+        return () {};
+      }
+
+      final otherUser = users
+          .firstWhereOrNull((u) => u.id.equals(currentOpenChat.conversationId));
+
+      if (otherUser == null) {
+        _log.warning('single-person room with unknown otherUser');
+        chatWidget.value = null;
+        return () {};
+      }
+
+      chatWidget.value = ChatScreen(
+        currentOpenChat,
+        defaultUser,
+        otherUser,
+      );
+
+      return () {};
+    }, [currentOpenChat]);
+
     final setOpenChat = useCallback((ChatRoom room, User otherUser) {
-      if (MediaQuery.of(context).size.width < kTabletBreakpoint) {
+      if (mobile) {
         openChat(room,
-            context: context, user: defaultUser, otherUser: otherUser);
+            ref: ref,
+            context: context,
+            user: defaultUser,
+            otherUser: otherUser);
       } else {
-        currentOpenChat.value = ChatScreen(
-            room, defaultUser, otherUser, () => currentOpenChat.value = null);
+        ref.read(uiOpenChatProvider.notifier).setCurrent(room);
       }
     }, []);
 
@@ -158,7 +187,7 @@ class _ChatState extends _BaseTabState<_Chat> {
           const VerticalDivider(width: 1),
           Expanded(
             child: Scaffold(
-              body: currentOpenChat.value ??
+              body: chatWidget.value ??
                   const Center(child: Text('No open chats')),
             ),
           ),
