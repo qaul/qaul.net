@@ -28,7 +28,7 @@ enum Qaul_Rpc_Users_Connectivity: SwiftProtobuf.Enum {
   /// and reachable for synchronous communication.
   case online // = 0
 
-  /// The node which hosts the user account is online 
+  /// The node which hosts the user account is online
   /// but the user is not actively connected to it.
   /// Messages can sent and will reach the node.
   case reachable // = 1
@@ -194,23 +194,27 @@ struct Qaul_Rpc_Users_UserEntry {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// user name
   var name: String = String()
 
+  /// user ID (38 Byte PeerID)
   var id: Data = Data()
 
-  var idBase58: String = String()
+  /// direct chat conversation ID
+  ///
+  /// this is a predictable 16 bytes UUID
+  var conversationID: Data = Data()
 
-  /// protobuf encoded public key
-  var key: Data = Data()
-
-  var keyType: String = String()
-
+  /// base58 string of public key
   var keyBase58: String = String()
 
+  /// reachability of the user: online | reachable | offline
   var connectivity: Qaul_Rpc_Users_Connectivity = .online
 
+  /// user has been verified
   var verified: Bool = false
 
+  /// user is blocked
   var blocked: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -411,9 +415,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "name"),
     2: .same(proto: "id"),
-    4: .standard(proto: "id_base58"),
-    5: .same(proto: "key"),
-    6: .standard(proto: "key_type"),
+    3: .standard(proto: "conversation_id"),
     7: .standard(proto: "key_base58"),
     8: .same(proto: "connectivity"),
     9: .same(proto: "verified"),
@@ -428,9 +430,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.id) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.idBase58) }()
-      case 5: try { try decoder.decodeSingularBytesField(value: &self.key) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.keyType) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.keyBase58) }()
       case 8: try { try decoder.decodeSingularEnumField(value: &self.connectivity) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.verified) }()
@@ -447,14 +447,8 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.id.isEmpty {
       try visitor.visitSingularBytesField(value: self.id, fieldNumber: 2)
     }
-    if !self.idBase58.isEmpty {
-      try visitor.visitSingularStringField(value: self.idBase58, fieldNumber: 4)
-    }
-    if !self.key.isEmpty {
-      try visitor.visitSingularBytesField(value: self.key, fieldNumber: 5)
-    }
-    if !self.keyType.isEmpty {
-      try visitor.visitSingularStringField(value: self.keyType, fieldNumber: 6)
+    if !self.conversationID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 3)
     }
     if !self.keyBase58.isEmpty {
       try visitor.visitSingularStringField(value: self.keyBase58, fieldNumber: 7)
@@ -474,9 +468,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static func ==(lhs: Qaul_Rpc_Users_UserEntry, rhs: Qaul_Rpc_Users_UserEntry) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.id != rhs.id {return false}
-    if lhs.idBase58 != rhs.idBase58 {return false}
-    if lhs.key != rhs.key {return false}
-    if lhs.keyType != rhs.keyType {return false}
+    if lhs.conversationID != rhs.conversationID {return false}
     if lhs.keyBase58 != rhs.keyBase58 {return false}
     if lhs.connectivity != rhs.connectivity {return false}
     if lhs.verified != rhs.verified {return false}

@@ -76,9 +76,7 @@ PROTOBUF_CONSTEXPR UserEntry::UserEntry(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.key_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.key_type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.conversation_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.key_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.connectivity_)*/0
   , /*decltype(_impl_.verified_)*/false
@@ -139,9 +137,7 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.name_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_type_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.conversation_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.key_base58_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.connectivity_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.verified_),
@@ -173,17 +169,16 @@ const char descriptor_table_protodef_router_2fusers_2eproto[] PROTOBUF_SECTION_V
   ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use"
   "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis"
   "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt"
-  "ry\"\302\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001"
-  "(\014\022\021\n\tid_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010ke"
-  "y_type\030\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014conn"
-  "ectivity\030\010 \001(\0162\034.qaul.rpc.users.Connecti"
-  "vity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*"
-  "6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tReachable"
-  "\020\001\022\013\n\007Offline\020\002b\006proto3"
+  "ry\"\251\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001"
+  "(\014\022\027\n\017conversation_id\030\003 \001(\014\022\022\n\nkey_base5"
+  "8\030\007 \001(\t\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc"
+  ".users.Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n"
+  "\007blocked\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online"
+  "\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_router_2fusers_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2fusers_2eproto = {
-    false, false, 623, descriptor_table_protodef_router_2fusers_2eproto,
+    false, false, 598, descriptor_table_protodef_router_2fusers_2eproto,
     "router/users.proto",
     &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 5,
     schemas, file_default_instances, TableStruct_router_2fusers_2eproto::offsets,
@@ -919,9 +914,7 @@ UserEntry::UserEntry(const UserEntry& from)
   new (&_impl_) Impl_{
       decltype(_impl_.name_){}
     , decltype(_impl_.id_){}
-    , decltype(_impl_.id_base58_){}
-    , decltype(_impl_.key_){}
-    , decltype(_impl_.key_type_){}
+    , decltype(_impl_.conversation_id_){}
     , decltype(_impl_.key_base58_){}
     , decltype(_impl_.connectivity_){}
     , decltype(_impl_.verified_){}
@@ -945,28 +938,12 @@ UserEntry::UserEntry(const UserEntry& from)
     _this->_impl_.id_.Set(from._internal_id(), 
       _this->GetArenaForAllocation());
   }
-  _impl_.id_base58_.InitDefault();
+  _impl_.conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_base58_.Set("", GetArenaForAllocation());
+    _impl_.conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_id_base58().empty()) {
-    _this->_impl_.id_base58_.Set(from._internal_id_base58(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.key_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_key().empty()) {
-    _this->_impl_.key_.Set(from._internal_key(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.key_type_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_type_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_key_type().empty()) {
-    _this->_impl_.key_type_.Set(from._internal_key_type(), 
+  if (!from._internal_conversation_id().empty()) {
+    _this->_impl_.conversation_id_.Set(from._internal_conversation_id(), 
       _this->GetArenaForAllocation());
   }
   _impl_.key_base58_.InitDefault();
@@ -990,9 +967,7 @@ inline void UserEntry::SharedCtor(
   new (&_impl_) Impl_{
       decltype(_impl_.name_){}
     , decltype(_impl_.id_){}
-    , decltype(_impl_.id_base58_){}
-    , decltype(_impl_.key_){}
-    , decltype(_impl_.key_type_){}
+    , decltype(_impl_.conversation_id_){}
     , decltype(_impl_.key_base58_){}
     , decltype(_impl_.connectivity_){0}
     , decltype(_impl_.verified_){false}
@@ -1007,17 +982,9 @@ inline void UserEntry::SharedCtor(
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.id_base58_.InitDefault();
+  _impl_.conversation_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_base58_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.key_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.key_type_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_type_.Set("", GetArenaForAllocation());
+    _impl_.conversation_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.key_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -1038,9 +1005,7 @@ inline void UserEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.name_.Destroy();
   _impl_.id_.Destroy();
-  _impl_.id_base58_.Destroy();
-  _impl_.key_.Destroy();
-  _impl_.key_type_.Destroy();
+  _impl_.conversation_id_.Destroy();
   _impl_.key_base58_.Destroy();
 }
 
@@ -1056,9 +1021,7 @@ void UserEntry::Clear() {
 
   _impl_.name_.ClearToEmpty();
   _impl_.id_.ClearToEmpty();
-  _impl_.id_base58_.ClearToEmpty();
-  _impl_.key_.ClearToEmpty();
-  _impl_.key_type_.ClearToEmpty();
+  _impl_.conversation_id_.ClearToEmpty();
   _impl_.key_base58_.ClearToEmpty();
   ::memset(&_impl_.connectivity_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&_impl_.blocked_) -
@@ -1091,32 +1054,12 @@ const char* UserEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
         } else
           goto handle_unusual;
         continue;
-      // string id_base58 = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          auto str = _internal_mutable_id_base58();
+      // bytes conversation_id = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          auto str = _internal_mutable_conversation_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.users.UserEntry.id_base58"));
-        } else
-          goto handle_unusual;
-        continue;
-      // bytes key = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
-          auto str = _internal_mutable_key();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // string key_type = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
-          auto str = _internal_mutable_key_type();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.users.UserEntry.key_type"));
         } else
           goto handle_unusual;
         continue;
@@ -1200,30 +1143,10 @@ uint8_t* UserEntry::_InternalSerialize(
         2, this->_internal_id(), target);
   }
 
-  // string id_base58 = 4;
-  if (!this->_internal_id_base58().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_id_base58().data(), static_cast<int>(this->_internal_id_base58().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.users.UserEntry.id_base58");
-    target = stream->WriteStringMaybeAliased(
-        4, this->_internal_id_base58(), target);
-  }
-
-  // bytes key = 5;
-  if (!this->_internal_key().empty()) {
+  // bytes conversation_id = 3;
+  if (!this->_internal_conversation_id().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        5, this->_internal_key(), target);
-  }
-
-  // string key_type = 6;
-  if (!this->_internal_key_type().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_key_type().data(), static_cast<int>(this->_internal_key_type().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.users.UserEntry.key_type");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_key_type(), target);
+        3, this->_internal_conversation_id(), target);
   }
 
   // string key_base58 = 7;
@@ -1285,25 +1208,11 @@ size_t UserEntry::ByteSizeLong() const {
         this->_internal_id());
   }
 
-  // string id_base58 = 4;
-  if (!this->_internal_id_base58().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_id_base58());
-  }
-
-  // bytes key = 5;
-  if (!this->_internal_key().empty()) {
+  // bytes conversation_id = 3;
+  if (!this->_internal_conversation_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_key());
-  }
-
-  // string key_type = 6;
-  if (!this->_internal_key_type().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_key_type());
+        this->_internal_conversation_id());
   }
 
   // string key_base58 = 7;
@@ -1353,14 +1262,8 @@ void UserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROT
   if (!from._internal_id().empty()) {
     _this->_internal_set_id(from._internal_id());
   }
-  if (!from._internal_id_base58().empty()) {
-    _this->_internal_set_id_base58(from._internal_id_base58());
-  }
-  if (!from._internal_key().empty()) {
-    _this->_internal_set_key(from._internal_key());
-  }
-  if (!from._internal_key_type().empty()) {
-    _this->_internal_set_key_type(from._internal_key_type());
+  if (!from._internal_conversation_id().empty()) {
+    _this->_internal_set_conversation_id(from._internal_conversation_id());
   }
   if (!from._internal_key_base58().empty()) {
     _this->_internal_set_key_base58(from._internal_key_base58());
@@ -1402,16 +1305,8 @@ void UserEntry::InternalSwap(UserEntry* other) {
       &other->_impl_.id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.id_base58_, lhs_arena,
-      &other->_impl_.id_base58_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.key_, lhs_arena,
-      &other->_impl_.key_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.key_type_, lhs_arena,
-      &other->_impl_.key_type_, rhs_arena
+      &_impl_.conversation_id_, lhs_arena,
+      &other->_impl_.conversation_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.key_base58_, lhs_arena,

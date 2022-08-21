@@ -232,9 +232,7 @@ class UserEntry extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idBase58')
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key', $pb.PbFieldType.OY)
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyType')
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyBase58')
     ..e<Connectivity>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
     ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verified')
@@ -246,9 +244,7 @@ class UserEntry extends $pb.GeneratedMessage {
   factory UserEntry({
     $core.String? name,
     $core.List<$core.int>? id,
-    $core.String? idBase58,
-    $core.List<$core.int>? key,
-    $core.String? keyType,
+    $core.List<$core.int>? conversationId,
     $core.String? keyBase58,
     Connectivity? connectivity,
     $core.bool? verified,
@@ -261,14 +257,8 @@ class UserEntry extends $pb.GeneratedMessage {
     if (id != null) {
       _result.id = id;
     }
-    if (idBase58 != null) {
-      _result.idBase58 = idBase58;
-    }
-    if (key != null) {
-      _result.key = key;
-    }
-    if (keyType != null) {
-      _result.keyType = keyType;
+    if (conversationId != null) {
+      _result.conversationId = conversationId;
     }
     if (keyBase58 != null) {
       _result.keyBase58 = keyBase58;
@@ -323,66 +313,48 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearId() => clearField(2);
 
-  @$pb.TagNumber(4)
-  $core.String get idBase58 => $_getSZ(2);
-  @$pb.TagNumber(4)
-  set idBase58($core.String v) { $_setString(2, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasIdBase58() => $_has(2);
-  @$pb.TagNumber(4)
-  void clearIdBase58() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.List<$core.int> get key => $_getN(3);
-  @$pb.TagNumber(5)
-  set key($core.List<$core.int> v) { $_setBytes(3, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasKey() => $_has(3);
-  @$pb.TagNumber(5)
-  void clearKey() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.String get keyType => $_getSZ(4);
-  @$pb.TagNumber(6)
-  set keyType($core.String v) { $_setString(4, v); }
-  @$pb.TagNumber(6)
-  $core.bool hasKeyType() => $_has(4);
-  @$pb.TagNumber(6)
-  void clearKeyType() => clearField(6);
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get conversationId => $_getN(2);
+  @$pb.TagNumber(3)
+  set conversationId($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasConversationId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearConversationId() => clearField(3);
 
   @$pb.TagNumber(7)
-  $core.String get keyBase58 => $_getSZ(5);
+  $core.String get keyBase58 => $_getSZ(3);
   @$pb.TagNumber(7)
-  set keyBase58($core.String v) { $_setString(5, v); }
+  set keyBase58($core.String v) { $_setString(3, v); }
   @$pb.TagNumber(7)
-  $core.bool hasKeyBase58() => $_has(5);
+  $core.bool hasKeyBase58() => $_has(3);
   @$pb.TagNumber(7)
   void clearKeyBase58() => clearField(7);
 
   @$pb.TagNumber(8)
-  Connectivity get connectivity => $_getN(6);
+  Connectivity get connectivity => $_getN(4);
   @$pb.TagNumber(8)
   set connectivity(Connectivity v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasConnectivity() => $_has(6);
+  $core.bool hasConnectivity() => $_has(4);
   @$pb.TagNumber(8)
   void clearConnectivity() => clearField(8);
 
   @$pb.TagNumber(9)
-  $core.bool get verified => $_getBF(7);
+  $core.bool get verified => $_getBF(5);
   @$pb.TagNumber(9)
-  set verified($core.bool v) { $_setBool(7, v); }
+  set verified($core.bool v) { $_setBool(5, v); }
   @$pb.TagNumber(9)
-  $core.bool hasVerified() => $_has(7);
+  $core.bool hasVerified() => $_has(5);
   @$pb.TagNumber(9)
   void clearVerified() => clearField(9);
 
   @$pb.TagNumber(10)
-  $core.bool get blocked => $_getBF(8);
+  $core.bool get blocked => $_getBF(6);
   @$pb.TagNumber(10)
-  set blocked($core.bool v) { $_setBool(8, v); }
+  set blocked($core.bool v) { $_setBool(6, v); }
   @$pb.TagNumber(10)
-  $core.bool hasBlocked() => $_has(8);
+  $core.bool hasBlocked() => $_has(6);
   @$pb.TagNumber(10)
   void clearBlocked() => clearField(10);
 }

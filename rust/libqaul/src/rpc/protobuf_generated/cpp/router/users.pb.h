@@ -862,9 +862,7 @@ class UserEntry final :
   enum : int {
     kNameFieldNumber = 1,
     kIdFieldNumber = 2,
-    kIdBase58FieldNumber = 4,
-    kKeyFieldNumber = 5,
-    kKeyTypeFieldNumber = 6,
+    kConversationIdFieldNumber = 3,
     kKeyBase58FieldNumber = 7,
     kConnectivityFieldNumber = 8,
     kVerifiedFieldNumber = 9,
@@ -898,46 +896,18 @@ class UserEntry final :
   std::string* _internal_mutable_id();
   public:
 
-  // string id_base58 = 4;
-  void clear_id_base58();
-  const std::string& id_base58() const;
+  // bytes conversation_id = 3;
+  void clear_conversation_id();
+  const std::string& conversation_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_id_base58(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_id_base58();
-  PROTOBUF_NODISCARD std::string* release_id_base58();
-  void set_allocated_id_base58(std::string* id_base58);
+  void set_conversation_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_conversation_id();
+  PROTOBUF_NODISCARD std::string* release_conversation_id();
+  void set_allocated_conversation_id(std::string* conversation_id);
   private:
-  const std::string& _internal_id_base58() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_id_base58(const std::string& value);
-  std::string* _internal_mutable_id_base58();
-  public:
-
-  // bytes key = 5;
-  void clear_key();
-  const std::string& key() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_key(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_key();
-  PROTOBUF_NODISCARD std::string* release_key();
-  void set_allocated_key(std::string* key);
-  private:
-  const std::string& _internal_key() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_key(const std::string& value);
-  std::string* _internal_mutable_key();
-  public:
-
-  // string key_type = 6;
-  void clear_key_type();
-  const std::string& key_type() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_key_type(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_key_type();
-  PROTOBUF_NODISCARD std::string* release_key_type();
-  void set_allocated_key_type(std::string* key_type);
-  private:
-  const std::string& _internal_key_type() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_key_type(const std::string& value);
-  std::string* _internal_mutable_key_type();
+  const std::string& _internal_conversation_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
+  std::string* _internal_mutable_conversation_id();
   public:
 
   // string key_base58 = 7;
@@ -991,9 +961,7 @@ class UserEntry final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_base58_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_type_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_base58_;
     int connectivity_;
     bool verified_;
@@ -1475,154 +1443,54 @@ inline void UserEntry::set_allocated_id(std::string* id) {
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.id)
 }
 
-// string id_base58 = 4;
-inline void UserEntry::clear_id_base58() {
-  _impl_.id_base58_.ClearToEmpty();
+// bytes conversation_id = 3;
+inline void UserEntry::clear_conversation_id() {
+  _impl_.conversation_id_.ClearToEmpty();
 }
-inline const std::string& UserEntry::id_base58() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.id_base58)
-  return _internal_id_base58();
+inline const std::string& UserEntry::conversation_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.conversation_id)
+  return _internal_conversation_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void UserEntry::set_id_base58(ArgT0&& arg0, ArgT... args) {
+void UserEntry::set_conversation_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.id_base58_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.id_base58)
+ _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.conversation_id)
 }
-inline std::string* UserEntry::mutable_id_base58() {
-  std::string* _s = _internal_mutable_id_base58();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.id_base58)
+inline std::string* UserEntry::mutable_conversation_id() {
+  std::string* _s = _internal_mutable_conversation_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.conversation_id)
   return _s;
 }
-inline const std::string& UserEntry::_internal_id_base58() const {
-  return _impl_.id_base58_.Get();
+inline const std::string& UserEntry::_internal_conversation_id() const {
+  return _impl_.conversation_id_.Get();
 }
-inline void UserEntry::_internal_set_id_base58(const std::string& value) {
+inline void UserEntry::_internal_set_conversation_id(const std::string& value) {
   
-  _impl_.id_base58_.Set(value, GetArenaForAllocation());
+  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* UserEntry::_internal_mutable_id_base58() {
+inline std::string* UserEntry::_internal_mutable_conversation_id() {
   
-  return _impl_.id_base58_.Mutable(GetArenaForAllocation());
+  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* UserEntry::release_id_base58() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.id_base58)
-  return _impl_.id_base58_.Release();
+inline std::string* UserEntry::release_conversation_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.conversation_id)
+  return _impl_.conversation_id_.Release();
 }
-inline void UserEntry::set_allocated_id_base58(std::string* id_base58) {
-  if (id_base58 != nullptr) {
+inline void UserEntry::set_allocated_conversation_id(std::string* conversation_id) {
+  if (conversation_id != nullptr) {
     
   } else {
     
   }
-  _impl_.id_base58_.SetAllocated(id_base58, GetArenaForAllocation());
+  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.id_base58_.IsDefault()) {
-    _impl_.id_base58_.Set("", GetArenaForAllocation());
+  if (_impl_.conversation_id_.IsDefault()) {
+    _impl_.conversation_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.id_base58)
-}
-
-// bytes key = 5;
-inline void UserEntry::clear_key() {
-  _impl_.key_.ClearToEmpty();
-}
-inline const std::string& UserEntry::key() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.key)
-  return _internal_key();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void UserEntry::set_key(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.key_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.key)
-}
-inline std::string* UserEntry::mutable_key() {
-  std::string* _s = _internal_mutable_key();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.key)
-  return _s;
-}
-inline const std::string& UserEntry::_internal_key() const {
-  return _impl_.key_.Get();
-}
-inline void UserEntry::_internal_set_key(const std::string& value) {
-  
-  _impl_.key_.Set(value, GetArenaForAllocation());
-}
-inline std::string* UserEntry::_internal_mutable_key() {
-  
-  return _impl_.key_.Mutable(GetArenaForAllocation());
-}
-inline std::string* UserEntry::release_key() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.key)
-  return _impl_.key_.Release();
-}
-inline void UserEntry::set_allocated_key(std::string* key) {
-  if (key != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.key_.SetAllocated(key, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.key_.IsDefault()) {
-    _impl_.key_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.key)
-}
-
-// string key_type = 6;
-inline void UserEntry::clear_key_type() {
-  _impl_.key_type_.ClearToEmpty();
-}
-inline const std::string& UserEntry::key_type() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.key_type)
-  return _internal_key_type();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void UserEntry::set_key_type(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.key_type_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.key_type)
-}
-inline std::string* UserEntry::mutable_key_type() {
-  std::string* _s = _internal_mutable_key_type();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.key_type)
-  return _s;
-}
-inline const std::string& UserEntry::_internal_key_type() const {
-  return _impl_.key_type_.Get();
-}
-inline void UserEntry::_internal_set_key_type(const std::string& value) {
-  
-  _impl_.key_type_.Set(value, GetArenaForAllocation());
-}
-inline std::string* UserEntry::_internal_mutable_key_type() {
-  
-  return _impl_.key_type_.Mutable(GetArenaForAllocation());
-}
-inline std::string* UserEntry::release_key_type() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.key_type)
-  return _impl_.key_type_.Release();
-}
-inline void UserEntry::set_allocated_key_type(std::string* key_type) {
-  if (key_type != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.key_type_.SetAllocated(key_type, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.key_type_.IsDefault()) {
-    _impl_.key_type_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.key_type)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.conversation_id)
 }
 
 // string key_base58 = 7;

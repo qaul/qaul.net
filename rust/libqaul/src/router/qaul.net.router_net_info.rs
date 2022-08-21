@@ -141,3 +141,16 @@ pub enum RouterInfoModule {
     /// Message is a FeedResponseMessage
     FeedResponse = 2,
 }
+impl RouterInfoModule {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            RouterInfoModule::RouterInfo => "ROUTER_INFO",
+            RouterInfoModule::FeedRequest => "FEED_REQUEST",
+            RouterInfoModule::FeedResponse => "FEED_RESPONSE",
+        }
+    }
+}

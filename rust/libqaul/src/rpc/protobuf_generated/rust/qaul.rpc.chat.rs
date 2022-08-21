@@ -157,6 +157,21 @@ pub enum ContentType {
     /// group event
     GroupEvent = 4,
 }
+impl ContentType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            ContentType::Chat => "chat",
+            ContentType::Group => "group",
+            ContentType::File => "file",
+            ContentType::Rtc => "rtc",
+            ContentType::GroupEvent => "group_event",
+        }
+    }
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum MessageStatus {
@@ -170,6 +185,20 @@ pub enum MessageStatus {
     /// this option is only used for groups with more then 2 members
     ReceivedByAll = 3,
 }
+impl MessageStatus {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            MessageStatus::Sending => "SENDING",
+            MessageStatus::Sent => "SENT",
+            MessageStatus::Received => "RECEIVED",
+            MessageStatus::ReceivedByAll => "RECEIVED_BY_ALL",
+        }
+    }
+}
 /// the possible group event types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -181,4 +210,17 @@ pub enum GroupEventType {
     GroupJoined = 1,
     /// user left group
     GroupLeft = 2,
+}
+impl GroupEventType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            GroupEventType::None => "NONE",
+            GroupEventType::GroupJoined => "GROUP_JOINED",
+            GroupEventType::GroupLeft => "GROUP_LEFT",
+        }
+    }
 }

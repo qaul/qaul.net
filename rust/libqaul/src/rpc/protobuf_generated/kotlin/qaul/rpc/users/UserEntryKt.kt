@@ -23,6 +23,10 @@ object UserEntryKt {
     internal fun _build(): qaul.rpc.users.UsersOuterClass.UserEntry = _builder.build()
 
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      */
     var name: kotlin.String
@@ -33,6 +37,10 @@ object UserEntryKt {
         _builder.setName(value)
       }
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      */
     fun clearName() {
@@ -40,6 +48,10 @@ object UserEntryKt {
     }
 
     /**
+     * <pre>
+     * user ID (38 Byte PeerID)
+     * </pre>
+     *
      * <code>bytes id = 2;</code>
      */
     var id: com.google.protobuf.ByteString
@@ -50,6 +62,10 @@ object UserEntryKt {
         _builder.setId(value)
       }
     /**
+     * <pre>
+     * user ID (38 Byte PeerID)
+     * </pre>
+     *
      * <code>bytes id = 2;</code>
      */
     fun clearId() {
@@ -57,65 +73,37 @@ object UserEntryKt {
     }
 
     /**
-     * <code>string id_base58 = 4;</code>
+     * <pre>
+     * direct chat conversation ID
+     * this is a predictable 16 bytes UUID
+     * </pre>
+     *
+     * <code>bytes conversation_id = 3;</code>
      */
-    var idBase58: kotlin.String
-      @JvmName("getIdBase58")
-      get() = _builder.getIdBase58()
-      @JvmName("setIdBase58")
+    var conversationId: com.google.protobuf.ByteString
+      @JvmName("getConversationId")
+      get() = _builder.getConversationId()
+      @JvmName("setConversationId")
       set(value) {
-        _builder.setIdBase58(value)
+        _builder.setConversationId(value)
       }
     /**
-     * <code>string id_base58 = 4;</code>
+     * <pre>
+     * direct chat conversation ID
+     * this is a predictable 16 bytes UUID
+     * </pre>
+     *
+     * <code>bytes conversation_id = 3;</code>
      */
-    fun clearIdBase58() {
-      _builder.clearIdBase58()
+    fun clearConversationId() {
+      _builder.clearConversationId()
     }
 
     /**
      * <pre>
-     * protobuf encoded public key
+     * base58 string of public key
      * </pre>
      *
-     * <code>bytes key = 5;</code>
-     */
-    var key: com.google.protobuf.ByteString
-      @JvmName("getKey")
-      get() = _builder.getKey()
-      @JvmName("setKey")
-      set(value) {
-        _builder.setKey(value)
-      }
-    /**
-     * <pre>
-     * protobuf encoded public key
-     * </pre>
-     *
-     * <code>bytes key = 5;</code>
-     */
-    fun clearKey() {
-      _builder.clearKey()
-    }
-
-    /**
-     * <code>string key_type = 6;</code>
-     */
-    var keyType: kotlin.String
-      @JvmName("getKeyType")
-      get() = _builder.getKeyType()
-      @JvmName("setKeyType")
-      set(value) {
-        _builder.setKeyType(value)
-      }
-    /**
-     * <code>string key_type = 6;</code>
-     */
-    fun clearKeyType() {
-      _builder.clearKeyType()
-    }
-
-    /**
      * <code>string key_base58 = 7;</code>
      */
     var keyBase58: kotlin.String
@@ -126,6 +114,10 @@ object UserEntryKt {
         _builder.setKeyBase58(value)
       }
     /**
+     * <pre>
+     * base58 string of public key
+     * </pre>
+     *
      * <code>string key_base58 = 7;</code>
      */
     fun clearKeyBase58() {
@@ -133,6 +125,10 @@ object UserEntryKt {
     }
 
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      */
      var connectivity: qaul.rpc.users.UsersOuterClass.Connectivity
@@ -143,6 +139,10 @@ object UserEntryKt {
         _builder.setConnectivity(value)
       }
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      */
     fun clearConnectivity() {
@@ -150,6 +150,10 @@ object UserEntryKt {
     }
 
     /**
+     * <pre>
+     * user has been verified
+     * </pre>
+     *
      * <code>bool verified = 9;</code>
      */
     var verified: kotlin.Boolean
@@ -160,6 +164,10 @@ object UserEntryKt {
         _builder.setVerified(value)
       }
     /**
+     * <pre>
+     * user has been verified
+     * </pre>
+     *
      * <code>bool verified = 9;</code>
      */
     fun clearVerified() {
@@ -167,6 +175,10 @@ object UserEntryKt {
     }
 
     /**
+     * <pre>
+     * user is blocked
+     * </pre>
+     *
      * <code>bool blocked = 10;</code>
      */
     var blocked: kotlin.Boolean
@@ -177,6 +189,10 @@ object UserEntryKt {
         _builder.setBlocked(value)
       }
     /**
+     * <pre>
+     * user is blocked
+     * </pre>
+     *
      * <code>bool blocked = 10;</code>
      */
     fun clearBlocked() {

@@ -35,23 +35,27 @@ pub struct UserList {
 /// user entry
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserEntry {
+    /// user name
     #[prost(string, tag="1")]
     pub name: ::prost::alloc::string::String,
+    /// user ID (38 Byte PeerID)
     #[prost(bytes="vec", tag="2")]
     pub id: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag="4")]
-    pub id_base58: ::prost::alloc::string::String,
-    /// protobuf encoded public key
-    #[prost(bytes="vec", tag="5")]
-    pub key: ::prost::alloc::vec::Vec<u8>,
-    #[prost(string, tag="6")]
-    pub key_type: ::prost::alloc::string::String,
+    /// direct chat conversation ID
+    ///
+    /// this is a predictable 16 bytes UUID
+    #[prost(bytes="vec", tag="3")]
+    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    /// base58 string of public key
     #[prost(string, tag="7")]
     pub key_base58: ::prost::alloc::string::String,
+    /// reachability of the user: online | reachable | offline
     #[prost(enumeration="Connectivity", tag="8")]
     pub connectivity: i32,
+    /// user has been verified
     #[prost(bool, tag="9")]
     pub verified: bool,
+    /// user is blocked
     #[prost(bool, tag="10")]
     pub blocked: bool,
 }
@@ -62,10 +66,23 @@ pub enum Connectivity {
     /// The user is actively connected to the node
     /// and reachable for synchronous communication.
     Online = 0,
-    /// The node which hosts the user account is online 
+    /// The node which hosts the user account is online
     /// but the user is not actively connected to it.
     /// Messages can sent and will reach the node.
     Reachable = 1,
     /// The user is currently not reachable.
     Offline = 2,
+}
+impl Connectivity {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Connectivity::Online => "Online",
+            Connectivity::Reachable => "Reachable",
+            Connectivity::Offline => "Offline",
+        }
+    }
 }
