@@ -66,9 +66,7 @@ const UserEntry$json = const {
   '2': const [
     const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'id', '3': 2, '4': 1, '5': 12, '10': 'id'},
-    const {'1': 'id_base58', '3': 4, '4': 1, '5': 9, '10': 'idBase58'},
-    const {'1': 'key', '3': 5, '4': 1, '5': 12, '10': 'key'},
-    const {'1': 'key_type', '3': 6, '4': 1, '5': 9, '10': 'keyType'},
+    const {'1': 'conversation_id', '3': 3, '4': 1, '5': 12, '10': 'conversationId'},
     const {'1': 'key_base58', '3': 7, '4': 1, '5': 9, '10': 'keyBase58'},
     const {'1': 'connectivity', '3': 8, '4': 1, '5': 14, '6': '.qaul.rpc.users.Connectivity', '10': 'connectivity'},
     const {'1': 'verified', '3': 9, '4': 1, '5': 8, '10': 'verified'},
@@ -77,4 +75,4 @@ const UserEntry$json = const {
 };
 
 /// Descriptor for `UserEntry`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userEntryDescriptor = $convert.base64Decode('CglVc2VyRW50cnkSEgoEbmFtZRgBIAEoCVIEbmFtZRIOCgJpZBgCIAEoDFICaWQSGwoJaWRfYmFzZTU4GAQgASgJUghpZEJhc2U1OBIQCgNrZXkYBSABKAxSA2tleRIZCghrZXlfdHlwZRgGIAEoCVIHa2V5VHlwZRIdCgprZXlfYmFzZTU4GAcgASgJUglrZXlCYXNlNTgSQAoMY29ubmVjdGl2aXR5GAggASgOMhwucWF1bC5ycGMudXNlcnMuQ29ubmVjdGl2aXR5Ugxjb25uZWN0aXZpdHkSGgoIdmVyaWZpZWQYCSABKAhSCHZlcmlmaWVkEhgKB2Jsb2NrZWQYCiABKAhSB2Jsb2NrZWQ=');
+final $typed_data.Uint8List userEntryDescriptor = $convert.base64Decode('CglVc2VyRW50cnkSEgoEbmFtZRgBIAEoCVIEbmFtZRIOCgJpZBgCIAEoDFICaWQSJwoPY29udmVyc2F0aW9uX2lkGAMgASgMUg5jb252ZXJzYXRpb25JZBIdCgprZXlfYmFzZTU4GAcgASgJUglrZXlCYXNlNTgSQAoMY29ubmVjdGl2aXR5GAggASgOMhwucWF1bC5ycGMudXNlcnMuQ29ubmVjdGl2aXR5Ugxjb25uZWN0aXZpdHkSGgoIdmVyaWZpZWQYCSABKAhSCHZlcmlmaWVkEhgKB2Jsb2NrZWQYCiABKAhSB2Jsb2NrZWQ=');

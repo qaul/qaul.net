@@ -34,7 +34,7 @@ public final class UsersOuterClass {
     Online(0),
     /**
      * <pre>
-     * The node which hosts the user account is online 
+     * The node which hosts the user account is online
      * but the user is not actively connected to it.
      * Messages can sent and will reach the node.
      * </pre>
@@ -64,7 +64,7 @@ public final class UsersOuterClass {
     public static final int Online_VALUE = 0;
     /**
      * <pre>
-     * The node which hosts the user account is online 
+     * The node which hosts the user account is online
      * but the user is not actively connected to it.
      * Messages can sent and will reach the node.
      * </pre>
@@ -3248,11 +3248,19 @@ public final class UsersOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      * @return The name.
      */
     java.lang.String getName();
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      * @return The bytes for name.
      */
@@ -3260,51 +3268,40 @@ public final class UsersOuterClass {
         getNameBytes();
 
     /**
+     * <pre>
+     * user ID (38 Byte PeerID)
+     * </pre>
+     *
      * <code>bytes id = 2;</code>
      * @return The id.
      */
     com.google.protobuf.ByteString getId();
 
     /**
-     * <code>string id_base58 = 4;</code>
-     * @return The idBase58.
+     * <pre>
+     * direct chat conversation ID
+     * this is a predictable 16 bytes UUID
+     * </pre>
+     *
+     * <code>bytes conversation_id = 3;</code>
+     * @return The conversationId.
      */
-    java.lang.String getIdBase58();
-    /**
-     * <code>string id_base58 = 4;</code>
-     * @return The bytes for idBase58.
-     */
-    com.google.protobuf.ByteString
-        getIdBase58Bytes();
+    com.google.protobuf.ByteString getConversationId();
 
     /**
      * <pre>
-     * protobuf encoded public key
+     * base58 string of public key
      * </pre>
      *
-     * <code>bytes key = 5;</code>
-     * @return The key.
-     */
-    com.google.protobuf.ByteString getKey();
-
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The keyType.
-     */
-    java.lang.String getKeyType();
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The bytes for keyType.
-     */
-    com.google.protobuf.ByteString
-        getKeyTypeBytes();
-
-    /**
      * <code>string key_base58 = 7;</code>
      * @return The keyBase58.
      */
     java.lang.String getKeyBase58();
     /**
+     * <pre>
+     * base58 string of public key
+     * </pre>
+     *
      * <code>string key_base58 = 7;</code>
      * @return The bytes for keyBase58.
      */
@@ -3312,23 +3309,39 @@ public final class UsersOuterClass {
         getKeyBase58Bytes();
 
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      * @return The enum numeric value on the wire for connectivity.
      */
     int getConnectivityValue();
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      * @return The connectivity.
      */
     qaul.rpc.users.UsersOuterClass.Connectivity getConnectivity();
 
     /**
+     * <pre>
+     * user has been verified
+     * </pre>
+     *
      * <code>bool verified = 9;</code>
      * @return The verified.
      */
     boolean getVerified();
 
     /**
+     * <pre>
+     * user is blocked
+     * </pre>
+     *
      * <code>bool blocked = 10;</code>
      * @return The blocked.
      */
@@ -3353,9 +3366,7 @@ public final class UsersOuterClass {
     private UserEntry() {
       name_ = "";
       id_ = com.google.protobuf.ByteString.EMPTY;
-      idBase58_ = "";
-      key_ = com.google.protobuf.ByteString.EMPTY;
-      keyType_ = "";
+      conversationId_ = com.google.protobuf.ByteString.EMPTY;
       keyBase58_ = "";
       connectivity_ = 0;
     }
@@ -3401,21 +3412,9 @@ public final class UsersOuterClass {
               id_ = input.readBytes();
               break;
             }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 26: {
 
-              idBase58_ = s;
-              break;
-            }
-            case 42: {
-
-              key_ = input.readBytes();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              keyType_ = s;
+              conversationId_ = input.readBytes();
               break;
             }
             case 58: {
@@ -3477,6 +3476,10 @@ public final class UsersOuterClass {
     public static final int NAME_FIELD_NUMBER = 1;
     private volatile java.lang.Object name_;
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      * @return The name.
      */
@@ -3494,6 +3497,10 @@ public final class UsersOuterClass {
       }
     }
     /**
+     * <pre>
+     * user name
+     * </pre>
+     *
      * <code>string name = 1;</code>
      * @return The bytes for name.
      */
@@ -3515,6 +3522,10 @@ public final class UsersOuterClass {
     public static final int ID_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString id_;
     /**
+     * <pre>
+     * user ID (38 Byte PeerID)
+     * </pre>
+     *
      * <code>bytes id = 2;</code>
      * @return The id.
      */
@@ -3523,100 +3534,29 @@ public final class UsersOuterClass {
       return id_;
     }
 
-    public static final int ID_BASE58_FIELD_NUMBER = 4;
-    private volatile java.lang.Object idBase58_;
-    /**
-     * <code>string id_base58 = 4;</code>
-     * @return The idBase58.
-     */
-    @java.lang.Override
-    public java.lang.String getIdBase58() {
-      java.lang.Object ref = idBase58_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        idBase58_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string id_base58 = 4;</code>
-     * @return The bytes for idBase58.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getIdBase58Bytes() {
-      java.lang.Object ref = idBase58_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        idBase58_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int KEY_FIELD_NUMBER = 5;
-    private com.google.protobuf.ByteString key_;
+    public static final int CONVERSATION_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString conversationId_;
     /**
      * <pre>
-     * protobuf encoded public key
+     * direct chat conversation ID
+     * this is a predictable 16 bytes UUID
      * </pre>
      *
-     * <code>bytes key = 5;</code>
-     * @return The key.
+     * <code>bytes conversation_id = 3;</code>
+     * @return The conversationId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getKey() {
-      return key_;
-    }
-
-    public static final int KEY_TYPE_FIELD_NUMBER = 6;
-    private volatile java.lang.Object keyType_;
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The keyType.
-     */
-    @java.lang.Override
-    public java.lang.String getKeyType() {
-      java.lang.Object ref = keyType_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        keyType_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string key_type = 6;</code>
-     * @return The bytes for keyType.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKeyTypeBytes() {
-      java.lang.Object ref = keyType_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        keyType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getConversationId() {
+      return conversationId_;
     }
 
     public static final int KEY_BASE58_FIELD_NUMBER = 7;
     private volatile java.lang.Object keyBase58_;
     /**
+     * <pre>
+     * base58 string of public key
+     * </pre>
+     *
      * <code>string key_base58 = 7;</code>
      * @return The keyBase58.
      */
@@ -3634,6 +3574,10 @@ public final class UsersOuterClass {
       }
     }
     /**
+     * <pre>
+     * base58 string of public key
+     * </pre>
+     *
      * <code>string key_base58 = 7;</code>
      * @return The bytes for keyBase58.
      */
@@ -3655,6 +3599,10 @@ public final class UsersOuterClass {
     public static final int CONNECTIVITY_FIELD_NUMBER = 8;
     private int connectivity_;
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      * @return The enum numeric value on the wire for connectivity.
      */
@@ -3662,6 +3610,10 @@ public final class UsersOuterClass {
       return connectivity_;
     }
     /**
+     * <pre>
+     * reachability of the user: online | reachable | offline
+     * </pre>
+     *
      * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
      * @return The connectivity.
      */
@@ -3674,6 +3626,10 @@ public final class UsersOuterClass {
     public static final int VERIFIED_FIELD_NUMBER = 9;
     private boolean verified_;
     /**
+     * <pre>
+     * user has been verified
+     * </pre>
+     *
      * <code>bool verified = 9;</code>
      * @return The verified.
      */
@@ -3685,6 +3641,10 @@ public final class UsersOuterClass {
     public static final int BLOCKED_FIELD_NUMBER = 10;
     private boolean blocked_;
     /**
+     * <pre>
+     * user is blocked
+     * </pre>
+     *
      * <code>bool blocked = 10;</code>
      * @return The blocked.
      */
@@ -3713,14 +3673,8 @@ public final class UsersOuterClass {
       if (!id_.isEmpty()) {
         output.writeBytes(2, id_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, idBase58_);
-      }
-      if (!key_.isEmpty()) {
-        output.writeBytes(5, key_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyType_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, keyType_);
+      if (!conversationId_.isEmpty()) {
+        output.writeBytes(3, conversationId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, keyBase58_);
@@ -3750,15 +3704,9 @@ public final class UsersOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, id_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idBase58_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, idBase58_);
-      }
-      if (!key_.isEmpty()) {
+      if (!conversationId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(5, key_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyType_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, keyType_);
+          .computeBytesSize(3, conversationId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, keyBase58_);
@@ -3794,12 +3742,8 @@ public final class UsersOuterClass {
           .equals(other.getName())) return false;
       if (!getId()
           .equals(other.getId())) return false;
-      if (!getIdBase58()
-          .equals(other.getIdBase58())) return false;
-      if (!getKey()
-          .equals(other.getKey())) return false;
-      if (!getKeyType()
-          .equals(other.getKeyType())) return false;
+      if (!getConversationId()
+          .equals(other.getConversationId())) return false;
       if (!getKeyBase58()
           .equals(other.getKeyBase58())) return false;
       if (connectivity_ != other.connectivity_) return false;
@@ -3822,12 +3766,8 @@ public final class UsersOuterClass {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + getId().hashCode();
-      hash = (37 * hash) + ID_BASE58_FIELD_NUMBER;
-      hash = (53 * hash) + getIdBase58().hashCode();
-      hash = (37 * hash) + KEY_FIELD_NUMBER;
-      hash = (53 * hash) + getKey().hashCode();
-      hash = (37 * hash) + KEY_TYPE_FIELD_NUMBER;
-      hash = (53 * hash) + getKeyType().hashCode();
+      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getConversationId().hashCode();
       hash = (37 * hash) + KEY_BASE58_FIELD_NUMBER;
       hash = (53 * hash) + getKeyBase58().hashCode();
       hash = (37 * hash) + CONNECTIVITY_FIELD_NUMBER;
@@ -3979,11 +3919,7 @@ public final class UsersOuterClass {
 
         id_ = com.google.protobuf.ByteString.EMPTY;
 
-        idBase58_ = "";
-
-        key_ = com.google.protobuf.ByteString.EMPTY;
-
-        keyType_ = "";
+        conversationId_ = com.google.protobuf.ByteString.EMPTY;
 
         keyBase58_ = "";
 
@@ -4021,9 +3957,7 @@ public final class UsersOuterClass {
         qaul.rpc.users.UsersOuterClass.UserEntry result = new qaul.rpc.users.UsersOuterClass.UserEntry(this);
         result.name_ = name_;
         result.id_ = id_;
-        result.idBase58_ = idBase58_;
-        result.key_ = key_;
-        result.keyType_ = keyType_;
+        result.conversationId_ = conversationId_;
         result.keyBase58_ = keyBase58_;
         result.connectivity_ = connectivity_;
         result.verified_ = verified_;
@@ -4083,16 +4017,8 @@ public final class UsersOuterClass {
         if (other.getId() != com.google.protobuf.ByteString.EMPTY) {
           setId(other.getId());
         }
-        if (!other.getIdBase58().isEmpty()) {
-          idBase58_ = other.idBase58_;
-          onChanged();
-        }
-        if (other.getKey() != com.google.protobuf.ByteString.EMPTY) {
-          setKey(other.getKey());
-        }
-        if (!other.getKeyType().isEmpty()) {
-          keyType_ = other.keyType_;
-          onChanged();
+        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
+          setConversationId(other.getConversationId());
         }
         if (!other.getKeyBase58().isEmpty()) {
           keyBase58_ = other.keyBase58_;
@@ -4138,6 +4064,10 @@ public final class UsersOuterClass {
 
       private java.lang.Object name_ = "";
       /**
+       * <pre>
+       * user name
+       * </pre>
+       *
        * <code>string name = 1;</code>
        * @return The name.
        */
@@ -4154,6 +4084,10 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * user name
+       * </pre>
+       *
        * <code>string name = 1;</code>
        * @return The bytes for name.
        */
@@ -4171,6 +4105,10 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * user name
+       * </pre>
+       *
        * <code>string name = 1;</code>
        * @param value The name to set.
        * @return This builder for chaining.
@@ -4186,6 +4124,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * user name
+       * </pre>
+       *
        * <code>string name = 1;</code>
        * @return This builder for chaining.
        */
@@ -4196,6 +4138,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * user name
+       * </pre>
+       *
        * <code>string name = 1;</code>
        * @param value The bytes for name to set.
        * @return This builder for chaining.
@@ -4214,6 +4160,10 @@ public final class UsersOuterClass {
 
       private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
       /**
+       * <pre>
+       * user ID (38 Byte PeerID)
+       * </pre>
+       *
        * <code>bytes id = 2;</code>
        * @return The id.
        */
@@ -4222,6 +4172,10 @@ public final class UsersOuterClass {
         return id_;
       }
       /**
+       * <pre>
+       * user ID (38 Byte PeerID)
+       * </pre>
+       *
        * <code>bytes id = 2;</code>
        * @param value The id to set.
        * @return This builder for chaining.
@@ -4236,6 +4190,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * user ID (38 Byte PeerID)
+       * </pre>
+       *
        * <code>bytes id = 2;</code>
        * @return This builder for chaining.
        */
@@ -4246,206 +4204,61 @@ public final class UsersOuterClass {
         return this;
       }
 
-      private java.lang.Object idBase58_ = "";
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return The idBase58.
-       */
-      public java.lang.String getIdBase58() {
-        java.lang.Object ref = idBase58_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          idBase58_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return The bytes for idBase58.
-       */
-      public com.google.protobuf.ByteString
-          getIdBase58Bytes() {
-        java.lang.Object ref = idBase58_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          idBase58_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @param value The idBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIdBase58(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        idBase58_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIdBase58() {
-        
-        idBase58_ = getDefaultInstance().getIdBase58();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string id_base58 = 4;</code>
-       * @param value The bytes for idBase58 to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIdBase58Bytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        idBase58_ = value;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * protobuf encoded public key
+       * direct chat conversation ID
+       * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes key = 5;</code>
-       * @return The key.
+       * <code>bytes conversation_id = 3;</code>
+       * @return The conversationId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getKey() {
-        return key_;
+      public com.google.protobuf.ByteString getConversationId() {
+        return conversationId_;
       }
       /**
        * <pre>
-       * protobuf encoded public key
+       * direct chat conversation ID
+       * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes key = 5;</code>
-       * @param value The key to set.
+       * <code>bytes conversation_id = 3;</code>
+       * @param value The conversationId to set.
        * @return This builder for chaining.
        */
-      public Builder setKey(com.google.protobuf.ByteString value) {
+      public Builder setConversationId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        key_ = value;
+        conversationId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * protobuf encoded public key
+       * direct chat conversation ID
+       * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes key = 5;</code>
+       * <code>bytes conversation_id = 3;</code>
        * @return This builder for chaining.
        */
-      public Builder clearKey() {
+      public Builder clearConversationId() {
         
-        key_ = getDefaultInstance().getKey();
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object keyType_ = "";
-      /**
-       * <code>string key_type = 6;</code>
-       * @return The keyType.
-       */
-      public java.lang.String getKeyType() {
-        java.lang.Object ref = keyType_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          keyType_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @return The bytes for keyType.
-       */
-      public com.google.protobuf.ByteString
-          getKeyTypeBytes() {
-        java.lang.Object ref = keyType_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          keyType_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @param value The keyType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyType(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        keyType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKeyType() {
-        
-        keyType_ = getDefaultInstance().getKeyType();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string key_type = 6;</code>
-       * @param value The bytes for keyType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyTypeBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        keyType_ = value;
+        conversationId_ = getDefaultInstance().getConversationId();
         onChanged();
         return this;
       }
 
       private java.lang.Object keyBase58_ = "";
       /**
+       * <pre>
+       * base58 string of public key
+       * </pre>
+       *
        * <code>string key_base58 = 7;</code>
        * @return The keyBase58.
        */
@@ -4462,6 +4275,10 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * base58 string of public key
+       * </pre>
+       *
        * <code>string key_base58 = 7;</code>
        * @return The bytes for keyBase58.
        */
@@ -4479,6 +4296,10 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * base58 string of public key
+       * </pre>
+       *
        * <code>string key_base58 = 7;</code>
        * @param value The keyBase58 to set.
        * @return This builder for chaining.
@@ -4494,6 +4315,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * base58 string of public key
+       * </pre>
+       *
        * <code>string key_base58 = 7;</code>
        * @return This builder for chaining.
        */
@@ -4504,6 +4329,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * base58 string of public key
+       * </pre>
+       *
        * <code>string key_base58 = 7;</code>
        * @param value The bytes for keyBase58 to set.
        * @return This builder for chaining.
@@ -4522,6 +4351,10 @@ public final class UsersOuterClass {
 
       private int connectivity_ = 0;
       /**
+       * <pre>
+       * reachability of the user: online | reachable | offline
+       * </pre>
+       *
        * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
        * @return The enum numeric value on the wire for connectivity.
        */
@@ -4529,6 +4362,10 @@ public final class UsersOuterClass {
         return connectivity_;
       }
       /**
+       * <pre>
+       * reachability of the user: online | reachable | offline
+       * </pre>
+       *
        * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
        * @param value The enum numeric value on the wire for connectivity to set.
        * @return This builder for chaining.
@@ -4540,6 +4377,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * reachability of the user: online | reachable | offline
+       * </pre>
+       *
        * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
        * @return The connectivity.
        */
@@ -4550,6 +4391,10 @@ public final class UsersOuterClass {
         return result == null ? qaul.rpc.users.UsersOuterClass.Connectivity.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * reachability of the user: online | reachable | offline
+       * </pre>
+       *
        * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
        * @param value The connectivity to set.
        * @return This builder for chaining.
@@ -4564,6 +4409,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * reachability of the user: online | reachable | offline
+       * </pre>
+       *
        * <code>.qaul.rpc.users.Connectivity connectivity = 8;</code>
        * @return This builder for chaining.
        */
@@ -4576,6 +4425,10 @@ public final class UsersOuterClass {
 
       private boolean verified_ ;
       /**
+       * <pre>
+       * user has been verified
+       * </pre>
+       *
        * <code>bool verified = 9;</code>
        * @return The verified.
        */
@@ -4584,6 +4437,10 @@ public final class UsersOuterClass {
         return verified_;
       }
       /**
+       * <pre>
+       * user has been verified
+       * </pre>
+       *
        * <code>bool verified = 9;</code>
        * @param value The verified to set.
        * @return This builder for chaining.
@@ -4595,6 +4452,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * user has been verified
+       * </pre>
+       *
        * <code>bool verified = 9;</code>
        * @return This builder for chaining.
        */
@@ -4607,6 +4468,10 @@ public final class UsersOuterClass {
 
       private boolean blocked_ ;
       /**
+       * <pre>
+       * user is blocked
+       * </pre>
+       *
        * <code>bool blocked = 10;</code>
        * @return The blocked.
        */
@@ -4615,6 +4480,10 @@ public final class UsersOuterClass {
         return blocked_;
       }
       /**
+       * <pre>
+       * user is blocked
+       * </pre>
+       *
        * <code>bool blocked = 10;</code>
        * @param value The blocked to set.
        * @return This builder for chaining.
@@ -4626,6 +4495,10 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * user is blocked
+       * </pre>
+       *
        * <code>bool blocked = 10;</code>
        * @return This builder for chaining.
        */
@@ -4731,13 +4604,12 @@ public final class UsersOuterClass {
       ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use" +
       "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis" +
       "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt" +
-      "ry\"\302\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
-      "(\014\022\021\n\tid_base58\030\004 \001(\t\022\013\n\003key\030\005 \001(\014\022\020\n\010ke" +
-      "y_type\030\006 \001(\t\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014conn" +
-      "ectivity\030\010 \001(\0162\034.qaul.rpc.users.Connecti" +
-      "vity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010*" +
-      "6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tReachable" +
-      "\020\001\022\013\n\007Offline\020\002b\006proto3"
+      "ry\"\251\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
+      "(\014\022\027\n\017conversation_id\030\003 \001(\014\022\022\n\nkey_base5" +
+      "8\030\007 \001(\t\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc" +
+      ".users.Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n" +
+      "\007blocked\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online" +
+      "\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4772,7 +4644,7 @@ public final class UsersOuterClass {
     internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserEntry_descriptor,
-        new java.lang.String[] { "Name", "Id", "IdBase58", "Key", "KeyType", "KeyBase58", "Connectivity", "Verified", "Blocked", });
+        new java.lang.String[] { "Name", "Id", "ConversationId", "KeyBase58", "Connectivity", "Verified", "Blocked", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
