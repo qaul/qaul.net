@@ -34,22 +34,22 @@ pub mod group {
         /// group remove member response
         #[prost(message, tag="8")]
         GroupRemoveMemberResponse(super::GroupRemoveMemberResponse),
-        ///group info request
+        /// group info request
         #[prost(message, tag="9")]
         GroupInfoRequest(super::GroupInfoRequest),
-        ///group info response
+        /// group info response
         #[prost(message, tag="10")]
         GroupInfoResponse(super::GroupInfoResponse),
-        ///group reply invite request
+        /// group reply invite request
         #[prost(message, tag="11")]
         GroupReplyInviteRequest(super::GroupReplyInviteRequest),
-        ///group reply invite response
+        /// group reply invite response
         #[prost(message, tag="12")]
         GroupReplyInviteResponse(super::GroupReplyInviteResponse),
-        ///group list request
+        /// group list request
         #[prost(message, tag="13")]
         GroupListRequest(super::GroupListRequest),
-        ///group list response
+        /// group list response
         #[prost(message, tag="14")]
         GroupListResponse(super::GroupListResponse),
         /// group invited
@@ -192,19 +192,19 @@ pub struct GroupInfoRequest {
 /// Group member response
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupMember {
-    ///user id
+    /// user id
     #[prost(bytes="vec", tag="1")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
-    ///role
+    /// role
     #[prost(enumeration="GroupMemberRole", tag="2")]
     pub role: i32,
-    ///joined at
+    /// joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
-    ///state 
+    /// state 
     #[prost(enumeration="GroupMemberState", tag="4")]
     pub state: i32,
-    ///last message index 
+    /// last message index 
     #[prost(uint32, tag="5")]
     pub last_message_index: u32,
 }
@@ -274,17 +274,41 @@ pub struct GroupInvitedResponse {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum GroupMemberState {
-    //// invited
+    /// / invited
     Invited = 0,
-    //// activated
+    /// / activated
     Activated = 1,
+}
+impl GroupMemberState {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            GroupMemberState::Invited => "Invited",
+            GroupMemberState::Activated => "Activated",
+        }
+    }
 }
 /// Group member role
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum GroupMemberRole {
-    //// user
+    /// / user
     User = 0,
-    //// admin
+    /// / admin
     Admin = 255,
+}
+impl GroupMemberRole {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            GroupMemberRole::User => "User",
+            GroupMemberRole::Admin => "Admin",
+        }
+    }
 }

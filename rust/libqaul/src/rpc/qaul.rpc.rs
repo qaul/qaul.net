@@ -43,3 +43,27 @@ pub enum Modules {
     Group = 12,
     Rtc = 13,
 }
+impl Modules {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Modules::None => "NONE",
+            Modules::Rpc => "RPC",
+            Modules::Node => "NODE",
+            Modules::Useraccounts => "USERACCOUNTS",
+            Modules::Users => "USERS",
+            Modules::Router => "ROUTER",
+            Modules::Feed => "FEED",
+            Modules::Connections => "CONNECTIONS",
+            Modules::Debug => "DEBUG",
+            Modules::Chat => "CHAT",
+            Modules::Ble => "BLE",
+            Modules::Fileshare => "FILESHARE",
+            Modules::Group => "GROUP",
+            Modules::Rtc => "RTC",
+        }
+    }
+}

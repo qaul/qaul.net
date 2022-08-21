@@ -78,3 +78,18 @@ pub enum Info {
     /// Error: Address not found
     RemoveErrorNotFound = 6,
 }
+impl Info {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Info::Request => "REQUEST",
+            Info::AddSuccess => "ADD_SUCCESS",
+            Info::AddErrorInvalid => "ADD_ERROR_INVALID",
+            Info::RemoveSuccess => "REMOVE_SUCCESS",
+            Info::RemoveErrorNotFound => "REMOVE_ERROR_NOT_FOUND",
+        }
+    }
+}

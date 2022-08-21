@@ -47,7 +47,7 @@ pub mod envelop_payload {
 /// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Encrypted {
-    ///repeated Data data = 1;
+    /// repeated Data data = 1;
     #[prost(bytes="vec", tag="1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
@@ -225,6 +225,18 @@ pub mod dtn_response {
         /// the message was rejected
         Rejected = 1,
     }
+    impl Type {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Type::Accepted => "ACCEPTED",
+                Type::Rejected => "REJECTED",
+            }
+        }
+    }
     /// the enum definition of the rejection reason
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
@@ -235,5 +247,18 @@ pub mod dtn_response {
         OverallQuota = 1,
         /// user quota reached
         UserQuota = 2,
+    }
+    impl Reason {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Reason::UserNotAccepted => "USER_NOT_ACCEPTED",
+                Reason::OverallQuota => "OVERALL_QUOTA",
+                Reason::UserQuota => "USER_QUOTA",
+            }
+        }
     }
 }

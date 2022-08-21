@@ -41,19 +41,19 @@ pub struct InviteMember {
 /// Group member
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Member {
-    ///user id
+    /// user id
     #[prost(bytes="vec", tag="1")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
-    ///role
+    /// role
     #[prost(int32, tag="2")]
     pub role: i32,
-    ///joined at
+    /// joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
-    ///state 
+    /// state 
     #[prost(int32, tag="4")]
     pub state: i32,
-    ///last message index
+    /// last message index
     #[prost(uint32, tag="5")]
     pub last_message_index: u32,
 }
@@ -66,7 +66,7 @@ pub struct GroupNotify {
     /// group name
     #[prost(string, tag="2")]
     pub group_name: ::prost::alloc::string::String,
-    ///created at
+    /// created at
     #[prost(uint64, tag="3")]
     pub created_at: u64,
     /// creator id
