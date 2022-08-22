@@ -8,8 +8,6 @@ message RtcContainer {
         RtcSessionRequest rtc_session_request = 1;
         // rtc session management
         RtcSessionManagement rtc_session_management = 2;
-        // rtc messasge
-        RtcMessage rtc_message = 3;
     }
 }
 

@@ -125,6 +125,8 @@ impl MessagingProcess {
                         );
                     }
                     Some(super::proto::common_message::Payload::RtcMessage(ref rtc_message)) => {
+                        rtc::Rtc::net(sender_id, receiver_id, &rtc_message.content);
+
                         chat::Chat::save_incoming_message(
                             receiver_id,
                             sender_id,
