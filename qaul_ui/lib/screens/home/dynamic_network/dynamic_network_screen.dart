@@ -63,7 +63,6 @@ class _DynamicNetworkGameEngine extends Forge2DGame
     await super.onLoad();
     final boundaries = _createBoundaries(this);
     boundaries.forEach(add);
-    addContactCallback(_NudgeSiblingsAndNephewsCallback());
 
     final worldCenter = screenToWorld(size * camera.zoom / 2);
     add(_NetworkNodeComponent(
@@ -115,33 +114,8 @@ class _Wall extends BodyComponent {
   }
 }
 
-class _NudgeSiblingsAndNephewsCallback
-    extends ContactCallback<_NetworkNodeComponent, _NetworkNodeComponent> {
-  @override
-  void begin(
-      _NetworkNodeComponent a, _NetworkNodeComponent b, Contact contact) {
-    var nodesInSameLevel = a.level == b.level;
-    var aHitsParentSibling = a.level == b.level + 1 && a.ballParent != b;
-    if (nodesInSameLevel || aHitsParentSibling) {
-      final dist =
-          contact.bodyA.position.distanceToSquared(contact.bodyB.position);
-      final overlap = 0.5 * (dist - a.radius - b.radius);
-
-      final x = a.body.position.x -
-          (overlap * (a.body.position.x - b.body.position.x) / dist);
-      final y = a.body.position.y -
-          (overlap * (a.body.position.y - b.body.position.y) / dist);
-
-      contact.bodyA.applyForce(Vector2(x, y));
-      contact.bodyB.applyForce(Vector2(-x, -y));
-    }
-  }
-
-  @override
-  void end(_NetworkNodeComponent a, _NetworkNodeComponent b, Contact contact) {}
-}
-
-class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
+class _NetworkNodeComponent extends BodyComponent
+    with Tappable, Draggable, ContactCallbacks {
   _NetworkNodeComponent(
     this.node,
     this._position, {
@@ -404,5 +378,29 @@ class _NetworkNodeComponent extends BodyComponent with Tappable, Draggable {
 
     restartTimer();
     return false;
+  }
+
+  // **************************
+  // ContactCallbacks Methods
+  // **************************
+  @override
+  void beginContact(Object other, Contact contact) {
+    if (other is! _NetworkNodeComponent) return;
+
+    var nodesInSameLevel = level == other.level;
+    var aHitsParentSibling = level == other.level + 1 && ballParent != other;
+    if (nodesInSameLevel || aHitsParentSibling) {
+      final dist =
+          contact.bodyA.position.distanceToSquared(contact.bodyB.position);
+      final overlap = 0.5 * (dist - radius - other.radius);
+
+      final x = body.position.x -
+          (overlap * (body.position.x - other.body.position.x) / dist);
+      final y = body.position.y -
+          (overlap * (body.position.y - other.body.position.y) / dist);
+
+      contact.bodyA.applyForce(Vector2(x, y));
+      contact.bodyB.applyForce(Vector2(-x, -y));
+    }
   }
 }
