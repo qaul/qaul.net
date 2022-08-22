@@ -9,13 +9,16 @@ import 'package:logging/logging.dart';
 
 import '../../qaul_rpc.dart';
 import '../generated/services/chat/chat.pb.dart';
+import '../generated/services/filesharing/filesharing_net.pb.dart';
 import '../generated/services/group/group_rpc.pb.dart';
 
 enum ChatRoomUserRole { normal, admin, unknown }
 
 enum InvitationState { sent, received, accepted, unknown }
 
-enum MessageStatus { nothing, sent, received }
+enum MessageStatus { sending, sent, received, receivedByAll }
+
+enum MessageContentType { chat, group, file, rtc, groupEvent }
 
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
@@ -28,7 +31,6 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.lastMessagePreview,
     this.messages,
     this.unreadCount = 0,
-    this.isGroupMessage = false,
     this.createdAt,
     this.members = const [],
   });
@@ -42,7 +44,6 @@ class ChatRoom with EquatableMixin implements Comparable {
   final int unreadCount;
   final MessageContent? lastMessagePreview;
   final List<Message>? messages;
-  final bool isGroupMessage;
   final DateTime? createdAt;
   final List<ChatRoomUser> members;
 
@@ -55,12 +56,13 @@ class ChatRoom with EquatableMixin implements Comparable {
       conversationId: Uint8List.fromList(overview.conversationId),
       name: overview.name,
       lastMessageSenderId: Uint8List.fromList(overview.lastMessageSenderId),
-      lastMessageIndex: overview.lastMessageIndex,
+      lastMessageIndex: overview.lastMessageIndex.toInt(),
       lastMessageTime: DateTime.fromMillisecondsSinceEpoch(
         overview.lastMessageAt.toInt(),
       ),
       unreadCount: overview.unread,
-      lastMessagePreview: MessageContent.fromBuffer(overview.content),
+      lastMessagePreview: MessageContent.fromBuffer(overview.content,
+          MessageContentType.values[overview.contentType.value]),
     );
   }
 
@@ -70,15 +72,6 @@ class ChatRoom with EquatableMixin implements Comparable {
       messages: conversationList.messageList
           .map((e) => Message.fromChatMessage(e))
           .toList(),
-    );
-  }
-
-  factory ChatRoom.fromChatGroupList(ChatGroupList groupList) {
-    return ChatRoom._(
-      conversationId: Uint8List.fromList(groupList.groupId),
-      messages:
-          groupList.messageList.map((e) => Message.fromChatMessage(e)).toList(),
-      isGroupMessage: true,
     );
   }
 
@@ -101,7 +94,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   String get idBase58 => Base58Encode(conversationId);
 
-  bool get isGroupChatRoom => isGroupMessage || members.isNotEmpty;
+  bool get isGroupChatRoom => members.isNotEmpty;
 
   @override
   int compareTo(dynamic other) {
@@ -152,9 +145,7 @@ class ChatRoomUser extends User {
   }) : super(
           name: u.name,
           id: u.id,
-          idBase58: u.idBase58,
-          key: u.key,
-          keyType: u.keyType,
+          conversationId: u.conversationId,
           keyBase58: u.keyBase58,
           availableTypes: u.availableTypes,
           isBlocked: u.isBlocked,
@@ -172,18 +163,16 @@ class ChatRoomUser extends User {
       u,
       roomId: Uint8List.fromList(m.userId),
       joinedAt: DateTime.fromMillisecondsSinceEpoch(m.joinedAt.toInt()),
-      role: m.role == 0
+      role: m.role == GroupMemberRole.User
           ? ChatRoomUserRole.normal
-          : m.role == 255
+          : m.role == GroupMemberRole.Admin
               ? ChatRoomUserRole.admin
               : ChatRoomUserRole.unknown,
-      invitationState: m.state == 1
+      invitationState: m.state == GroupMemberState.Invited
           ? InvitationState.sent
-          : m.state == 2
-              ? InvitationState.received
-              : m.state == 3
-                  ? InvitationState.accepted
-                  : InvitationState.unknown,
+          : m.state == GroupMemberState.Activated
+              ? InvitationState.accepted
+              : InvitationState.unknown,
     );
   }
 
@@ -200,7 +189,7 @@ class Message with EquatableMixin implements Comparable<Message> {
     required this.index,
     required this.sentAt,
     required this.receivedAt,
-    this.status = MessageStatus.nothing,
+    this.status = MessageStatus.sending,
   });
 
   final Uint8List senderId;
@@ -217,9 +206,10 @@ class Message with EquatableMixin implements Comparable<Message> {
     return Message(
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(m.messageId),
-      content: MessageContent.fromBuffer(m.content),
-      index: m.index,
-      status: MessageStatus.values[m.status],
+      content: MessageContent.fromBuffer(
+          m.content, MessageContentType.values[m.contentType.value]),
+      index: m.index.toInt(),
+      status: MessageStatus.values[m.status.value],
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
       receivedAt: DateTime.fromMillisecondsSinceEpoch(m.receivedAt.toInt()),
     );
@@ -260,37 +250,31 @@ class GroupInfo extends Equatable {
 abstract class MessageContent extends Equatable {
   const MessageContent();
 
-  factory MessageContent.fromBuffer(List<int> buffer) {
-    final content = ChatMessageContent.fromBuffer(buffer);
-    switch (content.whichContent()) {
-      case ChatMessageContent_Content.chatContent:
-        return TextMessageContent(content.ensureChatContent().content);
-      case ChatMessageContent_Content.groupInviteContent:
-        final invite = content.ensureGroupInviteContent();
-        return GroupInviteContent(
-          groupId: Uint8List.fromList(invite.groupId),
-          groupName: invite.groupName,
-          createdAt:
-              DateTime.fromMillisecondsSinceEpoch(invite.createdAt.toInt()),
-          numOfMembers: invite.memberCount,
-          adminId: Uint8List.fromList(invite.adminId),
-        );
-      case ChatMessageContent_Content.fileContent:
-        final fileContent = content.ensureFileContent();
+  factory MessageContent.fromBuffer(List<int> buffer, MessageContentType t) {
+    switch (t) {
+      case MessageContentType.chat:
+        return TextMessageContent(String.fromCharCodes(buffer));
+      case MessageContentType.file:
+        final file = FileSharingContainer.fromBuffer(buffer).fileInfo;
         return FileShareContent(
-          historyIndex: fileContent.historyIndex.toInt(),
-          fileId: fileContent.fileId.toStringUnsigned(),
-          fileName: fileContent.fileName,
-          size: fileContent.fileSize,
-          description: fileContent.fileDescr,
+          historyIndex: file.startIndex,
+          fileId: file.fileId.toStringUnsigned(),
+          fileName: file.fileName,
+          size: file.fileSize,
+          description: file.fileDescr,
         );
-      case ChatMessageContent_Content.groupInviteReplyContent:
-      case ChatMessageContent_Content.notSet:
+      case MessageContentType.group:
+        final event = GroupEvent.fromBuffer(buffer);
+        return GroupEventContent(
+          userId: Uint8List.fromList(event.userId),
+          type: GroupEventContentType.values[event.eventType.value],
+        );
+      case MessageContentType.rtc:
+      case MessageContentType.groupEvent:
       default:
-        Logger.root.warning(
-            '(_messageContentFactory) Unmapped content type: ${content.whichContent()}');
+        Logger.root.warning('(_messageContentFactory) Unmapped content type');
     }
-    throw UnimplementedError('');
+    throw UnimplementedError('(_messageContentFactory) error building message');
   }
 }
 
@@ -303,39 +287,35 @@ class TextMessageContent extends MessageContent {
   List<Object?> get props => [content];
 }
 
-class GroupInviteContent extends MessageContent {
-  const GroupInviteContent({
-    required this.groupId,
-    required this.groupName,
-    required this.createdAt,
-    required this.numOfMembers,
-    required this.adminId,
+enum GroupEventContentType { none, joined, left }
+
+class GroupEventContent extends MessageContent {
+  const GroupEventContent({
+    required this.userId,
+    required this.type,
   });
 
-  final Uint8List groupId;
-  final String groupName;
-  final DateTime createdAt;
-  final int numOfMembers;
-  final Uint8List adminId;
+  final Uint8List userId;
+  final GroupEventContentType type;
+
+  String get userIdBase58 => Base58Encode(userId);
 
   @override
-  List<Object?> get props => [groupName, createdAt];
+  List<Object?> get props => [userIdBase58, type];
 
-  GroupInviteContent.fromJson(Map<String, dynamic> json)
-      : groupId = Uint8List.fromList(json['groupId']),
-        groupName = json['groupName'],
-        createdAt = DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
-        numOfMembers = json['numOfMembers'],
-        adminId = Uint8List.fromList(json['adminId']);
+  GroupEventContent.fromJson(Map<String, dynamic> json)
+      : userId = Uint8List.fromList(json['userId']),
+        type = _typeFromString(json['type']);
 
   Map<String, dynamic> toJson() {
-    return {
-      'groupId': groupId.toList(),
-      'groupName': groupName,
-      'createdAt': createdAt.millisecondsSinceEpoch,
-      'numOfMembers': numOfMembers,
-      'adminId': adminId.toList(),
-    };
+    return {'userId': userId.toList(), 'type': type.toString()};
+  }
+
+  static GroupEventContentType _typeFromString(String s) {
+    for (var element in GroupEventContentType.values) {
+      if (element.toString() == s) return element;
+    }
+    throw ArgumentError.value(s, 'GroupEventType', 'unable to deserialize');
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
+import 'package:fast_base58/fast_base58.dart';
 
 enum ConnectionStatus { online, reachable, offline }
 
@@ -10,9 +11,7 @@ class User with EquatableMixin implements Comparable<User> {
   const User({
     required this.name,
     required this.id,
-    required this.idBase58,
-    this.key,
-    this.keyType,
+    this.conversationId,
     this.keyBase58,
     this.availableTypes,
     this.isBlocked,
@@ -21,10 +20,8 @@ class User with EquatableMixin implements Comparable<User> {
   });
 
   final String name;
-  final String idBase58;
   final Uint8List id;
-  final Uint8List? key;
-  final String? keyType;
+  final Uint8List? conversationId;
   final String? keyBase58;
   final Map<ConnectionType, ConnectionInfo>? availableTypes;
   final bool? isBlocked;
@@ -49,6 +46,8 @@ class User with EquatableMixin implements Comparable<User> {
   @override
   List<Object?> get props => [name, idBase58];
 
+  String get idBase58 => Base58Encode(id);
+
   bool get isConnected => _statusIsNotOffline && _typesAreNotEmpty;
 
   bool get _statusIsNotOffline => status != ConnectionStatus.offline;
@@ -59,9 +58,7 @@ class User with EquatableMixin implements Comparable<User> {
     return User(
       name: name,
       id: id,
-      idBase58: idBase58,
-      key: key,
-      keyType: keyType,
+      conversationId: conversationId,
       keyBase58: keyBase58,
       availableTypes: availableTypes,
       isBlocked: isBlocked,

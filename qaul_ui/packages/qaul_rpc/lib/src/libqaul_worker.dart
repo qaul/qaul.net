@@ -233,13 +233,14 @@ class LibqaulWorker {
   }
 
   void sendGroupMessage(ChatRoom room, String content) async {
-    final msg = Group(
-      groupSendRequest: GroupSendRequest(
-        groupId: room.conversationId.toList(),
-        message: content,
-      ),
-    );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    throw UnimplementedError('SendGroupMessage');
+    // final msg = Group(
+    //   groupSendRequest: GroupSendRequest(
+    //     groupId: room.conversationId.toList(),
+    //     message: content,
+    //   ),
+    // );
+    // await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
   }
 
   // -------------------
@@ -291,10 +292,7 @@ class LibqaulWorker {
   // *******************************
   UserEntry _baseUserEntryFrom(User u) => UserEntry(
         name: u.name,
-        idBase58: u.idBase58,
         id: u.id,
-        key: u.key,
-        keyType: u.keyType,
         keyBase58: u.keyBase58,
       );
 

@@ -15,12 +15,10 @@ class UserListNotifier extends StateNotifier<List<User>> {
         if (usr.id == u.id || usr.idBase58 == u.idBase58)
           User(
             name: usr.name == 'Name Undefined' ? u.name : usr.name,
-            idBase58: u.idBase58,
             id: u.id,
+            conversationId: u.conversationId ?? usr.conversationId,
             status:
             u.status == ConnectionStatus.offline ? usr.status : u.status,
-            key: u.key ?? usr.key,
-            keyType: u.keyType ?? usr.keyType,
             keyBase58: u.keyBase58 ?? usr.keyBase58,
             isBlocked: u.isBlocked ?? usr.isBlocked,
             isVerified: u.isVerified ?? usr.isVerified,
