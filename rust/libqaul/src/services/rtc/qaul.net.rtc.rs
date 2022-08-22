@@ -1,7 +1,7 @@
 /// RTC network message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcContainer {
-    #[prost(oneof="rtc_container::Message", tags="1, 2, 3")]
+    #[prost(oneof="rtc_container::Message", tags="1, 2")]
     pub message: ::core::option::Option<rtc_container::Message>,
 }
 /// Nested message and enum types in `RtcContainer`.
@@ -14,9 +14,6 @@ pub mod rtc_container {
         /// rtc session management
         #[prost(message, tag="2")]
         RtcSessionManagement(super::RtcSessionManagement),
-        /// rtc messasge
-        #[prost(message, tag="3")]
-        RtcMessage(super::RtcMessage),
     }
 }
 /// rtc session request
