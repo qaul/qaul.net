@@ -23,8 +23,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   device_info_plus: ^4.1.2
   equatable: ^2.0.3
+  ffi: ^2.0.1
   file_picker: ^5.0.1
   filesize: ^2.0.1
+  fixnum: ^1.0.1
   flame: ^1.2.1
   flame_forge2d: ^0.12.2
   fluent_ui: ^3.12.0
