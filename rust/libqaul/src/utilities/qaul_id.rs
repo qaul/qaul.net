@@ -110,47 +110,4 @@ impl QaulId {
 
         Err("q8id range conversion failed".to_string())
     }
-
-    /// create conversation ID for a direct chat
-    ///
-    /// this is a predictable 16 Bytes UUID
-    /// which consists of the q8id of both users.
-    ///
-    /// {smaller q8id}{bigger q8id}
-    pub fn create_conversation_id(qaul_id_1: PeerId, qaul_id_2: PeerId) -> Vec<u8> {
-        let q8id_1 = Self::to_q8id(qaul_id_1);
-        let q8id_2 = Self::to_q8id(qaul_id_2);
-
-        Self::create_conversation_id_from_q8ids(q8id_1, q8id_2)
-    }
-
-    /// create the conversation ID for a direct chat from the q8id's of the users
-    pub fn create_conversation_id_from_q8ids(q8id_1: Vec<u8>, q8id_2: Vec<u8>) -> Vec<u8> {
-        log::info!("q8id_1 {:?}", q8id_1.clone());
-        log::info!("q8id_2 {:?}", q8id_2.clone());
-
-        let mut ids: Vec<Vec<u8>> = Vec::new();
-        ids.push(q8id_1);
-        ids.push(q8id_2);
-
-        ids.sort();
-
-        let mut conversation_id: Vec<u8> = Vec::new();
-        conversation_id.extend(ids[0].clone());
-        conversation_id.extend(ids[1].clone());
-
-        log::info!("conversation_id: {:?}", conversation_id.clone());
-
-        conversation_id
-    }
-
-    /// checks if the group id is a direct conversation
-    ///
-    /// one needs to provide the own user account ID
-    ///
-    /// returns None if the group is not a direct conversation ID
-    /// returns the q8id of the other party, if it is a direct conversation
-    pub fn conversation_to_q8id(_account_id: PeerId) -> Option<Vec<u8>> {
-        None
-    }
 }

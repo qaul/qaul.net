@@ -28,6 +28,7 @@ use crate::utilities::timestamp;
 use crate::utilities::timestamp::Timestamp;
 
 use super::group;
+use super::group::conversation_id::ConversationId;
 use super::messaging::proto;
 use super::messaging::Messaging;
 use std::ffi::OsStr;
@@ -437,15 +438,12 @@ impl FileShare {
         }
 
         //pack into common messge
-        let conversation_id = super::messaging::ConversationId::from_bytes(group_id).unwrap();
+        let conversation_id = ConversationId::from_bytes(group_id).unwrap();
         let mut msgs: Vec<(Vec<u8>, Vec<u8>)> = vec![];
         let mut stored_info = false;
         for msg in messages {
-            let message_id = super::messaging::Messaging::generate_group_message_id(
-                group_id,
-                &user_account.id,
-                last_index,
-            );
+            let message_id =
+                Messaging::generate_group_message_id(group_id, &user_account.id, last_index);
             last_index = last_index + 1;
 
             let common_message = proto::CommonMessage {
@@ -511,7 +509,7 @@ impl FileShare {
 
     /// Send the file on the messaging service
     /// This function is called from RPC command (file send conversation_id file_path_name)
-    pub fn send_to_peer(
+    pub fn send_to_user(
         user_account: &UserAccount,
         send_file_req: proto_rpc::SendFileRequest,
     ) -> Result<bool, String> {
@@ -524,9 +522,8 @@ impl FileShare {
                 return Err("You can not send file to yourself".to_string());
             }
 
-            let group_id =
-                super::messaging::ConversationId::from_peers(&user_account.id, &peer_id).unwrap();
-            if !group::Group::is_group_exist(&user_account.id, &group_id.to_bytes()) {
+            let group_id = ConversationId::from_peers(&user_account.id, &peer_id);
+            if !group::Group::group_exists(&user_account.id, &group_id.to_bytes()) {
                 group::Manage::create_new_direct_chat_group(&user_account.id, &peer_id);
             }
             conversation_id = group_id.to_bytes();
@@ -737,7 +734,7 @@ impl FileShare {
                     Some(proto_rpc::file_sharing::Message::SendFileRequest(send_req)) => {
                         let user_account = UserAccounts::get_by_id(my_user_id).unwrap();
 
-                        if let Err(e) = Self::send_to_peer(&user_account, send_req) {
+                        if let Err(e) = Self::send_to_user(&user_account, send_req) {
                             log::error!("file rpc send file failed {}", e.to_string());
                         }
                     }

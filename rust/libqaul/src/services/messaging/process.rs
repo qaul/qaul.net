@@ -14,9 +14,8 @@ use crate::services::chat;
 use crate::services::crypto::Crypto;
 use crate::services::filesharing;
 use crate::services::group;
+use crate::services::group::conversation_id::ConversationId;
 use crate::services::rtc;
-
-use super::ConversationId;
 
 /// Qaul Messaging Structure
 pub struct MessagingProcess {}
