@@ -5,18 +5,18 @@
 //!
 //! This table contains all users known to this node.
 
-use crate::router::table::RoutingTable;
 use libp2p::{identity::PublicKey, PeerId};
-
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use state::Storage;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
+use super::router_net_proto;
+use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
-use crate::router::router_net_proto;
 use crate::rpc::Rpc;
+use crate::services::group::conversation_id::ConversationId;
 use crate::storage::database::DbUsers;
 use crate::utilities::qaul_id::QaulId;
 
@@ -169,6 +169,17 @@ impl Users {
         }
     }
 
+    /// get user by q8id
+    pub fn get_user_id_by_q8id(q8id: Vec<u8>) -> Option<PeerId> {
+        let store = USERS.get().read().unwrap();
+
+        if let Some(user) = store.users.get(&q8id) {
+            return Some(user.id);
+        }
+
+        None
+    }
+
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
     ///
@@ -239,7 +250,7 @@ impl Users {
 
                                 // create conversation ID
                                 let conversation_id =
-                                    QaulId::create_conversation_id(account.id, user.id);
+                                    ConversationId::from_peers(&account.id, &user.id).to_bytes();
 
                                 // create user entry message
                                 let user_entry = proto::UserEntry {
@@ -297,7 +308,8 @@ impl Users {
 
                                     // create conversation ID
                                     let conversation_id =
-                                        QaulId::create_conversation_id(account.id, user.id);
+                                        ConversationId::from_peers(&account.id, &user.id)
+                                            .to_bytes();
 
                                     // create user entry message
                                     let user_entry = proto::UserEntry {

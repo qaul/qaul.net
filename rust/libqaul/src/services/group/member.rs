@@ -1,13 +1,22 @@
-//use bs58::decode;
-use super::chat;
-use super::messaging;
+// Copyright (c) 2022 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Group Members Management
+//!
+//! Invite new group members.
+//! Accept or reject invitations.
+
 use libp2p::PeerId;
 use prost::Message;
 
+use super::chat;
+use super::conversation_id::ConversationId;
 use super::Group;
 use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
+/// Group Member Structure
 pub struct Member {}
+
 impl Member {
     /// invite member from rpc command
     pub fn invite(
@@ -107,9 +116,8 @@ impl Member {
     ) -> Result<bool, String> {
         //if already has not direct chat room, it's not allowed
         //check if already has direct chat room
-        let conversation_id =
-            super::messaging::ConversationId::from_peers(my_user_id, user_id).unwrap();
-        if !Group::is_group_exist(my_user_id, &conversation_id.to_bytes()) {
+        let conversation_id = ConversationId::from_peers(my_user_id, user_id);
+        if !Group::group_exists(my_user_id, &conversation_id.to_bytes()) {
             return Err("you have not been received group invite meesage".to_string());
         }
 
@@ -196,9 +204,8 @@ impl Member {
         }
 
         //check if already has direct chat room
-        let conversation_id =
-            super::messaging::ConversationId::from_peers(my_user_id, user_id).unwrap();
-        if !Group::is_group_exist(my_user_id, &conversation_id.to_bytes()) {
+        let conversation_id = ConversationId::from_peers(my_user_id, user_id);
+        if !Group::group_exists(my_user_id, &conversation_id.to_bytes()) {
             super::Manage::create_new_direct_chat_group(my_user_id, user_id);
         }
 
@@ -233,7 +240,7 @@ impl Member {
             my_user_id,
             chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
             &event.encode_to_vec(),
-            &messaging::ConversationId::from_bytes(group_id).unwrap(),
+            &ConversationId::from_bytes(group_id).unwrap(),
         );
         Ok(true)
     }
@@ -287,9 +294,8 @@ impl Member {
         }
 
         //check if already has direct chat room
-        let conversation_id =
-            super::messaging::ConversationId::from_peers(sender_id, receiver_id).unwrap();
-        if !Group::is_group_exist(receiver_id, &conversation_id.to_bytes()) {
+        let conversation_id = ConversationId::from_peers(sender_id, receiver_id);
+        if !Group::group_exists(receiver_id, &conversation_id.to_bytes()) {
             return Err("you have not sent invite".to_string());
         }
 
@@ -319,7 +325,7 @@ impl Member {
             &sender_id,
             chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
             &event.encode_to_vec(),
-            &messaging::ConversationId::from_bytes(&resp.group_id).unwrap(),
+            &ConversationId::from_bytes(&resp.group_id).unwrap(),
         );
 
         Ok(true)
@@ -350,9 +356,8 @@ impl Member {
         }
 
         //check if already has direct chat room
-        let conversation_id =
-            super::messaging::ConversationId::from_peers(sender_id, receiver_id).unwrap();
-        if !Group::is_group_exist(receiver_id, &conversation_id.to_bytes()) {
+        let conversation_id = ConversationId::from_peers(sender_id, receiver_id);
+        if !Group::group_exists(receiver_id, &conversation_id.to_bytes()) {
             return Err("you have not sent invite".to_string());
         }
 
