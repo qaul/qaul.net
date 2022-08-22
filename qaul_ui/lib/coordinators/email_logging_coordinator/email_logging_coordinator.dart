@@ -214,13 +214,13 @@ ${stack ?? 'Not available'}
       {List<FileSystemEntity>? libqaulAttachments}) async {
     var body = 'Customer Feedback - Error/Exception Logs\n\n\n${'#' * 100}\n\n';
     for (final log in (await _storageManager.logs)) {
-      body += _storageManager.logContents(log) + '\n${'#' * 100}\n\n';
+      body += '${_storageManager.logContents(log)}\n${'#' * 100}\n\n';
     }
     if (libqaulAttachments != null && libqaulAttachments.isNotEmpty) {
       for (final log in libqaulAttachments) {
         if (_pathLeadsToLogFile(log)) {
           body += 'Libqaul log << ${log.path.split('/').last} >>:\n';
-          body += File(log.path).readAsStringSync() + '\n${'#' * 100}\n\n';
+          body += '${File(log.path).readAsStringSync()}\n${'#' * 100}\n\n';
         }
       }
     }

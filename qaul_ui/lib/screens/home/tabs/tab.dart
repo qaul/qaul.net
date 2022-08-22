@@ -25,7 +25,6 @@ import '../../../decorators/search_user_decorator.dart';
 import '../../../providers/providers.dart';
 import '../../../utils.dart';
 import '../../../widgets/widgets.dart';
-import '../user_details_screen.dart';
 import 'chat/current_open_chat_notifier.dart';
 import 'chat/widgets/chat.dart';
 

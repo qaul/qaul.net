@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 part of '../../tab.dart';
 
 class _CreateNewRoomDialog extends StatelessWidget {
@@ -19,8 +20,8 @@ class _CreateNewRoomDialog extends StatelessWidget {
                   alignment: AlignmentDirectional.topStart,
                   children: const [
                     CircleAvatar(
-                        child: Icon(Icons.people, color: Colors.white),
-                        backgroundColor: Colors.lightBlue),
+                        backgroundColor: Colors.lightBlue,
+                        child: Icon(Icons.people, color: Colors.white)),
                     Icon(Icons.add, size: 12),
                   ],
                 ),
@@ -107,6 +108,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                       .read(chatRoomsProvider)
                       .firstWhereOrNull((g) => g.name == name);
                   if (group == null) {
+                    if (!useIsMounted()()) return;
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('An error occurred. Please try again.'),
                     ));
@@ -114,6 +116,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     return;
                   }
 
+                  if (!useIsMounted()()) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -121,6 +124,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     ),
                   );
 
+                  if (!useIsMounted()()) return;
                   Navigator.pop(
                     context,
                     ref

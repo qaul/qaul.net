@@ -115,7 +115,8 @@ class _CreateFeedMessage extends HookConsumerWidget {
       final worker = ref.read(qaulWorkerProvider);
       await worker.sendFeedMessage(controller.text.trim());
       loading.value = false;
-      Navigator.pop(context);
+      if (!useIsMounted()()) return;
+      Navigator.pop(context); // ignore: use_build_context_synchronously
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context)!;
@@ -135,8 +136,8 @@ class _CreateFeedMessage extends HookConsumerWidget {
         floatingActionButton: FloatingActionButton(
           heroTag: 'createFeedMessageSubscreenFAB',
           tooltip: l18ns.submitPostTooltip,
-          child: const Icon(Icons.check, size: 32.0),
           onPressed: sendMessage,
+          child: const Icon(Icons.check, size: 32.0),
         ),
         body: Shortcuts(
           shortcuts: {

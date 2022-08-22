@@ -1,10 +1,10 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:meta/meta.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers.dart';
@@ -24,16 +24,19 @@ class NotificationController<T> {
   late final User _user;
 
   @protected
-  TabType get currentVisibleHomeTab => ref.read(homeScreenControllerProvider.notifier).currentTab;
+  TabType get currentVisibleHomeTab =>
+      ref.read(homeScreenControllerProvider.notifier).currentTab;
 
   @protected
   @visibleForOverriding
-  MapEntry<AlwaysAliveProviderListenable<T>, void Function(T?, T)> get strategy =>
+  MapEntry<AlwaysAliveProviderListenable<T>, void Function(T?, T)>
+      get strategy =>
+          throw UnimplementedError('Must be implemented by child class');
+
+  @protected
+  @visibleForOverriding
+  String get cacheKey =>
       throw UnimplementedError('Must be implemented by child class');
-
-  @protected
-  @visibleForOverriding
-  String get cacheKey => throw UnimplementedError('Must be implemented by child class');
 
   @mustCallSuper
   Future<void> initialize() async {
@@ -47,7 +50,8 @@ class NotificationController<T> {
   void updatePersistentCachedData() =>
       throw UnimplementedError('Must be implemented by child class');
 
-  void removeNotifications() => LocalNotifications.instance.removeNotifications();
+  void removeNotifications() =>
+      LocalNotifications.instance.removeNotifications();
 }
 
 mixin DataProcessingStrategy<T> {
