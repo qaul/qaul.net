@@ -67,8 +67,8 @@ class _CustomInputState extends State<_CustomInput> {
   void _handleSendPressed() {
     final trimmedText = _textController.text.trim();
     if (trimmedText != '') {
-      final _partialText = types.PartialText(text: trimmedText);
-      widget.onSendPressed(_partialText);
+      final partialText = types.PartialText(text: trimmedText);
+      widget.onSendPressed(partialText);
       _textController.clear();
     }
   }
@@ -82,8 +82,8 @@ class _CustomInputState extends State<_CustomInput> {
       return;
     }
 
-    final _partialText = types.PartialText(text: trimmedText);
-    callback(text: _partialText);
+    final partialText = types.PartialText(text: trimmedText);
+    callback(text: partialText);
     _textController.clear();
   }
 
@@ -95,7 +95,7 @@ class _CustomInputState extends State<_CustomInput> {
 
   @override
   Widget build(BuildContext context) {
-    final _query = MediaQuery.of(context);
+    final query = MediaQuery.of(context);
 
     return GestureDetector(
       onTap: () => _inputFocusNode.requestFocus(),
@@ -114,11 +114,11 @@ class _CustomInputState extends State<_CustomInput> {
             ),
             NewLineIntent: CallbackAction<NewLineIntent>(
               onInvoke: (NewLineIntent intent) {
-                final _newValue = '${_textController.text}\r\n';
+                final newValue = '${_textController.text}\r\n';
                 _textController.value = TextEditingValue(
-                  text: _newValue,
+                  text: newValue,
                   selection: TextSelection.fromPosition(
-                    TextPosition(offset: _newValue.length),
+                    TextPosition(offset: newValue.length),
                   ),
                 );
                 return null;
@@ -132,10 +132,10 @@ class _CustomInputState extends State<_CustomInput> {
               color: Colors.transparent,
               child: Container(
                 padding: EdgeInsets.fromLTRB(
-                  24 + _query.padding.left,
+                  24 + query.padding.left,
                   20,
-                  24 + _query.padding.right,
-                  20 + _query.viewInsets.bottom + _query.padding.bottom,
+                  24 + query.padding.right,
+                  20 + query.viewInsets.bottom + query.padding.bottom,
                 ),
                 child: Row(
                   children: [

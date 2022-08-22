@@ -15,7 +15,7 @@ class ImageMessageWidget extends StatefulWidget {
   final bool isDefaultUser;
 
   @override
-  _ImageMessageWidgetState createState() => _ImageMessageWidgetState();
+  State<ImageMessageWidget> createState() => _ImageMessageWidgetState();
 }
 
 class _ImageMessageWidgetState extends State<ImageMessageWidget> {

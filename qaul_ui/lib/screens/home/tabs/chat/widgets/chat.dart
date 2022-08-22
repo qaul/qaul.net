@@ -84,7 +84,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
   final User otherUser;
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
@@ -375,7 +375,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }) {
     return Builder(builder: (context) {
       return Bubble(
-        child: child,
         color: user.toInternalUser().id != message.author.id
             ? const Color(0xfff5f5f7)
             : Colors.lightBlue.shade700,
@@ -387,6 +386,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             : user.toInternalUser().id != message.author.id
                 ? BubbleNip.leftBottom
                 : BubbleNip.rightBottom,
+        child: child,
       );
     });
   }

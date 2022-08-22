@@ -19,7 +19,7 @@ class CronTaskDecorator extends StatefulWidget {
   final Widget child;
 
   @override
-  _CronTaskDecoratorState createState() => _CronTaskDecoratorState();
+  State<CronTaskDecorator> createState() => _CronTaskDecoratorState();
 }
 
 class _CronTaskDecoratorState extends State<CronTaskDecorator>

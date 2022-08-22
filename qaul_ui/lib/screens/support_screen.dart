@@ -71,6 +71,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                                 child: const Text('Delete Logs'),
                                 onPressed: () async {
                                   await emailLogger.deleteLogs();
+                                  if (!mounted) return;
                                   Navigator.pop(context);
                                 },
                               ),
@@ -93,14 +94,15 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                         const Text('You can choose to report them or delete them.'),
                         const SizedBox(height: 20, width: double.maxFinite),
                         TextButton(
-                          child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
                           onPressed: hasLogs
                               ? () async {
                                   await emailLogger.sendLogs(reader: ref.read);
                                   await emailLogger.deleteLogs();
+                                  if (!mounted) return;
                                   Navigator.pop(context);
                                 }
                               : null,
+                          child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
                         ),
                         const SizedBox(height: 20, width: double.maxFinite),
                       ],

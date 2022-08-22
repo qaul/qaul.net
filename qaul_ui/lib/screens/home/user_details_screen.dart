@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -119,6 +120,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                                       : await worker.verifyUser(user);
 
                                   loading.value = false;
+                                  if (!useIsMounted()()) return;
                                   Navigator.pop(context);
                                 },
                           child: Row(
@@ -151,6 +153,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                           blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
 
                           loading.value = false;
+                          if (!useIsMounted()()) return;
                           Navigator.pop(context);
                         },
                         child: Text(blocked ? l18ns.unblockUser : l18ns.blockUser),

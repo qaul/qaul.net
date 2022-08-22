@@ -30,6 +30,7 @@ abstract class UserAvatar extends ConsumerWidget {
 
     return CircleAvatar(
       radius: radius,
+      backgroundColor: user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
       child: Text(
         user != null
             ? userInitials
@@ -38,7 +39,6 @@ abstract class UserAvatar extends ConsumerWidget {
                 : 'WW',
         style: initialsStyle,
       ),
-      backgroundColor: user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
     );
   }
 
