@@ -25,10 +25,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
   RpcTranslatorResponse _buildResponseWithUser(MyUserAccount account) {
     final user = User(
       name: account.name,
-      idBase58: account.idBase58,
       id: Uint8List.fromList(account.id),
-      key: Uint8List.fromList(account.key),
-      keyType: account.keyType,
       keyBase58: account.keyBase58,
     );
 

@@ -8,8 +8,8 @@ class FileHistoryEntity {
     required this.size,
     required this.description,
     required this.time,
-    required this.isSent,
-    required this.peedId,
+    required this.senderId,
+    required this.groupId,
   });
 
   final int id;
@@ -18,8 +18,8 @@ class FileHistoryEntity {
   final int size;
   final String description;
   final DateTime time;
-  final bool isSent;
-  final String peedId;
+  final String senderId;
+  final String groupId;
 
   factory FileHistoryEntity.fromRpcEntry(FileHistoryEntry file) {
     return FileHistoryEntity(
@@ -29,8 +29,8 @@ class FileHistoryEntity {
       size: file.fileSize,
       description: file.fileDescr,
       time: DateTime.fromMillisecondsSinceEpoch(file.time.toInt()),
-      isSent: file.sent,
-      peedId: file.peerId,
+      senderId: file.senderId,
+      groupId: file.groupId,
     );
   }
 }
