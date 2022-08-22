@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/screens/home/dynamic_network/dynamic_network_screen.dart';
@@ -11,7 +10,6 @@ User generateUser(String name, {Map<ConnectionType, ConnectionInfo>? connections
   return User(
     name: name,
     id: Uint8List.fromList(id.codeUnits),
-    idBase58: Base58Encode(id.codeUnits),
     availableTypes: connections,
   );
 }
