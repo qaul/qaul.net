@@ -296,7 +296,7 @@ packages:
     source: hosted
     version: "0.2.1"
   ffi:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: ffi
       url: "https://pub.dartlang.org"
@@ -324,7 +324,7 @@ packages:
     source: hosted
     version: "2.0.1"
   fixnum:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: fixnum
       url: "https://pub.dartlang.org"
