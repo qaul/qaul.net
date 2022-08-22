@@ -15,7 +15,6 @@ class RouterTranslator extends RpcModuleTranslator {
             .map(
               (e) => User(
                 name: 'Name Undefined',
-                idBase58: Base58Encode(e.userId),
                 id: Uint8List.fromList(e.userId),
                 availableTypes: _mapFromRoutingTableConnections(e.connections),
                 status: _isConnected(e)

@@ -14,10 +14,8 @@ class UsersTranslator extends RpcModuleTranslator {
             .user
             .map((u) => User(
                   name: u.name,
-                  idBase58: u.idBase58,
                   id: Uint8List.fromList(u.id),
-                  key: Uint8List.fromList(u.key),
-                  keyType: u.keyType,
+                  conversationId: Uint8List.fromList(u.conversationId),
                   keyBase58: u.keyBase58,
                   isBlocked: u.blocked,
                   isVerified: u.verified,
@@ -29,10 +27,8 @@ class UsersTranslator extends RpcModuleTranslator {
         final userEntry = message.ensureUserUpdate();
         final user = User(
           name: userEntry.name,
-          idBase58: userEntry.idBase58,
           id: Uint8List.fromList(userEntry.id),
-          key: Uint8List.fromList(userEntry.key),
-          keyType: userEntry.keyType,
+          conversationId: Uint8List.fromList(userEntry.conversationId),
           keyBase58: userEntry.keyBase58,
           isBlocked: userEntry.blocked,
           isVerified: userEntry.verified,
