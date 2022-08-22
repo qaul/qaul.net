@@ -137,14 +137,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       worker.sendMessage(room.conversationId, msg.text);
     }, [UniqueKey()]);
 
-    final replyToGroupInvite = useCallback((
-      Uint8List groupId, {
-      required bool accepted,
-    }) {
-      final worker = ref.read(qaulWorkerProvider);
-      worker.replyToGroupInvite(groupId, accepted: accepted);
-    }, []);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButtonFactory(
@@ -283,45 +275,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               );
             },
             customMessageBuilder: (message, {required int messageWidth}) {
-              final invite = GroupInviteContent.fromJson(message.metadata!);
-              if (widget.user.id.equals(invite.adminId)) {
-                return Text(
-                  'Invite for group "${invite.groupName}" sent',
-                  style: const TextStyle(fontStyle: FontStyle.italic),
-                );
+              final event = GroupEventContent.fromJson(message.metadata!);
+              final u = ref.read(usersProvider).firstWhereOrNull((e) => e.idBase58 == event.userIdBase58);
+              if (u == null || event.type == GroupEventContentType.none) {
+                return const SizedBox.shrink();
               }
-              return SizedBox(
-                width: messageWidth.toDouble(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'You\'ve been invited to join "${invite.groupName}"!',
-                      style: const TextStyle(fontSize: 20),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text('· Number of members: ${invite.numOfMembers}'),
-                    Text('· Created at: ${invite.createdAt}'),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => replyToGroupInvite(invite.groupId,
-                              accepted: true),
-                          child: const Text('JOIN'),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () => replyToGroupInvite(invite.groupId,
-                              accepted: false),
-                          child: const Text('NO, THANKS'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+
+              return Text(
+                '"${u.name}" has ${message.type == GroupEventContentType.joined ? 'joined' : 'left'} the group',
+                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               );
             },
             theme: DefaultChatTheme(
@@ -384,13 +348,13 @@ extension _MessageExtension on Message {
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,
       );
-    } else if (content is GroupInviteContent) {
+    } else if (content is GroupEventContent) {
       return types.CustomMessage(
         id: messageIdBase58,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedStatus,
-        metadata: (content as GroupInviteContent).toJson(),
+        metadata: (content as GroupEventContent).toJson(),
       );
     } else if (content is FileShareContent) {
       var filePath = (content as FileShareContent).filePath(read);
