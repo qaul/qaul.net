@@ -1,23 +1,26 @@
-//use bs58::decode;
+// Copyright (c) 2022 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Group Management
+
 use libp2p::PeerId;
 use prost::Message;
-
-use crate::services::messaging;
-use crate::utilities::timestamp;
 use std::collections::BTreeMap;
 
 use super::chat;
+use super::conversation_id::ConversationId;
 use super::Group;
+use crate::utilities::timestamp;
 
+/// Group Manage Structure
 pub struct Manage {}
 impl Manage {
+    /// Create a new direct chat group
     pub fn create_new_direct_chat_group(user_id: &PeerId, peer_id: &PeerId) -> Vec<u8> {
-        let conversation_id =
-            super::messaging::ConversationId::from_peers(user_id, peer_id).unwrap();
-        let group_id = &conversation_id.to_bytes();
+        let group_id = ConversationId::from_peers(user_id, peer_id).to_bytes();
 
         let groups = Group::get_groups_of_user(user_id);
-        let group_idx = groups.group_id_to_index(group_id);
+        let group_idx = groups.group_id_to_index(&group_id);
         if group_idx > 0 {
             return group_id.clone();
         }
@@ -321,7 +324,7 @@ impl Manage {
         // save events
         let user_id = PeerId::from_bytes(&receiver_id).unwrap();
         let snd_id = PeerId::from_bytes(&sender_id).unwrap();
-        let converstion_id = messaging::ConversationId::from_bytes(&notify.group_id).unwrap();
+        let converstion_id = ConversationId::from_bytes(&notify.group_id).unwrap();
 
         if first_join {
             let event = chat::rpc_proto::GroupEvent {

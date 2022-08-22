@@ -12,7 +12,7 @@ use state::Storage;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
-use super::messaging;
+use super::group::conversation_id::ConversationId;
 use super::messaging::proto;
 use super::messaging::Messaging;
 use crate::connections::{internet::Internet, lan::Lan};
@@ -132,7 +132,7 @@ impl Chat {
         sender_id: &PeerId,
         content_type: i32,
         content: &Vec<u8>,
-        conversation_id: &messaging::ConversationId,
+        conversation_id: &ConversationId,
     ) -> bool {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
@@ -140,18 +140,23 @@ impl Chat {
         // get data base of user account
         let db_ref = Self::get_user_db_ref(user_id.clone());
 
-        // check if group message
-        let is_group = !(conversation_id
-            .is_equal(&messaging::ConversationId::from_peers(user_id, sender_id).unwrap()));
+        // check if group exists
+        if !group::Group::group_exists(user_id, &conversation_id.to_bytes()) {
+            let test_conversation_id = ConversationId::from_peers(user_id, sender_id);
 
-        // if direct chat, check group exist
-        if !is_group {
-            if !group::Group::is_group_exist(user_id, &conversation_id.to_bytes()) {
+            // check if it is a direct chat
+            if conversation_id == &test_conversation_id {
+                // create new group
                 group::Manage::create_new_direct_chat_group(user_id, sender_id);
+            } else {
+                // group is unknown
+                return false;
             }
         }
 
-        log::error!("save incomeming is_group={}", is_group);
+        // check if it is a direct group
+        let is_group = !(conversation_id == &ConversationId::from_peers(user_id, sender_id));
+
         let overview;
         match Self::update_overview(
             user_id,
@@ -209,7 +214,7 @@ impl Chat {
         content_type: i32,
         content: &Vec<u8>,
         sent_at: u64,
-        conversation_id: &messaging::ConversationId,
+        conversation_id: &ConversationId,
         message_id: &Vec<u8>,
         status: rpc_proto::MessageStatus,
     ) -> bool {
@@ -225,12 +230,11 @@ impl Chat {
         }
 
         // check if group message
-        let is_group = !(conversation_id
-            .is_equal(&messaging::ConversationId::from_peers(user_id, sender_id).unwrap()));
+        let is_group = !(conversation_id == &ConversationId::from_peers(user_id, sender_id));
 
         // if direct chat, check group exist
         if !is_group {
-            if !group::Group::is_group_exist(user_id, &conversation_id.to_bytes()) {
+            if !group::Group::group_exists(user_id, &conversation_id.to_bytes()) {
                 group::Manage::create_new_direct_chat_group(user_id, sender_id);
             }
         }
@@ -295,7 +299,7 @@ impl Chat {
         true
     }
 
-    // send message
+    /// send message
     pub fn send(
         user_account: &UserAccount,
         receiver: &PeerId,
@@ -315,37 +319,46 @@ impl Chat {
         )
     }
 
-    // send the message
-    pub fn send_to_peer(
+    /// send the message to a specific user
+    pub fn send_to_user(
         user_account: &UserAccount,
         chat_message: rpc_proto::ChatMessageSend,
     ) -> Result<bool, String> {
-        let conversation_id;
-        //direct chat messge case.
-        if chat_message.conversation_id.len() > 16 {
-            // create new room if no exist
-            let peer_id = PeerId::from_bytes(&chat_message.conversation_id).unwrap();
-            if user_account.id == peer_id {
-                return Err("You can not send message to yourself".to_string());
+        let conversation_id_binary;
+        // check if group exists
+        if !group::Group::group_exists(&user_account.id, &chat_message.conversation_id) {
+            match ConversationId::from_bytes(&chat_message.conversation_id) {
+                Ok(conversation_id) => {
+                    // check if the conversation ID is a direct chat ID
+                    if let Some(peer_q8id) = conversation_id.is_direct(user_account.id) {
+                        // check if user exists
+                        if let Some(peer_id) = router::users::Users::get_user_id_by_q8id(peer_q8id)
+                        {
+                            // create direct chat room
+                            conversation_id_binary = group::Manage::create_new_direct_chat_group(
+                                &user_account.id,
+                                &peer_id,
+                            );
+                        } else {
+                            return Err("user for conversation id not found".to_string());
+                        }
+                    } else {
+                        return Err("coversation id, is not a direct chat".to_string());
+                    }
+                }
+                Err(e) => return Err(e),
             }
-
-            let group_id =
-                messaging::ConversationId::from_peers(&user_account.id, &peer_id).unwrap();
-            if !group::Group::is_group_exist(&user_account.id, &group_id.to_bytes()) {
-                group::Manage::create_new_direct_chat_group(&user_account.id, &peer_id);
-            }
-            conversation_id = group_id.to_bytes();
         } else {
-            conversation_id = chat_message.conversation_id.clone();
+            conversation_id_binary = chat_message.conversation_id.clone();
         }
         Self::send_message(
             &user_account.id,
-            &conversation_id,
+            &conversation_id_binary,
             chat_message.content.clone(),
         )
     }
 
-    // send group message
+    /// send group message
     fn send_message(
         my_user_id: &PeerId,
         group_id: &Vec<u8>,
@@ -373,7 +386,7 @@ impl Chat {
 
         let last_index = my_member.last_message_index + 1;
         let timestamp = Timestamp::get_timestamp();
-        let conversation_id = super::messaging::ConversationId::from_bytes(&group.id).unwrap();
+        let conversation_id = ConversationId::from_bytes(&group.id).unwrap();
         let message_id = super::messaging::Messaging::generate_group_message_id(
             &group.id, my_user_id, last_index,
         );
@@ -420,20 +433,20 @@ impl Chat {
         Ok(true)
     }
 
-    // save an outgoing message to the data base
+    /// save an outgoing message to the data base
     pub fn save_outgoing_message(
         user_id: &PeerId,
         receiver_id: &PeerId,
-        conversation_id: &messaging::ConversationId,
+        conversation_id: &ConversationId,
         message_id: &Vec<u8>,
         content_type: i32,
         content: &Vec<u8>,
         status: rpc_proto::MessageStatus,
     ) {
-        // // create timestamp
+        // create timestamp
         let timestamp = Timestamp::get_timestamp();
 
-        // // get data base of user account
+        // get data base of user account
         let db_ref = Self::get_user_db_ref(user_id.clone());
 
         // check if message_id is already exist
@@ -442,12 +455,11 @@ impl Chat {
         }
 
         // check if group message
-        let is_group = !(conversation_id
-            .is_equal(&messaging::ConversationId::from_peers(user_id, receiver_id).unwrap()));
+        let is_group = !(conversation_id == &ConversationId::from_peers(user_id, receiver_id));
 
         // if direct chat, check group exist
         if !is_group {
-            if !group::Group::is_group_exist(user_id, &conversation_id.to_bytes()) {
+            if !group::Group::group_exists(user_id, &conversation_id.to_bytes()) {
                 group::Manage::create_new_direct_chat_group(user_id, receiver_id);
             }
         }
@@ -532,7 +544,7 @@ impl Chat {
 
     /// Update the last Message and the Conversation Index of an Overview entry
     fn update_overview(
-        user_id: &PeerId,
+        account_id: &PeerId,
         peer_id: &PeerId,
         db_ref: &ChatUser,
         conversation_id: &Vec<u8>,
@@ -558,13 +570,13 @@ impl Chat {
                 overview.content_type = content_type;
                 overview.last_message_sender_id = last_message_sender_id.clone();
             }
-            // conversation does not exist yet            unconfirmed: chat_user.unconfirmed.clone(),
+            // conversation does not exist yet
             Ok(None) => {
                 // get user name from known users
                 let name;
                 if b_group {
                     if let Some(group_name) =
-                        super::group::Group::get_group_name(user_id, &conversation_id)
+                        super::group::Group::get_group_name(account_id, &conversation_id)
                     {
                         name = group_name.clone();
                     } else {
@@ -644,11 +656,10 @@ impl Chat {
         let mut conversation_id0 = conversation_id.clone();
         log::error!("id len={}", conversation_id.len());
         if conversation_id.len() > 16 {
-            conversation_id0 = messaging::ConversationId::from_peers(
+            conversation_id0 = ConversationId::from_peers(
                 &user_id,
                 &PeerId::from_bytes(&conversation_id.clone()).unwrap(),
             )
-            .unwrap()
             .to_bytes();
         }
 
@@ -840,7 +851,7 @@ impl Chat {
                         }
 
                         // send the message
-                        if let Err(error) = Self::send_to_peer(&user_account, message.clone()) {
+                        if let Err(error) = Self::send_to_user(&user_account, message.clone()) {
                             log::error!("Outgoing chat message error: {}", error)
                         }
                     }

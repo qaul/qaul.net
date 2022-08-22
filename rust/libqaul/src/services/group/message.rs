@@ -1,9 +1,15 @@
-//use bs58::decode;
+// Copyright (c) 2022 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Group Message Handling
+
 use libp2p::PeerId;
 
 use super::Group;
 
+/// Group Message Structure
 pub struct GroupMessage {}
+
 impl GroupMessage {
     /// process group message from network
     pub fn on_message(
@@ -31,7 +37,7 @@ impl GroupMessage {
         }
 
         let mut sender;
-        // checkif the sender is in group
+        // check if the sender is in group
         match group.get_member(&sender_id.to_bytes()) {
             Some(v) => {
                 sender = v.clone();
