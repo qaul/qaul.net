@@ -26,7 +26,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     final chatRooms = ref.watch(chatRoomsProvider);
 
     final blockedIds =
-        users.where((u) => u.isBlocked ?? false).map((u) => u.id);
+        users.where((u) => u.isBlocked ?? false).map((u) => u.conversationId);
     final filteredRooms = chatRooms
         .where((m) => !blockedIds.contains(m.conversationId))
         .toList()
@@ -112,7 +112,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                 content: _contentFromOverview(
                   room.lastMessagePreview,
                   theme,
-                  defaultUser: defaultUser,
+                  users: users,
                 ),
                 trailingMetadata: Row(
                   children: [
@@ -199,7 +199,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   Widget _contentFromOverview(
     MessageContent? message,
     TextTheme theme, {
-    required User defaultUser,
+    required List<User> users,
   }) {
     if (message is TextMessageContent) {
       return Text(
@@ -208,17 +208,19 @@ class _ChatState extends _BaseTabState<_Chat> {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
-    } else if (message is GroupInviteContent) {
-      if (defaultUser.id.equals(message.adminId)) {
-        return Text(
-          'Invite for group "${message.groupName}" sent',
-          style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        );
+    } else if (message is GroupEventContent) {
+      final u =
+          users.firstWhereOrNull((e) => e.idBase58 == message.userIdBase58);
+      if (u == null) {
+        _log.warning('group event message from unknown user');
+        return const SizedBox.shrink();
       }
+      if (message.type == GroupEventContentType.none) {
+        return const SizedBox.shrink();
+      }
+
       return Text(
-        'You\'ve received an invite to join the group ${message.groupName}!',
+        '"${u.name}" has ${message.type == GroupEventContentType.joined ? 'joined' : 'left'} the group',
         style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

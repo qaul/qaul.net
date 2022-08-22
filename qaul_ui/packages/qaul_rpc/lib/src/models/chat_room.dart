@@ -48,7 +48,8 @@ class ChatRoom with EquatableMixin implements Comparable {
   final List<ChatRoomUser> members;
 
   factory ChatRoom.blank({required User user, required User otherUser}) {
-    return ChatRoom._(conversationId: otherUser.id, name: otherUser.name);
+    assert(otherUser.conversationId != null);
+    return ChatRoom._(conversationId: otherUser.conversationId!, name: otherUser.name);
   }
 
   factory ChatRoom.fromOverview(ChatOverview overview) {
