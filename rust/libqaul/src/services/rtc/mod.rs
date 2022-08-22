@@ -17,6 +17,8 @@ use state::Storage;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
+use super::group::conversation_id::ConversationId;
+
 use super::messaging::proto;
 use super::messaging::Messaging;
 use crate::utilities::timestamp;
@@ -105,8 +107,8 @@ impl Rtc {
         data: &Vec<u8>,
     ) {
         // create direct chat room
-        let group_id = messaging::ConversationId::from_peers(&user_account.id, &receiver).unwrap();
-        if !group::Group::is_group_exist(&user_account.id, &group_id.to_bytes()) {
+        let group_id = ConversationId::from_peers(&user_account.id, &receiver);
+        if !group::Group::group_exists(&user_account.id, &group_id.to_bytes()) {
             group::Manage::create_new_direct_chat_group(&user_account.id, &receiver);
         }
 
