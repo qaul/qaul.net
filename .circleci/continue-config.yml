@@ -848,7 +848,22 @@ parameters:
     run-flutter-workflow:
         default: false
         type: boolean
+    run-rust-android-tagged-workflow:
+        default: false
+        type: boolean
+    run-rust-ios-tagged-workflow:
+        default: false
+        type: boolean
+    run-rust-linux-tagged-workflow:
+        default: false
+        type: boolean
+    run-rust-macos-tagged-workflow:
+        default: false
+        type: boolean
     run-rust-tagged-workflow:
+        default: false
+        type: boolean
+    run-rust-windows-tagged-workflow:
         default: false
         type: boolean
     run-rust-workflow:
@@ -953,7 +968,10 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-android
-        when: << pipeline.parameters.run-rust-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-rust-tagged-workflow >>
+                - << pipeline.parameters.run-rust-android-tagged-workflow >>
     build-and-deploy-rust-ios:
         jobs:
             - verify-version-rust:
@@ -972,7 +990,10 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-ios
-        when: << pipeline.parameters.run-rust-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-rust-tagged-workflow >>
+                - << pipeline.parameters.run-rust-ios-tagged-workflow >>
     build-and-deploy-rust-linux:
         jobs:
             - verify-version-rust:
@@ -991,7 +1012,10 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-linux
-        when: << pipeline.parameters.run-rust-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-rust-tagged-workflow >>
+                - << pipeline.parameters.run-rust-linux-tagged-workflow >>
     build-and-deploy-rust-macos:
         jobs:
             - verify-version-rust:
@@ -1010,7 +1034,10 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-macos
-        when: << pipeline.parameters.run-rust-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-rust-tagged-workflow >>
+                - << pipeline.parameters.run-rust-macos-tagged-workflow >>
     build-and-deploy-rust-windows:
         jobs:
             - verify-version-rust:
@@ -1029,7 +1056,10 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-windows
-        when: << pipeline.parameters.run-rust-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-rust-tagged-workflow >>
+                - << pipeline.parameters.run-rust-windows-tagged-workflow >>
     build-rust:
         jobs:
             - build-libqaul-linux

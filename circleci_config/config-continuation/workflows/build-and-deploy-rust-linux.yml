@@ -1,4 +1,7 @@
-when: << pipeline.parameters.run-rust-tagged-workflow >>
+when:
+  or:
+    - << pipeline.parameters.run-rust-tagged-workflow >>
+    - << pipeline.parameters.run-rust-linux-tagged-workflow >>
 jobs:
   - verify-version-rust: { 'filters': { 'tags': { 'only': '/.*/' } } }
   - build-libqaul-linux: { 'requires': [ 'verify-version-rust' ], 'filters': { 'tags': { 'only': '/.*/' } } }
