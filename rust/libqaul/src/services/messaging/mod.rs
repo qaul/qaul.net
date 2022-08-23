@@ -119,40 +119,6 @@ impl Messaging {
         UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
 
-    pub fn generate_message_id(sender_id: &PeerId) -> Vec<u8> {
-        let timestamp = timestamp::Timestamp::get_timestamp();
-        // determine index
-        let mut index: u32 = 0;
-        let mut message_ids = MESSAGEIDS.get().write().unwrap();
-        match message_ids.ids.get_mut(&sender_id.to_bytes()) {
-            Some(mut id) => {
-                if id.timestamp == timestamp {
-                    index = id.last_index + 1;
-                }
-                id.timestamp = timestamp;
-                id.last_index = index;
-            }
-            _ => {
-                message_ids.ids.insert(
-                    sender_id.to_bytes(),
-                    MessageId {
-                        timestamp,
-                        last_index: 0,
-                    },
-                );
-            }
-        }
-
-        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
-        let mut buff = sender_crc.to_be_bytes().to_vec();
-        let mut time_bytes = timestamp.to_be_bytes().to_vec();
-        let mut index_bytes = index.to_be_bytes().to_vec();
-
-        buff.append(&mut time_bytes);
-        buff.append(&mut index_bytes);
-        buff
-    }
-
     pub fn generate_group_message_id(
         group_id: &Vec<u8>,
         sender_id: &PeerId,
@@ -168,45 +134,6 @@ impl Messaging {
         buff0.append(&mut index_bytes);
         buff0
     }
-
-    // // create DB key from conversation ID, timestamp
-    // fn get_db_key_from_vec(conversation_id: Vec<u8>, timestamp: u64) -> Vec<u8> {
-    //     let mut timestamp_bytes = timestamp.to_be_bytes().to_vec();
-    //     let mut userid_bytes = timestamp.to_be_bytes().to_vec();
-    //     let mut key_bytes = conversation_id;
-
-    //     userid_bytes.append(&mut key_bytes);
-    //     userid_bytes.append(&mut timestamp_bytes);
-    //     userid_bytes
-    // }
-
-    // /// save failed message
-    // pub fn save_failed_outgoing_message(user_id: PeerId, conversation_id: PeerId, contents: String){
-    //     let timestamp = Timestamp::get_timestamp();
-    //     let key = Self::get_db_key_from_vec(conversation_id.to_bytes(), timestamp);
-
-    //     // create chat message
-    //     let message = FailedMessage {
-    //         user_id: user_id.to_bytes(),
-    //         conversation_id: conversation_id.to_bytes(),
-    //         message: contents,
-    //         last_try: timestamp,
-    //         created_at: timestamp,
-    //         try_count: 1,
-    //     };
-
-    //     let failed_meesaging = FAILEDMESSAGING.get().write().unwrap();
-
-    //     // save message in data base
-    //     if let Err(e) = failed_meesaging.tree.insert(key, message) {
-    //         log::error!("Error saving failed chat message to data base: {}", e);
-    //     }
-
-    //     // flush trees to disk
-    //     if let Err(e) = failed_meesaging.tree.flush() {
-    //         log::error!("Error failed chat messages flush: {}", e);
-    //     }
-    // }
 
     fn save_unconfirmed_message(
         message_id: &Vec<u8>,
