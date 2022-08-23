@@ -8,17 +8,17 @@
 // Async comparison
 // https://runrust.miraheze.org/wiki/Async_crate_comparison
 // MPSC = Multi-Producer, Single-Consumer FiFo
+use crate::utilities::filelogger::FileLogger;
+use crate::utilities::timestamp::Timestamp;
+use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
 use state::Storage;
+use std::collections::BTreeMap;
+use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
-use std::fs::File;
-use filetime::FileTime;
-use std::collections::BTreeMap;
-use crate::utilities::timestamp::Timestamp;
-use crate::utilities::filelogger::FileLogger;
 
 // crate modules
 pub mod api;
@@ -94,9 +94,9 @@ pub async fn start(storage_path: String) -> () {
     std::fs::create_dir_all(&log_path).unwrap();
 
     // create log file name
-    let log_file_name: String = "error_".to_string() + Timestamp::get_timestamp().to_string().as_str() + ".log";
+    let log_file_name: String =
+        "error_".to_string() + Timestamp::get_timestamp().to_string().as_str() + ".log";
     let log_file_path = log_path.join(log_file_name);
-
 
     // maintain log files
     let paths = std::fs::read_dir(log_path).unwrap();
@@ -104,7 +104,7 @@ pub async fn start(storage_path: String) -> () {
 
     let mut logfiles: BTreeMap<i64, String> = BTreeMap::new();
     let mut logfile_times: Vec<i64> = vec![];
-    for path in paths{
+    for path in paths {
         let filename = String::from(path.as_ref().unwrap().path().to_str().unwrap());
         let metadata = std::fs::metadata(filename.clone()).unwrap();
         //print!("path={}", path.unwrap().path().display());
@@ -115,28 +115,44 @@ pub async fn start(storage_path: String) -> () {
     }
     logfile_times.sort();
 
-    if logfile_times.len() > 2{
+    if logfile_times.len() > 2 {
         for i in 0..(logfile_times.len() - 2) {
             if let Some(filename) = logfiles.get(&logfile_times[i]) {
                 std::fs::remove_file(std::path::Path::new(filename)).unwrap();
             }
-        }    
+        }
     }
 
     // logging on android with android logger
     #[cfg(target_os = "android")]
     {
-        let env_logger = Box::new(android_logger::AndroidLogger::new(Config::default().with_min_level(Level::Info)));
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
+        let env_logger = Box::new(android_logger::AndroidLogger::new(
+            Config::default().with_min_level(Level::Info),
+        ));
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
+            simplelog::LevelFilter::Error,
+            simplelog::Config::default(),
+            File::create(log_file_path).unwrap(),
+        ));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
+            .unwrap();
     }
 
     // logging on ios
     #[cfg(target_os = "ios")]
     {
-        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, log::LevelFilter::Info).build());
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
+        let env_logger = Box::new(
+            pretty_env_logger::formatted_builder()
+                .filter(None, log::LevelFilter::Info)
+                .build(),
+        );
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
+            simplelog::LevelFilter::Error,
+            simplelog::Config::default(),
+            File::create(log_file_path).unwrap(),
+        ));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
+            .unwrap();
     }
 
     // only use the simple logger on desktop systems
@@ -145,7 +161,7 @@ pub async fn start(storage_path: String) -> () {
         // find rust env var
         let mut env_log_level = String::from("error");
         for (key, value) in std::env::vars() {
-            if key == "RUST_LOG"{
+            if key == "RUST_LOG" {
                 env_log_level = value;
                 break;
             }
@@ -153,9 +169,9 @@ pub async fn start(storage_path: String) -> () {
 
         // define log level
         let mut level_filter = log::LevelFilter::Error;
-        if env_log_level == "warn"{
+        if env_log_level == "warn" {
             level_filter = log::LevelFilter::Warn;
-        } else if  env_log_level == "debug" {
+        } else if env_log_level == "debug" {
             level_filter = log::LevelFilter::Debug;
         } else if env_log_level == "info" {
             level_filter = log::LevelFilter::Info;
@@ -163,9 +179,18 @@ pub async fn start(storage_path: String) -> () {
             level_filter = log::LevelFilter::Trace;
         }
 
-        let env_logger = Box::new(pretty_env_logger::formatted_builder().filter(None, level_filter).build());
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(simplelog::LevelFilter::Error, simplelog::Config::default(), File::create(log_file_path).unwrap()));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info).unwrap();
+        let env_logger = Box::new(
+            pretty_env_logger::formatted_builder()
+                .filter(None, level_filter)
+                .build(),
+        );
+        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
+            simplelog::LevelFilter::Error,
+            simplelog::Config::default(),
+            File::create(log_file_path).unwrap(),
+        ));
+        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
+            .unwrap();
     }
 
     log::error!("test log to ensure that logging is working");
@@ -318,7 +343,7 @@ pub async fn start(storage_path: String) -> () {
                         },
                         libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
                             internet.swarm.behaviour_mut().process_events(behaviour);
-                        }                        
+                        }
                         _ => {}
                     }
                     None
@@ -534,7 +559,7 @@ pub async fn start(storage_path: String) -> () {
                                 };
                                 // forward to messaging module
                                 Messaging::received(message);
-                            },
+                            }
                             ConnectionModule::None => {
                                 // TODO: DTN behaviour
                                 // reschedule it for the moment
