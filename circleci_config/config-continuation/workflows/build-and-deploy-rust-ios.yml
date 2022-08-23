@@ -1,0 +1,5 @@
+when: << pipeline.parameters.run-rust-tagged-workflow >>
+jobs:
+  - verify-version-rust: { 'filters': { 'tags': { 'only': '/.*/' } } }
+  - build-libqaul-ios: { 'requires': [ 'verify-version-rust' ], 'filters': { 'tags': { 'only': '/.*/' } } }
+  - publish-rust-github-release: { 'requires': [ 'build-libqaul-ios' ], 'filters': { 'tags': { 'only': '/.*/' } } }
