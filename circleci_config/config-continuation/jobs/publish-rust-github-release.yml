@@ -5,6 +5,7 @@ steps:
       at: ~/qaul-libp2p
   - run:
       name: Copy binaries to ./artifacts
+      shell: /bin/bash --login +eo pipefail
       command: |
         mkdir artifacts
         # Linux
@@ -20,6 +21,9 @@ steps:
         cp rust/target/universal/release/liblibqaul.a ./artifacts/
         # Windows
         cp rust/target/release/libqaul.dll ./artifacts/
+
+        # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
+        exit 0
   - run:
       name: Install ghr
       command: |
@@ -47,5 +51,4 @@ steps:
           -c "${CIRCLE_SHA1}" \
           -n "Rust - v${VERSION}" \
           -b "${DESCRIPTION}" \
-          -delete \
           "${TAG}" artifacts/

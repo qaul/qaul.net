@@ -770,7 +770,11 @@ jobs:
                     cp rust/target/universal/release/liblibqaul.a ./artifacts/
                     # Windows
                     cp rust/target/release/libqaul.dll ./artifacts/
+
+                    # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
+                    exit 0
                 name: Copy binaries to ./artifacts
+                shell: /bin/bash --login +eo pipefail
             - run:
                 command: |
                     GHR_VERSION=0.14.0
@@ -797,7 +801,6 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "Rust - v${VERSION}" \
                       -b "${DESCRIPTION}" \
-                      -delete \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
     test-flutter:
@@ -932,7 +935,45 @@ workflows:
                     - build-flutter-windows
                     - build-flutter-linux
         when: << pipeline.parameters.run-flutter-tagged-workflow >>
-    build-and-deploy-rust:
+    build-and-deploy-rust-android:
+        jobs:
+            - verify-version-rust:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-libqaul-android:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-rust
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - build-libqaul-android
+        when: << pipeline.parameters.run-rust-tagged-workflow >>
+    build-and-deploy-rust-ios:
+        jobs:
+            - verify-version-rust:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-libqaul-ios:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-rust
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - build-libqaul-ios
+        when: << pipeline.parameters.run-rust-tagged-workflow >>
+    build-and-deploy-rust-linux:
         jobs:
             - verify-version-rust:
                 filters:
@@ -944,24 +985,38 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - build-libqaul-android:
+            - publish-rust-github-release:
                 filters:
                     tags:
                         only: /.*/
                 requires:
-                    - verify-version-rust
-            - build-libqaul-ios:
+                    - build-libqaul-linux
+        when: << pipeline.parameters.run-rust-tagged-workflow >>
+    build-and-deploy-rust-macos:
+        jobs:
+            - verify-version-rust:
                 filters:
                     tags:
                         only: /.*/
-                requires:
-                    - verify-version-rust
             - build-libqaul-macos:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - verify-version-rust
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - build-libqaul-macos
+        when: << pipeline.parameters.run-rust-tagged-workflow >>
+    build-and-deploy-rust-windows:
+        jobs:
+            - verify-version-rust:
+                filters:
+                    tags:
+                        only: /.*/
             - build-libqaul-windows:
                 filters:
                     tags:
@@ -973,10 +1028,6 @@ workflows:
                     tags:
                         only: /.*/
                 requires:
-                    - build-libqaul-linux
-                    - build-libqaul-android
-                    - build-libqaul-ios
-                    - build-libqaul-macos
                     - build-libqaul-windows
         when: << pipeline.parameters.run-rust-tagged-workflow >>
     build-rust:
