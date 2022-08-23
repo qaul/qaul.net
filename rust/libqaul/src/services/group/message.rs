@@ -61,8 +61,11 @@ impl GroupMessage {
         let sender_msg_index = u32::from_be_bytes(message_id[16..20].try_into().unwrap());
 
         // change members status
-        sender.last_message_index = sender_msg_index;
-        super::Group::update_group_member(&receiver_id, group_id, &sender);
+        if sender_msg_index > sender.last_message_index {
+            sender.last_message_index = sender_msg_index;
+            super::Group::update_group_member(&receiver_id, group_id, &sender);
+        }
+
         Ok(true)
     }
 }

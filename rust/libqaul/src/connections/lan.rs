@@ -23,7 +23,7 @@ use libp2p::{
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping::{Ping, PingConfig, PingEvent},
-    swarm::{Swarm},
+    swarm::Swarm,
     tcp::TcpConfig,
     yamux, NetworkBehaviour, Transport,
 };
@@ -64,24 +64,24 @@ pub struct QaulLanBehaviour {
     pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
-impl QaulLanBehaviour{
-    pub fn process_events(&mut self, event: QaulLanEvent){
+impl QaulLanBehaviour {
+    pub fn process_events(&mut self, event: QaulLanEvent) {
         match event {
-            QaulLanEvent::QaulInfo(ev)=>{
+            QaulLanEvent::QaulInfo(ev) => {
                 self.qaul_info_event(ev);
-            },
-            QaulLanEvent::QaulMessaging(ev)=>{
+            }
+            QaulLanEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
-            },
-            QaulLanEvent::Ping(ev)=>{
+            }
+            QaulLanEvent::Ping(ev) => {
                 self.ping_event(ev);
-            },
-            QaulLanEvent::Mdns(ev)=>{
+            }
+            QaulLanEvent::Mdns(ev) => {
                 self.mdsn_event(ev);
-            },
-            QaulLanEvent::Floodsub(ev)=>{
+            }
+            QaulLanEvent::Floodsub(ev) => {
                 self.floodsub_event(ev);
-            },
+            }
         }
     }
     fn qaul_info_event(&mut self, event: QaulInfoEvent) {
@@ -110,8 +110,8 @@ impl QaulLanBehaviour{
                 }
             }
         }
-    }  
-    
+    }
+
     fn floodsub_event(&mut self, event: FloodsubEvent) {
         match event {
             FloodsubEvent::Message(msg) => {
@@ -149,7 +149,6 @@ impl QaulLanBehaviour{
             _ => (),
         }
     }
-    
 }
 
 #[derive(Debug)]
@@ -304,14 +303,11 @@ impl Lan {
     }
 }
 
-
-
 // impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
 //     fn inject_event(&mut self, event: QaulInfoEvent) {
 //         events::qaul_info_event(event, ConnectionModule::Lan);
 //     }
 // }
-
 
 // impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulLanBehaviour {
 //     fn inject_event(&mut self, event: QaulMessagingEvent) {
@@ -319,13 +315,11 @@ impl Lan {
 //     }
 // }
 
-
 // impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
 //     fn inject_event(&mut self, event: PingEvent) {
 //         events::ping_event(event, ConnectionModule::Lan);
 //     }
 // }
-
 
 // impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
 //     fn inject_event(&mut self, event: MdnsEvent) {
@@ -353,7 +347,6 @@ impl Lan {
 //         }
 //     }
 // }
-
 
 // impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
 //     fn inject_event(&mut self, event: FloodsubEvent) {

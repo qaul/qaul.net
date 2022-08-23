@@ -89,8 +89,8 @@ pub struct FileHistory {
 /// mutable state of all file
 static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
 
-/// pub const DEF_PACKAGE_SIZE: u32 = 64000;
-pub const DEF_PACKAGE_SIZE: u32 = 1000;
+pub const DEF_PACKAGE_SIZE: u32 = 1500;
+///pub const DEF_PACKAGE_SIZE: u32 = 1000;
 
 pub struct FileShare {}
 /// File sharing module to process transfer, receive and RPC commands
@@ -326,7 +326,7 @@ impl FileShare {
             }
         }
 
-        let mut last_index = my_member.last_message_index + 1;
+        let mut last_index = my_member.last_message_index;
         let timestamp = Timestamp::get_timestamp();
 
         let mut file: File;
@@ -397,7 +397,7 @@ impl FileShare {
             file_extension: extension.clone(),
             file_size: size,
             file_descr: description.clone(),
-            start_index: last_index,
+            start_index: last_index + 1,
             message_count: mesage_count,
         };
         Self::on_completed(&user_account.id, &user_account.id, group_id, &file_info);
@@ -427,7 +427,7 @@ impl FileShare {
             let data = proto_net::FileSharingContainer {
                 message: Some(proto_net::file_sharing_container::Message::FileData(
                     proto_net::FileSharingData {
-                        start_index: last_index,
+                        start_index: last_index + 1,
                         message_count: mesage_count,
                         data: buffer[0..(read_size as usize)].iter().cloned().collect(),
                     },
@@ -442,9 +442,10 @@ impl FileShare {
         let mut msgs: Vec<(Vec<u8>, Vec<u8>)> = vec![];
         let mut stored_info = false;
         for msg in messages {
+            last_index = last_index + 1;
+
             let message_id =
                 Messaging::generate_group_message_id(group_id, &user_account.id, last_index);
-            last_index = last_index + 1;
 
             let common_message = proto::CommonMessage {
                 message_id: message_id.clone(),
