@@ -23,9 +23,19 @@ To trigger such a task, one must create an annotated tag starting with "v" follo
 
 !> You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of Cargo.toml **will fail** the pipeline.
 
+#### Platform-specific release pipelines
+Optionally, you may add another suffix, describing the platform you'd like to build and release for.
+This is specially useful when a pipeline fails for a single platform. In that case, you may push
+a hotfix for the desired platform and tag a platform-specific release.
+
+The options are: `.*-android`; `.*-ios`; `.*-linux`; `.*-macos`; `.*-windows`.
+
 ```bash
-# Creates annotated tag
+# Creates annotated tag - **ALL Platforms**
 git tag -a v<SemVer>-rust -m '<brief message>'
+
+# [Optional] Platform-specific tag
+git tag -a v<SemVer>-rust-android -m '<message>'
 
 # Pushes both commits and annotated tags (available since Git 1.8.3)
 git push --follow-tags
