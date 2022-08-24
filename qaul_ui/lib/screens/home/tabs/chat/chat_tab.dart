@@ -99,8 +99,9 @@ class _ChatState extends _BaseTabState<_Chat> {
                 throw UnimplementedError('multi person room not implemented');
               }
 
-              final otherUser = users
-                  .firstWhereOrNull((u) => u.id.equals(room.conversationId));
+              final otherUser = users.firstWhereOrNull((u) =>
+                  u.conversationId != null &&
+                  u.conversationId!.equals(room.conversationId));
 
               if (otherUser == null) {
                 _log.warning('single-person room with unknown otherUser');
