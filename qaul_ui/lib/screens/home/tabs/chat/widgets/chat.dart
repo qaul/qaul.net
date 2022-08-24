@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
@@ -45,7 +44,8 @@ Future<void> openChat(
   required WidgetRef ref,
   required BuildContext context,
   required User user,
-  required User otherUser,
+  User? otherUser,
+  VoidCallback? onBackButtonPressed,
 }) async {
   ref.read(uiOpenChatProvider.notifier).setCurrent(room);
 
@@ -61,7 +61,8 @@ Future<void> openChat(
       builder: (context) => ChatScreen(
         room,
         user,
-        otherUser,
+        onBackButtonPressed,
+        otherUser: otherUser,
       ),
     ),
   );
@@ -71,8 +72,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   const ChatScreen(
     this.room,
     this.user,
-    this.otherUser, {
+    this.onBackButtonPressed, {
     Key? key,
+    this.otherUser,
   }) : super(key: key);
 
   final ChatRoom room;
@@ -80,8 +82,11 @@ class ChatScreen extends StatefulHookConsumerWidget {
   /// The default user
   final User user;
 
-  /// Someone the default user is having a conversation with
-  final User otherUser;
+  /// Someone the default user is having a conversation with. Leave null if group chat
+  final User? otherUser;
+
+  /// If null, back button will pop the current route.
+  final VoidCallback? onBackButtonPressed;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -92,7 +97,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User get user => widget.user;
 
-  User get otherUser => widget.otherUser;
+  User? get otherUser => widget.otherUser;
 
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < kTabletBreakpoint;
@@ -120,6 +125,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    assert(otherUser != null || room.isGroupChatRoom);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(currentOpenChatRoom.notifier).state = room;
+      ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
+    });
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -169,7 +180,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             UserAvatar.small(badgeEnabled: false, user: otherUser),
             const SizedBox(width: 12),
-            Text(otherUser.name),
+            Text(otherUser?.name ?? room.name!),
           ],
         ),
         titleSpacing: 0,
@@ -299,21 +310,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             customMessageBuilder: (message, {required int messageWidth}) {
               final event = GroupEventContent.fromJson(message.metadata!);
-              final u = ref.read(usersProvider).firstWhereOrNull((e) => e.idBase58 == event.userIdBase58);
+              final u = ref
+                  .read(usersProvider)
+                  .firstWhereOrNull((e) => e.idBase58 == event.userIdBase58);
               if (u == null || event.type == GroupEventContentType.none) {
                 return const SizedBox.shrink();
               }
 
               return Text(
                 '"${u.name}" has ${message.type == GroupEventContentType.joined ? 'joined' : 'left'} the group',
-                style: Theme.of(context).textTheme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1!
+                    .copyWith(fontStyle: FontStyle.italic),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               );
             },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
-                colorGenerationStrategy(otherUser.idBase58),
+                colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
               ],
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
@@ -323,7 +339,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  User _author(Message e) => e.senderId.equals(user.id) ? user : otherUser;
+  User _author(Message e) => e.senderId.equals(user.id)
+      ? user
+      : ref.read(usersProvider).firstWhere((usr) => usr.id.equals(e.senderId));
 
   List<types.Message>? messages(ChatRoom room) {
     return room.messages
