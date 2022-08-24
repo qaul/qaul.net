@@ -149,7 +149,7 @@ class LibqaulWorker {
     dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
     await _sendMessage(Modules.CHAT, msg);
     msg = Group(groupListRequest: GroupListRequest());
-    await _sendMessage(Modules.CHAT, msg);
+    await _sendMessage(Modules.GROUP, msg.writeToBuffer());
   }
 
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
