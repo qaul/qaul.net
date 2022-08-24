@@ -161,7 +161,7 @@ class LibqaulWorker {
     dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
     await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
     msg = Group(groupListRequest: GroupListRequest());
-    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
   }
 
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
@@ -369,6 +369,9 @@ class LibqaulWorker {
         }
       } else if (m.module == Modules.BLE) {
         final resp = await BleTranslator().decodeMessageBytes(m.data);
+        if (resp != null) _processResponse(resp);
+      } else if (m.module == Modules.GROUP) {
+        final resp = await GroupTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else if (m.module == Modules.FILESHARE) {
         final resp = await FileSharingTranslator().decodeMessageBytes(m.data);

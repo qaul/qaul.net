@@ -40,13 +40,18 @@ class _ChatState extends _BaseTabState<_Chat> {
     final l18ns = AppLocalizations.of(context);
 
     final currentOpenChat = useState<Widget?>(null);
-    final setOpenChat = useCallback((ChatRoom room, User otherUser) {
+    final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
+      assert(room.isGroupChatRoom || otherUser != null);
       if (MediaQuery.of(context).size.width < kTabletBreakpoint) {
         openChat(room,
             context: context, user: defaultUser, otherUser: otherUser);
       } else {
         currentOpenChat.value = ChatScreen(
-            room, defaultUser, otherUser, () => currentOpenChat.value = null);
+          room,
+          defaultUser,
+          () => currentOpenChat.value = null,
+          otherUser: otherUser,
+        );
       }
     }, []);
 
@@ -67,7 +72,31 @@ class _ChatState extends _BaseTabState<_Chat> {
               var theme = Theme.of(context).textTheme;
               final room = filteredRooms[i];
               if (room.isGroupChatRoom) {
-                throw UnimplementedError('multi person room not implemented');
+                return GroupListTile(
+                  room,
+                  content: _contentFromOverview(
+                    room.lastMessagePreview,
+                    theme,
+                    users: users,
+                  ),
+                  trailingMetadata: Row(
+                    children: [
+                      Text(
+                        room.lastMessageTime == null
+                            ? ''
+                            : describeFuzzyTimestamp(
+                                room.lastMessageTime!,
+                                locale:
+                                    Locale.parse(Intl.defaultLocale ?? 'en'),
+                              ),
+                        style: theme.caption!
+                            .copyWith(fontStyle: FontStyle.italic),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                  onTap: () => setOpenChat(room),
+                );
               }
 
               final otherUser = users.firstWhereOrNull((u) =>
@@ -205,7 +234,7 @@ class _ChatState extends _BaseTabState<_Chat> {
         overflow: TextOverflow.ellipsis,
       );
     } else {
-      _log.info('overview type ${message.runtimeType} has not been rendered');
+      _log.fine('overview type ${message.runtimeType} has not been rendered');
       return const SizedBox.shrink();
     }
   }

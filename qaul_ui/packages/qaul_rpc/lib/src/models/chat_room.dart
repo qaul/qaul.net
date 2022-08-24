@@ -49,7 +49,8 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   factory ChatRoom.blank({required User user, required User otherUser}) {
     assert(otherUser.conversationId != null);
-    return ChatRoom._(conversationId: otherUser.conversationId!, name: otherUser.name);
+    return ChatRoom._(
+        conversationId: otherUser.conversationId!, name: otherUser.name);
   }
 
   factory ChatRoom.fromOverview(ChatOverview overview) {
@@ -87,7 +88,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
     return ChatRoom._(
       conversationId: g.id,
-      name: g.groupName,
+      name: g.groupName.isNotEmpty ? g.groupName : 'Unknown Group Name',
       createdAt: g.createdAt,
       members: members,
     );
@@ -113,7 +114,7 @@ class ChatRoom with EquatableMixin implements Comparable {
   }
 
   @override
-  List<Object?> get props => [conversationId];
+  List<Object?> get props => [idBase58];
 
   ChatRoom copyWith({
     int? lastMessageIndex,
@@ -246,6 +247,15 @@ class GroupInfo extends Equatable {
 
   @override
   List<Object?> get props => [groupName, createdAt];
+
+  factory GroupInfo.fromGroupInfoResponse(GroupInfoResponse group) {
+    return GroupInfo(
+      id: Uint8List.fromList(group.groupId),
+      groupName: group.groupName,
+      createdAt: DateTime.now(),
+      members: group.members,
+    );
+  }
 }
 
 abstract class MessageContent extends Equatable {

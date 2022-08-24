@@ -20,6 +20,8 @@ import '../utils.dart';
 
 part 'default_back_button.dart';
 
+part 'group_list_tile.dart';
+
 part 'language_select_dropdown.dart';
 
 part 'loading_indicator.dart';
