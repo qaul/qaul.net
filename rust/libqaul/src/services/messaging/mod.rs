@@ -228,30 +228,6 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_message(signature: &Vec<u8>) {
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
-            return;
-        }
-
-        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-
-        unconfirmed_message.scheduled = true;
-        if let Err(_e) = unconfirmed
-            .unconfirmed
-            .insert(signature.clone(), unconfirmed_message)
-        {
-            log::error!("error updating unconfirmed table");
-        } else {
-            if let Err(_e) = unconfirmed.unconfirmed.flush() {
-                log::error!("error updating unconfirmed table");
-            }
-        }
-    }
-
     /// pack, sign and schedule a message for sending
     pub fn pack_and_send_message(
         user_account: &UserAccount,
