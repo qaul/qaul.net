@@ -14,7 +14,11 @@ use state::Storage;
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::RwLock;
 
+#[cfg(emulate)]
+mod network_emul;
+
 mod process;
+pub mod retrans;
 
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
@@ -67,6 +71,7 @@ pub struct UnConfirmedMessage {
     pub container: Vec<u8>,
     pub last_sent: u64,
     pub retry: u32,
+    pub scheduled: bool,
 }
 pub struct UnConfirmedMessages {
     /// signature => UnConfirmedMessage
@@ -98,6 +103,10 @@ pub struct FailedMessaging {
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
+        #[cfg(emulate)]
+        /// init emulator
+        network_emul::NetworkEmulator::init();
+
         let message_ids = MessageIds {
             ids: BTreeMap::new(),
         };
@@ -145,7 +154,8 @@ impl Messaging {
             container: container.encode_to_vec(),
             last_sent: Timestamp::get_timestamp(),
             message_id: message_id.clone(),
-            retry: 0,
+            retry: 1,
+            scheduled: false,
         };
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -185,6 +195,30 @@ impl Messaging {
             }
         }
         None
+    }
+
+    fn on_scheduled_message(signature: &Vec<u8>) {
+        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
+            return;
+        }
+
+        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+
+        unconfirmed_message.scheduled = true;
+        if let Err(_e) = unconfirmed
+            .unconfirmed
+            .insert(signature.clone(), unconfirmed_message)
+        {
+            log::error!("error updating unconfirmed table");
+        } else {
+            if let Err(_e) = unconfirmed.unconfirmed.flush() {
+                log::error!("error updating unconfirmed table");
+            }
+        }
     }
 
     /// pack, sign and schedule a message for sending
@@ -272,7 +306,16 @@ impl Messaging {
     /// This function adds the message to the ring buffer for sending.
     /// This buffer is checked regularly by libqaul for sending.
     ///
-    fn schedule_message(receiver: PeerId, container: proto::Container) {
+    pub fn schedule_message(receiver: PeerId, container: proto::Container) {
+        #[cfg(emulate)]
+        if network_emul::NetworkEmulator::is_lost() {
+            log::error!(
+                "drop message, signature: {}",
+                bs58::encode(container.signature.clone()).into_string()
+            );
+            return;
+        }
+
         let msg = ScheduledMessage {
             receiver,
             container,
@@ -299,6 +342,9 @@ impl Messaging {
         if let Some(message) = message_item {
             // check for route
             if let Some(route) = RoutingTable::get_route_to_user(message.receiver) {
+                // update unconfirmed table set scheduled flag.
+                Self::on_scheduled_message(&message.container.signature);
+
                 // create binary message
                 let data = message.container.encode_to_vec();
 
@@ -306,9 +352,8 @@ impl Messaging {
                 return Some((route.node, route.module, data));
             } else {
                 log::trace!("No route found to user {}", message.receiver.to_base58());
-
                 // reschedule if no route is found
-                Self::schedule_message(message.receiver, message.container);
+                //Self::schedule_message(message.receiver, message.container);
             }
         }
 

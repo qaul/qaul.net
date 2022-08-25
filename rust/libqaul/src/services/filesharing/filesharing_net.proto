@@ -34,12 +34,15 @@ message FileSharingInfo {
 
 // FileSharing Data Message
 message FileSharingData{    
+    // file id
+    uint64 file_id = 1;
+
     // start index
-    uint32 start_index = 1;
+    uint32 start_index = 2;
 
     // message count
-    uint32 message_count = 2;
+    uint32 message_count = 3;
 
     // package data
-    bytes data = 3;
+    bytes data = 4;
 }

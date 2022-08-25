@@ -42,13 +42,16 @@ pub struct FileSharingInfo {
 /// FileSharing Data Message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FileSharingData {
+    /// file id
+    #[prost(uint64, tag="1")]
+    pub file_id: u64,
     /// start index
-    #[prost(uint32, tag="1")]
+    #[prost(uint32, tag="2")]
     pub start_index: u32,
     /// message count
-    #[prost(uint32, tag="2")]
+    #[prost(uint32, tag="3")]
     pub message_count: u32,
     /// package data
-    #[prost(bytes="vec", tag="3")]
+    #[prost(bytes="vec", tag="4")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }

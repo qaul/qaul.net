@@ -91,22 +91,30 @@ impl MessagingProcess {
                         );
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
-                        chat::Chat::save_incoming_message(
-                            receiver_id,
-                            sender_id,
-                            chat::rpc_proto::ContentType::File.try_into().unwrap(),
-                            &file_message.content,
-                            common.sent_at,
-                            &conversation_id,
-                            &common.message_id,
-                            chat::rpc_proto::MessageStatus::Received,
-                        );
-                        filesharing::FileShare::net(
-                            &sender_id,
+                        if let Ok(exist) = filesharing::FileShare::is_completed(
                             &receiver_id,
-                            &common.conversation_id,
                             &file_message.content,
-                        );
+                        ) {
+                            if !exist {
+                                chat::Chat::save_incoming_message(
+                                    receiver_id,
+                                    sender_id,
+                                    chat::rpc_proto::ContentType::File.try_into().unwrap(),
+                                    &file_message.content,
+                                    common.sent_at,
+                                    &conversation_id,
+                                    &common.message_id,
+                                    chat::rpc_proto::MessageStatus::Received,
+                                );
+
+                                filesharing::FileShare::net(
+                                    &sender_id,
+                                    &receiver_id,
+                                    &common.conversation_id,
+                                    &file_message.content,
+                                );
+                            }
+                        }
                     }
                     Some(super::proto::common_message::Payload::GroupMessage(
                         ref group_message,

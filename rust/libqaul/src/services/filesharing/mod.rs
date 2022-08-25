@@ -184,6 +184,33 @@ impl FileShare {
         user_files
     }
 
+    pub fn is_completed(user_id: &PeerId, msg_date: &Vec<u8>) -> Result<bool, String> {
+        let mut file_id: u64 = 0;
+        match proto_net::FileSharingContainer::decode(&msg_date[..]) {
+            Ok(messaging) => match messaging.message {
+                Some(proto_net::file_sharing_container::Message::FileInfo(file_info)) => {
+                    file_id = file_info.file_id;
+                }
+                Some(proto_net::file_sharing_container::Message::FileData(file_data)) => {
+                    file_id = file_data.file_id;
+                }
+                None => {
+                    return Err("not file data".to_string());
+                }
+            },
+            Err(e) => {
+                return Err("file data decode error".to_string());
+            }
+        }
+        let db_ref = Self::get_db_ref(user_id);
+
+        let exists = db_ref
+            .file_ids
+            .contains_key(&file_id.to_be_bytes())
+            .unwrap();
+        Ok(exists)
+    }
+
     /// This function is called when file transfer or receiving finished successfully.    
     fn on_completed(
         user_id: &PeerId,
@@ -427,6 +454,7 @@ impl FileShare {
             let data = proto_net::FileSharingContainer {
                 message: Some(proto_net::file_sharing_container::Message::FileData(
                     proto_net::FileSharingData {
+                        file_id,
                         start_index: last_index + 1,
                         message_count: mesage_count,
                         data: buffer[0..(read_size as usize)].iter().cloned().collect(),
