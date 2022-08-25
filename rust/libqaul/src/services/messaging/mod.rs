@@ -25,7 +25,7 @@ use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::table::RoutingTable;
 use crate::storage::database::DataBase;
-use crate::utilities::timestamp::{self, Timestamp};
+use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
 use qaul_messaging::QaulMessagingReceived;
 
@@ -35,26 +35,8 @@ pub mod proto {
     include!("qaul.net.messaging.rs");
 }
 
-/// mutable state of messages id for generate uniq id
-pub static MESSAGEIDS: Storage<RwLock<MessageIds>> = Storage::new();
-
-/// MessagId Structure
-pub struct MessageId {
-    timestamp: u64,
-    last_index: u32,
-}
-
-/// MessageIds structure
-pub struct MessageIds {
-    /// sender => mesage id
-    pub ids: BTreeMap<Vec<u8>, MessageId>,
-}
-
 /// mutable state of messages, scheduled for sending
 pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
-
-/// mutable state of failed messages, scheduled for sending
-pub static FAILEDMESSAGING: Storage<RwLock<FailedMessaging>> = Storage::new();
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -64,13 +46,21 @@ pub struct ScheduledMessage {
 
 /// mutable state of messages, scheduled for sending
 pub static UNCONFIRMED: Storage<RwLock<UnConfirmedMessages>> = Storage::new();
+
+/// unconfirmed message
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct UnConfirmedMessage {
+    // receiver id
     pub receiver_id: Vec<u8>,
+    // message id
     pub message_id: Vec<u8>,
+    // encoded container
     pub container: Vec<u8>,
+    // last sent time
     pub last_sent: u64,
+    // retry time
     pub retry: u32,
+    // flag that transfered on the network
     pub scheduled: bool,
 }
 pub struct UnConfirmedMessages {
@@ -95,11 +85,6 @@ pub struct FailedMessage {
     pub message: String,
 }
 
-/// Qaul Failed Messaging Structure
-pub struct FailedMessaging {
-    pub tree: Tree<FailedMessage>,
-}
-
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
@@ -107,20 +92,12 @@ impl Messaging {
         /// init emulator
         network_emul::NetworkEmulator::init();
 
-        let message_ids = MessageIds {
-            ids: BTreeMap::new(),
-        };
-        MESSAGEIDS.set(RwLock::new(message_ids));
-
         let messaging = Messaging {
             to_send: VecDeque::new(),
         };
         MESSAGING.set(RwLock::new(messaging));
 
         let db = DataBase::get_node_db();
-        let tree: Tree<FailedMessage> = db.open_bincode_tree("failed_messages").unwrap();
-        let failed_messaging = FailedMessaging { tree: tree };
-        FAILEDMESSAGING.set(RwLock::new(failed_messaging));
 
         // open trees
         let unconfirmed: Tree<UnConfirmedMessage> = db.open_bincode_tree("unconfirmed").unwrap();

@@ -35,13 +35,15 @@ impl RtcMessaging {
 
                 if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
                     let receiver = PeerId::from_bytes(&req.conversation_id).unwrap();
-                    messaging::Messaging::pack_and_send_message(
+                    if let Err(e) = messaging::Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
                         send_message.encode_to_vec(),
                         None,
                         false,
-                    );
+                    ) {
+                        log::error!("error {}", e);
+                    }
                 } else {
                     return Err("user account has problem".to_string());
                 }

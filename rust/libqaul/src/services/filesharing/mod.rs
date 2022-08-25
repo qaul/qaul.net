@@ -198,7 +198,7 @@ impl FileShare {
                     return Err("not file data".to_string());
                 }
             },
-            Err(e) => {
+            Err(_e) => {
                 return Err("file data decode error".to_string());
             }
         }

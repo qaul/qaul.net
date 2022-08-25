@@ -385,7 +385,9 @@ impl Member {
         if resp.accept {
             Self::on_accpeted_invite(sender_id, receiver_id, resp)
         } else {
-            Self::on_declined_invite(sender_id, receiver_id, resp);
+            if let Err(e) = Self::on_declined_invite(sender_id, receiver_id, resp) {
+                log::error!("on_decline error {}", e);
+            }
             Ok(false)
         }
     }

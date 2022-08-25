@@ -123,7 +123,7 @@ impl Rtc {
             }
         }
 
-        let mut my_member;
+        let my_member;
         match group.get_member(&user_account.id.to_bytes()) {
             Some(v) => {
                 my_member = v.clone();
