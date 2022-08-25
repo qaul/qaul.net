@@ -76,7 +76,7 @@ impl MessagingRetransmit {
 
                             unconfirmed_mesage.retry = new_retry;
                             unconfirmed_mesage.last_sent = cur_time;
-                            if let Err(e) = unconfirmed
+                            if let Err(_e) = unconfirmed
                                 .unconfirmed
                                 .insert(signature, unconfirmed_mesage.clone())
                             {
@@ -91,7 +91,7 @@ impl MessagingRetransmit {
         }
 
         if updated {
-            if let Err(e) = unconfirmed.unconfirmed.flush() {
+            if let Err(_e) = unconfirmed.unconfirmed.flush() {
                 log::error!("updating unconfirmed table error!");
             }
         }
