@@ -184,6 +184,11 @@ class LibqaulWorker {
   // -------------------
   // GROUP Requests
   // -------------------
+  void getGroupInfo(Uint8List id) async {
+    final msg = Group(groupInfoRequest: GroupInfoRequest(groupId: id.toList()));
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
   void createGroup(String name) async {
     assert(name.isNotEmpty);
     final msg = Group(groupCreateRequest: GroupCreateRequest(groupName: name));

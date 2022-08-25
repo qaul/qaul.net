@@ -32,6 +32,8 @@ part 'file_message_widget.dart';
 
 part 'file_sharing.dart';
 
+part 'group_settings.dart';
+
 part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
@@ -98,6 +100,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           return const _FileHistoryPage();
         }));
         break;
+      case 'groupSettings':
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return _GroupSettingsPage(room);
+        }));
+
+        break;
     }
   }
 
@@ -105,6 +113,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     assert(otherUser != null || room.isGroupChatRoom);
+    if (room.isGroupChatRoom) {
+      _overflowMenuOptions.addAll({'groupSettings': 'Group Settings'});
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(currentOpenChatRoom.notifier).state = room;
@@ -147,7 +158,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             UserAvatar.small(badgeEnabled: false, user: otherUser),
             const SizedBox(width: 12),
-            Text(otherUser?.name ?? room.name!),
+            Text(otherUser?.name ?? room.name ?? 'Group'),
           ],
         ),
         titleSpacing: 0,
