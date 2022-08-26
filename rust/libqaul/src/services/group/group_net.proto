@@ -13,9 +13,8 @@ message GroupContainer {
     }
 }
 
-
 // Invite member
-message InviteMember{
+message InviteMember {
     // group id
     bytes group_id = 1;
     // group name
@@ -28,28 +27,27 @@ message InviteMember{
     uint32 members_count = 5;
 }
 
-
 // Group member
 message Member {
-    //user id
+    // user id
     bytes user_id = 1;
-    //role
+    // role
     int32 role = 2;
-    //joined at
+    // joined at
     uint64 joined_at = 3;
-    //state 
+    // state
     int32 state = 4;
-    //last message index
+    // last message index
     uint32 last_message_index = 5;
 }
 
 // Group Notify
-message GroupNotify{
+message GroupNotify {
     // group id
     bytes group_id = 1;
     // group name
     string group_name = 2;
-    //created at
+    // created at
     uint64 created_at = 3;
     // creator id
     bytes creator_id = 4;
@@ -58,15 +56,15 @@ message GroupNotify{
 }
 
 // Accept Invite
-message ReplyInvite{
+message ReplyInvite {
     // group id
     bytes group_id = 1;
     // accept true : accept, false: decline
-    bool accept = 2; 
+    bool accept = 2;
 }
 
-// Removed member 
-message RemovedMember{
+// Removed member
+message RemovedMember {
     // group id
     bytes group_id = 1;
 }

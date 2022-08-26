@@ -82,7 +82,7 @@ message CryptoService {}
 message Confirmation {
     // message ID
     bytes signature = 1;
-    // receveived at timestamp
+    // received at timestamp
     uint64 received_at = 2;
 }
 

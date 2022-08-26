@@ -29,7 +29,7 @@ pub mod chat {
 }
 /// request for overview list of all conversations
 /// this request shall be sent continuously when the view is open
-/// 
+///
 /// at the moment always the entire list is sent
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatOverviewRequest {
@@ -61,7 +61,7 @@ pub struct ChatOverview {
     #[prost(int32, tag="5")]
     pub unread: i32,
     /// content type
-    #[prost(enumeration="ContentType", tag="6")]
+    #[prost(enumeration="ChatContentType", tag="6")]
     pub content_type: i32,
     /// preview text of the last message
     #[prost(bytes="vec", tag="7")]
@@ -113,11 +113,32 @@ pub struct ChatMessage {
     #[prost(uint64, tag="7")]
     pub received_at: u64,
     /// content type
-    #[prost(enumeration="ContentType", tag="8")]
+    #[prost(enumeration="ChatContentType", tag="8")]
     pub content_type: i32,
     /// content of the message
     #[prost(bytes="vec", tag="9")]
     pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// chat content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatContent {
+    /// message text
+    #[prost(string, tag="1")]
+    pub text: ::prost::alloc::string::String,
+}
+/// file content
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FileContent {
+}
+/// info content message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InfoContent {
+    /// info event type
+    #[prost(enumeration="InfoEventType", tag="1")]
+    pub event_type: i32,
+    /// user ID of user joined or left
+    #[prost(bytes="vec", tag="2")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// send chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -129,49 +150,40 @@ pub struct ChatMessageSend {
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,
 }
-/// the info message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupEvent {
-    /// message type
-    #[prost(enumeration="GroupEventType", tag="1")]
-    pub event_type: i32,
-    /// user ID of user joined or left
-    #[prost(bytes="vec", tag="2")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
-}
-/// Content Type
+/// Chat Content Type
 ///
-/// These power settings relate to the android
-/// power modes.
+/// describes the message content type
+/// of the message encoded in the ChatMessage content field
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
-pub enum ContentType {
-    /// chat
-    Chat = 0,
-    /// group management 
-    Group = 1,
-    /// file
+pub enum ChatContentType {
+    /// Undefined / Error
+    None = 0,
+    /// chat content message
+    /// ChatContent
+    Chat = 1,
+    /// file content message
+    /// FileContent
     File = 2,
-    /// rtc management
-    Rtc = 3,
-    /// group event
-    GroupEvent = 4,
+    /// info content message
+    /// InfoContent
+    Info = 3,
 }
-impl ContentType {
+impl ChatContentType {
     /// String value of the enum field names used in the ProtoBuf definition.
     ///
     /// The values are not transformed in any way and thus are considered stable
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            ContentType::Chat => "chat",
-            ContentType::Group => "group",
-            ContentType::File => "file",
-            ContentType::Rtc => "rtc",
-            ContentType::GroupEvent => "group_event",
+            ChatContentType::None => "none",
+            ChatContentType::Chat => "chat",
+            ChatContentType::File => "file",
+            ChatContentType::Info => "info",
         }
     }
 }
+/// Sending status of sent messages
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum MessageStatus {
@@ -199,28 +211,28 @@ impl MessageStatus {
         }
     }
 }
-/// the possible group event types
+/// Event type definition
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
-pub enum GroupEventType {
+pub enum InfoEventType {
     /// default value, undefined message
-    /// delete this message
+    /// ignore this message
     None = 0,
     /// user joined group
     GroupJoined = 1,
     /// user left group
     GroupLeft = 2,
 }
-impl GroupEventType {
+impl InfoEventType {
     /// String value of the enum field names used in the ProtoBuf definition.
     ///
     /// The values are not transformed in any way and thus are considered stable
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            GroupEventType::None => "NONE",
-            GroupEventType::GroupJoined => "GROUP_JOINED",
-            GroupEventType::GroupLeft => "GROUP_LEFT",
+            InfoEventType::None => "NONE",
+            InfoEventType::GroupJoined => "GROUP_JOINED",
+            InfoEventType::GroupLeft => "GROUP_LEFT",
         }
     }
 }

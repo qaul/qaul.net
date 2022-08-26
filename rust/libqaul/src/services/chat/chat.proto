@@ -1,7 +1,6 @@
 syntax = "proto3";
 package qaul.rpc.chat;
 
-
 // Chat service RPC message container
 message Chat {
     // message type
@@ -23,10 +22,9 @@ message Chat {
 
 // request for overview list of all conversations
 // this request shall be sent continuously when the view is open
-// 
+//
 // at the moment always the entire list is sent
-message ChatOverviewRequest {
-}
+message ChatOverviewRequest {}
 
 // overview list of conversations
 // this can eighter be the entire list or the last updates
@@ -47,7 +45,7 @@ message ChatOverview {
     // unread messages
     int32 unread = 5;
     // content type
-    ContentType content_type = 6;
+    ChatContentType content_type = 6;
     // preview text of the last message
     bytes content = 7;
     // sender of the last message
@@ -63,28 +61,51 @@ message ChatConversationRequest {
 
 // list of chat messages of a specific conversation
 message ChatConversationList {
-    bytes conversation_id = 1;
+    bytes conversation_id             = 1;
     repeated ChatMessage message_list = 2;
 }
 
-// Content Type
-//
-// These power settings relate to the android
-// power modes.
-enum ContentType {
-    // chat
-    chat = 0;
-    // group management 
-    group = 1;
-    // file
-    file = 2;
-    // rtc management
-    rtc = 3;
-    // group event
-    group_event = 4;    
+// a single chat message
+message ChatMessage {
+    // index
+    uint64 index = 1;
+    // id of the sending user
+    bytes sender_id = 2;
+    // message id or member id
+    bytes message_id = 3;
+    // message status
+    MessageStatus status = 4;
+    // conversation id
+    bytes conversation_id = 5;
+    // time when the message was sent
+    uint64 sent_at = 6;
+    // time when the message was received
+    uint64 received_at = 7;
+    // content type
+    ChatContentType content_type = 8;
+    // content of the message
+    bytes content = 9;
 }
 
+// Chat Content Type
+//
+// describes the message content type
+// of the message encoded in the ChatMessage content field
+enum ChatContentType {
+    // Undefined / Error
+    none = 0;
+    // chat content message
+    // ChatContent
+    chat = 1;
+    // file content message
+    // FileContent
+    file = 2;
+    // info content message
+    // InfoContent
+    info = 3;
+}
 
+// Sending status of sent messages
 enum MessageStatus {
     // message not sent yet
     SENDING = 0;
@@ -97,27 +118,32 @@ enum MessageStatus {
     RECEIVED_BY_ALL = 3;
 }
 
+// chat content
+message ChatContent {
+    // message text
+    string text = 1;
+}
 
-// a single chat message
-message ChatMessage {
-    // index
-    uint64 index = 1;
-    // id of the sending user
-    bytes sender_id = 2;
-    // message id or member id
-    bytes message_id = 3;        
-    // message status
-    MessageStatus status = 4;
-    // conversation id
-    bytes conversation_id = 5;
-    // time when the message was sent
-    uint64 sent_at = 6;
-    // time when the message was received
-    uint64 received_at = 7;
-    // content type
-    ContentType content_type = 8;
-    // content of the message
-    bytes content = 9;
+// file content
+message FileContent {}
+
+// info content message
+message InfoContent {
+    // info event type
+    InfoEventType event_type = 1;
+    // user ID of user joined or left
+    bytes user_id = 2;
+}
+
+// Event type definition
+enum InfoEventType {
+    // default value, undefined message
+    // ignore this message
+    NONE = 0;
+    // user joined group
+    GROUP_JOINED = 1;
+    // user left group
+    GROUP_LEFT = 2;
 }
 
 // send chat message
@@ -126,24 +152,4 @@ message ChatMessageSend {
     bytes conversation_id = 1;
     // content of the message
     string content = 2;
-}
-
-
-// the possible group event types
-enum GroupEventType {
-  // default value, undefined message
-  // delete this message
-  NONE = 0;
-  // user joined group
-  GROUP_JOINED = 1;
-  // user left group
-  GROUP_LEFT = 2;
-}
-
-// the info message
-message GroupEvent {
-  // message type
-  GroupEventType event_type = 1;
-  // user ID of user joined or left
-  bytes user_id = 2;
 }

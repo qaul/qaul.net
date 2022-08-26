@@ -212,7 +212,7 @@ impl Chat {
         user_id: &PeerId,
         sender_id: &PeerId,
         content_type: i32,
-        content: &Vec<u8>,
+        content: Vec<u8>,
         sent_at: u64,
         conversation_id: &ConversationId,
         message_id: &Vec<u8>,
@@ -239,7 +239,7 @@ impl Chat {
             }
         }
 
-        log::error!("save incomeming is_group={}", is_group);
+        log::trace!("save incoming is_group={}", is_group);
         let overview;
         match Self::update_overview(
             user_id,
@@ -248,7 +248,7 @@ impl Chat {
             &conversation_id.to_bytes(),
             timestamp,
             content_type,
-            content,
+            &content,
             &sender_id.to_bytes(),
             is_group,
         ) {
@@ -273,7 +273,7 @@ impl Chat {
             sent_at,
             received_at: timestamp,
             content_type: content_type,
-            content: content.clone(),
+            content,
         };
 
         // save message in data base

@@ -112,7 +112,7 @@ pub struct Confirmation {
     /// message ID
     #[prost(bytes="vec", tag="1")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
-    /// receveived at timestamp
+    /// received at timestamp
     #[prost(uint64, tag="2")]
     pub received_at: u64,
 }

@@ -50,7 +50,7 @@ pub struct Member {
     /// joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
-    /// state 
+    /// state
     #[prost(int32, tag="4")]
     pub state: i32,
     /// last message index
@@ -86,7 +86,7 @@ pub struct ReplyInvite {
     #[prost(bool, tag="2")]
     pub accept: bool,
 }
-/// Removed member 
+/// Removed member
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RemovedMember {
     /// group id
