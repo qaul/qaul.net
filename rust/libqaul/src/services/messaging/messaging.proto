@@ -23,7 +23,7 @@ message Envelope {
 }
 
 // envelop payload
-message EnvelopPayload{
+message EnvelopPayload {
     oneof payload {
         // encrypted message data
         Encrypted encrypted = 1;
@@ -32,29 +32,34 @@ message EnvelopPayload{
     }
 }
 
-
 // encrypted message data
 message Encrypted {
-    //repeated Data data = 1;
-    bytes data = 1;
+    // one or several Data messages
+    // of maximally 64KB each.
+    repeated Data data = 1;
 }
 
 // encrypted message data
 message Data {
     // message nonce for encryption
+    //
+    // each nonce is only used once per key
+    // and increases by one fore each new data package.
     uint64 nonce = 1;
-    // the encrypted message data
+    // the encrypted message data slice
+    // each data package contains maximally
+    // 64KB
     bytes data = 2;
 }
 
 // messaging unified message
-message Messaging {   
+message Messaging {
     oneof message {
         // confirm chat message
         Confirmation confirmation_message = 1;
         // crypto service
         CryptoService crypto_service = 2;
-        // rtc stream 
+        // rtc stream
         RtcStreamMessage rtc_stream_message = 3;
         // group notify
         GroupNotifyMessage group_notify_message = 4;
@@ -67,12 +72,10 @@ message Messaging {
 //
 // This message is for crypto specific tasks,
 // such as completing a handshake.
-message CryptoService {
-
-}
+message CryptoService {}
 
 // message received confirmation
-// 
+//
 // every message that was received by a user
 // sends an acknowledgment package, to the sender
 // to confirm the receive.
@@ -83,9 +86,8 @@ message Confirmation {
     uint64 received_at = 2;
 }
 
-
 // common message
-message CommonMessage{
+message CommonMessage {
     // message ID
     bytes message_id = 1;
 
@@ -94,13 +96,13 @@ message CommonMessage{
 
     // conversation id
     uint64 sent_at = 3;
-    
+
     // payload
     oneof payload {
         // chat message
         ChatMessage chat_message = 4;
         // file message
-        FileMessage file_message = 5;                
+        FileMessage file_message = 5;
         // group message
         GroupMessage group_message = 6;
         // rtc message
@@ -128,7 +130,6 @@ message RtcStreamMessage {
     bytes content = 1;
 }
 
-
 // group message
 message GroupMessage {
     bytes content = 1;
@@ -138,7 +139,6 @@ message GroupMessage {
 message GroupNotifyMessage {
     bytes content = 1;
 }
-
 
 // DTN message
 message Dtn {

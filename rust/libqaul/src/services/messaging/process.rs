@@ -28,7 +28,7 @@ impl MessagingProcess {
         data: &Vec<u8>,
         signature: &Vec<u8>,
     ) {
-        // decode mesaging
+        // decode messaging
         let messaging;
         match super::proto::Messaging::decode(&data[..]) {
             Ok(v) => {
@@ -49,7 +49,7 @@ impl MessagingProcess {
             Some(super::proto::messaging::Message::ConfirmationMessage(confirm)) => {
                 //update unconfirmed_table
                 if let Some(msg_id) = super::Messaging::on_confirmed_message(&confirm.signature) {
-                    //update chat table received_at and state
+                    // update chat table received_at and state
                     chat::Chat::update_confirmation(receiver_id, &msg_id, confirm.received_at);
                 }
             }
@@ -59,7 +59,7 @@ impl MessagingProcess {
                 group::Group::on_notify(sender_id, receiver_id, &group_notify.content);
             }
             Some(super::proto::messaging::Message::CommonMessage(common)) => {
-                // check converssation id
+                // check conversation id
                 let conversation_id;
                 match ConversationId::from_bytes(&common.conversation_id) {
                     Ok(v) => {
@@ -150,7 +150,7 @@ impl MessagingProcess {
                     receiver_id.to_base58()
                 );
 
-                //update group status
+                // update group status
                 if let Err(e) = group::GroupMessage::on_message(
                     sender_id,
                     receiver_id,
@@ -239,21 +239,25 @@ impl MessagingProcess {
                 match payload.payload {
                     Some(super::proto::envelop_payload::Payload::Encrypted(encrypted)) => {
                         // decrypt data
-                        // let mut decrypted: Vec<u8> = Vec::new();
-                        // for data_message in encrypted.data {
-                        //     if let Some(mut decrypted_chunk) = Crypto::decrypt(data_message.data, data_message.nonce, receiver_id, sender_id.clone()) {
-                        //         decrypted.append(&mut decrypted_chunk);
-                        //     }
-                        //     else {
-                        //         log::error!("decryption error");
-                        //         return;
-                        //     }
-                        // }
-                        // Self::on_direct_message(&sender_id, &receiver_id, &decrypted, &container.signature);
+                        let mut decrypted: Vec<u8> = Vec::new();
+                        for data_message in encrypted.data {
+                            if let Some(mut decrypted_chunk) = Crypto::decrypt(
+                                data_message.data,
+                                data_message.nonce,
+                                receiver_id,
+                                sender_id.clone(),
+                            ) {
+                                decrypted.append(&mut decrypted_chunk);
+                            } else {
+                                log::error!("decryption error");
+                                return;
+                            }
+                        }
+
                         Self::on_direct_message(
                             &sender_id,
                             &receiver_id,
-                            &encrypted.data,
+                            &decrypted,
                             &container.signature,
                         );
                     }

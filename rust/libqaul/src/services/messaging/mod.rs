@@ -191,52 +191,51 @@ impl Messaging {
     pub fn pack_and_send_message(
         user_account: &UserAccount,
         receiver: &PeerId,
-        data: &Vec<u8>,
+        data: Vec<u8>,
         message_id: Option<&Vec<u8>>,
         is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
-        // // encrypt data
-        // // TODO: slize data to 64K
-        // let (encryption_result, nonce) = Crypto::encrypt(data.clone(), user_account.to_owned(), receiver.clone());
+        // encrypt data
+        // TODO: slize data to 64K
+        let (encryption_result, nonce) =
+            Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
 
-        // let mut encrypted: Vec<proto::Data> = Vec::new();
-        // match encryption_result {
-        //     Some(encrypted_chunk) => {
-        //         let data_message = proto::Data{ nonce, data: encrypted_chunk };
+        let mut encrypted: Vec<proto::Data> = Vec::new();
+        match encryption_result {
+            Some(encrypted_chunk) => {
+                let data_message = proto::Data {
+                    nonce,
+                    data: encrypted_chunk,
+                };
 
-        //         log::info!("data len: {}", data_message.encoded_len());
+                log::trace!("data len: {}", data_message.encoded_len());
 
-        //         encrypted.push(data_message);
-        //     },
-        //     None => return Err("Encryption error occurred".to_string()),
-        // }
+                encrypted.push(data_message);
+            }
+            None => return Err("Encryption error occurred".to_string()),
+        }
 
-        // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+        log::trace!(
+            "sender_id: {}, receiver_id: {}",
+            user_account.id.to_bytes().len(),
+            receiver.to_bytes().len()
+        );
 
         let envelop_payload = proto::EnvelopPayload {
             payload: Some(proto::envelop_payload::Payload::Encrypted(
-                proto::Encrypted { data: data.clone() },
+                proto::Encrypted { data: encrypted },
             )),
         };
-
-        // let payload = proto::Encrypted{data: data.clone()};
-
-        // let mut message_buf = Vec::with_capacity(payload.encoded_len());
-        // payload
-        //     .encode(&mut message_buf)
-        //     .expect("Vec<u8> provides capacity as needed");
 
         // create envelope
         let envelope = proto::Envelope {
             sender_id: user_account.id.to_bytes(),
             receiver_id: receiver.to_bytes(),
-            //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
-            //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
             payload: envelop_payload.encode_to_vec(),
         };
 
         // debug
-        log::info!("envelope len: {}", envelope.encoded_len());
+        log::debug!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
@@ -343,7 +342,7 @@ impl Messaging {
                 .expect("Vec<u8> provides capacity as needed");
 
             // // send message via messaging
-            Self::pack_and_send_message(&user, receiver_id, &message_buf, None, false)
+            Self::pack_and_send_message(&user, receiver_id, message_buf, None, false)
         } else {
             return Err("invalid user_id".to_string());
         }

@@ -496,7 +496,7 @@ impl FileShare {
                 if let Err(error) = Messaging::pack_and_send_message(
                     user_account,
                     &receiver,
-                    msg,
+                    msg.to_owned(),
                     Some(msg_id),
                     true,
                 ) {

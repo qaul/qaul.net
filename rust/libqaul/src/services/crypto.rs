@@ -2,51 +2,34 @@
 // This software is published under the AGPLv3 license.
 
 //! # End to End Encryption from user to user
-//! 
+//!
 //! This module provides the end to end encryption functionality
 //! for the messaging service.
-//! 
+//!
 //! The cryptography is based on the Noise protocol.
 //! qaul uses the `Noise_KK_25519_ChaChaPoly_SHA256` pattern.
 
-use libp2p::PeerId;
-use libp2p::identity::{Keypair, PublicKey};
-use prost::Message;
-use sled_extensions::{
-    DbExt,
-    bincode::Tree,
-};
-use serde::{Serialize, Deserialize};
-use ed25519_dalek;
-use x25519_dalek;
 use curve25519_dalek;
+use ed25519_dalek;
+use libp2p::identity::{Keypair, PublicKey};
+use libp2p::PeerId;
+use noise_protocol::{Cipher, CipherState, HandshakeState, Hash, U8Array, DH};
+use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
+use prost::Message;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
-use noise_protocol::{
-    HandshakeState,
-    CipherState,
-    DH,
-    Hash,
-    Cipher,
-    U8Array,
-};
-use noise_rust_crypto::{
-    X25519,
-    ChaCha20Poly1305,
-    Sha256,
-};
+use sled_extensions::{bincode::Tree, DbExt};
+use x25519_dalek;
 
-use super::messaging::{
-    Messaging,
-    proto,
-};
+use super::messaging::{proto, Messaging};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::storage::database::DataBase;
 use crate::router::users::Users;
+use crate::storage::database::DataBase;
 
 /// The State Data of the Noise Protocol
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CryptoState {
-    /// the state of this Noise of this 
+    /// the state of this Noise of this
     pub state: CryptoProcessState,
     /// are we the initiator?
     pub initiator: bool,
@@ -63,17 +46,17 @@ pub struct CryptoState {
     /// nonce index for outgoing messages
     pub index_nonce_out: u64,
     /// cipher key to decrypt incoming messages
-    /// 
+    ///
     /// As messages can arrive out of order, libqaul has
     /// to deal with the message index (= nonces) itself.
     pub cipher_in: Option<Vec<u8>>,
     /// highest message index of incoming messages
     pub highest_index_nonce_in: u64,
     /// Missing out of order message indexes
-    /// 
+    ///
     /// These are indexes of messages that are lower then
     /// the highest message but have not arrived yet.
-    /// Due to the delay tolerance of the system, this 
+    /// Due to the delay tolerance of the system, this
     /// can happen.
     /// They shall be stored in the data base.
     /// Once we have a direct connection to the user, we
@@ -101,32 +84,43 @@ pub enum CryptoProcessState {
 }
 
 /// Crypto Module State
-/// 
+///
 /// This contains all references to the DB tree
 pub struct Crypto {}
 
 impl Crypto {
     /// Encrypt an Outgoing Message
-    /// 
-    /// This uses the `Noise_KK_X25519_ChaChaPoly_Sha256` 
+    ///
+    /// This uses the `Noise_KK_X25519_ChaChaPoly_Sha256`
     /// to encrypt messages.
     /// It also takes care of the handshake messages
     /// and saves the handshake state to the data base.
-    /// 
+    ///
     /// * data: the message data to encrypt
     /// * user_account: sender id
     /// * remote_id: receiver id
-    /// 
+    ///
     /// The function returns the encrypted data and the nonce.
-    pub fn encrypt(data: Vec<u8>, user_account: UserAccount, remote_id: PeerId) -> (Option<Vec<u8>>, u64)
-    {
-        Self::encrypt_noise_kk::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(data, user_account, remote_id)
+    pub fn encrypt(
+        data: Vec<u8>,
+        user_account: UserAccount,
+        remote_id: PeerId,
+    ) -> (Option<Vec<u8>>, u64) {
+        Self::encrypt_noise_kk::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+            data,
+            user_account,
+            remote_id,
+        )
     }
 
     /// Encrypt a Message
-    /// 
+    ///
     /// Encrypt an outgoing message.
-    fn encrypt_noise_kk<D, C, H, P>(data: Vec<u8>, user_account: UserAccount, remote_id: PeerId) -> (Option<Vec<u8>>, u64)
+    fn encrypt_noise_kk<D, C, H, P>(
+        data: Vec<u8>,
+        user_account: UserAccount,
+        remote_id: PeerId,
+    ) -> (Option<Vec<u8>>, u64)
     where
         D: DH,
         C: Cipher,
@@ -136,7 +130,7 @@ impl Crypto {
         let mut state: CryptoState;
         let mut message: Option<Vec<u8>> = None;
         let mut nonce: u64 = 0;
-        
+
         // get or build noise state
         if let Some(saved_state) = Self::get_handshake_state(user_account.clone(), remote_id) {
             // noise state exists
@@ -154,15 +148,16 @@ impl Crypto {
                     let e = D::Key::from_slice(state.e.as_slice());
 
                     // build noise handshake state
-                    let mut handshake: HandshakeState<D, C, H> = noise_protocol::HandshakeState::new(
-                        pattern,
-                        false,
-                        prologue.as_slice(),
-                        Some(U8Array::from_slice(state.s.clone().as_slice())),
-                        Some(e),
-                        Some(U8Array::from_slice(state.rs.clone().as_slice())),
-                        Some(U8Array::from_slice(state.re.clone().unwrap().as_slice())),
-                    );
+                    let mut handshake: HandshakeState<D, C, H> =
+                        noise_protocol::HandshakeState::new(
+                            pattern,
+                            false,
+                            prologue.as_slice(),
+                            Some(U8Array::from_slice(state.s.clone().as_slice())),
+                            Some(e),
+                            Some(U8Array::from_slice(state.rs.clone().as_slice())),
+                            Some(U8Array::from_slice(state.re.clone().unwrap().as_slice())),
+                        );
 
                     // set message index
                     handshake.set_index(1);
@@ -176,9 +171,9 @@ impl Crypto {
                             // TODO: delete old handshake
                             log::error!("{}", e);
                             return (message, nonce);
-                        },
+                        }
                     }
-        
+
                     // get ciphers & put them to state
                     let (cipher_key_in, cipher_key_out) = handshake.get_ciphers();
                     let (key_out, _nonce_out) = cipher_key_out.extract();
@@ -192,7 +187,7 @@ impl Crypto {
 
                     // save crypto state to data base
                     Self::save_handshake_state(user_account, remote_id, state);
-                },
+                }
                 CryptoProcessState::Verified => {
                     log::info!("Encrypt with full encryption");
 
@@ -200,21 +195,21 @@ impl Crypto {
                     nonce = state.index_nonce_out;
 
                     // create cipher
-                    let mut cipher: CipherState<C> = CipherState::new(state.clone().cipher_out.unwrap().as_slice(), nonce);
+                    let mut cipher: CipherState<C> =
+                        CipherState::new(state.clone().cipher_out.unwrap().as_slice(), nonce);
 
                     // encrypt message
                     message = Some(cipher.encrypt_vec(data.as_slice()));
 
                     // save new nonce to state
-                    state.index_nonce_out = nonce +1;
+                    state.index_nonce_out = nonce + 1;
                     Self::save_handshake_state(user_account, remote_id, state);
-                },
+                }
                 _ => {
                     log::error!("unexpected handshake state");
-                },
+                }
             }
-        }
-        else {
+        } else {
             // no saved state available: generate crypto state
             log::info!("Initiate Crypto Handshake");
 
@@ -225,9 +220,9 @@ impl Crypto {
                 None => {
                     log::error!("No key found for user {:?}", remote_id);
                     return (None, 0);
-                },
+                }
             }
-            
+
             // create crypto state
             state = Self::create_crypto_state::<D>(true, user_account.clone(), remote_key);
 
@@ -256,7 +251,7 @@ impl Crypto {
                     // TODO: delete old handshake
                     log::error!("{}", e);
                     return (message, nonce);
-                },
+                }
             }
 
             // save state to data base
@@ -268,26 +263,41 @@ impl Crypto {
     }
 
     /// Decrypt an incoming message
-    /// 
-    /// This uses the `Noise_KK_X25519_ChaChaPoly_Sha256` 
+    ///
+    /// This uses the `Noise_KK_X25519_ChaChaPoly_Sha256`
     /// to decrypt messages.
     /// It also takes care of the first handshake messages
     /// and saves the handshake state to the data base.
-    /// 
+    ///
     /// * data: the encrypted data
     /// * nonce: the nonce of this message
     /// * user_account: sender id
     /// * remote_id: receiver id
-    /// 
+    ///
     /// The function returns the decrypted data.
-    pub fn decrypt(data: Vec<u8>, nonce: u64, user_account_id: PeerId, remote_id: PeerId) -> Option<Vec<u8>> {
-        Self::decrypt_noise_kk::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(data, nonce, user_account_id, remote_id)
+    pub fn decrypt(
+        data: Vec<u8>,
+        nonce: u64,
+        user_account_id: PeerId,
+        remote_id: PeerId,
+    ) -> Option<Vec<u8>> {
+        Self::decrypt_noise_kk::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+            data,
+            nonce,
+            user_account_id,
+            remote_id,
+        )
     }
 
     /// Decrypt a Message
-    /// 
+    ///
     /// Decrypt an incoming message.
-    fn decrypt_noise_kk<D, C, H, P>(data: Vec<u8>, nonce: u64, user_account_id: PeerId, remote_id: PeerId) -> Option<Vec<u8>>
+    fn decrypt_noise_kk<D, C, H, P>(
+        data: Vec<u8>,
+        nonce: u64,
+        user_account_id: PeerId,
+        remote_id: PeerId,
+    ) -> Option<Vec<u8>>
     where
         D: DH,
         C: Cipher,
@@ -299,7 +309,7 @@ impl Crypto {
 
         // get user account
         let user_account: UserAccount;
-        if let Some(result) = UserAccounts::get_by_id(user_account_id){
+        if let Some(result) = UserAccounts::get_by_id(user_account_id) {
             user_account = result;
         } else {
             log::error!("user account not found");
@@ -322,15 +332,16 @@ impl Crypto {
                     let e = D::Key::from_slice(state.e.as_slice());
 
                     // build noise handshake state
-                    let mut handshake: HandshakeState<D, C, H> = noise_protocol::HandshakeState::new(
-                        pattern,
-                        true,
-                        prologue.as_slice(),
-                        Some(U8Array::from_slice(state.s.as_slice())),
-                        Some(e),
-                        Some(U8Array::from_slice(state.rs.as_slice())),
-                        None,
-                    );
+                    let mut handshake: HandshakeState<D, C, H> =
+                        noise_protocol::HandshakeState::new(
+                            pattern,
+                            true,
+                            prologue.as_slice(),
+                            Some(U8Array::from_slice(state.s.as_slice())),
+                            Some(e),
+                            Some(U8Array::from_slice(state.rs.as_slice())),
+                            None,
+                        );
 
                     // set message index
                     handshake.set_index(1);
@@ -341,7 +352,7 @@ impl Crypto {
                         Err(e) => {
                             log::error!("{}", e);
                             return None;
-                        },
+                        }
                     }
 
                     // get remote ephemeral
@@ -349,11 +360,11 @@ impl Crypto {
                         Some(re) => {
                             // put it to state
                             state.re = Some(Vec::from(re.as_slice()));
-                        },
+                        }
                         None => {
                             // TODO: remove state
                             return None;
-                        },
+                        }
                     }
 
                     // get ciphers & put them to state
@@ -361,7 +372,11 @@ impl Crypto {
                     let (key_out, nonce_out) = cipher_key_out.extract();
                     let (key_in, nonce_in) = cipher_key_in.extract();
 
-                    log::info!("handshake initiation finished: noce out: {}, in: {}", nonce_out, nonce_in);
+                    log::info!(
+                        "handshake initiation finished: noce out: {}, in: {}",
+                        nonce_out,
+                        nonce_in
+                    );
 
                     state.state = CryptoProcessState::Verified;
                     state.cipher_in = Some(key_in.as_slice().to_vec());
@@ -371,13 +386,14 @@ impl Crypto {
 
                     // save state to data base
                     Self::save_handshake_state(user_account.clone(), remote_id, state);
-                },
+                }
                 CryptoProcessState::Verified => {
                     // we had a successful handshake and are in transport state
                     log::info!("Decrypting with full encryption");
 
                     // create cipher
-                    let mut cipher: CipherState<C> = CipherState::new(state.cipher_in.clone().unwrap().as_slice(), nonce);
+                    let mut cipher: CipherState<C> =
+                        CipherState::new(state.cipher_in.clone().unwrap().as_slice(), nonce);
 
                     // decrypt message
                     match cipher.decrypt_vec(data.as_slice()) {
@@ -386,19 +402,18 @@ impl Crypto {
 
                             state.highest_index_nonce_in = nonce;
                             Self::save_handshake_state(user_account, remote_id, state);
-                        },
+                        }
                         Err(_) => {
                             log::error!("decryption error");
                             return None;
-                        },
+                        }
                     }
-                },
+                }
                 _ => {
                     log::error!("unexpected handshake state");
-                },
+                }
             }
-        }
-        else {
+        } else {
             log::info!("Incoming handshake");
 
             // no saved state available: generate crypto state
@@ -410,7 +425,7 @@ impl Crypto {
                 None => {
                     log::error!("No key found for user {:?}", remote_id);
                     return None;
-                },
+                }
             }
 
             // create initial crypto state
@@ -438,7 +453,7 @@ impl Crypto {
                 Err(e) => {
                     log::error!("{}", e);
                     return None;
-                },
+                }
             }
 
             // get remote ephemeral
@@ -446,11 +461,11 @@ impl Crypto {
                 Some(re) => {
                     // put it to state
                     state.re = Some(Vec::from(re.as_slice()));
-                },
+                }
                 None => {
                     // TODO: remove state
                     return None;
-                },
+                }
             }
 
             // save state to data base
@@ -464,9 +479,13 @@ impl Crypto {
     }
 
     /// Create CryptoState during handshake phase
-    /// for outgoing or incoming 
-    fn create_crypto_state<D>(initiator: bool, user_account: UserAccount, remote_key: PublicKey) -> CryptoState
-    where 
+    /// for outgoing or incoming
+    fn create_crypto_state<D>(
+        initiator: bool,
+        user_account: UserAccount,
+        remote_key: PublicKey,
+    ) -> CryptoState
+    where
         D: DH,
     {
         // create private key
@@ -484,8 +503,7 @@ impl Crypto {
         let process_state: CryptoProcessState;
         if initiator {
             process_state = CryptoProcessState::HalfOutgoing;
-        }
-        else {
+        } else {
             process_state = CryptoProcessState::HalfIncoming;
         }
 
@@ -507,33 +525,35 @@ impl Crypto {
     }
 
     /// Convert ed25519 private key to montgomery form
-    /// 
+    ///
     /// libqaul's Keypair is an `ed25519::KeyPair`
     /// To get to the montgomery form, the following actions are done:
-    /// 
+    ///
     /// 1) Get the `SecretKey` from the KeyPair structure.
     /// 2) Convert the `EdwardsPoint` to a `MontgomeryPoint` by hashing it with sha512.
     /// 3) This gives us the bytes of the curve25519_dalek secret key in the Montgomery form to be used with for the X25519 Diffie-Hellman.
-    /// 
+    ///
     /// ## References
-    /// 
+    ///
     /// * libqaul's `Keypair` = [`libp2p::identity::ed25519::Keypair`](https://docs.rs/libp2p/latest/libp2p/identity/enum.Keypair.html)
     /// * `EdwardsPoint` = [`curve25519_dalek::edwards::EdwardsPoint`](https://doc.dalek.rs/curve25519_dalek/edwards/struct.EdwardsPoint.html)
     /// * `MontgomeryPoint` = [`curve25519_dalek::montgomery::MontgomeryPoint`](https://doc.dalek.rs/curve25519_dalek/montgomery/struct.MontgomeryPoint.html)
     /// * [`x25519_dalek::PublicKey`](https://doc.dalek.rs/x25519_dalek/struct.PublicKey.html)
-    /// 
+    ///
     pub fn private_key_to_montgomery(key: Keypair) -> Option<Vec<u8>> {
         // get ed25519 keypair
         if let Keypair::Ed25519(ed25519_keypair) = key {
             // get dalek keypair as bytes
             //
-            // unfortunately the dalek keypair is private in the 
+            // unfortunately the dalek keypair is private in the
             // libp2p keypair structure, therefore we have to
             // make the detour via the bytes.
             let ed25519_dalek_keypair_bytes = ed25519_keypair.encode();
 
             // create dalek ed25519 keypair
-            if let Ok(ed25519_dalek_keypair) = ed25519_dalek::Keypair::from_bytes(&ed25519_dalek_keypair_bytes) {
+            if let Ok(ed25519_dalek_keypair) =
+                ed25519_dalek::Keypair::from_bytes(&ed25519_dalek_keypair_bytes)
+            {
                 // get dalek secret key as bytes
                 let ed25519_dalek_secret_bytes = ed25519_dalek_keypair.secret.to_bytes();
 
@@ -541,7 +561,7 @@ impl Crypto {
                 let mut curve25519_dalek_secret: [u8; 32] = [0; 32];
                 let hash = Sha512::digest(ed25519_dalek_secret_bytes.as_ref());
                 curve25519_dalek_secret.copy_from_slice(&hash[..32]);
-        
+
                 return Some(curve25519_dalek_secret.to_vec());
             }
         }
@@ -550,22 +570,22 @@ impl Crypto {
     }
 
     /// Convert ed25519 public key to montgomery form
-    /// 
+    ///
     /// Libqaul's PublicKey is a `CompressedEdwardsY` point from the `curve25519_dalek` library.
     /// To get to the montgomery form, the following actions are done:
-    /// 
+    ///
     /// 1) Decompress `CompressedEdwardsY` point, which returns an `EdwardsPoint`.
     /// 2) Convert the `EdwardsPoint` to a `MontgomeryPoint`
     /// 3) The bytes of the `MontgomeryPoint` are equal to the `x25519_dalek::PublicKey`
-    /// 
+    ///
     /// ## References
-    /// 
+    ///
     /// * libqaul's `PublicKey` = [`libp2p::identity::ed25519::PublicKey`](https://docs.rs/libp2p/latest/libp2p/identity/ed25519/struct.PublicKey.html)
     /// * `EdwardsPoint` = [`curve25519_dalek::edwards::EdwardsPoint`](https://doc.dalek.rs/curve25519_dalek/edwards/struct.EdwardsPoint.html)
     /// * `CompressedEdwardsY` = [`curve25519_dalek::edwards::CompressedEdwardsY`](https://doc.dalek.rs/curve25519_dalek/edwards/struct.CompressedEdwardsY.html)
     /// * `MontgomeryPoint` = [`curve25519_dalek::montgomery::MontgomeryPoint`](https://doc.dalek.rs/curve25519_dalek/montgomery/struct.MontgomeryPoint.html)
     /// * [`x25519_dalek::PublicKey`](https://doc.dalek.rs/x25519_dalek/struct.PublicKey.html)
-    /// 
+    ///
     pub fn public_key_to_montgomery(key: PublicKey) -> Option<x25519_dalek::PublicKey> {
         // get ed25519 structure
         if let PublicKey::Ed25519(ed25519_pub) = key {
@@ -590,7 +610,7 @@ impl Crypto {
     fn get_handshake_state(user_account: UserAccount, remote_id: PeerId) -> Option<CryptoState> {
         // get data base of user account
         let db = DataBase::get_user_db(user_account.id);
-        
+
         // get data base tree
         let state_tree: Tree<CryptoState> = db.open_bincode_tree("crypto_state").unwrap();
 
@@ -604,10 +624,14 @@ impl Crypto {
     }
 
     /// Save Updated Crypto Handshake State
-    fn save_handshake_state(user_account: UserAccount, remote_id: PeerId, crypto_state: CryptoState) {
+    fn save_handshake_state(
+        user_account: UserAccount,
+        remote_id: PeerId,
+        crypto_state: CryptoState,
+    ) {
         // get data base of user account
         let db = DataBase::get_user_db(user_account.id);
-        
+
         // get data base tree
         let state_tree: Tree<CryptoState> = db.open_bincode_tree("crypto_state").unwrap();
 
@@ -625,21 +649,22 @@ impl Crypto {
     /// Send crypto service message
     fn send_crypto_service_message(user_account: &UserAccount, receiver: PeerId) {
         // pack message
-        let send_message = proto::Messaging{
+        let send_message = proto::Messaging {
             message: Some(proto::messaging::Message::CryptoService(
-                proto::CryptoService {
-                }
+                proto::CryptoService {},
             )),
         };
 
         // encode chat message
         let mut message_buf = Vec::with_capacity(send_message.encoded_len());
-        send_message.encode(&mut message_buf).expect("Vec<u8> provides capacity as needed");
+        send_message
+            .encode(&mut message_buf)
+            .expect("Vec<u8> provides capacity as needed");
         log::info!("message_buf len {}", message_buf.len());
 
         // send message via messaging
-        match Messaging::pack_and_send_message(user_account, &receiver, &message_buf, None, false) {
-            Ok(_) => {},
+        match Messaging::pack_and_send_message(user_account, &receiver, message_buf, None, false) {
+            Ok(_) => {}
             Err(e) => log::error!("{}", e),
         }
     }

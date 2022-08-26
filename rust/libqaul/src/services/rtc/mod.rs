@@ -156,7 +156,7 @@ impl Rtc {
         if let Err(e) = Messaging::pack_and_send_message(
             user_account,
             &receiver,
-            &send_message.encode_to_vec(),
+            send_message.encode_to_vec(),
             Some(&message_id),
             true,
         ) {

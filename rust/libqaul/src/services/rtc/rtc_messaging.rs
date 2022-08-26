@@ -38,7 +38,7 @@ impl RtcMessaging {
                     messaging::Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
-                        &send_message.encode_to_vec(),
+                        send_message.encode_to_vec(),
                         None,
                         false,
                     );

@@ -313,7 +313,7 @@ impl Chat {
         Messaging::pack_and_send_message(
             user_account,
             &receiver,
-            &send_message.encode_to_vec(),
+            send_message.encode_to_vec(),
             Some(&common_message.message_id),
             true,
         )

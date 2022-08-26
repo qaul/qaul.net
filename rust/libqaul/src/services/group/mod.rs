@@ -431,7 +431,7 @@ impl Group {
         match Messaging::pack_and_send_message(
             user_account,
             &receiver,
-            &send_message.encode_to_vec(),
+            send_message.encode_to_vec(),
             Some(&message_id),
             true,
         ) {
@@ -512,7 +512,7 @@ impl Group {
                     if let Err(error) = Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
-                        &send_message.encode_to_vec(),
+                        send_message.encode_to_vec(),
                         None,
                         false,
                     ) {

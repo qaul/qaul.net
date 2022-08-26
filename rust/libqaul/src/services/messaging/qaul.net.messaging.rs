@@ -47,17 +47,23 @@ pub mod envelop_payload {
 /// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Encrypted {
-    /// repeated Data data = 1;
-    #[prost(bytes="vec", tag="1")]
-    pub data: ::prost::alloc::vec::Vec<u8>,
+    /// one or several Data messages
+    /// of maximally 64KB each.
+    #[prost(message, repeated, tag="1")]
+    pub data: ::prost::alloc::vec::Vec<Data>,
 }
 /// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Data {
     /// message nonce for encryption
+    ///
+    /// each nonce is only used once per key
+    /// and increases by one fore each new data package.
     #[prost(uint64, tag="1")]
     pub nonce: u64,
-    /// the encrypted message data
+    /// the encrypted message data slice
+    /// each data package contains maximally
+    /// 64KB
     #[prost(bytes="vec", tag="2")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
@@ -77,7 +83,7 @@ pub mod messaging {
         /// crypto service
         #[prost(message, tag="2")]
         CryptoService(super::CryptoService),
-        /// rtc stream 
+        /// rtc stream
         #[prost(message, tag="3")]
         RtcStreamMessage(super::RtcStreamMessage),
         /// group notify
@@ -96,7 +102,7 @@ pub mod messaging {
 pub struct CryptoService {
 }
 /// message received confirmation
-/// 
+///
 /// every message that was received by a user
 /// sends an acknowledgment package, to the sender
 /// to confirm the receive.
