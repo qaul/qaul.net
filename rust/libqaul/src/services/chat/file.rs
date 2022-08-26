@@ -209,7 +209,7 @@ impl ChatFile {
         Ok(exists)
     }
 
-    /// This function is called when file transfer or receiving finished successfully.    
+    /// This function is called when file transfer or receiving finished successfully.
     fn on_completed(
         user_id: &PeerId,
         sender_id: &PeerId,
