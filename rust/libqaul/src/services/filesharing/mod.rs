@@ -89,8 +89,10 @@ pub struct FileHistory {
 /// mutable state of all file
 static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
 
-pub const DEF_PACKAGE_SIZE: u32 = 1500;
-///pub const DEF_PACKAGE_SIZE: u32 = 1000;
+/// Size of the biggest file data package
+pub const DEF_PACKAGE_SIZE: u32 = 64000;
+//pub const DEF_PACKAGE_SIZE: u32 = 1500;
+//pub const DEF_PACKAGE_SIZE: u32 = 1000;
 
 pub struct FileShare {}
 /// File sharing module to process transfer, receive and RPC commands
@@ -105,7 +107,7 @@ impl FileShare {
     }
 
     /// File history stored based on the user id.
-    /// This function getting histrory table based on the user id.
+    /// This function getting history table based on the user id.
     fn get_db_ref(user_id: &PeerId) -> UserFiles {
         // check if user data exists
         {
