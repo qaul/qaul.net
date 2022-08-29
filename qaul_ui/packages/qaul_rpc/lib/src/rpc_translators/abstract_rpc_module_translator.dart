@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -57,10 +58,30 @@ class UnhandledRpcMessageException implements Exception {
 abstract class RpcModuleTranslator {
   final _log = Logger('RpcModuleTranslator');
 
+  static final _translators = [
+    BleTranslator(),
+    ChatTranslator(),
+    ConnectionTranslator(),
+    DebugTranslator(),
+    FeedTranslator(),
+    FileSharingTranslator(),
+    NodeTranslator(),
+    RouterTranslator(),
+    UserAccountsTranslator(),
+    UsersTranslator(),
+  ];
+
+  static RpcModuleTranslator translatorFactory(Modules module) {
+    var t = _translators.firstWhereOrNull((element) => element.type == module);
+    if (t == null) {
+      throw UnimplementedError('Factory missing translator of type $module');
+    }
+    return t;
+  }
+
   @protected
   Modules get type;
 
-  @protected
   @mustCallSuper
   Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
     _log.severe(
@@ -70,6 +91,9 @@ abstract class RpcModuleTranslator {
     );
     return null;
   }
+
+  @protected
+  Future<void> processResponse(RpcTranslatorResponse response) async {}
 }
 
 class RpcTranslatorResponse {

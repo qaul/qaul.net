@@ -336,65 +336,15 @@ class LibqaulWorker {
 
   Future<void> _receiveResponse() async {
     final response = await _lib.receiveRpc();
+    if (response == null) return;
 
-    if (response != null) {
-      final m = QaulRpc.fromBuffer(response);
-
-      if (m.module == Modules.CONNECTIONS) {
-        final resp = await ConnectionTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.FEED) {
-        final resp = await FeedTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.NODE) {
-        final resp = await NodeTranslator().decodeMessageBytes(m.data);
-        if (resp != null && resp.data is NodeInfo) {
-          _reader(nodeInfoProvider.state).state = resp.data;
-        }
-      } else if (m.module == Modules.USERACCOUNTS) {
-        final resp = await UserAccountsTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.USERS) {
-        final resp = await UsersTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.ROUTER) {
-        final resp = await RouterTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.CHAT) {
-        final resp = await ChatTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.DEBUG) {
-        final resp = await DebugTranslator().decodeMessageBytes(m.data);
-        if (resp?.data is bool) {
-          _log.finest('libqaul answered a heartbeat request');
-          _heartbeats.removeFirst();
-        }
-        if (resp?.data is String) {
-          final path = await findFolderWithFilesOfExtension(
-              Directory(resp!.data), '.log');
-          _log.info('libqaul log storage path: $path');
-          _reader(libqaulLogsStoragePath.state).state = path;
-        }
-      } else if (m.module == Modules.BLE) {
-        final resp = await BleTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.FILESHARE) {
-        final resp = await FileSharingTranslator().decodeMessageBytes(m.data);
-        if (resp != null) _processResponse(resp);
-      } else {
-        _log.severe(
-          'LibqaulWorker.receiveResponse($m)',
-          UnhandledRpcMessageException(
-            m.toString(),
-            'LibqaulWorker.receiveResponse',
-          ),
-          StackTrace.current,
-        );
-      }
-    }
+    final m = QaulRpc.fromBuffer(response);
+    final translator = RpcModuleTranslator.translatorFactory(m.module);
+    final resp = await translator.decodeMessageBytes(m.data);
+    if (resp != null) _processResponse(resp);
   }
 
-  void _processResponse(RpcTranslatorResponse resp) {
+  void _processResponse(RpcTranslatorResponse resp) async {
     if (resp.module == Modules.USERS || resp.module == Modules.ROUTER) {
       final provider = _reader(usersProvider.notifier);
       if (resp.data is List<User>) {
@@ -406,6 +356,25 @@ class LibqaulWorker {
         if (provider.contains(resp.data)) provider.update(resp.data);
         return;
       }
+    }
+    if (resp.module == Modules.NODE) {
+      if (resp.data is NodeInfo) {
+        _reader(nodeInfoProvider.state).state = resp.data;
+      }
+      return;
+    }
+    if (resp.module == Modules.DEBUG) {
+      if (resp.data is bool) {
+        _log.finest('libqaul answered a heartbeat request');
+        _heartbeats.removeFirst();
+      }
+      if (resp.data is String) {
+        final path =
+            await findFolderWithFilesOfExtension(Directory(resp.data), '.log');
+        _log.info('libqaul log storage path: $path');
+        _reader(libqaulLogsStoragePath.state).state = path;
+      }
+      return;
     }
     if (resp.module == Modules.FEED) {
       if (resp.data != null && resp.data is List<FeedPost>) {
