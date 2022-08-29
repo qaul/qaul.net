@@ -157,32 +157,32 @@ impl NetworkBehaviour for QaulInfo {
     ) {
     }
 
-    fn inject_new_listener(&mut self, _id: libp2p::core::connection::ListenerId) {}
+    fn inject_new_listener(&mut self, _id: libp2p::core::transport::ListenerId) {}
 
     fn inject_new_listen_addr(
         &mut self,
-        _id: libp2p::core::connection::ListenerId,
+        _id: libp2p::core::transport::ListenerId,
         _addr: &Multiaddr,
     ) {
     }
 
     fn inject_expired_listen_addr(
         &mut self,
-        _id: libp2p::core::connection::ListenerId,
+        _id: libp2p::core::transport::ListenerId,
         _addr: &Multiaddr,
     ) {
     }
 
     fn inject_listener_error(
         &mut self,
-        _id: libp2p::core::connection::ListenerId,
+        _id: libp2p::core::transport::ListenerId,
         _err: &(dyn std::error::Error + 'static),
     ) {
     }
 
     fn inject_listener_closed(
         &mut self,
-        _id: libp2p::core::connection::ListenerId,
+        _id: libp2p::core::transport::ListenerId,
         _reason: Result<(), &std::io::Error>,
     ) {
     }
