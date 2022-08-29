@@ -26,7 +26,7 @@ use libp2p::{
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping::{Ping, PingConfig, PingEvent},
     swarm::{Swarm},
-    tcp::TcpConfig,
+    tcp::{TcpTransport, GenTcpConfig},
     yamux, Multiaddr, NetworkBehaviour, Transport,
 };
 // DNS is excluded on mobile, as it is not working there
@@ -243,16 +243,16 @@ impl Internet {
         // as the DNS module crashes on android due to a file system access
         #[cfg(any(target_os = "android", target_os = "ios"))]
         let transport = {
-            let tcp = TcpConfig::new().nodelay(true);
+            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             tcp
         };
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         let transport = {
-            let tcp = TcpConfig::new().nodelay(true);
+            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
             let ws_dns_tcp = WsConfig::new(
-                DnsConfig::system(TcpConfig::new().nodelay(true))
+                DnsConfig::system(TcpTransport::new(GenTcpConfig::new().nodelay(true),))
                     .await
                     .unwrap(),
             );
