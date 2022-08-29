@@ -252,8 +252,8 @@ class LibqaulWorker {
     required String description,
   }) async {
     var file = File(pathName);
-    if (isImage(file.path)) {
-      final compressed = await compressImage(file, quality: 95);
+    if (isImage(file.path) && file.statSync().size >= 150.kb) {
+      final compressed = await processImage(file);
       if (compressed != null) file = compressed;
     }
     final msg = FileSharing(

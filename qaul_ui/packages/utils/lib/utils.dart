@@ -13,6 +13,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'src/emoji_string_manipulator.dart';
 
+export 'src/file_size_descriptor.dart';
 export 'src/image_manipulation.dart';
 
 Color colorGenerationStrategy(String first) {
