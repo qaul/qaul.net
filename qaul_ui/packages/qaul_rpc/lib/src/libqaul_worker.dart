@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
 import '../qaul_rpc.dart';
@@ -250,9 +251,14 @@ class LibqaulWorker {
     required Uint8List conversationId,
     required String description,
   }) async {
+    var file = File(pathName);
+    if (isImage(file.path)) {
+      final compressed = await compressImage(file, quality: 95);
+      if (compressed != null) file = compressed;
+    }
     final msg = FileSharing(
         sendFileRequest: SendFileRequest(
-      pathName: pathName,
+      pathName: file.path,
       conversationId: conversationId.toList(),
       description: description,
     ));
