@@ -18,4 +18,9 @@ class DebugTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    // handled within libqaul worker
+  }
 }

@@ -28,4 +28,22 @@ class BleTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! BleConnectionStatus) return;
+    var newStatus = res.data as BleConnectionStatus;
+    _log.finer('BLE Module: received new status $newStatus');
+    final currentStatus = reader(bleStatusProvider);
+    if (currentStatus != null) {
+      newStatus = currentStatus.copyWith(
+        status: newStatus.status,
+        deviceInfo: newStatus.deviceInfo,
+        discoveredNodes: newStatus.discoveredNodes,
+        nodesPendingConfirmation: newStatus.discoveredNodes,
+      );
+      _log.finest('BLE Module: Merged with previous status: $newStatus');
+    }
+    reader(bleStatusProvider.state).state = newStatus;
+  }
 }

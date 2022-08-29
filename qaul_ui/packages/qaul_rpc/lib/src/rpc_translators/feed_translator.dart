@@ -19,4 +19,13 @@ class FeedTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! List<FeedPost>) return;
+    final provider = reader(feedMessagesProvider.notifier);
+    for (final msg in res.data) {
+      if (!provider.contains(msg)) provider.add(msg);
+    }
+  }
 }

@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
@@ -340,146 +339,23 @@ class LibqaulWorker {
 
     final m = QaulRpc.fromBuffer(response);
     final translator = RpcModuleTranslator.translatorFactory(m.module);
-    final resp = await translator.decodeMessageBytes(m.data);
-    if (resp != null) _processResponse(resp);
-  }
+    final res = await translator.decodeMessageBytes(m.data);
+    if (res == null) return;
 
-  void _processResponse(RpcTranslatorResponse resp) async {
-    if (resp.module == Modules.USERS || resp.module == Modules.ROUTER) {
-      final provider = _reader(usersProvider.notifier);
-      if (resp.data is List<User>) {
-        for (final user in resp.data) {
-          provider.contains(user) ? provider.update(user) : provider.add(user);
-        }
-        return;
-      } else if (resp.data is User) {
-        if (provider.contains(resp.data)) provider.update(resp.data);
-        return;
-      }
-    }
-    if (resp.module == Modules.NODE) {
-      if (resp.data is NodeInfo) {
-        _reader(nodeInfoProvider.state).state = resp.data;
-      }
+    if (res.module != Modules.DEBUG) {
+      translator.processResponse(res, _reader);
       return;
     }
-    if (resp.module == Modules.DEBUG) {
-      if (resp.data is bool) {
-        _log.finest('libqaul answered a heartbeat request');
-        _heartbeats.removeFirst();
-      }
-      if (resp.data is String) {
-        final path =
-            await findFolderWithFilesOfExtension(Directory(resp.data), '.log');
-        _log.info('libqaul log storage path: $path');
-        _reader(libqaulLogsStoragePath.state).state = path;
-      }
-      return;
-    }
-    if (resp.module == Modules.FEED) {
-      if (resp.data != null && resp.data is List<FeedPost>) {
-        final provider = _reader(feedMessagesProvider.notifier);
 
-        for (final msg in resp.data) {
-          if (!provider.contains(msg)) provider.add(msg);
-        }
-        return;
-      }
+    if (res.data is bool) {
+      _log.finest('libqaul answered a heartbeat request');
+      _heartbeats.removeFirst();
     }
-    if (resp.module == Modules.CONNECTIONS) {
-      if (resp.data != null && resp.data is List<InternetNode>) {
-        _reader(connectedNodesProvider.notifier).state = resp.data;
-      }
-      return;
+    if (res.data is String) {
+      final path =
+          await findFolderWithFilesOfExtension(Directory(res.data), '.log');
+      _log.info('libqaul log storage path: $path');
+      _reader(libqaulLogsStoragePath.state).state = path;
     }
-    if (resp.module == Modules.USERACCOUNTS) {
-      if (resp.data != null && resp.data is User) {
-        _reader(defaultUserProvider.state).state = resp.data;
-      }
-      return;
-    }
-    if (resp.module == Modules.CHAT) {
-      if (resp.data != null) {
-        if (resp.data is List<ChatRoom>) {
-          final state = _reader(chatRoomsProvider.notifier);
-          for (final room in resp.data) {
-            if (!state.contains(room)) {
-              state.add(room);
-            } else {
-              state.update(room);
-            }
-          }
-          return;
-        }
-        if (resp.data is ChatRoom) {
-          final currentRoom = _reader(currentOpenChatRoom);
-
-          if (currentRoom != null &&
-              currentRoom.conversationId.equals(resp.data.conversationId)) {
-            _reader(currentOpenChatRoom.notifier).state = resp.data;
-          }
-          return;
-        }
-      }
-    }
-    if (resp.module == Modules.GROUP) {
-      if (resp.data != null) {
-        final state = _reader(chatRoomsProvider.notifier);
-        final users = _reader(usersProvider);
-        if (resp.data is List<GroupInfo>) {
-          for (final groupInfo in resp.data) {
-            final room = ChatRoom.fromGroupInfo(groupInfo, users);
-            if (!state.contains(room)) {
-              state.add(room);
-            } else {
-              state.update(room);
-            }
-          }
-          return;
-        } else if (resp.data is GroupInfo) {
-          final room = ChatRoom.fromGroupInfo(resp.data, users);
-          if (!state.contains(room)) {
-            state.add(room);
-          } else {
-            state.update(room);
-          }
-          return;
-        }
-      }
-    }
-    if (resp.module == Modules.BLE) {
-      if (resp.data is BleConnectionStatus) {
-        var newStatus = resp.data as BleConnectionStatus;
-        _log.finer('BLE Module: received new status $newStatus');
-        final currentStatus = _reader(bleStatusProvider);
-        if (currentStatus != null) {
-          newStatus = currentStatus.copyWith(
-            status: newStatus.status,
-            deviceInfo: newStatus.deviceInfo,
-            discoveredNodes: newStatus.discoveredNodes,
-            nodesPendingConfirmation: newStatus.discoveredNodes,
-          );
-          _log.finest(
-              'BLE Module: merged status with current status. New Status: $newStatus');
-        }
-        _reader(bleStatusProvider.state).state = newStatus;
-        return;
-      }
-    }
-    if (resp.module == Modules.FILESHARE) {
-      if (resp.data is List<FileHistoryEntity>) {
-        final provider = _reader(fileHistoryEntitiesProvider.notifier);
-        for (final file in resp.data) {
-          provider.contains(file) ? provider.update(file) : provider.add(file);
-        }
-
-        return;
-      }
-    }
-    _log.severe(
-      'LibqaulWorker._processResponse($resp)',
-      UnhandledRpcMessageException(resp.toString(), '_processResponse'),
-      StackTrace.current,
-    );
   }
 }

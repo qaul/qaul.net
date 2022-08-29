@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
@@ -17,6 +19,7 @@ import '../generated/services/chat/chat.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../generated/services/filesharing/filesharing_rpc.pb.dart';
 import '../models/models.dart';
+import '../providers.dart';
 
 part 'ble_translator.dart';
 
@@ -92,8 +95,7 @@ abstract class RpcModuleTranslator {
     return null;
   }
 
-  @protected
-  Future<void> processResponse(RpcTranslatorResponse response) async {}
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader);
 }
 
 class RpcTranslatorResponse {
