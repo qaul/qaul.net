@@ -40,6 +40,7 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   hooks_riverpod: ^1.0.4
+  image: ^3.2.0
   image_picker: ^0.8.5+3
   intersperse: ^2.0.0
   intl: ^0.17.0
