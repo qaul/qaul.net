@@ -34,4 +34,10 @@ class UserAccountsTranslator extends RpcModuleTranslator {
 
     return RpcTranslatorResponse(Modules.USERACCOUNTS, user);
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! User) return;
+    reader(defaultUserProvider.state).state = res.data;
+  }
 }

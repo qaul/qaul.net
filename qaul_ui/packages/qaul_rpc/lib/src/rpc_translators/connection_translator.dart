@@ -20,4 +20,10 @@ class ConnectionTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! List<InternetNode>) return;
+    reader(connectedNodesProvider.notifier).state = res.data;
+  }
 }

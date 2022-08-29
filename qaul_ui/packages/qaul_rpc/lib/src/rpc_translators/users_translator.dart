@@ -1,6 +1,5 @@
 part of 'abstract_rpc_module_translator.dart';
 
-
 class UsersTranslator extends RpcModuleTranslator {
   @override
   Modules get type => Modules.USERS;
@@ -14,15 +13,15 @@ class UsersTranslator extends RpcModuleTranslator {
             .ensureUserList()
             .user
             .map((u) => User(
-          name: u.name,
-          idBase58: u.idBase58,
-          id: Uint8List.fromList(u.id),
-          key: Uint8List.fromList(u.key),
-          keyType: u.keyType,
-          keyBase58: u.keyBase58,
-          isBlocked: u.blocked,
-          isVerified: u.verified,
-        ))
+                  name: u.name,
+                  idBase58: u.idBase58,
+                  id: Uint8List.fromList(u.id),
+                  key: Uint8List.fromList(u.key),
+                  keyType: u.keyType,
+                  keyBase58: u.keyBase58,
+                  isBlocked: u.blocked,
+                  isVerified: u.verified,
+                ))
             .toList();
 
         return RpcTranslatorResponse(type, users);
@@ -49,5 +48,18 @@ class UsersTranslator extends RpcModuleTranslator {
     if (c == Connectivity.Online) return ConnectionStatus.online;
     if (c == Connectivity.Reachable) return ConnectionStatus.reachable;
     return ConnectionStatus.offline;
+  }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type) return;
+    final provider = reader(usersProvider.notifier);
+    if (res.data is List<User>) {
+      for (final user in res.data) {
+        provider.contains(user) ? provider.update(user) : provider.add(user);
+      }
+    } else if (res.data is User) {
+      if (provider.contains(res.data)) provider.update(res.data);
+    }
   }
 }

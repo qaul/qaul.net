@@ -16,4 +16,10 @@ class NodeTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! NodeInfo) return;
+    reader(nodeInfoProvider.state).state = res.data;
+  }
 }

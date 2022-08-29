@@ -18,7 +18,9 @@ class RouterTranslator extends RpcModuleTranslator {
                 idBase58: Base58Encode(e.userId),
                 id: Uint8List.fromList(e.userId),
                 availableTypes: _mapFromRoutingTableConnections(e.connections),
-                status: _isConnected(e) ? ConnectionStatus.online : ConnectionStatus.offline,
+                status: _isConnected(e)
+                    ? ConnectionStatus.online
+                    : ConnectionStatus.offline,
               ),
             )
             .toList();
@@ -59,5 +61,18 @@ class RouterTranslator extends RpcModuleTranslator {
     return Map.fromEntries(connections
         .where((c) => c.module != ConnectionModule.NONE)
         .map((e) => MapEntry(toType(e), toConnectionInfo(e))));
+  }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type) return;
+    final provider = reader(usersProvider.notifier);
+    if (res.data is List<User>) {
+      for (final user in res.data) {
+        provider.contains(user) ? provider.update(user) : provider.add(user);
+      }
+    } else if (res.data is User) {
+      if (provider.contains(res.data)) provider.update(res.data);
+    }
   }
 }

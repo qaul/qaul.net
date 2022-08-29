@@ -19,4 +19,13 @@ class FileSharingTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data is! List<FileHistoryEntity>) return;
+    final provider = reader(fileHistoryEntitiesProvider.notifier);
+    for (final file in res.data) {
+      provider.contains(file) ? provider.update(file) : provider.add(file);
+    }
+  }
 }
