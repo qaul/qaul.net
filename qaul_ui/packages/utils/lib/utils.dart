@@ -13,6 +13,8 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'src/emoji_string_manipulator.dart';
 
+export 'src/image_manipulation.dart';
+
 Color colorGenerationStrategy(String first) {
   // defined using --dart-define=testing_mode=true when running tests
   if (const bool.fromEnvironment('testing_mode', defaultValue: false)) {
@@ -41,7 +43,8 @@ String initials(String name) {
     name = removeEmoji(name);
   }
   if (name.replaceAll(' ', '').length < 2) {
-    throw ArgumentError.value(name, 'Name', 'not enough characters to form initials string');
+    throw ArgumentError.value(
+        name, 'Name', 'not enough characters to form initials string');
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
@@ -53,9 +56,12 @@ String initials(String name) {
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
 ///
 /// Will throw if [date] is in the future (When [clock] is provided, *future* represents time after it).
-String describeFuzzyTimestamp(DateTime date, {DateTime? clock, Locale? locale}) {
+String describeFuzzyTimestamp(DateTime date,
+    {DateTime? clock, Locale? locale}) {
   if (date.isAfter(clock ?? DateTime.now())) throw ArgumentError.value(date);
-  if ((clock ?? DateTime.now()).subtract(const Duration(days: 50)).isAfter(date)) {
+  if ((clock ?? DateTime.now())
+      .subtract(const Duration(days: 50))
+      .isAfter(date)) {
     return DateFormat('d MMM y').format(date);
   }
 
@@ -93,7 +99,8 @@ timeago.LookupMessages _fromLocale(Locale l) {
 
 bool isValidIPv4(String? s) {
   if (s == null || s.isEmpty) return false;
-  return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$').hasMatch(s);
+  return RegExp(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$')
+      .hasMatch(s);
 }
 
 bool isValidPort(String? s) {
@@ -106,7 +113,8 @@ class IPv4TextInputFormatter extends TextInputFormatter {
       FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]'));
 
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
     if (_userIsErasing(oldValue, newValue)) return newValue;
 
