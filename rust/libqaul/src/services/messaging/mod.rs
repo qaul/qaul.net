@@ -42,6 +42,10 @@ pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
 pub struct ScheduledMessage {
     receiver: PeerId,
     container: proto::Container,
+    is_common: bool,
+    is_forward: bool,
+    scheduled_dtn: bool,
+    is_dtn: bool,
 }
 
 /// mutable state of messages, scheduled for sending
@@ -312,7 +316,14 @@ impl Messaging {
             }
 
             // schedule message for sending
-            Self::schedule_message(receiver.clone(), container);
+            Self::schedule_message(
+                receiver.clone(),
+                container,
+                is_common_message,
+                false,
+                false,
+                false,
+            );
 
             // return signature
             Ok(signature)
@@ -408,7 +419,14 @@ impl Messaging {
                 );
 
                 // schedule message for sending
-                Self::schedule_message(storage_node_id.clone(), container_dtn);
+                Self::schedule_message(
+                    storage_node_id.clone(),
+                    container_dtn,
+                    true,
+                    false,
+                    false,
+                    true,
+                );
 
                 // return signature
                 Ok(signature_dtn)
@@ -426,7 +444,14 @@ impl Messaging {
     /// This function adds the message to the ring buffer for sending.
     /// This buffer is checked regularly by libqaul for sending.
     ///
-    pub fn schedule_message(receiver: PeerId, container: proto::Container) {
+    pub fn schedule_message(
+        receiver: PeerId,
+        container: proto::Container,
+        is_common: bool,
+        is_forward: bool,
+        scheduled_dtn: bool,
+        is_dtn: bool,
+    ) {
         #[cfg(emulate)]
         if network_emul::NetworkEmulator::is_lost() {
             log::error!(
@@ -439,6 +464,10 @@ impl Messaging {
         let msg = ScheduledMessage {
             receiver,
             container,
+            is_common,
+            is_forward,
+            scheduled_dtn,
+            is_dtn,
         };
 
         // add it to sending queue
@@ -471,7 +500,9 @@ impl Messaging {
                 // return information
                 return Some((route.node, route.module, data));
             } else {
-                log::trace!("No route found to user {}", message.receiver.to_base58());
+                // user is offline we schedule through DTN service
+                if !message.is_forward && !message.is_dtn && !message.scheduled_dtn {}
+                // log::trace!("No route found to user {}", message.receiver.to_base58());
                 // reschedule if no route is found
                 //Self::schedule_message(message.receiver, message.container);
             }
@@ -537,8 +568,16 @@ impl Messaging {
                                     user_account,
                                     container,
                                 ),
+
                                 // schedule it for further sending otherwise
-                                None => Self::schedule_message(receiver_id, container),
+                                None => Self::schedule_message(
+                                    receiver_id,
+                                    container,
+                                    true,
+                                    true,
+                                    false,
+                                    false,
+                                ),
                             }
                         }
                         Err(e) => log::error!(
