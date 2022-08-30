@@ -66,7 +66,14 @@ impl MessagingRetransmit {
                                 "retrans message, signature: {}",
                                 bs58::encode(container.signature.clone()).into_string()
                             );
-                            super::Messaging::schedule_message(receiver.clone(), container.clone());
+                            super::Messaging::schedule_message(
+                                receiver.clone(),
+                                container.clone(),
+                                true,
+                                false,
+                                unconfirmed_mesage.scheduled_dtn,
+                                unconfirmed_mesage.is_dtn,
+                            );
 
                             // update entry
                             let mut new_retry = unconfirmed_mesage.retry;
