@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:protobuf/protobuf.dart' as pb;
 import 'package:utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
@@ -67,7 +68,7 @@ class LibqaulWorker {
       _heartbeats.addLast(true);
       _log.finest('requesting heartbeat to libqaul');
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
-      _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+      _sendMessage(Modules.DEBUG, msg);
     });
 
     _initialized.complete(true);
@@ -78,90 +79,77 @@ class LibqaulWorker {
   // *******************************
   Future<void> sendFeedMessage(String content) async {
     final msg = Feed(send: SendMessage(content: content));
-    await _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
+    await _sendMessage(Modules.FEED, msg);
   }
 
   Future<void> requestFeedMessages({int? lastIndex}) async {
     final msg = Feed(
       request: FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0)),
     );
-    _encodeAndSendMessage(Modules.FEED, msg.writeToBuffer());
+    _sendMessage(Modules.FEED, msg);
   }
 
   Future<void> getUsers() async {
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userRequest: UserRequest()).writeToBuffer());
+    await _sendMessage(Modules.USERS, Users(userRequest: UserRequest()));
 
-    _encodeAndSendMessage(Modules.ROUTER,
-        Router(routingTableRequest: RoutingTableRequest()).writeToBuffer());
+    _sendMessage(
+        Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()));
   }
 
   Future<void> verifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = true;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
   }
 
   Future<void> unverifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = false;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
   }
 
   Future<void> blockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = true;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
   }
 
   Future<void> unblockUser(User u) async {
     final entry = _baseUserEntryFrom(u);
     entry.blocked = false;
-    await _encodeAndSendMessage(
-        Modules.USERS, Users(userUpdate: entry).writeToBuffer());
+    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
   }
 
-  Future<void> getNodeInfo() async => await _encodeAndSendMessage(
-      Modules.NODE, Node(getNodeInfo: true).writeToBuffer());
+  Future<void> getNodeInfo() async =>
+      await _sendMessage(Modules.NODE, Node(getNodeInfo: true));
 
-  Future<void> requestNodes() async => await _encodeAndSendMessage(
-      Modules.CONNECTIONS,
-      Connections(internetNodesRequest: InternetNodesRequest())
-          .writeToBuffer());
+  Future<void> requestNodes() async => await _sendMessage(Modules.CONNECTIONS,
+      Connections(internetNodesRequest: InternetNodesRequest()));
 
-  Future<void> addNode(String address) async => await _encodeAndSendMessage(
+  Future<void> addNode(String address) async => await _sendMessage(
       Modules.CONNECTIONS,
-      Connections(internetNodesAdd: InternetNodesEntry(address: address))
-          .writeToBuffer());
+      Connections(internetNodesAdd: InternetNodesEntry(address: address)));
 
-  Future<void> removeNode(String address) async => await _encodeAndSendMessage(
+  Future<void> removeNode(String address) async => await _sendMessage(
       Modules.CONNECTIONS,
-      Connections(internetNodesRemove: InternetNodesEntry(address: address))
-          .writeToBuffer());
+      Connections(internetNodesRemove: InternetNodesEntry(address: address)));
 
   Future<void> getDefaultUserAccount() async {
     final message = UserAccounts(getDefaultUserAccount: true);
-    await _encodeAndSendMessage(Modules.USERACCOUNTS, message.writeToBuffer());
+    await _sendMessage(Modules.USERACCOUNTS, message);
   }
 
   Future<void> createUserAccount(String name) async {
     final msg = UserAccounts(createUserAccount: CreateUserAccount(name: name));
-    await _encodeAndSendMessage(Modules.USERACCOUNTS, msg.writeToBuffer());
-  }
-
-  void sendDebugPanicMessage() async {
-    await _encodeAndSendMessage(Modules.DEBUG, Uint8List(0));
+    await _sendMessage(Modules.USERACCOUNTS, msg);
   }
 
   /// Requests both [ChatOverviewRequest] and [GroupListRequest]
   void getAllChatRooms() async {
     dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
-    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    await _sendMessage(Modules.CHAT, msg);
     msg = Group(groupListRequest: GroupListRequest());
-    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    await _sendMessage(Modules.CHAT, msg);
   }
 
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
@@ -171,14 +159,14 @@ class LibqaulWorker {
         lastIndex: Int64(lastIndex),
       ),
     );
-    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    await _sendMessage(Modules.CHAT, msg);
   }
 
   void sendMessage(Uint8List chatId, String content) async {
     final msg = Chat(
       send: ChatMessageSend(conversationId: chatId, content: content),
     );
-    await _encodeAndSendMessage(Modules.CHAT, msg.writeToBuffer());
+    await _sendMessage(Modules.CHAT, msg);
   }
 
   // -------------------
@@ -187,7 +175,7 @@ class LibqaulWorker {
   void createGroup(String name) async {
     assert(name.isNotEmpty);
     final msg = Group(groupCreateRequest: GroupCreateRequest(groupName: name));
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void renameGroup(ChatRoom room, String name) async {
@@ -196,7 +184,7 @@ class LibqaulWorker {
       groupRenameRequest: GroupRenameRequest(
           groupId: room.conversationId.toList(), groupName: name),
     );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void inviteUserToGroup(User user, ChatRoom room) async {
@@ -206,7 +194,7 @@ class LibqaulWorker {
         userId: user.id.toList(),
       ),
     );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void removeUserFromGroup(User user, ChatRoom room) async {
@@ -216,7 +204,7 @@ class LibqaulWorker {
         userId: user.id.toList(),
       ),
     );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void replyToGroupInvite(Uint8List groupId, {required bool accepted}) async {
@@ -229,7 +217,7 @@ class LibqaulWorker {
         accept: accepted,
       ),
     );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void sendGroupMessage(ChatRoom room, String content) async {
@@ -239,7 +227,7 @@ class LibqaulWorker {
         message: content,
       ),
     );
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   // -------------------
@@ -261,33 +249,33 @@ class LibqaulWorker {
       conversationId: conversationId.toList(),
       description: description,
     ));
-    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
+    await _sendMessage(Modules.FILESHARE, msg);
   }
 
   void getFileHistory({int? offset, int? limit}) async {
     final msg = FileSharing(
       fileHistory: FileHistoryRequest(offset: offset, limit: limit),
     );
-    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
+    await _sendMessage(Modules.FILESHARE, msg);
   }
 
   // -------------------
   void setLibqaulLogging(bool enabled) async {
     final msg = Debug(logToFile: LogToFile(enable: enabled));
-    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+    await _sendMessage(Modules.DEBUG, msg);
   }
 
   void deleteLogs() async {
     final msg = Debug(deleteLibqaulLogsRequest: DeleteLibqaulLogsRequest());
-    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+    await _sendMessage(Modules.DEBUG, msg);
   }
 
   void sendBleInfoRequest() async {
     for (final message in [
-      Ble(infoRequest: InfoRequest()).writeToBuffer(),
-      Ble(discoveredRequest: DiscoveredRequest()).writeToBuffer(),
+      Ble(infoRequest: InfoRequest()),
+      Ble(discoveredRequest: DiscoveredRequest()),
     ]) {
-      await _encodeAndSendMessage(Modules.BLE, message);
+      await _sendMessage(Modules.BLE, message);
     }
   }
 
@@ -305,32 +293,22 @@ class LibqaulWorker {
 
   void _getLibqaulLogsStoragePath() async {
     final msg = Debug(storagePathRequest: StoragePathRequest());
-    await _encodeAndSendMessage(Modules.DEBUG, msg.writeToBuffer());
+    await _sendMessage(Modules.DEBUG, msg);
   }
 
   // *******************************
   // Private (control) methods
   // *******************************
-  Future<String> _encodeAndSendMessage(Modules module, Uint8List data) async {
-    // create message
-    QaulRpc message = QaulRpc();
-    message.module = module;
-    message.data = data;
+  Future<void> _sendMessage(Modules module, pb.GeneratedMessage data) async {
+    QaulRpc message = QaulRpc()
+      ..module = module
+      ..data = data.writeToBuffer()
+      ..requestId = const Uuid().v4();
 
     final user = _reader(defaultUserProvider);
     if (user != null) message.userId = user.id;
 
-    final id = const Uuid().v4();
-    message.requestId = id;
-
-    // encode it
-    Uint8List messageEncoded = message.writeToBuffer();
-
-    // send it
-    final libqaul = _reader(libqaulProvider);
-    await libqaul.sendRpc(messageEncoded);
-
-    return id;
+    await _reader(libqaulProvider).sendRpc(message.writeToBuffer());
   }
 
   Future<void> _receiveResponse() async {
