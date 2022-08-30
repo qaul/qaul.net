@@ -66,6 +66,10 @@ pub struct UnConfirmedMessage {
     pub retry: u32,
     // flag that transferred on the network
     pub scheduled: bool,
+    // flag that transfered as DTN service
+    pub scheduled_dtn: bool,
+    // flag that indicate DTN message
+    pub is_dtn: bool,
 }
 
 /// Unconfirmed Message Type
@@ -139,6 +143,7 @@ impl Messaging {
         message_id: &Vec<u8>,
         receiver: &PeerId,
         container: &proto::Container,
+        is_dtn: bool,
     ) {
         let new_entry = UnConfirmedMessage {
             receiver_id: receiver.to_bytes(),
@@ -148,6 +153,8 @@ impl Messaging {
             message_id: message_id.to_owned(),
             retry: 1,
             scheduled: false,
+            scheduled_dtn: false,
+            is_dtn,
         };
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -295,7 +302,13 @@ impl Messaging {
 
             // in common message case, save into unconfirmed table
             if is_common_message {
-                Self::save_unconfirmed_message(message_type, message_id, receiver, &container);
+                Self::save_unconfirmed_message(
+                    MessagingServiceType::Chat,
+                    message_id,
+                    receiver,
+                    &container,
+                    false,
+                );
             }
 
             // schedule message for sending
@@ -391,6 +404,7 @@ impl Messaging {
                     message_id.unwrap(),
                     storage_node_id,
                     &container,
+                    true,
                 );
 
                 // schedule message for sending
