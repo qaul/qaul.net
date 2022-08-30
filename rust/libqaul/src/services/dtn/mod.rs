@@ -158,6 +158,7 @@ impl Dtn {
                 &vec![],
                 receiver_id,
                 &container,
+                true,
             );
         }
 
