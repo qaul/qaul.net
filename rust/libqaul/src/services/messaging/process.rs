@@ -13,6 +13,7 @@ use crate::node::user_accounts::UserAccount;
 use crate::router;
 use crate::services::chat::{self, ChatFile, ChatStorage};
 use crate::services::crypto::Crypto;
+use crate::services::dtn;
 use crate::services::group;
 use crate::services::group::conversation_id::ConversationId;
 use crate::services::rtc;
@@ -123,27 +124,7 @@ impl MessagingProcess {
                             common.message_id.clone(),
                             common.sent_at,
                             &file_message.content,
-                        ) {
-                            if !exist {
-                                chat::Chat::save_incoming_message(
-                                    receiver_id,
-                                    sender_id,
-                                    chat::rpc_proto::ContentType::File.try_into().unwrap(),
-                                    &file_message.content,
-                                    common.sent_at,
-                                    &conversation_id,
-                                    &common.message_id,
-                                    chat::rpc_proto::MessageStatus::Received,
-                                );
-
-                                filesharing::FileShare::net(
-                                    &sender_id,
-                                    &receiver_id,
-                                    &common.conversation_id,
-                                    &file_message.content,
-                                );
-                            }
-                        }
+                        );
                     }
                     Some(super::proto::common_message::Payload::GroupMessage(
                         ref group_message,
@@ -197,16 +178,16 @@ impl MessagingProcess {
     /// process received message
     pub fn process_received_message(user_account: UserAccount, container: super::proto::Container) {
         // check envelop
-        let envelope;
-        match container.envelope {
-            Some(v) => {
-                envelope = v;
-            }
-            _ => {
-                log::error!("No Envelope in Message Container");
-                return;
-            }
-        }
+        let envelope = container.envelope.as_ref().unwrap();
+        // match container.envelope {
+        //     Some(v) => {
+        //         envelope = v;
+        //     }
+        //     _ => {
+        //         log::error!("No Envelope in Message Container");
+        //         return;
+        //     }
+        // }
 
         // check sender_id
         let sender_id;
@@ -281,7 +262,9 @@ impl MessagingProcess {
                             &container.signature,
                         );
                     }
-                    Some(super::proto::envelop_payload::Payload::Dtn(_dtn)) => {}
+                    Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {
+                        dtn::Dtn::net(&receiver_id, &sender_id, &container.signature, &dtn);
+                    }
                     _ => {
                         log::error!("unknown envelop payload");
                         return;

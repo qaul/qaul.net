@@ -6,6 +6,9 @@
 //! The RTC module manages and forwards the session requests
 
 use libp2p::PeerId;
+
+use crate::node::user_accounts::UserAccount;
+use crate::rpc::Rpc;
 use prost::Message;
 use state::Storage;
 use std::collections::BTreeMap;
@@ -18,8 +21,6 @@ use super::chat::Chat;
 use super::group;
 use super::group::conversation_id::ConversationId;
 use super::messaging::{proto, Messaging, MessagingServiceType};
-use crate::node::user_accounts::UserAccount;
-use crate::rpc::Rpc;
 use crate::utilities::timestamp;
 use rtc_managing::RtcManaging;
 use rtc_messaging::RtcMessaging;

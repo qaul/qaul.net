@@ -17,7 +17,7 @@ use std::sync::RwLock;
 #[cfg(emulate)]
 mod network_emul;
 
-mod process;
+pub mod process;
 pub mod retransmit;
 
 use super::crypto::Crypto;
@@ -134,7 +134,7 @@ impl Messaging {
     }
 
     /// Save a message to the data base to wait for confirmation
-    fn save_unconfirmed_message(
+    pub fn save_unconfirmed_message(
         message_type: MessagingServiceType,
         message_id: &Vec<u8>,
         receiver: &PeerId,
@@ -303,6 +303,104 @@ impl Messaging {
 
             // return signature
             Ok(signature)
+        } else {
+            return Err("messaging signing error".to_string());
+        }
+    }
+
+    /// pack, sign and schedule a message for sending
+    pub fn pack_and_send_dtn_message(
+        user_account: &UserAccount,
+        receiver: &PeerId,
+        storage_node_id: &PeerId,
+        data: &Vec<u8>,
+        message_id: Option<&Vec<u8>>,
+    ) -> Result<Vec<u8>, String> {
+        // // encrypt data
+        // // TODO: slize data to 64K
+        // let (encryption_result, nonce) = Crypto::encrypt(data.clone(), user_account.to_owned(), receiver.clone());
+
+        // let mut encrypted: Vec<proto::Data> = Vec::new();
+        // match encryption_result {
+        //     Some(encrypted_chunk) => {
+        //         let data_message = proto::Data{ nonce, data: encrypted_chunk };
+
+        //         log::info!("data len: {}", data_message.encoded_len());
+
+        //         encrypted.push(data_message);
+        //     },
+        //     None => return Err("Encryption error occurred".to_string()),
+        // }
+
+        // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+
+        let envelop_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::Dtn(data.clone())),
+        };
+
+        // let payload = proto::Encrypted{data: data.clone()};
+        // let mut message_buf = Vec::with_capacity(payload.encoded_len());
+        // payload
+        //     .encode(&mut message_buf)
+        //     .expect("Vec<u8> provides capacity as needed");
+
+        // create envelope
+        let envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: receiver.to_bytes(),
+            //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
+            //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
+            payload: envelop_payload.encode_to_vec(),
+        };
+
+        // encode envelope
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope
+            .encode(&mut envelope_buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // sign message
+        if let Ok(signature) = user_account.keys.sign(&envelope_buf) {
+            // create container
+            let container = proto::Container {
+                signature: signature.clone(),
+                envelope: Some(envelope),
+            };
+
+            // create Dtn message
+            let dtn_payload = proto::EnvelopPayload {
+                payload: Some(proto::envelop_payload::Payload::Dtn(
+                    container.encode_to_vec(),
+                )),
+            };
+
+            let envelope_dtn = proto::Envelope {
+                sender_id: user_account.id.to_bytes(),
+                receiver_id: storage_node_id.to_bytes(),
+                payload: dtn_payload.encode_to_vec(),
+            };
+            if let Ok(signature_dtn) = user_account.keys.sign(&envelope_dtn.encode_to_vec()) {
+                // create dtn container
+                let container_dtn = proto::Container {
+                    signature: signature_dtn.clone(),
+                    envelope: Some(envelope_dtn),
+                };
+                // in common message case, save into unconfirmed table
+                Self::save_unconfirmed_message(
+                    MessagingServiceType::DtnOrigin,
+                    message_id.unwrap(),
+                    storage_node_id,
+                    &container,
+                );
+
+                // schedule message for sending
+                Self::schedule_message(storage_node_id.clone(), container_dtn);
+
+                // return signature
+                Ok(signature_dtn)
+            } else {
+                return Err("dtn messaging signing error".to_string());
+            }
         } else {
             return Err("messaging signing error".to_string());
         }
