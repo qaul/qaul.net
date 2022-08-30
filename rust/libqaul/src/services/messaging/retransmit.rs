@@ -1,9 +1,9 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Qaul Messaging process
+//! # Retransmit Qaul Messages
 //!
-//! The messaging service is used for sending, receiving and
+//! Messages that couldn't be sent to a user are scheduled for retransmission.
 
 use libp2p::PeerId;
 use prost::Message;
@@ -12,7 +12,6 @@ use crate::router;
 
 use crate::services::chat;
 use crate::services::crypto::Crypto;
-use crate::services::filesharing;
 use crate::services::group;
 use crate::services::group::conversation_id::ConversationId;
 use crate::services::rtc;
@@ -24,7 +23,7 @@ use crate::utilities::timestamp::{self, Timestamp};
 pub struct MessagingRetransmit {}
 
 impl MessagingRetransmit {
-    /// process retrans
+    /// process retransmission
     pub fn process() {
         // get unconfirmed table
         let unconfirmed = super::UNCONFIRMED.get().write().unwrap();

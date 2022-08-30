@@ -86,20 +86,13 @@ pub mod messaging {
         /// rtc stream
         #[prost(message, tag="3")]
         RtcStreamMessage(super::RtcStreamMessage),
-        /// group notify
+        /// group invite messages
         #[prost(message, tag="4")]
-        GroupNotifyMessage(super::GroupNotifyMessage),
+        GroupInviteMessage(super::GroupInviteMessage),
         /// common message
         #[prost(message, tag="5")]
         CommonMessage(super::CommonMessage),
     }
-}
-/// Crypto Service Message
-///
-/// This message is for crypto specific tasks,
-/// such as completing a handshake.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CryptoService {
 }
 /// message received confirmation
 ///
@@ -116,6 +109,25 @@ pub struct Confirmation {
     #[prost(uint64, tag="2")]
     pub received_at: u64,
 }
+/// Crypto Service Message
+///
+/// This message is for crypto specific tasks,
+/// such as completing a handshake.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CryptoService {
+}
+/// rtc stream mesasge
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RtcStreamMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// group invite message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInviteMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
 /// common message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CommonMessage {
@@ -125,7 +137,7 @@ pub struct CommonMessage {
     /// conversation id
     #[prost(bytes="vec", tag="2")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
-    /// conversation id
+    /// sent at timestamp
     #[prost(uint64, tag="3")]
     pub sent_at: u64,
     /// payload
@@ -165,27 +177,15 @@ pub struct FileMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// rtc message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RtcMessage {
-    #[prost(bytes="vec", tag="1")]
-    pub content: ::prost::alloc::vec::Vec<u8>,
-}
-/// rtc stream mesasge
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RtcStreamMessage {
-    #[prost(bytes="vec", tag="1")]
-    pub content: ::prost::alloc::vec::Vec<u8>,
-}
 /// group message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// group notify message
+/// rtc message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupNotifyMessage {
+pub struct RtcMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }

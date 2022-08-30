@@ -1,16 +1,18 @@
 syntax = "proto3";
-package qaul.net.filesharing;
+package qaul.net.chatfile;
 
-// Filesharing service network message container
-message FileSharingContainer {
+// Chat file sending container
+message ChatFileContainer {
     oneof message {
-        FileSharingInfo file_info = 1;
-        FileSharingData file_data = 2;
+        // Chat File Info Message
+        ChatFileInfo file_info = 1;
+        // Chat File Data Message
+        ChatFileData file_data = 2;
     }
 }
 
-// FileSharing Message Content
-message FileSharingInfo {
+// Chat File Info Message
+message ChatFileInfo {
     // file id
     uint64 file_id = 1;
 
@@ -23,17 +25,21 @@ message FileSharingInfo {
     uint32 file_size = 4;
 
     // file description
-    string file_descr = 5;
+    string file_description = 5;
 
+    // DEPRECATED: What is this used for?
     // start index
     uint32 start_index = 6;
 
     // message count
     uint32 message_count = 7;
+
+    // file data chunk size
+    uint32 data_chunk_size = 8;
 }
 
-// FileSharing Data Message
-message FileSharingData{    
+// Chat File Data Message
+message ChatFileData {
     // file id
     uint64 file_id = 1;
 

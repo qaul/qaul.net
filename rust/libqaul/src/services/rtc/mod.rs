@@ -14,12 +14,11 @@ use std::sync::RwLock;
 mod rtc_managing;
 mod rtc_messaging;
 
+use super::chat::Chat;
 use super::group;
 use super::group::conversation_id::ConversationId;
-use super::messaging;
-use super::messaging::proto;
-use super::messaging::Messaging;
-use crate::node::user_accounts::{UserAccount, UserAccounts};
+use super::messaging::{proto, Messaging, MessagingServiceType};
+use crate::node::user_accounts::UserAccount;
 use crate::rpc::Rpc;
 use crate::utilities::timestamp;
 use rtc_managing::RtcManaging;
@@ -102,19 +101,15 @@ impl Rtc {
     ) {
         // create direct chat room
         let group_id = ConversationId::from_peers(&user_account.id, &receiver);
-        if !group::Group::group_exists(&user_account.id, &group_id.to_bytes()) {
+        if !group::GroupStorage::group_exists(user_account.id, group_id.to_bytes()) {
             group::Manage::create_new_direct_chat_group(&user_account.id, &receiver);
         }
 
         //get last index
         let group;
-        match group::Group::get_group(&user_account.id, &group_id.to_bytes()) {
-            Ok(v) => {
-                group = v;
-            }
-            Err(_error) => {
-                return;
-            }
+        match group::GroupStorage::get_group(user_account.id, group_id.to_bytes()) {
+            Some(v) => group = v,
+            None => return,
         }
 
         let my_member;
@@ -128,8 +123,7 @@ impl Rtc {
         }
         let last_index = my_member.last_message_index + 1;
 
-        let message_id =
-            Messaging::generate_group_message_id(&group.id, &user_account.id, last_index);
+        let message_id = Chat::generate_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
             conversation_id: group_id.to_bytes(),
@@ -151,7 +145,8 @@ impl Rtc {
             user_account,
             &receiver,
             send_message.encode_to_vec(),
-            Some(&message_id),
+            MessagingServiceType::Rtc,
+            &message_id,
             true,
         ) {
             log::error!("rtc message sending failed {}", e.to_string());

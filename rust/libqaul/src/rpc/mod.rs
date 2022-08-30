@@ -23,8 +23,8 @@ use crate::node::Node;
 use crate::router::users::Users;
 use crate::router::Router;
 use crate::services::chat::Chat;
+use crate::services::chat::ChatFile;
 use crate::services::feed::Feed;
-use crate::services::filesharing::FileShare;
 use crate::services::group::Group;
 use crate::services::rtc::Rtc;
 use debug::Debug;
@@ -126,7 +126,7 @@ impl Rpc {
     /// This function will decode the message from the binary
     /// protobuf format to rust structures and send it to
     /// the module responsible.
-    pub fn process_received_message(
+    pub async fn process_received_message(
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
@@ -156,9 +156,6 @@ impl Rpc {
                     Some(Modules::Feed) => {
                         Feed::rpc(message.data, message.user_id, lan, internet);
                     }
-                    Some(Modules::Chat) => {
-                        Chat::rpc(message.data, message.user_id, lan, internet);
-                    }
                     Some(Modules::Connections) => {
                         Connections::rpc(message.data, internet);
                     }
@@ -168,16 +165,19 @@ impl Rpc {
                     Some(Modules::Debug) => {
                         Debug::rpc(message.data, message.user_id);
                     }
-                    Some(Modules::Fileshare) => {
-                        log::info!("Message Modules::Fileshare received");
-                        FileShare::rpc(message.data, message.user_id);
+                    Some(Modules::Chat) => {
+                        Chat::rpc(message.data, message.user_id, lan, internet);
+                    }
+                    Some(Modules::Chatfile) => {
+                        log::trace!("Message Modules::Chatfile received");
+                        ChatFile::rpc(message.data, message.user_id).await;
                     }
                     Some(Modules::Group) => {
-                        log::info!("Message Modules::Group received");
+                        log::trace!("Message Modules::Group received");
                         Group::rpc(message.data, message.user_id);
                     }
                     Some(Modules::Rtc) => {
-                        log::info!("Message Modules::Group received");
+                        log::trace!("Message Modules::Group received");
                         Rtc::rpc(message.data, message.user_id);
                     }
                     Some(Modules::None) => {

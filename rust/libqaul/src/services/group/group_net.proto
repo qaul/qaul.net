@@ -8,6 +8,8 @@ message GroupContainer {
         InviteMember invite_member = 1;
         // reply invite
         ReplyInvite reply_invite = 2;
+        // group status update
+        GroupInfo group_info = 3;
         // member removed
         RemovedMember removed = 4;
     }
@@ -15,47 +17,57 @@ message GroupContainer {
 
 // Invite member
 message InviteMember {
-    // group id
-    bytes group_id = 1;
-    // group name
-    string group_name = 2;
-    // group admin id
-    bytes admin_id = 3;
-    // group created at
-    uint64 created_at = 4;
-    // group member count
-    uint32 members_count = 5;
+    // Group Info
+    GroupInfo group = 1;
+}
+
+// Group member state
+enum GroupMemberState {
+    // invited
+    Invited = 0;
+    // activated
+    Activated = 1;
+}
+
+// Group member role
+enum GroupMemberRole {
+    // user
+    User = 0;
+    // admin
+    Admin = 255;
 }
 
 // Group member
-message Member {
+message GroupMember {
     // user id
     bytes user_id = 1;
     // role
-    int32 role = 2;
+    GroupMemberRole role = 2;
     // joined at
     uint64 joined_at = 3;
     // state
-    int32 state = 4;
+    GroupMemberState state = 4;
     // last message index
     uint32 last_message_index = 5;
 }
 
-// Group Notify
-message GroupNotify {
+// Group Info
+message GroupInfo {
     // group id
     bytes group_id = 1;
     // group name
     string group_name = 2;
     // created at
     uint64 created_at = 3;
-    // creator id
-    bytes creator_id = 4;
+    // group revision
+    uint32 revision = 4;
     // updated members
-    repeated Member members = 5;
+    repeated GroupMember members = 5;
 }
 
-// Accept Invite
+// Reply to Invite
+//
+// Accept / Reject invitation
 message ReplyInvite {
     // group id
     bytes group_id = 1;

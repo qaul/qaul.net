@@ -70,12 +70,12 @@ impl ConversationId {
         bs58::encode(self.to_bytes()).into_string()
     }
 
-    /// get the conversation ID uuid encoded
-    pub fn to_uuid_string(&self) -> String {
+    /// get the conversation ID as a hyphenated uuid string
+    pub fn to_string(&self) -> String {
         let conversation_uuid;
         match Uuid::from_slice(&self.id) {
             Ok(uuid) => {
-                conversation_uuid = uuid.urn().to_string();
+                conversation_uuid = uuid.hyphenated().to_string();
             }
             Err(e) => {
                 log::error!("{}", e);
@@ -110,6 +110,26 @@ impl ConversationId {
         }
 
         None
+    }
+
+    /// create an informational string from a slice
+    ///
+    /// This function is intended for log messages, and
+    /// will return a string no matter what.
+    ///
+    /// If the provided vector is a valid UUID, the function will
+    /// return a hyphenated UUID string.
+    ///
+    /// If the bytes are not a valid UUID, it will convert them into
+    /// bs58 encoding.
+    pub fn slice_to_string(bytes: &Vec<u8>) -> String {
+        let string;
+        match uuid::Uuid::from_slice(bytes) {
+            Ok(uuid) => string = uuid.hyphenated().to_string(),
+            Err(_) => string = bs58::encode(bytes).into_string(),
+        }
+
+        string
     }
 }
 

@@ -376,7 +376,8 @@ pub async fn start(storage_path: String) -> () {
                             rpc_message,
                             Some(&mut lan),
                             Some(&mut internet),
-                        );
+                        )
+                        .await;
                     }
                 }
                 EventType::Sys(_) => {
@@ -575,7 +576,7 @@ pub async fn start(storage_path: String) -> () {
                     }
                 }
                 EventType::Retransmit(_) => {
-                    services::messaging::retrans::MessagingRetransmit::process();
+                    services::messaging::retransmit::MessagingRetransmit::process();
                 }
             }
         }

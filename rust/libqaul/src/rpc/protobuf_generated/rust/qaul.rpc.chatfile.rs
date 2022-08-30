@@ -1,38 +1,70 @@
-/// File sharing service RPC message container
+/// Chat file RPC message container
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileSharing {
+pub struct ChatFile {
     /// message type
-    #[prost(oneof="file_sharing::Message", tags="1, 2, 3")]
-    pub message: ::core::option::Option<file_sharing::Message>,
+    #[prost(oneof="chat_file::Message", tags="1, 2, 3, 4")]
+    pub message: ::core::option::Option<chat_file::Message>,
 }
-/// Nested message and enum types in `FileSharing`.
-pub mod file_sharing {
+/// Nested message and enum types in `ChatFile`.
+pub mod chat_file {
     /// message type
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
-        /// request for sending file
+        /// send file request
+        ///
+        /// this messages sends a file from UI to libqaul
         #[prost(message, tag="1")]
         SendFileRequest(super::SendFileRequest),
-        /// file history request
+        /// send file response
+        ///
+        /// response message from libqaul to the UI about
+        /// the result of the send file request
         #[prost(message, tag="2")]
+        SendFileResponse(super::SendFileResponse),
+        /// file history request
+        ///
+        /// request a paginated list of
+        #[prost(message, tag="3")]
         FileHistory(super::FileHistoryRequest),
         /// file history response
-        #[prost(message, tag="3")]
+        ///
+        /// delivers the requested list of
+        #[prost(message, tag="4")]
         FileHistoryResponse(super::FileHistoryResponse),
     }
 }
 /// Send File Request
+///
+/// UI requests libqaul to send a file
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SendFileRequest {
-    /// file path name to send
+    /// file path with file name to send
     #[prost(string, tag="1")]
     pub path_name: ::prost::alloc::string::String,
     /// conversation id to receive file
     #[prost(bytes="vec", tag="2")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
-    /// description
+    /// file description text to be sent in the message
     #[prost(string, tag="3")]
     pub description: ::prost::alloc::string::String,
+}
+/// Send File Response
+///
+/// sends the result of the file send request to the UI
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SendFileResponse {
+    /// was the file processing successful
+    ///
+    /// a success does not mean the file has been sent,
+    /// but that it was successfully scheduled for sending.
+    #[prost(bool, tag="1")]
+    pub success: bool,
+    /// error reason
+    #[prost(string, tag="2")]
+    pub error: ::prost::alloc::string::String,
+    /// file ID (only present if the sending was a success)
+    #[prost(uint64, tag="3")]
+    pub file_id: u64,
 }
 /// File History Request
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -50,18 +82,18 @@ pub struct FileHistoryEntry {
     /// file id
     #[prost(uint64, tag="1")]
     pub file_id: u64,
-    /// file name
+    /// file name (without extension)
     #[prost(string, tag="2")]
     pub file_name: ::prost::alloc::string::String,
     /// file extension
     #[prost(string, tag="3")]
-    pub file_ext: ::prost::alloc::string::String,
+    pub file_extension: ::prost::alloc::string::String,
     /// file size
     #[prost(uint32, tag="4")]
     pub file_size: u32,
     /// file description
     #[prost(string, tag="5")]
-    pub file_descr: ::prost::alloc::string::String,
+    pub file_description: ::prost::alloc::string::String,
     /// time
     #[prost(uint64, tag="6")]
     pub time: u64,

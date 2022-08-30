@@ -21,7 +21,7 @@ use sha2::{Digest, Sha512};
 use sled_extensions::{bincode::Tree, DbExt};
 use x25519_dalek;
 
-use super::messaging::{proto, Messaging};
+use super::messaging::{proto, Messaging, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::users::Users;
 use crate::storage::database::DataBase;
@@ -663,7 +663,15 @@ impl Crypto {
         log::info!("message_buf len {}", message_buf.len());
 
         // send message via messaging
-        match Messaging::pack_and_send_message(user_account, &receiver, message_buf, None, false) {
+        let message_id: Vec<u8> = Vec::new();
+        match Messaging::pack_and_send_message(
+            user_account,
+            &receiver,
+            message_buf,
+            MessagingServiceType::Crypto,
+            &message_id,
+            false,
+        ) {
             Ok(_) => {}
             Err(e) => log::error!("{}", e),
         }

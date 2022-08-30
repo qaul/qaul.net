@@ -1,22 +1,24 @@
-/// Filesharing service network message container
+/// Chat file sending container
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileSharingContainer {
-    #[prost(oneof="file_sharing_container::Message", tags="1, 2")]
-    pub message: ::core::option::Option<file_sharing_container::Message>,
+pub struct ChatFileContainer {
+    #[prost(oneof="chat_file_container::Message", tags="1, 2")]
+    pub message: ::core::option::Option<chat_file_container::Message>,
 }
-/// Nested message and enum types in `FileSharingContainer`.
-pub mod file_sharing_container {
+/// Nested message and enum types in `ChatFileContainer`.
+pub mod chat_file_container {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
+        /// Chat File Info Message
         #[prost(message, tag="1")]
-        FileInfo(super::FileSharingInfo),
+        FileInfo(super::ChatFileInfo),
+        /// Chat File Data Message
         #[prost(message, tag="2")]
-        FileData(super::FileSharingData),
+        FileData(super::ChatFileData),
     }
 }
-/// FileSharing Message Content
+/// Chat File Info Message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileSharingInfo {
+pub struct ChatFileInfo {
     /// file id
     #[prost(uint64, tag="1")]
     pub file_id: u64,
@@ -31,17 +33,21 @@ pub struct FileSharingInfo {
     pub file_size: u32,
     /// file description
     #[prost(string, tag="5")]
-    pub file_descr: ::prost::alloc::string::String,
+    pub file_description: ::prost::alloc::string::String,
+    /// DEPRECATED: What is this used for?
     /// start index
     #[prost(uint32, tag="6")]
     pub start_index: u32,
     /// message count
     #[prost(uint32, tag="7")]
     pub message_count: u32,
+    /// file data chunk size
+    #[prost(uint32, tag="8")]
+    pub data_chunk_size: u32,
 }
-/// FileSharing Data Message
+/// Chat File Data Message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FileSharingData {
+pub struct ChatFileData {
     /// file id
     #[prost(uint64, tag="1")]
     pub file_id: u64,

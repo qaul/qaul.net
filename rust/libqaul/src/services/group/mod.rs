@@ -15,10 +15,9 @@ use state::Storage;
 use std::collections::BTreeMap;
 use std::{convert::TryInto, sync::RwLock};
 
-use super::chat::{self, Chat};
+use super::chat::{self, Chat, ChatStorage};
 use super::group::conversation_id::ConversationId;
-use super::messaging::proto;
-use super::messaging::Messaging;
+use super::messaging::{proto, Messaging, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
 use crate::storage::database::DataBase;
@@ -43,33 +42,180 @@ pub mod proto_net {
 }
 
 /// mutable state of all user groups
-pub static GROUPSOFUSER: Storage<RwLock<GroupsOfUser>> = Storage::new();
+pub static GROUPSTORAGE: Storage<RwLock<GroupStorage>> = Storage::new();
 
-/// Structure to management for groups.
+/// Group DB links for user account
 #[derive(Clone)]
-pub struct Groups {
-    //DB reference
-    pub db_ref: Tree<Group>,
-    //DB invited ref
-    pub invited_ref: Tree<GroupInvited>,
-    // last group index
-    pub last_group: u64,
-    // id mapping group_id => index in DB
-    pub group_ids: BTreeMap<Vec<u8>, u64>,
+pub struct GroupAccountDb {
+    /// group DB reference
+    pub groups: Tree<Group>,
+    /// invited DB ref
+    pub invited: Tree<GroupInvited>,
 }
 
-impl Groups {
-    pub fn group_id_to_index(&self, group_id: &Vec<u8>) -> u64 {
-        if self.group_ids.contains_key(group_id) {
-            return *self.group_ids.get(group_id).unwrap();
-        }
-        return 0;
+/// qaul Chat Conversation Storage
+pub struct GroupStorage {
+    /// data base tree references accessible
+    /// by user account
+    db_ref: BTreeMap<Vec<u8>, GroupAccountDb>,
+}
+
+impl GroupStorage {
+    /// Initialize Group Storage
+    pub fn init() {
+        let group_storage = GroupStorage {
+            db_ref: BTreeMap::new(),
+        };
+        GROUPSTORAGE.set(RwLock::new(group_storage));
     }
-}
 
-/// Structure of user => groups mapping for storage
-pub struct GroupsOfUser {
-    pub groups_of_user: BTreeMap<Vec<u8>, Groups>,
+    /// get DB refs for user account
+    fn get_db_ref(account_id: PeerId) -> GroupAccountDb {
+        // check if user account data exists
+        {
+            // get chat state
+            let group_storage = GROUPSTORAGE.get().read().unwrap();
+
+            // check if user account ID is in map
+            if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
+                return GroupAccountDb {
+                    groups: group_account_db.groups.clone(),
+                    invited: group_account_db.invited.clone(),
+                };
+            }
+        }
+
+        // create group account db entry if it does not exist
+        let group_account_db = Self::create_groupaccountdb(account_id);
+
+        // return group_account_db structure
+        GroupAccountDb {
+            groups: group_account_db.groups.clone(),
+            invited: group_account_db.invited.clone(),
+        }
+    }
+
+    /// create group account db entry when it does not exist
+    fn create_groupaccountdb(account_id: PeerId) -> GroupAccountDb {
+        // get user data base
+        let db = DataBase::get_user_db(account_id);
+
+        // open trees
+        let groups: Tree<Group> = db.open_bincode_tree("groups").unwrap();
+        let invited: Tree<GroupInvited> = db.open_bincode_tree("invited").unwrap();
+
+        let group_account_db = GroupAccountDb { groups, invited };
+
+        // get group storage for writing
+        let mut group_storage = GROUPSTORAGE.get().write().unwrap();
+
+        // add user to state
+        group_storage
+            .db_ref
+            .insert(account_id.to_bytes(), group_account_db.clone());
+
+        // return structure
+        group_account_db
+    }
+
+    /// get a group from data base
+    pub fn get_group(account_id: PeerId, group_id: Vec<u8>) -> Option<Group> {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // get group
+        match db_ref.groups.get(group_id) {
+            Ok(group) => {
+                return group;
+            }
+            Err(e) => log::error!("{}", e),
+        }
+
+        None
+    }
+
+    /// Check if a group exists in the data base
+    pub fn group_exists(account_id: PeerId, group_id: Vec<u8>) -> bool {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // check id group exists
+        match db_ref.groups.contains_key(group_id) {
+            Ok(exists) => {
+                return exists;
+            }
+            Err(e) => log::error!("{}", e),
+        }
+
+        false
+    }
+
+    /// Save a group into the data base
+    ///
+    /// This function overwrites an already existing group entry or
+    /// creates a new one.
+    pub fn save_group(account_id: PeerId, group: Group) {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // save group in data base
+        if let Err(e) = db_ref.groups.insert(group.id.clone(), group) {
+            log::error!("Error saving group to data base: {}", e);
+        }
+        // flush trees to disk
+        if let Err(e) = db_ref.groups.flush() {
+            log::error!("Error groups flush: {}", e);
+        }
+    }
+
+    /// get invite
+    pub fn get_invite(account_id: PeerId, group_id: Vec<u8>) -> Option<GroupInvited> {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // get invite
+        match db_ref.invited.get(group_id) {
+            Ok(invite) => {
+                return invite;
+            }
+            Err(e) => log::error!("{}", e),
+        }
+
+        None
+    }
+
+    /// Save a group invite into the data base
+    ///
+    /// This function overwrites an already existing invite entry for
+    /// the same group or creates a new one.
+    pub fn save_invite(account_id: PeerId, invite: GroupInvited) {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // save group invite in data base
+        if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite) {
+            log::error!("Error saving group invite to data base: {}", e);
+        }
+        // flush trees to disk
+        if let Err(e) = db_ref.invited.flush() {
+            log::error!("Error invited flush: {}", e);
+        }
+    }
+
+    /// Remove a group invite from the data base
+    pub fn remove_invite(account_id: PeerId, group_id: &Vec<u8>) {
+        // get DB ref
+        let db_ref = Self::get_db_ref(account_id);
+
+        // remove group invite from data base
+        if let Err(e) = db_ref.invited.remove(group_id) {
+            log::error!("Error removing group invite from data base: {}", e);
+        }
+        // flush trees to disk
+        if let Err(e) = db_ref.invited.flush() {
+            log::error!("Error invited flush: {}", e);
+        }
+    }
 }
 
 /// Structure of group member
@@ -90,18 +236,12 @@ pub struct GroupMember {
 /// Structure of Group
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GroupInvited {
-    /// group id
-    pub id: Vec<u8>,
     /// sender id
     pub sender_id: Vec<u8>,
     /// received at
     pub received_at: u64,
-    /// created at
-    pub created_at: u64,
-    /// group name
-    pub name: String,
-    /// group member count
-    pub member_count: u32,
+    /// group info
+    pub group: Group,
 }
 
 /// Structure of Group
@@ -115,14 +255,22 @@ pub struct Group {
     pub is_direct_chat: bool,
     /// created at
     pub created_at: u64,
-    /// creator id
-    pub creator_id: Vec<u8>,
+    /// group revision number
+    ///
+    /// this number increases with every revision
+    pub revision: u32,
     /// members
     pub members: BTreeMap<Vec<u8>, GroupMember>,
 }
 
 /// Group module to process transfer, receive and RPC commands
 impl Group {
+    /// initialize group chat module
+    pub fn init() {
+        // initialize group storage
+        GroupStorage::init();
+    }
+
     /// get a group member
     pub fn get_member(&self, user_id: &Vec<u8>) -> Option<&GroupMember> {
         if self.members.contains_key(user_id) {
@@ -131,33 +279,26 @@ impl Group {
         None
     }
 
-    /// initialize group chat module
-    pub fn init() {
-        let groups_of_user = GroupsOfUser {
-            groups_of_user: BTreeMap::new(),
-        };
-        GROUPSOFUSER.set(RwLock::new(groups_of_user));
-    }
-    /// group exist
-    pub fn group_exists(user_id: &PeerId, group_id: &Vec<u8>) -> bool {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(group_id);
-        idx > 0
-    }
-
+    // REMOVE
+    /*
+       /// group exists
+       pub fn group_exists(user_id: &PeerId, group_id: &Vec<u8>) -> bool {
+           let user_groups = Self::get_groups_of_user(user_id);
+           let idx = user_groups.group_id_to_index(group_id);
+           idx > 0
+       }
+    */
+    // REMOVE
+    /*
     /// member exist
-    pub fn _is_group_member_exist(
-        user_id: &PeerId,
-        group_id: &Vec<u8>,
-        member_id: &Vec<u8>,
-    ) -> bool {
+    pub fn _group_member_exist(user_id: &PeerId, group_id: &Vec<u8>, member_id: &Vec<u8>) -> bool {
         let user_groups = Self::get_groups_of_user(user_id);
         let idx = user_groups.group_id_to_index(group_id);
         if idx == 0 {
             return false;
         }
 
-        if let Ok(res) = user_groups.db_ref.get(&idx.to_be_bytes()) {
+        if let Ok(res) = user_groups.groups.get(&idx.to_be_bytes()) {
             match res {
                 Some(group) => {
                     return group.members.contains_key(member_id);
@@ -167,234 +308,223 @@ impl Group {
         }
         false
     }
-
-    /// get group member    
-    pub fn _get_group_member(
-        user_id: &PeerId,
-        group_id: &Vec<u8>,
-        member_id: &Vec<u8>,
-    ) -> Option<GroupMember> {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(group_id);
-        if idx == 0 {
-            return None;
-        }
-        if let Ok(res) = user_groups.db_ref.get(&idx.to_be_bytes()) {
-            match res {
-                Some(group) => {
-                    if let Some(member) = group.members.get(member_id) {
-                        return Some(member.clone());
-                    }
-                }
-                _ => {}
-            }
-        }
-        None
-    }
+    */
 
     /// update group member
-    pub fn update_group_member(user_id: &PeerId, group_id: &Vec<u8>, member: &GroupMember) {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(group_id);
-        if idx == 0 {
-            return;
-        }
-        if let Ok(res) = user_groups.db_ref.get(&idx.to_be_bytes()) {
-            match res {
-                Some(mut group) => {
-                    group.members.insert(member.user_id.clone(), member.clone());
-                    // update DB
-                    if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group) {
-                        log::error!("group db updating error");
-                    }
+    pub fn update_group_member(account_id: &PeerId, group_id: &Vec<u8>, member: &GroupMember) {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
+        {
+            // insert member
+            group.members.insert(member.user_id.clone(), member.clone());
 
-                    if let Err(_e) = user_groups.db_ref.flush() {
-                        log::error!("group db flush error");
-                    }
-                }
-                _ => {}
+            // increase revision
+            group.revision = group.revision + 1;
+
+            // update DB
+            GroupStorage::save_group(account_id.to_owned(), group);
+
+            // send new state to all users
+            Group::post_group_update(account_id, group_id);
+        }
+    }
+
+    // REMOVE
+    /*
+        /// update group
+        pub fn update_group(user_id: &PeerId, group: &Group) {
+            let user_groups = Self::get_groups_of_user(user_id);
+            let idx = user_groups.group_id_to_index(&group.id);
+            if idx == 0 {
+                return;
+            }
+
+            if let Err(_e) = user_groups.groups.insert(&idx.to_be_bytes(), group.clone()) {
+                log::error!("group db updating error");
+            }
+
+            if let Err(_e) = user_groups.groups.flush() {
+                log::error!("group db flush error");
             }
         }
-    }
-
-    /// update group
-    pub fn update_group(user_id: &PeerId, group: &Group) {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(&group.id);
-        if idx == 0 {
-            return;
-        }
-
-        if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group.clone()) {
-            log::error!("group db updating error");
-        }
-
-        if let Err(_e) = user_groups.db_ref.flush() {
-            log::error!("group db flush error");
-        }
-    }
+    */
 
     /// get group name
-    pub fn get_group_name(user_id: &PeerId, group_id: &Vec<u8>) -> Option<String> {
-        let groups = Self::get_groups_of_user(user_id);
-        let idx = groups.group_id_to_index(group_id);
-        if idx == 0 {
-            return None;
-        }
-        if let Ok(res) = groups.db_ref.get(&idx.to_be_bytes()) {
-            match res {
-                Some(group) => {
-                    return Some(group.name.clone());
-                }
-                _ => {}
-            }
+    pub fn get_group_name(account_id: &PeerId, group_id: &Vec<u8>) -> Option<String> {
+        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            return Some(group.name.clone());
         }
         None
     }
 
-    /// update group name
-    pub fn _update_group_name(user_id: &PeerId, group_id: &Vec<u8>, name: String) {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(group_id);
-        if idx == 0 {
-            return;
-        }
-        if let Ok(res) = user_groups.db_ref.get(&idx.to_be_bytes()) {
-            match res {
-                Some(mut group) => {
-                    group.name = name.clone();
-                    // update DB
-                    if let Err(_e) = user_groups.db_ref.insert(&idx.to_be_bytes(), group) {
-                        log::error!("group db updating error");
+    /*
+        /// update group name
+        pub fn _update_group_name(user_id: &PeerId, group_id: &Vec<u8>, name: String) {
+            let user_groups = Self::get_groups_of_user(user_id);
+            let idx = user_groups.group_id_to_index(group_id);
+            if idx == 0 {
+                return;
+            }
+            if let Ok(res) = user_groups.groups.get(&idx.to_be_bytes()) {
+                match res {
+                    Some(mut group) => {
+                        group.name = name.clone();
+                        // update DB
+                        if let Err(_e) = user_groups.groups.insert(&idx.to_be_bytes(), group) {
+                            log::error!("group db updating error");
+                        }
+                        if let Err(_e) = user_groups.groups.flush() {
+                            log::error!("group db flush error");
+                        }
                     }
-                    if let Err(_e) = user_groups.db_ref.flush() {
-                        log::error!("group db flush error");
-                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
-    }
+    */
+    // remove
+    /*
+       /// get group
+       pub fn get_group(account_id: &PeerId, group_id: &Vec<u8>) -> Result<Group, String> {
+           let user_groups = Self::get_groups_of_user(account_id);
+           let idx = user_groups.group_id_to_index(group_id);
+           if idx == 0 {
+               return Err("group no exists".to_string());
+           }
+           if let Ok(res) = user_groups.groups.get(&idx.to_be_bytes()) {
+               match res {
+                   Some(group) => {
+                       return Ok(group.clone());
+                   }
+                   _ => {}
+               }
+           }
+           Err("db error".to_string())
+       }
+    */
+    /*
+       /// update user's groups
+       pub fn update_groups_of_user(user_id: &PeerId, groups: Groups) {
+           let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
+           groups_of_user
+               .groups_of_user
+               .insert(user_id.to_bytes(), groups);
+       }
+    */
 
-    /// get group
-    pub fn get_group(user_id: &PeerId, group_id: &Vec<u8>) -> Result<Group, String> {
-        let user_groups = Self::get_groups_of_user(user_id);
-        let idx = user_groups.group_id_to_index(group_id);
-        if idx == 0 {
-            return Err("group no exists".to_string());
-        }
-        if let Ok(res) = user_groups.db_ref.get(&idx.to_be_bytes()) {
-            match res {
-                Some(group) => {
-                    return Ok(group.clone());
-                }
-                _ => {}
-            }
-        }
-        Err("db error".to_string())
-    }
-
-    /// update user's groups
-    pub fn update_groups_of_user(user_id: &PeerId, groups: Groups) {
-        let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
-        groups_of_user
-            .groups_of_user
-            .insert(user_id.to_bytes(), groups);
-    }
-
-    /// get user's groups
-    pub fn get_groups_of_user(user_id: &PeerId) -> Groups {
-        let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
-        if !groups_of_user
-            .groups_of_user
-            .contains_key(&user_id.to_bytes())
-        {
-            let new_groups_of_user = Self::create_groups_of_user(user_id);
-            groups_of_user
+    /*
+        /// get user's groups
+        pub fn get_groups_of_user(user_id: &PeerId) -> Groups {
+            let mut groups_of_user = GROUPSOFUSER.get().write().unwrap();
+            if !groups_of_user
                 .groups_of_user
-                .insert(user_id.to_bytes(), new_groups_of_user);
+                .contains_key(&user_id.to_bytes())
+            {
+                let new_groups_of_user = Self::create_groups_of_user(user_id);
+                groups_of_user
+                    .groups_of_user
+                    .insert(user_id.to_bytes(), new_groups_of_user);
+            }
+            let groups = groups_of_user
+                .groups_of_user
+                .get(&user_id.to_bytes())
+                .unwrap();
+            groups.clone()
         }
-        let groups = groups_of_user
-            .groups_of_user
-            .get(&user_id.to_bytes())
-            .unwrap();
-        groups.clone()
-    }
+    */
 
-    /// create new user's groups from DB
-    fn create_groups_of_user(user_id: &PeerId) -> Groups {
-        let db = DataBase::get_user_db(user_id.clone());
-        let tree: Tree<Group> = db.open_bincode_tree("groups").unwrap();
-        let invited: Tree<GroupInvited> = db.open_bincode_tree("group_invited").unwrap();
+    /*
+        /// create new user's groups from DB
+        fn create_groups_of_user(user_id: &PeerId) -> Groups {
+            let db = DataBase::get_user_db(user_id.clone());
+            let tree: Tree<Group> = db.open_bincode_tree("groups").unwrap();
+            let invited: Tree<GroupInvited> = db.open_bincode_tree("group_invited").unwrap();
 
-        // // get last key
-        let last_group: u64;
-        match tree.iter().last() {
-            Some(Ok((ivec, _))) => {
-                let i = ivec.to_vec();
-                match i.try_into() {
-                    Ok(arr) => {
-                        last_group = u64::from_be_bytes(arr);
+            // get last key
+            let last_group: u64;
+            match tree.iter().last() {
+                Some(Ok((ivec, _))) => {
+                    let i = ivec.to_vec();
+                    match i.try_into() {
+                        Ok(arr) => {
+                            last_group = u64::from_be_bytes(arr);
+                        }
+                        Err(e) => {
+                            log::error!("couldn't convert ivec to u64: {:?}", e);
+                            last_group = 0;
+                        }
+                    }
+                }
+                None => {
+                    last_group = 0;
+                }
+                Some(Err(e)) => {
+                    log::error!("Sled group table error: {}", e);
+                    last_group = 0;
+                }
+            }
+
+            let mut ids: BTreeMap<Vec<u8>, u64> = BTreeMap::new();
+
+            //initialize group_id mapping
+            for res in tree.iter() {
+                match res {
+                    Ok((idx, group)) => {
+                        let index = idx.to_vec();
+                        ids.insert(group.id, u64::from_be_bytes(index.try_into().unwrap()));
                     }
                     Err(e) => {
-                        log::error!("couldn't convert ivec to u64: {:?}", e);
-                        last_group = 0;
+                        log::error!("Error retrieving feed message from data base: {}", e);
                     }
                 }
             }
-            None => {
-                last_group = 0;
-            }
-            Some(Err(e)) => {
-                log::error!("Sled feed table error: {}", e);
-                last_group = 0;
-            }
-        }
 
-        let mut ids: BTreeMap<Vec<u8>, u64> = BTreeMap::new();
-        //initialize group_id mapping
-        for res in tree.iter() {
-            match res {
-                Ok((idx, group)) => {
-                    let index = idx.to_vec();
-                    ids.insert(group.id, u64::from_be_bytes(index.try_into().unwrap()));
-                }
-                Err(e) => {
-                    log::error!("Error retrieving feed message from data base: {}", e);
-                }
-            }
+            let groups = Groups {
+                groups: tree,
+                invited: invited,
+                last_group,
+                group_ids: ids,
+            };
+            groups
         }
-
-        let groups = Groups {
-            db_ref: tree,
-            invited_ref: invited,
-            last_group,
-            group_ids: ids,
+    */
+    /// Send packed notify message directly
+    pub fn send_notify_message(user_account: &UserAccount, receiver: &PeerId, data: Vec<u8>) {
+        // pack group container into messaging message
+        let proto_message = proto::Messaging {
+            message: Some(proto::messaging::Message::GroupInviteMessage(
+                proto::GroupInviteMessage { content: data },
+            )),
         };
-        groups
+
+        // send message via messaging
+        let message_id: Vec<u8> = Vec::new();
+        match Messaging::pack_and_send_message(
+            user_account,
+            &receiver,
+            proto_message.encode_to_vec(),
+            MessagingServiceType::Group,
+            &message_id,
+            true,
+        ) {
+            Ok(_) => {}
+            Err(err) => {
+                log::error!("group notify message sending failed {}", err);
+            }
+        }
     }
 
     /// Send capsuled group message through messaging service
-    pub fn send_group_message_through_message(
+    pub fn send_group_message(
         user_account: &UserAccount,
         receiver: &PeerId,
+        group_id: Vec<u8>,
         data: &Vec<u8>,
     ) {
-        // create direct chat room
-        let group_id = ConversationId::from_peers(&user_account.id, &receiver);
-        if !Self::group_exists(&user_account.id, &group_id.to_bytes()) {
-            Manage::create_new_direct_chat_group(&user_account.id, &receiver);
-        }
-
-        //get last index
+        // get last index
         let group;
-        match Self::get_group(&user_account.id, &group_id.to_bytes()) {
-            Ok(v) => {
-                group = v;
-            }
-            Err(_error) => {
-                return;
-            }
+        match GroupStorage::get_group(user_account.id, group_id.clone()) {
+            Some(v) => group = v,
+            None => return,
         }
 
         let mut my_member;
@@ -408,8 +538,7 @@ impl Group {
         }
 
         let last_index = my_member.last_message_index + 1;
-        let message_id =
-            Messaging::generate_group_message_id(&group.id, &user_account.id, last_index);
+        let message_id = Chat::generate_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
             conversation_id: group.id.clone(),
@@ -432,23 +561,25 @@ impl Group {
             user_account,
             &receiver,
             send_message.encode_to_vec(),
-            Some(&message_id),
+            MessagingServiceType::Group,
+            &message_id,
             true,
         ) {
             Ok(_) => {
                 // save
-                Chat::save_outgoing_message(
-                    &user_account.id,
-                    &receiver,
-                    &group_id,
-                    &message_id,
-                    chat::rpc_proto::ContentType::Group.try_into().unwrap(),
-                    data,
-                    chat::rpc_proto::MessageStatus::Sending,
-                );
-                //update member state
+                // ChatStorage::save_outgoing_message(
+                //     &user_account.id,
+                //     &receiver,
+                //     &group_id,
+                //     &message_id,
+                //     chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
+                //     data,
+                //     chat::rpc_proto::MessageStatus::Sending,
+                // );
+
+                // update member state
                 my_member.last_message_index = last_index;
-                Self::update_group_member(&user_account.id, &group_id.to_bytes(), &my_member);
+                Self::update_group_member(&user_account.id, &group_id, &my_member);
             }
             Err(err) => {
                 log::error!("group message sending failed {}", err);
@@ -456,29 +587,19 @@ impl Group {
         }
     }
 
-    /// BroadCast group updated to all members
-    fn post_group_update(my_user_id: &PeerId, group_id: &Vec<u8>) {
-        let groups = Self::get_groups_of_user(my_user_id);
-
-        log::error!("post_group_update!");
-        let group_idx = groups.group_id_to_index(group_id);
-        if group_idx == 0 {
-            return;
+    /// Send group updated to all members
+    fn post_group_update(account_id: &PeerId, group_id: &Vec<u8>) {
+        let group;
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            Some(my_group) => group = my_group,
+            None => return,
         }
 
-        log::error!("post_group_update111!");
-
-        let group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
-
-        //create group notify messge and post to all members
-        let mut members: Vec<proto_net::Member> = vec![];
+        // create group notify message and post to all members
+        let mut members: Vec<proto_net::GroupMember> = vec![];
         for m in group.members.values() {
             if m.state > 0 {
-                members.push(proto_net::Member {
+                members.push(proto_net::GroupMember {
                     user_id: m.user_id.clone(),
                     role: m.role,
                     state: m.state,
@@ -488,33 +609,39 @@ impl Group {
             }
         }
 
-        let notify = proto_net::GroupNotify {
+        let notify = proto_net::GroupInfo {
             group_id: group_id.clone(),
             group_name: group.name.clone(),
             created_at: group.created_at,
-            creator_id: group.creator_id.clone(),
+            revision: group.revision,
             members,
         };
 
+        let container = proto_net::GroupContainer {
+            message: Some(proto_net::group_container::Message::GroupInfo(notify)),
+        };
+
         let send_message = proto::Messaging {
-            message: Some(proto::messaging::Message::GroupNotifyMessage(
-                proto::GroupNotifyMessage {
-                    content: notify.encode_to_vec(),
+            message: Some(proto::messaging::Message::GroupInviteMessage(
+                proto::GroupInviteMessage {
+                    content: container.encode_to_vec(),
                 },
             )),
         };
 
-        //broad cast to all group members
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
+        // send to all group members
+        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
             for user_id in group.members.keys() {
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
-                if receiver != *my_user_id {
+                if receiver != *account_id {
+                    let message_id: Vec<u8> = Vec::new();
                     if let Err(error) = Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
                         send_message.encode_to_vec(),
-                        None,
-                        false,
+                        MessagingServiceType::Group,
+                        &message_id,
+                        true,
                     ) {
                         log::error!("send group notify error {}", error);
                     }
@@ -523,13 +650,13 @@ impl Group {
         }
     }
 
-    /// Process group notify message from network
+    /// Process group info message from network
     pub fn on_notify(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>) {
-        match proto_net::GroupNotify::decode(&data[..]) {
+        match proto_net::GroupInfo::decode(&data[..]) {
             Ok(notify) => {
                 manage::Manage::on_group_notify(
-                    &sender_id.to_bytes(),
-                    &receiver_id.to_bytes(),
+                    sender_id.to_owned(),
+                    receiver_id.to_owned(),
                     &notify,
                 );
             }
@@ -541,7 +668,7 @@ impl Group {
 
     /// Process incoming NET messages for group chat module
     pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>) {
-        //check receiver id is in users list
+        // check receiver id is in users list
         let user;
         match UserAccounts::get_by_id(receiver_id.clone()) {
             Some(usr) => {
@@ -565,7 +692,7 @@ impl Group {
                 Some(proto_net::group_container::Message::ReplyInvite(reply_invite)) => {
                     log::info!("group::on_answered for invite");
                     if let Err(error) =
-                        Member::on_reply_invite(&sender_id, &receiver_id, &reply_invite)
+                        Member::on_reply_invite(sender_id, receiver_id, &reply_invite)
                     {
                         log::error!("group on_reply_invite error {}", error);
                     } else {
@@ -574,16 +701,21 @@ impl Group {
                         }
                     }
                 }
+                Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
+                    log::info!("group info arrived");
+                    manage::Manage::on_group_notify(
+                        sender_id.to_owned(),
+                        receiver_id.to_owned(),
+                        &group_info,
+                    );
+                }
                 None => {
-                    log::error!(
-                        "file share message from {} was empty",
-                        sender_id.to_base58()
-                    )
+                    log::error!("group message from {} was empty", sender_id.to_base58())
                 }
             },
             Err(e) => {
                 log::error!(
-                    "Error decoding FileSharing Message from {} to {}: {}",
+                    "Error decoding Group Message from {} to {}: {}",
                     sender_id.to_base58(),
                     receiver_id.to_base58(),
                     e
@@ -742,12 +874,9 @@ impl Group {
                         let mut status = true;
                         let mut message: String = "".to_string();
 
-                        if let Err(err) = Member::reply_invite(
-                            &my_user_id,
-                            &reply_req.group_id,
-                            &PeerId::from_bytes(&reply_req.user_id).unwrap(),
-                            reply_req.accept,
-                        ) {
+                        if let Err(err) =
+                            Member::reply_invite(&my_user_id, &reply_req.group_id, reply_req.accept)
+                        {
                             status = false;
                             message = err.clone();
                             log::error!("Get group info error, {}", err);
@@ -756,7 +885,6 @@ impl Group {
                             message: Some(proto_rpc::group::Message::GroupReplyInviteResponse(
                                 proto_rpc::GroupReplyInviteResponse {
                                     group_id: reply_req.group_id.clone(),
-                                    user_id: reply_req.user_id.clone(),
                                     result: Some(proto_rpc::GroupResult { status, message }),
                                 },
                             )),
@@ -770,7 +898,6 @@ impl Group {
                             Vec::new(),
                         );
                     }
-
                     Some(proto_rpc::group::Message::GroupRemoveMemberRequest(remove_req)) => {
                         let mut status = true;
                         let mut message: String = "".to_string();

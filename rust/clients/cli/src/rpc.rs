@@ -3,12 +3,13 @@
 
 //! # RPC client functions
 
-use prost::Message;
 use libqaul;
+use prost::Message;
 
 /// include generated protobuf RPC rust definition file
-pub mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs"); }
-
+pub mod proto {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
+}
 
 /// RPC message communication between client
 /// and libqaul.
@@ -32,7 +33,7 @@ impl Rpc {
                 println!("");
 
                 // stop here
-                return
+                return;
             }
         }
 
@@ -40,11 +41,10 @@ impl Rpc {
         let user_id;
         if let Some(data) = my_user_id {
             user_id = data;
-        }
-        else {
+        } else {
             user_id = Vec::new();
         }
-        
+
         // Create RPC message container
         let proto_message = proto::QaulRpc {
             module,
@@ -55,7 +55,9 @@ impl Rpc {
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send the message
         libqaul::api::send_rpc(buf);
@@ -70,50 +72,50 @@ impl Rpc {
                 match proto::Modules::from_i32(message.module) {
                     Some(proto::Modules::Node) => {
                         super::node::Node::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Rpc) => {
                         // TODO: authorisation
-                    },
+                    }
                     Some(proto::Modules::Useraccounts) => {
                         super::user_accounts::UserAccounts::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Users) => {
                         super::users::Users::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Router) => {
                         super::router::Router::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Feed) => {
                         super::feed::Feed::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Chat) => {
                         super::chat::Chat::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Connections) => {
                         super::connections::Connections::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Ble) => {
                         super::ble::Ble::rpc(message.data);
-                    },
+                    }
                     Some(proto::Modules::Debug) => {
                         super::debug::Debug::rpc(message.data);
-                    },
-                    Some(proto::Modules::Fileshare) => {
-                        super::fileshare::FileShare::rpc(message.data);
-                    },
-                    Some(proto::Modules::Group) => {                        
+                    }
+                    Some(proto::Modules::Chatfile) => {
+                        super::chatfile::ChatFile::rpc(message.data);
+                    }
+                    Some(proto::Modules::Group) => {
                         super::group::Group::rpc(message.data);
-                    },
-                    Some(proto::Modules::Rtc) => {   
+                    }
+                    Some(proto::Modules::Rtc) => {
                         super::rtc::Rtc::rpc(message.data);
-                    },
-                    Some(proto::Modules::None) => {},
-                    None => {},
+                    }
+                    Some(proto::Modules::None) => {}
+                    None => {}
                 }
-            },
+            }
             Err(error) => {
                 log::error!("{:?}", error);
-            },
+            }
         }
     }
 }

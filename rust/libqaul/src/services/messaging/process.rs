@@ -1,18 +1,18 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Qaul Messaging process
+//! # Process Received Messages
 //!
-//! The messaging service is used for sending, receiving and
+//! This processes the received messages from the messaging module
+//! which have reached it's destination
 
 use libp2p::PeerId;
 use prost::Message;
 
 use crate::router;
 
-use crate::services::chat;
+use crate::services::chat::{self, ChatFile, ChatStorage};
 use crate::services::crypto::Crypto;
-use crate::services::filesharing;
 use crate::services::group;
 use crate::services::group::conversation_id::ConversationId;
 use crate::services::rtc;
@@ -27,8 +27,8 @@ use crate::services::rtc;
 pub struct MessagingProcess {}
 
 impl MessagingProcess {
-    /// process direct message from network
-    pub fn on_direct_message(
+    /// process encrypted message
+    pub fn on_encrypted_message(
         sender_id: &PeerId,
         receiver_id: &PeerId,
         data: &Vec<u8>,
@@ -53,16 +53,31 @@ impl MessagingProcess {
 
         match messaging.message {
             Some(super::proto::messaging::Message::ConfirmationMessage(confirm)) => {
-                //update unconfirmed_table
-                if let Some(msg_id) = super::Messaging::on_confirmed_message(&confirm.signature) {
-                    // update chat table received_at and state
-                    chat::Chat::update_confirmation(receiver_id, &msg_id, confirm.received_at);
+                // process confirmation message
+                super::Messaging::on_confirmed_message(&confirm.signature);
+                // REMOVE
+                // update chat table received_at and state
+                //ChatStorage::update_confirmation(receiver_id, &msg_id, confirm.received_at);
+            }
+            Some(super::proto::messaging::Message::CryptoService(_crypto)) => {
+                // send confirm message
+                if let Err(e) =
+                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                {
+                    log::error!("send confirmation failed {}", e);
                 }
             }
-            Some(super::proto::messaging::Message::CryptoService(_crypto)) => {}
             Some(super::proto::messaging::Message::RtcStreamMessage(_rtc_stream)) => {}
-            Some(super::proto::messaging::Message::GroupNotifyMessage(group_notify)) => {
-                group::Group::on_notify(sender_id, receiver_id, &group_notify.content);
+            Some(super::proto::messaging::Message::GroupInviteMessage(group_invite)) => {
+                group::Group::net(sender_id, receiver_id, &group_invite.content);
+                //group::Group::on_notify(sender_id, receiver_id, &group_notify.content);
+
+                // send confirm message
+                if let Err(e) =
+                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                {
+                    log::error!("send confirmation failed {}", e);
+                }
             }
             Some(super::proto::messaging::Message::CommonMessage(common)) => {
                 // check conversation id
@@ -85,7 +100,7 @@ impl MessagingProcess {
 
                 match common.payload {
                     Some(super::proto::common_message::Payload::ChatMessage(ref chat_message)) => {
-                        chat::Chat::save_incoming_message(
+                        ChatStorage::save_incoming_message(
                             receiver_id,
                             sender_id,
                             chat::rpc_proto::ChatContentType::Chat.try_into().unwrap(),
@@ -97,12 +112,12 @@ impl MessagingProcess {
                         );
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
-                        if let Ok(exist) = filesharing::FileShare::is_completed(
-                            &receiver_id,
-                            &file_message.content,
-                        ) {
+                        // TODO: HOW TO DO THIS HERE?
+                        if let Ok(exist) =
+                            ChatFile::is_completed(&receiver_id, &file_message.content)
+                        {
                             if !exist {
-                                filesharing::FileShare::net(
+                                ChatFile::net(
                                     &sender_id,
                                     &receiver_id,
                                     &common.conversation_id,
@@ -237,7 +252,7 @@ impl MessagingProcess {
                             }
                         }
 
-                        Self::on_direct_message(
+                        Self::on_encrypted_message(
                             &sender_id,
                             &receiver_id,
                             &decrypted,

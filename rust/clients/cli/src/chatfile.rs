@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # FileShare module functions
+//! # ChatFile module functions
 
 use super::rpc::Rpc;
 use prost::Message;
@@ -9,16 +9,16 @@ use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.filesharing.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chatfile.rs");
 }
 
-/// FileShare module function handling
-pub struct FileShare {}
+/// Chat file module function handling
+pub struct ChatFile {}
 
-impl FileShare {
+impl ChatFile {
     /// CLI command interpretation
     ///
-    /// The CLI commands of FileShare module are processed here
+    /// The CLI commands of the chat file module are processed here
     pub fn cli(command: &str) {
         match command {
             // send file
@@ -68,7 +68,7 @@ impl FileShare {
                 }
             }
 
-            // request fileShare history list
+            // request chat file history list
             cmd if cmd.starts_with("history ") => {
                 let command_string = cmd.strip_prefix("history ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
@@ -117,8 +117,8 @@ impl FileShare {
     /// send file via rpc
     fn send_file(conversation_id: Vec<u8>, file_name: String, description: String) {
         // create file send message
-        let proto_message = proto::FileSharing {
-            message: Some(proto::file_sharing::Message::SendFileRequest(
+        let proto_message = proto::ChatFile {
+            message: Some(proto::chat_file::Message::SendFileRequest(
                 proto::SendFileRequest {
                     path_name: file_name.clone(),
                     conversation_id: conversation_id.clone(),
@@ -136,7 +136,7 @@ impl FileShare {
         // send message
         Rpc::send_message(
             buf,
-            super::rpc::proto::Modules::Fileshare.into(),
+            super::rpc::proto::Modules::Chatfile.into(),
             "".to_string(),
         );
     }
@@ -144,8 +144,8 @@ impl FileShare {
     /// send file history list command via rpc
     fn send_file_history_commnad(offset: u32, limit: u32) {
         // create file history message
-        let proto_message = proto::FileSharing {
-            message: Some(proto::file_sharing::Message::FileHistory(
+        let proto_message = proto::ChatFile {
+            message: Some(proto::chat_file::Message::FileHistory(
                 proto::FileHistoryRequest { offset, limit },
             )),
         };
@@ -159,7 +159,7 @@ impl FileShare {
         // send message
         Rpc::send_message(
             buf,
-            super::rpc::proto::Modules::Fileshare.into(),
+            super::rpc::proto::Modules::Chatfile.into(),
             "".to_string(),
         );
     }
@@ -169,10 +169,10 @@ impl FileShare {
     /// Decodes received protobuf encoded binary RPC message
     /// of the file share module.
     pub fn rpc(data: Vec<u8>) {
-        match proto::FileSharing::decode(&data[..]) {
+        match proto::ChatFile::decode(&data[..]) {
             Ok(file_share) => {
                 match file_share.message {
-                    Some(proto::file_sharing::Message::FileHistoryResponse(proto_file_history)) => {
+                    Some(proto::chat_file::Message::FileHistoryResponse(proto_file_history)) => {
                         // List header
                         println!("====================================");
                         println!("File Sharing Histories");
@@ -191,7 +191,7 @@ impl FileShare {
                             println!("\t Group Id: {}", entry.group_id);
                             println!(
                                 "\t FileSize: {}, Description: {}",
-                                entry.file_size, entry.file_descr
+                                entry.file_size, entry.file_description
                             );
                             println!("");
                         }

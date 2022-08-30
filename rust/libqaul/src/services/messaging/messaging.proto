@@ -61,18 +61,12 @@ message Messaging {
         CryptoService crypto_service = 2;
         // rtc stream
         RtcStreamMessage rtc_stream_message = 3;
-        // group notify
-        GroupNotifyMessage group_notify_message = 4;
+        // group invite messages
+        GroupInviteMessage group_invite_message = 4;
         // common message
         CommonMessage common_message = 5;
     }
 }
-
-// Crypto Service Message
-//
-// This message is for crypto specific tasks,
-// such as completing a handshake.
-message CryptoService {}
 
 // message received confirmation
 //
@@ -86,6 +80,22 @@ message Confirmation {
     uint64 received_at = 2;
 }
 
+// Crypto Service Message
+//
+// This message is for crypto specific tasks,
+// such as completing a handshake.
+message CryptoService {}
+
+// rtc stream mesasge
+message RtcStreamMessage {
+    bytes content = 1;
+}
+
+// group invite message
+message GroupInviteMessage {
+    bytes content = 1;
+}
+
 // common message
 message CommonMessage {
     // message ID
@@ -94,7 +104,7 @@ message CommonMessage {
     // conversation id
     bytes conversation_id = 2;
 
-    // conversation id
+    // sent at timestamp
     uint64 sent_at = 3;
 
     // payload
@@ -121,22 +131,13 @@ message FileMessage {
     bytes content = 1;
 }
 
-// rtc message
-message RtcMessage {
-    bytes content = 1;
-}
-// rtc stream mesasge
-message RtcStreamMessage {
-    bytes content = 1;
-}
-
 // group message
 message GroupMessage {
     bytes content = 1;
 }
 
-// group notify message
-message GroupNotifyMessage {
+// rtc message
+message RtcMessage {
     bytes content = 1;
 }
 
