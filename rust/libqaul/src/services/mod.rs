@@ -14,6 +14,7 @@
 
 pub mod chat;
 pub mod crypto;
+pub mod dtn;
 pub mod feed;
 pub mod group;
 pub mod messaging;
@@ -33,5 +34,6 @@ impl Services {
         chat::Chat::init();
         group::Group::init();
         rtc::Rtc::init();
+        dtn::Dtn::init();
     }
 }

@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 
 //! # Configuration
-//! 
+//!
 //! **Configure qaul.net via a config file, or from the commandline.**
 //!
 //! On the first startup a `config.yaml` file is saved.
@@ -104,9 +104,9 @@ impl Default for UserAccount {
 }
 
 /// Debugging Configuration Options
-/// 
+///
 /// The following options can be configured:
-/// 
+///
 /// * logging to file
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct DebugOption {
@@ -115,14 +115,12 @@ pub struct DebugOption {
 
 impl Default for DebugOption {
     fn default() -> Self {
-        DebugOption {
-            log: false,
-        }
+        DebugOption { log: false }
     }
 }
 
 /// Routing Configuration Options
-/// 
+///
 /// The following options can be configured:
 /// All units are second
 /// because rtt is measured as micro seconds
@@ -134,24 +132,46 @@ pub struct RoutingOptions {
     //Pinging every neighbour all 5 seconds.
     pub ping_neighbour_period: u64,
     //Hop count penalty.
-    pub hop_count_penalty : u64,
+    pub hop_count_penalty: u64,
     //How long a route is stored until it is removed.
-    pub maintain_period_limit: u64, 
+    pub maintain_period_limit: u64,
 }
 
 impl Default for RoutingOptions {
     fn default() -> Self {
         RoutingOptions {
-            sending_table_period: 10, //10 seconds, unit seconds
-            ping_neighbour_period: 5, //5  seconds, unit: seconds
-            hop_count_penalty : 10, //10 seconds, unit: second
+            sending_table_period: 10,   //10 seconds, unit seconds
+            ping_neighbour_period: 5,   //5  seconds, unit: seconds
+            hop_count_penalty: 10,      //10 seconds, unit: second
             maintain_period_limit: 300, //5min, unit: second
         }
     }
 }
 
+/// Storage Configuration Options
+///
+/// The following options can be configured:
+/// size_total units are MB
+/// * storage options
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct StorageOptions {
+    //storage node users
+    pub users: Vec<String>,
+    //Sending the table every 10 seconds to direct neighbours.
+    pub size_total: u32,
+}
+
+impl Default for StorageOptions {
+    fn default() -> Self {
+        StorageOptions {
+            users: vec![],
+            size_total: 1024, //1024 MB
+        }
+    }
+}
+
 /// Configuration Structure of libqaul
-/// 
+///
 /// This structure contains the entire configuration of libqaul.
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Configuration {
@@ -161,6 +181,7 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    pub storage: StorageOptions,
 }
 
 impl Default for Configuration {
@@ -172,6 +193,7 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            storage: StorageOptions::default(),
         }
     }
 }
@@ -188,16 +210,17 @@ impl Configuration {
         let config_path = path.join("config.yaml");
 
         // Merge config if a Config file exists
-        let config: Configuration = match settings.merge(File::with_name(&config_path.to_str().unwrap())) {
-            Err(_) => {
-                log::error!("no configuration file found, creating one.");
-                Configuration::default()
-            },
-            Ok(c) => c
-                .clone()
-                .try_into()
-                .expect("Couldn't Convert to `Configuration`, malformed config file."),
-        };
+        let config: Configuration =
+            match settings.merge(File::with_name(&config_path.to_str().unwrap())) {
+                Err(_) => {
+                    log::error!("no configuration file found, creating one.");
+                    Configuration::default()
+                }
+                Ok(c) => c
+                    .clone()
+                    .try_into()
+                    .expect("Couldn't Convert to `Configuration`, malformed config file."),
+            };
 
         // There is no key for debug in the the configuration hence fails.
 
@@ -228,7 +251,7 @@ impl Configuration {
     /// Enable/disable logging to file for debugging
     pub fn enable_debug_log(enable: bool) {
         let mut config_mutable = CONFIG.get().write().unwrap();
-        config_mutable.debug.log = enable; 
+        config_mutable.debug.log = enable;
     }
 
     /// Check if logging to file for debugging is enabled
@@ -261,6 +284,7 @@ impl Configuration {
 
         info!("Writing to Path {:?}, {:?}", path, config_path);
 
-        fs::write(config_path.clone(), yaml).expect(&format!("Could not write config to {:?}.", config_path));
+        fs::write(config_path.clone(), yaml)
+            .expect(&format!("Could not write config to {:?}.", config_path));
     }
 }

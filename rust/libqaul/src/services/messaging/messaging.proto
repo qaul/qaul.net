@@ -57,14 +57,16 @@ message Messaging {
     oneof message {
         // confirm chat message
         Confirmation confirmation_message = 1;
+        // dtn response message
+        DtnResponse dtn_response = 2;
         // crypto service
-        CryptoService crypto_service = 2;
+        CryptoService crypto_service = 3;
         // rtc stream
-        RtcStreamMessage rtc_stream_message = 3;
+        RtcStreamMessage rtc_stream_message = 4;
         // group invite messages
-        GroupInviteMessage group_invite_message = 4;
+        GroupInviteMessage group_invite_message = 5;
         // common message
-        CommonMessage common_message = 5;
+        CommonMessage common_message = 6;
     }
 }
 
@@ -154,24 +156,26 @@ message Dtn {
 // DTN response
 message DtnResponse {
     // the enum definition of the type
-    enum Type {
+    enum ResponseType {
         // the message was accepted for storage
         ACCEPTED = 0;
         // the message was rejected
         REJECTED = 1;
     }
     // the type of the message
-    Type type = 1;
+    ResponseType response_type = 1;
     // message signature reference
     bytes signature = 2;
     // the enum definition of the rejection reason
     enum Reason {
+        // none
+        NONE = 0;
         // this user is not accepted
-        USER_NOT_ACCEPTED = 0;
+        USER_NOT_ACCEPTED = 1;
         // overall quota reached
-        OVERALL_QUOTA = 1;
+        OVERALL_QUOTA = 2;
         // user quota reached
-        USER_QUOTA = 2;
+        USER_QUOTA = 3;
     }
     // reason of rejection
     Reason reason = 3;

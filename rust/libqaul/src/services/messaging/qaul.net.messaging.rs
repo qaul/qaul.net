@@ -70,7 +70,7 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5")]
+    #[prost(oneof="messaging::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -80,17 +80,20 @@ pub mod messaging {
         /// confirm chat message
         #[prost(message, tag="1")]
         ConfirmationMessage(super::Confirmation),
-        /// crypto service
+        /// dtn response message
         #[prost(message, tag="2")]
+        DtnResponse(super::DtnResponse),
+        /// crypto service
+        #[prost(message, tag="3")]
         CryptoService(super::CryptoService),
         /// rtc stream
-        #[prost(message, tag="3")]
+        #[prost(message, tag="4")]
         RtcStreamMessage(super::RtcStreamMessage),
         /// group invite messages
-        #[prost(message, tag="4")]
+        #[prost(message, tag="5")]
         GroupInviteMessage(super::GroupInviteMessage),
         /// common message
-        #[prost(message, tag="5")]
+        #[prost(message, tag="6")]
         CommonMessage(super::CommonMessage),
     }
 }
@@ -211,8 +214,8 @@ pub mod dtn {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DtnResponse {
     /// the type of the message
-    #[prost(enumeration="dtn_response::Type", tag="1")]
-    pub r#type: i32,
+    #[prost(enumeration="dtn_response::ResponseType", tag="1")]
+    pub response_type: i32,
     /// message signature reference
     #[prost(bytes="vec", tag="2")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
@@ -225,21 +228,21 @@ pub mod dtn_response {
     /// the enum definition of the type
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
-    pub enum Type {
+    pub enum ResponseType {
         /// the message was accepted for storage
         Accepted = 0,
         /// the message was rejected
         Rejected = 1,
     }
-    impl Type {
+    impl ResponseType {
         /// String value of the enum field names used in the ProtoBuf definition.
         ///
         /// The values are not transformed in any way and thus are considered stable
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
-                Type::Accepted => "ACCEPTED",
-                Type::Rejected => "REJECTED",
+                ResponseType::Accepted => "ACCEPTED",
+                ResponseType::Rejected => "REJECTED",
             }
         }
     }
@@ -247,12 +250,14 @@ pub mod dtn_response {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum Reason {
+        /// none
+        None = 0,
         /// this user is not accepted
-        UserNotAccepted = 0,
+        UserNotAccepted = 1,
         /// overall quota reached
-        OverallQuota = 1,
+        OverallQuota = 2,
         /// user quota reached
-        UserQuota = 2,
+        UserQuota = 3,
     }
     impl Reason {
         /// String value of the enum field names used in the ProtoBuf definition.
@@ -261,6 +266,7 @@ pub mod dtn_response {
         /// (if the ProtoBuf definition does not change) and safe for programmatic use.
         pub fn as_str_name(&self) -> &'static str {
             match self {
+                Reason::None => "NONE",
                 Reason::UserNotAccepted => "USER_NOT_ACCEPTED",
                 Reason::OverallQuota => "OVERALL_QUOTA",
                 Reason::UserQuota => "USER_QUOTA",
