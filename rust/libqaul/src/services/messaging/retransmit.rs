@@ -38,46 +38,53 @@ impl MessagingRetransmit {
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
         for entry in unconfirmed.unconfirmed.iter() {
-            if let Ok((signature, mut unconfirmed_mesage)) = entry {
+            if let Ok((signature, mut unconfirmed_message)) = entry {
                 // let's assume message transmit in 3 seconds
-                if cur_time < (unconfirmed_mesage.last_sent + 3000) {
+                if cur_time < (unconfirmed_message.last_sent + 3000) {
                     continue;
                 }
 
-                let qaul_id = QaulId::bytes_to_q8id(unconfirmed_mesage.receiver_id.clone());
+                let qaul_id = QaulId::bytes_to_q8id(unconfirmed_message.receiver_id.clone());
                 //1. check receiver is online
                 if let Some(_hc) = online_users.get(&qaul_id) {
                     let mut timeout: u64 = 0;
-                    if unconfirmed_mesage.scheduled {
+                    if unconfirmed_message.scheduled {
                         timeout = 20 * 1000;
                     }
 
                     //check if expired timeout
-                    if cur_time > (timeout + unconfirmed_mesage.last_sent) {
+                    if cur_time > (timeout + unconfirmed_message.last_sent) {
                         // queue into messaging queue
                         if let Ok(container) =
-                            super::proto::Container::decode(&unconfirmed_mesage.container[..])
+                            super::proto::Container::decode(&unconfirmed_message.container[..])
                         {
                             let receiver =
-                                PeerId::from_bytes(&unconfirmed_mesage.receiver_id).unwrap();
+                                PeerId::from_bytes(&unconfirmed_message.receiver_id).unwrap();
 
                             log::error!(
                                 "retrans message, signature: {}",
                                 bs58::encode(container.signature.clone()).into_string()
                             );
-                            super::Messaging::schedule_message(receiver.clone(), container.clone());
+                            super::Messaging::schedule_message(
+                                receiver.clone(),
+                                container.clone(),
+                                true,
+                                false,
+                                unconfirmed_message.scheduled_dtn,
+                                unconfirmed_message.is_dtn,
+                            );
 
                             // update entry
-                            let mut new_retry = unconfirmed_mesage.retry;
+                            let mut new_retry = unconfirmed_message.retry;
                             if new_retry > 10 {
                                 new_retry = 1;
                             }
 
-                            unconfirmed_mesage.retry = new_retry;
-                            unconfirmed_mesage.last_sent = cur_time;
+                            unconfirmed_message.retry = new_retry;
+                            unconfirmed_message.last_sent = cur_time;
                             if let Err(_e) = unconfirmed
                                 .unconfirmed
-                                .insert(signature, unconfirmed_mesage.clone())
+                                .insert(signature, unconfirmed_message.clone())
                             {
                                 log::error!("updating unconfirmed table error!");
                             } else {

@@ -239,6 +239,30 @@ impl Messaging {
         }
     }
 
+    fn on_scheduled_as_dtn_message(signature: &Vec<u8>) {
+        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
+            return;
+        }
+
+        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+
+        unconfirmed_message.scheduled_dtn = true;
+        if let Err(_e) = unconfirmed
+            .unconfirmed
+            .insert(signature.clone(), unconfirmed_message)
+        {
+            log::error!("error updating unconfirmed table");
+        } else {
+            if let Err(_e) = unconfirmed.unconfirmed.flush() {
+                log::error!("error updating unconfirmed table");
+            }
+        }
+    }
+
     /// pack, sign and schedule a message for sending
     pub fn pack_and_send_message(
         user_account: &UserAccount,
@@ -329,6 +353,56 @@ impl Messaging {
             Ok(signature)
         } else {
             return Err("messaging signing error".to_string());
+        }
+    }
+
+    /// pack, sign and schedule a message for sending
+    pub fn send_dtn_message(
+        user_account: &UserAccount,
+        storage_node_id: &PeerId,
+        org_container: &proto::Container,
+        message_id: Option<&Vec<u8>>,
+    ) -> Result<Vec<u8>, String> {
+        // create Dtn message
+        let dtn_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::Dtn(
+                org_container.encode_to_vec(),
+            )),
+        };
+        let envelope_dtn = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: storage_node_id.to_bytes(),
+            payload: dtn_payload.encode_to_vec(),
+        };
+
+        if let Ok(signature_dtn) = user_account.keys.sign(&envelope_dtn.encode_to_vec()) {
+            // create dtn container
+            let container_dtn = proto::Container {
+                signature: signature_dtn.clone(),
+                envelope: Some(envelope_dtn),
+            };
+            // in common message case, save into unconfirmed table
+            Self::save_unconfirmed_message(
+                MessagingServiceType::Chat,
+                &Vec::new(),
+                &storage_node_id,
+                &container_dtn,
+                true,
+            );
+
+            // schedule message for sending
+            Self::schedule_message(
+                storage_node_id.clone(),
+                container_dtn,
+                true,
+                false,
+                false,
+                true,
+            );
+            // return signature
+            Ok(signature_dtn)
+        } else {
+            return Err("dtn messaging signing error".to_string());
         }
     }
 
@@ -501,7 +575,34 @@ impl Messaging {
                 return Some((route.node, route.module, data));
             } else {
                 // user is offline we schedule through DTN service
-                if !message.is_forward && !message.is_dtn && !message.scheduled_dtn {}
+                if !message.is_forward
+                    && !message.is_dtn
+                    && !message.scheduled_dtn
+                    && message.is_common
+                {
+                    // get storage node id
+                    if let Some(storage_node_id) =
+                        super::dtn::Dtn::get_storage_user(&message.receiver)
+                    {
+                        if let Ok(my_user_id) = PeerId::from_bytes(
+                            &message.container.envelope.as_ref().unwrap().sender_id,
+                        ) {
+                            if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
+                                if let Err(_e) = Self::send_dtn_message(
+                                    &user_account,
+                                    &storage_node_id,
+                                    &message.container,
+                                    Some(&vec![]),
+                                ) {
+                                    log::error!("DTN scheduling error!");
+                                } else {
+                                    // update unconfirmed table
+                                    Self::on_scheduled_as_dtn_message(&message.container.signature);
+                                }
+                            }
+                        }
+                    }
+                }
                 // log::trace!("No route found to user {}", message.receiver.to_base58());
                 // reschedule if no route is found
                 //Self::schedule_message(message.receiver, message.container);
