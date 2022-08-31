@@ -23,6 +23,7 @@ import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
+import 'models/group_invite.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
@@ -189,6 +190,11 @@ class LibqaulWorker {
     await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
   }
 
+  void getGroupInvitesReceived() async {
+    final msg = Group(groupInvitedRequest: GroupInvitedRequest());
+    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+  }
+
   void createGroup(String name) async {
     assert(name.isNotEmpty);
     final msg = Group(groupCreateRequest: GroupCreateRequest(groupName: name));
@@ -225,12 +231,9 @@ class LibqaulWorker {
   }
 
   void replyToGroupInvite(Uint8List groupId, {required bool accepted}) async {
-    final user = _reader(defaultUserProvider);
-    assert(user != null);
     final msg = Group(
       groupReplyInviteRequest: GroupReplyInviteRequest(
         groupId: groupId.toList(),
-        userId: user!.id.toList(),
         accept: accepted,
       ),
     );
@@ -249,7 +252,7 @@ class LibqaulWorker {
   }
 
   // -------------------
-  // FILESHARE Requests
+  // CHATFILE Requests
   // -------------------
   void sendFile({
     required String pathName,
@@ -262,14 +265,14 @@ class LibqaulWorker {
       conversationId: conversationId.toList(),
       description: description,
     ));
-    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
+    await _encodeAndSendMessage(Modules.CHATFILE, msg.writeToBuffer());
   }
 
   void getFileHistory({int? offset, int? limit}) async {
     final msg = FileSharing(
       fileHistory: FileHistoryRequest(offset: offset, limit: limit),
     );
-    await _encodeAndSendMessage(Modules.FILESHARE, msg.writeToBuffer());
+    await _encodeAndSendMessage(Modules.CHATFILE, msg.writeToBuffer());
   }
 
   // -------------------
@@ -378,7 +381,7 @@ class LibqaulWorker {
       } else if (m.module == Modules.GROUP) {
         final resp = await GroupTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
-      } else if (m.module == Modules.FILESHARE) {
+      } else if (m.module == Modules.CHATFILE) {
         final resp = await FileSharingTranslator().decodeMessageBytes(m.data);
         if (resp != null) _processResponse(resp);
       } else {
@@ -442,12 +445,14 @@ class LibqaulWorker {
           }
           return;
         }
-        if (resp.data is ChatRoom) {
-          final currentRoom = _reader(currentOpenChatRoom);
+        if (resp.data is ChatConversationList) {
+          final currRoom = _reader(currentOpenChatRoom);
 
-          if (currentRoom != null &&
-              currentRoom.conversationId.equals(resp.data.conversationId)) {
-            _reader(currentOpenChatRoom.notifier).state = resp.data;
+          var list = (resp.data as ChatConversationList);
+          final listId = Uint8List.fromList(list.conversationId);
+          if (currRoom != null && listId.equals(currRoom.conversationId)) {
+            _reader(currentOpenChatRoom.notifier).state =
+                currRoom.mergeWithConversationList(resp.data);
           }
           return;
         }
@@ -457,9 +462,9 @@ class LibqaulWorker {
       if (resp.data != null) {
         final state = _reader(chatRoomsProvider.notifier);
         final users = _reader(usersProvider);
-        if (resp.data is List<GroupInfo>) {
+        if (resp.data is List<GroupDetails>) {
           for (final groupInfo in resp.data) {
-            final room = ChatRoom.fromGroupInfo(groupInfo, users);
+            final room = ChatRoom.fromGroupDetails(groupInfo, users);
             if (!state.contains(room)) {
               state.add(room);
             } else {
@@ -467,12 +472,22 @@ class LibqaulWorker {
             }
           }
           return;
-        } else if (resp.data is GroupInfo) {
-          final room = ChatRoom.fromGroupInfo(resp.data, users);
+        } else if (resp.data is GroupDetails) {
+          final room = ChatRoom.fromGroupDetails(resp.data, users);
           if (!state.contains(room)) {
             state.add(room);
           } else {
             state.update(room);
+          }
+          return;
+        } else if (resp.data is List<GroupInvite>) {
+          final invites = _reader(groupInvitesProvider.notifier);
+          for (final invite in resp.data) {
+            if (!invites.contains(invite)) {
+              invites.add(invite);
+            } else {
+              invites.update(invite);
+            }
           }
           return;
         }
@@ -497,7 +512,7 @@ class LibqaulWorker {
         return;
       }
     }
-    if (resp.module == Modules.FILESHARE) {
+    if (resp.module == Modules.CHATFILE) {
       if (resp.data is List<FileHistoryEntity>) {
         final provider = _reader(fileHistoryEntitiesProvider.notifier);
         for (final file in resp.data) {

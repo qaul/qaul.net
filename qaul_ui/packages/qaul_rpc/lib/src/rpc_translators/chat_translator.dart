@@ -13,8 +13,7 @@ class ChatTranslator extends RpcModuleTranslator {
             message.ensureOverviewList().overviewList.map((e) => ChatRoom.fromOverview(e)).toList();
         return RpcTranslatorResponse(Modules.CHAT, rooms);
       case Chat_Message.conversationList:
-        var r = ChatRoom.fromConversationList(message.ensureConversationList());
-        return RpcTranslatorResponse(Modules.CHAT, r);
+        return RpcTranslatorResponse(Modules.CHAT, message.ensureConversationList());
       default:
         return super.decodeMessageBytes(data);
     }

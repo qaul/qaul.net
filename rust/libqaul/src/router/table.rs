@@ -13,7 +13,7 @@
 use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::RwLock;
 
 use super::proto;
@@ -130,6 +130,22 @@ impl RoutingTable {
         table
     }
 
+    /// get online users and hope count    
+    pub fn get_online_users() -> BTreeMap<Vec<u8>, u8> {
+        let mut user_ids: BTreeMap<Vec<u8>, u8> = BTreeMap::new();
+
+        // get access to routing table
+        let routing_table = ROUTINGTABLE.get().read().unwrap();
+
+        // loop through routing table
+        for (user_id, user) in routing_table.table.iter() {
+            if user.connections.len() > 0 {
+                user_ids.insert(user_id.clone(), user.connections[0].hc);
+            }
+        }
+        user_ids
+    }
+
     /// Create routing information for a specific neighbour node,
     /// to be sent to this neighbour node.
     pub fn get_online_user_ids(last_sent: u64) -> Vec<Vec<u8>> {
@@ -231,7 +247,6 @@ impl RoutingTable {
             let mut compare: Option<&RoutingConnectionEntry> = None;
 
             //log::error!("found user entry connections = {}", user_entry.connections.len());
-
             // find best route
             for connection in &user_entry.connections {
                 match compare {

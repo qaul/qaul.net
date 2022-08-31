@@ -666,7 +666,7 @@ public final class FeedNet {
 
     /**
      * <pre>
-     * timestamp in milli seconds
+     * timestamp in milliseconds
      * </pre>
      *
      * <code>uint64 time = 3;</code>
@@ -840,7 +840,7 @@ public final class FeedNet {
     private long time_;
     /**
      * <pre>
-     * timestamp in milli seconds
+     * timestamp in milliseconds
      * </pre>
      *
      * <code>uint64 time = 3;</code>
@@ -1337,7 +1337,7 @@ public final class FeedNet {
       private long time_ ;
       /**
        * <pre>
-       * timestamp in milli seconds
+       * timestamp in milliseconds
        * </pre>
        *
        * <code>uint64 time = 3;</code>
@@ -1349,7 +1349,7 @@ public final class FeedNet {
       }
       /**
        * <pre>
-       * timestamp in milli seconds
+       * timestamp in milliseconds
        * </pre>
        *
        * <code>uint64 time = 3;</code>
@@ -1364,7 +1364,7 @@ public final class FeedNet {
       }
       /**
        * <pre>
-       * timestamp in milli seconds
+       * timestamp in milliseconds
        * </pre>
        *
        * <code>uint64 time = 3;</code>

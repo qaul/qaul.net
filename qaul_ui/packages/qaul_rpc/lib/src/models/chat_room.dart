@@ -32,6 +32,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.messages,
     this.unreadCount = 0,
     this.createdAt,
+    this.isDirectChat = true,
     this.members = const [],
   });
 
@@ -45,6 +46,7 @@ class ChatRoom with EquatableMixin implements Comparable {
   final MessageContent? lastMessagePreview;
   final List<Message>? messages;
   final DateTime? createdAt;
+  final bool isDirectChat;
   final List<ChatRoomUser> members;
 
   factory ChatRoom.blank({required User user, required User otherUser}) {
@@ -68,16 +70,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     );
   }
 
-  factory ChatRoom.fromConversationList(ChatConversationList conversationList) {
-    return ChatRoom._(
-      conversationId: Uint8List.fromList(conversationList.conversationId),
-      messages: conversationList.messageList
-          .map((e) => Message.fromChatMessage(e))
-          .toList(),
-    );
-  }
-
-  factory ChatRoom.fromGroupInfo(GroupInfo g, List<User> users) {
+  factory ChatRoom.fromGroupDetails(GroupDetails g, List<User> users) {
     final members = <ChatRoomUser>[];
 
     for (final user in users) {
@@ -90,13 +83,18 @@ class ChatRoom with EquatableMixin implements Comparable {
       conversationId: g.id,
       name: g.groupName.isNotEmpty ? g.groupName : 'Unknown Group Name',
       createdAt: g.createdAt,
+      isDirectChat: false,
       members: members,
     );
   }
 
   String get idBase58 => Base58Encode(conversationId);
 
-  bool get isGroupChatRoom => members.isNotEmpty;
+  bool get isGroupChatRoom => members.isNotEmpty || !isDirectChat;
+
+  String? get groupAdminIdBase58 => members
+      .firstWhereOrNull((m) => m.role == ChatRoomUserRole.admin)
+      ?.idBase58;
 
   @override
   int compareTo(dynamic other) {
@@ -132,6 +130,23 @@ class ChatRoom with EquatableMixin implements Comparable {
       unreadCount: unreadCount ?? this.unreadCount,
       lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
       messages: messages ?? this.messages,
+    );
+  }
+
+  ChatRoom mergeWithConversationList(ChatConversationList c) {
+    assert(conversationId.equals(Uint8List.fromList(c.conversationId)));
+    return ChatRoom._(
+      conversationId: conversationId,
+      messages: c.messageList.map((e) => Message.fromChatMessage(e)).toList(),
+      lastMessageIndex: lastMessageIndex,
+      name: name,
+      lastMessageTime: lastMessageTime,
+      unreadCount: unreadCount,
+      lastMessagePreview: lastMessagePreview,
+      lastMessageSenderId: lastMessageSenderId,
+      createdAt: createdAt,
+      isDirectChat: isDirectChat,
+      members: members,
     );
   }
 }
@@ -232,24 +247,26 @@ class Message with EquatableMixin implements Comparable<Message> {
 }
 
 @immutable
-class GroupInfo extends Equatable {
+class GroupDetails extends Equatable {
   final Uint8List id;
   final String groupName;
   final DateTime createdAt;
   final List<GroupMember> members;
 
-  const GroupInfo({
+  const GroupDetails({
     required this.id,
     required this.groupName,
     required this.createdAt,
     required this.members,
   });
 
+  get idBase58 => Base58Encode(id);
+
   @override
   List<Object?> get props => [groupName, createdAt];
 
-  factory GroupInfo.fromGroupInfoResponse(GroupInfoResponse group) {
-    return GroupInfo(
+  factory GroupDetails.fromRpcGroupInfo(GroupInfo group) {
+    return GroupDetails(
       id: Uint8List.fromList(group.groupId),
       groupName: group.groupName,
       createdAt: DateTime.now(),

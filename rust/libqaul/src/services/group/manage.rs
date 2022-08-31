@@ -7,29 +7,33 @@ use libp2p::PeerId;
 use prost::Message;
 use std::collections::BTreeMap;
 
-use super::chat;
+use super::chat::{self, ChatStorage};
 use super::conversation_id::ConversationId;
-use super::Group;
+use super::{Group, GroupStorage};
 use crate::utilities::timestamp;
 
 /// Group Manage Structure
 pub struct Manage {}
 impl Manage {
     /// Create a new direct chat group
-    pub fn create_new_direct_chat_group(user_id: &PeerId, peer_id: &PeerId) -> Vec<u8> {
-        let group_id = ConversationId::from_peers(user_id, peer_id).to_bytes();
+    ///
+    /// The function expects two qaul user ID's:
+    ///
+    /// * `account_id` your user account ID
+    /// * `user_id` the user ID of the other user
+    pub fn create_new_direct_chat_group(account_id: &PeerId, user_id: &PeerId) -> Group {
+        let group_id = ConversationId::from_peers(account_id, user_id).to_bytes();
 
-        let groups = Group::get_groups_of_user(user_id);
-        let group_idx = groups.group_id_to_index(&group_id);
-        if group_idx > 0 {
-            return group_id.clone();
+        // check if group already exists
+        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), group_id.clone()) {
+            return group;
         }
 
         let mut members = BTreeMap::new();
         members.insert(
-            user_id.to_bytes(),
+            account_id.to_bytes(),
             super::GroupMember {
-                user_id: user_id.to_bytes(),
+                user_id: account_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
@@ -39,9 +43,9 @@ impl Manage {
             },
         );
         members.insert(
-            peer_id.to_bytes(),
+            user_id.to_bytes(),
             super::GroupMember {
-                user_id: peer_id.to_bytes(),
+                user_id: user_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
@@ -54,39 +58,27 @@ impl Manage {
         let new_group = super::Group {
             id: group_id.clone(),
             name: "".to_string(),
+            revision: 0,
             is_direct_chat: true,
             created_at: timestamp::Timestamp::get_timestamp(),
-            creator_id: user_id.to_bytes(),
             members,
         };
-        let mut groups = Group::get_groups_of_user(user_id);
 
-        let key = groups.last_group + 1;
-        //db save
-        if let Err(error) = groups.db_ref.insert(&key.to_be_bytes(), new_group) {
-            log::error!("group db updating error {}", error.to_string());
-        }
-        if let Err(error) = groups.db_ref.flush() {
-            log::error!("group db flush error {}", error.to_string());
-        }
+        // save group to data base
+        GroupStorage::save_group(account_id.to_owned(), new_group.clone());
 
-        //add new id
-        groups.last_group = key;
-        groups.group_ids.insert(group_id.clone(), key);
-        Group::update_groups_of_user(user_id, groups);
-
-        return group_id.clone();
+        new_group
     }
 
     /// create new group from rpc command
-    pub fn create_new_group(user_id: &PeerId, name: String) -> Vec<u8> {
+    pub fn create_new_group(account_id: &PeerId, name: String) -> Vec<u8> {
         let id = uuid::Uuid::new_v4().as_bytes().to_vec();
 
         let mut members = BTreeMap::new();
         members.insert(
-            user_id.to_bytes(),
+            account_id.to_bytes(),
             super::GroupMember {
-                user_id: user_id.to_bytes(),
+                user_id: account_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
@@ -99,82 +91,63 @@ impl Manage {
         let new_group = super::Group {
             id: id.clone(),
             name,
+            revision: 0,
             is_direct_chat: false,
             created_at: timestamp::Timestamp::get_timestamp(),
-            creator_id: user_id.to_bytes(),
             members,
         };
 
-        let mut groups = Group::get_groups_of_user(user_id);
+        // save group
+        GroupStorage::save_group(account_id.to_owned(), new_group);
 
-        let key = groups.last_group + 1;
-        //db save
-        if let Err(error) = groups.db_ref.insert(&key.to_be_bytes(), new_group) {
-            log::error!("group db updating error {}", error.to_string());
-        }
-        if let Err(error) = groups.db_ref.flush() {
-            log::error!("group db flush error {}", error.to_string());
-        }
-
-        //add new id
-        groups.last_group = key;
-        groups.group_ids.insert(id.clone(), key);
-        Group::update_groups_of_user(user_id, groups);
-
-        return id.clone();
+        return id;
     }
 
-    /// remove group from rpc command
+    /// rename group from RPC command
+    ///
+    /// `account_id` the user account ID
     pub fn rename_group(
-        user_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
         name: String,
-    ) -> Result<Vec<u8>, String> {
-        let groups = Group::get_groups_of_user(user_id);
-        let group_idx = groups.group_id_to_index(group_id);
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
-        }
-
-        let mut group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
-        if let Some(member) = group.get_member(&user_id.to_bytes()) {
-            //check permission
-            if member.role != 255 {
-                return Err("you have not permission for rename this group".to_string());
+    ) -> Result<(), String> {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
+        {
+            // check if administrator
+            if let Some(member) = group.get_member(&account_id.to_bytes()) {
+                // check permission
+                if member.role != 255 {
+                    return Err("you don't have the permissions to rename this group".to_string());
+                }
+            } else {
+                return Err("you are not a member for this group".to_string());
             }
-        } else {
-            return Err("you are not member for this group".to_string());
+
+            // rename group
+            group.name = name;
+
+            // save group
+            GroupStorage::save_group(account_id.to_owned(), group);
+
+            return Ok(());
         }
 
-        //rename and save db
-        group.name = name.clone();
-        if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group) {
-            log::error!("group db updating error {}", error.to_string());
-        }
-        Ok(group_id.clone())
+        Err("can not find group".to_string())
     }
 
     /// get group information from rpc command
+    ///
+    /// `account_id` the user account ID
     pub fn group_info(
-        user_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
-    ) -> Result<super::proto_rpc::GroupInfoResponse, String> {
-        let groups = Group::get_groups_of_user(user_id);
-
-        let group_idx = groups.group_id_to_index(group_id);
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
+    ) -> Result<super::proto_rpc::GroupInfo, String> {
+        let group;
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            Some(group_result) => group = group_result,
+            None => return Err("group not found".to_string()),
         }
 
-        let group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
         let mut members: Vec<super::proto_rpc::GroupMember> = vec![];
         for m in group.members.values() {
             let member = super::proto_rpc::GroupMember {
@@ -187,10 +160,11 @@ impl Manage {
             members.push(member);
         }
 
-        let res = super::proto_rpc::GroupInfoResponse {
+        let res = super::proto_rpc::GroupInfo {
             group_id: group.id,
             group_name: group.name,
             created_at: group.created_at,
+            revision: group.revision,
             is_direct_chat: group.is_direct_chat,
             members,
         };
@@ -198,12 +172,14 @@ impl Manage {
     }
 
     /// get group list from rpc command
-    pub fn group_list(user_id: &PeerId) -> super::proto_rpc::GroupListResponse {
-        let groups = Group::get_groups_of_user(user_id);
+    ///
+    /// `account_id` the user account ID
+    pub fn group_list(account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
+        let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
 
         let mut res = super::proto_rpc::GroupListResponse { groups: vec![] };
 
-        for entry in groups.db_ref.iter() {
+        for entry in db_ref.groups.iter() {
             match entry {
                 Ok((_, group)) => {
                     let mut members: Vec<super::proto_rpc::GroupMember> = vec![];
@@ -218,10 +194,11 @@ impl Manage {
                         members.push(member);
                     }
 
-                    let grp = super::proto_rpc::GroupInfoResponse {
+                    let grp = super::proto_rpc::GroupInfo {
                         group_id: group.id,
                         group_name: group.name,
                         created_at: group.created_at,
+                        revision: group.revision,
                         is_direct_chat: group.is_direct_chat,
                         members,
                     };
@@ -233,23 +210,39 @@ impl Manage {
         res
     }
 
-    /// get group list from rpc command
-    pub fn invited_list(user_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
-        let groups = Group::get_groups_of_user(user_id);
+    /// get invited list from rpc command
+    pub fn invited_list(account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
+        let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
 
         let mut res = super::proto_rpc::GroupInvitedResponse { invited: vec![] };
 
-        for entry in groups.invited_ref.iter() {
+        for entry in db_ref.invited.iter() {
             match entry {
                 Ok((_, invite)) => {
+                    let mut members: Vec<super::proto_rpc::GroupMember> = Vec::new();
+                    for (_, member) in invite.group.members {
+                        members.push(super::proto_rpc::GroupMember {
+                            user_id: member.user_id,
+                            role: member.role,
+                            joined_at: member.joined_at,
+                            state: member.state,
+                            last_message_index: member.last_message_index,
+                        });
+                    }
+
                     let invited = super::proto_rpc::GroupInvited {
-                        group_id: invite.id.clone(),
                         sender_id: invite.sender_id.clone(),
                         received_at: invite.received_at,
-                        group_name: invite.name.clone(),
-                        created_at: invite.created_at,
-                        member_count: invite.member_count,
+                        group: Some(super::proto_rpc::GroupInfo {
+                            group_id: invite.group.id,
+                            group_name: invite.group.name,
+                            created_at: invite.group.created_at,
+                            revision: invite.group.revision,
+                            is_direct_chat: invite.group.is_direct_chat,
+                            members,
+                        }),
                     };
+
                     res.invited.push(invited);
                 }
                 _ => {}
@@ -259,34 +252,53 @@ impl Manage {
     }
 
     /// process group notify message from network
+    ///
+    /// RISK: Someone could force us into a group without our invitation agreement.
     pub fn on_group_notify(
-        sender_id: &Vec<u8>,
-        receiver_id: &Vec<u8>,
-        notify: &super::proto_net::GroupNotify,
+        sender_id: PeerId,
+        account_id: PeerId,
+        notify: &super::proto_net::GroupInfo,
     ) {
-        log::error!("on_group_notify!");
-        let user_id = PeerId::from_bytes(receiver_id).unwrap();
-        let mut groups = Group::get_groups_of_user(&user_id);
+        // check for valid group ID
+        let conversation_id;
+        match ConversationId::from_bytes(&notify.group_id) {
+            Ok(id) => conversation_id = id,
+            Err(e) => {
+                log::error!("invalid group id: {}", e);
+                return;
+            }
+        }
 
-        let mut group_idx = groups.group_id_to_index(&notify.group_id);
         let mut first_join = false;
         let mut orign_members: BTreeMap<Vec<u8>, bool> = BTreeMap::new();
         let mut new_members: Vec<Vec<u8>> = vec![];
 
-        if group_idx == 0 {
-            group_idx = groups.last_group + 1;
-            groups.last_group = group_idx;
-            groups.group_ids.insert(notify.group_id.clone(), group_idx);
-            first_join = true;
-        } else {
-            // get all origin members
-            if let Ok(grp_opt) = groups.db_ref.get(&group_idx.to_be_bytes().to_vec()) {
-                for (member_id, _member) in &grp_opt.unwrap().members {
+        // get group
+        match GroupStorage::get_group(account_id, notify.group_id.clone()) {
+            Some(group) => {
+                let mut sender_is_admin = false;
+                for (member_id, member) in &group.members {
                     orign_members.insert(member_id.clone(), true);
+
+                    if member.user_id == sender_id.to_bytes() && member.role == 255 {
+                        sender_is_admin = true;
+                    }
+                }
+
+                // check if sender is administrator, otherwise return
+                if !sender_is_admin {
+                    log::error!(
+                        "illegitimate update from user {} for group {}",
+                        sender_id.to_base58(),
+                        conversation_id.to_string(),
+                    );
+                    return;
                 }
             }
+            None => first_join = true,
         }
 
+        // check for new members
         let mut members: BTreeMap<Vec<u8>, super::GroupMember> = BTreeMap::new();
         for m in &notify.members {
             if orign_members.contains_key(&m.user_id) {
@@ -312,64 +324,52 @@ impl Manage {
             name: notify.group_name.clone(),
             is_direct_chat: false,
             created_at: notify.created_at,
-            creator_id: notify.creator_id.clone(),
+            revision: notify.revision,
             members,
         };
 
-        if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group) {
-            log::error!("group db updating error {}", error.to_string());
-        }
-        Group::update_groups_of_user(&user_id, groups);
+        // save group
+        GroupStorage::save_group(account_id, group);
 
         // save events
-        let user_id = PeerId::from_bytes(&receiver_id).unwrap();
-        let snd_id = PeerId::from_bytes(&sender_id).unwrap();
-        let converstion_id = ConversationId::from_bytes(&notify.group_id).unwrap();
-
         if first_join {
             let event = chat::rpc_proto::GroupEvent {
-                event_type: chat::rpc_proto::GroupEventType::GroupJoined
-                    .try_into()
-                    .unwrap(),
-                user_id: receiver_id.clone(),
+                event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
+                user_id: account_id.to_bytes(),
             };
-            chat::Chat::save_event(
-                &user_id,
-                &snd_id,
-                chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+            ChatStorage::save_event(
+                &account_id,
+                &sender_id,
+                chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
                 &event.encode_to_vec(),
-                &converstion_id,
+                &conversation_id,
             );
         } else {
             for new_member in &new_members {
                 let event = chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::GroupJoined
-                        .try_into()
-                        .unwrap(),
+                    event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
                     user_id: new_member.clone(),
                 };
-                chat::Chat::save_event(
-                    &user_id,
-                    &snd_id,
-                    chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+                ChatStorage::save_event(
+                    &account_id,
+                    &sender_id,
+                    chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
                     &event.encode_to_vec(),
-                    &converstion_id,
+                    &conversation_id,
                 );
             }
 
             for left_member in orign_members.keys() {
                 let event = chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::GroupLeft
-                        .try_into()
-                        .unwrap(),
+                    event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
                     user_id: left_member.clone(),
                 };
-                chat::Chat::save_event(
-                    &user_id,
-                    &snd_id,
-                    chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+                ChatStorage::save_event(
+                    &account_id,
+                    &sender_id,
+                    chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
                     &event.encode_to_vec(),
-                    &converstion_id,
+                    &conversation_id,
                 );
             }
         }

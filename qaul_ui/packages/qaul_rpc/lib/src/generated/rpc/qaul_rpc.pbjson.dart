@@ -21,16 +21,16 @@ const Modules$json = const {
     const {'1': 'FEED', '2': 6},
     const {'1': 'CONNECTIONS', '2': 7},
     const {'1': 'DEBUG', '2': 8},
-    const {'1': 'CHAT', '2': 9},
-    const {'1': 'BLE', '2': 10},
-    const {'1': 'FILESHARE', '2': 11},
-    const {'1': 'GROUP', '2': 12},
+    const {'1': 'GROUP', '2': 9},
+    const {'1': 'CHAT', '2': 10},
+    const {'1': 'CHATFILE', '2': 11},
+    const {'1': 'BLE', '2': 12},
     const {'1': 'RTC', '2': 13},
   ],
 };
 
 /// Descriptor for `Modules`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAYSDwoLQ09OTkVDVElPTlMQBxIJCgVERUJVRxAIEggKBENIQVQQCRIHCgNCTEUQChINCglGSUxFU0hBUkUQCxIJCgVHUk9VUBAMEgcKA1JUQxAN');
+final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode('CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEAMSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAYSDwoLQ09OTkVDVElPTlMQBxIJCgVERUJVRxAIEgkKBUdST1VQEAkSCAoEQ0hBVBAKEgwKCENIQVRGSUxFEAsSBwoDQkxFEAwSBwoDUlRDEA0=');
 @$core.Deprecated('Use qaulRpcDescriptor instead')
 const QaulRpc$json = const {
   '1': 'QaulRpc',

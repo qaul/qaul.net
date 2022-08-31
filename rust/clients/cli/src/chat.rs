@@ -20,7 +20,7 @@ mod proto_group {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.group.rs");
 }
 mod proto_file {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.filesharing.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.chatfile.rs");
 }
 
 /// chat module function handling
@@ -242,7 +242,7 @@ impl Chat {
     ) -> Result<Vec<String>, String> {
         let mut res: Vec<String> = vec![];
         let tp;
-        match proto::ContentType::from_i32(content_type) {
+        match proto::ChatContentType::from_i32(content_type) {
             Some(v) => tp = v,
             _ => {
                 return Err("".to_string());
@@ -250,16 +250,17 @@ impl Chat {
         }
 
         match tp {
-            proto::ContentType::Chat => {
+            proto::ChatContentType::None => {}
+            proto::ChatContentType::Chat => {
                 if let Ok(v) = String::decode(&content[..]) {
                     res.push(v.clone());
                     return Ok(res);
                 }
             }
-            proto::ContentType::File => {
-                if let Ok(v) = proto_file::FileSharingContainer::decode(&content[..]) {
+            proto::ChatContentType::File => {
+                if let Ok(v) = proto_file::ChatFileContainer::decode(&content[..]) {
                     match v.message {
-                        Some(proto_file::file_sharing_container::Message::FileInfo(file_info)) => {
+                        Some(proto_file::chat_file_container::Message::FileInfo(file_info)) => {
                             res.push(
                                 "file transfer id: ".to_string()
                                     + file_info.file_id.to_string().as_str(),
@@ -276,7 +277,8 @@ impl Chat {
                     }
                 }
             }
-            proto::ContentType::Group => {
+            // REMOVE
+            /*proto::ChatContentType::Group => {
                 if let Ok(v) = proto_group::GroupContainer::decode(&content[..]) {
                     match v.message {
                         Some(proto_group::group_container::Message::InviteMember(invite)) => {
@@ -325,18 +327,18 @@ impl Chat {
                         _ => {}
                     }
                 }
-            }
-            proto::ContentType::GroupEvent => {
+            }*/
+            proto::ChatContentType::Group => {
                 if let Ok(v) = proto::GroupEvent::decode(&content[..]) {
                     match proto::GroupEventType::from_i32(v.event_type).unwrap() {
-                        proto::GroupEventType::GroupJoined => {
+                        proto::GroupEventType::Joined => {
                             res.push(
                                 "New user joined group, user id: ".to_string()
                                     + bs58::encode(v.user_id).into_string().as_str(),
                             );
                             return Ok(res);
                         }
-                        proto::GroupEventType::GroupLeft => {
+                        proto::GroupEventType::Left => {
                             res.push(
                                 "User left group, user id: ".to_string()
                                     + bs58::encode(v.user_id).into_string().as_str(),
@@ -347,7 +349,7 @@ impl Chat {
                     }
                 }
             }
-            proto::ContentType::Rtc => {}
+            proto::ChatContentType::Rtc => {}
         }
         Err("".to_string())
     }

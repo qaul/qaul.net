@@ -1,12 +1,11 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-use libp2p::core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo, upgrade};
 use futures::{
-    Future,
     io::{AsyncRead, AsyncWrite},
-    AsyncWriteExt,
+    AsyncWriteExt, Future,
 };
+use libp2p::core::{upgrade, InboundUpgrade, OutboundUpgrade, UpgradeInfo};
 use std::{io, iter, pin::Pin};
 
 use crate::types::QaulInfoData;
@@ -42,14 +41,13 @@ where
     fn upgrade_inbound(self, mut substream: TSocket, _info: Self::Info) -> Self::Future {
         Box::pin(async move {
             // receive new QaulInfo binary message
-            let data = upgrade::read_length_prefixed( &mut substream, 4096 ).await?;
+            let data = upgrade::read_length_prefixed(&mut substream, 65536).await?;
 
             // hand it directly to the internal message bus
             Ok(QaulInfoData { data })
         })
     }
 }
-
 
 impl UpgradeInfo for QaulInfoData {
     type Info = &'static [u8];

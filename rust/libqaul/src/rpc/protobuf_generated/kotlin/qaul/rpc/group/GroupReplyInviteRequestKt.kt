@@ -49,31 +49,6 @@ object GroupReplyInviteRequestKt {
 
     /**
      * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     */
-    var userId: com.google.protobuf.ByteString
-      @JvmName("getUserId")
-      get() = _builder.getUserId()
-      @JvmName("setUserId")
-      set(value) {
-        _builder.setUserId(value)
-      }
-    /**
-     * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     */
-    fun clearUserId() {
-      _builder.clearUserId()
-    }
-
-    /**
-     * <pre>
      * accept
      * </pre>
      *

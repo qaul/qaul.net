@@ -2,26 +2,18 @@
 // This software is published under the AGPLv3 license.
 
 //! # Libqaul Database
-//! 
-//! Embedded sled database. 
+//!
+//! Embedded sled database.
 
 use libp2p::PeerId;
+use sled_extensions::{bincode::Tree, DbExt};
 use state::Storage;
-use sled_extensions::{
-    DbExt,
-    bincode::Tree,
-};
-use std::{
-    collections::BTreeMap,
-    sync::RwLock,
-    path::Path,
-};
+use std::{collections::BTreeMap, path::Path, sync::RwLock};
 
 use crate::router::users::UserData;
 
 /// make database globally accessible
 static DATABASE: Storage<RwLock<DataBase>> = Storage::new();
-
 
 /// DataBase Module
 #[derive(Clone, Debug)]
@@ -33,7 +25,7 @@ pub struct DataBase {
     // user data bases
     // each user account has an own data base
     // that is opened on request
-    pub users: BTreeMap< Vec<u8>, sled_extensions::Db>,
+    pub users: BTreeMap<Vec<u8>, sled_extensions::Db>,
 }
 
 impl DataBase {
@@ -69,16 +61,15 @@ impl DataBase {
     }
 
     /// get a user account data base
-    /// 
+    ///
     /// Each user account has an own storage folder
     /// with a data base.
     /// The data base is opened on request.
-    pub fn get_user_db(user_id: PeerId) -> sled_extensions::Db {
+    pub fn get_user_db(account_id: PeerId) -> sled_extensions::Db {
         // check if user account data base is already open
-        if let Some(db) = Self::user_db_opened(user_id) {
+        if let Some(db) = Self::user_db_opened(account_id) {
             return db;
         }
-
         // otherwise open it from disk and save it to state
         else {
             // get data base structure
@@ -86,7 +77,7 @@ impl DataBase {
 
             // create path
             let path = Path::new(database.path.as_str());
-            let db_folder = path.join(user_id.to_base58());
+            let db_folder = path.join(account_id.to_base58());
             let db_path = db_folder.join("user.db");
 
             // open data base from disk
@@ -96,7 +87,7 @@ impl DataBase {
                 .expect("Failed to open sled db");
 
             // save data base to state
-            database.users.insert(user_id.to_bytes(), db.clone());
+            database.users.insert(account_id.to_bytes(), db.clone());
 
             // return data base handle
             db
@@ -104,15 +95,14 @@ impl DataBase {
     }
 
     /// check if user account data base has already been opened
-    fn user_db_opened(user_id: PeerId) -> Option<sled_extensions::Db> {
+    fn user_db_opened(account_id: PeerId) -> Option<sled_extensions::Db> {
         // get data base structure
         let database = DATABASE.get().read().unwrap();
 
         // check if data base is opened and return the output
-        if let Some(db) = database.users.get(&user_id.to_bytes()) {
+        if let Some(db) = database.users.get(&account_id.to_bytes()) {
             return Some(db.clone());
-        }
-        else {
+        } else {
             return None;
         }
     }
@@ -120,8 +110,7 @@ impl DataBase {
 
 /// Data Base Users Storage
 #[derive(Clone, Debug)]
-pub struct DbUsers {
-}
+pub struct DbUsers {}
 
 impl DbUsers {
     /// Add a user to the DB
@@ -138,8 +127,7 @@ impl DbUsers {
         // save user
         if let Err(e) = tree.insert(key.as_slice(), user) {
             log::error!("Error saving user to data base: {}", e);
-        } 
-        else {
+        } else {
             if let Err(e) = tree.flush() {
                 log::error!("Error when flushing data base to disk: {}", e);
             }
@@ -155,4 +143,3 @@ impl DbUsers {
         db.open_bincode_tree("users").unwrap()
     }
 }
-

@@ -16,7 +16,7 @@ public final class QaulRpcOuterClass {
   }
   /**
    * <pre>
-   * Identification to which module the message shall be 
+   * Identification to which module the message shall be
    * handed to.
    * </pre>
    *
@@ -26,7 +26,7 @@ public final class QaulRpcOuterClass {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * default value, when nothing is defined. 
+     * default value, when nothing is defined.
      * drop this message
      * </pre>
      *
@@ -44,53 +44,103 @@ public final class QaulRpcOuterClass {
     RPC(1),
     /**
      * <pre>
-     * qaul modules
+     * node information
      * </pre>
      *
      * <code>NODE = 2;</code>
      */
     NODE(2),
     /**
+     * <pre>
+     * user accounts on this node
+     * </pre>
+     *
      * <code>USERACCOUNTS = 3;</code>
      */
     USERACCOUNTS(3),
     /**
+     * <pre>
+     * all users in the network
+     * </pre>
+     *
      * <code>USERS = 4;</code>
      */
     USERS(4),
     /**
+     * <pre>
+     * routing information
+     * </pre>
+     *
      * <code>ROUTER = 5;</code>
      */
     ROUTER(5),
     /**
+     * <pre>
+     * feed module handling
+     * send and retrieve feed messages
+     * </pre>
+     *
      * <code>FEED = 6;</code>
      */
     FEED(6),
     /**
+     * <pre>
+     * connection information to other nodes
+     * </pre>
+     *
      * <code>CONNECTIONS = 7;</code>
      */
     CONNECTIONS(7),
     /**
+     * <pre>
+     * debug information &amp; settings
+     * </pre>
+     *
      * <code>DEBUG = 8;</code>
      */
     DEBUG(8),
     /**
-     * <code>CHAT = 9;</code>
+     * <pre>
+     * chat group handling
+     * manage chat groups and group invites
+     * </pre>
+     *
+     * <code>GROUP = 9;</code>
      */
-    CHAT(9),
+    GROUP(9),
     /**
-     * <code>BLE = 10;</code>
+     * <pre>
+     * chat module
+     * to send chat messages, get a
+     * conversation overiew and all
+     * messages within a conversation
+     * </pre>
+     *
+     * <code>CHAT = 10;</code>
      */
-    BLE(10),
+    CHAT(10),
     /**
-     * <code>FILESHARE = 11;</code>
+     * <pre>
+     * all functions to send and manage
+     * files sent into a chat conversation
+     * </pre>
+     *
+     * <code>CHATFILE = 11;</code>
      */
-    FILESHARE(11),
+    CHATFILE(11),
     /**
-     * <code>GROUP = 12;</code>
+     * <pre>
+     * BLE module handling
+     * </pre>
+     *
+     * <code>BLE = 12;</code>
      */
-    GROUP(12),
+    BLE(12),
     /**
+     * <pre>
+     * Real Time Communication handling
+     * </pre>
+     *
      * <code>RTC = 13;</code>
      */
     RTC(13),
@@ -99,7 +149,7 @@ public final class QaulRpcOuterClass {
 
     /**
      * <pre>
-     * default value, when nothing is defined. 
+     * default value, when nothing is defined.
      * drop this message
      * </pre>
      *
@@ -117,53 +167,103 @@ public final class QaulRpcOuterClass {
     public static final int RPC_VALUE = 1;
     /**
      * <pre>
-     * qaul modules
+     * node information
      * </pre>
      *
      * <code>NODE = 2;</code>
      */
     public static final int NODE_VALUE = 2;
     /**
+     * <pre>
+     * user accounts on this node
+     * </pre>
+     *
      * <code>USERACCOUNTS = 3;</code>
      */
     public static final int USERACCOUNTS_VALUE = 3;
     /**
+     * <pre>
+     * all users in the network
+     * </pre>
+     *
      * <code>USERS = 4;</code>
      */
     public static final int USERS_VALUE = 4;
     /**
+     * <pre>
+     * routing information
+     * </pre>
+     *
      * <code>ROUTER = 5;</code>
      */
     public static final int ROUTER_VALUE = 5;
     /**
+     * <pre>
+     * feed module handling
+     * send and retrieve feed messages
+     * </pre>
+     *
      * <code>FEED = 6;</code>
      */
     public static final int FEED_VALUE = 6;
     /**
+     * <pre>
+     * connection information to other nodes
+     * </pre>
+     *
      * <code>CONNECTIONS = 7;</code>
      */
     public static final int CONNECTIONS_VALUE = 7;
     /**
+     * <pre>
+     * debug information &amp; settings
+     * </pre>
+     *
      * <code>DEBUG = 8;</code>
      */
     public static final int DEBUG_VALUE = 8;
     /**
-     * <code>CHAT = 9;</code>
+     * <pre>
+     * chat group handling
+     * manage chat groups and group invites
+     * </pre>
+     *
+     * <code>GROUP = 9;</code>
      */
-    public static final int CHAT_VALUE = 9;
+    public static final int GROUP_VALUE = 9;
     /**
-     * <code>BLE = 10;</code>
+     * <pre>
+     * chat module
+     * to send chat messages, get a
+     * conversation overiew and all
+     * messages within a conversation
+     * </pre>
+     *
+     * <code>CHAT = 10;</code>
      */
-    public static final int BLE_VALUE = 10;
+    public static final int CHAT_VALUE = 10;
     /**
-     * <code>FILESHARE = 11;</code>
+     * <pre>
+     * all functions to send and manage
+     * files sent into a chat conversation
+     * </pre>
+     *
+     * <code>CHATFILE = 11;</code>
      */
-    public static final int FILESHARE_VALUE = 11;
+    public static final int CHATFILE_VALUE = 11;
     /**
-     * <code>GROUP = 12;</code>
+     * <pre>
+     * BLE module handling
+     * </pre>
+     *
+     * <code>BLE = 12;</code>
      */
-    public static final int GROUP_VALUE = 12;
+    public static final int BLE_VALUE = 12;
     /**
+     * <pre>
+     * Real Time Communication handling
+     * </pre>
+     *
      * <code>RTC = 13;</code>
      */
     public static final int RTC_VALUE = 13;
@@ -202,10 +302,10 @@ public final class QaulRpcOuterClass {
         case 6: return FEED;
         case 7: return CONNECTIONS;
         case 8: return DEBUG;
-        case 9: return CHAT;
-        case 10: return BLE;
-        case 11: return FILESHARE;
-        case 12: return GROUP;
+        case 9: return GROUP;
+        case 10: return CHAT;
+        case 11: return CHATFILE;
+        case 12: return BLE;
         case 13: return RTC;
         default: return null;
       }
@@ -331,7 +431,7 @@ public final class QaulRpcOuterClass {
   /**
    * <pre>
    * The main libqaul RPC message container.
-   * All RPC messages from and to libqaul are packed 
+   * All RPC messages from and to libqaul are packed
    * into this container.
    * </pre>
    *
@@ -733,7 +833,7 @@ public final class QaulRpcOuterClass {
     /**
      * <pre>
      * The main libqaul RPC message container.
-     * All RPC messages from and to libqaul are packed 
+     * All RPC messages from and to libqaul are packed
      * into this container.
      * </pre>
      *
@@ -1239,11 +1339,11 @@ public final class QaulRpcOuterClass {
       "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp" +
       "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n" +
       "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat" +
-      "a\030\004 \001(\014*\253\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
+      "a\030\004 \001(\014*\252\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
       "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n" +
       "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005" +
-      "DEBUG\020\010\022\010\n\004CHAT\020\t\022\007\n\003BLE\020\n\022\r\n\tFILESHARE\020" +
-      "\013\022\t\n\005GROUP\020\014\022\007\n\003RTC\020\rb\006proto3"
+      "DEBUG\020\010\022\t\n\005GROUP\020\t\022\010\n\004CHAT\020\n\022\014\n\010CHATFILE" +
+      "\020\013\022\007\n\003BLE\020\014\022\007\n\003RTC\020\rb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

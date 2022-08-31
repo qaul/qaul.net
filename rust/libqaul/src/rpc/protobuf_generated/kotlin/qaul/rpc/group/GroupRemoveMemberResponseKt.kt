@@ -74,7 +74,7 @@ object GroupRemoveMemberResponseKt {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -88,7 +88,7 @@ object GroupRemoveMemberResponseKt {
       }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -98,7 +98,7 @@ object GroupRemoveMemberResponseKt {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>

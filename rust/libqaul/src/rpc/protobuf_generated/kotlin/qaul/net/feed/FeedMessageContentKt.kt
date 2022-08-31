@@ -74,7 +74,7 @@ object FeedMessageContentKt {
 
     /**
      * <pre>
-     * timestamp in milli seconds
+     * timestamp in milliseconds
      * </pre>
      *
      * <code>uint64 time = 3;</code>
@@ -88,7 +88,7 @@ object FeedMessageContentKt {
       }
     /**
      * <pre>
-     * timestamp in milli seconds
+     * timestamp in milliseconds
      * </pre>
      *
      * <code>uint64 time = 3;</code>

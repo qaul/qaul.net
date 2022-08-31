@@ -33,9 +33,9 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
-     val groups: com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>
+     val groups: com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>
       @kotlin.jvm.JvmSynthetic
       get() = com.google.protobuf.kotlin.DslList(
         _builder.getGroupsList()
@@ -45,12 +45,12 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      * @param value The groups to add.
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addGroups")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.add(value: qaul.rpc.group.GroupRpc.GroupInfoResponse) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.add(value: qaul.rpc.group.GroupRpc.GroupInfo) {
       _builder.addGroups(value)
     }
     /**
@@ -58,13 +58,13 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      * @param value The groups to add.
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignGroups")
     @Suppress("NOTHING_TO_INLINE")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.plusAssign(value: qaul.rpc.group.GroupRpc.GroupInfoResponse) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.plusAssign(value: qaul.rpc.group.GroupRpc.GroupInfo) {
       add(value)
     }
     /**
@@ -72,12 +72,12 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      * @param values The groups to add.
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("addAllGroups")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.group.GroupRpc.GroupInfoResponse>) {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.group.GroupRpc.GroupInfo>) {
       _builder.addAllGroups(values)
     }
     /**
@@ -85,13 +85,13 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      * @param values The groups to add.
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("plusAssignAllGroups")
     @Suppress("NOTHING_TO_INLINE")
-    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.group.GroupRpc.GroupInfoResponse>) {
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.group.GroupRpc.GroupInfo>) {
       addAll(values)
     }
     /**
@@ -99,13 +99,13 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      * @param index The index to set the value at.
      * @param value The groups to set.
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("setGroups")
-    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.set(index: kotlin.Int, value: qaul.rpc.group.GroupRpc.GroupInfoResponse) {
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.set(index: kotlin.Int, value: qaul.rpc.group.GroupRpc.GroupInfo) {
       _builder.setGroups(index, value)
     }
     /**
@@ -113,11 +113,11 @@ object GroupListResponseKt {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearGroups")
-    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfoResponse, GroupsProxy>.clear() {
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupInfo, GroupsProxy>.clear() {
       _builder.clearGroups()
     }
 

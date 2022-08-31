@@ -1,7 +1,6 @@
 syntax = "proto3";
 package qaul.rpc.chat;
 
-
 // Chat service RPC message container
 message Chat {
     // message type
@@ -23,10 +22,9 @@ message Chat {
 
 // request for overview list of all conversations
 // this request shall be sent continuously when the view is open
-// 
+//
 // at the moment always the entire list is sent
-message ChatOverviewRequest {
-}
+message ChatOverviewRequest {}
 
 // overview list of conversations
 // this can eighter be the entire list or the last updates
@@ -47,7 +45,7 @@ message ChatOverview {
     // unread messages
     int32 unread = 5;
     // content type
-    ContentType content_type = 6;
+    ChatContentType content_type = 6;
     // preview text of the last message
     bytes content = 7;
     // sender of the last message
@@ -63,30 +61,64 @@ message ChatConversationRequest {
 
 // list of chat messages of a specific conversation
 message ChatConversationList {
-    bytes conversation_id = 1;
+    bytes conversation_id             = 1;
     repeated ChatMessage message_list = 2;
 }
 
-// Content Type
-//
-// These power settings relate to the android
-// power modes.
-enum ContentType {
-    // chat
-    chat = 0;
-    // group management 
-    group = 1;
-    // file
-    file = 2;
-    // rtc management
-    rtc = 3;
-    // group event
-    group_event = 4;    
+// a single chat message
+message ChatMessage {
+    // index
+    uint64 index = 1;
+    // id of the sending user
+    bytes sender_id = 2;
+    // message id or member id
+    bytes message_id = 3;
+    // message status
+    MessageStatus status = 4;
+    // message reception confirmed
+    //
+    // When a user receives a message, sent by us,
+    // the user is confirming the reception of this message.
+    // We are only getting this confirmation if we are the sender of this
+    // message.
+    repeated MessageReceptionConfirmed message_reception_confirmed = 10;
+    // conversation id
+    bytes conversation_id = 5;
+    // time when the message was sent
+    uint64 sent_at = 6;
+    // time when the message was received
+    uint64 received_at = 7;
+    // content type
+    ChatContentType content_type = 8;
+    // content of the message
+    bytes content = 9;
 }
 
+// Chat Content Type
+//
+// describes the message content type
+// of the message encoded in the ChatMessage content field
+enum ChatContentType {
+    // Undefined / Error
+    NONE = 0;
+    // chat content message
+    // ChatContent
+    CHAT = 1;
+    // file content message
+    // FileContent
+    FILE = 2;
+    // group event information
+    // GroupEvent
+    GROUP = 3;
+    // RTC event information
+    RTC = 4;
+}
 
+// Sending status of sent messages
 enum MessageStatus {
     // message not sent yet
+    //
+    // this state is used for receiving files too
     SENDING = 0;
     // message sent
     SENT = 1;
@@ -97,27 +129,59 @@ enum MessageStatus {
     RECEIVED_BY_ALL = 3;
 }
 
+// message reception confirmed
+message MessageReceptionConfirmed {
+    // user id
+    bytes user_id = 1;
+    // time of confirmation
+    uint64 confirmed_at = 2;
+}
 
-// a single chat message
-message ChatMessage {
-    // index
-    uint64 index = 1;
-    // id of the sending user
-    bytes sender_id = 2;
-    // message id or member id
-    bytes message_id = 3;        
-    // message status
-    MessageStatus status = 4;
-    // conversation id
-    bytes conversation_id = 5;
-    // time when the message was sent
-    uint64 sent_at = 6;
-    // time when the message was received
-    uint64 received_at = 7;
-    // content type
-    ContentType content_type = 8;
-    // content of the message
-    bytes content = 9;
+// chat content
+message ChatContent {
+    // message text
+    string text = 1;
+}
+
+// file content
+message FileContent {
+    // file id
+    uint64 file_id = 1;
+
+    // file name
+    string file_name = 2;
+
+    // file extension
+    string file_extension = 3;
+    // file size
+    uint32 file_size = 4;
+
+    // file description
+    string file_description = 5;
+}
+
+// Group event information
+// this message is purely informational
+message GroupEvent {
+    // group event type
+    GroupEventType event_type = 1;
+    // user ID of user joined or left
+    bytes user_id = 2;
+}
+
+// Group info type definition
+enum GroupEventType {
+    // default value, undefined message
+    // ignore this message
+    DEFAULT = 0;
+    // user invited to group
+    INVITED = 1;
+    // user joined group
+    JOINED = 2;
+    // user left group
+    LEFT = 3;
+    // group was closed
+    CLOSED = 4;
 }
 
 // send chat message
@@ -126,24 +190,4 @@ message ChatMessageSend {
     bytes conversation_id = 1;
     // content of the message
     string content = 2;
-}
-
-
-// the possible group event types
-enum GroupEventType {
-  // default value, undefined message
-  // delete this message
-  NONE = 0;
-  // user joined group
-  GROUP_JOINED = 1;
-  // user left group
-  GROUP_LEFT = 2;
-}
-
-// the info message
-message GroupEvent {
-  // message type
-  GroupEventType event_type = 1;
-  // user ID of user joined or left
-  bytes user_id = 2;
 }

@@ -2,7 +2,7 @@ part of 'abstract_rpc_module_translator.dart';
 
 class FileSharingTranslator extends RpcModuleTranslator {
   @override
-  Modules get type => Modules.FILESHARE;
+  Modules get type => Modules.CHATFILE;
 
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
@@ -14,7 +14,7 @@ class FileSharingTranslator extends RpcModuleTranslator {
             .histories
             .map((e) => FileHistoryEntity.fromRpcEntry(e))
             .toList();
-        return RpcTranslatorResponse(Modules.FILESHARE, entities);
+        return RpcTranslatorResponse(Modules.CHATFILE, entities);
       default:
         return super.decodeMessageBytes(data);
     }

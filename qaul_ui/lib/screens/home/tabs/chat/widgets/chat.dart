@@ -24,6 +24,7 @@ import 'package:utils/utils.dart';
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../widgets/widgets.dart';
+import '../../tab.dart';
 import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
@@ -89,9 +90,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User? get otherUser => widget.otherUser;
 
-  Map<String, String> get _overflowMenuOptions => {
-        'showFiles': 'Show All Files',
-      };
+  final Map<String, String> _overflowMenuOptions = {
+    'showFiles': 'Show All Files',
+  };
 
   void _handleClick(String value) {
     switch (value) {
@@ -113,6 +114,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     assert(otherUser != null || room.isGroupChatRoom);
+
+    print('%' * 80);
+    print(room);
+    print(room.isGroupChatRoom);
+    print(room.name);
     if (room.isGroupChatRoom) {
       _overflowMenuOptions.addAll({'groupSettings': 'Group Settings'});
     }

@@ -16,98 +16,104 @@ public final class ChatOuterClass {
   }
   /**
    * <pre>
-   * Content Type
-   * These power settings relate to the android
-   * power modes.
+   * Chat Content Type
+   * describes the message content type
+   * of the message encoded in the ChatMessage content field
    * </pre>
    *
-   * Protobuf enum {@code qaul.rpc.chat.ContentType}
+   * Protobuf enum {@code qaul.rpc.chat.ChatContentType}
    */
-  public enum ContentType
+  public enum ChatContentType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     * chat
+     * Undefined / Error
      * </pre>
      *
-     * <code>chat = 0;</code>
+     * <code>NONE = 0;</code>
      */
-    chat(0),
+    NONE(0),
     /**
      * <pre>
-     * group management 
+     * chat content message
+     * ChatContent
      * </pre>
      *
-     * <code>group = 1;</code>
+     * <code>CHAT = 1;</code>
      */
-    group(1),
+    CHAT(1),
     /**
      * <pre>
-     * file
+     * file content message
+     * FileContent
      * </pre>
      *
-     * <code>file = 2;</code>
+     * <code>FILE = 2;</code>
      */
-    file(2),
+    FILE(2),
     /**
      * <pre>
-     * rtc management
+     * group event information
+     * GroupEvent
      * </pre>
      *
-     * <code>rtc = 3;</code>
+     * <code>GROUP = 3;</code>
      */
-    rtc(3),
+    GROUP(3),
     /**
      * <pre>
-     * group event
+     * RTC event information
      * </pre>
      *
-     * <code>group_event = 4;</code>
+     * <code>RTC = 4;</code>
      */
-    group_event(4),
+    RTC(4),
     UNRECOGNIZED(-1),
     ;
 
     /**
      * <pre>
-     * chat
+     * Undefined / Error
      * </pre>
      *
-     * <code>chat = 0;</code>
+     * <code>NONE = 0;</code>
      */
-    public static final int chat_VALUE = 0;
+    public static final int NONE_VALUE = 0;
     /**
      * <pre>
-     * group management 
+     * chat content message
+     * ChatContent
      * </pre>
      *
-     * <code>group = 1;</code>
+     * <code>CHAT = 1;</code>
      */
-    public static final int group_VALUE = 1;
+    public static final int CHAT_VALUE = 1;
     /**
      * <pre>
-     * file
+     * file content message
+     * FileContent
      * </pre>
      *
-     * <code>file = 2;</code>
+     * <code>FILE = 2;</code>
      */
-    public static final int file_VALUE = 2;
+    public static final int FILE_VALUE = 2;
     /**
      * <pre>
-     * rtc management
+     * group event information
+     * GroupEvent
      * </pre>
      *
-     * <code>rtc = 3;</code>
+     * <code>GROUP = 3;</code>
      */
-    public static final int rtc_VALUE = 3;
+    public static final int GROUP_VALUE = 3;
     /**
      * <pre>
-     * group event
+     * RTC event information
      * </pre>
      *
-     * <code>group_event = 4;</code>
+     * <code>RTC = 4;</code>
      */
-    public static final int group_event_VALUE = 4;
+    public static final int RTC_VALUE = 4;
 
 
     public final int getNumber() {
@@ -124,7 +130,7 @@ public final class ChatOuterClass {
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
-    public static ContentType valueOf(int value) {
+    public static ChatContentType valueOf(int value) {
       return forNumber(value);
     }
 
@@ -132,26 +138,26 @@ public final class ChatOuterClass {
      * @param value The numeric wire value of the corresponding enum entry.
      * @return The enum associated with the given numeric wire value.
      */
-    public static ContentType forNumber(int value) {
+    public static ChatContentType forNumber(int value) {
       switch (value) {
-        case 0: return chat;
-        case 1: return group;
-        case 2: return file;
-        case 3: return rtc;
-        case 4: return group_event;
+        case 0: return NONE;
+        case 1: return CHAT;
+        case 2: return FILE;
+        case 3: return GROUP;
+        case 4: return RTC;
         default: return null;
       }
     }
 
-    public static com.google.protobuf.Internal.EnumLiteMap<ContentType>
+    public static com.google.protobuf.Internal.EnumLiteMap<ChatContentType>
         internalGetValueMap() {
       return internalValueMap;
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
-        ContentType> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<ContentType>() {
-            public ContentType findValueByNumber(int number) {
-              return ContentType.forNumber(number);
+        ChatContentType> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ChatContentType>() {
+            public ChatContentType findValueByNumber(int number) {
+              return ChatContentType.forNumber(number);
             }
           };
 
@@ -172,9 +178,9 @@ public final class ChatOuterClass {
       return qaul.rpc.chat.ChatOuterClass.getDescriptor().getEnumTypes().get(0);
     }
 
-    private static final ContentType[] VALUES = values();
+    private static final ChatContentType[] VALUES = values();
 
-    public static ContentType valueOf(
+    public static ChatContentType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
         throw new java.lang.IllegalArgumentException(
@@ -188,14 +194,18 @@ public final class ChatOuterClass {
 
     private final int value;
 
-    private ContentType(int value) {
+    private ChatContentType(int value) {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:qaul.rpc.chat.ContentType)
+    // @@protoc_insertion_point(enum_scope:qaul.rpc.chat.ChatContentType)
   }
 
   /**
+   * <pre>
+   * Sending status of sent messages
+   * </pre>
+   *
    * Protobuf enum {@code qaul.rpc.chat.MessageStatus}
    */
   public enum MessageStatus
@@ -203,6 +213,7 @@ public final class ChatOuterClass {
     /**
      * <pre>
      * message not sent yet
+     * this state is used for receiving files too
      * </pre>
      *
      * <code>SENDING = 0;</code>
@@ -239,6 +250,7 @@ public final class ChatOuterClass {
     /**
      * <pre>
      * message not sent yet
+     * this state is used for receiving files too
      * </pre>
      *
      * <code>SENDING = 0;</code>
@@ -357,7 +369,7 @@ public final class ChatOuterClass {
 
   /**
    * <pre>
-   * the possible group event types
+   * Group info type definition
    * </pre>
    *
    * Protobuf enum {@code qaul.rpc.chat.GroupEventType}
@@ -367,56 +379,88 @@ public final class ChatOuterClass {
     /**
      * <pre>
      * default value, undefined message
-     * delete this message
+     * ignore this message
      * </pre>
      *
-     * <code>NONE = 0;</code>
+     * <code>DEFAULT = 0;</code>
      */
-    NONE(0),
+    DEFAULT(0),
+    /**
+     * <pre>
+     * user invited to group
+     * </pre>
+     *
+     * <code>INVITED = 1;</code>
+     */
+    INVITED(1),
     /**
      * <pre>
      * user joined group
      * </pre>
      *
-     * <code>GROUP_JOINED = 1;</code>
+     * <code>JOINED = 2;</code>
      */
-    GROUP_JOINED(1),
+    JOINED(2),
     /**
      * <pre>
      * user left group
      * </pre>
      *
-     * <code>GROUP_LEFT = 2;</code>
+     * <code>LEFT = 3;</code>
      */
-    GROUP_LEFT(2),
+    LEFT(3),
+    /**
+     * <pre>
+     * group was closed
+     * </pre>
+     *
+     * <code>CLOSED = 4;</code>
+     */
+    CLOSED(4),
     UNRECOGNIZED(-1),
     ;
 
     /**
      * <pre>
      * default value, undefined message
-     * delete this message
+     * ignore this message
      * </pre>
      *
-     * <code>NONE = 0;</code>
+     * <code>DEFAULT = 0;</code>
      */
-    public static final int NONE_VALUE = 0;
+    public static final int DEFAULT_VALUE = 0;
+    /**
+     * <pre>
+     * user invited to group
+     * </pre>
+     *
+     * <code>INVITED = 1;</code>
+     */
+    public static final int INVITED_VALUE = 1;
     /**
      * <pre>
      * user joined group
      * </pre>
      *
-     * <code>GROUP_JOINED = 1;</code>
+     * <code>JOINED = 2;</code>
      */
-    public static final int GROUP_JOINED_VALUE = 1;
+    public static final int JOINED_VALUE = 2;
     /**
      * <pre>
      * user left group
      * </pre>
      *
-     * <code>GROUP_LEFT = 2;</code>
+     * <code>LEFT = 3;</code>
      */
-    public static final int GROUP_LEFT_VALUE = 2;
+    public static final int LEFT_VALUE = 3;
+    /**
+     * <pre>
+     * group was closed
+     * </pre>
+     *
+     * <code>CLOSED = 4;</code>
+     */
+    public static final int CLOSED_VALUE = 4;
 
 
     public final int getNumber() {
@@ -443,9 +487,11 @@ public final class ChatOuterClass {
      */
     public static GroupEventType forNumber(int value) {
       switch (value) {
-        case 0: return NONE;
-        case 1: return GROUP_JOINED;
-        case 2: return GROUP_LEFT;
+        case 0: return DEFAULT;
+        case 1: return INVITED;
+        case 2: return JOINED;
+        case 3: return LEFT;
+        case 4: return CLOSED;
         default: return null;
       }
     }
@@ -2459,7 +2505,6 @@ public final class ChatOuterClass {
    * <pre>
    * request for overview list of all conversations
    * this request shall be sent continuously when the view is open
-   * 
    * at the moment always the entire list is sent
    * </pre>
    *
@@ -2689,7 +2734,6 @@ public final class ChatOuterClass {
      * <pre>
      * request for overview list of all conversations
      * this request shall be sent continuously when the view is open
-     * 
      * at the moment always the entire list is sent
      * </pre>
      *
@@ -3759,7 +3803,7 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      * @return The enum numeric value on the wire for contentType.
      */
     int getContentTypeValue();
@@ -3768,10 +3812,10 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      * @return The contentType.
      */
-    qaul.rpc.chat.ChatOuterClass.ContentType getContentType();
+    qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType();
 
     /**
      * <pre>
@@ -4036,7 +4080,7 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      * @return The enum numeric value on the wire for contentType.
      */
     @java.lang.Override public int getContentTypeValue() {
@@ -4047,13 +4091,13 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      * @return The contentType.
      */
-    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.ContentType getContentType() {
+    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType() {
       @SuppressWarnings("deprecation")
-      qaul.rpc.chat.ChatOuterClass.ContentType result = qaul.rpc.chat.ChatOuterClass.ContentType.valueOf(contentType_);
-      return result == null ? qaul.rpc.chat.ChatOuterClass.ContentType.UNRECOGNIZED : result;
+      qaul.rpc.chat.ChatOuterClass.ChatContentType result = qaul.rpc.chat.ChatOuterClass.ChatContentType.valueOf(contentType_);
+      return result == null ? qaul.rpc.chat.ChatOuterClass.ChatContentType.UNRECOGNIZED : result;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 7;
@@ -4115,7 +4159,7 @@ public final class ChatOuterClass {
       if (unread_ != 0) {
         output.writeInt32(5, unread_);
       }
-      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ContentType.chat.getNumber()) {
+      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ChatContentType.NONE.getNumber()) {
         output.writeEnum(6, contentType_);
       }
       if (!content_.isEmpty()) {
@@ -4152,7 +4196,7 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, unread_);
       }
-      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ContentType.chat.getNumber()) {
+      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ChatContentType.NONE.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, contentType_);
       }
@@ -4789,7 +4833,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
        * @return The enum numeric value on the wire for contentType.
        */
       @java.lang.Override public int getContentTypeValue() {
@@ -4800,7 +4844,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
        * @param value The enum numeric value on the wire for contentType to set.
        * @return This builder for chaining.
        */
@@ -4815,25 +4859,25 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
        * @return The contentType.
        */
       @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.ContentType getContentType() {
+      public qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType() {
         @SuppressWarnings("deprecation")
-        qaul.rpc.chat.ChatOuterClass.ContentType result = qaul.rpc.chat.ChatOuterClass.ContentType.valueOf(contentType_);
-        return result == null ? qaul.rpc.chat.ChatOuterClass.ContentType.UNRECOGNIZED : result;
+        qaul.rpc.chat.ChatOuterClass.ChatContentType result = qaul.rpc.chat.ChatOuterClass.ChatContentType.valueOf(contentType_);
+        return result == null ? qaul.rpc.chat.ChatOuterClass.ChatContentType.UNRECOGNIZED : result;
       }
       /**
        * <pre>
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
        * @param value The contentType to set.
        * @return This builder for chaining.
        */
-      public Builder setContentType(qaul.rpc.chat.ChatOuterClass.ContentType value) {
+      public Builder setContentType(qaul.rpc.chat.ChatOuterClass.ChatContentType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -4847,7 +4891,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearContentType() {
@@ -6526,6 +6570,70 @@ public final class ChatOuterClass {
 
     /**
      * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> 
+        getMessageReceptionConfirmedList();
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getMessageReceptionConfirmed(int index);
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    int getMessageReceptionConfirmedCount();
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    java.util.List<? extends qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder> 
+        getMessageReceptionConfirmedOrBuilderList();
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder getMessageReceptionConfirmedOrBuilder(
+        int index);
+
+    /**
+     * <pre>
      * conversation id
      * </pre>
      *
@@ -6559,7 +6667,7 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      * @return The enum numeric value on the wire for contentType.
      */
     int getContentTypeValue();
@@ -6568,10 +6676,10 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      * @return The contentType.
      */
-    qaul.rpc.chat.ChatOuterClass.ContentType getContentType();
+    qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType();
 
     /**
      * <pre>
@@ -6603,6 +6711,7 @@ public final class ChatOuterClass {
       senderId_ = com.google.protobuf.ByteString.EMPTY;
       messageId_ = com.google.protobuf.ByteString.EMPTY;
       status_ = 0;
+      messageReceptionConfirmed_ = java.util.Collections.emptyList();
       conversationId_ = com.google.protobuf.ByteString.EMPTY;
       contentType_ = 0;
       content_ = com.google.protobuf.ByteString.EMPTY;
@@ -6628,6 +6737,7 @@ public final class ChatOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6685,6 +6795,15 @@ public final class ChatOuterClass {
               content_ = input.readBytes();
               break;
             }
+            case 82: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                messageReceptionConfirmed_ = new java.util.ArrayList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              messageReceptionConfirmed_.add(
+                  input.readMessage(qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.parser(), extensionRegistry));
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -6702,6 +6821,9 @@ public final class ChatOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          messageReceptionConfirmed_ = java.util.Collections.unmodifiableList(messageReceptionConfirmed_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -6791,6 +6913,86 @@ public final class ChatOuterClass {
       return result == null ? qaul.rpc.chat.ChatOuterClass.MessageStatus.UNRECOGNIZED : result;
     }
 
+    public static final int MESSAGE_RECEPTION_CONFIRMED_FIELD_NUMBER = 10;
+    private java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> messageReceptionConfirmed_;
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> getMessageReceptionConfirmedList() {
+      return messageReceptionConfirmed_;
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder> 
+        getMessageReceptionConfirmedOrBuilderList() {
+      return messageReceptionConfirmed_;
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @java.lang.Override
+    public int getMessageReceptionConfirmedCount() {
+      return messageReceptionConfirmed_.size();
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getMessageReceptionConfirmed(int index) {
+      return messageReceptionConfirmed_.get(index);
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder getMessageReceptionConfirmedOrBuilder(
+        int index) {
+      return messageReceptionConfirmed_.get(index);
+    }
+
     public static final int CONVERSATION_ID_FIELD_NUMBER = 5;
     private com.google.protobuf.ByteString conversationId_;
     /**
@@ -6843,7 +7045,7 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      * @return The enum numeric value on the wire for contentType.
      */
     @java.lang.Override public int getContentTypeValue() {
@@ -6854,13 +7056,13 @@ public final class ChatOuterClass {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      * @return The contentType.
      */
-    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.ContentType getContentType() {
+    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType() {
       @SuppressWarnings("deprecation")
-      qaul.rpc.chat.ChatOuterClass.ContentType result = qaul.rpc.chat.ChatOuterClass.ContentType.valueOf(contentType_);
-      return result == null ? qaul.rpc.chat.ChatOuterClass.ContentType.UNRECOGNIZED : result;
+      qaul.rpc.chat.ChatOuterClass.ChatContentType result = qaul.rpc.chat.ChatOuterClass.ChatContentType.valueOf(contentType_);
+      return result == null ? qaul.rpc.chat.ChatOuterClass.ChatContentType.UNRECOGNIZED : result;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 9;
@@ -6913,11 +7115,14 @@ public final class ChatOuterClass {
       if (receivedAt_ != 0L) {
         output.writeUInt64(7, receivedAt_);
       }
-      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ContentType.chat.getNumber()) {
+      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ChatContentType.NONE.getNumber()) {
         output.writeEnum(8, contentType_);
       }
       if (!content_.isEmpty()) {
         output.writeBytes(9, content_);
+      }
+      for (int i = 0; i < messageReceptionConfirmed_.size(); i++) {
+        output.writeMessage(10, messageReceptionConfirmed_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -6956,13 +7161,17 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(7, receivedAt_);
       }
-      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ContentType.chat.getNumber()) {
+      if (contentType_ != qaul.rpc.chat.ChatOuterClass.ChatContentType.NONE.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(8, contentType_);
       }
       if (!content_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(9, content_);
+      }
+      for (int i = 0; i < messageReceptionConfirmed_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, messageReceptionConfirmed_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -6986,6 +7195,8 @@ public final class ChatOuterClass {
       if (!getMessageId()
           .equals(other.getMessageId())) return false;
       if (status_ != other.status_) return false;
+      if (!getMessageReceptionConfirmedList()
+          .equals(other.getMessageReceptionConfirmedList())) return false;
       if (!getConversationId()
           .equals(other.getConversationId())) return false;
       if (getSentAt()
@@ -7015,6 +7226,10 @@ public final class ChatOuterClass {
       hash = (53 * hash) + getMessageId().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + status_;
+      if (getMessageReceptionConfirmedCount() > 0) {
+        hash = (37 * hash) + MESSAGE_RECEPTION_CONFIRMED_FIELD_NUMBER;
+        hash = (53 * hash) + getMessageReceptionConfirmedList().hashCode();
+      }
       hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
       hash = (53 * hash) + getConversationId().hashCode();
       hash = (37 * hash) + SENT_AT_FIELD_NUMBER;
@@ -7159,6 +7374,7 @@ public final class ChatOuterClass {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getMessageReceptionConfirmedFieldBuilder();
         }
       }
       @java.lang.Override
@@ -7172,6 +7388,12 @@ public final class ChatOuterClass {
 
         status_ = 0;
 
+        if (messageReceptionConfirmedBuilder_ == null) {
+          messageReceptionConfirmed_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          messageReceptionConfirmedBuilder_.clear();
+        }
         conversationId_ = com.google.protobuf.ByteString.EMPTY;
 
         sentAt_ = 0L;
@@ -7208,10 +7430,20 @@ public final class ChatOuterClass {
       @java.lang.Override
       public qaul.rpc.chat.ChatOuterClass.ChatMessage buildPartial() {
         qaul.rpc.chat.ChatOuterClass.ChatMessage result = new qaul.rpc.chat.ChatOuterClass.ChatMessage(this);
+        int from_bitField0_ = bitField0_;
         result.index_ = index_;
         result.senderId_ = senderId_;
         result.messageId_ = messageId_;
         result.status_ = status_;
+        if (messageReceptionConfirmedBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            messageReceptionConfirmed_ = java.util.Collections.unmodifiableList(messageReceptionConfirmed_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.messageReceptionConfirmed_ = messageReceptionConfirmed_;
+        } else {
+          result.messageReceptionConfirmed_ = messageReceptionConfirmedBuilder_.build();
+        }
         result.conversationId_ = conversationId_;
         result.sentAt_ = sentAt_;
         result.receivedAt_ = receivedAt_;
@@ -7277,6 +7509,32 @@ public final class ChatOuterClass {
         if (other.status_ != 0) {
           setStatusValue(other.getStatusValue());
         }
+        if (messageReceptionConfirmedBuilder_ == null) {
+          if (!other.messageReceptionConfirmed_.isEmpty()) {
+            if (messageReceptionConfirmed_.isEmpty()) {
+              messageReceptionConfirmed_ = other.messageReceptionConfirmed_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureMessageReceptionConfirmedIsMutable();
+              messageReceptionConfirmed_.addAll(other.messageReceptionConfirmed_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.messageReceptionConfirmed_.isEmpty()) {
+            if (messageReceptionConfirmedBuilder_.isEmpty()) {
+              messageReceptionConfirmedBuilder_.dispose();
+              messageReceptionConfirmedBuilder_ = null;
+              messageReceptionConfirmed_ = other.messageReceptionConfirmed_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              messageReceptionConfirmedBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMessageReceptionConfirmedFieldBuilder() : null;
+            } else {
+              messageReceptionConfirmedBuilder_.addAllMessages(other.messageReceptionConfirmed_);
+            }
+          }
+        }
         if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
           setConversationId(other.getConversationId());
         }
@@ -7320,6 +7578,7 @@ public final class ChatOuterClass {
         }
         return this;
       }
+      private int bitField0_;
 
       private long index_ ;
       /**
@@ -7530,6 +7789,390 @@ public final class ChatOuterClass {
         return this;
       }
 
+      private java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> messageReceptionConfirmed_ =
+        java.util.Collections.emptyList();
+      private void ensureMessageReceptionConfirmedIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          messageReceptionConfirmed_ = new java.util.ArrayList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed>(messageReceptionConfirmed_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder> messageReceptionConfirmedBuilder_;
+
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> getMessageReceptionConfirmedList() {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(messageReceptionConfirmed_);
+        } else {
+          return messageReceptionConfirmedBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public int getMessageReceptionConfirmedCount() {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          return messageReceptionConfirmed_.size();
+        } else {
+          return messageReceptionConfirmedBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getMessageReceptionConfirmed(int index) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          return messageReceptionConfirmed_.get(index);
+        } else {
+          return messageReceptionConfirmedBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder setMessageReceptionConfirmed(
+          int index, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed value) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.set(index, value);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder setMessageReceptionConfirmed(
+          int index, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder builderForValue) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder addMessageReceptionConfirmed(qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed value) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.add(value);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder addMessageReceptionConfirmed(
+          int index, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed value) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.add(index, value);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder addMessageReceptionConfirmed(
+          qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder builderForValue) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.add(builderForValue.build());
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder addMessageReceptionConfirmed(
+          int index, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder builderForValue) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder addAllMessageReceptionConfirmed(
+          java.lang.Iterable<? extends qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed> values) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          ensureMessageReceptionConfirmedIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, messageReceptionConfirmed_);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder clearMessageReceptionConfirmed() {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          messageReceptionConfirmed_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public Builder removeMessageReceptionConfirmed(int index) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          ensureMessageReceptionConfirmedIsMutable();
+          messageReceptionConfirmed_.remove(index);
+          onChanged();
+        } else {
+          messageReceptionConfirmedBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder getMessageReceptionConfirmedBuilder(
+          int index) {
+        return getMessageReceptionConfirmedFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder getMessageReceptionConfirmedOrBuilder(
+          int index) {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          return messageReceptionConfirmed_.get(index);  } else {
+          return messageReceptionConfirmedBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public java.util.List<? extends qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder> 
+           getMessageReceptionConfirmedOrBuilderList() {
+        if (messageReceptionConfirmedBuilder_ != null) {
+          return messageReceptionConfirmedBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(messageReceptionConfirmed_);
+        }
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder addMessageReceptionConfirmedBuilder() {
+        return getMessageReceptionConfirmedFieldBuilder().addBuilder(
+            qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder addMessageReceptionConfirmedBuilder(
+          int index) {
+        return getMessageReceptionConfirmedFieldBuilder().addBuilder(
+            index, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * message reception confirmed
+       * When a user receives a message, sent by us,
+       * the user is confirming the reception of this message.
+       * We are only getting this confirmation if we are the sender of this
+       * message.
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+       */
+      public java.util.List<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder> 
+           getMessageReceptionConfirmedBuilderList() {
+        return getMessageReceptionConfirmedFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder> 
+          getMessageReceptionConfirmedFieldBuilder() {
+        if (messageReceptionConfirmedBuilder_ == null) {
+          messageReceptionConfirmedBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder>(
+                  messageReceptionConfirmed_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          messageReceptionConfirmed_ = null;
+        }
+        return messageReceptionConfirmedBuilder_;
+      }
+
       private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
@@ -7668,7 +8311,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
        * @return The enum numeric value on the wire for contentType.
        */
       @java.lang.Override public int getContentTypeValue() {
@@ -7679,7 +8322,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
        * @param value The enum numeric value on the wire for contentType to set.
        * @return This builder for chaining.
        */
@@ -7694,25 +8337,25 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
        * @return The contentType.
        */
       @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.ContentType getContentType() {
+      public qaul.rpc.chat.ChatOuterClass.ChatContentType getContentType() {
         @SuppressWarnings("deprecation")
-        qaul.rpc.chat.ChatOuterClass.ContentType result = qaul.rpc.chat.ChatOuterClass.ContentType.valueOf(contentType_);
-        return result == null ? qaul.rpc.chat.ChatOuterClass.ContentType.UNRECOGNIZED : result;
+        qaul.rpc.chat.ChatOuterClass.ChatContentType result = qaul.rpc.chat.ChatOuterClass.ChatContentType.valueOf(contentType_);
+        return result == null ? qaul.rpc.chat.ChatOuterClass.ChatContentType.UNRECOGNIZED : result;
       }
       /**
        * <pre>
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
        * @param value The contentType to set.
        * @return This builder for chaining.
        */
-      public Builder setContentType(qaul.rpc.chat.ChatOuterClass.ContentType value) {
+      public Builder setContentType(qaul.rpc.chat.ChatOuterClass.ChatContentType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -7726,7 +8369,7 @@ public final class ChatOuterClass {
        * content type
        * </pre>
        *
-       * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+       * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
        * @return This builder for chaining.
        */
       public Builder clearContentType() {
@@ -7829,6 +8472,3067 @@ public final class ChatOuterClass {
 
     @java.lang.Override
     public qaul.rpc.chat.ChatOuterClass.ChatMessage getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface MessageReceptionConfirmedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.MessageReceptionConfirmed)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * user id
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    com.google.protobuf.ByteString getUserId();
+
+    /**
+     * <pre>
+     * time of confirmation
+     * </pre>
+     *
+     * <code>uint64 confirmed_at = 2;</code>
+     * @return The confirmedAt.
+     */
+    long getConfirmedAt();
+  }
+  /**
+   * <pre>
+   * message reception confirmed
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.MessageReceptionConfirmed}
+   */
+  public static final class MessageReceptionConfirmed extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.MessageReceptionConfirmed)
+      MessageReceptionConfirmedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use MessageReceptionConfirmed.newBuilder() to construct.
+    private MessageReceptionConfirmed(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private MessageReceptionConfirmed() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MessageReceptionConfirmed();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MessageReceptionConfirmed(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+
+              confirmedAt_ = input.readUInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_MessageReceptionConfirmed_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.class, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder.class);
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <pre>
+     * user id
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    public static final int CONFIRMED_AT_FIELD_NUMBER = 2;
+    private long confirmedAt_;
+    /**
+     * <pre>
+     * time of confirmation
+     * </pre>
+     *
+     * <code>uint64 confirmed_at = 2;</code>
+     * @return The confirmedAt.
+     */
+    @java.lang.Override
+    public long getConfirmedAt() {
+      return confirmedAt_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!userId_.isEmpty()) {
+        output.writeBytes(1, userId_);
+      }
+      if (confirmedAt_ != 0L) {
+        output.writeUInt64(2, confirmedAt_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      if (confirmedAt_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, confirmedAt_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed other = (qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) obj;
+
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (getConfirmedAt()
+          != other.getConfirmedAt()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      hash = (37 * hash) + CONFIRMED_AT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getConfirmedAt());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.MessageReceptionConfirmed}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.MessageReceptionConfirmed)
+        qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_MessageReceptionConfirmed_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.class, qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        confirmedAt_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed build() {
+        qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed result = new qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed(this);
+        result.userId_ = userId_;
+        result.confirmedAt_ = confirmedAt_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed.getDefaultInstance()) return this;
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        if (other.getConfirmedAt() != 0L) {
+          setConfirmedAt(other.getConfirmedAt());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      private long confirmedAt_ ;
+      /**
+       * <pre>
+       * time of confirmation
+       * </pre>
+       *
+       * <code>uint64 confirmed_at = 2;</code>
+       * @return The confirmedAt.
+       */
+      @java.lang.Override
+      public long getConfirmedAt() {
+        return confirmedAt_;
+      }
+      /**
+       * <pre>
+       * time of confirmation
+       * </pre>
+       *
+       * <code>uint64 confirmed_at = 2;</code>
+       * @param value The confirmedAt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setConfirmedAt(long value) {
+        
+        confirmedAt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * time of confirmation
+       * </pre>
+       *
+       * <code>uint64 confirmed_at = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearConfirmedAt() {
+        
+        confirmedAt_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.MessageReceptionConfirmed)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.MessageReceptionConfirmed)
+    private static final qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<MessageReceptionConfirmed>
+        PARSER = new com.google.protobuf.AbstractParser<MessageReceptionConfirmed>() {
+      @java.lang.Override
+      public MessageReceptionConfirmed parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MessageReceptionConfirmed(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<MessageReceptionConfirmed> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MessageReceptionConfirmed> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ChatContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.ChatContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * message text
+     * </pre>
+     *
+     * <code>string text = 1;</code>
+     * @return The text.
+     */
+    java.lang.String getText();
+    /**
+     * <pre>
+     * message text
+     * </pre>
+     *
+     * <code>string text = 1;</code>
+     * @return The bytes for text.
+     */
+    com.google.protobuf.ByteString
+        getTextBytes();
+  }
+  /**
+   * <pre>
+   * chat content
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.ChatContent}
+   */
+  public static final class ChatContent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.ChatContent)
+      ChatContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ChatContent.newBuilder() to construct.
+    private ChatContent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ChatContent() {
+      text_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChatContent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ChatContent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              text_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.ChatContent.class, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder.class);
+    }
+
+    public static final int TEXT_FIELD_NUMBER = 1;
+    private volatile java.lang.Object text_;
+    /**
+     * <pre>
+     * message text
+     * </pre>
+     *
+     * <code>string text = 1;</code>
+     * @return The text.
+     */
+    @java.lang.Override
+    public java.lang.String getText() {
+      java.lang.Object ref = text_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        text_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * message text
+     * </pre>
+     *
+     * <code>string text = 1;</code>
+     * @return The bytes for text.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTextBytes() {
+      java.lang.Object ref = text_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        text_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(text_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, text_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(text_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, text_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.ChatContent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.ChatContent other = (qaul.rpc.chat.ChatOuterClass.ChatContent) obj;
+
+      if (!getText()
+          .equals(other.getText())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TEXT_FIELD_NUMBER;
+      hash = (53 * hash) + getText().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.ChatContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * chat content
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.ChatContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.ChatContent)
+        qaul.rpc.chat.ChatOuterClass.ChatContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.ChatContent.class, qaul.rpc.chat.ChatOuterClass.ChatContent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.ChatContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        text_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_ChatContent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent build() {
+        qaul.rpc.chat.ChatOuterClass.ChatContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.ChatContent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.ChatContent result = new qaul.rpc.chat.ChatOuterClass.ChatContent(this);
+        result.text_ = text_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.ChatContent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.ChatContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatContent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.ChatContent.getDefaultInstance()) return this;
+        if (!other.getText().isEmpty()) {
+          text_ = other.text_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.ChatContent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.ChatContent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object text_ = "";
+      /**
+       * <pre>
+       * message text
+       * </pre>
+       *
+       * <code>string text = 1;</code>
+       * @return The text.
+       */
+      public java.lang.String getText() {
+        java.lang.Object ref = text_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          text_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * message text
+       * </pre>
+       *
+       * <code>string text = 1;</code>
+       * @return The bytes for text.
+       */
+      public com.google.protobuf.ByteString
+          getTextBytes() {
+        java.lang.Object ref = text_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          text_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * message text
+       * </pre>
+       *
+       * <code>string text = 1;</code>
+       * @param value The text to set.
+       * @return This builder for chaining.
+       */
+      public Builder setText(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        text_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * message text
+       * </pre>
+       *
+       * <code>string text = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearText() {
+        
+        text_ = getDefaultInstance().getText();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * message text
+       * </pre>
+       *
+       * <code>string text = 1;</code>
+       * @param value The bytes for text to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTextBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        text_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.ChatContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatContent)
+    private static final qaul.rpc.chat.ChatOuterClass.ChatContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.ChatContent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ChatContent>
+        PARSER = new com.google.protobuf.AbstractParser<ChatContent>() {
+      @java.lang.Override
+      public ChatContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ChatContent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ChatContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ChatContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.ChatContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.FileContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * file id
+     * </pre>
+     *
+     * <code>uint64 file_id = 1;</code>
+     * @return The fileId.
+     */
+    long getFileId();
+
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     * @return The fileName.
+     */
+    java.lang.String getFileName();
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     * @return The bytes for fileName.
+     */
+    com.google.protobuf.ByteString
+        getFileNameBytes();
+
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     * @return The fileExtension.
+     */
+    java.lang.String getFileExtension();
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     * @return The bytes for fileExtension.
+     */
+    com.google.protobuf.ByteString
+        getFileExtensionBytes();
+
+    /**
+     * <pre>
+     * file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     * @return The fileSize.
+     */
+    int getFileSize();
+
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_description = 5;</code>
+     * @return The fileDescription.
+     */
+    java.lang.String getFileDescription();
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_description = 5;</code>
+     * @return The bytes for fileDescription.
+     */
+    com.google.protobuf.ByteString
+        getFileDescriptionBytes();
+  }
+  /**
+   * <pre>
+   * file content
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.FileContent}
+   */
+  public static final class FileContent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.FileContent)
+      FileContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileContent.newBuilder() to construct.
+    private FileContent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileContent() {
+      fileName_ = "";
+      fileExtension_ = "";
+      fileDescription_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileContent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileContent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              fileId_ = input.readUInt64();
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileName_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileExtension_ = s;
+              break;
+            }
+            case 32: {
+
+              fileSize_ = input.readUInt32();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileDescription_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.FileContent.class, qaul.rpc.chat.ChatOuterClass.FileContent.Builder.class);
+    }
+
+    public static final int FILE_ID_FIELD_NUMBER = 1;
+    private long fileId_;
+    /**
+     * <pre>
+     * file id
+     * </pre>
+     *
+     * <code>uint64 file_id = 1;</code>
+     * @return The fileId.
+     */
+    @java.lang.Override
+    public long getFileId() {
+      return fileId_;
+    }
+
+    public static final int FILE_NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object fileName_;
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     * @return The fileName.
+     */
+    @java.lang.Override
+    public java.lang.String getFileName() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * file name
+     * </pre>
+     *
+     * <code>string file_name = 2;</code>
+     * @return The bytes for fileName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileNameBytes() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILE_EXTENSION_FIELD_NUMBER = 3;
+    private volatile java.lang.Object fileExtension_;
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     * @return The fileExtension.
+     */
+    @java.lang.Override
+    public java.lang.String getFileExtension() {
+      java.lang.Object ref = fileExtension_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileExtension_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * file extension
+     * </pre>
+     *
+     * <code>string file_extension = 3;</code>
+     * @return The bytes for fileExtension.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileExtensionBytes() {
+      java.lang.Object ref = fileExtension_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileExtension_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILE_SIZE_FIELD_NUMBER = 4;
+    private int fileSize_;
+    /**
+     * <pre>
+     * file size
+     * </pre>
+     *
+     * <code>uint32 file_size = 4;</code>
+     * @return The fileSize.
+     */
+    @java.lang.Override
+    public int getFileSize() {
+      return fileSize_;
+    }
+
+    public static final int FILE_DESCRIPTION_FIELD_NUMBER = 5;
+    private volatile java.lang.Object fileDescription_;
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_description = 5;</code>
+     * @return The fileDescription.
+     */
+    @java.lang.Override
+    public java.lang.String getFileDescription() {
+      java.lang.Object ref = fileDescription_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileDescription_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * file description
+     * </pre>
+     *
+     * <code>string file_description = 5;</code>
+     * @return The bytes for fileDescription.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileDescriptionBytes() {
+      java.lang.Object ref = fileDescription_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileDescription_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (fileId_ != 0L) {
+        output.writeUInt64(1, fileId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, fileName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileExtension_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, fileExtension_);
+      }
+      if (fileSize_ != 0) {
+        output.writeUInt32(4, fileSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileDescription_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, fileDescription_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (fileId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(1, fileId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, fileName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileExtension_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, fileExtension_);
+      }
+      if (fileSize_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, fileSize_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileDescription_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, fileDescription_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.FileContent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.FileContent other = (qaul.rpc.chat.ChatOuterClass.FileContent) obj;
+
+      if (getFileId()
+          != other.getFileId()) return false;
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (!getFileExtension()
+          .equals(other.getFileExtension())) return false;
+      if (getFileSize()
+          != other.getFileSize()) return false;
+      if (!getFileDescription()
+          .equals(other.getFileDescription())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + FILE_ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getFileId());
+      hash = (37 * hash) + FILE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFileName().hashCode();
+      hash = (37 * hash) + FILE_EXTENSION_FIELD_NUMBER;
+      hash = (53 * hash) + getFileExtension().hashCode();
+      hash = (37 * hash) + FILE_SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + getFileSize();
+      hash = (37 * hash) + FILE_DESCRIPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getFileDescription().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.FileContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.FileContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * file content
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.FileContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.FileContent)
+        qaul.rpc.chat.ChatOuterClass.FileContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.FileContent.class, qaul.rpc.chat.ChatOuterClass.FileContent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.FileContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        fileId_ = 0L;
+
+        fileName_ = "";
+
+        fileExtension_ = "";
+
+        fileSize_ = 0;
+
+        fileDescription_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_FileContent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileContent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.FileContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileContent build() {
+        qaul.rpc.chat.ChatOuterClass.FileContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.FileContent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.FileContent result = new qaul.rpc.chat.ChatOuterClass.FileContent(this);
+        result.fileId_ = fileId_;
+        result.fileName_ = fileName_;
+        result.fileExtension_ = fileExtension_;
+        result.fileSize_ = fileSize_;
+        result.fileDescription_ = fileDescription_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.FileContent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.FileContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.FileContent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.FileContent.getDefaultInstance()) return this;
+        if (other.getFileId() != 0L) {
+          setFileId(other.getFileId());
+        }
+        if (!other.getFileName().isEmpty()) {
+          fileName_ = other.fileName_;
+          onChanged();
+        }
+        if (!other.getFileExtension().isEmpty()) {
+          fileExtension_ = other.fileExtension_;
+          onChanged();
+        }
+        if (other.getFileSize() != 0) {
+          setFileSize(other.getFileSize());
+        }
+        if (!other.getFileDescription().isEmpty()) {
+          fileDescription_ = other.fileDescription_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.FileContent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.FileContent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long fileId_ ;
+      /**
+       * <pre>
+       * file id
+       * </pre>
+       *
+       * <code>uint64 file_id = 1;</code>
+       * @return The fileId.
+       */
+      @java.lang.Override
+      public long getFileId() {
+        return fileId_;
+      }
+      /**
+       * <pre>
+       * file id
+       * </pre>
+       *
+       * <code>uint64 file_id = 1;</code>
+       * @param value The fileId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileId(long value) {
+        
+        fileId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file id
+       * </pre>
+       *
+       * <code>uint64 file_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileId() {
+        
+        fileId_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileName_ = "";
+      /**
+       * <pre>
+       * file name
+       * </pre>
+       *
+       * <code>string file_name = 2;</code>
+       * @return The fileName.
+       */
+      public java.lang.String getFileName() {
+        java.lang.Object ref = fileName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file name
+       * </pre>
+       *
+       * <code>string file_name = 2;</code>
+       * @return The bytes for fileName.
+       */
+      public com.google.protobuf.ByteString
+          getFileNameBytes() {
+        java.lang.Object ref = fileName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file name
+       * </pre>
+       *
+       * <code>string file_name = 2;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file name
+       * </pre>
+       *
+       * <code>string file_name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileName() {
+        
+        fileName_ = getDefaultInstance().getFileName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file name
+       * </pre>
+       *
+       * <code>string file_name = 2;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileExtension_ = "";
+      /**
+       * <pre>
+       * file extension
+       * </pre>
+       *
+       * <code>string file_extension = 3;</code>
+       * @return The fileExtension.
+       */
+      public java.lang.String getFileExtension() {
+        java.lang.Object ref = fileExtension_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileExtension_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file extension
+       * </pre>
+       *
+       * <code>string file_extension = 3;</code>
+       * @return The bytes for fileExtension.
+       */
+      public com.google.protobuf.ByteString
+          getFileExtensionBytes() {
+        java.lang.Object ref = fileExtension_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileExtension_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file extension
+       * </pre>
+       *
+       * <code>string file_extension = 3;</code>
+       * @param value The fileExtension to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileExtension(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileExtension_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file extension
+       * </pre>
+       *
+       * <code>string file_extension = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileExtension() {
+        
+        fileExtension_ = getDefaultInstance().getFileExtension();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file extension
+       * </pre>
+       *
+       * <code>string file_extension = 3;</code>
+       * @param value The bytes for fileExtension to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileExtensionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileExtension_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int fileSize_ ;
+      /**
+       * <pre>
+       * file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @return The fileSize.
+       */
+      @java.lang.Override
+      public int getFileSize() {
+        return fileSize_;
+      }
+      /**
+       * <pre>
+       * file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @param value The fileSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileSize(int value) {
+        
+        fileSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file size
+       * </pre>
+       *
+       * <code>uint32 file_size = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileSize() {
+        
+        fileSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileDescription_ = "";
+      /**
+       * <pre>
+       * file description
+       * </pre>
+       *
+       * <code>string file_description = 5;</code>
+       * @return The fileDescription.
+       */
+      public java.lang.String getFileDescription() {
+        java.lang.Object ref = fileDescription_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileDescription_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file description
+       * </pre>
+       *
+       * <code>string file_description = 5;</code>
+       * @return The bytes for fileDescription.
+       */
+      public com.google.protobuf.ByteString
+          getFileDescriptionBytes() {
+        java.lang.Object ref = fileDescription_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileDescription_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * file description
+       * </pre>
+       *
+       * <code>string file_description = 5;</code>
+       * @param value The fileDescription to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileDescription(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileDescription_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file description
+       * </pre>
+       *
+       * <code>string file_description = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileDescription() {
+        
+        fileDescription_ = getDefaultInstance().getFileDescription();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * file description
+       * </pre>
+       *
+       * <code>string file_description = 5;</code>
+       * @param value The bytes for fileDescription to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileDescriptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileDescription_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.FileContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.FileContent)
+    private static final qaul.rpc.chat.ChatOuterClass.FileContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.FileContent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.FileContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileContent>
+        PARSER = new com.google.protobuf.AbstractParser<FileContent>() {
+      @java.lang.Override
+      public FileContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileContent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.FileContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface GroupEventOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.GroupEvent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * group event type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+     * @return The enum numeric value on the wire for eventType.
+     */
+    int getEventTypeValue();
+    /**
+     * <pre>
+     * group event type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+     * @return The eventType.
+     */
+    qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType();
+
+    /**
+     * <pre>
+     * user ID of user joined or left
+     * </pre>
+     *
+     * <code>bytes user_id = 2;</code>
+     * @return The userId.
+     */
+    com.google.protobuf.ByteString getUserId();
+  }
+  /**
+   * <pre>
+   * Group event information
+   * this message is purely informational
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.chat.GroupEvent}
+   */
+  public static final class GroupEvent extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.GroupEvent)
+      GroupEventOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GroupEvent.newBuilder() to construct.
+    private GroupEvent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GroupEvent() {
+      eventType_ = 0;
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GroupEvent();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GroupEvent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              int rawValue = input.readEnum();
+
+              eventType_ = rawValue;
+              break;
+            }
+            case 18: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.chat.ChatOuterClass.GroupEvent.class, qaul.rpc.chat.ChatOuterClass.GroupEvent.Builder.class);
+    }
+
+    public static final int EVENT_TYPE_FIELD_NUMBER = 1;
+    private int eventType_;
+    /**
+     * <pre>
+     * group event type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+     * @return The enum numeric value on the wire for eventType.
+     */
+    @java.lang.Override public int getEventTypeValue() {
+      return eventType_;
+    }
+    /**
+     * <pre>
+     * group event type
+     * </pre>
+     *
+     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+     * @return The eventType.
+     */
+    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType() {
+      @SuppressWarnings("deprecation")
+      qaul.rpc.chat.ChatOuterClass.GroupEventType result = qaul.rpc.chat.ChatOuterClass.GroupEventType.valueOf(eventType_);
+      return result == null ? qaul.rpc.chat.ChatOuterClass.GroupEventType.UNRECOGNIZED : result;
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <pre>
+     * user ID of user joined or left
+     * </pre>
+     *
+     * <code>bytes user_id = 2;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (eventType_ != qaul.rpc.chat.ChatOuterClass.GroupEventType.DEFAULT.getNumber()) {
+        output.writeEnum(1, eventType_);
+      }
+      if (!userId_.isEmpty()) {
+        output.writeBytes(2, userId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (eventType_ != qaul.rpc.chat.ChatOuterClass.GroupEventType.DEFAULT.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, eventType_);
+      }
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, userId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.GroupEvent)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.chat.ChatOuterClass.GroupEvent other = (qaul.rpc.chat.ChatOuterClass.GroupEvent) obj;
+
+      if (eventType_ != other.eventType_) return false;
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + EVENT_TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + eventType_;
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.GroupEvent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Group event information
+     * this message is purely informational
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.chat.GroupEvent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.GroupEvent)
+        qaul.rpc.chat.ChatOuterClass.GroupEventOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.chat.ChatOuterClass.GroupEvent.class, qaul.rpc.chat.ChatOuterClass.GroupEvent.Builder.class);
+      }
+
+      // Construct using qaul.rpc.chat.ChatOuterClass.GroupEvent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        eventType_ = 0;
+
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstanceForType() {
+        return qaul.rpc.chat.ChatOuterClass.GroupEvent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.GroupEvent build() {
+        qaul.rpc.chat.ChatOuterClass.GroupEvent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.GroupEvent buildPartial() {
+        qaul.rpc.chat.ChatOuterClass.GroupEvent result = new qaul.rpc.chat.ChatOuterClass.GroupEvent(this);
+        result.eventType_ = eventType_;
+        result.userId_ = userId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.chat.ChatOuterClass.GroupEvent) {
+          return mergeFrom((qaul.rpc.chat.ChatOuterClass.GroupEvent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.GroupEvent other) {
+        if (other == qaul.rpc.chat.ChatOuterClass.GroupEvent.getDefaultInstance()) return this;
+        if (other.eventType_ != 0) {
+          setEventTypeValue(other.getEventTypeValue());
+        }
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.chat.ChatOuterClass.GroupEvent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.chat.ChatOuterClass.GroupEvent) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int eventType_ = 0;
+      /**
+       * <pre>
+       * group event type
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+       * @return The enum numeric value on the wire for eventType.
+       */
+      @java.lang.Override public int getEventTypeValue() {
+        return eventType_;
+      }
+      /**
+       * <pre>
+       * group event type
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+       * @param value The enum numeric value on the wire for eventType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEventTypeValue(int value) {
+        
+        eventType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group event type
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+       * @return The eventType.
+       */
+      @java.lang.Override
+      public qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType() {
+        @SuppressWarnings("deprecation")
+        qaul.rpc.chat.ChatOuterClass.GroupEventType result = qaul.rpc.chat.ChatOuterClass.GroupEventType.valueOf(eventType_);
+        return result == null ? qaul.rpc.chat.ChatOuterClass.GroupEventType.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * group event type
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+       * @param value The eventType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEventType(qaul.rpc.chat.ChatOuterClass.GroupEventType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        eventType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group event type
+       * </pre>
+       *
+       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEventType() {
+        
+        eventType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * user ID of user joined or left
+       * </pre>
+       *
+       * <code>bytes user_id = 2;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <pre>
+       * user ID of user joined or left
+       * </pre>
+       *
+       * <code>bytes user_id = 2;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user ID of user joined or left
+       * </pre>
+       *
+       * <code>bytes user_id = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.GroupEvent)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.GroupEvent)
+    private static final qaul.rpc.chat.ChatOuterClass.GroupEvent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.GroupEvent();
+    }
+
+    public static qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GroupEvent>
+        PARSER = new com.google.protobuf.AbstractParser<GroupEvent>() {
+      @java.lang.Override
+      public GroupEvent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GroupEvent(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GroupEvent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GroupEvent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -8542,671 +12246,6 @@ public final class ChatOuterClass {
 
   }
 
-  public interface GroupEventOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.rpc.chat.GroupEvent)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * message type
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-     * @return The enum numeric value on the wire for eventType.
-     */
-    int getEventTypeValue();
-    /**
-     * <pre>
-     * message type
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-     * @return The eventType.
-     */
-    qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType();
-
-    /**
-     * <pre>
-     * user ID of user joined or left
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    com.google.protobuf.ByteString getUserId();
-  }
-  /**
-   * <pre>
-   * the info message
-   * </pre>
-   *
-   * Protobuf type {@code qaul.rpc.chat.GroupEvent}
-   */
-  public static final class GroupEvent extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.rpc.chat.GroupEvent)
-      GroupEventOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use GroupEvent.newBuilder() to construct.
-    private GroupEvent(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private GroupEvent() {
-      eventType_ = 0;
-      userId_ = com.google.protobuf.ByteString.EMPTY;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new GroupEvent();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private GroupEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-
-              eventType_ = rawValue;
-              break;
-            }
-            case 18: {
-
-              userId_ = input.readBytes();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              qaul.rpc.chat.ChatOuterClass.GroupEvent.class, qaul.rpc.chat.ChatOuterClass.GroupEvent.Builder.class);
-    }
-
-    public static final int EVENT_TYPE_FIELD_NUMBER = 1;
-    private int eventType_;
-    /**
-     * <pre>
-     * message type
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-     * @return The enum numeric value on the wire for eventType.
-     */
-    @java.lang.Override public int getEventTypeValue() {
-      return eventType_;
-    }
-    /**
-     * <pre>
-     * message type
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-     * @return The eventType.
-     */
-    @java.lang.Override public qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.chat.ChatOuterClass.GroupEventType result = qaul.rpc.chat.ChatOuterClass.GroupEventType.valueOf(eventType_);
-      return result == null ? qaul.rpc.chat.ChatOuterClass.GroupEventType.UNRECOGNIZED : result;
-    }
-
-    public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
-    /**
-     * <pre>
-     * user ID of user joined or left
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getUserId() {
-      return userId_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (eventType_ != qaul.rpc.chat.ChatOuterClass.GroupEventType.NONE.getNumber()) {
-        output.writeEnum(1, eventType_);
-      }
-      if (!userId_.isEmpty()) {
-        output.writeBytes(2, userId_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (eventType_ != qaul.rpc.chat.ChatOuterClass.GroupEventType.NONE.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, eventType_);
-      }
-      if (!userId_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, userId_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof qaul.rpc.chat.ChatOuterClass.GroupEvent)) {
-        return super.equals(obj);
-      }
-      qaul.rpc.chat.ChatOuterClass.GroupEvent other = (qaul.rpc.chat.ChatOuterClass.GroupEvent) obj;
-
-      if (eventType_ != other.eventType_) return false;
-      if (!getUserId()
-          .equals(other.getUserId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + EVENT_TYPE_FIELD_NUMBER;
-      hash = (53 * hash) + eventType_;
-      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getUserId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(qaul.rpc.chat.ChatOuterClass.GroupEvent prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * <pre>
-     * the info message
-     * </pre>
-     *
-     * Protobuf type {@code qaul.rpc.chat.GroupEvent}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.rpc.chat.GroupEvent)
-        qaul.rpc.chat.ChatOuterClass.GroupEventOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                qaul.rpc.chat.ChatOuterClass.GroupEvent.class, qaul.rpc.chat.ChatOuterClass.GroupEvent.Builder.class);
-      }
-
-      // Construct using qaul.rpc.chat.ChatOuterClass.GroupEvent.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        eventType_ = 0;
-
-        userId_ = com.google.protobuf.ByteString.EMPTY;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return qaul.rpc.chat.ChatOuterClass.internal_static_qaul_rpc_chat_GroupEvent_descriptor;
-      }
-
-      @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstanceForType() {
-        return qaul.rpc.chat.ChatOuterClass.GroupEvent.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.GroupEvent build() {
-        qaul.rpc.chat.ChatOuterClass.GroupEvent result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.GroupEvent buildPartial() {
-        qaul.rpc.chat.ChatOuterClass.GroupEvent result = new qaul.rpc.chat.ChatOuterClass.GroupEvent(this);
-        result.eventType_ = eventType_;
-        result.userId_ = userId_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.rpc.chat.ChatOuterClass.GroupEvent) {
-          return mergeFrom((qaul.rpc.chat.ChatOuterClass.GroupEvent)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.GroupEvent other) {
-        if (other == qaul.rpc.chat.ChatOuterClass.GroupEvent.getDefaultInstance()) return this;
-        if (other.eventType_ != 0) {
-          setEventTypeValue(other.getEventTypeValue());
-        }
-        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
-          setUserId(other.getUserId());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        qaul.rpc.chat.ChatOuterClass.GroupEvent parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.chat.ChatOuterClass.GroupEvent) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private int eventType_ = 0;
-      /**
-       * <pre>
-       * message type
-       * </pre>
-       *
-       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-       * @return The enum numeric value on the wire for eventType.
-       */
-      @java.lang.Override public int getEventTypeValue() {
-        return eventType_;
-      }
-      /**
-       * <pre>
-       * message type
-       * </pre>
-       *
-       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-       * @param value The enum numeric value on the wire for eventType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setEventTypeValue(int value) {
-        
-        eventType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * message type
-       * </pre>
-       *
-       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-       * @return The eventType.
-       */
-      @java.lang.Override
-      public qaul.rpc.chat.ChatOuterClass.GroupEventType getEventType() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.chat.ChatOuterClass.GroupEventType result = qaul.rpc.chat.ChatOuterClass.GroupEventType.valueOf(eventType_);
-        return result == null ? qaul.rpc.chat.ChatOuterClass.GroupEventType.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * message type
-       * </pre>
-       *
-       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-       * @param value The eventType to set.
-       * @return This builder for chaining.
-       */
-      public Builder setEventType(qaul.rpc.chat.ChatOuterClass.GroupEventType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        eventType_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * message type
-       * </pre>
-       *
-       * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearEventType() {
-        
-        eventType_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <pre>
-       * user ID of user joined or left
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return The userId.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getUserId() {
-        return userId_;
-      }
-      /**
-       * <pre>
-       * user ID of user joined or left
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @param value The userId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        userId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * user ID of user joined or left
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUserId() {
-        
-        userId_ = getDefaultInstance().getUserId();
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:qaul.rpc.chat.GroupEvent)
-    }
-
-    // @@protoc_insertion_point(class_scope:qaul.rpc.chat.GroupEvent)
-    private static final qaul.rpc.chat.ChatOuterClass.GroupEvent DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new qaul.rpc.chat.ChatOuterClass.GroupEvent();
-    }
-
-    public static qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<GroupEvent>
-        PARSER = new com.google.protobuf.AbstractParser<GroupEvent>() {
-      @java.lang.Override
-      public GroupEvent parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GroupEvent(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<GroupEvent> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<GroupEvent> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public qaul.rpc.chat.ChatOuterClass.GroupEvent getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_chat_Chat_descriptor;
   private static final 
@@ -9243,15 +12282,30 @@ public final class ChatOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_chat_ChatMessage_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor;
+    internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable;
+      internal_static_qaul_rpc_chat_MessageReceptionConfirmed_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_ChatContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_FileContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_FileContent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_chat_GroupEvent_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -9272,32 +12326,40 @@ public final class ChatOuterClass {
       " \001(\0132\036.qaul.rpc.chat.ChatMessageSendH\000B\t" +
       "\n\007message\"\025\n\023ChatOverviewRequest\"F\n\020Chat" +
       "OverviewList\0222\n\roverview_list\030\001 \003(\0132\033.qa" +
-      "ul.rpc.chat.ChatOverview\"\335\001\n\014ChatOvervie" +
+      "ul.rpc.chat.ChatOverview\"\341\001\n\014ChatOvervie" +
       "w\022\027\n\017conversation_id\030\001 \001(\014\022\032\n\022last_messa" +
       "ge_index\030\002 \001(\004\022\014\n\004name\030\003 \001(\t\022\027\n\017last_mes" +
-      "sage_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(\005\0220\n\014content" +
-      "_type\030\006 \001(\0162\032.qaul.rpc.chat.ContentType\022" +
-      "\017\n\007content\030\007 \001(\014\022\036\n\026last_message_sender_" +
-      "id\030\010 \001(\014\"F\n\027ChatConversationRequest\022\027\n\017c" +
-      "onversation_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004" +
-      "\"a\n\024ChatConversationList\022\027\n\017conversation" +
-      "_id\030\001 \001(\014\0220\n\014message_list\030\002 \003(\0132\032.qaul.r" +
-      "pc.chat.ChatMessage\"\363\001\n\013ChatMessage\022\r\n\005i" +
-      "ndex\030\001 \001(\004\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage" +
-      "_id\030\003 \001(\014\022,\n\006status\030\004 \001(\0162\034.qaul.rpc.cha" +
-      "t.MessageStatus\022\027\n\017conversation_id\030\005 \001(\014" +
-      "\022\017\n\007sent_at\030\006 \001(\004\022\023\n\013received_at\030\007 \001(\004\0220" +
-      "\n\014content_type\030\010 \001(\0162\032.qaul.rpc.chat.Con" +
-      "tentType\022\017\n\007content\030\t \001(\014\";\n\017ChatMessage" +
-      "Send\022\027\n\017conversation_id\030\001 \001(\014\022\017\n\007content" +
-      "\030\002 \001(\t\"P\n\nGroupEvent\0221\n\nevent_type\030\001 \001(\016" +
-      "2\035.qaul.rpc.chat.GroupEventType\022\017\n\007user_" +
-      "id\030\002 \001(\014*F\n\013ContentType\022\010\n\004chat\020\000\022\t\n\005gro" +
-      "up\020\001\022\010\n\004file\020\002\022\007\n\003rtc\020\003\022\017\n\013group_event\020\004" +
-      "*I\n\rMessageStatus\022\013\n\007SENDING\020\000\022\010\n\004SENT\020\001" +
-      "\022\014\n\010RECEIVED\020\002\022\023\n\017RECEIVED_BY_ALL\020\003*<\n\016G" +
-      "roupEventType\022\010\n\004NONE\020\000\022\020\n\014GROUP_JOINED\020" +
-      "\001\022\016\n\nGROUP_LEFT\020\002b\006proto3"
+      "sage_at\030\004 \001(\004\022\016\n\006unread\030\005 \001(\005\0224\n\014content" +
+      "_type\030\006 \001(\0162\036.qaul.rpc.chat.ChatContentT" +
+      "ype\022\017\n\007content\030\007 \001(\014\022\036\n\026last_message_sen" +
+      "der_id\030\010 \001(\014\"F\n\027ChatConversationRequest\022" +
+      "\027\n\017conversation_id\030\001 \001(\014\022\022\n\nlast_index\030\002" +
+      " \001(\004\"a\n\024ChatConversationList\022\027\n\017conversa" +
+      "tion_id\030\001 \001(\014\0220\n\014message_list\030\002 \003(\0132\032.qa" +
+      "ul.rpc.chat.ChatMessage\"\306\002\n\013ChatMessage\022" +
+      "\r\n\005index\030\001 \001(\004\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmes" +
+      "sage_id\030\003 \001(\014\022,\n\006status\030\004 \001(\0162\034.qaul.rpc" +
+      ".chat.MessageStatus\022M\n\033message_reception" +
+      "_confirmed\030\n \003(\0132(.qaul.rpc.chat.Message" +
+      "ReceptionConfirmed\022\027\n\017conversation_id\030\005 " +
+      "\001(\014\022\017\n\007sent_at\030\006 \001(\004\022\023\n\013received_at\030\007 \001(" +
+      "\004\0224\n\014content_type\030\010 \001(\0162\036.qaul.rpc.chat." +
+      "ChatContentType\022\017\n\007content\030\t \001(\014\"B\n\031Mess" +
+      "ageReceptionConfirmed\022\017\n\007user_id\030\001 \001(\014\022\024" +
+      "\n\014confirmed_at\030\002 \001(\004\"\033\n\013ChatContent\022\014\n\004t" +
+      "ext\030\001 \001(\t\"v\n\013FileContent\022\017\n\007file_id\030\001 \001(" +
+      "\004\022\021\n\tfile_name\030\002 \001(\t\022\026\n\016file_extension\030\003" +
+      " \001(\t\022\021\n\tfile_size\030\004 \001(\r\022\030\n\020file_descript" +
+      "ion\030\005 \001(\t\"P\n\nGroupEvent\0221\n\nevent_type\030\001 " +
+      "\001(\0162\035.qaul.rpc.chat.GroupEventType\022\017\n\007us" +
+      "er_id\030\002 \001(\014\";\n\017ChatMessageSend\022\027\n\017conver" +
+      "sation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(\t*C\n\017Chat" +
+      "ContentType\022\010\n\004NONE\020\000\022\010\n\004CHAT\020\001\022\010\n\004FILE\020" +
+      "\002\022\t\n\005GROUP\020\003\022\007\n\003RTC\020\004*I\n\rMessageStatus\022\013" +
+      "\n\007SENDING\020\000\022\010\n\004SENT\020\001\022\014\n\010RECEIVED\020\002\022\023\n\017R" +
+      "ECEIVED_BY_ALL\020\003*L\n\016GroupEventType\022\013\n\007DE" +
+      "FAULT\020\000\022\013\n\007INVITED\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT" +
+      "\020\003\022\n\n\006CLOSED\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -9344,19 +12406,37 @@ public final class ChatOuterClass {
     internal_static_qaul_rpc_chat_ChatMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatMessage_descriptor,
-        new java.lang.String[] { "Index", "SenderId", "MessageId", "Status", "ConversationId", "SentAt", "ReceivedAt", "ContentType", "Content", });
-    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor =
+        new java.lang.String[] { "Index", "SenderId", "MessageId", "Status", "MessageReceptionConfirmed", "ConversationId", "SentAt", "ReceivedAt", "ContentType", "Content", });
+    internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor =
       getDescriptor().getMessageTypes().get(7);
-    internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable = new
+    internal_static_qaul_rpc_chat_MessageReceptionConfirmed_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_rpc_chat_ChatMessageSend_descriptor,
-        new java.lang.String[] { "ConversationId", "Content", });
-    internal_static_qaul_rpc_chat_GroupEvent_descriptor =
+        internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor,
+        new java.lang.String[] { "UserId", "ConfirmedAt", });
+    internal_static_qaul_rpc_chat_ChatContent_descriptor =
       getDescriptor().getMessageTypes().get(8);
+    internal_static_qaul_rpc_chat_ChatContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_ChatContent_descriptor,
+        new java.lang.String[] { "Text", });
+    internal_static_qaul_rpc_chat_FileContent_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_qaul_rpc_chat_FileContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_FileContent_descriptor,
+        new java.lang.String[] { "FileId", "FileName", "FileExtension", "FileSize", "FileDescription", });
+    internal_static_qaul_rpc_chat_GroupEvent_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_qaul_rpc_chat_GroupEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_GroupEvent_descriptor,
         new java.lang.String[] { "EventType", "UserId", });
+    internal_static_qaul_rpc_chat_ChatMessageSend_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_chat_ChatMessageSend_descriptor,
+        new java.lang.String[] { "ConversationId", "Content", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

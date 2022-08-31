@@ -6,12 +6,14 @@
 //! Invite new group members.
 //! Accept or reject invitations.
 
+use std::collections::BTreeMap;
+
 use libp2p::PeerId;
 use prost::Message;
 
-use super::chat;
+use super::chat::{self, ChatStorage};
 use super::conversation_id::ConversationId;
-use super::Group;
+use super::{Group, GroupMember, GroupStorage};
 use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
 /// Group Member Structure
@@ -20,30 +22,24 @@ pub struct Member {}
 impl Member {
     /// invite member from rpc command
     pub fn invite(
-        my_user_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
         user_id: &PeerId,
     ) -> Result<bool, String> {
-        //check group
-        let groups = Group::get_groups_of_user(my_user_id);
-
-        let group_idx = groups.group_id_to_index(group_id);
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
+        // get group
+        let mut group;
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            Some(my_group) => group = my_group,
+            None => return Err("group not found".to_string()),
         }
-        let mut group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
 
-        //check it's direct chat room
+        // check it's direct chat room
         if group.is_direct_chat {
             return Err("direct chat room does not allow this action".to_string());
         }
 
-        //check admin permission
-        if let Some(member) = group.get_member(&my_user_id.to_bytes()) {
+        // check admin permission
+        if let Some(member) = group.get_member(&account_id.to_bytes()) {
             if member.role != 255 {
                 return Err("you haven't permission for remove member".to_string());
             }
@@ -51,7 +47,7 @@ impl Member {
             return Err("you are not member in this group".to_string());
         }
 
-        //check user
+        // check user
         if let Some(member) = group.get_member(&user_id.to_bytes()) {
             if member.state > 0 {
                 return Err("user is already member in this group".to_string());
@@ -60,27 +56,36 @@ impl Member {
             }
         }
 
-        //send invite.
+        // send invite.
+        let mut members: Vec<super::proto_net::GroupMember> = Vec::new();
+        for (_, member) in group.members.clone() {
+            members.push(super::proto_net::GroupMember {
+                user_id: member.user_id.clone(),
+                role: member.role,
+                joined_at: member.joined_at,
+                state: member.state,
+                last_message_index: member.last_message_index,
+            });
+        }
+
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::InviteMember(
                 super::proto_net::InviteMember {
-                    group_id: group.id.clone(),
-                    group_name: group.name.clone(),
-                    admin_id: my_user_id.to_bytes(),
-                    created_at: group.created_at,
-                    members_count: group.members.len() as u32,
+                    group: Some(super::proto_net::GroupInfo {
+                        group_id: group.id.clone(),
+                        group_name: group.name.clone(),
+                        created_at: group.created_at,
+                        revision: group.revision,
+                        members,
+                    }),
                 },
             )),
         };
 
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            Group::send_group_message_through_message(
-                &user_account,
-                user_id,
-                &proto_message.encode_to_vec(),
-            );
+        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
+            Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
-            //save new user
+            // save new user
             let member = super::GroupMember {
                 user_id: user_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::User.try_into().unwrap(),
@@ -93,14 +98,7 @@ impl Member {
 
             group.members.insert(user_id.to_bytes(), member);
 
-            if let Err(_e) = groups
-                .db_ref
-                .insert(group_idx.to_be_bytes().to_vec(), group)
-            {
-                return Err("group updating error!".to_string());
-            } else if let Err(_e) = groups.db_ref.flush() {
-                return Err("group updating error!".to_string());
-            }
+            GroupStorage::save_group(user_account.id, group);
         } else {
             return Err("user account problem".to_string());
         }
@@ -109,30 +107,25 @@ impl Member {
 
     /// reply to invited message from rpc command
     pub fn reply_invite(
-        my_user_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
-        user_id: &PeerId,
         accept: bool,
     ) -> Result<bool, String> {
-        //if already has not direct chat room, it's not allowed
-        //check if already has direct chat room
-        let conversation_id = ConversationId::from_peers(my_user_id, user_id);
-        if !Group::group_exists(my_user_id, &conversation_id.to_bytes()) {
-            return Err("you have not been received group invite meesage".to_string());
+        // check if there is a group invite
+        let invite;
+        match GroupStorage::get_invite(account_id.to_owned(), group_id.to_owned()) {
+            Some(my_invite) => invite = my_invite,
+            None => return Err("there is no group invite".to_string()),
         }
 
-        let groups = Group::get_groups_of_user(my_user_id);
-
-        //check if there is group invite
-        if !groups.invited_ref.contains_key(group_id).unwrap() {
-            return Err("you have not group invited".to_string());
-        }
-        let invited = groups.invited_ref.get(group_id).unwrap().unwrap();
-        if PeerId::from_bytes(&invited.sender_id).unwrap() != *user_id {
-            return Err("the group invite sender is different than inviter".to_string());
+        // create receiver id
+        let receiver;
+        match PeerId::from_bytes(&invite.sender_id) {
+            Ok(sender) => receiver = sender,
+            Err(e) => return Err("invite sender_id not valid".to_string()),
         }
 
-        //send reply.
+        // send reply.
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::ReplyInvite(
                 super::proto_net::ReplyInvite {
@@ -142,49 +135,48 @@ impl Member {
             )),
         };
 
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            Group::send_group_message_through_message(
-                &user_account,
-                &user_id,
-                &proto_message.encode_to_vec(),
-            );
+        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
+            Group::send_notify_message(&user_account, &receiver, proto_message.encode_to_vec());
 
             // remove invited
-            if let Ok(_) = groups.invited_ref.remove(group_id) {
-                if let Err(_) = groups.invited_ref.flush() {
-                    log::error!("group invite removing error");
-                }
-            }
+            GroupStorage::remove_invite(account_id.to_owned(), group_id);
         } else {
             return Err("user account problem".to_string());
         }
+
+        // save group into data base
+        GroupStorage::save_group(account_id.to_owned(), invite.group);
+
         Ok(true)
     }
 
     /// remove member from rpc command
     pub fn remove(
-        my_user_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
         user_id: &PeerId,
     ) -> Result<bool, String> {
-        let groups = Group::get_groups_of_user(my_user_id);
-        let group_idx = groups.group_id_to_index(group_id);
-
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
+        // get user account from node
+        let user_account;
+        match UserAccounts::get_by_id(*account_id) {
+            Some(my_account) => user_account = my_account,
+            None => return Err("user account has problem".to_string()),
         }
-        let mut group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
+
+        // get group from data base
+        let mut group;
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            Some(my_group) => group = my_group,
+            None => return Err("group not found".to_string()),
+        }
 
         //check it's direct chat room
         if group.is_direct_chat {
             return Err("direct chat room does not allow this action".to_string());
         }
 
-        if let Some(member) = group.get_member(&my_user_id.to_bytes()) {
+        // check permissions
+        if let Some(member) = group.get_member(&account_id.to_bytes()) {
             if member.role != 255 {
                 return Err("you haven't permission for remove member".to_string());
             }
@@ -192,24 +184,21 @@ impl Member {
             return Err("you are not member in this group".to_string());
         }
 
+        // update group
         if let Some(_member) = group.get_member(&user_id.to_bytes()) {
             // remove member
             group.members.remove(&user_id.to_bytes());
-            if let Err(error) = groups.db_ref.insert(&group_idx.to_be_bytes(), group) {
-                log::error!("group db updating error {}", error.to_string());
-            }
-            Group::update_groups_of_user(my_user_id, groups);
+
+            // set new revision
+            group.revision = group.revision + 1;
+
+            // save to data base
+            GroupStorage::save_group(account_id.to_owned(), group);
         } else {
             return Err("this user is not member of this group".to_string());
         }
 
-        //check if already has direct chat room
-        let conversation_id = ConversationId::from_peers(my_user_id, user_id);
-        if !Group::group_exists(my_user_id, &conversation_id.to_bytes()) {
-            super::Manage::create_new_direct_chat_group(my_user_id, user_id);
-        }
-
-        //send direct message to removed user
+        // send direct message to removed user
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::Removed(
                 super::proto_net::RemovedMember {
@@ -217,113 +206,113 @@ impl Member {
                 },
             )),
         };
+        Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            Group::send_group_message_through_message(
-                &user_account,
-                user_id,
-                &proto_message.encode_to_vec(),
-            );
-        } else {
-            return Err("user account has problem".to_string());
-        }
-
-        //save group event
+        // save group event
         let event = chat::rpc_proto::GroupEvent {
-            event_type: chat::rpc_proto::GroupEventType::GroupLeft
-                .try_into()
-                .unwrap(),
+            event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
             user_id: user_id.to_bytes(),
         };
-        chat::Chat::save_event(
-            my_user_id,
-            my_user_id,
-            chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+        ChatStorage::save_event(
+            account_id,
+            account_id,
+            chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
             &event.encode_to_vec(),
             &ConversationId::from_bytes(group_id).unwrap(),
         );
+
         Ok(true)
     }
 
     /// process group invite message from network
     pub fn on_be_invited(
         sender_id: &PeerId,
-        receiver_id: &PeerId,
-        req: &super::proto_net::InviteMember,
+        account_id: &PeerId,
+        invite_message: &super::proto_net::InviteMember,
     ) {
-        let groups = Group::get_groups_of_user(receiver_id);
+        let group;
+        match invite_message.group.to_owned() {
+            Some(my_group) => group = my_group,
+            None => {
+                log::error!("invite message contains no group");
+                return;
+            }
+        }
+
+        let mut members: BTreeMap<Vec<u8>, GroupMember> = BTreeMap::new();
+        for member in group.members {
+            members.insert(
+                member.user_id.clone(),
+                GroupMember {
+                    user_id: member.user_id.clone(),
+                    role: member.role,
+                    joined_at: member.joined_at,
+                    state: member.state,
+                    last_message_index: member.last_message_index,
+                },
+            );
+        }
+
         let invited = super::GroupInvited {
-            id: req.group_id.clone(),
             sender_id: sender_id.to_bytes(),
             received_at: timestamp::Timestamp::get_timestamp(),
-            created_at: req.created_at,
-            name: req.group_name.clone(),
-            member_count: req.members_count,
+            group: super::Group {
+                id: group.group_id.clone(),
+                name: group.group_name.clone(),
+                is_direct_chat: false,
+                created_at: group.created_at,
+                revision: group.revision,
+                members,
+            },
         };
 
-        if let Err(_e) = groups.invited_ref.insert(req.group_id.clone(), invited) {
-            log::error!("group invite stroing error!");
-        }
-        if let Err(_e) = groups.invited_ref.flush() {
-            log::error!("group invite stroing error!");
-        }
+        GroupStorage::save_invite(account_id.to_owned(), invited);
     }
 
-    /// process accept invite message from network
+    /// process incoming invite accept
     fn on_accpeted_invite(
         sender_id: &PeerId,
-        receiver_id: &PeerId,
+        account_id: &PeerId,
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
-        let groups = Group::get_groups_of_user(receiver_id);
-
-        let group_idx = groups.group_id_to_index(&resp.group_id);
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
+        // get group from data base
+        let group;
+        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.clone()) {
+            Some(my_group) => group = my_group,
+            None => return Err("group not found".to_string()),
         }
 
-        let group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
-
-        //check it's direct chat room
+        // check it's direct chat room
         if group.is_direct_chat {
             return Err("direct chat room does not allow accept invite".to_string());
         }
 
-        //check if already has direct chat room
-        let conversation_id = ConversationId::from_peers(sender_id, receiver_id);
-        if !Group::group_exists(receiver_id, &conversation_id.to_bytes()) {
-            return Err("you have not sent invite".to_string());
-        }
-
         // check if user is invite pending state
         if !group.members.contains_key(&sender_id.to_bytes()) {
-            return Err("member is not invite pending state".to_string());
+            return Err("member has no invite pending".to_string());
         }
 
+        // check if user already joined
         let mut member = group.members.get(&sender_id.to_bytes()).unwrap().clone();
         if member.state > 0 {
-            return Err("member is already joined".to_string());
+            return Err("member has already joined".to_string());
         }
+
+        // update group member state & send update to all users
         member.state = super::proto_rpc::GroupMemberState::Activated
             .try_into()
             .unwrap();
-        Group::update_group_member(receiver_id, &resp.group_id, &member);
+        Group::update_group_member(account_id, &resp.group_id, &member);
 
-        //save event
+        // save event
         let event = chat::rpc_proto::GroupEvent {
-            event_type: chat::rpc_proto::GroupEventType::GroupJoined
-                .try_into()
-                .unwrap(),
+            event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
             user_id: sender_id.to_bytes(),
         };
-        chat::Chat::save_event(
-            &receiver_id,
+        ChatStorage::save_event(
+            &account_id,
             &sender_id,
-            chat::rpc_proto::ContentType::GroupEvent.try_into().unwrap(),
+            chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
             &event.encode_to_vec(),
             &ConversationId::from_bytes(&resp.group_id).unwrap(),
         );
@@ -331,34 +320,22 @@ impl Member {
         Ok(true)
     }
 
-    /// process accept invite message from network
+    /// process reject group invite
     fn on_declined_invite(
         sender_id: &PeerId,
-        receiver_id: &PeerId,
+        account_id: &PeerId,
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
-        let groups = Group::get_groups_of_user(receiver_id);
-
-        let group_idx = groups.group_id_to_index(&resp.group_id);
-        if group_idx == 0 {
-            return Err("can not find group".to_string());
+        // get group from data base
+        let mut group;
+        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.to_owned()) {
+            Some(my_group) => group = my_group,
+            None => return Err("group not found".to_string()),
         }
 
-        let mut group = groups
-            .db_ref
-            .get(&group_idx.to_be_bytes())
-            .unwrap()
-            .unwrap();
-
-        //check it's direct chat room
+        // check it's direct chat room
         if group.is_direct_chat {
             return Err("direct chat room does not allow accept invite".to_string());
-        }
-
-        //check if already has direct chat room
-        let conversation_id = ConversationId::from_peers(sender_id, receiver_id);
-        if !Group::group_exists(receiver_id, &conversation_id.to_bytes()) {
-            return Err("you have not sent invite".to_string());
         }
 
         // check if user is invite pending state
@@ -371,7 +348,7 @@ impl Member {
         }
 
         group.members.remove(&sender_id.to_bytes());
-        Group::update_group(receiver_id, &group);
+        GroupStorage::save_group(account_id.to_owned(), group);
 
         Ok(true)
     }
@@ -385,7 +362,9 @@ impl Member {
         if resp.accept {
             Self::on_accpeted_invite(sender_id, receiver_id, resp)
         } else {
-            Self::on_declined_invite(sender_id, receiver_id, resp);
+            if let Err(e) = Self::on_declined_invite(sender_id, receiver_id, resp) {
+                log::error!("on_decline error {}", e);
+            }
             Ok(false)
         }
     }

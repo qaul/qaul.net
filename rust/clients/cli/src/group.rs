@@ -129,19 +129,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            if let Some(user_id_str) = iter.next() {
-                                match Self::id_string_to_bin(user_id_str.to_string()) {
-                                    Ok(user_id) => {
-                                        Self::reply_invite(group_id, user_id, true);
-                                    }
-                                    Err(e) => {
-                                        log::error!("{}", e);
-                                        return;
-                                    }
-                                }
-                            } else {
-                                log::error!("user id is not given");
-                            }
+                            Self::reply_invite(group_id, true);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -160,19 +148,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            if let Some(user_id_str) = iter.next() {
-                                match Self::id_string_to_bin(user_id_str.to_string()) {
-                                    Ok(user_id) => {
-                                        Self::reply_invite(group_id, user_id, false);
-                                    }
-                                    Err(e) => {
-                                        log::error!("{}", e);
-                                        return;
-                                    }
-                                }
-                            } else {
-                                log::error!("user id is not given");
-                            }
+                            Self::reply_invite(group_id, false);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -387,13 +363,12 @@ impl Group {
     }
 
     /// reply invite
-    fn reply_invite(group_id: Vec<u8>, user_id: Vec<u8>, accept: bool) {
+    fn reply_invite(group_id: Vec<u8>, accept: bool) {
         // group invite send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupReplyInviteRequest(
                 proto::GroupReplyInviteRequest {
                     group_id: group_id.clone(),
-                    user_id: user_id.clone(),
                     accept,
                 },
             )),
@@ -562,16 +537,22 @@ impl Group {
                         // List groups
                         println!("=============List Of Invited=================");
                         for invite in group_invited_response.invited {
-                            let group_id =
-                                uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
-                            println!("id: {}", group_id.to_string());
-                            println!("\tname: {}", invite.group_name.clone());
-                            println!("\tsender: {}", bs58::encode(invite.sender_id).into_string());
-                            println!("\treceived at: {}", invite.received_at);
-                            println!(
-                                "\tcreated_at: {}, members: {}",
-                                invite.received_at, invite.member_count
-                            );
+                            if let Some(group) = invite.group {
+                                let group_id =
+                                    uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
+                                println!("id: {}", group_id.to_string());
+                                println!("\tname: {}", group.group_name.clone());
+                                println!(
+                                    "\tsender: {}",
+                                    bs58::encode(invite.sender_id).into_string()
+                                );
+                                println!("\treceived at: {}", invite.received_at);
+                                println!(
+                                    "\tcreated_at: {}, members: {}",
+                                    invite.received_at,
+                                    group.members.len()
+                                );
+                            }
                         }
                     }
                     _ => {
