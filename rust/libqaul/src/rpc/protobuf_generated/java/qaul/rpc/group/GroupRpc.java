@@ -25,7 +25,7 @@ public final class GroupRpc {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     *&#47; invited
+     * invited
      * </pre>
      *
      * <code>Invited = 0;</code>
@@ -33,7 +33,7 @@ public final class GroupRpc {
     Invited(0),
     /**
      * <pre>
-     *&#47; activated
+     * activated
      * </pre>
      *
      * <code>Activated = 1;</code>
@@ -44,7 +44,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *&#47; invited
+     * invited
      * </pre>
      *
      * <code>Invited = 0;</code>
@@ -52,7 +52,7 @@ public final class GroupRpc {
     public static final int Invited_VALUE = 0;
     /**
      * <pre>
-     *&#47; activated
+     * activated
      * </pre>
      *
      * <code>Activated = 1;</code>
@@ -153,7 +153,7 @@ public final class GroupRpc {
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <pre>
-     *&#47; user
+     * user
      * </pre>
      *
      * <code>User = 0;</code>
@@ -161,7 +161,7 @@ public final class GroupRpc {
     User(0),
     /**
      * <pre>
-     *&#47; admin
+     * admin
      * </pre>
      *
      * <code>Admin = 255;</code>
@@ -172,7 +172,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *&#47; user
+     * user
      * </pre>
      *
      * <code>User = 0;</code>
@@ -180,7 +180,7 @@ public final class GroupRpc {
     public static final int User_VALUE = 0;
     /**
      * <pre>
-     *&#47; admin
+     * admin
      * </pre>
      *
      * <code>Admin = 255;</code>
@@ -492,7 +492,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -501,7 +501,7 @@ public final class GroupRpc {
     boolean hasGroupInfoRequest();
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -510,7 +510,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupInfoRequest getGroupInfoRequest();
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -519,34 +519,34 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      * @return Whether the groupInfoResponse field is set.
      */
     boolean hasGroupInfoResponse();
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      * @return The groupInfoResponse.
      */
-    qaul.rpc.group.GroupRpc.GroupInfoResponse getGroupInfoResponse();
+    qaul.rpc.group.GroupRpc.GroupInfo getGroupInfoResponse();
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      */
-    qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupInfoResponseOrBuilder();
+    qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupInfoResponseOrBuilder();
 
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -555,7 +555,7 @@ public final class GroupRpc {
     boolean hasGroupReplyInviteRequest();
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -564,7 +564,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupReplyInviteRequest getGroupReplyInviteRequest();
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -573,7 +573,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -582,7 +582,7 @@ public final class GroupRpc {
     boolean hasGroupReplyInviteResponse();
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -591,7 +591,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupReplyInviteResponse getGroupReplyInviteResponse();
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -600,7 +600,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -609,7 +609,7 @@ public final class GroupRpc {
     boolean hasGroupListRequest();
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -618,7 +618,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupListRequest getGroupListRequest();
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -627,7 +627,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -636,7 +636,7 @@ public final class GroupRpc {
     boolean hasGroupListResponse();
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -645,7 +645,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupListResponse getGroupListResponse();
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -884,14 +884,14 @@ public final class GroupRpc {
               break;
             }
             case 82: {
-              qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder subBuilder = null;
+              qaul.rpc.group.GroupRpc.GroupInfo.Builder subBuilder = null;
               if (messageCase_ == 10) {
-                subBuilder = ((qaul.rpc.group.GroupRpc.GroupInfoResponse) message_).toBuilder();
+                subBuilder = ((qaul.rpc.group.GroupRpc.GroupInfo) message_).toBuilder();
               }
               message_ =
-                  input.readMessage(qaul.rpc.group.GroupRpc.GroupInfoResponse.parser(), extensionRegistry);
+                  input.readMessage(qaul.rpc.group.GroupRpc.GroupInfo.parser(), extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.group.GroupRpc.GroupInfoResponse) message_);
+                subBuilder.mergeFrom((qaul.rpc.group.GroupRpc.GroupInfo) message_);
                 message_ = subBuilder.buildPartial();
               }
               messageCase_ = 10;
@@ -1431,7 +1431,7 @@ public final class GroupRpc {
     public static final int GROUP_INFO_REQUEST_FIELD_NUMBER = 9;
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -1443,7 +1443,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -1458,7 +1458,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -1474,10 +1474,10 @@ public final class GroupRpc {
     public static final int GROUP_INFO_RESPONSE_FIELD_NUMBER = 10;
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      * @return Whether the groupInfoResponse field is set.
      */
     @java.lang.Override
@@ -1486,38 +1486,38 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      * @return The groupInfoResponse.
      */
     @java.lang.Override
-    public qaul.rpc.group.GroupRpc.GroupInfoResponse getGroupInfoResponse() {
+    public qaul.rpc.group.GroupRpc.GroupInfo getGroupInfoResponse() {
       if (messageCase_ == 10) {
-         return (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_;
+         return (qaul.rpc.group.GroupRpc.GroupInfo) message_;
       }
-      return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+      return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
     }
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      */
     @java.lang.Override
-    public qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupInfoResponseOrBuilder() {
+    public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupInfoResponseOrBuilder() {
       if (messageCase_ == 10) {
-         return (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_;
+         return (qaul.rpc.group.GroupRpc.GroupInfo) message_;
       }
-      return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+      return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
     }
 
     public static final int GROUP_REPLY_INVITE_REQUEST_FIELD_NUMBER = 11;
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -1529,7 +1529,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -1544,7 +1544,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -1560,7 +1560,7 @@ public final class GroupRpc {
     public static final int GROUP_REPLY_INVITE_RESPONSE_FIELD_NUMBER = 12;
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -1572,7 +1572,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -1587,7 +1587,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -1603,7 +1603,7 @@ public final class GroupRpc {
     public static final int GROUP_LIST_REQUEST_FIELD_NUMBER = 13;
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -1615,7 +1615,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -1630,7 +1630,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -1646,7 +1646,7 @@ public final class GroupRpc {
     public static final int GROUP_LIST_RESPONSE_FIELD_NUMBER = 14;
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -1658,7 +1658,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -1673,7 +1673,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -1814,7 +1814,7 @@ public final class GroupRpc {
         output.writeMessage(9, (qaul.rpc.group.GroupRpc.GroupInfoRequest) message_);
       }
       if (messageCase_ == 10) {
-        output.writeMessage(10, (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_);
+        output.writeMessage(10, (qaul.rpc.group.GroupRpc.GroupInfo) message_);
       }
       if (messageCase_ == 11) {
         output.writeMessage(11, (qaul.rpc.group.GroupRpc.GroupReplyInviteRequest) message_);
@@ -1881,7 +1881,7 @@ public final class GroupRpc {
       }
       if (messageCase_ == 10) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_);
+          .computeMessageSize(10, (qaul.rpc.group.GroupRpc.GroupInfo) message_);
       }
       if (messageCase_ == 11) {
         size += com.google.protobuf.CodedOutputStream
@@ -3937,7 +3937,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupInfoRequest, qaul.rpc.group.GroupRpc.GroupInfoRequest.Builder, qaul.rpc.group.GroupRpc.GroupInfoRequestOrBuilder> groupInfoRequestBuilder_;
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -3949,7 +3949,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -3971,7 +3971,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -3991,7 +3991,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4009,7 +4009,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4036,7 +4036,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4059,7 +4059,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4069,7 +4069,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4087,7 +4087,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info request
+       * group info request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -4112,13 +4112,13 @@ public final class GroupRpc {
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> groupInfoResponseBuilder_;
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> groupInfoResponseBuilder_;
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        * @return Whether the groupInfoResponse field is set.
        */
       @java.lang.Override
@@ -4127,34 +4127,34 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        * @return The groupInfoResponse.
        */
       @java.lang.Override
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse getGroupInfoResponse() {
+      public qaul.rpc.group.GroupRpc.GroupInfo getGroupInfoResponse() {
         if (groupInfoResponseBuilder_ == null) {
           if (messageCase_ == 10) {
-            return (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_;
+            return (qaul.rpc.group.GroupRpc.GroupInfo) message_;
           }
-          return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+          return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
         } else {
           if (messageCase_ == 10) {
             return groupInfoResponseBuilder_.getMessage();
           }
-          return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+          return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
         }
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
-      public Builder setGroupInfoResponse(qaul.rpc.group.GroupRpc.GroupInfoResponse value) {
+      public Builder setGroupInfoResponse(qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupInfoResponseBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4169,13 +4169,13 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
       public Builder setGroupInfoResponse(
-          qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder builderForValue) {
+          qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
         if (groupInfoResponseBuilder_ == null) {
           message_ = builderForValue.build();
           onChanged();
@@ -4187,16 +4187,16 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
-      public Builder mergeGroupInfoResponse(qaul.rpc.group.GroupRpc.GroupInfoResponse value) {
+      public Builder mergeGroupInfoResponse(qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupInfoResponseBuilder_ == null) {
           if (messageCase_ == 10 &&
-              message_ != qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance()) {
-            message_ = qaul.rpc.group.GroupRpc.GroupInfoResponse.newBuilder((qaul.rpc.group.GroupRpc.GroupInfoResponse) message_)
+              message_ != qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance()) {
+            message_ = qaul.rpc.group.GroupRpc.GroupInfo.newBuilder((qaul.rpc.group.GroupRpc.GroupInfo) message_)
                 .mergeFrom(value).buildPartial();
           } else {
             message_ = value;
@@ -4214,10 +4214,10 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
       public Builder clearGroupInfoResponse() {
         if (groupInfoResponseBuilder_ == null) {
@@ -4237,49 +4237,49 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder getGroupInfoResponseBuilder() {
+      public qaul.rpc.group.GroupRpc.GroupInfo.Builder getGroupInfoResponseBuilder() {
         return getGroupInfoResponseFieldBuilder().getBuilder();
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
       @java.lang.Override
-      public qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupInfoResponseOrBuilder() {
+      public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupInfoResponseOrBuilder() {
         if ((messageCase_ == 10) && (groupInfoResponseBuilder_ != null)) {
           return groupInfoResponseBuilder_.getMessageOrBuilder();
         } else {
           if (messageCase_ == 10) {
-            return (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_;
+            return (qaul.rpc.group.GroupRpc.GroupInfo) message_;
           }
-          return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+          return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
         }
       }
       /**
        * <pre>
-       *group info response
+       * group info response
        * </pre>
        *
-       * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+       * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> 
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
           getGroupInfoResponseFieldBuilder() {
         if (groupInfoResponseBuilder_ == null) {
           if (!(messageCase_ == 10)) {
-            message_ = qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+            message_ = qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
           }
           groupInfoResponseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder>(
-                  (qaul.rpc.group.GroupRpc.GroupInfoResponse) message_,
+              qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder>(
+                  (qaul.rpc.group.GroupRpc.GroupInfo) message_,
                   getParentForChildren(),
                   isClean());
           message_ = null;
@@ -4293,7 +4293,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupReplyInviteRequest, qaul.rpc.group.GroupRpc.GroupReplyInviteRequest.Builder, qaul.rpc.group.GroupRpc.GroupReplyInviteRequestOrBuilder> groupReplyInviteRequestBuilder_;
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4305,7 +4305,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4327,7 +4327,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4347,7 +4347,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4365,7 +4365,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4392,7 +4392,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4415,7 +4415,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4425,7 +4425,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4443,7 +4443,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite request
+       * group reply invite request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -4471,7 +4471,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupReplyInviteResponse, qaul.rpc.group.GroupRpc.GroupReplyInviteResponse.Builder, qaul.rpc.group.GroupRpc.GroupReplyInviteResponseOrBuilder> groupReplyInviteResponseBuilder_;
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4483,7 +4483,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4505,7 +4505,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4525,7 +4525,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4543,7 +4543,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4570,7 +4570,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4593,7 +4593,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4603,7 +4603,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4621,7 +4621,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group reply invite response
+       * group reply invite response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -4649,7 +4649,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupListRequest, qaul.rpc.group.GroupRpc.GroupListRequest.Builder, qaul.rpc.group.GroupRpc.GroupListRequestOrBuilder> groupListRequestBuilder_;
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4661,7 +4661,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4683,7 +4683,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4703,7 +4703,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4721,7 +4721,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4748,7 +4748,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4771,7 +4771,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4781,7 +4781,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4799,7 +4799,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list request
+       * group list request
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -4827,7 +4827,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupListResponse, qaul.rpc.group.GroupRpc.GroupListResponse.Builder, qaul.rpc.group.GroupRpc.GroupListResponseOrBuilder> groupListResponseBuilder_;
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4839,7 +4839,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4861,7 +4861,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4881,7 +4881,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4899,7 +4899,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4926,7 +4926,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4949,7 +4949,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4959,7 +4959,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -4977,7 +4977,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *group list response
+       * group list response
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -6744,7 +6744,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -6753,7 +6753,7 @@ public final class GroupRpc {
     boolean hasResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -6762,7 +6762,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupResult getResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -6890,7 +6890,7 @@ public final class GroupRpc {
     private qaul.rpc.group.GroupRpc.GroupResult result_;
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -6902,7 +6902,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -6914,7 +6914,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7311,7 +7311,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult, qaul.rpc.group.GroupRpc.GroupResult.Builder, qaul.rpc.group.GroupRpc.GroupResultOrBuilder> resultBuilder_;
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7322,7 +7322,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7337,7 +7337,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7357,7 +7357,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7375,7 +7375,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7397,7 +7397,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7415,7 +7415,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7427,7 +7427,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -7442,7 +7442,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -8257,7 +8257,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8266,7 +8266,7 @@ public final class GroupRpc {
     boolean hasResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8275,7 +8275,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupResult getResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8456,7 +8456,7 @@ public final class GroupRpc {
     private qaul.rpc.group.GroupRpc.GroupResult result_;
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8468,7 +8468,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8480,7 +8480,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -8990,7 +8990,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult, qaul.rpc.group.GroupRpc.GroupResult.Builder, qaul.rpc.group.GroupRpc.GroupResultOrBuilder> resultBuilder_;
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9001,7 +9001,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9016,7 +9016,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9036,7 +9036,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9054,7 +9054,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9076,7 +9076,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9094,7 +9094,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9106,7 +9106,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9121,7 +9121,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9834,7 +9834,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9843,7 +9843,7 @@ public final class GroupRpc {
     boolean hasResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -9852,7 +9852,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupResult getResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10001,7 +10001,7 @@ public final class GroupRpc {
     private qaul.rpc.group.GroupRpc.GroupResult result_;
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10013,7 +10013,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10025,7 +10025,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10485,7 +10485,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult, qaul.rpc.group.GroupRpc.GroupResult.Builder, qaul.rpc.group.GroupRpc.GroupResultOrBuilder> resultBuilder_;
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10496,7 +10496,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10511,7 +10511,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10531,7 +10531,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10549,7 +10549,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10571,7 +10571,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10589,7 +10589,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10601,7 +10601,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10616,7 +10616,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -10703,16 +10703,6 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    com.google.protobuf.ByteString getUserId();
-
-    /**
-     * <pre>
      * accept
      * </pre>
      *
@@ -10723,7 +10713,7 @@ public final class GroupRpc {
   }
   /**
    * <pre>
-   * Reply Invite 
+   * Reply Invite
    * </pre>
    *
    * Protobuf type {@code qaul.rpc.group.GroupReplyInviteRequest}
@@ -10739,7 +10729,6 @@ public final class GroupRpc {
     }
     private GroupReplyInviteRequest() {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
-      userId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -10775,11 +10764,6 @@ public final class GroupRpc {
             case 10: {
 
               groupId_ = input.readBytes();
-              break;
-            }
-            case 18: {
-
-              userId_ = input.readBytes();
               break;
             }
             case 24: {
@@ -10836,21 +10820,6 @@ public final class GroupRpc {
       return groupId_;
     }
 
-    public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
-    /**
-     * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getUserId() {
-      return userId_;
-    }
-
     public static final int ACCEPT_FIELD_NUMBER = 3;
     private boolean accept_;
     /**
@@ -10883,9 +10852,6 @@ public final class GroupRpc {
       if (!groupId_.isEmpty()) {
         output.writeBytes(1, groupId_);
       }
-      if (!userId_.isEmpty()) {
-        output.writeBytes(2, userId_);
-      }
       if (accept_ != false) {
         output.writeBool(3, accept_);
       }
@@ -10901,10 +10867,6 @@ public final class GroupRpc {
       if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, groupId_);
-      }
-      if (!userId_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, userId_);
       }
       if (accept_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -10927,8 +10889,6 @@ public final class GroupRpc {
 
       if (!getGroupId()
           .equals(other.getGroupId())) return false;
-      if (!getUserId()
-          .equals(other.getUserId())) return false;
       if (getAccept()
           != other.getAccept()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -10944,8 +10904,6 @@ public final class GroupRpc {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
       hash = (53 * hash) + getGroupId().hashCode();
-      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getUserId().hashCode();
       hash = (37 * hash) + ACCEPT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAccept());
@@ -11046,7 +11004,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * Reply Invite 
+     * Reply Invite
      * </pre>
      *
      * Protobuf type {@code qaul.rpc.group.GroupReplyInviteRequest}
@@ -11088,8 +11046,6 @@ public final class GroupRpc {
         super.clear();
         groupId_ = com.google.protobuf.ByteString.EMPTY;
 
-        userId_ = com.google.protobuf.ByteString.EMPTY;
-
         accept_ = false;
 
         return this;
@@ -11119,7 +11075,6 @@ public final class GroupRpc {
       public qaul.rpc.group.GroupRpc.GroupReplyInviteRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupReplyInviteRequest result = new qaul.rpc.group.GroupRpc.GroupReplyInviteRequest(this);
         result.groupId_ = groupId_;
-        result.userId_ = userId_;
         result.accept_ = accept_;
         onBuilt();
         return result;
@@ -11171,9 +11126,6 @@ public final class GroupRpc {
         if (other == qaul.rpc.group.GroupRpc.GroupReplyInviteRequest.getDefaultInstance()) return this;
         if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
           setGroupId(other.getGroupId());
-        }
-        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
-          setUserId(other.getUserId());
         }
         if (other.getAccept() != false) {
           setAccept(other.getAccept());
@@ -11249,52 +11201,6 @@ public final class GroupRpc {
       public Builder clearGroupId() {
         
         groupId_ = getDefaultInstance().getGroupId();
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return The userId.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getUserId() {
-        return userId_;
-      }
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @param value The userId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        userId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUserId() {
-        
-        userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
       }
@@ -11410,17 +11316,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    com.google.protobuf.ByteString getUserId();
-
-    /**
-     * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11429,7 +11325,7 @@ public final class GroupRpc {
     boolean hasResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11438,7 +11334,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupResult getResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11463,7 +11359,6 @@ public final class GroupRpc {
     }
     private GroupReplyInviteResponse() {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
-      userId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -11499,11 +11394,6 @@ public final class GroupRpc {
             case 10: {
 
               groupId_ = input.readBytes();
-              break;
-            }
-            case 18: {
-
-              userId_ = input.readBytes();
               break;
             }
             case 26: {
@@ -11568,26 +11458,11 @@ public final class GroupRpc {
       return groupId_;
     }
 
-    public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
-    /**
-     * <pre>
-     * user id
-     * </pre>
-     *
-     * <code>bytes user_id = 2;</code>
-     * @return The userId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getUserId() {
-      return userId_;
-    }
-
     public static final int RESULT_FIELD_NUMBER = 3;
     private qaul.rpc.group.GroupRpc.GroupResult result_;
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11599,7 +11474,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11611,7 +11486,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -11638,9 +11513,6 @@ public final class GroupRpc {
       if (!groupId_.isEmpty()) {
         output.writeBytes(1, groupId_);
       }
-      if (!userId_.isEmpty()) {
-        output.writeBytes(2, userId_);
-      }
       if (result_ != null) {
         output.writeMessage(3, getResult());
       }
@@ -11656,10 +11528,6 @@ public final class GroupRpc {
       if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, groupId_);
-      }
-      if (!userId_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, userId_);
       }
       if (result_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -11682,8 +11550,6 @@ public final class GroupRpc {
 
       if (!getGroupId()
           .equals(other.getGroupId())) return false;
-      if (!getUserId()
-          .equals(other.getUserId())) return false;
       if (hasResult() != other.hasResult()) return false;
       if (hasResult()) {
         if (!getResult()
@@ -11702,8 +11568,6 @@ public final class GroupRpc {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
       hash = (53 * hash) + getGroupId().hashCode();
-      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getUserId().hashCode();
       if (hasResult()) {
         hash = (37 * hash) + RESULT_FIELD_NUMBER;
         hash = (53 * hash) + getResult().hashCode();
@@ -11847,8 +11711,6 @@ public final class GroupRpc {
         super.clear();
         groupId_ = com.google.protobuf.ByteString.EMPTY;
 
-        userId_ = com.google.protobuf.ByteString.EMPTY;
-
         if (resultBuilder_ == null) {
           result_ = null;
         } else {
@@ -11882,7 +11744,6 @@ public final class GroupRpc {
       public qaul.rpc.group.GroupRpc.GroupReplyInviteResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupReplyInviteResponse result = new qaul.rpc.group.GroupRpc.GroupReplyInviteResponse(this);
         result.groupId_ = groupId_;
-        result.userId_ = userId_;
         if (resultBuilder_ == null) {
           result.result_ = result_;
         } else {
@@ -11938,9 +11799,6 @@ public final class GroupRpc {
         if (other == qaul.rpc.group.GroupRpc.GroupReplyInviteResponse.getDefaultInstance()) return this;
         if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
           setGroupId(other.getGroupId());
-        }
-        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
-          setUserId(other.getUserId());
         }
         if (other.hasResult()) {
           mergeResult(other.getResult());
@@ -12020,58 +11878,12 @@ public final class GroupRpc {
         return this;
       }
 
-      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return The userId.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getUserId() {
-        return userId_;
-      }
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @param value The userId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        userId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * user id
-       * </pre>
-       *
-       * <code>bytes user_id = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUserId() {
-        
-        userId_ = getDefaultInstance().getUserId();
-        onChanged();
-        return this;
-      }
-
       private qaul.rpc.group.GroupRpc.GroupResult result_;
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.group.GroupRpc.GroupResult, qaul.rpc.group.GroupRpc.GroupResult.Builder, qaul.rpc.group.GroupRpc.GroupResultOrBuilder> resultBuilder_;
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12082,7 +11894,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12097,7 +11909,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12117,7 +11929,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12135,7 +11947,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12157,7 +11969,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12175,7 +11987,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12187,7 +11999,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12202,7 +12014,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12915,7 +12727,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12924,7 +12736,7 @@ public final class GroupRpc {
     boolean hasResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -12933,7 +12745,7 @@ public final class GroupRpc {
     qaul.rpc.group.GroupRpc.GroupResult getResult();
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13082,7 +12894,7 @@ public final class GroupRpc {
     private qaul.rpc.group.GroupRpc.GroupResult result_;
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13094,7 +12906,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13106,7 +12918,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13566,7 +13378,7 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult, qaul.rpc.group.GroupRpc.GroupResult.Builder, qaul.rpc.group.GroupRpc.GroupResultOrBuilder> resultBuilder_;
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13577,7 +13389,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13592,7 +13404,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13612,7 +13424,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13630,7 +13442,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13652,7 +13464,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13670,7 +13482,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13682,7 +13494,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -13697,7 +13509,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       * result 
+       * result
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
@@ -14296,7 +14108,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *user id
+     * user id
      * </pre>
      *
      * <code>bytes user_id = 1;</code>
@@ -14306,7 +14118,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -14315,7 +14127,7 @@ public final class GroupRpc {
     int getRoleValue();
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -14325,7 +14137,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *joined at
+     * joined at
      * </pre>
      *
      * <code>uint64 joined_at = 3;</code>
@@ -14335,7 +14147,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -14344,7 +14156,7 @@ public final class GroupRpc {
     int getStateValue();
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -14354,7 +14166,7 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     *last message index 
+     * last message index
      * </pre>
      *
      * <code>uint32 last_message_index = 5;</code>
@@ -14479,7 +14291,7 @@ public final class GroupRpc {
     private com.google.protobuf.ByteString userId_;
     /**
      * <pre>
-     *user id
+     * user id
      * </pre>
      *
      * <code>bytes user_id = 1;</code>
@@ -14494,7 +14306,7 @@ public final class GroupRpc {
     private int role_;
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -14505,7 +14317,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -14521,7 +14333,7 @@ public final class GroupRpc {
     private long joinedAt_;
     /**
      * <pre>
-     *joined at
+     * joined at
      * </pre>
      *
      * <code>uint64 joined_at = 3;</code>
@@ -14536,7 +14348,7 @@ public final class GroupRpc {
     private int state_;
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -14547,7 +14359,7 @@ public final class GroupRpc {
     }
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -14563,7 +14375,7 @@ public final class GroupRpc {
     private int lastMessageIndex_;
     /**
      * <pre>
-     *last message index 
+     * last message index
      * </pre>
      *
      * <code>uint32 last_message_index = 5;</code>
@@ -14950,7 +14762,7 @@ public final class GroupRpc {
       private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       *user id
+       * user id
        * </pre>
        *
        * <code>bytes user_id = 1;</code>
@@ -14962,7 +14774,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *user id
+       * user id
        * </pre>
        *
        * <code>bytes user_id = 1;</code>
@@ -14980,7 +14792,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *user id
+       * user id
        * </pre>
        *
        * <code>bytes user_id = 1;</code>
@@ -14996,7 +14808,7 @@ public final class GroupRpc {
       private int role_ = 0;
       /**
        * <pre>
-       *role
+       * role
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -15007,7 +14819,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *role
+       * role
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -15022,7 +14834,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *role
+       * role
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -15036,7 +14848,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *role
+       * role
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -15054,7 +14866,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *role
+       * role
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -15070,7 +14882,7 @@ public final class GroupRpc {
       private long joinedAt_ ;
       /**
        * <pre>
-       *joined at
+       * joined at
        * </pre>
        *
        * <code>uint64 joined_at = 3;</code>
@@ -15082,7 +14894,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *joined at
+       * joined at
        * </pre>
        *
        * <code>uint64 joined_at = 3;</code>
@@ -15097,7 +14909,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *joined at
+       * joined at
        * </pre>
        *
        * <code>uint64 joined_at = 3;</code>
@@ -15113,7 +14925,7 @@ public final class GroupRpc {
       private int state_ = 0;
       /**
        * <pre>
-       *state 
+       * state
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -15124,7 +14936,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *state 
+       * state
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -15139,7 +14951,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *state 
+       * state
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -15153,7 +14965,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *state 
+       * state
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -15171,7 +14983,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *state 
+       * state
        * </pre>
        *
        * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -15187,7 +14999,7 @@ public final class GroupRpc {
       private int lastMessageIndex_ ;
       /**
        * <pre>
-       *last message index 
+       * last message index
        * </pre>
        *
        * <code>uint32 last_message_index = 5;</code>
@@ -15199,7 +15011,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *last message index 
+       * last message index
        * </pre>
        *
        * <code>uint32 last_message_index = 5;</code>
@@ -15214,7 +15026,7 @@ public final class GroupRpc {
       }
       /**
        * <pre>
-       *last message index 
+       * last message index
        * </pre>
        *
        * <code>uint32 last_message_index = 5;</code>
@@ -15279,8 +15091,8 @@ public final class GroupRpc {
 
   }
 
-  public interface GroupInfoResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:qaul.rpc.group.GroupInfoResponse)
+  public interface GroupInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.group.GroupInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -15325,10 +15137,20 @@ public final class GroupRpc {
 
     /**
      * <pre>
+     * group revision number
+     * </pre>
+     *
+     * <code>uint32 revision = 4;</code>
+     * @return The revision.
+     */
+    int getRevision();
+
+    /**
+     * <pre>
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 4;</code>
+     * <code>bool is_direct_chat = 5;</code>
      * @return The isDirectChat.
      */
     boolean getIsDirectChat();
@@ -15338,7 +15160,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     java.util.List<qaul.rpc.group.GroupRpc.GroupMember> 
         getMembersList();
@@ -15347,7 +15169,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     qaul.rpc.group.GroupRpc.GroupMember getMembers(int index);
     /**
@@ -15355,7 +15177,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     int getMembersCount();
     /**
@@ -15363,7 +15185,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
         getMembersOrBuilderList();
@@ -15372,7 +15194,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
         int index);
@@ -15382,18 +15204,18 @@ public final class GroupRpc {
    * Group info response
    * </pre>
    *
-   * Protobuf type {@code qaul.rpc.group.GroupInfoResponse}
+   * Protobuf type {@code qaul.rpc.group.GroupInfo}
    */
-  public static final class GroupInfoResponse extends
+  public static final class GroupInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:qaul.rpc.group.GroupInfoResponse)
-      GroupInfoResponseOrBuilder {
+      // @@protoc_insertion_point(message_implements:qaul.rpc.group.GroupInfo)
+      GroupInfoOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GroupInfoResponse.newBuilder() to construct.
-    private GroupInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use GroupInfo.newBuilder() to construct.
+    private GroupInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GroupInfoResponse() {
+    private GroupInfo() {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
       groupName_ = "";
       members_ = java.util.Collections.emptyList();
@@ -15403,7 +15225,7 @@ public final class GroupRpc {
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new GroupInfoResponse();
+      return new GroupInfo();
     }
 
     @java.lang.Override
@@ -15411,7 +15233,7 @@ public final class GroupRpc {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GroupInfoResponse(
+    private GroupInfo(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -15448,10 +15270,15 @@ public final class GroupRpc {
             }
             case 32: {
 
+              revision_ = input.readUInt32();
+              break;
+            }
+            case 40: {
+
               isDirectChat_ = input.readBool();
               break;
             }
-            case 42: {
+            case 50: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 members_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupMember>();
                 mutable_bitField0_ |= 0x00000001;
@@ -15486,15 +15313,15 @@ public final class GroupRpc {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoResponse_descriptor;
+      return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoResponse_fieldAccessorTable
+      return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              qaul.rpc.group.GroupRpc.GroupInfoResponse.class, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder.class);
+              qaul.rpc.group.GroupRpc.GroupInfo.class, qaul.rpc.group.GroupRpc.GroupInfo.Builder.class);
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
@@ -15573,14 +15400,29 @@ public final class GroupRpc {
       return createdAt_;
     }
 
-    public static final int IS_DIRECT_CHAT_FIELD_NUMBER = 4;
+    public static final int REVISION_FIELD_NUMBER = 4;
+    private int revision_;
+    /**
+     * <pre>
+     * group revision number
+     * </pre>
+     *
+     * <code>uint32 revision = 4;</code>
+     * @return The revision.
+     */
+    @java.lang.Override
+    public int getRevision() {
+      return revision_;
+    }
+
+    public static final int IS_DIRECT_CHAT_FIELD_NUMBER = 5;
     private boolean isDirectChat_;
     /**
      * <pre>
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 4;</code>
+     * <code>bool is_direct_chat = 5;</code>
      * @return The isDirectChat.
      */
     @java.lang.Override
@@ -15588,14 +15430,14 @@ public final class GroupRpc {
       return isDirectChat_;
     }
 
-    public static final int MEMBERS_FIELD_NUMBER = 5;
+    public static final int MEMBERS_FIELD_NUMBER = 6;
     private java.util.List<qaul.rpc.group.GroupRpc.GroupMember> members_;
     /**
      * <pre>
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     @java.lang.Override
     public java.util.List<qaul.rpc.group.GroupRpc.GroupMember> getMembersList() {
@@ -15606,7 +15448,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     @java.lang.Override
     public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
@@ -15618,7 +15460,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     @java.lang.Override
     public int getMembersCount() {
@@ -15629,7 +15471,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupMember getMembers(int index) {
@@ -15640,7 +15482,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
@@ -15671,11 +15513,14 @@ public final class GroupRpc {
       if (createdAt_ != 0L) {
         output.writeUInt64(3, createdAt_);
       }
+      if (revision_ != 0) {
+        output.writeUInt32(4, revision_);
+      }
       if (isDirectChat_ != false) {
-        output.writeBool(4, isDirectChat_);
+        output.writeBool(5, isDirectChat_);
       }
       for (int i = 0; i < members_.size(); i++) {
-        output.writeMessage(5, members_.get(i));
+        output.writeMessage(6, members_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -15697,13 +15542,17 @@ public final class GroupRpc {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(3, createdAt_);
       }
+      if (revision_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, revision_);
+      }
       if (isDirectChat_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(4, isDirectChat_);
+          .computeBoolSize(5, isDirectChat_);
       }
       for (int i = 0; i < members_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, members_.get(i));
+          .computeMessageSize(6, members_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -15715,10 +15564,10 @@ public final class GroupRpc {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof qaul.rpc.group.GroupRpc.GroupInfoResponse)) {
+      if (!(obj instanceof qaul.rpc.group.GroupRpc.GroupInfo)) {
         return super.equals(obj);
       }
-      qaul.rpc.group.GroupRpc.GroupInfoResponse other = (qaul.rpc.group.GroupRpc.GroupInfoResponse) obj;
+      qaul.rpc.group.GroupRpc.GroupInfo other = (qaul.rpc.group.GroupRpc.GroupInfo) obj;
 
       if (!getGroupId()
           .equals(other.getGroupId())) return false;
@@ -15726,6 +15575,8 @@ public final class GroupRpc {
           .equals(other.getGroupName())) return false;
       if (getCreatedAt()
           != other.getCreatedAt()) return false;
+      if (getRevision()
+          != other.getRevision()) return false;
       if (getIsDirectChat()
           != other.getIsDirectChat()) return false;
       if (!getMembersList()
@@ -15748,6 +15599,8 @@ public final class GroupRpc {
       hash = (37 * hash) + CREATED_AT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCreatedAt());
+      hash = (37 * hash) + REVISION_FIELD_NUMBER;
+      hash = (53 * hash) + getRevision();
       hash = (37 * hash) + IS_DIRECT_CHAT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getIsDirectChat());
@@ -15760,69 +15613,69 @@ public final class GroupRpc {
       return hash;
     }
 
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(byte[] data)
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(java.io.InputStream input)
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseDelimitedFrom(java.io.InputStream input)
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseDelimitedFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse parseFrom(
+    public static qaul.rpc.group.GroupRpc.GroupInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -15835,7 +15688,7 @@ public final class GroupRpc {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(qaul.rpc.group.GroupRpc.GroupInfoResponse prototype) {
+    public static Builder newBuilder(qaul.rpc.group.GroupRpc.GroupInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -15855,26 +15708,26 @@ public final class GroupRpc {
      * Group info response
      * </pre>
      *
-     * Protobuf type {@code qaul.rpc.group.GroupInfoResponse}
+     * Protobuf type {@code qaul.rpc.group.GroupInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:qaul.rpc.group.GroupInfoResponse)
-        qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder {
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.group.GroupInfo)
+        qaul.rpc.group.GroupRpc.GroupInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoResponse_descriptor;
+        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoResponse_fieldAccessorTable
+        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                qaul.rpc.group.GroupRpc.GroupInfoResponse.class, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder.class);
+                qaul.rpc.group.GroupRpc.GroupInfo.class, qaul.rpc.group.GroupRpc.GroupInfo.Builder.class);
       }
 
-      // Construct using qaul.rpc.group.GroupRpc.GroupInfoResponse.newBuilder()
+      // Construct using qaul.rpc.group.GroupRpc.GroupInfo.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -15899,6 +15752,8 @@ public final class GroupRpc {
 
         createdAt_ = 0L;
 
+        revision_ = 0;
+
         isDirectChat_ = false;
 
         if (membersBuilder_ == null) {
@@ -15913,17 +15768,17 @@ public final class GroupRpc {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoResponse_descriptor;
+        return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_descriptor;
       }
 
       @java.lang.Override
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse getDefaultInstanceForType() {
-        return qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance();
+      public qaul.rpc.group.GroupRpc.GroupInfo getDefaultInstanceForType() {
+        return qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance();
       }
 
       @java.lang.Override
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse build() {
-        qaul.rpc.group.GroupRpc.GroupInfoResponse result = buildPartial();
+      public qaul.rpc.group.GroupRpc.GroupInfo build() {
+        qaul.rpc.group.GroupRpc.GroupInfo result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -15931,12 +15786,13 @@ public final class GroupRpc {
       }
 
       @java.lang.Override
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse buildPartial() {
-        qaul.rpc.group.GroupRpc.GroupInfoResponse result = new qaul.rpc.group.GroupRpc.GroupInfoResponse(this);
+      public qaul.rpc.group.GroupRpc.GroupInfo buildPartial() {
+        qaul.rpc.group.GroupRpc.GroupInfo result = new qaul.rpc.group.GroupRpc.GroupInfo(this);
         int from_bitField0_ = bitField0_;
         result.groupId_ = groupId_;
         result.groupName_ = groupName_;
         result.createdAt_ = createdAt_;
+        result.revision_ = revision_;
         result.isDirectChat_ = isDirectChat_;
         if (membersBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
@@ -15985,16 +15841,16 @@ public final class GroupRpc {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof qaul.rpc.group.GroupRpc.GroupInfoResponse) {
-          return mergeFrom((qaul.rpc.group.GroupRpc.GroupInfoResponse)other);
+        if (other instanceof qaul.rpc.group.GroupRpc.GroupInfo) {
+          return mergeFrom((qaul.rpc.group.GroupRpc.GroupInfo)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(qaul.rpc.group.GroupRpc.GroupInfoResponse other) {
-        if (other == qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(qaul.rpc.group.GroupRpc.GroupInfo other) {
+        if (other == qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance()) return this;
         if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
           setGroupId(other.getGroupId());
         }
@@ -16004,6 +15860,9 @@ public final class GroupRpc {
         }
         if (other.getCreatedAt() != 0L) {
           setCreatedAt(other.getCreatedAt());
+        }
+        if (other.getRevision() != 0) {
+          setRevision(other.getRevision());
         }
         if (other.getIsDirectChat() != false) {
           setIsDirectChat(other.getIsDirectChat());
@@ -16049,11 +15908,11 @@ public final class GroupRpc {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.group.GroupRpc.GroupInfoResponse parsedMessage = null;
+        qaul.rpc.group.GroupRpc.GroupInfo parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.group.GroupRpc.GroupInfoResponse) e.getUnfinishedMessage();
+          parsedMessage = (qaul.rpc.group.GroupRpc.GroupInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -16249,13 +16108,56 @@ public final class GroupRpc {
         return this;
       }
 
+      private int revision_ ;
+      /**
+       * <pre>
+       * group revision number
+       * </pre>
+       *
+       * <code>uint32 revision = 4;</code>
+       * @return The revision.
+       */
+      @java.lang.Override
+      public int getRevision() {
+        return revision_;
+      }
+      /**
+       * <pre>
+       * group revision number
+       * </pre>
+       *
+       * <code>uint32 revision = 4;</code>
+       * @param value The revision to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRevision(int value) {
+        
+        revision_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group revision number
+       * </pre>
+       *
+       * <code>uint32 revision = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRevision() {
+        
+        revision_ = 0;
+        onChanged();
+        return this;
+      }
+
       private boolean isDirectChat_ ;
       /**
        * <pre>
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 4;</code>
+       * <code>bool is_direct_chat = 5;</code>
        * @return The isDirectChat.
        */
       @java.lang.Override
@@ -16267,7 +16169,7 @@ public final class GroupRpc {
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 4;</code>
+       * <code>bool is_direct_chat = 5;</code>
        * @param value The isDirectChat to set.
        * @return This builder for chaining.
        */
@@ -16282,7 +16184,7 @@ public final class GroupRpc {
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 4;</code>
+       * <code>bool is_direct_chat = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearIsDirectChat() {
@@ -16309,7 +16211,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public java.util.List<qaul.rpc.group.GroupRpc.GroupMember> getMembersList() {
         if (membersBuilder_ == null) {
@@ -16323,7 +16225,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public int getMembersCount() {
         if (membersBuilder_ == null) {
@@ -16337,7 +16239,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember getMembers(int index) {
         if (membersBuilder_ == null) {
@@ -16351,7 +16253,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder setMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember value) {
@@ -16372,7 +16274,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder setMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16390,7 +16292,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder addMembers(qaul.rpc.group.GroupRpc.GroupMember value) {
         if (membersBuilder_ == null) {
@@ -16410,7 +16312,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder addMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember value) {
@@ -16431,7 +16333,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder addMembers(
           qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16449,7 +16351,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder addMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16467,7 +16369,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder addAllMembers(
           java.lang.Iterable<? extends qaul.rpc.group.GroupRpc.GroupMember> values) {
@@ -16486,7 +16388,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder clearMembers() {
         if (membersBuilder_ == null) {
@@ -16503,7 +16405,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public Builder removeMembers(int index) {
         if (membersBuilder_ == null) {
@@ -16520,7 +16422,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder getMembersBuilder(
           int index) {
@@ -16531,7 +16433,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
           int index) {
@@ -16545,7 +16447,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
            getMembersOrBuilderList() {
@@ -16560,7 +16462,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder addMembersBuilder() {
         return getMembersFieldBuilder().addBuilder(
@@ -16571,7 +16473,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder addMembersBuilder(
           int index) {
@@ -16583,7 +16485,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 5;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
        */
       public java.util.List<qaul.rpc.group.GroupRpc.GroupMember.Builder> 
            getMembersBuilderList() {
@@ -16616,41 +16518,41 @@ public final class GroupRpc {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:qaul.rpc.group.GroupInfoResponse)
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.group.GroupInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:qaul.rpc.group.GroupInfoResponse)
-    private static final qaul.rpc.group.GroupRpc.GroupInfoResponse DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:qaul.rpc.group.GroupInfo)
+    private static final qaul.rpc.group.GroupRpc.GroupInfo DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new qaul.rpc.group.GroupRpc.GroupInfoResponse();
+      DEFAULT_INSTANCE = new qaul.rpc.group.GroupRpc.GroupInfo();
     }
 
-    public static qaul.rpc.group.GroupRpc.GroupInfoResponse getDefaultInstance() {
+    public static qaul.rpc.group.GroupRpc.GroupInfo getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<GroupInfoResponse>
-        PARSER = new com.google.protobuf.AbstractParser<GroupInfoResponse>() {
+    private static final com.google.protobuf.Parser<GroupInfo>
+        PARSER = new com.google.protobuf.AbstractParser<GroupInfo>() {
       @java.lang.Override
-      public GroupInfoResponse parsePartialFrom(
+      public GroupInfo parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GroupInfoResponse(input, extensionRegistry);
+        return new GroupInfo(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<GroupInfoResponse> parser() {
+    public static com.google.protobuf.Parser<GroupInfo> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<GroupInfoResponse> getParserForType() {
+    public com.google.protobuf.Parser<GroupInfo> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public qaul.rpc.group.GroupRpc.GroupInfoResponse getDefaultInstanceForType() {
+    public qaul.rpc.group.GroupRpc.GroupInfo getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -17093,24 +16995,24 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
-    java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse> 
+    java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> 
         getGroupsList();
     /**
      * <pre>
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
-    qaul.rpc.group.GroupRpc.GroupInfoResponse getGroups(int index);
+    qaul.rpc.group.GroupRpc.GroupInfo getGroups(int index);
     /**
      * <pre>
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     int getGroupsCount();
     /**
@@ -17118,18 +17020,18 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
-    java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> 
+    java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
         getGroupsOrBuilderList();
     /**
      * <pre>
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
-    qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupsOrBuilder(
+    qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupsOrBuilder(
         int index);
   }
   /**
@@ -17185,11 +17087,11 @@ public final class GroupRpc {
               break;
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                groups_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupInfoResponse>();
+                groups_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupInfo>();
                 mutable_bitField0_ |= 0x00000001;
               }
               groups_.add(
-                  input.readMessage(qaul.rpc.group.GroupRpc.GroupInfoResponse.parser(), extensionRegistry));
+                  input.readMessage(qaul.rpc.group.GroupRpc.GroupInfo.parser(), extensionRegistry));
               break;
             }
             default: {
@@ -17230,16 +17132,16 @@ public final class GroupRpc {
     }
 
     public static final int GROUPS_FIELD_NUMBER = 1;
-    private java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse> groups_;
+    private java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> groups_;
     /**
      * <pre>
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse> getGroupsList() {
+    public java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> getGroupsList() {
       return groups_;
     }
     /**
@@ -17247,10 +17149,10 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> 
+    public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
         getGroupsOrBuilderList() {
       return groups_;
     }
@@ -17259,7 +17161,7 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @java.lang.Override
     public int getGroupsCount() {
@@ -17270,10 +17172,10 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @java.lang.Override
-    public qaul.rpc.group.GroupRpc.GroupInfoResponse getGroups(int index) {
+    public qaul.rpc.group.GroupRpc.GroupInfo getGroups(int index) {
       return groups_.get(index);
     }
     /**
@@ -17281,10 +17183,10 @@ public final class GroupRpc {
      * group list
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+     * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
      */
     @java.lang.Override
-    public qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupsOrBuilder(
+    public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupsOrBuilder(
         int index) {
       return groups_.get(index);
     }
@@ -17635,26 +17537,26 @@ public final class GroupRpc {
       }
       private int bitField0_;
 
-      private java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse> groups_ =
+      private java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> groups_ =
         java.util.Collections.emptyList();
       private void ensureGroupsIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          groups_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupInfoResponse>(groups_);
+          groups_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupInfo>(groups_);
           bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> groupsBuilder_;
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> groupsBuilder_;
 
       /**
        * <pre>
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse> getGroupsList() {
+      public java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> getGroupsList() {
         if (groupsBuilder_ == null) {
           return java.util.Collections.unmodifiableList(groups_);
         } else {
@@ -17666,7 +17568,7 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public int getGroupsCount() {
         if (groupsBuilder_ == null) {
@@ -17680,9 +17582,9 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse getGroups(int index) {
+      public qaul.rpc.group.GroupRpc.GroupInfo getGroups(int index) {
         if (groupsBuilder_ == null) {
           return groups_.get(index);
         } else {
@@ -17694,10 +17596,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder setGroups(
-          int index, qaul.rpc.group.GroupRpc.GroupInfoResponse value) {
+          int index, qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupsBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -17715,10 +17617,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder setGroups(
-          int index, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder builderForValue) {
+          int index, qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
         if (groupsBuilder_ == null) {
           ensureGroupsIsMutable();
           groups_.set(index, builderForValue.build());
@@ -17733,9 +17635,9 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public Builder addGroups(qaul.rpc.group.GroupRpc.GroupInfoResponse value) {
+      public Builder addGroups(qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupsBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -17753,10 +17655,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder addGroups(
-          int index, qaul.rpc.group.GroupRpc.GroupInfoResponse value) {
+          int index, qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupsBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -17774,10 +17676,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder addGroups(
-          qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder builderForValue) {
+          qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
         if (groupsBuilder_ == null) {
           ensureGroupsIsMutable();
           groups_.add(builderForValue.build());
@@ -17792,10 +17694,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder addGroups(
-          int index, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder builderForValue) {
+          int index, qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
         if (groupsBuilder_ == null) {
           ensureGroupsIsMutable();
           groups_.add(index, builderForValue.build());
@@ -17810,10 +17712,10 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder addAllGroups(
-          java.lang.Iterable<? extends qaul.rpc.group.GroupRpc.GroupInfoResponse> values) {
+          java.lang.Iterable<? extends qaul.rpc.group.GroupRpc.GroupInfo> values) {
         if (groupsBuilder_ == null) {
           ensureGroupsIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -17829,7 +17731,7 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder clearGroups() {
         if (groupsBuilder_ == null) {
@@ -17846,7 +17748,7 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
       public Builder removeGroups(int index) {
         if (groupsBuilder_ == null) {
@@ -17863,9 +17765,9 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder getGroupsBuilder(
+      public qaul.rpc.group.GroupRpc.GroupInfo.Builder getGroupsBuilder(
           int index) {
         return getGroupsFieldBuilder().getBuilder(index);
       }
@@ -17874,9 +17776,9 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder getGroupsOrBuilder(
+      public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupsOrBuilder(
           int index) {
         if (groupsBuilder_ == null) {
           return groups_.get(index);  } else {
@@ -17888,9 +17790,9 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> 
+      public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
            getGroupsOrBuilderList() {
         if (groupsBuilder_ != null) {
           return groupsBuilder_.getMessageOrBuilderList();
@@ -17903,41 +17805,41 @@ public final class GroupRpc {
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder addGroupsBuilder() {
+      public qaul.rpc.group.GroupRpc.GroupInfo.Builder addGroupsBuilder() {
         return getGroupsFieldBuilder().addBuilder(
-            qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance());
+            qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance());
       }
       /**
        * <pre>
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder addGroupsBuilder(
+      public qaul.rpc.group.GroupRpc.GroupInfo.Builder addGroupsBuilder(
           int index) {
         return getGroupsFieldBuilder().addBuilder(
-            index, qaul.rpc.group.GroupRpc.GroupInfoResponse.getDefaultInstance());
+            index, qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance());
       }
       /**
        * <pre>
        * group list
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupInfoResponse groups = 1;</code>
+       * <code>repeated .qaul.rpc.group.GroupInfo groups = 1;</code>
        */
-      public java.util.List<qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder> 
+      public java.util.List<qaul.rpc.group.GroupRpc.GroupInfo.Builder> 
            getGroupsBuilderList() {
         return getGroupsFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder> 
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
           getGroupsFieldBuilder() {
         if (groupsBuilder_ == null) {
           groupsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              qaul.rpc.group.GroupRpc.GroupInfoResponse, qaul.rpc.group.GroupRpc.GroupInfoResponse.Builder, qaul.rpc.group.GroupRpc.GroupInfoResponseOrBuilder>(
+              qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder>(
                   groups_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -18005,20 +17907,10 @@ public final class GroupRpc {
 
     /**
      * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     * @return The groupId.
-     */
-    com.google.protobuf.ByteString getGroupId();
-
-    /**
-     * <pre>
      * sender id
      * </pre>
      *
-     * <code>bytes sender_id = 2;</code>
+     * <code>bytes sender_id = 1;</code>
      * @return The senderId.
      */
     com.google.protobuf.ByteString getSenderId();
@@ -18028,50 +17920,37 @@ public final class GroupRpc {
      * received at
      * </pre>
      *
-     * <code>uint64 received_at = 3;</code>
+     * <code>uint64 received_at = 2;</code>
      * @return The receivedAt.
      */
     long getReceivedAt();
 
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
-     * @return The groupName.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+     * @return Whether the group field is set.
      */
-    java.lang.String getGroupName();
+    boolean hasGroup();
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
-     * @return The bytes for groupName.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+     * @return The group.
      */
-    com.google.protobuf.ByteString
-        getGroupNameBytes();
-
+    qaul.rpc.group.GroupRpc.GroupInfo getGroup();
     /**
      * <pre>
-     * created at
+     * group info
      * </pre>
      *
-     * <code>uint64 created_at = 5;</code>
-     * @return The createdAt.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
      */
-    long getCreatedAt();
-
-    /**
-     * <pre>
-     * member count
-     * </pre>
-     *
-     * <code>uint32 member_count = 6;</code>
-     * @return The memberCount.
-     */
-    int getMemberCount();
+    qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupOrBuilder();
   }
   /**
    * Protobuf type {@code qaul.rpc.group.GroupInvited}
@@ -18086,9 +17965,7 @@ public final class GroupRpc {
       super(builder);
     }
     private GroupInvited() {
-      groupId_ = com.google.protobuf.ByteString.EMPTY;
       senderId_ = com.google.protobuf.ByteString.EMPTY;
-      groupName_ = "";
     }
 
     @java.lang.Override
@@ -18123,33 +18000,25 @@ public final class GroupRpc {
               break;
             case 10: {
 
-              groupId_ = input.readBytes();
-              break;
-            }
-            case 18: {
-
               senderId_ = input.readBytes();
               break;
             }
-            case 24: {
+            case 16: {
 
               receivedAt_ = input.readUInt64();
               break;
             }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 26: {
+              qaul.rpc.group.GroupRpc.GroupInfo.Builder subBuilder = null;
+              if (group_ != null) {
+                subBuilder = group_.toBuilder();
+              }
+              group_ = input.readMessage(qaul.rpc.group.GroupRpc.GroupInfo.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(group_);
+                group_ = subBuilder.buildPartial();
+              }
 
-              groupName_ = s;
-              break;
-            }
-            case 40: {
-
-              createdAt_ = input.readUInt64();
-              break;
-            }
-            case 48: {
-
-              memberCount_ = input.readUInt32();
               break;
             }
             default: {
@@ -18186,29 +18055,14 @@ public final class GroupRpc {
               qaul.rpc.group.GroupRpc.GroupInvited.class, qaul.rpc.group.GroupRpc.GroupInvited.Builder.class);
     }
 
-    public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
-    /**
-     * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     * @return The groupId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString getGroupId() {
-      return groupId_;
-    }
-
-    public static final int SENDER_ID_FIELD_NUMBER = 2;
+    public static final int SENDER_ID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString senderId_;
     /**
      * <pre>
      * sender id
      * </pre>
      *
-     * <code>bytes sender_id = 2;</code>
+     * <code>bytes sender_id = 1;</code>
      * @return The senderId.
      */
     @java.lang.Override
@@ -18216,14 +18070,14 @@ public final class GroupRpc {
       return senderId_;
     }
 
-    public static final int RECEIVED_AT_FIELD_NUMBER = 3;
+    public static final int RECEIVED_AT_FIELD_NUMBER = 2;
     private long receivedAt_;
     /**
      * <pre>
      * received at
      * </pre>
      *
-     * <code>uint64 received_at = 3;</code>
+     * <code>uint64 received_at = 2;</code>
      * @return The receivedAt.
      */
     @java.lang.Override
@@ -18231,80 +18085,42 @@ public final class GroupRpc {
       return receivedAt_;
     }
 
-    public static final int GROUP_NAME_FIELD_NUMBER = 4;
-    private volatile java.lang.Object groupName_;
+    public static final int GROUP_FIELD_NUMBER = 3;
+    private qaul.rpc.group.GroupRpc.GroupInfo group_;
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
-     * @return The groupName.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+     * @return Whether the group field is set.
      */
     @java.lang.Override
-    public java.lang.String getGroupName() {
-      java.lang.Object ref = groupName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        groupName_ = s;
-        return s;
-      }
+    public boolean hasGroup() {
+      return group_ != null;
     }
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
-     * @return The bytes for groupName.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+     * @return The group.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString
-        getGroupNameBytes() {
-      java.lang.Object ref = groupName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        groupName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public qaul.rpc.group.GroupRpc.GroupInfo getGroup() {
+      return group_ == null ? qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance() : group_;
     }
-
-    public static final int CREATED_AT_FIELD_NUMBER = 5;
-    private long createdAt_;
     /**
      * <pre>
-     * created at
+     * group info
      * </pre>
      *
-     * <code>uint64 created_at = 5;</code>
-     * @return The createdAt.
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
      */
     @java.lang.Override
-    public long getCreatedAt() {
-      return createdAt_;
-    }
-
-    public static final int MEMBER_COUNT_FIELD_NUMBER = 6;
-    private int memberCount_;
-    /**
-     * <pre>
-     * member count
-     * </pre>
-     *
-     * <code>uint32 member_count = 6;</code>
-     * @return The memberCount.
-     */
-    @java.lang.Override
-    public int getMemberCount() {
-      return memberCount_;
+    public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupOrBuilder() {
+      return getGroup();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -18321,23 +18137,14 @@ public final class GroupRpc {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!groupId_.isEmpty()) {
-        output.writeBytes(1, groupId_);
-      }
       if (!senderId_.isEmpty()) {
-        output.writeBytes(2, senderId_);
+        output.writeBytes(1, senderId_);
       }
       if (receivedAt_ != 0L) {
-        output.writeUInt64(3, receivedAt_);
+        output.writeUInt64(2, receivedAt_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(groupName_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, groupName_);
-      }
-      if (createdAt_ != 0L) {
-        output.writeUInt64(5, createdAt_);
-      }
-      if (memberCount_ != 0) {
-        output.writeUInt32(6, memberCount_);
+      if (group_ != null) {
+        output.writeMessage(3, getGroup());
       }
       unknownFields.writeTo(output);
     }
@@ -18348,28 +18155,17 @@ public final class GroupRpc {
       if (size != -1) return size;
 
       size = 0;
-      if (!groupId_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, groupId_);
-      }
       if (!senderId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, senderId_);
+          .computeBytesSize(1, senderId_);
       }
       if (receivedAt_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(3, receivedAt_);
+          .computeUInt64Size(2, receivedAt_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(groupName_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, groupName_);
-      }
-      if (createdAt_ != 0L) {
+      if (group_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(5, createdAt_);
-      }
-      if (memberCount_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(6, memberCount_);
+          .computeMessageSize(3, getGroup());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -18386,18 +18182,15 @@ public final class GroupRpc {
       }
       qaul.rpc.group.GroupRpc.GroupInvited other = (qaul.rpc.group.GroupRpc.GroupInvited) obj;
 
-      if (!getGroupId()
-          .equals(other.getGroupId())) return false;
       if (!getSenderId()
           .equals(other.getSenderId())) return false;
       if (getReceivedAt()
           != other.getReceivedAt()) return false;
-      if (!getGroupName()
-          .equals(other.getGroupName())) return false;
-      if (getCreatedAt()
-          != other.getCreatedAt()) return false;
-      if (getMemberCount()
-          != other.getMemberCount()) return false;
+      if (hasGroup() != other.hasGroup()) return false;
+      if (hasGroup()) {
+        if (!getGroup()
+            .equals(other.getGroup())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -18409,20 +18202,15 @@ public final class GroupRpc {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + SENDER_ID_FIELD_NUMBER;
       hash = (53 * hash) + getSenderId().hashCode();
       hash = (37 * hash) + RECEIVED_AT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getReceivedAt());
-      hash = (37 * hash) + GROUP_NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getGroupName().hashCode();
-      hash = (37 * hash) + CREATED_AT_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getCreatedAt());
-      hash = (37 * hash) + MEMBER_COUNT_FIELD_NUMBER;
-      hash = (53 * hash) + getMemberCount();
+      if (hasGroup()) {
+        hash = (37 * hash) + GROUP_FIELD_NUMBER;
+        hash = (53 * hash) + getGroup().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -18556,18 +18344,16 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         senderId_ = com.google.protobuf.ByteString.EMPTY;
 
         receivedAt_ = 0L;
 
-        groupName_ = "";
-
-        createdAt_ = 0L;
-
-        memberCount_ = 0;
-
+        if (groupBuilder_ == null) {
+          group_ = null;
+        } else {
+          group_ = null;
+          groupBuilder_ = null;
+        }
         return this;
       }
 
@@ -18594,12 +18380,13 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInvited buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInvited result = new qaul.rpc.group.GroupRpc.GroupInvited(this);
-        result.groupId_ = groupId_;
         result.senderId_ = senderId_;
         result.receivedAt_ = receivedAt_;
-        result.groupName_ = groupName_;
-        result.createdAt_ = createdAt_;
-        result.memberCount_ = memberCount_;
+        if (groupBuilder_ == null) {
+          result.group_ = group_;
+        } else {
+          result.group_ = groupBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -18648,24 +18435,14 @@ public final class GroupRpc {
 
       public Builder mergeFrom(qaul.rpc.group.GroupRpc.GroupInvited other) {
         if (other == qaul.rpc.group.GroupRpc.GroupInvited.getDefaultInstance()) return this;
-        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
-          setGroupId(other.getGroupId());
-        }
         if (other.getSenderId() != com.google.protobuf.ByteString.EMPTY) {
           setSenderId(other.getSenderId());
         }
         if (other.getReceivedAt() != 0L) {
           setReceivedAt(other.getReceivedAt());
         }
-        if (!other.getGroupName().isEmpty()) {
-          groupName_ = other.groupName_;
-          onChanged();
-        }
-        if (other.getCreatedAt() != 0L) {
-          setCreatedAt(other.getCreatedAt());
-        }
-        if (other.getMemberCount() != 0) {
-          setMemberCount(other.getMemberCount());
+        if (other.hasGroup()) {
+          mergeGroup(other.getGroup());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -18696,59 +18473,13 @@ public final class GroupRpc {
         return this;
       }
 
-      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @return The groupId.
-       */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getGroupId() {
-        return groupId_;
-      }
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @param value The groupId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        groupId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * group id
-       * </pre>
-       *
-       * <code>bytes group_id = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearGroupId() {
-        
-        groupId_ = getDefaultInstance().getGroupId();
-        onChanged();
-        return this;
-      }
-
       private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
        * sender id
        * </pre>
        *
-       * <code>bytes sender_id = 2;</code>
+       * <code>bytes sender_id = 1;</code>
        * @return The senderId.
        */
       @java.lang.Override
@@ -18760,7 +18491,7 @@ public final class GroupRpc {
        * sender id
        * </pre>
        *
-       * <code>bytes sender_id = 2;</code>
+       * <code>bytes sender_id = 1;</code>
        * @param value The senderId to set.
        * @return This builder for chaining.
        */
@@ -18778,7 +18509,7 @@ public final class GroupRpc {
        * sender id
        * </pre>
        *
-       * <code>bytes sender_id = 2;</code>
+       * <code>bytes sender_id = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
@@ -18794,7 +18525,7 @@ public final class GroupRpc {
        * received at
        * </pre>
        *
-       * <code>uint64 received_at = 3;</code>
+       * <code>uint64 received_at = 2;</code>
        * @return The receivedAt.
        */
       @java.lang.Override
@@ -18806,7 +18537,7 @@ public final class GroupRpc {
        * received at
        * </pre>
        *
-       * <code>uint64 received_at = 3;</code>
+       * <code>uint64 received_at = 2;</code>
        * @param value The receivedAt to set.
        * @return This builder for chaining.
        */
@@ -18821,7 +18552,7 @@ public final class GroupRpc {
        * received at
        * </pre>
        *
-       * <code>uint64 received_at = 3;</code>
+       * <code>uint64 received_at = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearReceivedAt() {
@@ -18831,186 +18562,159 @@ public final class GroupRpc {
         return this;
       }
 
-      private java.lang.Object groupName_ = "";
+      private qaul.rpc.group.GroupRpc.GroupInfo group_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> groupBuilder_;
       /**
        * <pre>
-       * group name
+       * group info
        * </pre>
        *
-       * <code>string group_name = 4;</code>
-       * @return The groupName.
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       * @return Whether the group field is set.
        */
-      public java.lang.String getGroupName() {
-        java.lang.Object ref = groupName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          groupName_ = s;
-          return s;
+      public boolean hasGroup() {
+        return groupBuilder_ != null || group_ != null;
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       * @return The group.
+       */
+      public qaul.rpc.group.GroupRpc.GroupInfo getGroup() {
+        if (groupBuilder_ == null) {
+          return group_ == null ? qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance() : group_;
         } else {
-          return (java.lang.String) ref;
+          return groupBuilder_.getMessage();
         }
       }
       /**
        * <pre>
-       * group name
+       * group info
        * </pre>
        *
-       * <code>string group_name = 4;</code>
-       * @return The bytes for groupName.
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getGroupNameBytes() {
-        java.lang.Object ref = groupName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          groupName_ = b;
-          return b;
+      public Builder setGroup(qaul.rpc.group.GroupRpc.GroupInfo value) {
+        if (groupBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          group_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          groupBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       */
+      public Builder setGroup(
+          qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
+        if (groupBuilder_ == null) {
+          group_ = builderForValue.build();
+          onChanged();
+        } else {
+          groupBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       */
+      public Builder mergeGroup(qaul.rpc.group.GroupRpc.GroupInfo value) {
+        if (groupBuilder_ == null) {
+          if (group_ != null) {
+            group_ =
+              qaul.rpc.group.GroupRpc.GroupInfo.newBuilder(group_).mergeFrom(value).buildPartial();
+          } else {
+            group_ = value;
+          }
+          onChanged();
+        } else {
+          groupBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       */
+      public Builder clearGroup() {
+        if (groupBuilder_ == null) {
+          group_ = null;
+          onChanged();
+        } else {
+          group_ = null;
+          groupBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       */
+      public qaul.rpc.group.GroupRpc.GroupInfo.Builder getGroupBuilder() {
+        
+        onChanged();
+        return getGroupFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * group info
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+       */
+      public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupOrBuilder() {
+        if (groupBuilder_ != null) {
+          return groupBuilder_.getMessageOrBuilder();
+        } else {
+          return group_ == null ?
+              qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance() : group_;
         }
       }
       /**
        * <pre>
-       * group name
+       * group info
        * </pre>
        *
-       * <code>string group_name = 4;</code>
-       * @param value The groupName to set.
-       * @return This builder for chaining.
+       * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
        */
-      public Builder setGroupName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        groupName_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * group name
-       * </pre>
-       *
-       * <code>string group_name = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearGroupName() {
-        
-        groupName_ = getDefaultInstance().getGroupName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * group name
-       * </pre>
-       *
-       * <code>string group_name = 4;</code>
-       * @param value The bytes for groupName to set.
-       * @return This builder for chaining.
-       */
-      public Builder setGroupNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        groupName_ = value;
-        onChanged();
-        return this;
-      }
-
-      private long createdAt_ ;
-      /**
-       * <pre>
-       * created at
-       * </pre>
-       *
-       * <code>uint64 created_at = 5;</code>
-       * @return The createdAt.
-       */
-      @java.lang.Override
-      public long getCreatedAt() {
-        return createdAt_;
-      }
-      /**
-       * <pre>
-       * created at
-       * </pre>
-       *
-       * <code>uint64 created_at = 5;</code>
-       * @param value The createdAt to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCreatedAt(long value) {
-        
-        createdAt_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * created at
-       * </pre>
-       *
-       * <code>uint64 created_at = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearCreatedAt() {
-        
-        createdAt_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private int memberCount_ ;
-      /**
-       * <pre>
-       * member count
-       * </pre>
-       *
-       * <code>uint32 member_count = 6;</code>
-       * @return The memberCount.
-       */
-      @java.lang.Override
-      public int getMemberCount() {
-        return memberCount_;
-      }
-      /**
-       * <pre>
-       * member count
-       * </pre>
-       *
-       * <code>uint32 member_count = 6;</code>
-       * @param value The memberCount to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMemberCount(int value) {
-        
-        memberCount_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * member count
-       * </pre>
-       *
-       * <code>uint32 member_count = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMemberCount() {
-        
-        memberCount_ = 0;
-        onChanged();
-        return this;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder> 
+          getGroupFieldBuilder() {
+        if (groupBuilder_ == null) {
+          groupBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.group.GroupRpc.GroupInfo, qaul.rpc.group.GroupRpc.GroupInfo.Builder, qaul.rpc.group.GroupRpc.GroupInfoOrBuilder>(
+                  getGroup(),
+                  getParentForChildren(),
+                  isClean());
+          group_ = null;
+        }
+        return groupBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -20479,10 +20183,10 @@ public final class GroupRpc {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_group_GroupMember_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_qaul_rpc_group_GroupInfoResponse_descriptor;
+    internal_static_qaul_rpc_group_GroupInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_qaul_rpc_group_GroupInfoResponse_fieldAccessorTable;
+      internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_group_GroupListRequest_descriptor;
   private static final 
@@ -20518,7 +20222,7 @@ public final class GroupRpc {
   static {
     java.lang.String[] descriptorData = {
       "\n\036services/group/group_rpc.proto\022\016qaul.r" +
-      "pc.group\"\240\t\n\005Group\022B\n\024group_create_reque" +
+      "pc.group\"\230\t\n\005Group\022B\n\024group_create_reque" +
       "st\030\001 \001(\0132\".qaul.rpc.group.GroupCreateReq" +
       "uestH\000\022D\n\025group_create_response\030\002 \001(\0132#." +
       "qaul.rpc.group.GroupCreateResponseH\000\022B\n\024" +
@@ -20535,61 +20239,59 @@ public final class GroupRpc {
       "er_response\030\010 \001(\0132).qaul.rpc.group.Group" +
       "RemoveMemberResponseH\000\022>\n\022group_info_req" +
       "uest\030\t \001(\0132 .qaul.rpc.group.GroupInfoReq" +
-      "uestH\000\022@\n\023group_info_response\030\n \001(\0132!.qa" +
-      "ul.rpc.group.GroupInfoResponseH\000\022M\n\032grou" +
-      "p_reply_invite_request\030\013 \001(\0132\'.qaul.rpc." +
-      "group.GroupReplyInviteRequestH\000\022O\n\033group" +
-      "_reply_invite_response\030\014 \001(\0132(.qaul.rpc." +
-      "group.GroupReplyInviteResponseH\000\022>\n\022grou" +
-      "p_list_request\030\r \001(\0132 .qaul.rpc.group.Gr" +
-      "oupListRequestH\000\022@\n\023group_list_response\030" +
-      "\016 \001(\0132!.qaul.rpc.group.GroupListResponse" +
-      "H\000\022D\n\025group_invited_request\030\017 \001(\0132#.qaul" +
-      ".rpc.group.GroupInvitedRequestH\000\022F\n\026grou" +
-      "p_invited_response\030\020 \001(\0132$.qaul.rpc.grou" +
-      "p.GroupInvitedResponseH\000B\t\n\007message\".\n\013G" +
-      "roupResult\022\016\n\006status\030\001 \001(\010\022\017\n\007message\030\002 " +
-      "\001(\t\"(\n\022GroupCreateRequest\022\022\n\ngroup_name\030" +
-      "\001 \001(\t\"T\n\023GroupCreateResponse\022\020\n\010group_id" +
-      "\030\001 \001(\014\022+\n\006result\030\002 \001(\0132\033.qaul.rpc.group." +
-      "GroupResult\":\n\022GroupRenameRequest\022\020\n\010gro" +
-      "up_id\030\001 \001(\014\022\022\n\ngroup_name\030\002 \001(\t\"h\n\023Group" +
-      "RenameResponse\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngrou" +
-      "p_name\030\002 \001(\t\022+\n\006result\030\003 \001(\0132\033.qaul.rpc." +
-      "group.GroupResult\"=\n\030GroupInviteMemberRe" +
-      "quest\022\020\n\010group_id\030\001 \001(\014\022\017\n\007user_id\030\002 \001(\014" +
-      "\"k\n\031GroupInviteMemberResponse\022\020\n\010group_i" +
-      "d\030\001 \001(\014\022\017\n\007user_id\030\002 \001(\014\022+\n\006result\030\003 \001(\013" +
-      "2\033.qaul.rpc.group.GroupResult\"L\n\027GroupRe" +
-      "plyInviteRequest\022\020\n\010group_id\030\001 \001(\014\022\017\n\007us" +
-      "er_id\030\002 \001(\014\022\016\n\006accept\030\003 \001(\010\"j\n\030GroupRepl" +
-      "yInviteResponse\022\020\n\010group_id\030\001 \001(\014\022\017\n\007use" +
-      "r_id\030\002 \001(\014\022+\n\006result\030\003 \001(\0132\033.qaul.rpc.gr" +
-      "oup.GroupResult\"=\n\030GroupRemoveMemberRequ" +
-      "est\022\020\n\010group_id\030\001 \001(\014\022\017\n\007user_id\030\002 \001(\014\"k" +
-      "\n\031GroupRemoveMemberResponse\022\020\n\010group_id\030" +
-      "\001 \001(\014\022\017\n\007user_id\030\002 \001(\014\022+\n\006result\030\003 \001(\0132\033" +
-      ".qaul.rpc.group.GroupResult\"$\n\020GroupInfo" +
-      "Request\022\020\n\010group_id\030\001 \001(\014\"\255\001\n\013GroupMembe" +
-      "r\022\017\n\007user_id\030\001 \001(\014\022-\n\004role\030\002 \001(\0162\037.qaul." +
-      "rpc.group.GroupMemberRole\022\021\n\tjoined_at\030\003" +
-      " \001(\004\022/\n\005state\030\004 \001(\0162 .qaul.rpc.group.Gro" +
-      "upMemberState\022\032\n\022last_message_index\030\005 \001(" +
-      "\r\"\223\001\n\021GroupInfoResponse\022\020\n\010group_id\030\001 \001(" +
-      "\014\022\022\n\ngroup_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(" +
-      "\004\022\026\n\016is_direct_chat\030\004 \001(\010\022,\n\007members\030\005 \003" +
-      "(\0132\033.qaul.rpc.group.GroupMember\"\022\n\020Group" +
-      "ListRequest\"F\n\021GroupListResponse\0221\n\006grou" +
-      "ps\030\001 \003(\0132!.qaul.rpc.group.GroupInfoRespo" +
-      "nse\"\206\001\n\014GroupInvited\022\020\n\010group_id\030\001 \001(\014\022\021" +
-      "\n\tsender_id\030\002 \001(\014\022\023\n\013received_at\030\003 \001(\004\022\022" +
-      "\n\ngroup_name\030\004 \001(\t\022\022\n\ncreated_at\030\005 \001(\004\022\024" +
-      "\n\014member_count\030\006 \001(\r\"\025\n\023GroupInvitedRequ" +
-      "est\"E\n\024GroupInvitedResponse\022-\n\007invited\030\001" +
-      " \003(\0132\034.qaul.rpc.group.GroupInvited*.\n\020Gr" +
-      "oupMemberState\022\013\n\007Invited\020\000\022\r\n\tActivated" +
-      "\020\001*\'\n\017GroupMemberRole\022\010\n\004User\020\000\022\n\n\005Admin" +
-      "\020\377\001b\006proto3"
+      "uestH\000\0228\n\023group_info_response\030\n \001(\0132\031.qa" +
+      "ul.rpc.group.GroupInfoH\000\022M\n\032group_reply_" +
+      "invite_request\030\013 \001(\0132\'.qaul.rpc.group.Gr" +
+      "oupReplyInviteRequestH\000\022O\n\033group_reply_i" +
+      "nvite_response\030\014 \001(\0132(.qaul.rpc.group.Gr" +
+      "oupReplyInviteResponseH\000\022>\n\022group_list_r" +
+      "equest\030\r \001(\0132 .qaul.rpc.group.GroupListR" +
+      "equestH\000\022@\n\023group_list_response\030\016 \001(\0132!." +
+      "qaul.rpc.group.GroupListResponseH\000\022D\n\025gr" +
+      "oup_invited_request\030\017 \001(\0132#.qaul.rpc.gro" +
+      "up.GroupInvitedRequestH\000\022F\n\026group_invite" +
+      "d_response\030\020 \001(\0132$.qaul.rpc.group.GroupI" +
+      "nvitedResponseH\000B\t\n\007message\".\n\013GroupResu" +
+      "lt\022\016\n\006status\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"(\n\022G" +
+      "roupCreateRequest\022\022\n\ngroup_name\030\001 \001(\t\"T\n" +
+      "\023GroupCreateResponse\022\020\n\010group_id\030\001 \001(\014\022+" +
+      "\n\006result\030\002 \001(\0132\033.qaul.rpc.group.GroupRes" +
+      "ult\":\n\022GroupRenameRequest\022\020\n\010group_id\030\001 " +
+      "\001(\014\022\022\n\ngroup_name\030\002 \001(\t\"h\n\023GroupRenameRe" +
+      "sponse\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup_name\030\002" +
+      " \001(\t\022+\n\006result\030\003 \001(\0132\033.qaul.rpc.group.Gr" +
+      "oupResult\"=\n\030GroupInviteMemberRequest\022\020\n" +
+      "\010group_id\030\001 \001(\014\022\017\n\007user_id\030\002 \001(\014\"k\n\031Grou" +
+      "pInviteMemberResponse\022\020\n\010group_id\030\001 \001(\014\022" +
+      "\017\n\007user_id\030\002 \001(\014\022+\n\006result\030\003 \001(\0132\033.qaul." +
+      "rpc.group.GroupResult\";\n\027GroupReplyInvit" +
+      "eRequest\022\020\n\010group_id\030\001 \001(\014\022\016\n\006accept\030\003 \001" +
+      "(\010\"Y\n\030GroupReplyInviteResponse\022\020\n\010group_" +
+      "id\030\001 \001(\014\022+\n\006result\030\003 \001(\0132\033.qaul.rpc.grou" +
+      "p.GroupResult\"=\n\030GroupRemoveMemberReques" +
+      "t\022\020\n\010group_id\030\001 \001(\014\022\017\n\007user_id\030\002 \001(\014\"k\n\031" +
+      "GroupRemoveMemberResponse\022\020\n\010group_id\030\001 " +
+      "\001(\014\022\017\n\007user_id\030\002 \001(\014\022+\n\006result\030\003 \001(\0132\033.q" +
+      "aul.rpc.group.GroupResult\"$\n\020GroupInfoRe" +
+      "quest\022\020\n\010group_id\030\001 \001(\014\"\255\001\n\013GroupMember\022" +
+      "\017\n\007user_id\030\001 \001(\014\022-\n\004role\030\002 \001(\0162\037.qaul.rp" +
+      "c.group.GroupMemberRole\022\021\n\tjoined_at\030\003 \001" +
+      "(\004\022/\n\005state\030\004 \001(\0162 .qaul.rpc.group.Group" +
+      "MemberState\022\032\n\022last_message_index\030\005 \001(\r\"" +
+      "\235\001\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup" +
+      "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022\020\n\010revis" +
+      "ion\030\004 \001(\r\022\026\n\016is_direct_chat\030\005 \001(\010\022,\n\007mem" +
+      "bers\030\006 \003(\0132\033.qaul.rpc.group.GroupMember\"" +
+      "\022\n\020GroupListRequest\">\n\021GroupListResponse" +
+      "\022)\n\006groups\030\001 \003(\0132\031.qaul.rpc.group.GroupI" +
+      "nfo\"`\n\014GroupInvited\022\021\n\tsender_id\030\001 \001(\014\022\023" +
+      "\n\013received_at\030\002 \001(\004\022(\n\005group\030\003 \001(\0132\031.qau" +
+      "l.rpc.group.GroupInfo\"\025\n\023GroupInvitedReq" +
+      "uest\"E\n\024GroupInvitedResponse\022-\n\007invited\030" +
+      "\001 \003(\0132\034.qaul.rpc.group.GroupInvited*.\n\020G" +
+      "roupMemberState\022\013\n\007Invited\020\000\022\r\n\tActivate" +
+      "d\020\001*\'\n\017GroupMemberRole\022\010\n\004User\020\000\022\n\n\005Admi" +
+      "n\020\377\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -20648,13 +20350,13 @@ public final class GroupRpc {
     internal_static_qaul_rpc_group_GroupReplyInviteRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupReplyInviteRequest_descriptor,
-        new java.lang.String[] { "GroupId", "UserId", "Accept", });
+        new java.lang.String[] { "GroupId", "Accept", });
     internal_static_qaul_rpc_group_GroupReplyInviteResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_qaul_rpc_group_GroupReplyInviteResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupReplyInviteResponse_descriptor,
-        new java.lang.String[] { "GroupId", "UserId", "Result", });
+        new java.lang.String[] { "GroupId", "Result", });
     internal_static_qaul_rpc_group_GroupRemoveMemberRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_qaul_rpc_group_GroupRemoveMemberRequest_fieldAccessorTable = new
@@ -20679,12 +20381,12 @@ public final class GroupRpc {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupMember_descriptor,
         new java.lang.String[] { "UserId", "Role", "JoinedAt", "State", "LastMessageIndex", });
-    internal_static_qaul_rpc_group_GroupInfoResponse_descriptor =
+    internal_static_qaul_rpc_group_GroupInfo_descriptor =
       getDescriptor().getMessageTypes().get(14);
-    internal_static_qaul_rpc_group_GroupInfoResponse_fieldAccessorTable = new
+    internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_qaul_rpc_group_GroupInfoResponse_descriptor,
-        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "IsDirectChat", "Members", });
+        internal_static_qaul_rpc_group_GroupInfo_descriptor,
+        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "Revision", "IsDirectChat", "Members", });
     internal_static_qaul_rpc_group_GroupListRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_qaul_rpc_group_GroupListRequest_fieldAccessorTable = new
@@ -20702,7 +20404,7 @@ public final class GroupRpc {
     internal_static_qaul_rpc_group_GroupInvited_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupInvited_descriptor,
-        new java.lang.String[] { "GroupId", "SenderId", "ReceivedAt", "GroupName", "CreatedAt", "MemberCount", });
+        new java.lang.String[] { "SenderId", "ReceivedAt", "Group", });
     internal_static_qaul_rpc_group_GroupInvitedRequest_descriptor =
       getDescriptor().getMessageTypes().get(18);
     internal_static_qaul_rpc_group_GroupInvitedRequest_fieldAccessorTable = new

@@ -9,25 +9,25 @@
 import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class ContentType extends $pb.ProtobufEnum {
-  static const ContentType chat = ContentType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'chat');
-  static const ContentType group = ContentType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'group');
-  static const ContentType file = ContentType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'file');
-  static const ContentType rtc = ContentType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'rtc');
-  static const ContentType group_event = ContentType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'group_event');
+class ChatContentType extends $pb.ProtobufEnum {
+  static const ChatContentType NONE = ChatContentType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
+  static const ChatContentType CHAT = ChatContentType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHAT');
+  static const ChatContentType FILE = ChatContentType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FILE');
+  static const ChatContentType GROUP = ChatContentType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP');
+  static const ChatContentType RTC = ChatContentType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RTC');
 
-  static const $core.List<ContentType> values = <ContentType> [
-    chat,
-    group,
-    file,
-    rtc,
-    group_event,
+  static const $core.List<ChatContentType> values = <ChatContentType> [
+    NONE,
+    CHAT,
+    FILE,
+    GROUP,
+    RTC,
   ];
 
-  static final $core.Map<$core.int, ContentType> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static ContentType? valueOf($core.int value) => _byValue[value];
+  static final $core.Map<$core.int, ChatContentType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static ChatContentType? valueOf($core.int value) => _byValue[value];
 
-  const ContentType._($core.int v, $core.String n) : super(v, n);
+  const ChatContentType._($core.int v, $core.String n) : super(v, n);
 }
 
 class MessageStatus extends $pb.ProtobufEnum {
@@ -50,14 +50,18 @@ class MessageStatus extends $pb.ProtobufEnum {
 }
 
 class GroupEventType extends $pb.ProtobufEnum {
-  static const GroupEventType NONE = GroupEventType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
-  static const GroupEventType GROUP_JOINED = GroupEventType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP_JOINED');
-  static const GroupEventType GROUP_LEFT = GroupEventType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP_LEFT');
+  static const GroupEventType DEFAULT = GroupEventType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DEFAULT');
+  static const GroupEventType INVITED = GroupEventType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INVITED');
+  static const GroupEventType JOINED = GroupEventType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'JOINED');
+  static const GroupEventType LEFT = GroupEventType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LEFT');
+  static const GroupEventType CLOSED = GroupEventType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSED');
 
   static const $core.List<GroupEventType> values = <GroupEventType> [
-    NONE,
-    GROUP_JOINED,
-    GROUP_LEFT,
+    DEFAULT,
+    INVITED,
+    JOINED,
+    LEFT,
+    CLOSED,
   ];
 
   static final $core.Map<$core.int, GroupEventType> _byValue = $pb.ProtobufEnum.initByValue(values);

@@ -96,7 +96,7 @@ object MessagingKt {
 
     /**
      * <pre>
-     * rtc stream 
+     * rtc stream
      * </pre>
      *
      * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
@@ -110,7 +110,7 @@ object MessagingKt {
       }
     /**
      * <pre>
-     * rtc stream 
+     * rtc stream
      * </pre>
      *
      * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
@@ -120,7 +120,7 @@ object MessagingKt {
     }
     /**
      * <pre>
-     * rtc stream 
+     * rtc stream
      * </pre>
      *
      * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
@@ -132,38 +132,38 @@ object MessagingKt {
 
     /**
      * <pre>
-     * group notify
+     * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
      */
-    var groupNotifyMessage: qaul.net.messaging.MessagingOuterClass.GroupNotifyMessage
-      @JvmName("getGroupNotifyMessage")
-      get() = _builder.getGroupNotifyMessage()
-      @JvmName("setGroupNotifyMessage")
+    var groupInviteMessage: qaul.net.messaging.MessagingOuterClass.GroupInviteMessage
+      @JvmName("getGroupInviteMessage")
+      get() = _builder.getGroupInviteMessage()
+      @JvmName("setGroupInviteMessage")
       set(value) {
-        _builder.setGroupNotifyMessage(value)
+        _builder.setGroupInviteMessage(value)
       }
     /**
      * <pre>
-     * group notify
+     * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
      */
-    fun clearGroupNotifyMessage() {
-      _builder.clearGroupNotifyMessage()
+    fun clearGroupInviteMessage() {
+      _builder.clearGroupInviteMessage()
     }
     /**
      * <pre>
-     * group notify
+     * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;</code>
-     * @return Whether the groupNotifyMessage field is set.
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
+     * @return Whether the groupInviteMessage field is set.
      */
-    fun hasGroupNotifyMessage(): kotlin.Boolean {
-      return _builder.hasGroupNotifyMessage()
+    fun hasGroupInviteMessage(): kotlin.Boolean {
+      return _builder.hasGroupInviteMessage()
     }
 
     /**
@@ -223,8 +223,8 @@ val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNul
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.rtcStreamMessageOrNull: qaul.net.messaging.MessagingOuterClass.RtcStreamMessage?
   get() = if (hasRtcStreamMessage()) getRtcStreamMessage() else null
 
-val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupNotifyMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupNotifyMessage?
-  get() = if (hasGroupNotifyMessage()) getGroupNotifyMessage() else null
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.groupInviteMessageOrNull: qaul.net.messaging.MessagingOuterClass.GroupInviteMessage?
+  get() = if (hasGroupInviteMessage()) getGroupInviteMessage() else null
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.commonMessageOrNull: qaul.net.messaging.MessagingOuterClass.CommonMessage?
   get() = if (hasCommonMessage()) getCommonMessage() else null

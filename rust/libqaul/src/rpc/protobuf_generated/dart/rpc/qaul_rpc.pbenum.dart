@@ -19,10 +19,10 @@ class Modules extends $pb.ProtobufEnum {
   static const Modules FEED = Modules._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FEED');
   static const Modules CONNECTIONS = Modules._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTIONS');
   static const Modules DEBUG = Modules._(8, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DEBUG');
-  static const Modules CHAT = Modules._(9, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHAT');
-  static const Modules BLE = Modules._(10, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BLE');
-  static const Modules FILESHARE = Modules._(11, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FILESHARE');
-  static const Modules GROUP = Modules._(12, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP');
+  static const Modules GROUP = Modules._(9, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP');
+  static const Modules CHAT = Modules._(10, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHAT');
+  static const Modules CHATFILE = Modules._(11, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHATFILE');
+  static const Modules BLE = Modules._(12, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BLE');
   static const Modules RTC = Modules._(13, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RTC');
 
   static const $core.List<Modules> values = <Modules> [
@@ -35,10 +35,10 @@ class Modules extends $pb.ProtobufEnum {
     FEED,
     CONNECTIONS,
     DEBUG,
-    CHAT,
-    BLE,
-    FILESHARE,
     GROUP,
+    CHAT,
+    CHATFILE,
+    BLE,
     RTC,
   ];
 

@@ -65,7 +65,7 @@ class Group extends $pb.GeneratedMessage {
     ..aOM<GroupRemoveMemberRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupRemoveMemberRequest', subBuilder: GroupRemoveMemberRequest.create)
     ..aOM<GroupRemoveMemberResponse>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupRemoveMemberResponse', subBuilder: GroupRemoveMemberResponse.create)
     ..aOM<GroupInfoRequest>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInfoRequest', subBuilder: GroupInfoRequest.create)
-    ..aOM<GroupInfoResponse>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInfoResponse', subBuilder: GroupInfoResponse.create)
+    ..aOM<GroupInfo>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInfoResponse', subBuilder: GroupInfo.create)
     ..aOM<GroupReplyInviteRequest>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupReplyInviteRequest', subBuilder: GroupReplyInviteRequest.create)
     ..aOM<GroupReplyInviteResponse>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupReplyInviteResponse', subBuilder: GroupReplyInviteResponse.create)
     ..aOM<GroupListRequest>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupListRequest', subBuilder: GroupListRequest.create)
@@ -86,7 +86,7 @@ class Group extends $pb.GeneratedMessage {
     GroupRemoveMemberRequest? groupRemoveMemberRequest,
     GroupRemoveMemberResponse? groupRemoveMemberResponse,
     GroupInfoRequest? groupInfoRequest,
-    GroupInfoResponse? groupInfoResponse,
+    GroupInfo? groupInfoResponse,
     GroupReplyInviteRequest? groupReplyInviteRequest,
     GroupReplyInviteResponse? groupReplyInviteResponse,
     GroupListRequest? groupListRequest,
@@ -269,15 +269,15 @@ class Group extends $pb.GeneratedMessage {
   GroupInfoRequest ensureGroupInfoRequest() => $_ensure(8);
 
   @$pb.TagNumber(10)
-  GroupInfoResponse get groupInfoResponse => $_getN(9);
+  GroupInfo get groupInfoResponse => $_getN(9);
   @$pb.TagNumber(10)
-  set groupInfoResponse(GroupInfoResponse v) { setField(10, v); }
+  set groupInfoResponse(GroupInfo v) { setField(10, v); }
   @$pb.TagNumber(10)
   $core.bool hasGroupInfoResponse() => $_has(9);
   @$pb.TagNumber(10)
   void clearGroupInfoResponse() => clearField(10);
   @$pb.TagNumber(10)
-  GroupInfoResponse ensureGroupInfoResponse() => $_ensure(9);
+  GroupInfo ensureGroupInfoResponse() => $_ensure(9);
 
   @$pb.TagNumber(11)
   GroupReplyInviteRequest get groupReplyInviteRequest => $_getN(10);
@@ -796,7 +796,6 @@ class GroupInviteMemberResponse extends $pb.GeneratedMessage {
 class GroupReplyInviteRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupReplyInviteRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accept')
     ..hasRequiredFields = false
   ;
@@ -804,15 +803,11 @@ class GroupReplyInviteRequest extends $pb.GeneratedMessage {
   GroupReplyInviteRequest._() : super();
   factory GroupReplyInviteRequest({
     $core.List<$core.int>? groupId,
-    $core.List<$core.int>? userId,
     $core.bool? accept,
   }) {
     final _result = create();
     if (groupId != null) {
       _result.groupId = groupId;
-    }
-    if (userId != null) {
-      _result.userId = userId;
     }
     if (accept != null) {
       _result.accept = accept;
@@ -849,21 +844,12 @@ class GroupReplyInviteRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearGroupId() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.List<$core.int> get userId => $_getN(1);
-  @$pb.TagNumber(2)
-  set userId($core.List<$core.int> v) { $_setBytes(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasUserId() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUserId() => clearField(2);
-
   @$pb.TagNumber(3)
-  $core.bool get accept => $_getBF(2);
+  $core.bool get accept => $_getBF(1);
   @$pb.TagNumber(3)
-  set accept($core.bool v) { $_setBool(2, v); }
+  set accept($core.bool v) { $_setBool(1, v); }
   @$pb.TagNumber(3)
-  $core.bool hasAccept() => $_has(2);
+  $core.bool hasAccept() => $_has(1);
   @$pb.TagNumber(3)
   void clearAccept() => clearField(3);
 }
@@ -871,7 +857,6 @@ class GroupReplyInviteRequest extends $pb.GeneratedMessage {
 class GroupReplyInviteResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupReplyInviteResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
     ..aOM<GroupResult>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'result', subBuilder: GroupResult.create)
     ..hasRequiredFields = false
   ;
@@ -879,15 +864,11 @@ class GroupReplyInviteResponse extends $pb.GeneratedMessage {
   GroupReplyInviteResponse._() : super();
   factory GroupReplyInviteResponse({
     $core.List<$core.int>? groupId,
-    $core.List<$core.int>? userId,
     GroupResult? result,
   }) {
     final _result = create();
     if (groupId != null) {
       _result.groupId = groupId;
-    }
-    if (userId != null) {
-      _result.userId = userId;
     }
     if (result != null) {
       _result.result = result;
@@ -924,25 +905,16 @@ class GroupReplyInviteResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearGroupId() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.List<$core.int> get userId => $_getN(1);
-  @$pb.TagNumber(2)
-  set userId($core.List<$core.int> v) { $_setBytes(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasUserId() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUserId() => clearField(2);
-
   @$pb.TagNumber(3)
-  GroupResult get result => $_getN(2);
+  GroupResult get result => $_getN(1);
   @$pb.TagNumber(3)
   set result(GroupResult v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasResult() => $_has(2);
+  $core.bool hasResult() => $_has(1);
   @$pb.TagNumber(3)
   void clearResult() => clearField(3);
   @$pb.TagNumber(3)
-  GroupResult ensureResult() => $_ensure(2);
+  GroupResult ensureResult() => $_ensure(1);
 }
 
 class GroupRemoveMemberRequest extends $pb.GeneratedMessage {
@@ -1233,21 +1205,23 @@ class GroupMember extends $pb.GeneratedMessage {
   void clearLastMessageIndex() => clearField(5);
 }
 
-class GroupInfoResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInfoResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
+class GroupInfo extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupName')
     ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDirectChat')
-    ..pc<GroupMember>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', $pb.PbFieldType.PM, subBuilder: GroupMember.create)
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'revision', $pb.PbFieldType.OU3)
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDirectChat')
+    ..pc<GroupMember>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', $pb.PbFieldType.PM, subBuilder: GroupMember.create)
     ..hasRequiredFields = false
   ;
 
-  GroupInfoResponse._() : super();
-  factory GroupInfoResponse({
+  GroupInfo._() : super();
+  factory GroupInfo({
     $core.List<$core.int>? groupId,
     $core.String? groupName,
     $fixnum.Int64? createdAt,
+    $core.int? revision,
     $core.bool? isDirectChat,
     $core.Iterable<GroupMember>? members,
   }) {
@@ -1261,6 +1235,9 @@ class GroupInfoResponse extends $pb.GeneratedMessage {
     if (createdAt != null) {
       _result.createdAt = createdAt;
     }
+    if (revision != null) {
+      _result.revision = revision;
+    }
     if (isDirectChat != null) {
       _result.isDirectChat = isDirectChat;
     }
@@ -1269,26 +1246,26 @@ class GroupInfoResponse extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory GroupInfoResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GroupInfoResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory GroupInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GroupInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  GroupInfoResponse clone() => GroupInfoResponse()..mergeFromMessage(this);
+  GroupInfo clone() => GroupInfo()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GroupInfoResponse copyWith(void Function(GroupInfoResponse) updates) => super.copyWith((message) => updates(message as GroupInfoResponse)) as GroupInfoResponse; // ignore: deprecated_member_use
+  GroupInfo copyWith(void Function(GroupInfo) updates) => super.copyWith((message) => updates(message as GroupInfo)) as GroupInfo; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static GroupInfoResponse create() => GroupInfoResponse._();
-  GroupInfoResponse createEmptyInstance() => create();
-  static $pb.PbList<GroupInfoResponse> createRepeated() => $pb.PbList<GroupInfoResponse>();
+  static GroupInfo create() => GroupInfo._();
+  GroupInfo createEmptyInstance() => create();
+  static $pb.PbList<GroupInfo> createRepeated() => $pb.PbList<GroupInfo>();
   @$core.pragma('dart2js:noInline')
-  static GroupInfoResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupInfoResponse>(create);
-  static GroupInfoResponse? _defaultInstance;
+  static GroupInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupInfo>(create);
+  static GroupInfo? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.int> get groupId => $_getN(0);
@@ -1318,16 +1295,25 @@ class GroupInfoResponse extends $pb.GeneratedMessage {
   void clearCreatedAt() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.bool get isDirectChat => $_getBF(3);
+  $core.int get revision => $_getIZ(3);
   @$pb.TagNumber(4)
-  set isDirectChat($core.bool v) { $_setBool(3, v); }
+  set revision($core.int v) { $_setUnsignedInt32(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasIsDirectChat() => $_has(3);
+  $core.bool hasRevision() => $_has(3);
   @$pb.TagNumber(4)
-  void clearIsDirectChat() => clearField(4);
+  void clearRevision() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.List<GroupMember> get members => $_getList(4);
+  $core.bool get isDirectChat => $_getBF(4);
+  @$pb.TagNumber(5)
+  set isDirectChat($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasIsDirectChat() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearIsDirectChat() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.List<GroupMember> get members => $_getList(5);
 }
 
 class GroupListRequest extends $pb.GeneratedMessage {
@@ -1361,13 +1347,13 @@ class GroupListRequest extends $pb.GeneratedMessage {
 
 class GroupListResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupListResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
-    ..pc<GroupInfoResponse>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groups', $pb.PbFieldType.PM, subBuilder: GroupInfoResponse.create)
+    ..pc<GroupInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groups', $pb.PbFieldType.PM, subBuilder: GroupInfo.create)
     ..hasRequiredFields = false
   ;
 
   GroupListResponse._() : super();
   factory GroupListResponse({
-    $core.Iterable<GroupInfoResponse>? groups,
+    $core.Iterable<GroupInfo>? groups,
   }) {
     final _result = create();
     if (groups != null) {
@@ -1397,47 +1383,32 @@ class GroupListResponse extends $pb.GeneratedMessage {
   static GroupListResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<GroupInfoResponse> get groups => $_getList(0);
+  $core.List<GroupInfo> get groups => $_getList(0);
 }
 
 class GroupInvited extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInvited', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.group'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
-    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupName')
-    ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'memberCount', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOM<GroupInfo>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'group', subBuilder: GroupInfo.create)
     ..hasRequiredFields = false
   ;
 
   GroupInvited._() : super();
   factory GroupInvited({
-    $core.List<$core.int>? groupId,
     $core.List<$core.int>? senderId,
     $fixnum.Int64? receivedAt,
-    $core.String? groupName,
-    $fixnum.Int64? createdAt,
-    $core.int? memberCount,
+    GroupInfo? group,
   }) {
     final _result = create();
-    if (groupId != null) {
-      _result.groupId = groupId;
-    }
     if (senderId != null) {
       _result.senderId = senderId;
     }
     if (receivedAt != null) {
       _result.receivedAt = receivedAt;
     }
-    if (groupName != null) {
-      _result.groupName = groupName;
-    }
-    if (createdAt != null) {
-      _result.createdAt = createdAt;
-    }
-    if (memberCount != null) {
-      _result.memberCount = memberCount;
+    if (group != null) {
+      _result.group = group;
     }
     return _result;
   }
@@ -1463,58 +1434,33 @@ class GroupInvited extends $pb.GeneratedMessage {
   static GroupInvited? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.int> get groupId => $_getN(0);
+  $core.List<$core.int> get senderId => $_getN(0);
   @$pb.TagNumber(1)
-  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
+  set senderId($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasGroupId() => $_has(0);
+  $core.bool hasSenderId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearGroupId() => clearField(1);
+  void clearSenderId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get senderId => $_getN(1);
+  $fixnum.Int64 get receivedAt => $_getI64(1);
   @$pb.TagNumber(2)
-  set senderId($core.List<$core.int> v) { $_setBytes(1, v); }
+  set receivedAt($fixnum.Int64 v) { $_setInt64(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasSenderId() => $_has(1);
+  $core.bool hasReceivedAt() => $_has(1);
   @$pb.TagNumber(2)
-  void clearSenderId() => clearField(2);
+  void clearReceivedAt() => clearField(2);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get receivedAt => $_getI64(2);
+  GroupInfo get group => $_getN(2);
   @$pb.TagNumber(3)
-  set receivedAt($fixnum.Int64 v) { $_setInt64(2, v); }
+  set group(GroupInfo v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasReceivedAt() => $_has(2);
+  $core.bool hasGroup() => $_has(2);
   @$pb.TagNumber(3)
-  void clearReceivedAt() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get groupName => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set groupName($core.String v) { $_setString(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasGroupName() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearGroupName() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $fixnum.Int64 get createdAt => $_getI64(4);
-  @$pb.TagNumber(5)
-  set createdAt($fixnum.Int64 v) { $_setInt64(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasCreatedAt() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearCreatedAt() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.int get memberCount => $_getIZ(5);
-  @$pb.TagNumber(6)
-  set memberCount($core.int v) { $_setUnsignedInt32(5, v); }
-  @$pb.TagNumber(6)
-  $core.bool hasMemberCount() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearMemberCount() => clearField(6);
+  void clearGroup() => clearField(3);
+  @$pb.TagNumber(3)
+  GroupInfo ensureGroup() => $_ensure(2);
 }
 
 class GroupInvitedRequest extends $pb.GeneratedMessage {

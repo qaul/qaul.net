@@ -24,35 +24,10 @@ object GroupInvitedKt {
 
     /**
      * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     */
-    var groupId: com.google.protobuf.ByteString
-      @JvmName("getGroupId")
-      get() = _builder.getGroupId()
-      @JvmName("setGroupId")
-      set(value) {
-        _builder.setGroupId(value)
-      }
-    /**
-     * <pre>
-     * group id
-     * </pre>
-     *
-     * <code>bytes group_id = 1;</code>
-     */
-    fun clearGroupId() {
-      _builder.clearGroupId()
-    }
-
-    /**
-     * <pre>
      * sender id
      * </pre>
      *
-     * <code>bytes sender_id = 2;</code>
+     * <code>bytes sender_id = 1;</code>
      */
     var senderId: com.google.protobuf.ByteString
       @JvmName("getSenderId")
@@ -66,7 +41,7 @@ object GroupInvitedKt {
      * sender id
      * </pre>
      *
-     * <code>bytes sender_id = 2;</code>
+     * <code>bytes sender_id = 1;</code>
      */
     fun clearSenderId() {
       _builder.clearSenderId()
@@ -77,7 +52,7 @@ object GroupInvitedKt {
      * received at
      * </pre>
      *
-     * <code>uint64 received_at = 3;</code>
+     * <code>uint64 received_at = 2;</code>
      */
     var receivedAt: kotlin.Long
       @JvmName("getReceivedAt")
@@ -91,7 +66,7 @@ object GroupInvitedKt {
      * received at
      * </pre>
      *
-     * <code>uint64 received_at = 3;</code>
+     * <code>uint64 received_at = 2;</code>
      */
     fun clearReceivedAt() {
       _builder.clearReceivedAt()
@@ -99,81 +74,45 @@ object GroupInvitedKt {
 
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
      */
-    var groupName: kotlin.String
-      @JvmName("getGroupName")
-      get() = _builder.getGroupName()
-      @JvmName("setGroupName")
+    var group: qaul.rpc.group.GroupRpc.GroupInfo
+      @JvmName("getGroup")
+      get() = _builder.getGroup()
+      @JvmName("setGroup")
       set(value) {
-        _builder.setGroupName(value)
+        _builder.setGroup(value)
       }
     /**
      * <pre>
-     * group name
+     * group info
      * </pre>
      *
-     * <code>string group_name = 4;</code>
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
      */
-    fun clearGroupName() {
-      _builder.clearGroupName()
+    fun clearGroup() {
+      _builder.clearGroup()
     }
-
     /**
      * <pre>
-     * created at
+     * group info
      * </pre>
      *
-     * <code>uint64 created_at = 5;</code>
+     * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
+     * @return Whether the group field is set.
      */
-    var createdAt: kotlin.Long
-      @JvmName("getCreatedAt")
-      get() = _builder.getCreatedAt()
-      @JvmName("setCreatedAt")
-      set(value) {
-        _builder.setCreatedAt(value)
-      }
-    /**
-     * <pre>
-     * created at
-     * </pre>
-     *
-     * <code>uint64 created_at = 5;</code>
-     */
-    fun clearCreatedAt() {
-      _builder.clearCreatedAt()
-    }
-
-    /**
-     * <pre>
-     * member count
-     * </pre>
-     *
-     * <code>uint32 member_count = 6;</code>
-     */
-    var memberCount: kotlin.Int
-      @JvmName("getMemberCount")
-      get() = _builder.getMemberCount()
-      @JvmName("setMemberCount")
-      set(value) {
-        _builder.setMemberCount(value)
-      }
-    /**
-     * <pre>
-     * member count
-     * </pre>
-     *
-     * <code>uint32 member_count = 6;</code>
-     */
-    fun clearMemberCount() {
-      _builder.clearMemberCount()
+    fun hasGroup(): kotlin.Boolean {
+      return _builder.hasGroup()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
 inline fun qaul.rpc.group.GroupRpc.GroupInvited.copy(block: qaul.rpc.group.GroupInvitedKt.Dsl.() -> kotlin.Unit): qaul.rpc.group.GroupRpc.GroupInvited =
   qaul.rpc.group.GroupInvitedKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.rpc.group.GroupRpc.GroupInvitedOrBuilder.groupOrNull: qaul.rpc.group.GroupRpc.GroupInfo?
+  get() = if (hasGroup()) getGroup() else null
 

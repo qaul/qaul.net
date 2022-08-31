@@ -29,6 +29,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -50,15 +51,15 @@ namespace group {
 class GroupContainer;
 struct GroupContainerDefaultTypeInternal;
 extern GroupContainerDefaultTypeInternal _GroupContainer_default_instance_;
-class GroupNotify;
-struct GroupNotifyDefaultTypeInternal;
-extern GroupNotifyDefaultTypeInternal _GroupNotify_default_instance_;
+class GroupInfo;
+struct GroupInfoDefaultTypeInternal;
+extern GroupInfoDefaultTypeInternal _GroupInfo_default_instance_;
+class GroupMember;
+struct GroupMemberDefaultTypeInternal;
+extern GroupMemberDefaultTypeInternal _GroupMember_default_instance_;
 class InviteMember;
 struct InviteMemberDefaultTypeInternal;
 extern InviteMemberDefaultTypeInternal _InviteMember_default_instance_;
-class Member;
-struct MemberDefaultTypeInternal;
-extern MemberDefaultTypeInternal _Member_default_instance_;
 class RemovedMember;
 struct RemovedMemberDefaultTypeInternal;
 extern RemovedMemberDefaultTypeInternal _RemovedMember_default_instance_;
@@ -70,9 +71,9 @@ extern ReplyInviteDefaultTypeInternal _ReplyInvite_default_instance_;
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
 template<> ::qaul::net::group::GroupContainer* Arena::CreateMaybeMessage<::qaul::net::group::GroupContainer>(Arena*);
-template<> ::qaul::net::group::GroupNotify* Arena::CreateMaybeMessage<::qaul::net::group::GroupNotify>(Arena*);
+template<> ::qaul::net::group::GroupInfo* Arena::CreateMaybeMessage<::qaul::net::group::GroupInfo>(Arena*);
+template<> ::qaul::net::group::GroupMember* Arena::CreateMaybeMessage<::qaul::net::group::GroupMember>(Arena*);
 template<> ::qaul::net::group::InviteMember* Arena::CreateMaybeMessage<::qaul::net::group::InviteMember>(Arena*);
-template<> ::qaul::net::group::Member* Arena::CreateMaybeMessage<::qaul::net::group::Member>(Arena*);
 template<> ::qaul::net::group::RemovedMember* Arena::CreateMaybeMessage<::qaul::net::group::RemovedMember>(Arena*);
 template<> ::qaul::net::group::ReplyInvite* Arena::CreateMaybeMessage<::qaul::net::group::ReplyInvite>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -80,6 +81,56 @@ namespace qaul {
 namespace net {
 namespace group {
 
+enum GroupMemberState : int {
+  Invited = 0,
+  Activated = 1,
+  GroupMemberState_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  GroupMemberState_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool GroupMemberState_IsValid(int value);
+constexpr GroupMemberState GroupMemberState_MIN = Invited;
+constexpr GroupMemberState GroupMemberState_MAX = Activated;
+constexpr int GroupMemberState_ARRAYSIZE = GroupMemberState_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupMemberState_descriptor();
+template<typename T>
+inline const std::string& GroupMemberState_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, GroupMemberState>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function GroupMemberState_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    GroupMemberState_descriptor(), enum_t_value);
+}
+inline bool GroupMemberState_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, GroupMemberState* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GroupMemberState>(
+    GroupMemberState_descriptor(), name, value);
+}
+enum GroupMemberRole : int {
+  User = 0,
+  Admin = 255,
+  GroupMemberRole_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  GroupMemberRole_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool GroupMemberRole_IsValid(int value);
+constexpr GroupMemberRole GroupMemberRole_MIN = User;
+constexpr GroupMemberRole GroupMemberRole_MAX = Admin;
+constexpr int GroupMemberRole_ARRAYSIZE = GroupMemberRole_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupMemberRole_descriptor();
+template<typename T>
+inline const std::string& GroupMemberRole_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, GroupMemberRole>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function GroupMemberRole_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    GroupMemberRole_descriptor(), enum_t_value);
+}
+inline bool GroupMemberRole_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, GroupMemberRole* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<GroupMemberRole>(
+    GroupMemberRole_descriptor(), name, value);
+}
 // ===================================================================
 
 class GroupContainer final :
@@ -128,6 +179,7 @@ class GroupContainer final :
   enum MessageCase {
     kInviteMember = 1,
     kReplyInvite = 2,
+    kGroupInfo = 3,
     kRemoved = 4,
     MESSAGE_NOT_SET = 0,
   };
@@ -212,6 +264,7 @@ class GroupContainer final :
   enum : int {
     kInviteMemberFieldNumber = 1,
     kReplyInviteFieldNumber = 2,
+    kGroupInfoFieldNumber = 3,
     kRemovedFieldNumber = 4,
   };
   // .qaul.net.group.InviteMember invite_member = 1;
@@ -250,6 +303,24 @@ class GroupContainer final :
       ::qaul::net::group::ReplyInvite* reply_invite);
   ::qaul::net::group::ReplyInvite* unsafe_arena_release_reply_invite();
 
+  // .qaul.net.group.GroupInfo group_info = 3;
+  bool has_group_info() const;
+  private:
+  bool _internal_has_group_info() const;
+  public:
+  void clear_group_info();
+  const ::qaul::net::group::GroupInfo& group_info() const;
+  PROTOBUF_NODISCARD ::qaul::net::group::GroupInfo* release_group_info();
+  ::qaul::net::group::GroupInfo* mutable_group_info();
+  void set_allocated_group_info(::qaul::net::group::GroupInfo* group_info);
+  private:
+  const ::qaul::net::group::GroupInfo& _internal_group_info() const;
+  ::qaul::net::group::GroupInfo* _internal_mutable_group_info();
+  public:
+  void unsafe_arena_set_allocated_group_info(
+      ::qaul::net::group::GroupInfo* group_info);
+  ::qaul::net::group::GroupInfo* unsafe_arena_release_group_info();
+
   // .qaul.net.group.RemovedMember removed = 4;
   bool has_removed() const;
   private:
@@ -275,6 +346,7 @@ class GroupContainer final :
   class _Internal;
   void set_has_invite_member();
   void set_has_reply_invite();
+  void set_has_group_info();
   void set_has_removed();
 
   inline bool has_message() const;
@@ -289,6 +361,7 @@ class GroupContainer final :
         ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
       ::qaul::net::group::InviteMember* invite_member_;
       ::qaul::net::group::ReplyInvite* reply_invite_;
+      ::qaul::net::group::GroupInfo* group_info_;
       ::qaul::net::group::RemovedMember* removed_;
     } message_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -421,71 +494,25 @@ class InviteMember final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kGroupIdFieldNumber = 1,
-    kGroupNameFieldNumber = 2,
-    kAdminIdFieldNumber = 3,
-    kCreatedAtFieldNumber = 4,
-    kMembersCountFieldNumber = 5,
+    kGroupFieldNumber = 1,
   };
-  // bytes group_id = 1;
-  void clear_group_id();
-  const std::string& group_id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_group_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_group_id();
-  PROTOBUF_NODISCARD std::string* release_group_id();
-  void set_allocated_group_id(std::string* group_id);
+  // .qaul.net.group.GroupInfo group = 1;
+  bool has_group() const;
   private:
-  const std::string& _internal_group_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
-  std::string* _internal_mutable_group_id();
+  bool _internal_has_group() const;
   public:
-
-  // string group_name = 2;
-  void clear_group_name();
-  const std::string& group_name() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_group_name(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_group_name();
-  PROTOBUF_NODISCARD std::string* release_group_name();
-  void set_allocated_group_name(std::string* group_name);
+  void clear_group();
+  const ::qaul::net::group::GroupInfo& group() const;
+  PROTOBUF_NODISCARD ::qaul::net::group::GroupInfo* release_group();
+  ::qaul::net::group::GroupInfo* mutable_group();
+  void set_allocated_group(::qaul::net::group::GroupInfo* group);
   private:
-  const std::string& _internal_group_name() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_name(const std::string& value);
-  std::string* _internal_mutable_group_name();
+  const ::qaul::net::group::GroupInfo& _internal_group() const;
+  ::qaul::net::group::GroupInfo* _internal_mutable_group();
   public:
-
-  // bytes admin_id = 3;
-  void clear_admin_id();
-  const std::string& admin_id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_admin_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_admin_id();
-  PROTOBUF_NODISCARD std::string* release_admin_id();
-  void set_allocated_admin_id(std::string* admin_id);
-  private:
-  const std::string& _internal_admin_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_admin_id(const std::string& value);
-  std::string* _internal_mutable_admin_id();
-  public:
-
-  // uint64 created_at = 4;
-  void clear_created_at();
-  uint64_t created_at() const;
-  void set_created_at(uint64_t value);
-  private:
-  uint64_t _internal_created_at() const;
-  void _internal_set_created_at(uint64_t value);
-  public:
-
-  // uint32 members_count = 5;
-  void clear_members_count();
-  uint32_t members_count() const;
-  void set_members_count(uint32_t value);
-  private:
-  uint32_t _internal_members_count() const;
-  void _internal_set_members_count(uint32_t value);
-  public:
+  void unsafe_arena_set_allocated_group(
+      ::qaul::net::group::GroupInfo* group);
+  ::qaul::net::group::GroupInfo* unsafe_arena_release_group();
 
   // @@protoc_insertion_point(class_scope:qaul.net.group.InviteMember)
  private:
@@ -495,11 +522,7 @@ class InviteMember final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_name_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr admin_id_;
-    uint64_t created_at_;
-    uint32_t members_count_;
+    ::qaul::net::group::GroupInfo* group_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -507,24 +530,24 @@ class InviteMember final :
 };
 // -------------------------------------------------------------------
 
-class Member final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.group.Member) */ {
+class GroupMember final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.group.GroupMember) */ {
  public:
-  inline Member() : Member(nullptr) {}
-  ~Member() override;
-  explicit PROTOBUF_CONSTEXPR Member(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline GroupMember() : GroupMember(nullptr) {}
+  ~GroupMember() override;
+  explicit PROTOBUF_CONSTEXPR GroupMember(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  Member(const Member& from);
-  Member(Member&& from) noexcept
-    : Member() {
+  GroupMember(const GroupMember& from);
+  GroupMember(GroupMember&& from) noexcept
+    : GroupMember() {
     *this = ::std::move(from);
   }
 
-  inline Member& operator=(const Member& from) {
+  inline GroupMember& operator=(const GroupMember& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Member& operator=(Member&& from) noexcept {
+  inline GroupMember& operator=(GroupMember&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -547,20 +570,20 @@ class Member final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const Member& default_instance() {
+  static const GroupMember& default_instance() {
     return *internal_default_instance();
   }
-  static inline const Member* internal_default_instance() {
-    return reinterpret_cast<const Member*>(
-               &_Member_default_instance_);
+  static inline const GroupMember* internal_default_instance() {
+    return reinterpret_cast<const GroupMember*>(
+               &_GroupMember_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     2;
 
-  friend void swap(Member& a, Member& b) {
+  friend void swap(GroupMember& a, GroupMember& b) {
     a.Swap(&b);
   }
-  inline void Swap(Member* other) {
+  inline void Swap(GroupMember* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -573,7 +596,7 @@ class Member final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Member* other) {
+  void UnsafeArenaSwap(GroupMember* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -581,14 +604,14 @@ class Member final :
 
   // implements Message ----------------------------------------------
 
-  Member* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<Member>(arena);
+  GroupMember* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GroupMember>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const Member& from);
+  void CopyFrom(const GroupMember& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const Member& from) {
-    Member::MergeImpl(*this, from);
+  void MergeFrom( const GroupMember& from) {
+    GroupMember::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -606,15 +629,15 @@ class Member final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Member* other);
+  void InternalSwap(GroupMember* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.group.Member";
+    return "qaul.net.group.GroupMember";
   }
   protected:
-  explicit Member(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit GroupMember(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -657,22 +680,22 @@ class Member final :
   void _internal_set_joined_at(uint64_t value);
   public:
 
-  // int32 role = 2;
+  // .qaul.net.group.GroupMemberRole role = 2;
   void clear_role();
-  int32_t role() const;
-  void set_role(int32_t value);
+  ::qaul::net::group::GroupMemberRole role() const;
+  void set_role(::qaul::net::group::GroupMemberRole value);
   private:
-  int32_t _internal_role() const;
-  void _internal_set_role(int32_t value);
+  ::qaul::net::group::GroupMemberRole _internal_role() const;
+  void _internal_set_role(::qaul::net::group::GroupMemberRole value);
   public:
 
-  // int32 state = 4;
+  // .qaul.net.group.GroupMemberState state = 4;
   void clear_state();
-  int32_t state() const;
-  void set_state(int32_t value);
+  ::qaul::net::group::GroupMemberState state() const;
+  void set_state(::qaul::net::group::GroupMemberState value);
   private:
-  int32_t _internal_state() const;
-  void _internal_set_state(int32_t value);
+  ::qaul::net::group::GroupMemberState _internal_state() const;
+  void _internal_set_state(::qaul::net::group::GroupMemberState value);
   public:
 
   // uint32 last_message_index = 5;
@@ -684,7 +707,7 @@ class Member final :
   void _internal_set_last_message_index(uint32_t value);
   public:
 
-  // @@protoc_insertion_point(class_scope:qaul.net.group.Member)
+  // @@protoc_insertion_point(class_scope:qaul.net.group.GroupMember)
  private:
   class _Internal;
 
@@ -694,8 +717,8 @@ class Member final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_id_;
     uint64_t joined_at_;
-    int32_t role_;
-    int32_t state_;
+    int role_;
+    int state_;
     uint32_t last_message_index_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -704,24 +727,24 @@ class Member final :
 };
 // -------------------------------------------------------------------
 
-class GroupNotify final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.group.GroupNotify) */ {
+class GroupInfo final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.group.GroupInfo) */ {
  public:
-  inline GroupNotify() : GroupNotify(nullptr) {}
-  ~GroupNotify() override;
-  explicit PROTOBUF_CONSTEXPR GroupNotify(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline GroupInfo() : GroupInfo(nullptr) {}
+  ~GroupInfo() override;
+  explicit PROTOBUF_CONSTEXPR GroupInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  GroupNotify(const GroupNotify& from);
-  GroupNotify(GroupNotify&& from) noexcept
-    : GroupNotify() {
+  GroupInfo(const GroupInfo& from);
+  GroupInfo(GroupInfo&& from) noexcept
+    : GroupInfo() {
     *this = ::std::move(from);
   }
 
-  inline GroupNotify& operator=(const GroupNotify& from) {
+  inline GroupInfo& operator=(const GroupInfo& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GroupNotify& operator=(GroupNotify&& from) noexcept {
+  inline GroupInfo& operator=(GroupInfo&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -744,20 +767,20 @@ class GroupNotify final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const GroupNotify& default_instance() {
+  static const GroupInfo& default_instance() {
     return *internal_default_instance();
   }
-  static inline const GroupNotify* internal_default_instance() {
-    return reinterpret_cast<const GroupNotify*>(
-               &_GroupNotify_default_instance_);
+  static inline const GroupInfo* internal_default_instance() {
+    return reinterpret_cast<const GroupInfo*>(
+               &_GroupInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     3;
 
-  friend void swap(GroupNotify& a, GroupNotify& b) {
+  friend void swap(GroupInfo& a, GroupInfo& b) {
     a.Swap(&b);
   }
-  inline void Swap(GroupNotify* other) {
+  inline void Swap(GroupInfo* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -770,7 +793,7 @@ class GroupNotify final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GroupNotify* other) {
+  void UnsafeArenaSwap(GroupInfo* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -778,14 +801,14 @@ class GroupNotify final :
 
   // implements Message ----------------------------------------------
 
-  GroupNotify* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GroupNotify>(arena);
+  GroupInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GroupInfo>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GroupNotify& from);
+  void CopyFrom(const GroupInfo& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GroupNotify& from) {
-    GroupNotify::MergeImpl(*this, from);
+  void MergeFrom( const GroupInfo& from) {
+    GroupInfo::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -803,15 +826,15 @@ class GroupNotify final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(GroupNotify* other);
+  void InternalSwap(GroupInfo* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.group.GroupNotify";
+    return "qaul.net.group.GroupInfo";
   }
   protected:
-  explicit GroupNotify(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit GroupInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -828,25 +851,25 @@ class GroupNotify final :
     kMembersFieldNumber = 5,
     kGroupIdFieldNumber = 1,
     kGroupNameFieldNumber = 2,
-    kCreatorIdFieldNumber = 4,
     kCreatedAtFieldNumber = 3,
+    kRevisionFieldNumber = 4,
   };
-  // repeated .qaul.net.group.Member members = 5;
+  // repeated .qaul.net.group.GroupMember members = 5;
   int members_size() const;
   private:
   int _internal_members_size() const;
   public:
   void clear_members();
-  ::qaul::net::group::Member* mutable_members(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::Member >*
+  ::qaul::net::group::GroupMember* mutable_members(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::GroupMember >*
       mutable_members();
   private:
-  const ::qaul::net::group::Member& _internal_members(int index) const;
-  ::qaul::net::group::Member* _internal_add_members();
+  const ::qaul::net::group::GroupMember& _internal_members(int index) const;
+  ::qaul::net::group::GroupMember* _internal_add_members();
   public:
-  const ::qaul::net::group::Member& members(int index) const;
-  ::qaul::net::group::Member* add_members();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::Member >&
+  const ::qaul::net::group::GroupMember& members(int index) const;
+  ::qaul::net::group::GroupMember* add_members();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::GroupMember >&
       members() const;
 
   // bytes group_id = 1;
@@ -877,20 +900,6 @@ class GroupNotify final :
   std::string* _internal_mutable_group_name();
   public:
 
-  // bytes creator_id = 4;
-  void clear_creator_id();
-  const std::string& creator_id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_creator_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_creator_id();
-  PROTOBUF_NODISCARD std::string* release_creator_id();
-  void set_allocated_creator_id(std::string* creator_id);
-  private:
-  const std::string& _internal_creator_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_creator_id(const std::string& value);
-  std::string* _internal_mutable_creator_id();
-  public:
-
   // uint64 created_at = 3;
   void clear_created_at();
   uint64_t created_at() const;
@@ -900,7 +909,16 @@ class GroupNotify final :
   void _internal_set_created_at(uint64_t value);
   public:
 
-  // @@protoc_insertion_point(class_scope:qaul.net.group.GroupNotify)
+  // uint32 revision = 4;
+  void clear_revision();
+  uint32_t revision() const;
+  void set_revision(uint32_t value);
+  private:
+  uint32_t _internal_revision() const;
+  void _internal_set_revision(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.net.group.GroupInfo)
  private:
   class _Internal;
 
@@ -908,11 +926,11 @@ class GroupNotify final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::Member > members_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::GroupMember > members_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_name_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr creator_id_;
     uint64_t created_at_;
+    uint32_t revision_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1394,6 +1412,80 @@ inline ::qaul::net::group::ReplyInvite* GroupContainer::mutable_reply_invite() {
   return _msg;
 }
 
+// .qaul.net.group.GroupInfo group_info = 3;
+inline bool GroupContainer::_internal_has_group_info() const {
+  return message_case() == kGroupInfo;
+}
+inline bool GroupContainer::has_group_info() const {
+  return _internal_has_group_info();
+}
+inline void GroupContainer::set_has_group_info() {
+  _impl_._oneof_case_[0] = kGroupInfo;
+}
+inline void GroupContainer::clear_group_info() {
+  if (_internal_has_group_info()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete _impl_.message_.group_info_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::group::GroupInfo* GroupContainer::release_group_info() {
+  // @@protoc_insertion_point(field_release:qaul.net.group.GroupContainer.group_info)
+  if (_internal_has_group_info()) {
+    clear_has_message();
+    ::qaul::net::group::GroupInfo* temp = _impl_.message_.group_info_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.message_.group_info_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::group::GroupInfo& GroupContainer::_internal_group_info() const {
+  return _internal_has_group_info()
+      ? *_impl_.message_.group_info_
+      : reinterpret_cast< ::qaul::net::group::GroupInfo&>(::qaul::net::group::_GroupInfo_default_instance_);
+}
+inline const ::qaul::net::group::GroupInfo& GroupContainer::group_info() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupContainer.group_info)
+  return _internal_group_info();
+}
+inline ::qaul::net::group::GroupInfo* GroupContainer::unsafe_arena_release_group_info() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.group.GroupContainer.group_info)
+  if (_internal_has_group_info()) {
+    clear_has_message();
+    ::qaul::net::group::GroupInfo* temp = _impl_.message_.group_info_;
+    _impl_.message_.group_info_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void GroupContainer::unsafe_arena_set_allocated_group_info(::qaul::net::group::GroupInfo* group_info) {
+  clear_message();
+  if (group_info) {
+    set_has_group_info();
+    _impl_.message_.group_info_ = group_info;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.group.GroupContainer.group_info)
+}
+inline ::qaul::net::group::GroupInfo* GroupContainer::_internal_mutable_group_info() {
+  if (!_internal_has_group_info()) {
+    clear_message();
+    set_has_group_info();
+    _impl_.message_.group_info_ = CreateMaybeMessage< ::qaul::net::group::GroupInfo >(GetArenaForAllocation());
+  }
+  return _impl_.message_.group_info_;
+}
+inline ::qaul::net::group::GroupInfo* GroupContainer::mutable_group_info() {
+  ::qaul::net::group::GroupInfo* _msg = _internal_mutable_group_info();
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupContainer.group_info)
+  return _msg;
+}
+
 // .qaul.net.group.RemovedMember removed = 4;
 inline bool GroupContainer::_internal_has_removed() const {
   return message_case() == kRemoved;
@@ -1481,236 +1573,136 @@ inline GroupContainer::MessageCase GroupContainer::message_case() const {
 
 // InviteMember
 
-// bytes group_id = 1;
-inline void InviteMember::clear_group_id() {
-  _impl_.group_id_.ClearToEmpty();
+// .qaul.net.group.GroupInfo group = 1;
+inline bool InviteMember::_internal_has_group() const {
+  return this != internal_default_instance() && _impl_.group_ != nullptr;
 }
-inline const std::string& InviteMember::group_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.group_id)
-  return _internal_group_id();
+inline bool InviteMember::has_group() const {
+  return _internal_has_group();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void InviteMember::set_group_id(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.InviteMember.group_id)
+inline void InviteMember::clear_group() {
+  if (GetArenaForAllocation() == nullptr && _impl_.group_ != nullptr) {
+    delete _impl_.group_;
+  }
+  _impl_.group_ = nullptr;
 }
-inline std::string* InviteMember::mutable_group_id() {
-  std::string* _s = _internal_mutable_group_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.InviteMember.group_id)
-  return _s;
+inline const ::qaul::net::group::GroupInfo& InviteMember::_internal_group() const {
+  const ::qaul::net::group::GroupInfo* p = _impl_.group_;
+  return p != nullptr ? *p : reinterpret_cast<const ::qaul::net::group::GroupInfo&>(
+      ::qaul::net::group::_GroupInfo_default_instance_);
 }
-inline const std::string& InviteMember::_internal_group_id() const {
-  return _impl_.group_id_.Get();
+inline const ::qaul::net::group::GroupInfo& InviteMember::group() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.group)
+  return _internal_group();
 }
-inline void InviteMember::_internal_set_group_id(const std::string& value) {
-  
-  _impl_.group_id_.Set(value, GetArenaForAllocation());
-}
-inline std::string* InviteMember::_internal_mutable_group_id() {
-  
-  return _impl_.group_id_.Mutable(GetArenaForAllocation());
-}
-inline std::string* InviteMember::release_group_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.InviteMember.group_id)
-  return _impl_.group_id_.Release();
-}
-inline void InviteMember::set_allocated_group_id(std::string* group_id) {
-  if (group_id != nullptr) {
+inline void InviteMember::unsafe_arena_set_allocated_group(
+    ::qaul::net::group::GroupInfo* group) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.group_);
+  }
+  _impl_.group_ = group;
+  if (group) {
     
   } else {
     
   }
-  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.group_id_.IsDefault()) {
-    _impl_.group_id_.Set("", GetArenaForAllocation());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.group.InviteMember.group)
+}
+inline ::qaul::net::group::GroupInfo* InviteMember::release_group() {
+  
+  ::qaul::net::group::GroupInfo* temp = _impl_.group_;
+  _impl_.group_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.InviteMember.group_id)
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
 }
-
-// string group_name = 2;
-inline void InviteMember::clear_group_name() {
-  _impl_.group_name_.ClearToEmpty();
-}
-inline const std::string& InviteMember::group_name() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.group_name)
-  return _internal_group_name();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void InviteMember::set_group_name(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.group_name_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.InviteMember.group_name)
-}
-inline std::string* InviteMember::mutable_group_name() {
-  std::string* _s = _internal_mutable_group_name();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.InviteMember.group_name)
-  return _s;
-}
-inline const std::string& InviteMember::_internal_group_name() const {
-  return _impl_.group_name_.Get();
-}
-inline void InviteMember::_internal_set_group_name(const std::string& value) {
+inline ::qaul::net::group::GroupInfo* InviteMember::unsafe_arena_release_group() {
+  // @@protoc_insertion_point(field_release:qaul.net.group.InviteMember.group)
   
-  _impl_.group_name_.Set(value, GetArenaForAllocation());
+  ::qaul::net::group::GroupInfo* temp = _impl_.group_;
+  _impl_.group_ = nullptr;
+  return temp;
 }
-inline std::string* InviteMember::_internal_mutable_group_name() {
+inline ::qaul::net::group::GroupInfo* InviteMember::_internal_mutable_group() {
   
-  return _impl_.group_name_.Mutable(GetArenaForAllocation());
+  if (_impl_.group_ == nullptr) {
+    auto* p = CreateMaybeMessage<::qaul::net::group::GroupInfo>(GetArenaForAllocation());
+    _impl_.group_ = p;
+  }
+  return _impl_.group_;
 }
-inline std::string* InviteMember::release_group_name() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.InviteMember.group_name)
-  return _impl_.group_name_.Release();
+inline ::qaul::net::group::GroupInfo* InviteMember::mutable_group() {
+  ::qaul::net::group::GroupInfo* _msg = _internal_mutable_group();
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.InviteMember.group)
+  return _msg;
 }
-inline void InviteMember::set_allocated_group_name(std::string* group_name) {
-  if (group_name != nullptr) {
+inline void InviteMember::set_allocated_group(::qaul::net::group::GroupInfo* group) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.group_;
+  }
+  if (group) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(group);
+    if (message_arena != submessage_arena) {
+      group = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, group, submessage_arena);
+    }
     
   } else {
     
   }
-  _impl_.group_name_.SetAllocated(group_name, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.group_name_.IsDefault()) {
-    _impl_.group_name_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.InviteMember.group_name)
-}
-
-// bytes admin_id = 3;
-inline void InviteMember::clear_admin_id() {
-  _impl_.admin_id_.ClearToEmpty();
-}
-inline const std::string& InviteMember::admin_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.admin_id)
-  return _internal_admin_id();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void InviteMember::set_admin_id(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.admin_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.InviteMember.admin_id)
-}
-inline std::string* InviteMember::mutable_admin_id() {
-  std::string* _s = _internal_mutable_admin_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.InviteMember.admin_id)
-  return _s;
-}
-inline const std::string& InviteMember::_internal_admin_id() const {
-  return _impl_.admin_id_.Get();
-}
-inline void InviteMember::_internal_set_admin_id(const std::string& value) {
-  
-  _impl_.admin_id_.Set(value, GetArenaForAllocation());
-}
-inline std::string* InviteMember::_internal_mutable_admin_id() {
-  
-  return _impl_.admin_id_.Mutable(GetArenaForAllocation());
-}
-inline std::string* InviteMember::release_admin_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.InviteMember.admin_id)
-  return _impl_.admin_id_.Release();
-}
-inline void InviteMember::set_allocated_admin_id(std::string* admin_id) {
-  if (admin_id != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.admin_id_.SetAllocated(admin_id, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.admin_id_.IsDefault()) {
-    _impl_.admin_id_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.InviteMember.admin_id)
-}
-
-// uint64 created_at = 4;
-inline void InviteMember::clear_created_at() {
-  _impl_.created_at_ = uint64_t{0u};
-}
-inline uint64_t InviteMember::_internal_created_at() const {
-  return _impl_.created_at_;
-}
-inline uint64_t InviteMember::created_at() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.created_at)
-  return _internal_created_at();
-}
-inline void InviteMember::_internal_set_created_at(uint64_t value) {
-  
-  _impl_.created_at_ = value;
-}
-inline void InviteMember::set_created_at(uint64_t value) {
-  _internal_set_created_at(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.InviteMember.created_at)
-}
-
-// uint32 members_count = 5;
-inline void InviteMember::clear_members_count() {
-  _impl_.members_count_ = 0u;
-}
-inline uint32_t InviteMember::_internal_members_count() const {
-  return _impl_.members_count_;
-}
-inline uint32_t InviteMember::members_count() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.InviteMember.members_count)
-  return _internal_members_count();
-}
-inline void InviteMember::_internal_set_members_count(uint32_t value) {
-  
-  _impl_.members_count_ = value;
-}
-inline void InviteMember::set_members_count(uint32_t value) {
-  _internal_set_members_count(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.InviteMember.members_count)
+  _impl_.group_ = group;
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.InviteMember.group)
 }
 
 // -------------------------------------------------------------------
 
-// Member
+// GroupMember
 
 // bytes user_id = 1;
-inline void Member::clear_user_id() {
+inline void GroupMember::clear_user_id() {
   _impl_.user_id_.ClearToEmpty();
 }
-inline const std::string& Member::user_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.Member.user_id)
+inline const std::string& GroupMember::user_id() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupMember.user_id)
   return _internal_user_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void Member::set_user_id(ArgT0&& arg0, ArgT... args) {
+void GroupMember::set_user_id(ArgT0&& arg0, ArgT... args) {
  
  _impl_.user_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.Member.user_id)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupMember.user_id)
 }
-inline std::string* Member::mutable_user_id() {
+inline std::string* GroupMember::mutable_user_id() {
   std::string* _s = _internal_mutable_user_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.Member.user_id)
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupMember.user_id)
   return _s;
 }
-inline const std::string& Member::_internal_user_id() const {
+inline const std::string& GroupMember::_internal_user_id() const {
   return _impl_.user_id_.Get();
 }
-inline void Member::_internal_set_user_id(const std::string& value) {
+inline void GroupMember::_internal_set_user_id(const std::string& value) {
   
   _impl_.user_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* Member::_internal_mutable_user_id() {
+inline std::string* GroupMember::_internal_mutable_user_id() {
   
   return _impl_.user_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* Member::release_user_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.Member.user_id)
+inline std::string* GroupMember::release_user_id() {
+  // @@protoc_insertion_point(field_release:qaul.net.group.GroupMember.user_id)
   return _impl_.user_id_.Release();
 }
-inline void Member::set_allocated_user_id(std::string* user_id) {
+inline void GroupMember::set_allocated_user_id(std::string* user_id) {
   if (user_id != nullptr) {
     
   } else {
@@ -1722,129 +1714,129 @@ inline void Member::set_allocated_user_id(std::string* user_id) {
     _impl_.user_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.Member.user_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupMember.user_id)
 }
 
-// int32 role = 2;
-inline void Member::clear_role() {
+// .qaul.net.group.GroupMemberRole role = 2;
+inline void GroupMember::clear_role() {
   _impl_.role_ = 0;
 }
-inline int32_t Member::_internal_role() const {
-  return _impl_.role_;
+inline ::qaul::net::group::GroupMemberRole GroupMember::_internal_role() const {
+  return static_cast< ::qaul::net::group::GroupMemberRole >(_impl_.role_);
 }
-inline int32_t Member::role() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.Member.role)
+inline ::qaul::net::group::GroupMemberRole GroupMember::role() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupMember.role)
   return _internal_role();
 }
-inline void Member::_internal_set_role(int32_t value) {
+inline void GroupMember::_internal_set_role(::qaul::net::group::GroupMemberRole value) {
   
   _impl_.role_ = value;
 }
-inline void Member::set_role(int32_t value) {
+inline void GroupMember::set_role(::qaul::net::group::GroupMemberRole value) {
   _internal_set_role(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.Member.role)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupMember.role)
 }
 
 // uint64 joined_at = 3;
-inline void Member::clear_joined_at() {
+inline void GroupMember::clear_joined_at() {
   _impl_.joined_at_ = uint64_t{0u};
 }
-inline uint64_t Member::_internal_joined_at() const {
+inline uint64_t GroupMember::_internal_joined_at() const {
   return _impl_.joined_at_;
 }
-inline uint64_t Member::joined_at() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.Member.joined_at)
+inline uint64_t GroupMember::joined_at() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupMember.joined_at)
   return _internal_joined_at();
 }
-inline void Member::_internal_set_joined_at(uint64_t value) {
+inline void GroupMember::_internal_set_joined_at(uint64_t value) {
   
   _impl_.joined_at_ = value;
 }
-inline void Member::set_joined_at(uint64_t value) {
+inline void GroupMember::set_joined_at(uint64_t value) {
   _internal_set_joined_at(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.Member.joined_at)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupMember.joined_at)
 }
 
-// int32 state = 4;
-inline void Member::clear_state() {
+// .qaul.net.group.GroupMemberState state = 4;
+inline void GroupMember::clear_state() {
   _impl_.state_ = 0;
 }
-inline int32_t Member::_internal_state() const {
-  return _impl_.state_;
+inline ::qaul::net::group::GroupMemberState GroupMember::_internal_state() const {
+  return static_cast< ::qaul::net::group::GroupMemberState >(_impl_.state_);
 }
-inline int32_t Member::state() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.Member.state)
+inline ::qaul::net::group::GroupMemberState GroupMember::state() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupMember.state)
   return _internal_state();
 }
-inline void Member::_internal_set_state(int32_t value) {
+inline void GroupMember::_internal_set_state(::qaul::net::group::GroupMemberState value) {
   
   _impl_.state_ = value;
 }
-inline void Member::set_state(int32_t value) {
+inline void GroupMember::set_state(::qaul::net::group::GroupMemberState value) {
   _internal_set_state(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.Member.state)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupMember.state)
 }
 
 // uint32 last_message_index = 5;
-inline void Member::clear_last_message_index() {
+inline void GroupMember::clear_last_message_index() {
   _impl_.last_message_index_ = 0u;
 }
-inline uint32_t Member::_internal_last_message_index() const {
+inline uint32_t GroupMember::_internal_last_message_index() const {
   return _impl_.last_message_index_;
 }
-inline uint32_t Member::last_message_index() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.Member.last_message_index)
+inline uint32_t GroupMember::last_message_index() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupMember.last_message_index)
   return _internal_last_message_index();
 }
-inline void Member::_internal_set_last_message_index(uint32_t value) {
+inline void GroupMember::_internal_set_last_message_index(uint32_t value) {
   
   _impl_.last_message_index_ = value;
 }
-inline void Member::set_last_message_index(uint32_t value) {
+inline void GroupMember::set_last_message_index(uint32_t value) {
   _internal_set_last_message_index(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.Member.last_message_index)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupMember.last_message_index)
 }
 
 // -------------------------------------------------------------------
 
-// GroupNotify
+// GroupInfo
 
 // bytes group_id = 1;
-inline void GroupNotify::clear_group_id() {
+inline void GroupInfo::clear_group_id() {
   _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& GroupNotify::group_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.GroupNotify.group_id)
+inline const std::string& GroupInfo::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupInfo.group_id)
   return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void GroupNotify::set_group_id(ArgT0&& arg0, ArgT... args) {
+void GroupInfo::set_group_id(ArgT0&& arg0, ArgT... args) {
  
  _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.GroupNotify.group_id)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupInfo.group_id)
 }
-inline std::string* GroupNotify::mutable_group_id() {
+inline std::string* GroupInfo::mutable_group_id() {
   std::string* _s = _internal_mutable_group_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupNotify.group_id)
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupInfo.group_id)
   return _s;
 }
-inline const std::string& GroupNotify::_internal_group_id() const {
+inline const std::string& GroupInfo::_internal_group_id() const {
   return _impl_.group_id_.Get();
 }
-inline void GroupNotify::_internal_set_group_id(const std::string& value) {
+inline void GroupInfo::_internal_set_group_id(const std::string& value) {
   
   _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* GroupNotify::_internal_mutable_group_id() {
+inline std::string* GroupInfo::_internal_mutable_group_id() {
   
   return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* GroupNotify::release_group_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.GroupNotify.group_id)
+inline std::string* GroupInfo::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.net.group.GroupInfo.group_id)
   return _impl_.group_id_.Release();
 }
-inline void GroupNotify::set_allocated_group_id(std::string* group_id) {
+inline void GroupInfo::set_allocated_group_id(std::string* group_id) {
   if (group_id != nullptr) {
     
   } else {
@@ -1856,45 +1848,45 @@ inline void GroupNotify::set_allocated_group_id(std::string* group_id) {
     _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupNotify.group_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupInfo.group_id)
 }
 
 // string group_name = 2;
-inline void GroupNotify::clear_group_name() {
+inline void GroupInfo::clear_group_name() {
   _impl_.group_name_.ClearToEmpty();
 }
-inline const std::string& GroupNotify::group_name() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.GroupNotify.group_name)
+inline const std::string& GroupInfo::group_name() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupInfo.group_name)
   return _internal_group_name();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void GroupNotify::set_group_name(ArgT0&& arg0, ArgT... args) {
+void GroupInfo::set_group_name(ArgT0&& arg0, ArgT... args) {
  
  _impl_.group_name_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.GroupNotify.group_name)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupInfo.group_name)
 }
-inline std::string* GroupNotify::mutable_group_name() {
+inline std::string* GroupInfo::mutable_group_name() {
   std::string* _s = _internal_mutable_group_name();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupNotify.group_name)
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupInfo.group_name)
   return _s;
 }
-inline const std::string& GroupNotify::_internal_group_name() const {
+inline const std::string& GroupInfo::_internal_group_name() const {
   return _impl_.group_name_.Get();
 }
-inline void GroupNotify::_internal_set_group_name(const std::string& value) {
+inline void GroupInfo::_internal_set_group_name(const std::string& value) {
   
   _impl_.group_name_.Set(value, GetArenaForAllocation());
 }
-inline std::string* GroupNotify::_internal_mutable_group_name() {
+inline std::string* GroupInfo::_internal_mutable_group_name() {
   
   return _impl_.group_name_.Mutable(GetArenaForAllocation());
 }
-inline std::string* GroupNotify::release_group_name() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.GroupNotify.group_name)
+inline std::string* GroupInfo::release_group_name() {
+  // @@protoc_insertion_point(field_release:qaul.net.group.GroupInfo.group_name)
   return _impl_.group_name_.Release();
 }
-inline void GroupNotify::set_allocated_group_name(std::string* group_name) {
+inline void GroupInfo::set_allocated_group_name(std::string* group_name) {
   if (group_name != nullptr) {
     
   } else {
@@ -1906,116 +1898,86 @@ inline void GroupNotify::set_allocated_group_name(std::string* group_name) {
     _impl_.group_name_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupNotify.group_name)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupInfo.group_name)
 }
 
 // uint64 created_at = 3;
-inline void GroupNotify::clear_created_at() {
+inline void GroupInfo::clear_created_at() {
   _impl_.created_at_ = uint64_t{0u};
 }
-inline uint64_t GroupNotify::_internal_created_at() const {
+inline uint64_t GroupInfo::_internal_created_at() const {
   return _impl_.created_at_;
 }
-inline uint64_t GroupNotify::created_at() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.GroupNotify.created_at)
+inline uint64_t GroupInfo::created_at() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupInfo.created_at)
   return _internal_created_at();
 }
-inline void GroupNotify::_internal_set_created_at(uint64_t value) {
+inline void GroupInfo::_internal_set_created_at(uint64_t value) {
   
   _impl_.created_at_ = value;
 }
-inline void GroupNotify::set_created_at(uint64_t value) {
+inline void GroupInfo::set_created_at(uint64_t value) {
   _internal_set_created_at(value);
-  // @@protoc_insertion_point(field_set:qaul.net.group.GroupNotify.created_at)
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupInfo.created_at)
 }
 
-// bytes creator_id = 4;
-inline void GroupNotify::clear_creator_id() {
-  _impl_.creator_id_.ClearToEmpty();
+// uint32 revision = 4;
+inline void GroupInfo::clear_revision() {
+  _impl_.revision_ = 0u;
 }
-inline const std::string& GroupNotify::creator_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.GroupNotify.creator_id)
-  return _internal_creator_id();
+inline uint32_t GroupInfo::_internal_revision() const {
+  return _impl_.revision_;
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void GroupNotify::set_creator_id(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.creator_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.group.GroupNotify.creator_id)
+inline uint32_t GroupInfo::revision() const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupInfo.revision)
+  return _internal_revision();
 }
-inline std::string* GroupNotify::mutable_creator_id() {
-  std::string* _s = _internal_mutable_creator_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupNotify.creator_id)
-  return _s;
-}
-inline const std::string& GroupNotify::_internal_creator_id() const {
-  return _impl_.creator_id_.Get();
-}
-inline void GroupNotify::_internal_set_creator_id(const std::string& value) {
+inline void GroupInfo::_internal_set_revision(uint32_t value) {
   
-  _impl_.creator_id_.Set(value, GetArenaForAllocation());
+  _impl_.revision_ = value;
 }
-inline std::string* GroupNotify::_internal_mutable_creator_id() {
-  
-  return _impl_.creator_id_.Mutable(GetArenaForAllocation());
-}
-inline std::string* GroupNotify::release_creator_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.group.GroupNotify.creator_id)
-  return _impl_.creator_id_.Release();
-}
-inline void GroupNotify::set_allocated_creator_id(std::string* creator_id) {
-  if (creator_id != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.creator_id_.SetAllocated(creator_id, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.creator_id_.IsDefault()) {
-    _impl_.creator_id_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupNotify.creator_id)
+inline void GroupInfo::set_revision(uint32_t value) {
+  _internal_set_revision(value);
+  // @@protoc_insertion_point(field_set:qaul.net.group.GroupInfo.revision)
 }
 
-// repeated .qaul.net.group.Member members = 5;
-inline int GroupNotify::_internal_members_size() const {
+// repeated .qaul.net.group.GroupMember members = 5;
+inline int GroupInfo::_internal_members_size() const {
   return _impl_.members_.size();
 }
-inline int GroupNotify::members_size() const {
+inline int GroupInfo::members_size() const {
   return _internal_members_size();
 }
-inline void GroupNotify::clear_members() {
+inline void GroupInfo::clear_members() {
   _impl_.members_.Clear();
 }
-inline ::qaul::net::group::Member* GroupNotify::mutable_members(int index) {
-  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupNotify.members)
+inline ::qaul::net::group::GroupMember* GroupInfo::mutable_members(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.net.group.GroupInfo.members)
   return _impl_.members_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::Member >*
-GroupNotify::mutable_members() {
-  // @@protoc_insertion_point(field_mutable_list:qaul.net.group.GroupNotify.members)
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::GroupMember >*
+GroupInfo::mutable_members() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.net.group.GroupInfo.members)
   return &_impl_.members_;
 }
-inline const ::qaul::net::group::Member& GroupNotify::_internal_members(int index) const {
+inline const ::qaul::net::group::GroupMember& GroupInfo::_internal_members(int index) const {
   return _impl_.members_.Get(index);
 }
-inline const ::qaul::net::group::Member& GroupNotify::members(int index) const {
-  // @@protoc_insertion_point(field_get:qaul.net.group.GroupNotify.members)
+inline const ::qaul::net::group::GroupMember& GroupInfo::members(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.net.group.GroupInfo.members)
   return _internal_members(index);
 }
-inline ::qaul::net::group::Member* GroupNotify::_internal_add_members() {
+inline ::qaul::net::group::GroupMember* GroupInfo::_internal_add_members() {
   return _impl_.members_.Add();
 }
-inline ::qaul::net::group::Member* GroupNotify::add_members() {
-  ::qaul::net::group::Member* _add = _internal_add_members();
-  // @@protoc_insertion_point(field_add:qaul.net.group.GroupNotify.members)
+inline ::qaul::net::group::GroupMember* GroupInfo::add_members() {
+  ::qaul::net::group::GroupMember* _add = _internal_add_members();
+  // @@protoc_insertion_point(field_add:qaul.net.group.GroupInfo.members)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::Member >&
-GroupNotify::members() const {
-  // @@protoc_insertion_point(field_list:qaul.net.group.GroupNotify.members)
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::group::GroupMember >&
+GroupInfo::members() const {
+  // @@protoc_insertion_point(field_list:qaul.net.group.GroupInfo.members)
   return _impl_.members_;
 }
 
@@ -2166,6 +2128,21 @@ inline void RemovedMember::set_allocated_group_id(std::string* group_id) {
 }  // namespace group
 }  // namespace net
 }  // namespace qaul
+
+PROTOBUF_NAMESPACE_OPEN
+
+template <> struct is_proto_enum< ::qaul::net::group::GroupMemberState> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::group::GroupMemberState>() {
+  return ::qaul::net::group::GroupMemberState_descriptor();
+}
+template <> struct is_proto_enum< ::qaul::net::group::GroupMemberRole> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::group::GroupMemberRole>() {
+  return ::qaul::net::group::GroupMemberRole_descriptor();
+}
+
+PROTOBUF_NAMESPACE_CLOSE
 
 // @@protoc_insertion_point(global_scope)
 

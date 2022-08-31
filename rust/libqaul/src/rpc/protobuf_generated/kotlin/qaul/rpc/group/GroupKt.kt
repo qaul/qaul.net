@@ -312,7 +312,7 @@ object GroupKt {
 
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -326,7 +326,7 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -336,7 +336,7 @@ object GroupKt {
     }
     /**
      * <pre>
-     *group info request
+     * group info request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupInfoRequest group_info_request = 9;</code>
@@ -348,12 +348,12 @@ object GroupKt {
 
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      */
-    var groupInfoResponse: qaul.rpc.group.GroupRpc.GroupInfoResponse
+    var groupInfoResponse: qaul.rpc.group.GroupRpc.GroupInfo
       @JvmName("getGroupInfoResponse")
       get() = _builder.getGroupInfoResponse()
       @JvmName("setGroupInfoResponse")
@@ -362,20 +362,20 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      */
     fun clearGroupInfoResponse() {
       _builder.clearGroupInfoResponse()
     }
     /**
      * <pre>
-     *group info response
+     * group info response
      * </pre>
      *
-     * <code>.qaul.rpc.group.GroupInfoResponse group_info_response = 10;</code>
+     * <code>.qaul.rpc.group.GroupInfo group_info_response = 10;</code>
      * @return Whether the groupInfoResponse field is set.
      */
     fun hasGroupInfoResponse(): kotlin.Boolean {
@@ -384,7 +384,7 @@ object GroupKt {
 
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -398,7 +398,7 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -408,7 +408,7 @@ object GroupKt {
     }
     /**
      * <pre>
-     *group reply invite request
+     * group reply invite request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteRequest group_reply_invite_request = 11;</code>
@@ -420,7 +420,7 @@ object GroupKt {
 
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -434,7 +434,7 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -444,7 +444,7 @@ object GroupKt {
     }
     /**
      * <pre>
-     *group reply invite response
+     * group reply invite response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupReplyInviteResponse group_reply_invite_response = 12;</code>
@@ -456,7 +456,7 @@ object GroupKt {
 
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -470,7 +470,7 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -480,7 +480,7 @@ object GroupKt {
     }
     /**
      * <pre>
-     *group list request
+     * group list request
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListRequest group_list_request = 13;</code>
@@ -492,7 +492,7 @@ object GroupKt {
 
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -506,7 +506,7 @@ object GroupKt {
       }
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -516,7 +516,7 @@ object GroupKt {
     }
     /**
      * <pre>
-     *group list response
+     * group list response
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupListResponse group_list_response = 14;</code>
@@ -637,7 +637,7 @@ val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupRemoveMemberResponseOrNull: qaul
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInfoRequestOrNull: qaul.rpc.group.GroupRpc.GroupInfoRequest?
   get() = if (hasGroupInfoRequest()) getGroupInfoRequest() else null
 
-val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInfoResponseOrNull: qaul.rpc.group.GroupRpc.GroupInfoResponse?
+val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupInfoResponseOrNull: qaul.rpc.group.GroupRpc.GroupInfo?
   get() = if (hasGroupInfoResponse()) getGroupInfoResponse() else null
 
 val qaul.rpc.group.GroupRpc.GroupOrBuilder.groupReplyInviteRequestOrNull: qaul.rpc.group.GroupRpc.GroupReplyInviteRequest?

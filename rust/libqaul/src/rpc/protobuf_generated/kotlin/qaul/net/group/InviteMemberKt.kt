@@ -24,131 +24,45 @@ object InviteMemberKt {
 
     /**
      * <pre>
-     * group id
+     * Group Info
      * </pre>
      *
-     * <code>bytes group_id = 1;</code>
+     * <code>.qaul.net.group.GroupInfo group = 1;</code>
      */
-    var groupId: com.google.protobuf.ByteString
-      @JvmName("getGroupId")
-      get() = _builder.getGroupId()
-      @JvmName("setGroupId")
+    var group: qaul.net.group.GroupNet.GroupInfo
+      @JvmName("getGroup")
+      get() = _builder.getGroup()
+      @JvmName("setGroup")
       set(value) {
-        _builder.setGroupId(value)
+        _builder.setGroup(value)
       }
     /**
      * <pre>
-     * group id
+     * Group Info
      * </pre>
      *
-     * <code>bytes group_id = 1;</code>
+     * <code>.qaul.net.group.GroupInfo group = 1;</code>
      */
-    fun clearGroupId() {
-      _builder.clearGroupId()
+    fun clearGroup() {
+      _builder.clearGroup()
     }
-
     /**
      * <pre>
-     * group name
+     * Group Info
      * </pre>
      *
-     * <code>string group_name = 2;</code>
+     * <code>.qaul.net.group.GroupInfo group = 1;</code>
+     * @return Whether the group field is set.
      */
-    var groupName: kotlin.String
-      @JvmName("getGroupName")
-      get() = _builder.getGroupName()
-      @JvmName("setGroupName")
-      set(value) {
-        _builder.setGroupName(value)
-      }
-    /**
-     * <pre>
-     * group name
-     * </pre>
-     *
-     * <code>string group_name = 2;</code>
-     */
-    fun clearGroupName() {
-      _builder.clearGroupName()
-    }
-
-    /**
-     * <pre>
-     * group admin id
-     * </pre>
-     *
-     * <code>bytes admin_id = 3;</code>
-     */
-    var adminId: com.google.protobuf.ByteString
-      @JvmName("getAdminId")
-      get() = _builder.getAdminId()
-      @JvmName("setAdminId")
-      set(value) {
-        _builder.setAdminId(value)
-      }
-    /**
-     * <pre>
-     * group admin id
-     * </pre>
-     *
-     * <code>bytes admin_id = 3;</code>
-     */
-    fun clearAdminId() {
-      _builder.clearAdminId()
-    }
-
-    /**
-     * <pre>
-     * group created at
-     * </pre>
-     *
-     * <code>uint64 created_at = 4;</code>
-     */
-    var createdAt: kotlin.Long
-      @JvmName("getCreatedAt")
-      get() = _builder.getCreatedAt()
-      @JvmName("setCreatedAt")
-      set(value) {
-        _builder.setCreatedAt(value)
-      }
-    /**
-     * <pre>
-     * group created at
-     * </pre>
-     *
-     * <code>uint64 created_at = 4;</code>
-     */
-    fun clearCreatedAt() {
-      _builder.clearCreatedAt()
-    }
-
-    /**
-     * <pre>
-     * group member count
-     * </pre>
-     *
-     * <code>uint32 members_count = 5;</code>
-     */
-    var membersCount: kotlin.Int
-      @JvmName("getMembersCount")
-      get() = _builder.getMembersCount()
-      @JvmName("setMembersCount")
-      set(value) {
-        _builder.setMembersCount(value)
-      }
-    /**
-     * <pre>
-     * group member count
-     * </pre>
-     *
-     * <code>uint32 members_count = 5;</code>
-     */
-    fun clearMembersCount() {
-      _builder.clearMembersCount()
+    fun hasGroup(): kotlin.Boolean {
+      return _builder.hasGroup()
     }
   }
 }
 @kotlin.jvm.JvmSynthetic
 inline fun qaul.net.group.GroupNet.InviteMember.copy(block: qaul.net.group.InviteMemberKt.Dsl.() -> kotlin.Unit): qaul.net.group.GroupNet.InviteMember =
   qaul.net.group.InviteMemberKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+
+val qaul.net.group.GroupNet.InviteMemberOrBuilder.groupOrNull: qaul.net.group.GroupNet.GroupInfo?
+  get() = if (hasGroup()) getGroup() else null
 
