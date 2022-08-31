@@ -49,7 +49,7 @@ struct Qaul_Net_Feed_FeedMessageContent {
   /// message content
   var content: String = String()
 
-  /// timestamp in milli seconds
+  /// timestamp in milliseconds
   var time: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()

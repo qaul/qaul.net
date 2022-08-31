@@ -2,33 +2,33 @@
 // This software is published under the AGPLv3 license.
 
 //! # qaul RPC CLI Client
-//! 
+//!
 //! This client uses all the functionality of the qaul.net
-//! RPC system and 
+//! RPC system and
 
-use futures_ticker::Ticker;
 use async_std::io;
+use futures_ticker::Ticker;
 //use async_std::stream;
 use futures::prelude::*;
-use futures::{ pin_mut, select, future::FutureExt };
+use futures::{future::FutureExt, pin_mut, select};
 use std::time::Duration;
 
 use libqaul;
 
-mod cli;
-mod rpc;
-mod node;
-mod user_accounts;
-mod connections;
-mod users;
-mod router;
-mod feed;
-mod chat;
-mod debug;
 mod ble;
-mod fileshare;
+mod chat;
+mod chatfile;
+mod cli;
+mod connections;
+mod debug;
+mod feed;
 mod group;
+mod node;
+mod router;
+mod rpc;
 mod rtc;
+mod user_accounts;
+mod users;
 
 use cli::Cli;
 use rpc::Rpc;
@@ -43,7 +43,7 @@ enum EventType {
 #[async_std::main]
 async fn main() {
     // get current working directory
-    let path = std::env::current_dir().unwrap(); 
+    let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
     // start libqaul in new thread and save configuration file to current working path
@@ -60,13 +60,12 @@ async fn main() {
 
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();
-    
+
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable. 
+    // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
-
 
     // loop and poll CLI and RPC
     loop {
@@ -89,14 +88,12 @@ async fn main() {
             match event {
                 EventType::Cli(line) => {
                     Cli::process_command(line);
-                },
-                EventType::Rpc(_) => {
-                    match libqaul::api::receive_rpc() {
-                        Ok(data) => {
-                            Rpc::received_message(data);
-                        },
-                        _ => {},
+                }
+                EventType::Rpc(_) => match libqaul::api::receive_rpc() {
+                    Ok(data) => {
+                        Rpc::received_message(data);
                     }
+                    _ => {}
                 },
             }
         }

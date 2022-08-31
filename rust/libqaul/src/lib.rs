@@ -66,6 +66,7 @@ enum EventType {
     ReConnecting(bool),
     RoutingTable(bool),
     Messaging(bool),
+    Retransmit(bool),
 }
 
 /// initialize and start libqaul
@@ -242,6 +243,9 @@ pub async fn start(storage_path: String) -> () {
     // manage the message sending
     let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
 
+    // manage the message retransmit
+    let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
+
     // set initialized flag
     INITIALIZED.set(true);
 
@@ -260,6 +264,7 @@ pub async fn start(storage_path: String) -> () {
             let connection_fut = connection_ticker.next().fuse();
             let routing_table_fut = routing_table_ticker.next().fuse();
             let messaging_fut = messaging_ticker.next().fuse();
+            let retransmit_fut = retransmit_ticker.next().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
@@ -275,6 +280,7 @@ pub async fn start(storage_path: String) -> () {
                 connection_fut,
                 routing_table_fut,
                 messaging_fut,
+                retransmit_fut,
             );
 
             select! {
@@ -357,6 +363,7 @@ pub async fn start(storage_path: String) -> () {
                 _connection_event = connection_fut => Some(EventType::ReConnecting(true)),
                 _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
                 _messaging_event = messaging_fut => Some(EventType::Messaging(true)),
+                _retransmit_event = retransmit_fut => Some(EventType::Retransmit(true)),
             }
         };
 
@@ -369,7 +376,8 @@ pub async fn start(storage_path: String) -> () {
                             rpc_message,
                             Some(&mut lan),
                             Some(&mut internet),
-                        );
+                        )
+                        .await;
                     }
                 }
                 EventType::Sys(_) => {
@@ -423,7 +431,7 @@ pub async fn start(storage_path: String) -> () {
                             );
                             continue;
                         }
-                        //make data
+                        //make dataMessaging
                         let data = RouterInfo::create_feed_request(&request.feed_ids);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -566,6 +574,9 @@ pub async fn start(storage_path: String) -> () {
                             }
                         }
                     }
+                }
+                EventType::Retransmit(_) => {
+                    services::messaging::retransmit::MessagingRetransmit::process();
                 }
             }
         }

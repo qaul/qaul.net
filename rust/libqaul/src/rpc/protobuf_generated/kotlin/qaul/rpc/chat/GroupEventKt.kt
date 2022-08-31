@@ -24,7 +24,7 @@ object GroupEventKt {
 
     /**
      * <pre>
-     * message type
+     * group event type
      * </pre>
      *
      * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>
@@ -38,7 +38,7 @@ object GroupEventKt {
       }
     /**
      * <pre>
-     * message type
+     * group event type
      * </pre>
      *
      * <code>.qaul.rpc.chat.GroupEventType event_type = 1;</code>

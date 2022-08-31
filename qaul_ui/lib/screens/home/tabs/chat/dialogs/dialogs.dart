@@ -120,7 +120,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => _InviteUsersToGroupDialog(room: group),
+                      builder: (_) => InviteUsersToGroupDialog(room: group),
                     ),
                   );
 
@@ -149,8 +149,8 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
   }
 }
 
-class _InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
-  const _InviteUsersToGroupDialog({
+class InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
+  const InviteUsersToGroupDialog({
     Key? key,
     required this.room,
   }) : super(key: key);
@@ -163,7 +163,7 @@ class _InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
 }
 
 class _InviteUsersToGroupDialogState
-    extends ConsumerState<_InviteUsersToGroupDialog> {
+    extends ConsumerState<InviteUsersToGroupDialog> {
   final selected = <User>{};
 
   @override
@@ -204,6 +204,7 @@ class _InviteUsersToGroupDialogState
                   for (final user in selected) {
                     worker.inviteUserToGroup(user, widget.room);
                   }
+                  Navigator.pop(context);
                 },
                 child: const Text('Invite', style: TextStyle(fontSize: 20)),
               ),

@@ -74,7 +74,7 @@ object CommonMessageKt {
 
     /**
      * <pre>
-     * conversation id
+     * sent at timestamp
      * </pre>
      *
      * <code>uint64 sent_at = 3;</code>
@@ -88,7 +88,7 @@ object CommonMessageKt {
       }
     /**
      * <pre>
-     * conversation id
+     * sent at timestamp
      * </pre>
      *
      * <code>uint64 sent_at = 3;</code>

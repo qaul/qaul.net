@@ -123,6 +123,134 @@ object ChatMessageKt {
     }
 
     /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    class MessageReceptionConfirmedProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+     val messageReceptionConfirmed: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.getMessageReceptionConfirmedList()
+      )
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     * @param value The messageReceptionConfirmed to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addMessageReceptionConfirmed")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.add(value: qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) {
+      _builder.addMessageReceptionConfirmed(value)
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     * @param value The messageReceptionConfirmed to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignMessageReceptionConfirmed")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.plusAssign(value: qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) {
+      add(value)
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     * @param values The messageReceptionConfirmed to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllMessageReceptionConfirmed")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed>) {
+      _builder.addAllMessageReceptionConfirmed(values)
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     * @param values The messageReceptionConfirmed to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllMessageReceptionConfirmed")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed>) {
+      addAll(values)
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     * @param index The index to set the value at.
+     * @param value The messageReceptionConfirmed to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setMessageReceptionConfirmed")
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.set(index: kotlin.Int, value: qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed) {
+      _builder.setMessageReceptionConfirmed(index, value)
+    }
+    /**
+     * <pre>
+     * message reception confirmed
+     * When a user receives a message, sent by us,
+     * the user is confirming the reception of this message.
+     * We are only getting this confirmation if we are the sender of this
+     * message.
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;</code>
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearMessageReceptionConfirmed")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.MessageReceptionConfirmed, MessageReceptionConfirmedProxy>.clear() {
+      _builder.clearMessageReceptionConfirmed()
+    }
+
+
+    /**
      * <pre>
      * conversation id
      * </pre>
@@ -202,9 +330,9 @@ object ChatMessageKt {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      */
-     var contentType: qaul.rpc.chat.ChatOuterClass.ContentType
+     var contentType: qaul.rpc.chat.ChatOuterClass.ChatContentType
       @JvmName("getContentType")
       get() = _builder.getContentType()
       @JvmName("setContentType")
@@ -216,7 +344,7 @@ object ChatMessageKt {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 8;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
      */
     fun clearContentType() {
       _builder.clearContentType()

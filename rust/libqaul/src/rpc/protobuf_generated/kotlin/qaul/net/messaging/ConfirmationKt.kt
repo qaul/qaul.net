@@ -49,7 +49,7 @@ object ConfirmationKt {
 
     /**
      * <pre>
-     * receveived at timestamp
+     * received at timestamp
      * </pre>
      *
      * <code>uint64 received_at = 2;</code>
@@ -63,7 +63,7 @@ object ConfirmationKt {
       }
     /**
      * <pre>
-     * receveived at timestamp
+     * received at timestamp
      * </pre>
      *
      * <code>uint64 received_at = 2;</code>

@@ -27,6 +27,7 @@ import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../current_open_chat_notifier.dart';
+import '../../tab.dart';
 import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
@@ -104,9 +105,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < kTabletBreakpoint;
 
-  Map<String, String> get _overflowMenuOptions => {
-        'showFiles': 'Show All Files',
-      };
+  final Map<String, String> _overflowMenuOptions = {
+    'showFiles': 'Show All Files',
+  };
 
   void _handleClick(String value) {
     switch (value) {

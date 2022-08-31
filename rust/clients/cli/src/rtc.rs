@@ -1,22 +1,26 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # FileShare module functions
+//! # ChatFile module functions
 
-use prost::Message;
 use super::rpc::Rpc;
+use prost::Message;
 use std::fmt;
 
 /// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rtc.rs"); }
-mod proto_net { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.rtc.rs"); }
+mod proto {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rtc.rs");
+}
+mod proto_net {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.rtc.rs");
+}
 
 /// GrouChat module function handling
 pub struct Rtc {}
 
 impl Rtc {
     /// CLI command interpretation
-    /// 
+    ///
     /// The CLI commands of RTC module are processed here
     pub fn cli(command: &str) {
         match command {
@@ -29,17 +33,16 @@ impl Rtc {
                     match Self::id_string_to_bin(user_id_str.to_string()) {
                         Ok(user_id) => {
                             Self::request_session(user_id);
-                        },
+                        }
                         Err(e) => {
                             log::error!("{}", e);
                             return;
-                        }                        
-                    }                    
-                }
-                else {
+                        }
+                    }
+                } else {
                     log::error!("rtc request command incorrectly formatted");
                 }
-            },
+            }
 
             // rtc session accept
             cmd if cmd.starts_with("accept ") => {
@@ -50,17 +53,16 @@ impl Rtc {
                     match Self::id_string_to_bin(conversation_id_str.to_string()) {
                         Ok(conversation_id) => {
                             Self::accept_session(conversation_id);
-                        },
+                        }
                         Err(e) => {
                             log::error!("{}", e);
                             return;
-                        }                        
-                    }                    
-                }
-                else {
+                        }
+                    }
+                } else {
                     log::error!("rtc accept command incorrectly formatted");
                 }
-            },
+            }
 
             // rtc session accept
             cmd if cmd.starts_with("decline ") => {
@@ -71,17 +73,16 @@ impl Rtc {
                     match Self::id_string_to_bin(conversation_id_str.to_string()) {
                         Ok(conversation_id) => {
                             Self::decline_session(conversation_id);
-                        },
+                        }
                         Err(e) => {
                             log::error!("{}", e);
                             return;
-                        }                        
-                    }                    
-                }
-                else {
+                        }
+                    }
+                } else {
                     log::error!("rtc decline command incorrectly formatted");
                 }
-            },
+            }
 
             // rtc session accept
             cmd if cmd.starts_with("end ") => {
@@ -92,18 +93,16 @@ impl Rtc {
                     match Self::id_string_to_bin(conversation_id_str.to_string()) {
                         Ok(conversation_id) => {
                             Self::end_session(conversation_id);
-                        },
+                        }
                         Err(e) => {
                             log::error!("{}", e);
                             return;
-                        }                        
-                    }                    
-                }
-                else {
+                        }
+                    }
+                } else {
                     log::error!("rtc end command incorrectly formatted");
                 }
-            },
-
+            }
 
             // rtc send message
             cmd if cmd.starts_with("send ") => {
@@ -113,35 +112,34 @@ impl Rtc {
                 if let Some(conversation_id_str) = iter.next() {
                     match Self::id_string_to_bin(conversation_id_str.to_string()) {
                         Ok(conversation_id) => {
-                            if let Some(message_str) = iter.next(){
+                            if let Some(message_str) = iter.next() {
                                 Self::send_session(conversation_id, message_str.to_string());
-                            }else{
+                            } else {
                                 log::error!("rtc send command no contents");
-                            }                            
-                        },
+                            }
+                        }
                         Err(e) => {
                             log::error!("{}", e);
                             return;
-                        }                        
-                    }                    
-                }
-                else {
+                        }
+                    }
+                } else {
                     log::error!("rtc send command incorrectly formatted");
                 }
-            },
+            }
 
             // rtc send message
             cmd if cmd.starts_with("list") => {
                 Self::list_session();
-            },            
+            }
 
             // unknown command
             _ => log::error!("unknown group command"),
         }
     }
 
-   /// Convert Conversation ID from String to Binary
-   fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
+    /// Convert Conversation ID from String to Binary
+    fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
             return Err("Conversation ID not long enough".to_string());
@@ -155,83 +153,90 @@ impl Rtc {
                 Err(err)
             }
         }
-    }    
+    }
 
     /// session request
     fn request_session(user_id: Vec<u8>) {
-
         // create group send message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionRequest(
-                proto::RtcSessionRequest{
+                proto::RtcSessionRequest {
                     conversation_id: user_id.clone(),
-                }
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
-   /// accept session
-   fn accept_session(conversation_id: Vec<u8>) {
+    /// accept session
+    fn accept_session(conversation_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
-                proto::RtcSessionManagement{
+                proto::RtcSessionManagement {
                     conversation_id: conversation_id.clone(),
-                    option: 1
-                }
+                    option: 1,
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
-    }    
+    }
 
     /// decline session
     fn decline_session(conversation_id: Vec<u8>) {
         // decline session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
-                proto::RtcSessionManagement{
+                proto::RtcSessionManagement {
                     conversation_id: conversation_id.clone(),
-                    option: 2
-                }
+                    option: 2,
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
-    }    
+    }
 
     /// end session
     fn end_session(conversation_id: Vec<u8>) {
         // end session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
-                proto::RtcSessionManagement{
+                proto::RtcSessionManagement {
                     conversation_id: conversation_id.clone(),
-                    option: 3
-                }
+                    option: 3,
+                },
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
@@ -239,53 +244,57 @@ impl Rtc {
 
     /// send session
     fn send_session(conversation_id: Vec<u8>, message: String) {
-        let rtc_content = proto_net::RtcContent{
+        let rtc_content = proto_net::RtcContent {
             content: Some(proto_net::rtc_content::Content::ChatContent(
-                proto_net::RtcChatContent{
+                proto_net::RtcChatContent {
                     content: message.clone(),
-            }))
+                },
+            )),
         };
 
         // session message
         let mut buf0 = Vec::with_capacity(rtc_content.encoded_len());
-        rtc_content.encode(&mut buf0).expect("Vec<u8> provides capacity as needed");
-        
+        rtc_content
+            .encode(&mut buf0)
+            .expect("Vec<u8> provides capacity as needed");
+
         let proto_message = proto::RtcRpc {
-            message: Some(proto::rtc_rpc::Message::RtcOutgoing(
-                proto::RtcOutgoing{
-                    conversation_id: conversation_id.clone(),
-                    content: buf0
-                }
-            )),
+            message: Some(proto::rtc_rpc::Message::RtcOutgoing(proto::RtcOutgoing {
+                conversation_id: conversation_id.clone(),
+                content: buf0,
+            })),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
-
     /// session list
     fn list_session() {
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionListRequest(
-                proto::RtcSessionListRequest{}
+                proto::RtcSessionListRequest {},
             )),
         };
 
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
-    }    
+    }
 
     /// Process received RPC message
-    /// 
+    ///
     /// Decodes received protobuf encoded binary RPC message
     /// of the group chat module.
     pub fn rpc(data: Vec<u8>) {
@@ -295,39 +304,52 @@ impl Rtc {
                     Some(proto::rtc_rpc::Message::RtcSessionResponse(resp)) => {
                         println!("====================================");
                         println!("Session was created");
-                        println!("\tconversation id: {}", bs58::encode(resp.conversation_id).into_string());
-                    },
+                        println!(
+                            "\tconversation id: {}",
+                            bs58::encode(resp.conversation_id).into_string()
+                        );
+                    }
                     Some(proto::rtc_rpc::Message::RtcIncoming(resp)) => {
-                        // 
+                        //
                         println!("====================================");
                         println!("Rtc Incoming");
-                        println!("\tconversation id: {}", bs58::encode(resp.conversation_id).into_string());
+                        println!(
+                            "\tconversation id: {}",
+                            bs58::encode(resp.conversation_id).into_string()
+                        );
 
-                        match proto_net::RtcContent::decode(&resp.content[..]).unwrap().content {
-                            Some(proto_net::rtc_content::Content::ChatContent(chat_content)) =>{
+                        match proto_net::RtcContent::decode(&resp.content[..])
+                            .unwrap()
+                            .content
+                        {
+                            Some(proto_net::rtc_content::Content::ChatContent(chat_content)) => {
                                 println!("\tchat content: {}", chat_content.content);
-                            },
-                            _ =>{
-
                             }
+                            _ => {}
                         }
-                    },
+                    }
                     Some(proto::rtc_rpc::Message::RtcSessionListResponse(resp)) => {
                         // List sessions
                         println!("=============List Of Sessions=================");
-                        for session in resp.sessions{                            
-                            println!("conversation id: {}", bs58::encode(session.conversation_id).into_string());
-                            println!("\ttype: {} , state: {} , created at: {}", session.session_type, session.state, session.created_at);
+                        for session in resp.sessions {
+                            println!(
+                                "conversation id: {}",
+                                bs58::encode(session.conversation_id).into_string()
+                            );
+                            println!(
+                                "\ttype: {} , state: {} , created at: {}",
+                                session.session_type, session.state, session.created_at
+                            );
                         }
-                    },                    
+                    }
                     _ => {
                         log::error!("unprocessable RPC RTC message");
-                    },
-                }    
-            },
+                    }
+                }
+            }
             Err(error) => {
                 log::error!("{:?}", error);
-            },
+            }
         }
     }
 }

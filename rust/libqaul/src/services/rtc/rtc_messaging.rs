@@ -1,9 +1,9 @@
 //use bs58::decode;
 use libp2p::PeerId;
 
-use super::messaging;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
+use crate::services::messaging;
 use prost::Message;
 
 pub struct RtcMessaging {}
@@ -33,15 +33,19 @@ impl RtcMessaging {
                     )),
                 };
 
+                let message_id: Vec<u8> = Vec::new();
                 if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
                     let receiver = PeerId::from_bytes(&req.conversation_id).unwrap();
-                    messaging::Messaging::pack_and_send_message(
+                    if let Err(e) = messaging::Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
-                        &send_message.encode_to_vec(),
-                        None,
+                        send_message.encode_to_vec(),
+                        messaging::MessagingServiceType::Unconfirmed,
+                        &message_id,
                         false,
-                    );
+                    ) {
+                        log::error!("error {}", e);
+                    }
                 } else {
                     return Err("user account has problem".to_string());
                 }

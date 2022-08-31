@@ -25,6 +25,8 @@ object DataKt {
     /**
      * <pre>
      * message nonce for encryption
+     * each nonce is only used once per key
+     * and increases by one fore each new data package.
      * </pre>
      *
      * <code>uint64 nonce = 1;</code>
@@ -39,6 +41,8 @@ object DataKt {
     /**
      * <pre>
      * message nonce for encryption
+     * each nonce is only used once per key
+     * and increases by one fore each new data package.
      * </pre>
      *
      * <code>uint64 nonce = 1;</code>
@@ -49,7 +53,9 @@ object DataKt {
 
     /**
      * <pre>
-     * the encrypted message data
+     * the encrypted message data slice
+     * each data package contains maximally
+     * 64KB
      * </pre>
      *
      * <code>bytes data = 2;</code>
@@ -63,7 +69,9 @@ object DataKt {
       }
     /**
      * <pre>
-     * the encrypted message data
+     * the encrypted message data slice
+     * each data package contains maximally
+     * 64KB
      * </pre>
      *
      * <code>bytes data = 2;</code>

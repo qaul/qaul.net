@@ -17,7 +17,7 @@ pub struct FeedMessageContent {
     /// message content
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,
-    /// timestamp in milli seconds
+    /// timestamp in milliseconds
     #[prost(uint64, tag="3")]
     pub time: u64,
 }

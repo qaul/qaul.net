@@ -85,12 +85,12 @@ extern EnvelopeDefaultTypeInternal _Envelope_default_instance_;
 class FileMessage;
 struct FileMessageDefaultTypeInternal;
 extern FileMessageDefaultTypeInternal _FileMessage_default_instance_;
+class GroupInviteMessage;
+struct GroupInviteMessageDefaultTypeInternal;
+extern GroupInviteMessageDefaultTypeInternal _GroupInviteMessage_default_instance_;
 class GroupMessage;
 struct GroupMessageDefaultTypeInternal;
 extern GroupMessageDefaultTypeInternal _GroupMessage_default_instance_;
-class GroupNotifyMessage;
-struct GroupNotifyMessageDefaultTypeInternal;
-extern GroupNotifyMessageDefaultTypeInternal _GroupNotifyMessage_default_instance_;
 class Messaging;
 struct MessagingDefaultTypeInternal;
 extern MessagingDefaultTypeInternal _Messaging_default_instance_;
@@ -116,8 +116,8 @@ template<> ::qaul::net::messaging::Encrypted* Arena::CreateMaybeMessage<::qaul::
 template<> ::qaul::net::messaging::EnvelopPayload* Arena::CreateMaybeMessage<::qaul::net::messaging::EnvelopPayload>(Arena*);
 template<> ::qaul::net::messaging::Envelope* Arena::CreateMaybeMessage<::qaul::net::messaging::Envelope>(Arena*);
 template<> ::qaul::net::messaging::FileMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::FileMessage>(Arena*);
+template<> ::qaul::net::messaging::GroupInviteMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::GroupInviteMessage>(Arena*);
 template<> ::qaul::net::messaging::GroupMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::GroupMessage>(Arena*);
-template<> ::qaul::net::messaging::GroupNotifyMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::GroupNotifyMessage>(Arena*);
 template<> ::qaul::net::messaging::Messaging* Arena::CreateMaybeMessage<::qaul::net::messaging::Messaging>(Arena*);
 template<> ::qaul::net::messaging::RtcMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::RtcMessage>(Arena*);
 template<> ::qaul::net::messaging::RtcStreamMessage* Arena::CreateMaybeMessage<::qaul::net::messaging::RtcStreamMessage>(Arena*);
@@ -856,19 +856,23 @@ class Encrypted final :
   enum : int {
     kDataFieldNumber = 1,
   };
-  // bytes data = 1;
-  void clear_data();
-  const std::string& data() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_data(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_data();
-  PROTOBUF_NODISCARD std::string* release_data();
-  void set_allocated_data(std::string* data);
+  // repeated .qaul.net.messaging.Data data = 1;
+  int data_size() const;
   private:
-  const std::string& _internal_data() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_data(const std::string& value);
-  std::string* _internal_mutable_data();
+  int _internal_data_size() const;
   public:
+  void clear_data();
+  ::qaul::net::messaging::Data* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >*
+      mutable_data();
+  private:
+  const ::qaul::net::messaging::Data& _internal_data(int index) const;
+  ::qaul::net::messaging::Data* _internal_add_data();
+  public:
+  const ::qaul::net::messaging::Data& data(int index) const;
+  ::qaul::net::messaging::Data* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >&
+      data() const;
 
   // @@protoc_insertion_point(class_scope:qaul.net.messaging.Encrypted)
  private:
@@ -878,7 +882,7 @@ class Encrypted final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data > data_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1097,7 +1101,7 @@ class Messaging final :
     kConfirmationMessage = 1,
     kCryptoService = 2,
     kRtcStreamMessage = 3,
-    kGroupNotifyMessage = 4,
+    kGroupInviteMessage = 4,
     kCommonMessage = 5,
     MESSAGE_NOT_SET = 0,
   };
@@ -1183,7 +1187,7 @@ class Messaging final :
     kConfirmationMessageFieldNumber = 1,
     kCryptoServiceFieldNumber = 2,
     kRtcStreamMessageFieldNumber = 3,
-    kGroupNotifyMessageFieldNumber = 4,
+    kGroupInviteMessageFieldNumber = 4,
     kCommonMessageFieldNumber = 5,
   };
   // .qaul.net.messaging.Confirmation confirmation_message = 1;
@@ -1240,23 +1244,23 @@ class Messaging final :
       ::qaul::net::messaging::RtcStreamMessage* rtc_stream_message);
   ::qaul::net::messaging::RtcStreamMessage* unsafe_arena_release_rtc_stream_message();
 
-  // .qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;
-  bool has_group_notify_message() const;
+  // .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+  bool has_group_invite_message() const;
   private:
-  bool _internal_has_group_notify_message() const;
+  bool _internal_has_group_invite_message() const;
   public:
-  void clear_group_notify_message();
-  const ::qaul::net::messaging::GroupNotifyMessage& group_notify_message() const;
-  PROTOBUF_NODISCARD ::qaul::net::messaging::GroupNotifyMessage* release_group_notify_message();
-  ::qaul::net::messaging::GroupNotifyMessage* mutable_group_notify_message();
-  void set_allocated_group_notify_message(::qaul::net::messaging::GroupNotifyMessage* group_notify_message);
+  void clear_group_invite_message();
+  const ::qaul::net::messaging::GroupInviteMessage& group_invite_message() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::GroupInviteMessage* release_group_invite_message();
+  ::qaul::net::messaging::GroupInviteMessage* mutable_group_invite_message();
+  void set_allocated_group_invite_message(::qaul::net::messaging::GroupInviteMessage* group_invite_message);
   private:
-  const ::qaul::net::messaging::GroupNotifyMessage& _internal_group_notify_message() const;
-  ::qaul::net::messaging::GroupNotifyMessage* _internal_mutable_group_notify_message();
+  const ::qaul::net::messaging::GroupInviteMessage& _internal_group_invite_message() const;
+  ::qaul::net::messaging::GroupInviteMessage* _internal_mutable_group_invite_message();
   public:
-  void unsafe_arena_set_allocated_group_notify_message(
-      ::qaul::net::messaging::GroupNotifyMessage* group_notify_message);
-  ::qaul::net::messaging::GroupNotifyMessage* unsafe_arena_release_group_notify_message();
+  void unsafe_arena_set_allocated_group_invite_message(
+      ::qaul::net::messaging::GroupInviteMessage* group_invite_message);
+  ::qaul::net::messaging::GroupInviteMessage* unsafe_arena_release_group_invite_message();
 
   // .qaul.net.messaging.CommonMessage common_message = 5;
   bool has_common_message() const;
@@ -1284,7 +1288,7 @@ class Messaging final :
   void set_has_confirmation_message();
   void set_has_crypto_service();
   void set_has_rtc_stream_message();
-  void set_has_group_notify_message();
+  void set_has_group_invite_message();
   void set_has_common_message();
 
   inline bool has_message() const;
@@ -1300,7 +1304,7 @@ class Messaging final :
       ::qaul::net::messaging::Confirmation* confirmation_message_;
       ::qaul::net::messaging::CryptoService* crypto_service_;
       ::qaul::net::messaging::RtcStreamMessage* rtc_stream_message_;
-      ::qaul::net::messaging::GroupNotifyMessage* group_notify_message_;
+      ::qaul::net::messaging::GroupInviteMessage* group_invite_message_;
       ::qaul::net::messaging::CommonMessage* common_message_;
     } message_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -1308,124 +1312,6 @@ class Messaging final :
 
   };
   union { Impl_ _impl_; };
-  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CryptoService final :
-    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:qaul.net.messaging.CryptoService) */ {
- public:
-  inline CryptoService() : CryptoService(nullptr) {}
-  explicit PROTOBUF_CONSTEXPR CryptoService(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  CryptoService(const CryptoService& from);
-  CryptoService(CryptoService&& from) noexcept
-    : CryptoService() {
-    *this = ::std::move(from);
-  }
-
-  inline CryptoService& operator=(const CryptoService& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline CryptoService& operator=(CryptoService&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const CryptoService& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const CryptoService* internal_default_instance() {
-    return reinterpret_cast<const CryptoService*>(
-               &_CryptoService_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    6;
-
-  friend void swap(CryptoService& a, CryptoService& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(CryptoService* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(CryptoService* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  CryptoService* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<CryptoService>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
-  inline void CopyFrom(const CryptoService& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(*this, from);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
-  void MergeFrom(const CryptoService& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(*this, from);
-  }
-  public:
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.messaging.CryptoService";
-  }
-  protected:
-  explicit CryptoService(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:qaul.net.messaging.CryptoService)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-  };
   friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
 };
 // -------------------------------------------------------------------
@@ -1478,7 +1364,7 @@ class Confirmation final :
                &_Confirmation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    6;
 
   friend void swap(Confirmation& a, Confirmation& b) {
     a.Swap(&b);
@@ -1594,6 +1480,430 @@ class Confirmation final :
 };
 // -------------------------------------------------------------------
 
+class CryptoService final :
+    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:qaul.net.messaging.CryptoService) */ {
+ public:
+  inline CryptoService() : CryptoService(nullptr) {}
+  explicit PROTOBUF_CONSTEXPR CryptoService(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CryptoService(const CryptoService& from);
+  CryptoService(CryptoService&& from) noexcept
+    : CryptoService() {
+    *this = ::std::move(from);
+  }
+
+  inline CryptoService& operator=(const CryptoService& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CryptoService& operator=(CryptoService&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const CryptoService& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CryptoService* internal_default_instance() {
+    return reinterpret_cast<const CryptoService*>(
+               &_CryptoService_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(CryptoService& a, CryptoService& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CryptoService* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CryptoService* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  CryptoService* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<CryptoService>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const CryptoService& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(*this, from);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const CryptoService& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(*this, from);
+  }
+  public:
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.CryptoService";
+  }
+  protected:
+  explicit CryptoService(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.CryptoService)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+  };
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RtcStreamMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.RtcStreamMessage) */ {
+ public:
+  inline RtcStreamMessage() : RtcStreamMessage(nullptr) {}
+  ~RtcStreamMessage() override;
+  explicit PROTOBUF_CONSTEXPR RtcStreamMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RtcStreamMessage(const RtcStreamMessage& from);
+  RtcStreamMessage(RtcStreamMessage&& from) noexcept
+    : RtcStreamMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline RtcStreamMessage& operator=(const RtcStreamMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RtcStreamMessage& operator=(RtcStreamMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RtcStreamMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RtcStreamMessage* internal_default_instance() {
+    return reinterpret_cast<const RtcStreamMessage*>(
+               &_RtcStreamMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(RtcStreamMessage& a, RtcStreamMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RtcStreamMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RtcStreamMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RtcStreamMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RtcStreamMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RtcStreamMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const RtcStreamMessage& from) {
+    RtcStreamMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RtcStreamMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.RtcStreamMessage";
+  }
+  protected:
+  explicit RtcStreamMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kContentFieldNumber = 1,
+  };
+  // bytes content = 1;
+  void clear_content();
+  const std::string& content() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_content(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_content();
+  PROTOBUF_NODISCARD std::string* release_content();
+  void set_allocated_content(std::string* content);
+  private:
+  const std::string& _internal_content() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_content(const std::string& value);
+  std::string* _internal_mutable_content();
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcStreamMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GroupInviteMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.GroupInviteMessage) */ {
+ public:
+  inline GroupInviteMessage() : GroupInviteMessage(nullptr) {}
+  ~GroupInviteMessage() override;
+  explicit PROTOBUF_CONSTEXPR GroupInviteMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GroupInviteMessage(const GroupInviteMessage& from);
+  GroupInviteMessage(GroupInviteMessage&& from) noexcept
+    : GroupInviteMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline GroupInviteMessage& operator=(const GroupInviteMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GroupInviteMessage& operator=(GroupInviteMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GroupInviteMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GroupInviteMessage* internal_default_instance() {
+    return reinterpret_cast<const GroupInviteMessage*>(
+               &_GroupInviteMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(GroupInviteMessage& a, GroupInviteMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GroupInviteMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GroupInviteMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GroupInviteMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GroupInviteMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GroupInviteMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const GroupInviteMessage& from) {
+    GroupInviteMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GroupInviteMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.net.messaging.GroupInviteMessage";
+  }
+  protected:
+  explicit GroupInviteMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kContentFieldNumber = 1,
+  };
+  // bytes content = 1;
+  void clear_content();
+  const std::string& content() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_content(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_content();
+  PROTOBUF_NODISCARD std::string* release_content();
+  void set_allocated_content(std::string* content);
+  private:
+  const std::string& _internal_content() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_content(const std::string& value);
+  std::string* _internal_mutable_content();
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.GroupInviteMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CommonMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.CommonMessage) */ {
  public:
@@ -1650,7 +1960,7 @@ class CommonMessage final :
                &_CommonMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    10;
 
   friend void swap(CommonMessage& a, CommonMessage& b) {
     a.Swap(&b);
@@ -1925,7 +2235,7 @@ class ChatMessage final :
                &_ChatMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    11;
 
   friend void swap(ChatMessage& a, ChatMessage& b) {
     a.Swap(&b);
@@ -2078,7 +2388,7 @@ class FileMessage final :
                &_FileMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    12;
 
   friend void swap(FileMessage& a, FileMessage& b) {
     a.Swap(&b);
@@ -2168,312 +2478,6 @@ class FileMessage final :
   public:
 
   // @@protoc_insertion_point(class_scope:qaul.net.messaging.FileMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
-};
-// -------------------------------------------------------------------
-
-class RtcMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.RtcMessage) */ {
- public:
-  inline RtcMessage() : RtcMessage(nullptr) {}
-  ~RtcMessage() override;
-  explicit PROTOBUF_CONSTEXPR RtcMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  RtcMessage(const RtcMessage& from);
-  RtcMessage(RtcMessage&& from) noexcept
-    : RtcMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline RtcMessage& operator=(const RtcMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline RtcMessage& operator=(RtcMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const RtcMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const RtcMessage* internal_default_instance() {
-    return reinterpret_cast<const RtcMessage*>(
-               &_RtcMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    11;
-
-  friend void swap(RtcMessage& a, RtcMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(RtcMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(RtcMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  RtcMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<RtcMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const RtcMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const RtcMessage& from) {
-    RtcMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(RtcMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.messaging.RtcMessage";
-  }
-  protected:
-  explicit RtcMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kContentFieldNumber = 1,
-  };
-  // bytes content = 1;
-  void clear_content();
-  const std::string& content() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_content(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_content();
-  PROTOBUF_NODISCARD std::string* release_content();
-  void set_allocated_content(std::string* content);
-  private:
-  const std::string& _internal_content() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_content(const std::string& value);
-  std::string* _internal_mutable_content();
-  public:
-
-  // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_services_2fmessaging_2fmessaging_2eproto;
-};
-// -------------------------------------------------------------------
-
-class RtcStreamMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.RtcStreamMessage) */ {
- public:
-  inline RtcStreamMessage() : RtcStreamMessage(nullptr) {}
-  ~RtcStreamMessage() override;
-  explicit PROTOBUF_CONSTEXPR RtcStreamMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  RtcStreamMessage(const RtcStreamMessage& from);
-  RtcStreamMessage(RtcStreamMessage&& from) noexcept
-    : RtcStreamMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline RtcStreamMessage& operator=(const RtcStreamMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline RtcStreamMessage& operator=(RtcStreamMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const RtcStreamMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const RtcStreamMessage* internal_default_instance() {
-    return reinterpret_cast<const RtcStreamMessage*>(
-               &_RtcStreamMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    12;
-
-  friend void swap(RtcStreamMessage& a, RtcStreamMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(RtcStreamMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(RtcStreamMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  RtcStreamMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<RtcStreamMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const RtcStreamMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const RtcStreamMessage& from) {
-    RtcStreamMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(RtcStreamMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.messaging.RtcStreamMessage";
-  }
-  protected:
-  explicit RtcStreamMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kContentFieldNumber = 1,
-  };
-  // bytes content = 1;
-  void clear_content();
-  const std::string& content() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_content(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_content();
-  PROTOBUF_NODISCARD std::string* release_content();
-  void set_allocated_content(std::string* content);
-  private:
-  const std::string& _internal_content() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_content(const std::string& value);
-  std::string* _internal_mutable_content();
-  public:
-
-  // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcStreamMessage)
  private:
   class _Internal;
 
@@ -2642,24 +2646,24 @@ class GroupMessage final :
 };
 // -------------------------------------------------------------------
 
-class GroupNotifyMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.GroupNotifyMessage) */ {
+class RtcMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.net.messaging.RtcMessage) */ {
  public:
-  inline GroupNotifyMessage() : GroupNotifyMessage(nullptr) {}
-  ~GroupNotifyMessage() override;
-  explicit PROTOBUF_CONSTEXPR GroupNotifyMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline RtcMessage() : RtcMessage(nullptr) {}
+  ~RtcMessage() override;
+  explicit PROTOBUF_CONSTEXPR RtcMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  GroupNotifyMessage(const GroupNotifyMessage& from);
-  GroupNotifyMessage(GroupNotifyMessage&& from) noexcept
-    : GroupNotifyMessage() {
+  RtcMessage(const RtcMessage& from);
+  RtcMessage(RtcMessage&& from) noexcept
+    : RtcMessage() {
     *this = ::std::move(from);
   }
 
-  inline GroupNotifyMessage& operator=(const GroupNotifyMessage& from) {
+  inline RtcMessage& operator=(const RtcMessage& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GroupNotifyMessage& operator=(GroupNotifyMessage&& from) noexcept {
+  inline RtcMessage& operator=(RtcMessage&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -2682,20 +2686,20 @@ class GroupNotifyMessage final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const GroupNotifyMessage& default_instance() {
+  static const RtcMessage& default_instance() {
     return *internal_default_instance();
   }
-  static inline const GroupNotifyMessage* internal_default_instance() {
-    return reinterpret_cast<const GroupNotifyMessage*>(
-               &_GroupNotifyMessage_default_instance_);
+  static inline const RtcMessage* internal_default_instance() {
+    return reinterpret_cast<const RtcMessage*>(
+               &_RtcMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     14;
 
-  friend void swap(GroupNotifyMessage& a, GroupNotifyMessage& b) {
+  friend void swap(RtcMessage& a, RtcMessage& b) {
     a.Swap(&b);
   }
-  inline void Swap(GroupNotifyMessage* other) {
+  inline void Swap(RtcMessage* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -2708,7 +2712,7 @@ class GroupNotifyMessage final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GroupNotifyMessage* other) {
+  void UnsafeArenaSwap(RtcMessage* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -2716,14 +2720,14 @@ class GroupNotifyMessage final :
 
   // implements Message ----------------------------------------------
 
-  GroupNotifyMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GroupNotifyMessage>(arena);
+  RtcMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RtcMessage>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GroupNotifyMessage& from);
+  void CopyFrom(const RtcMessage& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GroupNotifyMessage& from) {
-    GroupNotifyMessage::MergeImpl(*this, from);
+  void MergeFrom( const RtcMessage& from) {
+    RtcMessage::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -2741,15 +2745,15 @@ class GroupNotifyMessage final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(GroupNotifyMessage* other);
+  void InternalSwap(RtcMessage* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.net.messaging.GroupNotifyMessage";
+    return "qaul.net.messaging.RtcMessage";
   }
   protected:
-  explicit GroupNotifyMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit RtcMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -2779,7 +2783,7 @@ class GroupNotifyMessage final :
   std::string* _internal_mutable_content();
   public:
 
-  // @@protoc_insertion_point(class_scope:qaul.net.messaging.GroupNotifyMessage)
+  // @@protoc_insertion_point(class_scope:qaul.net.messaging.RtcMessage)
  private:
   class _Internal;
 
@@ -3699,54 +3703,44 @@ inline EnvelopPayload::PayloadCase EnvelopPayload::payload_case() const {
 
 // Encrypted
 
-// bytes data = 1;
+// repeated .qaul.net.messaging.Data data = 1;
+inline int Encrypted::_internal_data_size() const {
+  return _impl_.data_.size();
+}
+inline int Encrypted::data_size() const {
+  return _internal_data_size();
+}
 inline void Encrypted::clear_data() {
-  _impl_.data_.ClearToEmpty();
+  _impl_.data_.Clear();
 }
-inline const std::string& Encrypted::data() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.Encrypted.data)
-  return _internal_data();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void Encrypted::set_data(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.data_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.Encrypted.data)
-}
-inline std::string* Encrypted::mutable_data() {
-  std::string* _s = _internal_mutable_data();
+inline ::qaul::net::messaging::Data* Encrypted::mutable_data(int index) {
   // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Encrypted.data)
-  return _s;
+  return _impl_.data_.Mutable(index);
 }
-inline const std::string& Encrypted::_internal_data() const {
-  return _impl_.data_.Get();
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >*
+Encrypted::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.net.messaging.Encrypted.data)
+  return &_impl_.data_;
 }
-inline void Encrypted::_internal_set_data(const std::string& value) {
-  
-  _impl_.data_.Set(value, GetArenaForAllocation());
+inline const ::qaul::net::messaging::Data& Encrypted::_internal_data(int index) const {
+  return _impl_.data_.Get(index);
 }
-inline std::string* Encrypted::_internal_mutable_data() {
-  
-  return _impl_.data_.Mutable(GetArenaForAllocation());
+inline const ::qaul::net::messaging::Data& Encrypted::data(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Encrypted.data)
+  return _internal_data(index);
 }
-inline std::string* Encrypted::release_data() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.Encrypted.data)
-  return _impl_.data_.Release();
+inline ::qaul::net::messaging::Data* Encrypted::_internal_add_data() {
+  return _impl_.data_.Add();
 }
-inline void Encrypted::set_allocated_data(std::string* data) {
-  if (data != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.data_.SetAllocated(data, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.data_.IsDefault()) {
-    _impl_.data_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Encrypted.data)
+inline ::qaul::net::messaging::Data* Encrypted::add_data() {
+  ::qaul::net::messaging::Data* _add = _internal_add_data();
+  // @@protoc_insertion_point(field_add:qaul.net.messaging.Encrypted.data)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >&
+Encrypted::data() const {
+  // @@protoc_insertion_point(field_list:qaul.net.messaging.Encrypted.data)
+  return _impl_.data_;
 }
 
 // -------------------------------------------------------------------
@@ -4049,77 +4043,77 @@ inline ::qaul::net::messaging::RtcStreamMessage* Messaging::mutable_rtc_stream_m
   return _msg;
 }
 
-// .qaul.net.messaging.GroupNotifyMessage group_notify_message = 4;
-inline bool Messaging::_internal_has_group_notify_message() const {
-  return message_case() == kGroupNotifyMessage;
+// .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+inline bool Messaging::_internal_has_group_invite_message() const {
+  return message_case() == kGroupInviteMessage;
 }
-inline bool Messaging::has_group_notify_message() const {
-  return _internal_has_group_notify_message();
+inline bool Messaging::has_group_invite_message() const {
+  return _internal_has_group_invite_message();
 }
-inline void Messaging::set_has_group_notify_message() {
-  _impl_._oneof_case_[0] = kGroupNotifyMessage;
+inline void Messaging::set_has_group_invite_message() {
+  _impl_._oneof_case_[0] = kGroupInviteMessage;
 }
-inline void Messaging::clear_group_notify_message() {
-  if (_internal_has_group_notify_message()) {
+inline void Messaging::clear_group_invite_message() {
+  if (_internal_has_group_invite_message()) {
     if (GetArenaForAllocation() == nullptr) {
-      delete _impl_.message_.group_notify_message_;
+      delete _impl_.message_.group_invite_message_;
     }
     clear_has_message();
   }
 }
-inline ::qaul::net::messaging::GroupNotifyMessage* Messaging::release_group_notify_message() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.group_notify_message)
-  if (_internal_has_group_notify_message()) {
+inline ::qaul::net::messaging::GroupInviteMessage* Messaging::release_group_invite_message() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.group_invite_message)
+  if (_internal_has_group_invite_message()) {
     clear_has_message();
-    ::qaul::net::messaging::GroupNotifyMessage* temp = _impl_.message_.group_notify_message_;
+    ::qaul::net::messaging::GroupInviteMessage* temp = _impl_.message_.group_invite_message_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
-    _impl_.message_.group_notify_message_ = nullptr;
+    _impl_.message_.group_invite_message_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline const ::qaul::net::messaging::GroupNotifyMessage& Messaging::_internal_group_notify_message() const {
-  return _internal_has_group_notify_message()
-      ? *_impl_.message_.group_notify_message_
-      : reinterpret_cast< ::qaul::net::messaging::GroupNotifyMessage&>(::qaul::net::messaging::_GroupNotifyMessage_default_instance_);
+inline const ::qaul::net::messaging::GroupInviteMessage& Messaging::_internal_group_invite_message() const {
+  return _internal_has_group_invite_message()
+      ? *_impl_.message_.group_invite_message_
+      : reinterpret_cast< ::qaul::net::messaging::GroupInviteMessage&>(::qaul::net::messaging::_GroupInviteMessage_default_instance_);
 }
-inline const ::qaul::net::messaging::GroupNotifyMessage& Messaging::group_notify_message() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.group_notify_message)
-  return _internal_group_notify_message();
+inline const ::qaul::net::messaging::GroupInviteMessage& Messaging::group_invite_message() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.group_invite_message)
+  return _internal_group_invite_message();
 }
-inline ::qaul::net::messaging::GroupNotifyMessage* Messaging::unsafe_arena_release_group_notify_message() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.group_notify_message)
-  if (_internal_has_group_notify_message()) {
+inline ::qaul::net::messaging::GroupInviteMessage* Messaging::unsafe_arena_release_group_invite_message() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.group_invite_message)
+  if (_internal_has_group_invite_message()) {
     clear_has_message();
-    ::qaul::net::messaging::GroupNotifyMessage* temp = _impl_.message_.group_notify_message_;
-    _impl_.message_.group_notify_message_ = nullptr;
+    ::qaul::net::messaging::GroupInviteMessage* temp = _impl_.message_.group_invite_message_;
+    _impl_.message_.group_invite_message_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void Messaging::unsafe_arena_set_allocated_group_notify_message(::qaul::net::messaging::GroupNotifyMessage* group_notify_message) {
+inline void Messaging::unsafe_arena_set_allocated_group_invite_message(::qaul::net::messaging::GroupInviteMessage* group_invite_message) {
   clear_message();
-  if (group_notify_message) {
-    set_has_group_notify_message();
-    _impl_.message_.group_notify_message_ = group_notify_message;
+  if (group_invite_message) {
+    set_has_group_invite_message();
+    _impl_.message_.group_invite_message_ = group_invite_message;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.group_notify_message)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.group_invite_message)
 }
-inline ::qaul::net::messaging::GroupNotifyMessage* Messaging::_internal_mutable_group_notify_message() {
-  if (!_internal_has_group_notify_message()) {
+inline ::qaul::net::messaging::GroupInviteMessage* Messaging::_internal_mutable_group_invite_message() {
+  if (!_internal_has_group_invite_message()) {
     clear_message();
-    set_has_group_notify_message();
-    _impl_.message_.group_notify_message_ = CreateMaybeMessage< ::qaul::net::messaging::GroupNotifyMessage >(GetArenaForAllocation());
+    set_has_group_invite_message();
+    _impl_.message_.group_invite_message_ = CreateMaybeMessage< ::qaul::net::messaging::GroupInviteMessage >(GetArenaForAllocation());
   }
-  return _impl_.message_.group_notify_message_;
+  return _impl_.message_.group_invite_message_;
 }
-inline ::qaul::net::messaging::GroupNotifyMessage* Messaging::mutable_group_notify_message() {
-  ::qaul::net::messaging::GroupNotifyMessage* _msg = _internal_mutable_group_notify_message();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.group_notify_message)
+inline ::qaul::net::messaging::GroupInviteMessage* Messaging::mutable_group_invite_message() {
+  ::qaul::net::messaging::GroupInviteMessage* _msg = _internal_mutable_group_invite_message();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.group_invite_message)
   return _msg;
 }
 
@@ -4208,10 +4202,6 @@ inline Messaging::MessageCase Messaging::message_case() const {
 }
 // -------------------------------------------------------------------
 
-// CryptoService
-
-// -------------------------------------------------------------------
-
 // Confirmation
 
 // bytes signature = 1;
@@ -4282,6 +4272,118 @@ inline void Confirmation::_internal_set_received_at(uint64_t value) {
 inline void Confirmation::set_received_at(uint64_t value) {
   _internal_set_received_at(value);
   // @@protoc_insertion_point(field_set:qaul.net.messaging.Confirmation.received_at)
+}
+
+// -------------------------------------------------------------------
+
+// CryptoService
+
+// -------------------------------------------------------------------
+
+// RtcStreamMessage
+
+// bytes content = 1;
+inline void RtcStreamMessage::clear_content() {
+  _impl_.content_.ClearToEmpty();
+}
+inline const std::string& RtcStreamMessage::content() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.RtcStreamMessage.content)
+  return _internal_content();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void RtcStreamMessage::set_content(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.RtcStreamMessage.content)
+}
+inline std::string* RtcStreamMessage::mutable_content() {
+  std::string* _s = _internal_mutable_content();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.RtcStreamMessage.content)
+  return _s;
+}
+inline const std::string& RtcStreamMessage::_internal_content() const {
+  return _impl_.content_.Get();
+}
+inline void RtcStreamMessage::_internal_set_content(const std::string& value) {
+  
+  _impl_.content_.Set(value, GetArenaForAllocation());
+}
+inline std::string* RtcStreamMessage::_internal_mutable_content() {
+  
+  return _impl_.content_.Mutable(GetArenaForAllocation());
+}
+inline std::string* RtcStreamMessage::release_content() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.RtcStreamMessage.content)
+  return _impl_.content_.Release();
+}
+inline void RtcStreamMessage::set_allocated_content(std::string* content) {
+  if (content != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.content_.SetAllocated(content, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.content_.IsDefault()) {
+    _impl_.content_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.RtcStreamMessage.content)
+}
+
+// -------------------------------------------------------------------
+
+// GroupInviteMessage
+
+// bytes content = 1;
+inline void GroupInviteMessage::clear_content() {
+  _impl_.content_.ClearToEmpty();
+}
+inline const std::string& GroupInviteMessage::content() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.GroupInviteMessage.content)
+  return _internal_content();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void GroupInviteMessage::set_content(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.GroupInviteMessage.content)
+}
+inline std::string* GroupInviteMessage::mutable_content() {
+  std::string* _s = _internal_mutable_content();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.GroupInviteMessage.content)
+  return _s;
+}
+inline const std::string& GroupInviteMessage::_internal_content() const {
+  return _impl_.content_.Get();
+}
+inline void GroupInviteMessage::_internal_set_content(const std::string& value) {
+  
+  _impl_.content_.Set(value, GetArenaForAllocation());
+}
+inline std::string* GroupInviteMessage::_internal_mutable_content() {
+  
+  return _impl_.content_.Mutable(GetArenaForAllocation());
+}
+inline std::string* GroupInviteMessage::release_content() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.GroupInviteMessage.content)
+  return _impl_.content_.Release();
+}
+inline void GroupInviteMessage::set_allocated_content(std::string* content) {
+  if (content != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.content_.SetAllocated(content, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.content_.IsDefault()) {
+    _impl_.content_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.GroupInviteMessage.content)
 }
 
 // -------------------------------------------------------------------
@@ -4823,114 +4925,6 @@ inline void FileMessage::set_allocated_content(std::string* content) {
 
 // -------------------------------------------------------------------
 
-// RtcMessage
-
-// bytes content = 1;
-inline void RtcMessage::clear_content() {
-  _impl_.content_.ClearToEmpty();
-}
-inline const std::string& RtcMessage::content() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.RtcMessage.content)
-  return _internal_content();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void RtcMessage::set_content(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.RtcMessage.content)
-}
-inline std::string* RtcMessage::mutable_content() {
-  std::string* _s = _internal_mutable_content();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.RtcMessage.content)
-  return _s;
-}
-inline const std::string& RtcMessage::_internal_content() const {
-  return _impl_.content_.Get();
-}
-inline void RtcMessage::_internal_set_content(const std::string& value) {
-  
-  _impl_.content_.Set(value, GetArenaForAllocation());
-}
-inline std::string* RtcMessage::_internal_mutable_content() {
-  
-  return _impl_.content_.Mutable(GetArenaForAllocation());
-}
-inline std::string* RtcMessage::release_content() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.RtcMessage.content)
-  return _impl_.content_.Release();
-}
-inline void RtcMessage::set_allocated_content(std::string* content) {
-  if (content != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.content_.SetAllocated(content, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.content_.IsDefault()) {
-    _impl_.content_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.RtcMessage.content)
-}
-
-// -------------------------------------------------------------------
-
-// RtcStreamMessage
-
-// bytes content = 1;
-inline void RtcStreamMessage::clear_content() {
-  _impl_.content_.ClearToEmpty();
-}
-inline const std::string& RtcStreamMessage::content() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.RtcStreamMessage.content)
-  return _internal_content();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void RtcStreamMessage::set_content(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.RtcStreamMessage.content)
-}
-inline std::string* RtcStreamMessage::mutable_content() {
-  std::string* _s = _internal_mutable_content();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.RtcStreamMessage.content)
-  return _s;
-}
-inline const std::string& RtcStreamMessage::_internal_content() const {
-  return _impl_.content_.Get();
-}
-inline void RtcStreamMessage::_internal_set_content(const std::string& value) {
-  
-  _impl_.content_.Set(value, GetArenaForAllocation());
-}
-inline std::string* RtcStreamMessage::_internal_mutable_content() {
-  
-  return _impl_.content_.Mutable(GetArenaForAllocation());
-}
-inline std::string* RtcStreamMessage::release_content() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.RtcStreamMessage.content)
-  return _impl_.content_.Release();
-}
-inline void RtcStreamMessage::set_allocated_content(std::string* content) {
-  if (content != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.content_.SetAllocated(content, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.content_.IsDefault()) {
-    _impl_.content_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.RtcStreamMessage.content)
-}
-
-// -------------------------------------------------------------------
-
 // GroupMessage
 
 // bytes content = 1;
@@ -4985,44 +4979,44 @@ inline void GroupMessage::set_allocated_content(std::string* content) {
 
 // -------------------------------------------------------------------
 
-// GroupNotifyMessage
+// RtcMessage
 
 // bytes content = 1;
-inline void GroupNotifyMessage::clear_content() {
+inline void RtcMessage::clear_content() {
   _impl_.content_.ClearToEmpty();
 }
-inline const std::string& GroupNotifyMessage::content() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.GroupNotifyMessage.content)
+inline const std::string& RtcMessage::content() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.RtcMessage.content)
   return _internal_content();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void GroupNotifyMessage::set_content(ArgT0&& arg0, ArgT... args) {
+void RtcMessage::set_content(ArgT0&& arg0, ArgT... args) {
  
  _impl_.content_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.GroupNotifyMessage.content)
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.RtcMessage.content)
 }
-inline std::string* GroupNotifyMessage::mutable_content() {
+inline std::string* RtcMessage::mutable_content() {
   std::string* _s = _internal_mutable_content();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.GroupNotifyMessage.content)
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.RtcMessage.content)
   return _s;
 }
-inline const std::string& GroupNotifyMessage::_internal_content() const {
+inline const std::string& RtcMessage::_internal_content() const {
   return _impl_.content_.Get();
 }
-inline void GroupNotifyMessage::_internal_set_content(const std::string& value) {
+inline void RtcMessage::_internal_set_content(const std::string& value) {
   
   _impl_.content_.Set(value, GetArenaForAllocation());
 }
-inline std::string* GroupNotifyMessage::_internal_mutable_content() {
+inline std::string* RtcMessage::_internal_mutable_content() {
   
   return _impl_.content_.Mutable(GetArenaForAllocation());
 }
-inline std::string* GroupNotifyMessage::release_content() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.GroupNotifyMessage.content)
+inline std::string* RtcMessage::release_content() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.RtcMessage.content)
   return _impl_.content_.Release();
 }
-inline void GroupNotifyMessage::set_allocated_content(std::string* content) {
+inline void RtcMessage::set_allocated_content(std::string* content) {
   if (content != nullptr) {
     
   } else {
@@ -5034,7 +5028,7 @@ inline void GroupNotifyMessage::set_allocated_content(std::string* content) {
     _impl_.content_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.GroupNotifyMessage.content)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.RtcMessage.content)
 }
 
 // -------------------------------------------------------------------

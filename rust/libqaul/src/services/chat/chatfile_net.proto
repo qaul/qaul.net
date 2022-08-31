@@ -1,0 +1,54 @@
+syntax = "proto3";
+package qaul.net.chatfile;
+
+// Chat file sending container
+message ChatFileContainer {
+    oneof message {
+        // Chat File Info Message
+        ChatFileInfo file_info = 1;
+        // Chat File Data Message
+        ChatFileData file_data = 2;
+    }
+}
+
+// Chat File Info Message
+message ChatFileInfo {
+    // file id
+    uint64 file_id = 1;
+
+    // file name
+    string file_name = 2;
+
+    // file extension
+    string file_extension = 3;
+    // file size
+    uint32 file_size = 4;
+
+    // file description
+    string file_description = 5;
+
+    // DEPRECATED: What is this used for?
+    // start index
+    uint32 start_index = 6;
+
+    // message count
+    uint32 message_count = 7;
+
+    // file data chunk size
+    uint32 data_chunk_size = 8;
+}
+
+// Chat File Data Message
+message ChatFileData {
+    // file id
+    uint64 file_id = 1;
+
+    // start index
+    uint32 start_index = 2;
+
+    // message count
+    uint32 message_count = 3;
+
+    // package data
+    bytes data = 4;
+}

@@ -24,7 +24,7 @@ object GroupMemberKt {
 
     /**
      * <pre>
-     *user id
+     * user id
      * </pre>
      *
      * <code>bytes user_id = 1;</code>
@@ -38,7 +38,7 @@ object GroupMemberKt {
       }
     /**
      * <pre>
-     *user id
+     * user id
      * </pre>
      *
      * <code>bytes user_id = 1;</code>
@@ -49,7 +49,7 @@ object GroupMemberKt {
 
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -63,7 +63,7 @@ object GroupMemberKt {
       }
     /**
      * <pre>
-     *role
+     * role
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberRole role = 2;</code>
@@ -74,7 +74,7 @@ object GroupMemberKt {
 
     /**
      * <pre>
-     *joined at
+     * joined at
      * </pre>
      *
      * <code>uint64 joined_at = 3;</code>
@@ -88,7 +88,7 @@ object GroupMemberKt {
       }
     /**
      * <pre>
-     *joined at
+     * joined at
      * </pre>
      *
      * <code>uint64 joined_at = 3;</code>
@@ -99,7 +99,7 @@ object GroupMemberKt {
 
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -113,7 +113,7 @@ object GroupMemberKt {
       }
     /**
      * <pre>
-     *state 
+     * state
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupMemberState state = 4;</code>
@@ -124,7 +124,7 @@ object GroupMemberKt {
 
     /**
      * <pre>
-     *last message index 
+     * last message index
      * </pre>
      *
      * <code>uint32 last_message_index = 5;</code>
@@ -138,7 +138,7 @@ object GroupMemberKt {
       }
     /**
      * <pre>
-     *last message index 
+     * last message index
      * </pre>
      *
      * <code>uint32 last_message_index = 5;</code>

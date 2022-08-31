@@ -39,11 +39,7 @@ struct GroupContainerDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupContainerDefaultTypeInternal _GroupContainer_default_instance_;
 PROTOBUF_CONSTEXPR InviteMember::InviteMember(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.group_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.admin_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.created_at_)*/uint64_t{0u}
-  , /*decltype(_impl_.members_count_)*/0u
+    /*decltype(_impl_.group_)*/nullptr
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct InviteMemberDefaultTypeInternal {
   PROTOBUF_CONSTEXPR InviteMemberDefaultTypeInternal()
@@ -54,7 +50,7 @@ struct InviteMemberDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InviteMemberDefaultTypeInternal _InviteMember_default_instance_;
-PROTOBUF_CONSTEXPR Member::Member(
+PROTOBUF_CONSTEXPR GroupMember::GroupMember(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.joined_at_)*/uint64_t{0u}
@@ -62,32 +58,32 @@ PROTOBUF_CONSTEXPR Member::Member(
   , /*decltype(_impl_.state_)*/0
   , /*decltype(_impl_.last_message_index_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
-struct MemberDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR MemberDefaultTypeInternal()
+struct GroupMemberDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GroupMemberDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MemberDefaultTypeInternal() {}
+  ~GroupMemberDefaultTypeInternal() {}
   union {
-    Member _instance;
+    GroupMember _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MemberDefaultTypeInternal _Member_default_instance_;
-PROTOBUF_CONSTEXPR GroupNotify::GroupNotify(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupMemberDefaultTypeInternal _GroupMember_default_instance_;
+PROTOBUF_CONSTEXPR GroupInfo::GroupInfo(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.members_)*/{}
   , /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.group_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.creator_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.created_at_)*/uint64_t{0u}
+  , /*decltype(_impl_.revision_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
-struct GroupNotifyDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR GroupNotifyDefaultTypeInternal()
+struct GroupInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GroupInfoDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
-  ~GroupNotifyDefaultTypeInternal() {}
+  ~GroupInfoDefaultTypeInternal() {}
   union {
-    GroupNotify _instance;
+    GroupInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupNotifyDefaultTypeInternal _GroupNotify_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupInfoDefaultTypeInternal _GroupInfo_default_instance_;
 PROTOBUF_CONSTEXPR ReplyInvite::ReplyInvite(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
@@ -119,7 +115,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace net
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_services_2fgroup_2fgroup_5fnet_2eproto[6];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2fgroup_2fgroup_5fnet_2eproto = nullptr;
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_services_2fgroup_2fgroup_5fnet_2eproto[2];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fgroup_2fgroup_5fnet_2eproto = nullptr;
 
 const uint32_t TableStruct_services_2fgroup_2fgroup_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -132,6 +128,7 @@ const uint32_t TableStruct_services_2fgroup_2fgroup_5fnet_2eproto::offsets[] PRO
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupContainer, _impl_.message_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _internal_metadata_),
@@ -139,33 +136,29 @@ const uint32_t TableStruct_services_2fgroup_2fgroup_5fnet_2eproto::offsets[] PRO
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.group_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.group_name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.admin_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.created_at_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.members_count_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::InviteMember, _impl_.group_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _impl_.user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _impl_.role_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _impl_.joined_at_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _impl_.state_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::Member, _impl_.last_message_index_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _impl_.user_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _impl_.role_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _impl_.joined_at_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _impl_.state_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupMember, _impl_.last_message_index_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _impl_.group_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _impl_.group_name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _impl_.created_at_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _impl_.creator_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupNotify, _impl_.members_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _impl_.group_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _impl_.group_name_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _impl_.created_at_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _impl_.revision_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::group::GroupInfo, _impl_.members_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::group::ReplyInvite, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -184,45 +177,48 @@ const uint32_t TableStruct_services_2fgroup_2fgroup_5fnet_2eproto::offsets[] PRO
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::net::group::GroupContainer)},
-  { 10, -1, -1, sizeof(::qaul::net::group::InviteMember)},
-  { 21, -1, -1, sizeof(::qaul::net::group::Member)},
-  { 32, -1, -1, sizeof(::qaul::net::group::GroupNotify)},
-  { 43, -1, -1, sizeof(::qaul::net::group::ReplyInvite)},
-  { 51, -1, -1, sizeof(::qaul::net::group::RemovedMember)},
+  { 11, -1, -1, sizeof(::qaul::net::group::InviteMember)},
+  { 18, -1, -1, sizeof(::qaul::net::group::GroupMember)},
+  { 29, -1, -1, sizeof(::qaul::net::group::GroupInfo)},
+  { 40, -1, -1, sizeof(::qaul::net::group::ReplyInvite)},
+  { 48, -1, -1, sizeof(::qaul::net::group::RemovedMember)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::net::group::_GroupContainer_default_instance_._instance,
   &::qaul::net::group::_InviteMember_default_instance_._instance,
-  &::qaul::net::group::_Member_default_instance_._instance,
-  &::qaul::net::group::_GroupNotify_default_instance_._instance,
+  &::qaul::net::group::_GroupMember_default_instance_._instance,
+  &::qaul::net::group::_GroupInfo_default_instance_._instance,
   &::qaul::net::group::_ReplyInvite_default_instance_._instance,
   &::qaul::net::group::_RemovedMember_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_services_2fgroup_2fgroup_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\036services/group/group_net.proto\022\016qaul.n"
-  "et.group\"\271\001\n\016GroupContainer\0225\n\rinvite_me"
+  "et.group\"\352\001\n\016GroupContainer\0225\n\rinvite_me"
   "mber\030\001 \001(\0132\034.qaul.net.group.InviteMember"
   "H\000\0223\n\014reply_invite\030\002 \001(\0132\033.qaul.net.grou"
-  "p.ReplyInviteH\000\0220\n\007removed\030\004 \001(\0132\035.qaul."
-  "net.group.RemovedMemberH\000B\t\n\007message\"q\n\014"
-  "InviteMember\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup_"
-  "name\030\002 \001(\t\022\020\n\010admin_id\030\003 \001(\014\022\022\n\ncreated_"
-  "at\030\004 \001(\004\022\025\n\rmembers_count\030\005 \001(\r\"e\n\006Membe"
-  "r\022\017\n\007user_id\030\001 \001(\014\022\014\n\004role\030\002 \001(\005\022\021\n\tjoin"
-  "ed_at\030\003 \001(\004\022\r\n\005state\030\004 \001(\005\022\032\n\022last_messa"
-  "ge_index\030\005 \001(\r\"\204\001\n\013GroupNotify\022\020\n\010group_"
-  "id\030\001 \001(\014\022\022\n\ngroup_name\030\002 \001(\t\022\022\n\ncreated_"
-  "at\030\003 \001(\004\022\022\n\ncreator_id\030\004 \001(\014\022\'\n\007members\030"
-  "\005 \003(\0132\026.qaul.net.group.Member\"/\n\013ReplyIn"
-  "vite\022\020\n\010group_id\030\001 \001(\014\022\016\n\006accept\030\002 \001(\010\"!"
-  "\n\rRemovedMember\022\020\n\010group_id\030\001 \001(\014b\006proto"
-  "3"
+  "p.ReplyInviteH\000\022/\n\ngroup_info\030\003 \001(\0132\031.qa"
+  "ul.net.group.GroupInfoH\000\0220\n\007removed\030\004 \001("
+  "\0132\035.qaul.net.group.RemovedMemberH\000B\t\n\007me"
+  "ssage\"8\n\014InviteMember\022(\n\005group\030\001 \001(\0132\031.q"
+  "aul.net.group.GroupInfo\"\255\001\n\013GroupMember\022"
+  "\017\n\007user_id\030\001 \001(\014\022-\n\004role\030\002 \001(\0162\037.qaul.ne"
+  "t.group.GroupMemberRole\022\021\n\tjoined_at\030\003 \001"
+  "(\004\022/\n\005state\030\004 \001(\0162 .qaul.net.group.Group"
+  "MemberState\022\032\n\022last_message_index\030\005 \001(\r\""
+  "\205\001\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup"
+  "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022\020\n\010revis"
+  "ion\030\004 \001(\r\022,\n\007members\030\005 \003(\0132\033.qaul.net.gr"
+  "oup.GroupMember\"/\n\013ReplyInvite\022\020\n\010group_"
+  "id\030\001 \001(\014\022\016\n\006accept\030\002 \001(\010\"!\n\rRemovedMembe"
+  "r\022\020\n\010group_id\030\001 \001(\014*.\n\020GroupMemberState\022"
+  "\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017GroupMemb"
+  "erRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto = {
-    false, false, 681, descriptor_table_protodef_services_2fgroup_2fgroup_5fnet_2eproto,
+    false, false, 836, descriptor_table_protodef_services_2fgroup_2fgroup_5fnet_2eproto,
     "services/group/group_net.proto",
     &descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_once, nullptr, 0, 6,
     schemas, file_default_instances, TableStruct_services_2fgroup_2fgroup_5fnet_2eproto::offsets,
@@ -238,6 +234,34 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_in
 namespace qaul {
 namespace net {
 namespace group {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupMemberState_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto);
+  return file_level_enum_descriptors_services_2fgroup_2fgroup_5fnet_2eproto[0];
+}
+bool GroupMemberState_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupMemberRole_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto);
+  return file_level_enum_descriptors_services_2fgroup_2fgroup_5fnet_2eproto[1];
+}
+bool GroupMemberRole_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 255:
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 // ===================================================================
 
@@ -245,6 +269,7 @@ class GroupContainer::_Internal {
  public:
   static const ::qaul::net::group::InviteMember& invite_member(const GroupContainer* msg);
   static const ::qaul::net::group::ReplyInvite& reply_invite(const GroupContainer* msg);
+  static const ::qaul::net::group::GroupInfo& group_info(const GroupContainer* msg);
   static const ::qaul::net::group::RemovedMember& removed(const GroupContainer* msg);
 };
 
@@ -255,6 +280,10 @@ GroupContainer::_Internal::invite_member(const GroupContainer* msg) {
 const ::qaul::net::group::ReplyInvite&
 GroupContainer::_Internal::reply_invite(const GroupContainer* msg) {
   return *msg->_impl_.message_.reply_invite_;
+}
+const ::qaul::net::group::GroupInfo&
+GroupContainer::_Internal::group_info(const GroupContainer* msg) {
+  return *msg->_impl_.message_.group_info_;
 }
 const ::qaul::net::group::RemovedMember&
 GroupContainer::_Internal::removed(const GroupContainer* msg) {
@@ -289,6 +318,21 @@ void GroupContainer::set_allocated_reply_invite(::qaul::net::group::ReplyInvite*
     _impl_.message_.reply_invite_ = reply_invite;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupContainer.reply_invite)
+}
+void GroupContainer::set_allocated_group_info(::qaul::net::group::GroupInfo* group_info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (group_info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(group_info);
+    if (message_arena != submessage_arena) {
+      group_info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, group_info, submessage_arena);
+    }
+    set_has_group_info();
+    _impl_.message_.group_info_ = group_info;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.group.GroupContainer.group_info)
 }
 void GroupContainer::set_allocated_removed(::qaul::net::group::RemovedMember* removed) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -330,6 +374,11 @@ GroupContainer::GroupContainer(const GroupContainer& from)
     case kReplyInvite: {
       _this->_internal_mutable_reply_invite()->::qaul::net::group::ReplyInvite::MergeFrom(
           from._internal_reply_invite());
+      break;
+    }
+    case kGroupInfo: {
+      _this->_internal_mutable_group_info()->::qaul::net::group::GroupInfo::MergeFrom(
+          from._internal_group_info());
       break;
     }
     case kRemoved: {
@@ -391,6 +440,12 @@ void GroupContainer::clear_message() {
       }
       break;
     }
+    case kGroupInfo: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete _impl_.message_.group_info_;
+      }
+      break;
+    }
     case kRemoved: {
       if (GetArenaForAllocation() == nullptr) {
         delete _impl_.message_.removed_;
@@ -433,6 +488,14 @@ const char* GroupContainer::_InternalParse(const char* ptr, ::_pbi::ParseContext
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_reply_invite(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.net.group.GroupInfo group_info = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_group_info(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -488,6 +551,13 @@ uint8_t* GroupContainer::_InternalSerialize(
         _Internal::reply_invite(this).GetCachedSize(), target, stream);
   }
 
+  // .qaul.net.group.GroupInfo group_info = 3;
+  if (_internal_has_group_info()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::group_info(this),
+        _Internal::group_info(this).GetCachedSize(), target, stream);
+  }
+
   // .qaul.net.group.RemovedMember removed = 4;
   if (_internal_has_removed()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -524,6 +594,13 @@ size_t GroupContainer::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.message_.reply_invite_);
+      break;
+    }
+    // .qaul.net.group.GroupInfo group_info = 3;
+    case kGroupInfo: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.message_.group_info_);
       break;
     }
     // .qaul.net.group.RemovedMember removed = 4;
@@ -566,6 +643,11 @@ void GroupContainer::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const :
           from._internal_reply_invite());
       break;
     }
+    case kGroupInfo: {
+      _this->_internal_mutable_group_info()->::qaul::net::group::GroupInfo::MergeFrom(
+          from._internal_group_info());
+      break;
+    }
     case kRemoved: {
       _this->_internal_mutable_removed()->::qaul::net::group::RemovedMember::MergeFrom(
           from._internal_removed());
@@ -606,8 +688,13 @@ void GroupContainer::InternalSwap(GroupContainer* other) {
 
 class InviteMember::_Internal {
  public:
+  static const ::qaul::net::group::GroupInfo& group(const InviteMember* msg);
 };
 
+const ::qaul::net::group::GroupInfo&
+InviteMember::_Internal::group(const InviteMember* msg) {
+  return *msg->_impl_.group_;
+}
 InviteMember::InviteMember(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -618,41 +705,13 @@ InviteMember::InviteMember(const InviteMember& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   InviteMember* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.group_id_){}
-    , decltype(_impl_.group_name_){}
-    , decltype(_impl_.admin_id_){}
-    , decltype(_impl_.created_at_){}
-    , decltype(_impl_.members_count_){}
+      decltype(_impl_.group_){nullptr}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.group_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.group_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_group_id().empty()) {
-    _this->_impl_.group_id_.Set(from._internal_group_id(), 
-      _this->GetArenaForAllocation());
+  if (from._internal_has_group()) {
+    _this->_impl_.group_ = new ::qaul::net::group::GroupInfo(*from._impl_.group_);
   }
-  _impl_.group_name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.group_name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_group_name().empty()) {
-    _this->_impl_.group_name_.Set(from._internal_group_name(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.admin_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.admin_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_admin_id().empty()) {
-    _this->_impl_.admin_id_.Set(from._internal_admin_id(), 
-      _this->GetArenaForAllocation());
-  }
-  ::memcpy(&_impl_.created_at_, &from._impl_.created_at_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.members_count_) -
-    reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.members_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.group.InviteMember)
 }
 
@@ -661,25 +720,9 @@ inline void InviteMember::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.group_id_){}
-    , decltype(_impl_.group_name_){}
-    , decltype(_impl_.admin_id_){}
-    , decltype(_impl_.created_at_){uint64_t{0u}}
-    , decltype(_impl_.members_count_){0u}
+      decltype(_impl_.group_){nullptr}
     , /*decltype(_impl_._cached_size_)*/{}
   };
-  _impl_.group_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.group_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.group_name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.group_name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.admin_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.admin_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 InviteMember::~InviteMember() {
@@ -693,9 +736,7 @@ InviteMember::~InviteMember() {
 
 inline void InviteMember::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.group_id_.Destroy();
-  _impl_.group_name_.Destroy();
-  _impl_.admin_id_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.group_;
 }
 
 void InviteMember::SetCachedSize(int size) const {
@@ -708,12 +749,10 @@ void InviteMember::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.group_id_.ClearToEmpty();
-  _impl_.group_name_.ClearToEmpty();
-  _impl_.admin_id_.ClearToEmpty();
-  ::memset(&_impl_.created_at_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.members_count_) -
-      reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.members_count_));
+  if (GetArenaForAllocation() == nullptr && _impl_.group_ != nullptr) {
+    delete _impl_.group_;
+  }
+  _impl_.group_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -723,46 +762,10 @@ const char* InviteMember::_InternalParse(const char* ptr, ::_pbi::ParseContext* 
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // bytes group_id = 1;
+      // .qaul.net.group.GroupInfo group = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          auto str = _internal_mutable_group_id();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // string group_name = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          auto str = _internal_mutable_group_name();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "qaul.net.group.InviteMember.group_name"));
-        } else
-          goto handle_unusual;
-        continue;
-      // bytes admin_id = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          auto str = _internal_mutable_admin_id();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // uint64 created_at = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
-          _impl_.created_at_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // uint32 members_count = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
-          _impl_.members_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_group(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -796,38 +799,11 @@ uint8_t* InviteMember::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bytes group_id = 1;
-  if (!this->_internal_group_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_group_id(), target);
-  }
-
-  // string group_name = 2;
-  if (!this->_internal_group_name().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_group_name().data(), static_cast<int>(this->_internal_group_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.group.InviteMember.group_name");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_group_name(), target);
-  }
-
-  // bytes admin_id = 3;
-  if (!this->_internal_admin_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_admin_id(), target);
-  }
-
-  // uint64 created_at = 4;
-  if (this->_internal_created_at() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(4, this->_internal_created_at(), target);
-  }
-
-  // uint32 members_count = 5;
-  if (this->_internal_members_count() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_members_count(), target);
+  // .qaul.net.group.GroupInfo group = 1;
+  if (this->_internal_has_group()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::group(this),
+        _Internal::group(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -846,35 +822,11 @@ size_t InviteMember::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // bytes group_id = 1;
-  if (!this->_internal_group_id().empty()) {
+  // .qaul.net.group.GroupInfo group = 1;
+  if (this->_internal_has_group()) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_group_id());
-  }
-
-  // string group_name = 2;
-  if (!this->_internal_group_name().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_group_name());
-  }
-
-  // bytes admin_id = 3;
-  if (!this->_internal_admin_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_admin_id());
-  }
-
-  // uint64 created_at = 4;
-  if (this->_internal_created_at() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_created_at());
-  }
-
-  // uint32 members_count = 5;
-  if (this->_internal_members_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_members_count());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.group_);
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -895,20 +847,9 @@ void InviteMember::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!from._internal_group_id().empty()) {
-    _this->_internal_set_group_id(from._internal_group_id());
-  }
-  if (!from._internal_group_name().empty()) {
-    _this->_internal_set_group_name(from._internal_group_name());
-  }
-  if (!from._internal_admin_id().empty()) {
-    _this->_internal_set_admin_id(from._internal_admin_id());
-  }
-  if (from._internal_created_at() != 0) {
-    _this->_internal_set_created_at(from._internal_created_at());
-  }
-  if (from._internal_members_count() != 0) {
-    _this->_internal_set_members_count(from._internal_members_count());
+  if (from._internal_has_group()) {
+    _this->_internal_mutable_group()->::qaul::net::group::GroupInfo::MergeFrom(
+        from._internal_group());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -926,27 +867,8 @@ bool InviteMember::IsInitialized() const {
 
 void InviteMember::InternalSwap(InviteMember* other) {
   using std::swap;
-  auto* lhs_arena = GetArenaForAllocation();
-  auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.group_id_, lhs_arena,
-      &other->_impl_.group_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.group_name_, lhs_arena,
-      &other->_impl_.group_name_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.admin_id_, lhs_arena,
-      &other->_impl_.admin_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(InviteMember, _impl_.members_count_)
-      + sizeof(InviteMember::_impl_.members_count_)
-      - PROTOBUF_FIELD_OFFSET(InviteMember, _impl_.created_at_)>(
-          reinterpret_cast<char*>(&_impl_.created_at_),
-          reinterpret_cast<char*>(&other->_impl_.created_at_));
+  swap(_impl_.group_, other->_impl_.group_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata InviteMember::GetMetadata() const {
@@ -957,19 +879,19 @@ void InviteMember::InternalSwap(InviteMember* other) {
 
 // ===================================================================
 
-class Member::_Internal {
+class GroupMember::_Internal {
  public:
 };
 
-Member::Member(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+GroupMember::GroupMember(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.group.Member)
+  // @@protoc_insertion_point(arena_constructor:qaul.net.group.GroupMember)
 }
-Member::Member(const Member& from)
+GroupMember::GroupMember(const GroupMember& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Member* const _this = this; (void)_this;
+  GroupMember* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.user_id_){}
     , decltype(_impl_.joined_at_){}
@@ -990,10 +912,10 @@ Member::Member(const Member& from)
   ::memcpy(&_impl_.joined_at_, &from._impl_.joined_at_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.last_message_index_) -
     reinterpret_cast<char*>(&_impl_.joined_at_)) + sizeof(_impl_.last_message_index_));
-  // @@protoc_insertion_point(copy_constructor:qaul.net.group.Member)
+  // @@protoc_insertion_point(copy_constructor:qaul.net.group.GroupMember)
 }
 
-inline void Member::SharedCtor(
+inline void GroupMember::SharedCtor(
     ::_pb::Arena* arena, bool is_message_owned) {
   (void)arena;
   (void)is_message_owned;
@@ -1011,8 +933,8 @@ inline void Member::SharedCtor(
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
-Member::~Member() {
-  // @@protoc_insertion_point(destructor:qaul.net.group.Member)
+GroupMember::~GroupMember() {
+  // @@protoc_insertion_point(destructor:qaul.net.group.GroupMember)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -1020,17 +942,17 @@ Member::~Member() {
   SharedDtor();
 }
 
-inline void Member::SharedDtor() {
+inline void GroupMember::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.user_id_.Destroy();
 }
 
-void Member::SetCachedSize(int size) const {
+void GroupMember::SetCachedSize(int size) const {
   _impl_._cached_size_.Set(size);
 }
 
-void Member::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.group.Member)
+void GroupMember::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.net.group.GroupMember)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -1042,7 +964,7 @@ void Member::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Member::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+const char* GroupMember::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
@@ -1057,11 +979,12 @@ const char* Member::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
-      // int32 role = 2;
+      // .qaul.net.group.GroupMemberRole role = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          _impl_.role_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+          _internal_set_role(static_cast<::qaul::net::group::GroupMemberRole>(val));
         } else
           goto handle_unusual;
         continue;
@@ -1073,11 +996,12 @@ const char* Member::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
-      // int32 state = 4;
+      // .qaul.net.group.GroupMemberState state = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
-          _impl_.state_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+          _internal_set_state(static_cast<::qaul::net::group::GroupMemberState>(val));
         } else
           goto handle_unusual;
         continue;
@@ -1112,9 +1036,9 @@ failure:
 #undef CHK_
 }
 
-uint8_t* Member::_InternalSerialize(
+uint8_t* GroupMember::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.group.Member)
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.group.GroupMember)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -1124,10 +1048,11 @@ uint8_t* Member::_InternalSerialize(
         1, this->_internal_user_id(), target);
   }
 
-  // int32 role = 2;
+  // .qaul.net.group.GroupMemberRole role = 2;
   if (this->_internal_role() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(2, this->_internal_role(), target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      2, this->_internal_role(), target);
   }
 
   // uint64 joined_at = 3;
@@ -1136,10 +1061,11 @@ uint8_t* Member::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteUInt64ToArray(3, this->_internal_joined_at(), target);
   }
 
-  // int32 state = 4;
+  // .qaul.net.group.GroupMemberState state = 4;
   if (this->_internal_state() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(4, this->_internal_state(), target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      4, this->_internal_state(), target);
   }
 
   // uint32 last_message_index = 5;
@@ -1152,12 +1078,12 @@ uint8_t* Member::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.group.Member)
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.group.GroupMember)
   return target;
 }
 
-size_t Member::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.group.Member)
+size_t GroupMember::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.net.group.GroupMember)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -1176,14 +1102,16 @@ size_t Member::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_joined_at());
   }
 
-  // int32 role = 2;
+  // .qaul.net.group.GroupMemberRole role = 2;
   if (this->_internal_role() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_role());
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_role());
   }
 
-  // int32 state = 4;
+  // .qaul.net.group.GroupMemberState state = 4;
   if (this->_internal_state() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_state());
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_state());
   }
 
   // uint32 last_message_index = 5;
@@ -1194,17 +1122,17 @@ size_t Member::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Member::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData GroupMember::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Member::MergeImpl
+    GroupMember::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Member::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GroupMember::GetClassData() const { return &_class_data_; }
 
 
-void Member::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<Member*>(&to_msg);
-  auto& from = static_cast<const Member&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.group.Member)
+void GroupMember::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<GroupMember*>(&to_msg);
+  auto& from = static_cast<const GroupMember&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.group.GroupMember)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -1227,18 +1155,18 @@ void Member::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBU
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void Member::CopyFrom(const Member& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.group.Member)
+void GroupMember::CopyFrom(const GroupMember& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.group.GroupMember)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Member::IsInitialized() const {
+bool GroupMember::IsInitialized() const {
   return true;
 }
 
-void Member::InternalSwap(Member* other) {
+void GroupMember::InternalSwap(GroupMember* other) {
   using std::swap;
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
@@ -1248,14 +1176,14 @@ void Member::InternalSwap(Member* other) {
       &other->_impl_.user_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Member, _impl_.last_message_index_)
-      + sizeof(Member::_impl_.last_message_index_)
-      - PROTOBUF_FIELD_OFFSET(Member, _impl_.joined_at_)>(
+      PROTOBUF_FIELD_OFFSET(GroupMember, _impl_.last_message_index_)
+      + sizeof(GroupMember::_impl_.last_message_index_)
+      - PROTOBUF_FIELD_OFFSET(GroupMember, _impl_.joined_at_)>(
           reinterpret_cast<char*>(&_impl_.joined_at_),
           reinterpret_cast<char*>(&other->_impl_.joined_at_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Member::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata GroupMember::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_getter, &descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_once,
       file_level_metadata_services_2fgroup_2fgroup_5fnet_2eproto[2]);
@@ -1263,25 +1191,25 @@ void Member::InternalSwap(Member* other) {
 
 // ===================================================================
 
-class GroupNotify::_Internal {
+class GroupInfo::_Internal {
  public:
 };
 
-GroupNotify::GroupNotify(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+GroupInfo::GroupInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:qaul.net.group.GroupNotify)
+  // @@protoc_insertion_point(arena_constructor:qaul.net.group.GroupInfo)
 }
-GroupNotify::GroupNotify(const GroupNotify& from)
+GroupInfo::GroupInfo(const GroupInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
-  GroupNotify* const _this = this; (void)_this;
+  GroupInfo* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.members_){from._impl_.members_}
     , decltype(_impl_.group_id_){}
     , decltype(_impl_.group_name_){}
-    , decltype(_impl_.creator_id_){}
     , decltype(_impl_.created_at_){}
+    , decltype(_impl_.revision_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -1301,19 +1229,13 @@ GroupNotify::GroupNotify(const GroupNotify& from)
     _this->_impl_.group_name_.Set(from._internal_group_name(), 
       _this->GetArenaForAllocation());
   }
-  _impl_.creator_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.creator_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_creator_id().empty()) {
-    _this->_impl_.creator_id_.Set(from._internal_creator_id(), 
-      _this->GetArenaForAllocation());
-  }
-  _this->_impl_.created_at_ = from._impl_.created_at_;
-  // @@protoc_insertion_point(copy_constructor:qaul.net.group.GroupNotify)
+  ::memcpy(&_impl_.created_at_, &from._impl_.created_at_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.revision_) -
+    reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.revision_));
+  // @@protoc_insertion_point(copy_constructor:qaul.net.group.GroupInfo)
 }
 
-inline void GroupNotify::SharedCtor(
+inline void GroupInfo::SharedCtor(
     ::_pb::Arena* arena, bool is_message_owned) {
   (void)arena;
   (void)is_message_owned;
@@ -1321,8 +1243,8 @@ inline void GroupNotify::SharedCtor(
       decltype(_impl_.members_){arena}
     , decltype(_impl_.group_id_){}
     , decltype(_impl_.group_name_){}
-    , decltype(_impl_.creator_id_){}
     , decltype(_impl_.created_at_){uint64_t{0u}}
+    , decltype(_impl_.revision_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.group_id_.InitDefault();
@@ -1333,14 +1255,10 @@ inline void GroupNotify::SharedCtor(
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.group_name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.creator_id_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.creator_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
-GroupNotify::~GroupNotify() {
-  // @@protoc_insertion_point(destructor:qaul.net.group.GroupNotify)
+GroupInfo::~GroupInfo() {
+  // @@protoc_insertion_point(destructor:qaul.net.group.GroupInfo)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -1348,20 +1266,19 @@ GroupNotify::~GroupNotify() {
   SharedDtor();
 }
 
-inline void GroupNotify::SharedDtor() {
+inline void GroupInfo::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.members_.~RepeatedPtrField();
   _impl_.group_id_.Destroy();
   _impl_.group_name_.Destroy();
-  _impl_.creator_id_.Destroy();
 }
 
-void GroupNotify::SetCachedSize(int size) const {
+void GroupInfo::SetCachedSize(int size) const {
   _impl_._cached_size_.Set(size);
 }
 
-void GroupNotify::Clear() {
-// @@protoc_insertion_point(message_clear_start:qaul.net.group.GroupNotify)
+void GroupInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.net.group.GroupInfo)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -1369,12 +1286,13 @@ void GroupNotify::Clear() {
   _impl_.members_.Clear();
   _impl_.group_id_.ClearToEmpty();
   _impl_.group_name_.ClearToEmpty();
-  _impl_.creator_id_.ClearToEmpty();
-  _impl_.created_at_ = uint64_t{0u};
+  ::memset(&_impl_.created_at_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.revision_) -
+      reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.revision_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* GroupNotify::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+const char* GroupInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
@@ -1395,7 +1313,7 @@ const char* GroupNotify::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
           auto str = _internal_mutable_group_name();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "qaul.net.group.GroupNotify.group_name"));
+          CHK_(::_pbi::VerifyUTF8(str, "qaul.net.group.GroupInfo.group_name"));
         } else
           goto handle_unusual;
         continue;
@@ -1407,16 +1325,15 @@ const char* GroupNotify::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
         } else
           goto handle_unusual;
         continue;
-      // bytes creator_id = 4;
+      // uint32 revision = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          auto str = _internal_mutable_creator_id();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _impl_.revision_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .qaul.net.group.Member members = 5;
+      // repeated .qaul.net.group.GroupMember members = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           ptr -= 1;
@@ -1452,9 +1369,9 @@ failure:
 #undef CHK_
 }
 
-uint8_t* GroupNotify::_InternalSerialize(
+uint8_t* GroupInfo::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.group.GroupNotify)
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.net.group.GroupInfo)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -1469,7 +1386,7 @@ uint8_t* GroupNotify::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_group_name().data(), static_cast<int>(this->_internal_group_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.group.GroupNotify.group_name");
+      "qaul.net.group.GroupInfo.group_name");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_group_name(), target);
   }
@@ -1480,13 +1397,13 @@ uint8_t* GroupNotify::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteUInt64ToArray(3, this->_internal_created_at(), target);
   }
 
-  // bytes creator_id = 4;
-  if (!this->_internal_creator_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_creator_id(), target);
+  // uint32 revision = 4;
+  if (this->_internal_revision() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_revision(), target);
   }
 
-  // repeated .qaul.net.group.Member members = 5;
+  // repeated .qaul.net.group.GroupMember members = 5;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_members_size()); i < n; i++) {
     const auto& repfield = this->_internal_members(i);
@@ -1498,19 +1415,19 @@ uint8_t* GroupNotify::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.group.GroupNotify)
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.net.group.GroupInfo)
   return target;
 }
 
-size_t GroupNotify::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:qaul.net.group.GroupNotify)
+size_t GroupInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.net.group.GroupInfo)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .qaul.net.group.Member members = 5;
+  // repeated .qaul.net.group.GroupMember members = 5;
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->_impl_.members_) {
     total_size +=
@@ -1531,32 +1448,30 @@ size_t GroupNotify::ByteSizeLong() const {
         this->_internal_group_name());
   }
 
-  // bytes creator_id = 4;
-  if (!this->_internal_creator_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_creator_id());
-  }
-
   // uint64 created_at = 3;
   if (this->_internal_created_at() != 0) {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_created_at());
   }
 
+  // uint32 revision = 4;
+  if (this->_internal_revision() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_revision());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData GroupNotify::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData GroupInfo::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    GroupNotify::MergeImpl
+    GroupInfo::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GroupNotify::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GroupInfo::GetClassData() const { return &_class_data_; }
 
 
-void GroupNotify::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<GroupNotify*>(&to_msg);
-  auto& from = static_cast<const GroupNotify&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.group.GroupNotify)
+void GroupInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<GroupInfo*>(&to_msg);
+  auto& from = static_cast<const GroupInfo&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.group.GroupInfo)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -1568,27 +1483,27 @@ void GroupNotify::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PR
   if (!from._internal_group_name().empty()) {
     _this->_internal_set_group_name(from._internal_group_name());
   }
-  if (!from._internal_creator_id().empty()) {
-    _this->_internal_set_creator_id(from._internal_creator_id());
-  }
   if (from._internal_created_at() != 0) {
     _this->_internal_set_created_at(from._internal_created_at());
+  }
+  if (from._internal_revision() != 0) {
+    _this->_internal_set_revision(from._internal_revision());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void GroupNotify::CopyFrom(const GroupNotify& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.group.GroupNotify)
+void GroupInfo::CopyFrom(const GroupInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.net.group.GroupInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool GroupNotify::IsInitialized() const {
+bool GroupInfo::IsInitialized() const {
   return true;
 }
 
-void GroupNotify::InternalSwap(GroupNotify* other) {
+void GroupInfo::InternalSwap(GroupInfo* other) {
   using std::swap;
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
@@ -1602,14 +1517,15 @@ void GroupNotify::InternalSwap(GroupNotify* other) {
       &_impl_.group_name_, lhs_arena,
       &other->_impl_.group_name_, rhs_arena
   );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.creator_id_, lhs_arena,
-      &other->_impl_.creator_id_, rhs_arena
-  );
-  swap(_impl_.created_at_, other->_impl_.created_at_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GroupInfo, _impl_.revision_)
+      + sizeof(GroupInfo::_impl_.revision_)
+      - PROTOBUF_FIELD_OFFSET(GroupInfo, _impl_.created_at_)>(
+          reinterpret_cast<char*>(&_impl_.created_at_),
+          reinterpret_cast<char*>(&other->_impl_.created_at_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata GroupNotify::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata GroupInfo::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_getter, &descriptor_table_services_2fgroup_2fgroup_5fnet_2eproto_once,
       file_level_metadata_services_2fgroup_2fgroup_5fnet_2eproto[3]);
@@ -2051,13 +1967,13 @@ template<> PROTOBUF_NOINLINE ::qaul::net::group::InviteMember*
 Arena::CreateMaybeMessage< ::qaul::net::group::InviteMember >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::group::InviteMember >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::net::group::Member*
-Arena::CreateMaybeMessage< ::qaul::net::group::Member >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::group::Member >(arena);
+template<> PROTOBUF_NOINLINE ::qaul::net::group::GroupMember*
+Arena::CreateMaybeMessage< ::qaul::net::group::GroupMember >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::net::group::GroupMember >(arena);
 }
-template<> PROTOBUF_NOINLINE ::qaul::net::group::GroupNotify*
-Arena::CreateMaybeMessage< ::qaul::net::group::GroupNotify >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::qaul::net::group::GroupNotify >(arena);
+template<> PROTOBUF_NOINLINE ::qaul::net::group::GroupInfo*
+Arena::CreateMaybeMessage< ::qaul::net::group::GroupInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::net::group::GroupInfo >(arena);
 }
 template<> PROTOBUF_NOINLINE ::qaul::net::group::ReplyInvite*
 Arena::CreateMaybeMessage< ::qaul::net::group::ReplyInvite >(Arena* arena) {

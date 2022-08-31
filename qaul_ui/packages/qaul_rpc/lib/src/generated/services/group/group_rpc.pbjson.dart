@@ -43,7 +43,7 @@ const Group$json = const {
     const {'1': 'group_remove_member_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRemoveMemberRequest', '9': 0, '10': 'groupRemoveMemberRequest'},
     const {'1': 'group_remove_member_response', '3': 8, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRemoveMemberResponse', '9': 0, '10': 'groupRemoveMemberResponse'},
     const {'1': 'group_info_request', '3': 9, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfoRequest', '9': 0, '10': 'groupInfoRequest'},
-    const {'1': 'group_info_response', '3': 10, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfoResponse', '9': 0, '10': 'groupInfoResponse'},
+    const {'1': 'group_info_response', '3': 10, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '9': 0, '10': 'groupInfoResponse'},
     const {'1': 'group_reply_invite_request', '3': 11, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupReplyInviteRequest', '9': 0, '10': 'groupReplyInviteRequest'},
     const {'1': 'group_reply_invite_response', '3': 12, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupReplyInviteResponse', '9': 0, '10': 'groupReplyInviteResponse'},
     const {'1': 'group_list_request', '3': 13, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupListRequest', '9': 0, '10': 'groupListRequest'},
@@ -57,7 +57,7 @@ const Group$json = const {
 };
 
 /// Descriptor for `Group`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupDescriptor = $convert.base64Decode('CgVHcm91cBJWChRncm91cF9jcmVhdGVfcmVxdWVzdBgBIAEoCzIiLnFhdWwucnBjLmdyb3VwLkdyb3VwQ3JlYXRlUmVxdWVzdEgAUhJncm91cENyZWF0ZVJlcXVlc3QSWQoVZ3JvdXBfY3JlYXRlX3Jlc3BvbnNlGAIgASgLMiMucWF1bC5ycGMuZ3JvdXAuR3JvdXBDcmVhdGVSZXNwb25zZUgAUhNncm91cENyZWF0ZVJlc3BvbnNlElYKFGdyb3VwX3JlbmFtZV9yZXF1ZXN0GAMgASgLMiIucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZW5hbWVSZXF1ZXN0SABSEmdyb3VwUmVuYW1lUmVxdWVzdBJZChVncm91cF9yZW5hbWVfcmVzcG9uc2UYBCABKAsyIy5xYXVsLnJwYy5ncm91cC5Hcm91cFJlbmFtZVJlc3BvbnNlSABSE2dyb3VwUmVuYW1lUmVzcG9uc2USaQobZ3JvdXBfaW52aXRlX21lbWJlcl9yZXF1ZXN0GAUgASgLMigucWF1bC5ycGMuZ3JvdXAuR3JvdXBJbnZpdGVNZW1iZXJSZXF1ZXN0SABSGGdyb3VwSW52aXRlTWVtYmVyUmVxdWVzdBJsChxncm91cF9pbnZpdGVfbWVtYmVyX3Jlc3BvbnNlGAYgASgLMikucWF1bC5ycGMuZ3JvdXAuR3JvdXBJbnZpdGVNZW1iZXJSZXNwb25zZUgAUhlncm91cEludml0ZU1lbWJlclJlc3BvbnNlEmkKG2dyb3VwX3JlbW92ZV9tZW1iZXJfcmVxdWVzdBgHIAEoCzIoLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVtb3ZlTWVtYmVyUmVxdWVzdEgAUhhncm91cFJlbW92ZU1lbWJlclJlcXVlc3QSbAocZ3JvdXBfcmVtb3ZlX21lbWJlcl9yZXNwb25zZRgIIAEoCzIpLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVtb3ZlTWVtYmVyUmVzcG9uc2VIAFIZZ3JvdXBSZW1vdmVNZW1iZXJSZXNwb25zZRJQChJncm91cF9pbmZvX3JlcXVlc3QYCSABKAsyIC5xYXVsLnJwYy5ncm91cC5Hcm91cEluZm9SZXF1ZXN0SABSEGdyb3VwSW5mb1JlcXVlc3QSUwoTZ3JvdXBfaW5mb19yZXNwb25zZRgKIAEoCzIhLnFhdWwucnBjLmdyb3VwLkdyb3VwSW5mb1Jlc3BvbnNlSABSEWdyb3VwSW5mb1Jlc3BvbnNlEmYKGmdyb3VwX3JlcGx5X2ludml0ZV9yZXF1ZXN0GAsgASgLMicucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZXBseUludml0ZVJlcXVlc3RIAFIXZ3JvdXBSZXBseUludml0ZVJlcXVlc3QSaQobZ3JvdXBfcmVwbHlfaW52aXRlX3Jlc3BvbnNlGAwgASgLMigucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZXBseUludml0ZVJlc3BvbnNlSABSGGdyb3VwUmVwbHlJbnZpdGVSZXNwb25zZRJQChJncm91cF9saXN0X3JlcXVlc3QYDSABKAsyIC5xYXVsLnJwYy5ncm91cC5Hcm91cExpc3RSZXF1ZXN0SABSEGdyb3VwTGlzdFJlcXVlc3QSUwoTZ3JvdXBfbGlzdF9yZXNwb25zZRgOIAEoCzIhLnFhdWwucnBjLmdyb3VwLkdyb3VwTGlzdFJlc3BvbnNlSABSEWdyb3VwTGlzdFJlc3BvbnNlElkKFWdyb3VwX2ludml0ZWRfcmVxdWVzdBgPIAEoCzIjLnFhdWwucnBjLmdyb3VwLkdyb3VwSW52aXRlZFJlcXVlc3RIAFITZ3JvdXBJbnZpdGVkUmVxdWVzdBJcChZncm91cF9pbnZpdGVkX3Jlc3BvbnNlGBAgASgLMiQucWF1bC5ycGMuZ3JvdXAuR3JvdXBJbnZpdGVkUmVzcG9uc2VIAFIUZ3JvdXBJbnZpdGVkUmVzcG9uc2VCCQoHbWVzc2FnZQ==');
+final $typed_data.Uint8List groupDescriptor = $convert.base64Decode('CgVHcm91cBJWChRncm91cF9jcmVhdGVfcmVxdWVzdBgBIAEoCzIiLnFhdWwucnBjLmdyb3VwLkdyb3VwQ3JlYXRlUmVxdWVzdEgAUhJncm91cENyZWF0ZVJlcXVlc3QSWQoVZ3JvdXBfY3JlYXRlX3Jlc3BvbnNlGAIgASgLMiMucWF1bC5ycGMuZ3JvdXAuR3JvdXBDcmVhdGVSZXNwb25zZUgAUhNncm91cENyZWF0ZVJlc3BvbnNlElYKFGdyb3VwX3JlbmFtZV9yZXF1ZXN0GAMgASgLMiIucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZW5hbWVSZXF1ZXN0SABSEmdyb3VwUmVuYW1lUmVxdWVzdBJZChVncm91cF9yZW5hbWVfcmVzcG9uc2UYBCABKAsyIy5xYXVsLnJwYy5ncm91cC5Hcm91cFJlbmFtZVJlc3BvbnNlSABSE2dyb3VwUmVuYW1lUmVzcG9uc2USaQobZ3JvdXBfaW52aXRlX21lbWJlcl9yZXF1ZXN0GAUgASgLMigucWF1bC5ycGMuZ3JvdXAuR3JvdXBJbnZpdGVNZW1iZXJSZXF1ZXN0SABSGGdyb3VwSW52aXRlTWVtYmVyUmVxdWVzdBJsChxncm91cF9pbnZpdGVfbWVtYmVyX3Jlc3BvbnNlGAYgASgLMikucWF1bC5ycGMuZ3JvdXAuR3JvdXBJbnZpdGVNZW1iZXJSZXNwb25zZUgAUhlncm91cEludml0ZU1lbWJlclJlc3BvbnNlEmkKG2dyb3VwX3JlbW92ZV9tZW1iZXJfcmVxdWVzdBgHIAEoCzIoLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVtb3ZlTWVtYmVyUmVxdWVzdEgAUhhncm91cFJlbW92ZU1lbWJlclJlcXVlc3QSbAocZ3JvdXBfcmVtb3ZlX21lbWJlcl9yZXNwb25zZRgIIAEoCzIpLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVtb3ZlTWVtYmVyUmVzcG9uc2VIAFIZZ3JvdXBSZW1vdmVNZW1iZXJSZXNwb25zZRJQChJncm91cF9pbmZvX3JlcXVlc3QYCSABKAsyIC5xYXVsLnJwYy5ncm91cC5Hcm91cEluZm9SZXF1ZXN0SABSEGdyb3VwSW5mb1JlcXVlc3QSSwoTZ3JvdXBfaW5mb19yZXNwb25zZRgKIAEoCzIZLnFhdWwucnBjLmdyb3VwLkdyb3VwSW5mb0gAUhFncm91cEluZm9SZXNwb25zZRJmChpncm91cF9yZXBseV9pbnZpdGVfcmVxdWVzdBgLIAEoCzInLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVwbHlJbnZpdGVSZXF1ZXN0SABSF2dyb3VwUmVwbHlJbnZpdGVSZXF1ZXN0EmkKG2dyb3VwX3JlcGx5X2ludml0ZV9yZXNwb25zZRgMIAEoCzIoLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVwbHlJbnZpdGVSZXNwb25zZUgAUhhncm91cFJlcGx5SW52aXRlUmVzcG9uc2USUAoSZ3JvdXBfbGlzdF9yZXF1ZXN0GA0gASgLMiAucWF1bC5ycGMuZ3JvdXAuR3JvdXBMaXN0UmVxdWVzdEgAUhBncm91cExpc3RSZXF1ZXN0ElMKE2dyb3VwX2xpc3RfcmVzcG9uc2UYDiABKAsyIS5xYXVsLnJwYy5ncm91cC5Hcm91cExpc3RSZXNwb25zZUgAUhFncm91cExpc3RSZXNwb25zZRJZChVncm91cF9pbnZpdGVkX3JlcXVlc3QYDyABKAsyIy5xYXVsLnJwYy5ncm91cC5Hcm91cEludml0ZWRSZXF1ZXN0SABSE2dyb3VwSW52aXRlZFJlcXVlc3QSXAoWZ3JvdXBfaW52aXRlZF9yZXNwb25zZRgQIAEoCzIkLnFhdWwucnBjLmdyb3VwLkdyb3VwSW52aXRlZFJlc3BvbnNlSABSFGdyb3VwSW52aXRlZFJlc3BvbnNlQgkKB21lc3NhZ2U=');
 @$core.Deprecated('Use groupResultDescriptor instead')
 const GroupResult$json = const {
   '1': 'GroupResult',
@@ -141,25 +141,23 @@ const GroupReplyInviteRequest$json = const {
   '1': 'GroupReplyInviteRequest',
   '2': const [
     const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    const {'1': 'user_id', '3': 2, '4': 1, '5': 12, '10': 'userId'},
     const {'1': 'accept', '3': 3, '4': 1, '5': 8, '10': 'accept'},
   ],
 };
 
 /// Descriptor for `GroupReplyInviteRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupReplyInviteRequestDescriptor = $convert.base64Decode('ChdHcm91cFJlcGx5SW52aXRlUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIXCgd1c2VyX2lkGAIgASgMUgZ1c2VySWQSFgoGYWNjZXB0GAMgASgIUgZhY2NlcHQ=');
+final $typed_data.Uint8List groupReplyInviteRequestDescriptor = $convert.base64Decode('ChdHcm91cFJlcGx5SW52aXRlUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIWCgZhY2NlcHQYAyABKAhSBmFjY2VwdA==');
 @$core.Deprecated('Use groupReplyInviteResponseDescriptor instead')
 const GroupReplyInviteResponse$json = const {
   '1': 'GroupReplyInviteResponse',
   '2': const [
     const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    const {'1': 'user_id', '3': 2, '4': 1, '5': 12, '10': 'userId'},
     const {'1': 'result', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
   ],
 };
 
 /// Descriptor for `GroupReplyInviteResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupReplyInviteResponseDescriptor = $convert.base64Decode('ChhHcm91cFJlcGx5SW52aXRlUmVzcG9uc2USGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSFwoHdXNlcl9pZBgCIAEoDFIGdXNlcklkEjMKBnJlc3VsdBgDIAEoCzIbLnFhdWwucnBjLmdyb3VwLkdyb3VwUmVzdWx0UgZyZXN1bHQ=');
+final $typed_data.Uint8List groupReplyInviteResponseDescriptor = $convert.base64Decode('ChhHcm91cFJlcGx5SW52aXRlUmVzcG9uc2USGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSMwoGcmVzdWx0GAMgASgLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZXN1bHRSBnJlc3VsdA==');
 @$core.Deprecated('Use groupRemoveMemberRequestDescriptor instead')
 const GroupRemoveMemberRequest$json = const {
   '1': 'GroupRemoveMemberRequest',
@@ -207,20 +205,21 @@ const GroupMember$json = const {
 
 /// Descriptor for `GroupMember`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List groupMemberDescriptor = $convert.base64Decode('CgtHcm91cE1lbWJlchIXCgd1c2VyX2lkGAEgASgMUgZ1c2VySWQSMwoEcm9sZRgCIAEoDjIfLnFhdWwucnBjLmdyb3VwLkdyb3VwTWVtYmVyUm9sZVIEcm9sZRIbCglqb2luZWRfYXQYAyABKARSCGpvaW5lZEF0EjYKBXN0YXRlGAQgASgOMiAucWF1bC5ycGMuZ3JvdXAuR3JvdXBNZW1iZXJTdGF0ZVIFc3RhdGUSLAoSbGFzdF9tZXNzYWdlX2luZGV4GAUgASgNUhBsYXN0TWVzc2FnZUluZGV4');
-@$core.Deprecated('Use groupInfoResponseDescriptor instead')
-const GroupInfoResponse$json = const {
-  '1': 'GroupInfoResponse',
+@$core.Deprecated('Use groupInfoDescriptor instead')
+const GroupInfo$json = const {
+  '1': 'GroupInfo',
   '2': const [
     const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'group_name', '3': 2, '4': 1, '5': 9, '10': 'groupName'},
     const {'1': 'created_at', '3': 3, '4': 1, '5': 4, '10': 'createdAt'},
-    const {'1': 'is_direct_chat', '3': 4, '4': 1, '5': 8, '10': 'isDirectChat'},
-    const {'1': 'members', '3': 5, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
+    const {'1': 'revision', '3': 4, '4': 1, '5': 13, '10': 'revision'},
+    const {'1': 'is_direct_chat', '3': 5, '4': 1, '5': 8, '10': 'isDirectChat'},
+    const {'1': 'members', '3': 6, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
   ],
 };
 
-/// Descriptor for `GroupInfoResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInfoResponseDescriptor = $convert.base64Decode('ChFHcm91cEluZm9SZXNwb25zZRIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIdCgpncm91cF9uYW1lGAIgASgJUglncm91cE5hbWUSHQoKY3JlYXRlZF9hdBgDIAEoBFIJY3JlYXRlZEF0EiQKDmlzX2RpcmVjdF9jaGF0GAQgASgIUgxpc0RpcmVjdENoYXQSNQoHbWVtYmVycxgFIAMoCzIbLnFhdWwucnBjLmdyb3VwLkdyb3VwTWVtYmVyUgdtZW1iZXJz');
+/// Descriptor for `GroupInfo`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode('CglHcm91cEluZm8SGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSHQoKZ3JvdXBfbmFtZRgCIAEoCVIJZ3JvdXBOYW1lEh0KCmNyZWF0ZWRfYXQYAyABKARSCWNyZWF0ZWRBdBIaCghyZXZpc2lvbhgEIAEoDVIIcmV2aXNpb24SJAoOaXNfZGlyZWN0X2NoYXQYBSABKAhSDGlzRGlyZWN0Q2hhdBI1CgdtZW1iZXJzGAYgAygLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBNZW1iZXJSB21lbWJlcnM=');
 @$core.Deprecated('Use groupListRequestDescriptor instead')
 const GroupListRequest$json = const {
   '1': 'GroupListRequest',
@@ -232,27 +231,24 @@ final $typed_data.Uint8List groupListRequestDescriptor = $convert.base64Decode('
 const GroupListResponse$json = const {
   '1': 'GroupListResponse',
   '2': const [
-    const {'1': 'groups', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupInfoResponse', '10': 'groups'},
+    const {'1': 'groups', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '10': 'groups'},
   ],
 };
 
 /// Descriptor for `GroupListResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupListResponseDescriptor = $convert.base64Decode('ChFHcm91cExpc3RSZXNwb25zZRI5CgZncm91cHMYASADKAsyIS5xYXVsLnJwYy5ncm91cC5Hcm91cEluZm9SZXNwb25zZVIGZ3JvdXBz');
+final $typed_data.Uint8List groupListResponseDescriptor = $convert.base64Decode('ChFHcm91cExpc3RSZXNwb25zZRIxCgZncm91cHMYASADKAsyGS5xYXVsLnJwYy5ncm91cC5Hcm91cEluZm9SBmdyb3Vwcw==');
 @$core.Deprecated('Use groupInvitedDescriptor instead')
 const GroupInvited$json = const {
   '1': 'GroupInvited',
   '2': const [
-    const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    const {'1': 'sender_id', '3': 2, '4': 1, '5': 12, '10': 'senderId'},
-    const {'1': 'received_at', '3': 3, '4': 1, '5': 4, '10': 'receivedAt'},
-    const {'1': 'group_name', '3': 4, '4': 1, '5': 9, '10': 'groupName'},
-    const {'1': 'created_at', '3': 5, '4': 1, '5': 4, '10': 'createdAt'},
-    const {'1': 'member_count', '3': 6, '4': 1, '5': 13, '10': 'memberCount'},
+    const {'1': 'sender_id', '3': 1, '4': 1, '5': 12, '10': 'senderId'},
+    const {'1': 'received_at', '3': 2, '4': 1, '5': 4, '10': 'receivedAt'},
+    const {'1': 'group', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '10': 'group'},
   ],
 };
 
 /// Descriptor for `GroupInvited`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInvitedDescriptor = $convert.base64Decode('CgxHcm91cEludml0ZWQSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSGwoJc2VuZGVyX2lkGAIgASgMUghzZW5kZXJJZBIfCgtyZWNlaXZlZF9hdBgDIAEoBFIKcmVjZWl2ZWRBdBIdCgpncm91cF9uYW1lGAQgASgJUglncm91cE5hbWUSHQoKY3JlYXRlZF9hdBgFIAEoBFIJY3JlYXRlZEF0EiEKDG1lbWJlcl9jb3VudBgGIAEoDVILbWVtYmVyQ291bnQ=');
+final $typed_data.Uint8List groupInvitedDescriptor = $convert.base64Decode('CgxHcm91cEludml0ZWQSGwoJc2VuZGVyX2lkGAEgASgMUghzZW5kZXJJZBIfCgtyZWNlaXZlZF9hdBgCIAEoBFIKcmVjZWl2ZWRBdBIvCgVncm91cBgDIAEoCzIZLnFhdWwucnBjLmdyb3VwLkdyb3VwSW5mb1IFZ3JvdXA=');
 @$core.Deprecated('Use groupInvitedRequestDescriptor instead')
 const GroupInvitedRequest$json = const {
   '1': 'GroupInvitedRequest',

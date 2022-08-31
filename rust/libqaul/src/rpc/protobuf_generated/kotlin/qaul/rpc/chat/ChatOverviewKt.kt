@@ -152,9 +152,9 @@ object ChatOverviewKt {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      */
-     var contentType: qaul.rpc.chat.ChatOuterClass.ContentType
+     var contentType: qaul.rpc.chat.ChatOuterClass.ChatContentType
       @JvmName("getContentType")
       get() = _builder.getContentType()
       @JvmName("setContentType")
@@ -166,7 +166,7 @@ object ChatOverviewKt {
      * content type
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ContentType content_type = 6;</code>
+     * <code>.qaul.rpc.chat.ChatContentType content_type = 6;</code>
      */
     fun clearContentType() {
       _builder.clearContentType()

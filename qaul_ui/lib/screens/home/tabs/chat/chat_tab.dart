@@ -24,6 +24,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     final defaultUser = ref.watch(defaultUserProvider)!;
     final users = ref.watch(usersProvider);
     final chatRooms = ref.watch(chatRoomsProvider);
+    final groupInvites = ref.watch(groupInvitesProvider);
 
     final blockedIds =
         users.where((u) => u.isBlocked ?? false).map((u) => u.conversationId);
@@ -32,9 +33,10 @@ class _ChatState extends _BaseTabState<_Chat> {
         .toList()
       ..sort();
 
-    final refreshChats = useCallback(() async {
+    final refreshChatsAndInvites = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
       worker.getAllChatRooms();
+      worker.getGroupInvitesReceived();
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context);
@@ -80,21 +82,26 @@ class _ChatState extends _BaseTabState<_Chat> {
     }, []);
 
     final chatRoomsListView = CronTaskDecorator(
-      callback: () => refreshChats(),
+      callback: () => refreshChatsAndInvites(),
       schedule: const Duration(milliseconds: 500),
       child: RefreshIndicator(
-        onRefresh: () => refreshChats(),
+        onRefresh: () => refreshChatsAndInvites(),
         child: EmptyStateTextDecorator(
           l18ns!.emptyChatsList,
-          isEmpty: filteredRooms.isEmpty,
+          isEmpty: groupInvites.isEmpty && filteredRooms.isEmpty,
           child: ListView.separated(
             controller: ScrollController(),
             physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: filteredRooms.length,
+            itemCount: groupInvites.length + filteredRooms.length,
             separatorBuilder: (_, __) => const Divider(height: 12.0),
             itemBuilder: (_, i) {
               var theme = Theme.of(context).textTheme;
-              final room = filteredRooms[i];
+
+              if (i < groupInvites.length) {
+                return Text('group invite');
+              }
+
+              final room = filteredRooms[i - groupInvites.length];
               if (room.isGroupChatRoom) {
                 return GroupListTile(
                   room,
@@ -173,7 +180,7 @@ class _ChatState extends _BaseTabState<_Chat> {
         if (newChat is User) {
           final newRoom = ChatRoom.blank(user: defaultUser, otherUser: newChat);
           setOpenChat(newRoom, newChat);
-        } else if (newChat is GroupInfo) {
+        } else if (newChat is GroupDetails) {
           throw UnimplementedError('Open Group chat');
         }
       },

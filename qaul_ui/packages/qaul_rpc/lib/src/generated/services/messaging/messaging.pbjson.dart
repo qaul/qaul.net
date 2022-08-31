@@ -49,12 +49,12 @@ final $typed_data.Uint8List envelopPayloadDescriptor = $convert.base64Decode('Cg
 const Encrypted$json = const {
   '1': 'Encrypted',
   '2': const [
-    const {'1': 'data', '3': 1, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'data', '3': 1, '4': 3, '5': 11, '6': '.qaul.net.messaging.Data', '10': 'data'},
   ],
 };
 
 /// Descriptor for `Encrypted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List encryptedDescriptor = $convert.base64Decode('CglFbmNyeXB0ZWQSEgoEZGF0YRgBIAEoDFIEZGF0YQ==');
+final $typed_data.Uint8List encryptedDescriptor = $convert.base64Decode('CglFbmNyeXB0ZWQSLAoEZGF0YRgBIAMoCzIYLnFhdWwubmV0Lm1lc3NhZ2luZy5EYXRhUgRkYXRh');
 @$core.Deprecated('Use dataDescriptor instead')
 const Data$json = const {
   '1': 'Data',
@@ -73,7 +73,7 @@ const Messaging$json = const {
     const {'1': 'confirmation_message', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.messaging.Confirmation', '9': 0, '10': 'confirmationMessage'},
     const {'1': 'crypto_service', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
     const {'1': 'rtc_stream_message', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.RtcStreamMessage', '9': 0, '10': 'rtcStreamMessage'},
-    const {'1': 'group_notify_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupNotifyMessage', '9': 0, '10': 'groupNotifyMessage'},
+    const {'1': 'group_invite_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupInviteMessage', '9': 0, '10': 'groupInviteMessage'},
     const {'1': 'common_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.CommonMessage', '9': 0, '10': 'commonMessage'},
   ],
   '8': const [
@@ -82,14 +82,7 @@ const Messaging$json = const {
 };
 
 /// Descriptor for `Messaging`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USSgoOY3J5cHRvX3NlcnZpY2UYAiABKAsyIS5xYXVsLm5ldC5tZXNzYWdpbmcuQ3J5cHRvU2VydmljZUgAUg1jcnlwdG9TZXJ2aWNlElQKEnJ0Y19zdHJlYW1fbWVzc2FnZRgDIAEoCzIkLnFhdWwubmV0Lm1lc3NhZ2luZy5SdGNTdHJlYW1NZXNzYWdlSABSEHJ0Y1N0cmVhbU1lc3NhZ2USWgoUZ3JvdXBfbm90aWZ5X21lc3NhZ2UYBCABKAsyJi5xYXVsLm5ldC5tZXNzYWdpbmcuR3JvdXBOb3RpZnlNZXNzYWdlSABSEmdyb3VwTm90aWZ5TWVzc2FnZRJKCg5jb21tb25fbWVzc2FnZRgFIAEoCzIhLnFhdWwubmV0Lm1lc3NhZ2luZy5Db21tb25NZXNzYWdlSABSDWNvbW1vbk1lc3NhZ2VCCQoHbWVzc2FnZQ==');
-@$core.Deprecated('Use cryptoServiceDescriptor instead')
-const CryptoService$json = const {
-  '1': 'CryptoService',
-};
-
-/// Descriptor for `CryptoService`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List cryptoServiceDescriptor = $convert.base64Decode('Cg1DcnlwdG9TZXJ2aWNl');
+final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USSgoOY3J5cHRvX3NlcnZpY2UYAiABKAsyIS5xYXVsLm5ldC5tZXNzYWdpbmcuQ3J5cHRvU2VydmljZUgAUg1jcnlwdG9TZXJ2aWNlElQKEnJ0Y19zdHJlYW1fbWVzc2FnZRgDIAEoCzIkLnFhdWwubmV0Lm1lc3NhZ2luZy5SdGNTdHJlYW1NZXNzYWdlSABSEHJ0Y1N0cmVhbU1lc3NhZ2USWgoUZ3JvdXBfaW52aXRlX21lc3NhZ2UYBCABKAsyJi5xYXVsLm5ldC5tZXNzYWdpbmcuR3JvdXBJbnZpdGVNZXNzYWdlSABSEmdyb3VwSW52aXRlTWVzc2FnZRJKCg5jb21tb25fbWVzc2FnZRgFIAEoCzIhLnFhdWwubmV0Lm1lc3NhZ2luZy5Db21tb25NZXNzYWdlSABSDWNvbW1vbk1lc3NhZ2VCCQoHbWVzc2FnZQ==');
 @$core.Deprecated('Use confirmationDescriptor instead')
 const Confirmation$json = const {
   '1': 'Confirmation',
@@ -101,6 +94,33 @@ const Confirmation$json = const {
 
 /// Descriptor for `Confirmation`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List confirmationDescriptor = $convert.base64Decode('CgxDb25maXJtYXRpb24SHAoJc2lnbmF0dXJlGAEgASgMUglzaWduYXR1cmUSHwoLcmVjZWl2ZWRfYXQYAiABKARSCnJlY2VpdmVkQXQ=');
+@$core.Deprecated('Use cryptoServiceDescriptor instead')
+const CryptoService$json = const {
+  '1': 'CryptoService',
+};
+
+/// Descriptor for `CryptoService`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List cryptoServiceDescriptor = $convert.base64Decode('Cg1DcnlwdG9TZXJ2aWNl');
+@$core.Deprecated('Use rtcStreamMessageDescriptor instead')
+const RtcStreamMessage$json = const {
+  '1': 'RtcStreamMessage',
+  '2': const [
+    const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
+  ],
+};
+
+/// Descriptor for `RtcStreamMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rtcStreamMessageDescriptor = $convert.base64Decode('ChBSdGNTdHJlYW1NZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
+@$core.Deprecated('Use groupInviteMessageDescriptor instead')
+const GroupInviteMessage$json = const {
+  '1': 'GroupInviteMessage',
+  '2': const [
+    const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
+  ],
+};
+
+/// Descriptor for `GroupInviteMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List groupInviteMessageDescriptor = $convert.base64Decode('ChJHcm91cEludml0ZU1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
 @$core.Deprecated('Use commonMessageDescriptor instead')
 const CommonMessage$json = const {
   '1': 'CommonMessage',
@@ -140,26 +160,6 @@ const FileMessage$json = const {
 
 /// Descriptor for `FileMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List fileMessageDescriptor = $convert.base64Decode('CgtGaWxlTWVzc2FnZRIYCgdjb250ZW50GAEgASgMUgdjb250ZW50');
-@$core.Deprecated('Use rtcMessageDescriptor instead')
-const RtcMessage$json = const {
-  '1': 'RtcMessage',
-  '2': const [
-    const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
-  ],
-};
-
-/// Descriptor for `RtcMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rtcMessageDescriptor = $convert.base64Decode('CgpSdGNNZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
-@$core.Deprecated('Use rtcStreamMessageDescriptor instead')
-const RtcStreamMessage$json = const {
-  '1': 'RtcStreamMessage',
-  '2': const [
-    const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
-  ],
-};
-
-/// Descriptor for `RtcStreamMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rtcStreamMessageDescriptor = $convert.base64Decode('ChBSdGNTdHJlYW1NZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
 @$core.Deprecated('Use groupMessageDescriptor instead')
 const GroupMessage$json = const {
   '1': 'GroupMessage',
@@ -170,16 +170,16 @@ const GroupMessage$json = const {
 
 /// Descriptor for `GroupMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List groupMessageDescriptor = $convert.base64Decode('CgxHcm91cE1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
-@$core.Deprecated('Use groupNotifyMessageDescriptor instead')
-const GroupNotifyMessage$json = const {
-  '1': 'GroupNotifyMessage',
+@$core.Deprecated('Use rtcMessageDescriptor instead')
+const RtcMessage$json = const {
+  '1': 'RtcMessage',
   '2': const [
     const {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
   ],
 };
 
-/// Descriptor for `GroupNotifyMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupNotifyMessageDescriptor = $convert.base64Decode('ChJHcm91cE5vdGlmeU1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
+/// Descriptor for `RtcMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rtcMessageDescriptor = $convert.base64Decode('CgpSdGNNZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
 @$core.Deprecated('Use dtnDescriptor instead')
 const Dtn$json = const {
   '1': 'Dtn',

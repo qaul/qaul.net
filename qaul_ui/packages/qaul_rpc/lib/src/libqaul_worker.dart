@@ -24,6 +24,7 @@ import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
+import 'models/group_invite.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
@@ -174,7 +175,12 @@ class LibqaulWorker {
   // -------------------
   void getGroupInfo(Uint8List id) async {
     final msg = Group(groupInfoRequest: GroupInfoRequest(groupId: id.toList()));
-    await _encodeAndSendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
+  }
+
+  void getGroupInvitesReceived() async {
+    final msg = Group(groupInvitedRequest: GroupInvitedRequest());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void createGroup(String name) async {
@@ -213,12 +219,9 @@ class LibqaulWorker {
   }
 
   void replyToGroupInvite(Uint8List groupId, {required bool accepted}) async {
-    final user = _reader(defaultUserProvider);
-    assert(user != null);
     final msg = Group(
       groupReplyInviteRequest: GroupReplyInviteRequest(
         groupId: groupId.toList(),
-        userId: user!.id.toList(),
         accept: accepted,
       ),
     );
@@ -237,7 +240,7 @@ class LibqaulWorker {
   }
 
   // -------------------
-  // FILESHARE Requests
+  // CHATFILE Requests
   // -------------------
   void sendFile({
     required String pathName,
@@ -255,14 +258,14 @@ class LibqaulWorker {
       conversationId: conversationId.toList(),
       description: description,
     ));
-    await _sendMessage(Modules.FILESHARE, msg);
+    await _sendMessage(Modules.CHATFILE, msg);
   }
 
   void getFileHistory({int? offset, int? limit}) async {
     final msg = FileSharing(
       fileHistory: FileHistoryRequest(offset: offset, limit: limit),
     );
-    await _sendMessage(Modules.FILESHARE, msg);
+    await _sendMessage(Modules.CHATFILE, msg);
   }
 
   // -------------------

@@ -14,14 +14,18 @@ use state::Storage;
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::RwLock;
 
+#[cfg(emulate)]
+mod network_emul;
+
 mod process;
+pub mod retransmit;
 
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::table::RoutingTable;
 use crate::storage::database::DataBase;
-use crate::utilities::timestamp::{self, Timestamp};
+use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
 use qaul_messaging::QaulMessagingReceived;
 
@@ -31,26 +35,8 @@ pub mod proto {
     include!("qaul.net.messaging.rs");
 }
 
-/// mutable state of messages id for generate uniq id
-pub static MESSAGEIDS: Storage<RwLock<MessageIds>> = Storage::new();
-
-/// MessagId Structure
-pub struct MessageId {
-    timestamp: u64,
-    last_index: u32,
-}
-
-/// MessageIds structure
-pub struct MessageIds {
-    /// sender => mesage id
-    pub ids: BTreeMap<Vec<u8>, MessageId>,
-}
-
 /// mutable state of messages, scheduled for sending
 pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
-
-/// mutable state of failed messages, scheduled for sending
-pub static FAILEDMESSAGING: Storage<RwLock<FailedMessaging>> = Storage::new();
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -60,14 +46,51 @@ pub struct ScheduledMessage {
 
 /// mutable state of messages, scheduled for sending
 pub static UNCONFIRMED: Storage<RwLock<UnConfirmedMessages>> = Storage::new();
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
+
+// TODO: check if it wouldn't be easier to store
+// the message
+/// unconfirmed message
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UnConfirmedMessage {
+    // receiver id
     pub receiver_id: Vec<u8>,
+    // message type
+    pub message_type: MessagingServiceType,
+    // message id
     pub message_id: Vec<u8>,
+    // encoded container
     pub container: Vec<u8>,
+    // last sent time
     pub last_sent: u64,
+    // retry time
     pub retry: u32,
+    // flag that transferred on the network
+    pub scheduled: bool,
 }
+
+/// Unconfirmed Message Type
+#[derive(Serialize, Deserialize, Clone)]
+pub enum MessagingServiceType {
+    /// Unconfirmed Message
+    /// (this message does expect a confirmation)
+    Unconfirmed,
+    /// DTN message, originated from this host
+    DtnOrigin,
+    /// DTN message, stored on this host
+    DtnStored,
+    /// Crypto Handshake Message
+    Crypto,
+    /// Group Management Message
+    Group,
+    /// Chat Text Message
+    Chat,
+    /// Chat File Message
+    ChatFile,
+    /// RTC Message
+    Rtc,
+}
+
+/// Unconfirmed Messages Structure
 pub struct UnConfirmedMessages {
     /// signature => UnConfirmedMessage
     pub unconfirmed: Tree<UnConfirmedMessage>,
@@ -90,18 +113,12 @@ pub struct FailedMessage {
     pub message: String,
 }
 
-/// Qaul Failed Messaging Structure
-pub struct FailedMessaging {
-    pub tree: Tree<FailedMessage>,
-}
-
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
-        let message_ids = MessageIds {
-            ids: BTreeMap::new(),
-        };
-        MESSAGEIDS.set(RwLock::new(message_ids));
+        #[cfg(emulate)]
+        /// init emulator
+        network_emul::NetworkEmulator::init();
 
         let messaging = Messaging {
             to_send: VecDeque::new(),
@@ -109,9 +126,6 @@ impl Messaging {
         MESSAGING.set(RwLock::new(messaging));
 
         let db = DataBase::get_node_db();
-        let tree: Tree<FailedMessage> = db.open_bincode_tree("failed_messages").unwrap();
-        let failed_messaging = FailedMessaging { tree: tree };
-        FAILEDMESSAGING.set(RwLock::new(failed_messaging));
 
         // open trees
         let unconfirmed: Tree<UnConfirmedMessage> = db.open_bincode_tree("unconfirmed").unwrap();
@@ -119,23 +133,9 @@ impl Messaging {
         UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
 
-    pub fn generate_group_message_id(
-        group_id: &Vec<u8>,
-        sender_id: &PeerId,
-        index: u32,
-    ) -> Vec<u8> {
-        let group_crc = crc::crc64::checksum_iso(group_id);
-        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
-        let mut buff0 = group_crc.to_be_bytes().to_vec();
-        let mut buff = sender_crc.to_be_bytes().to_vec();
-        let mut index_bytes = index.to_be_bytes().to_vec();
-
-        buff0.append(&mut buff);
-        buff0.append(&mut index_bytes);
-        buff0
-    }
-
+    /// Save a message to the data base to wait for confirmation
     fn save_unconfirmed_message(
+        message_type: MessagingServiceType,
         message_id: &Vec<u8>,
         receiver: &PeerId,
         container: &proto::Container,
@@ -144,8 +144,10 @@ impl Messaging {
             receiver_id: receiver.to_bytes(),
             container: container.encode_to_vec(),
             last_sent: Timestamp::get_timestamp(),
-            message_id: message_id.clone(),
-            retry: 0,
+            message_type,
+            message_id: message_id.to_owned(),
+            retry: 1,
+            scheduled: false,
         };
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -162,20 +164,36 @@ impl Messaging {
         }
     }
 
-    // process confirmation message and return (sender_id, message_id)
-    pub fn on_confirmed_message(signature: &Vec<u8>) -> Option<Vec<u8>> {
+    // process confirmation message
+    pub fn on_confirmed_message(signature: &Vec<u8>) {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
-        // remove unconfirmed from DB
+        // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
             Ok(v) => {
+                // TODO: is this needed here?
+                // -> only flush after it has been changed on main table too
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
                     log::error!("Error unconfirmed table flush: {}", e);
                 }
 
                 match v {
                     Some(unconfirmed) => {
-                        return Some(unconfirmed.message_id.clone());
+                        // check message and decide what to do
+                        match unconfirmed.message_type {
+                            MessagingServiceType::Unconfirmed => {}
+                            MessagingServiceType::DtnOrigin => {}
+                            MessagingServiceType::DtnStored => {}
+                            MessagingServiceType::Crypto => {}
+                            MessagingServiceType::Group => {}
+                            MessagingServiceType::Chat => {}
+                            MessagingServiceType::ChatFile => {}
+                            MessagingServiceType::Rtc => {
+                                // TODO CONFIRM RTC MESSAGE
+                            }
+                        }
+                        // REMOVE
+                        //return Some(unconfirmed.message_id.clone());
                     }
                     _ => {}
                 }
@@ -184,59 +202,82 @@ impl Messaging {
                 log::error!("{}", e);
             }
         }
-        None
+    }
+
+    fn on_scheduled_message(signature: &Vec<u8>) {
+        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
+            return;
+        }
+
+        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+
+        unconfirmed_message.scheduled = true;
+        if let Err(_e) = unconfirmed
+            .unconfirmed
+            .insert(signature.clone(), unconfirmed_message)
+        {
+            log::error!("error updating unconfirmed table");
+        } else {
+            if let Err(_e) = unconfirmed.unconfirmed.flush() {
+                log::error!("error updating unconfirmed table");
+            }
+        }
     }
 
     /// pack, sign and schedule a message for sending
     pub fn pack_and_send_message(
         user_account: &UserAccount,
         receiver: &PeerId,
-        data: &Vec<u8>,
-        message_id: Option<&Vec<u8>>,
+        data: Vec<u8>,
+        message_type: MessagingServiceType,
+        message_id: &Vec<u8>,
         is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
-        // // encrypt data
-        // // TODO: slize data to 64K
-        // let (encryption_result, nonce) = Crypto::encrypt(data.clone(), user_account.to_owned(), receiver.clone());
+        // encrypt data
+        // TODO: slice data to 64K
+        let (encryption_result, nonce) =
+            Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
 
-        // let mut encrypted: Vec<proto::Data> = Vec::new();
-        // match encryption_result {
-        //     Some(encrypted_chunk) => {
-        //         let data_message = proto::Data{ nonce, data: encrypted_chunk };
+        let mut encrypted: Vec<proto::Data> = Vec::new();
+        match encryption_result {
+            Some(encrypted_chunk) => {
+                let data_message = proto::Data {
+                    nonce,
+                    data: encrypted_chunk,
+                };
 
-        //         log::info!("data len: {}", data_message.encoded_len());
+                log::trace!("data len: {}", data_message.encoded_len());
 
-        //         encrypted.push(data_message);
-        //     },
-        //     None => return Err("Encryption error occurred".to_string()),
-        // }
+                encrypted.push(data_message);
+            }
+            None => return Err("Encryption error occurred".to_string()),
+        }
 
-        // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
+        log::trace!(
+            "sender_id: {}, receiver_id: {}",
+            user_account.id.to_bytes().len(),
+            receiver.to_bytes().len()
+        );
 
         let envelop_payload = proto::EnvelopPayload {
             payload: Some(proto::envelop_payload::Payload::Encrypted(
-                proto::Encrypted { data: data.clone() },
+                proto::Encrypted { data: encrypted },
             )),
         };
-
-        // let payload = proto::Encrypted{data: data.clone()};
-
-        // let mut message_buf = Vec::with_capacity(payload.encoded_len());
-        // payload
-        //     .encode(&mut message_buf)
-        //     .expect("Vec<u8> provides capacity as needed");
 
         // create envelope
         let envelope = proto::Envelope {
             sender_id: user_account.id.to_bytes(),
             receiver_id: receiver.to_bytes(),
-            //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
-            //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
             payload: envelop_payload.encode_to_vec(),
         };
 
         // debug
-        log::info!("envelope len: {}", envelope.encoded_len());
+        log::debug!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
@@ -254,7 +295,7 @@ impl Messaging {
 
             // in common message case, save into unconfirmed table
             if is_common_message {
-                Self::save_unconfirmed_message(message_id.unwrap(), receiver, &container);
+                Self::save_unconfirmed_message(message_type, message_id, receiver, &container);
             }
 
             // schedule message for sending
@@ -273,7 +314,16 @@ impl Messaging {
     /// This function adds the message to the ring buffer for sending.
     /// This buffer is checked regularly by libqaul for sending.
     ///
-    fn schedule_message(receiver: PeerId, container: proto::Container) {
+    pub fn schedule_message(receiver: PeerId, container: proto::Container) {
+        #[cfg(emulate)]
+        if network_emul::NetworkEmulator::is_lost() {
+            log::error!(
+                "drop message, signature: {}",
+                bs58::encode(container.signature.clone()).into_string()
+            );
+            return;
+        }
+
         let msg = ScheduledMessage {
             receiver,
             container,
@@ -300,6 +350,9 @@ impl Messaging {
         if let Some(message) = message_item {
             // check for route
             if let Some(route) = RoutingTable::get_route_to_user(message.receiver) {
+                // update unconfirmed table set scheduled flag.
+                Self::on_scheduled_message(&message.container.signature);
+
                 // create binary message
                 let data = message.container.encode_to_vec();
 
@@ -307,26 +360,25 @@ impl Messaging {
                 return Some((route.node, route.module, data));
             } else {
                 log::trace!("No route found to user {}", message.receiver.to_base58());
-
                 // reschedule if no route is found
-                Self::schedule_message(message.receiver, message.container);
+                //Self::schedule_message(message.receiver, message.container);
             }
         }
 
         None
     }
 
-    /// TODO: send received confirmation message
+    /// Send a confirmation message for a received message
     pub fn send_confirmation(
         user_id: &PeerId,
         receiver_id: &PeerId,
         signature: &Vec<u8>,
     ) -> Result<Vec<u8>, String> {
         if let Some(user) = UserAccounts::get_by_id(user_id.clone()) {
-            // // create timestamp
+            // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
-            // // pack message
+            // pack message
             let send_message = proto::Messaging {
                 message: Some(proto::messaging::Message::ConfirmationMessage(
                     proto::Confirmation {
@@ -342,8 +394,16 @@ impl Messaging {
                 .encode(&mut message_buf)
                 .expect("Vec<u8> provides capacity as needed");
 
-            // // send message via messaging
-            Self::pack_and_send_message(&user, receiver_id, &message_buf, None, false)
+            // send message via messaging
+            let message_id: Vec<u8> = Vec::new();
+            Self::pack_and_send_message(
+                &user,
+                receiver_id,
+                message_buf,
+                MessagingServiceType::Unconfirmed,
+                &message_id,
+                false,
+            )
         } else {
             return Err("invalid user_id".to_string());
         }
