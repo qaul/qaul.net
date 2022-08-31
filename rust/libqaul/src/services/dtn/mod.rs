@@ -6,23 +6,17 @@
 //! The DTN service sends and receives DTN messages into the network.
 //! They should reach everyone in the network.
 
-//use bs58::decode;
 use libp2p::PeerId;
-
 use prost::Message;
-
 use sled_extensions::{bincode::Tree, DbExt};
 use state::Storage;
-
+use std::fmt;
 use std::{convert::TryInto, sync::RwLock};
 
+use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::storage::configuration::Configuration;
-
 use crate::storage::database::DataBase;
-
-use super::messaging::Messaging;
-use super::messaging::{proto, MessagingServiceType};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct DtnMessageEntry {
@@ -68,6 +62,40 @@ impl Dtn {
         };
 
         STORAGESTATE.set(RwLock::new(storage_state));
+    }
+
+    /// Convert Conversation ID from String to Binary
+    fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
+        // check length
+        if id.len() < 52 {
+            return Err("Conversation ID not long enough".to_string());
+        }
+
+        // convert input
+        match bs58::decode(id).into_vec() {
+            Ok(id_bin) => Ok(id_bin),
+            Err(e) => {
+                let err = fmt::format(format_args!("{}", e));
+                Err(err)
+            }
+        }
+    }
+
+    pub fn get_storage_user(receiver_id: &PeerId) -> Option<PeerId> {
+        let config = Configuration::get();
+        for user in &config.storage.users {
+            match Self::id_string_to_bin(user.clone()) {
+                Ok(v) => match PeerId::from_bytes(&v) {
+                    Ok(id) => {
+                        return Some(id.clone());
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+
+        None
     }
 
     fn process_storage_node_message(
