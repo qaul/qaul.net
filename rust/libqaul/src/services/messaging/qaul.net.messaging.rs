@@ -47,17 +47,23 @@ pub mod envelop_payload {
 /// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Encrypted {
-    /// repeated Data data = 1;
-    #[prost(bytes="vec", tag="1")]
-    pub data: ::prost::alloc::vec::Vec<u8>,
+    /// one or several Data messages
+    /// of maximally 64KB each.
+    #[prost(message, repeated, tag="1")]
+    pub data: ::prost::alloc::vec::Vec<Data>,
 }
 /// encrypted message data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Data {
     /// message nonce for encryption
+    ///
+    /// each nonce is only used once per key
+    /// and increases by one fore each new data package.
     #[prost(uint64, tag="1")]
     pub nonce: u64,
-    /// the encrypted message data
+    /// the encrypted message data slice
+    /// each data package contains maximally
+    /// 64KB
     #[prost(bytes="vec", tag="2")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
@@ -77,26 +83,19 @@ pub mod messaging {
         /// crypto service
         #[prost(message, tag="2")]
         CryptoService(super::CryptoService),
-        /// rtc stream 
+        /// rtc stream
         #[prost(message, tag="3")]
         RtcStreamMessage(super::RtcStreamMessage),
-        /// group notify
+        /// group invite messages
         #[prost(message, tag="4")]
-        GroupNotifyMessage(super::GroupNotifyMessage),
+        GroupInviteMessage(super::GroupInviteMessage),
         /// common message
         #[prost(message, tag="5")]
         CommonMessage(super::CommonMessage),
     }
 }
-/// Crypto Service Message
-///
-/// This message is for crypto specific tasks,
-/// such as completing a handshake.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CryptoService {
-}
 /// message received confirmation
-/// 
+///
 /// every message that was received by a user
 /// sends an acknowledgment package, to the sender
 /// to confirm the receive.
@@ -106,9 +105,28 @@ pub struct Confirmation {
     /// message ID
     #[prost(bytes="vec", tag="1")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
-    /// receveived at timestamp
+    /// received at timestamp
     #[prost(uint64, tag="2")]
     pub received_at: u64,
+}
+/// Crypto Service Message
+///
+/// This message is for crypto specific tasks,
+/// such as completing a handshake.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CryptoService {
+}
+/// rtc stream mesasge
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RtcStreamMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+/// group invite message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupInviteMessage {
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// common message
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -119,7 +137,7 @@ pub struct CommonMessage {
     /// conversation id
     #[prost(bytes="vec", tag="2")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
-    /// conversation id
+    /// sent at timestamp
     #[prost(uint64, tag="3")]
     pub sent_at: u64,
     /// payload
@@ -159,27 +177,15 @@ pub struct FileMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// rtc message
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RtcMessage {
-    #[prost(bytes="vec", tag="1")]
-    pub content: ::prost::alloc::vec::Vec<u8>,
-}
-/// rtc stream mesasge
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RtcStreamMessage {
-    #[prost(bytes="vec", tag="1")]
-    pub content: ::prost::alloc::vec::Vec<u8>,
-}
 /// group message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
-/// group notify message
+/// rtc message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupNotifyMessage {
+pub struct RtcMessage {
     #[prost(bytes="vec", tag="1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }

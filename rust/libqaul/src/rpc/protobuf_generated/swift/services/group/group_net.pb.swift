@@ -20,6 +20,96 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+/// Group member state
+enum Qaul_Net_Group_GroupMemberState: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// invited
+  case invited // = 0
+
+  /// activated
+  case activated // = 1
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .invited
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .invited
+    case 1: self = .activated
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .invited: return 0
+    case .activated: return 1
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Net_Group_GroupMemberState: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Net_Group_GroupMemberState] = [
+    .invited,
+    .activated,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+/// Group member role
+enum Qaul_Net_Group_GroupMemberRole: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// user
+  case user // = 0
+
+  /// admin
+  case admin // = 255
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .user
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .user
+    case 255: self = .admin
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .user: return 0
+    case .admin: return 255
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Net_Group_GroupMemberRole: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Net_Group_GroupMemberRole] = [
+    .user,
+    .admin,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// Group network message container
 struct Qaul_Net_Group_GroupContainer {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -46,6 +136,15 @@ struct Qaul_Net_Group_GroupContainer {
     set {message = .replyInvite(newValue)}
   }
 
+  /// group status update
+  var groupInfo: Qaul_Net_Group_GroupInfo {
+    get {
+      if case .groupInfo(let v)? = message {return v}
+      return Qaul_Net_Group_GroupInfo()
+    }
+    set {message = .groupInfo(newValue)}
+  }
+
   /// member removed
   var removed: Qaul_Net_Group_RemovedMember {
     get {
@@ -62,6 +161,8 @@ struct Qaul_Net_Group_GroupContainer {
     case inviteMember(Qaul_Net_Group_InviteMember)
     /// reply invite
     case replyInvite(Qaul_Net_Group_ReplyInvite)
+    /// group status update
+    case groupInfo(Qaul_Net_Group_GroupInfo)
     /// member removed
     case removed(Qaul_Net_Group_RemovedMember)
 
@@ -77,6 +178,10 @@ struct Qaul_Net_Group_GroupContainer {
       }()
       case (.replyInvite, .replyInvite): return {
         guard case .replyInvite(let l) = lhs, case .replyInvite(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.groupInfo, .groupInfo): return {
+        guard case .groupInfo(let l) = lhs, case .groupInfo(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.removed, .removed): return {
@@ -98,45 +203,42 @@ struct Qaul_Net_Group_InviteMember {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// group id
-  var groupID: Data = Data()
-
-  /// group name
-  var groupName: String = String()
-
-  /// group admin id
-  var adminID: Data = Data()
-
-  /// group created at
-  var createdAt: UInt64 = 0
-
-  /// group member count
-  var membersCount: UInt32 = 0
+  /// Group Info
+  var group: Qaul_Net_Group_GroupInfo {
+    get {return _group ?? Qaul_Net_Group_GroupInfo()}
+    set {_group = newValue}
+  }
+  /// Returns true if `group` has been explicitly set.
+  var hasGroup: Bool {return self._group != nil}
+  /// Clears the value of `group`. Subsequent reads from it will return its default value.
+  mutating func clearGroup() {self._group = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _group: Qaul_Net_Group_GroupInfo? = nil
 }
 
 /// Group member
-struct Qaul_Net_Group_Member {
+struct Qaul_Net_Group_GroupMember {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  ///user id
+  /// user id
   var userID: Data = Data()
 
-  ///role
-  var role: Int32 = 0
+  /// role
+  var role: Qaul_Net_Group_GroupMemberRole = .user
 
-  ///joined at
+  /// joined at
   var joinedAt: UInt64 = 0
 
-  ///state 
-  var state: Int32 = 0
+  /// state
+  var state: Qaul_Net_Group_GroupMemberState = .invited
 
-  ///last message index
+  /// last message index
   var lastMessageIndex: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -144,8 +246,8 @@ struct Qaul_Net_Group_Member {
   init() {}
 }
 
-/// Group Notify
-struct Qaul_Net_Group_GroupNotify {
+/// Group Info
+struct Qaul_Net_Group_GroupInfo {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -156,21 +258,23 @@ struct Qaul_Net_Group_GroupNotify {
   /// group name
   var groupName: String = String()
 
-  ///created at
+  /// created at
   var createdAt: UInt64 = 0
 
-  /// creator id
-  var creatorID: Data = Data()
+  /// group revision
+  var revision: UInt32 = 0
 
   /// updated members
-  var members: [Qaul_Net_Group_Member] = []
+  var members: [Qaul_Net_Group_GroupMember] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
 
-/// Accept Invite
+/// Reply to Invite
+///
+/// Accept / Reject invitation
 struct Qaul_Net_Group_ReplyInvite {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -187,7 +291,7 @@ struct Qaul_Net_Group_ReplyInvite {
   init() {}
 }
 
-/// Removed member 
+/// Removed member
 struct Qaul_Net_Group_RemovedMember {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -205,11 +309,26 @@ struct Qaul_Net_Group_RemovedMember {
 
 fileprivate let _protobuf_package = "qaul.net.group"
 
+extension Qaul_Net_Group_GroupMemberState: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "Invited"),
+    1: .same(proto: "Activated"),
+  ]
+}
+
+extension Qaul_Net_Group_GroupMemberRole: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "User"),
+    255: .same(proto: "Admin"),
+  ]
+}
+
 extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GroupContainer"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "invite_member"),
     2: .standard(proto: "reply_invite"),
+    3: .standard(proto: "group_info"),
     4: .same(proto: "removed"),
   ]
 
@@ -245,6 +364,19 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
           self.message = .replyInvite(v)
         }
       }()
+      case 3: try {
+        var v: Qaul_Net_Group_GroupInfo?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .groupInfo(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .groupInfo(v)
+        }
+      }()
       case 4: try {
         var v: Qaul_Net_Group_RemovedMember?
         var hadOneofValue = false
@@ -277,6 +409,10 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
       guard case .replyInvite(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     }()
+    case .groupInfo?: try {
+      guard case .groupInfo(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
     case .removed?: try {
       guard case .removed(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
@@ -296,11 +432,7 @@ extension Qaul_Net_Group_GroupContainer: SwiftProtobuf.Message, SwiftProtobuf._M
 extension Qaul_Net_Group_InviteMember: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".InviteMember"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "group_id"),
-    2: .standard(proto: "group_name"),
-    3: .standard(proto: "admin_id"),
-    4: .standard(proto: "created_at"),
-    5: .standard(proto: "members_count"),
+    1: .same(proto: "group"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -309,48 +441,32 @@ extension Qaul_Net_Group_InviteMember: SwiftProtobuf.Message, SwiftProtobuf._Mes
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.groupName) }()
-      case 3: try { try decoder.decodeSingularBytesField(value: &self.adminID) }()
-      case 4: try { try decoder.decodeSingularUInt64Field(value: &self.createdAt) }()
-      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.membersCount) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._group) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.groupID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.groupID, fieldNumber: 1)
-    }
-    if !self.groupName.isEmpty {
-      try visitor.visitSingularStringField(value: self.groupName, fieldNumber: 2)
-    }
-    if !self.adminID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.adminID, fieldNumber: 3)
-    }
-    if self.createdAt != 0 {
-      try visitor.visitSingularUInt64Field(value: self.createdAt, fieldNumber: 4)
-    }
-    if self.membersCount != 0 {
-      try visitor.visitSingularUInt32Field(value: self.membersCount, fieldNumber: 5)
-    }
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._group {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Group_InviteMember, rhs: Qaul_Net_Group_InviteMember) -> Bool {
-    if lhs.groupID != rhs.groupID {return false}
-    if lhs.groupName != rhs.groupName {return false}
-    if lhs.adminID != rhs.adminID {return false}
-    if lhs.createdAt != rhs.createdAt {return false}
-    if lhs.membersCount != rhs.membersCount {return false}
+    if lhs._group != rhs._group {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Member"
+extension Qaul_Net_Group_GroupMember: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".GroupMember"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "user_id"),
     2: .same(proto: "role"),
@@ -366,9 +482,9 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.userID) }()
-      case 2: try { try decoder.decodeSingularInt32Field(value: &self.role) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.role) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.joinedAt) }()
-      case 4: try { try decoder.decodeSingularInt32Field(value: &self.state) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.state) }()
       case 5: try { try decoder.decodeSingularUInt32Field(value: &self.lastMessageIndex) }()
       default: break
       }
@@ -379,14 +495,14 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     if !self.userID.isEmpty {
       try visitor.visitSingularBytesField(value: self.userID, fieldNumber: 1)
     }
-    if self.role != 0 {
-      try visitor.visitSingularInt32Field(value: self.role, fieldNumber: 2)
+    if self.role != .user {
+      try visitor.visitSingularEnumField(value: self.role, fieldNumber: 2)
     }
     if self.joinedAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.joinedAt, fieldNumber: 3)
     }
-    if self.state != 0 {
-      try visitor.visitSingularInt32Field(value: self.state, fieldNumber: 4)
+    if self.state != .invited {
+      try visitor.visitSingularEnumField(value: self.state, fieldNumber: 4)
     }
     if self.lastMessageIndex != 0 {
       try visitor.visitSingularUInt32Field(value: self.lastMessageIndex, fieldNumber: 5)
@@ -394,7 +510,7 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Net_Group_Member, rhs: Qaul_Net_Group_Member) -> Bool {
+  static func ==(lhs: Qaul_Net_Group_GroupMember, rhs: Qaul_Net_Group_GroupMember) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.role != rhs.role {return false}
     if lhs.joinedAt != rhs.joinedAt {return false}
@@ -405,13 +521,13 @@ extension Qaul_Net_Group_Member: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
   }
 }
 
-extension Qaul_Net_Group_GroupNotify: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GroupNotify"
+extension Qaul_Net_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".GroupInfo"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "group_id"),
     2: .standard(proto: "group_name"),
     3: .standard(proto: "created_at"),
-    4: .standard(proto: "creator_id"),
+    4: .same(proto: "revision"),
     5: .same(proto: "members"),
   ]
 
@@ -424,7 +540,7 @@ extension Qaul_Net_Group_GroupNotify: SwiftProtobuf.Message, SwiftProtobuf._Mess
       case 1: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.groupName) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.createdAt) }()
-      case 4: try { try decoder.decodeSingularBytesField(value: &self.creatorID) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
       case 5: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
       default: break
       }
@@ -441,8 +557,8 @@ extension Qaul_Net_Group_GroupNotify: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if self.createdAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.createdAt, fieldNumber: 3)
     }
-    if !self.creatorID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.creatorID, fieldNumber: 4)
+    if self.revision != 0 {
+      try visitor.visitSingularUInt32Field(value: self.revision, fieldNumber: 4)
     }
     if !self.members.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.members, fieldNumber: 5)
@@ -450,11 +566,11 @@ extension Qaul_Net_Group_GroupNotify: SwiftProtobuf.Message, SwiftProtobuf._Mess
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Qaul_Net_Group_GroupNotify, rhs: Qaul_Net_Group_GroupNotify) -> Bool {
+  static func ==(lhs: Qaul_Net_Group_GroupInfo, rhs: Qaul_Net_Group_GroupInfo) -> Bool {
     if lhs.groupID != rhs.groupID {return false}
     if lhs.groupName != rhs.groupName {return false}
     if lhs.createdAt != rhs.createdAt {return false}
-    if lhs.creatorID != rhs.creatorID {return false}
+    if lhs.revision != rhs.revision {return false}
     if lhs.members != rhs.members {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

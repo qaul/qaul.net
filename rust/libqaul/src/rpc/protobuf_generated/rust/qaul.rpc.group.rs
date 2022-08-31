@@ -39,7 +39,7 @@ pub mod group {
         GroupInfoRequest(super::GroupInfoRequest),
         /// group info response
         #[prost(message, tag="10")]
-        GroupInfoResponse(super::GroupInfoResponse),
+        GroupInfoResponse(super::GroupInfo),
         /// group reply invite request
         #[prost(message, tag="11")]
         GroupReplyInviteRequest(super::GroupReplyInviteRequest),
@@ -83,7 +83,7 @@ pub struct GroupCreateResponse {
     /// group id
     #[prost(bytes="vec", tag="1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
-    /// result 
+    /// result
     #[prost(message, optional, tag="2")]
     pub result: ::core::option::Option<GroupResult>,
 }
@@ -106,7 +106,7 @@ pub struct GroupRenameResponse {
     /// group name
     #[prost(string, tag="2")]
     pub group_name: ::prost::alloc::string::String,
-    /// result 
+    /// result
     #[prost(message, optional, tag="3")]
     pub result: ::core::option::Option<GroupResult>,
 }
@@ -129,19 +129,16 @@ pub struct GroupInviteMemberResponse {
     /// user id
     #[prost(bytes="vec", tag="2")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
-    /// result 
+    /// result
     #[prost(message, optional, tag="3")]
     pub result: ::core::option::Option<GroupResult>,
 }
-/// Reply Invite 
+/// Reply Invite
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupReplyInviteRequest {
     /// group id
     #[prost(bytes="vec", tag="1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
-    /// user id
-    #[prost(bytes="vec", tag="2")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
     /// accept
     #[prost(bool, tag="3")]
     pub accept: bool,
@@ -152,10 +149,7 @@ pub struct GroupReplyInviteResponse {
     /// group id
     #[prost(bytes="vec", tag="1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
-    /// user id
-    #[prost(bytes="vec", tag="2")]
-    pub user_id: ::prost::alloc::vec::Vec<u8>,
-    /// result 
+    /// result
     #[prost(message, optional, tag="3")]
     pub result: ::core::option::Option<GroupResult>,
 }
@@ -178,7 +172,7 @@ pub struct GroupRemoveMemberResponse {
     /// user id
     #[prost(bytes="vec", tag="2")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
-    /// result 
+    /// result
     #[prost(message, optional, tag="3")]
     pub result: ::core::option::Option<GroupResult>,
 }
@@ -190,6 +184,7 @@ pub struct GroupInfoRequest {
     pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Group member response
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupMember {
     /// user id
@@ -201,16 +196,17 @@ pub struct GroupMember {
     /// joined at
     #[prost(uint64, tag="3")]
     pub joined_at: u64,
-    /// state 
+    /// state
     #[prost(enumeration="GroupMemberState", tag="4")]
     pub state: i32,
-    /// last message index 
+    /// last message index
     #[prost(uint32, tag="5")]
     pub last_message_index: u32,
 }
 /// Group info response
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GroupInfoResponse {
+pub struct GroupInfo {
     /// group id
     #[prost(bytes="vec", tag="1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
@@ -220,11 +216,14 @@ pub struct GroupInfoResponse {
     /// created at
     #[prost(uint64, tag="3")]
     pub created_at: u64,
+    /// group revision number
+    #[prost(uint32, tag="4")]
+    pub revision: u32,
     /// is direct chat
-    #[prost(bool, tag="4")]
+    #[prost(bool, tag="5")]
     pub is_direct_chat: bool,
     /// members
-    #[prost(message, repeated, tag="5")]
+    #[prost(message, repeated, tag="6")]
     pub members: ::prost::alloc::vec::Vec<GroupMember>,
 }
 /// Group list request
@@ -236,28 +235,19 @@ pub struct GroupListRequest {
 pub struct GroupListResponse {
     /// group list
     #[prost(message, repeated, tag="1")]
-    pub groups: ::prost::alloc::vec::Vec<GroupInfoResponse>,
+    pub groups: ::prost::alloc::vec::Vec<GroupInfo>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupInvited {
-    /// group id
-    #[prost(bytes="vec", tag="1")]
-    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// sender id
-    #[prost(bytes="vec", tag="2")]
+    #[prost(bytes="vec", tag="1")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
     /// received at
-    #[prost(uint64, tag="3")]
+    #[prost(uint64, tag="2")]
     pub received_at: u64,
-    /// group name
-    #[prost(string, tag="4")]
-    pub group_name: ::prost::alloc::string::String,
-    /// created at
-    #[prost(uint64, tag="5")]
-    pub created_at: u64,
-    /// member count
-    #[prost(uint32, tag="6")]
-    pub member_count: u32,
+    /// group info
+    #[prost(message, optional, tag="3")]
+    pub group: ::core::option::Option<GroupInfo>,
 }
 /// Group list request
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -274,9 +264,9 @@ pub struct GroupInvitedResponse {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum GroupMemberState {
-    /// / invited
+    /// invited
     Invited = 0,
-    /// / activated
+    /// activated
     Activated = 1,
 }
 impl GroupMemberState {
@@ -295,9 +285,9 @@ impl GroupMemberState {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum GroupMemberRole {
-    /// / user
+    /// user
     User = 0,
-    /// / admin
+    /// admin
     Admin = 255,
 }
 impl GroupMemberRole {

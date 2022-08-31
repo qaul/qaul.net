@@ -1,11 +1,13 @@
 // Copyright (c) 2022 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Group Message Handling
+//! # Group Management Message Handling
+//!
+//! This file processes an incoming group management message.
 
 use libp2p::PeerId;
 
-use super::Group;
+use super::{Group, GroupStorage};
 
 /// Group Message Structure
 pub struct GroupMessage {}
@@ -14,22 +16,18 @@ impl GroupMessage {
     /// process group message from network
     pub fn on_message(
         sender_id: &PeerId,
-        receiver_id: &PeerId,
+        account_id: &PeerId,
         group_id: &Vec<u8>,
         message_id: &Vec<u8>,
     ) -> Result<bool, String> {
         let group;
-        match Group::get_group(receiver_id, group_id) {
-            Ok(v) => {
-                group = v;
-            }
-            Err(error) => {
-                return Err(error);
-            }
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+            Some(v) => group = v,
+            None => return Err("group not found".to_string()),
         }
 
-        //check member
-        match group.get_member(&receiver_id.to_bytes()) {
+        // check member
+        match group.get_member(&account_id.to_bytes()) {
             Some(_) => {}
             None => {
                 return Err("you are not member in this group".to_string());
@@ -63,7 +61,7 @@ impl GroupMessage {
         // change members status
         if sender_msg_index > sender.last_message_index {
             sender.last_message_index = sender_msg_index;
-            super::Group::update_group_member(&receiver_id, group_id, &sender);
+            super::Group::update_group_member(&account_id, group_id, &sender);
         }
 
         Ok(true)

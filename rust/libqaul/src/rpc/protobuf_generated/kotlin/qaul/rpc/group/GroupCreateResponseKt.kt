@@ -49,7 +49,7 @@ object GroupCreateResponseKt {
 
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -63,7 +63,7 @@ object GroupCreateResponseKt {
       }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>
@@ -73,7 +73,7 @@ object GroupCreateResponseKt {
     }
     /**
      * <pre>
-     * result 
+     * result
      * </pre>
      *
      * <code>.qaul.rpc.group.GroupResult result = 2;</code>

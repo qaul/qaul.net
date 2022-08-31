@@ -20,12 +20,12 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-/// Identification to which module the message shall be 
+/// Identification to which module the message shall be
 /// handed to.
 enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
   typealias RawValue = Int
 
-  /// default value, when nothing is defined. 
+  /// default value, when nothing is defined.
   /// drop this message
   case none // = 0
 
@@ -33,18 +33,48 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
   /// such as authorisation etc.
   case rpc // = 1
 
-  /// qaul modules
+  /// node information
   case node // = 2
+
+  /// user accounts on this node
   case useraccounts // = 3
+
+  /// all users in the network
   case users // = 4
+
+  /// routing information
   case router // = 5
+
+  /// feed module handling
+  ///
+  /// send and retrieve feed messages
   case feed // = 6
+
+  /// connection information to other nodes
   case connections // = 7
+
+  /// debug information & settings
   case debug // = 8
-  case chat // = 9
-  case ble // = 10
-  case fileshare // = 11
-  case group // = 12
+
+  /// chat group handling
+  ///
+  /// manage chat groups and group invites
+  case group // = 9
+
+  /// chat module
+  /// to send chat messages, get a
+  /// conversation overiew and all
+  /// messages within a conversation
+  case chat // = 10
+
+  /// all functions to send and manage
+  /// files sent into a chat conversation
+  case chatfile // = 11
+
+  /// BLE module handling
+  case ble // = 12
+
+  /// Real Time Communication handling
   case rtc // = 13
   case UNRECOGNIZED(Int)
 
@@ -63,10 +93,10 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case 6: self = .feed
     case 7: self = .connections
     case 8: self = .debug
-    case 9: self = .chat
-    case 10: self = .ble
-    case 11: self = .fileshare
-    case 12: self = .group
+    case 9: self = .group
+    case 10: self = .chat
+    case 11: self = .chatfile
+    case 12: self = .ble
     case 13: self = .rtc
     default: self = .UNRECOGNIZED(rawValue)
     }
@@ -83,10 +113,10 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case .feed: return 6
     case .connections: return 7
     case .debug: return 8
-    case .chat: return 9
-    case .ble: return 10
-    case .fileshare: return 11
-    case .group: return 12
+    case .group: return 9
+    case .chat: return 10
+    case .chatfile: return 11
+    case .ble: return 12
     case .rtc: return 13
     case .UNRECOGNIZED(let i): return i
     }
@@ -108,10 +138,10 @@ extension Qaul_Rpc_Modules: CaseIterable {
     .feed,
     .connections,
     .debug,
-    .chat,
-    .ble,
-    .fileshare,
     .group,
+    .chat,
+    .chatfile,
+    .ble,
     .rtc,
   ]
 }
@@ -119,7 +149,7 @@ extension Qaul_Rpc_Modules: CaseIterable {
 #endif  // swift(>=4.2)
 
 /// The main libqaul RPC message container.
-/// All RPC messages from and to libqaul are packed 
+/// All RPC messages from and to libqaul are packed
 /// into this container.
 struct Qaul_Rpc_QaulRpc {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -160,10 +190,10 @@ extension Qaul_Rpc_Modules: SwiftProtobuf._ProtoNameProviding {
     6: .same(proto: "FEED"),
     7: .same(proto: "CONNECTIONS"),
     8: .same(proto: "DEBUG"),
-    9: .same(proto: "CHAT"),
-    10: .same(proto: "BLE"),
-    11: .same(proto: "FILESHARE"),
-    12: .same(proto: "GROUP"),
+    9: .same(proto: "GROUP"),
+    10: .same(proto: "CHAT"),
+    11: .same(proto: "CHATFILE"),
+    12: .same(proto: "BLE"),
     13: .same(proto: "RTC"),
   ]
 }

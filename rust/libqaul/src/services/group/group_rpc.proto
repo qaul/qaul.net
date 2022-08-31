@@ -23,19 +23,19 @@ message Group {
         // group remove member response
         GroupRemoveMemberResponse group_remove_member_response = 8;
 
-        //group info request
+        // group info request
         GroupInfoRequest group_info_request = 9;
-        //group info response
-        GroupInfoResponse group_info_response = 10;
+        // group info response
+        GroupInfo group_info_response = 10;
 
-        //group reply invite request
+        // group reply invite request
         GroupReplyInviteRequest group_reply_invite_request = 11;
-        //group reply invite response
+        // group reply invite response
         GroupReplyInviteResponse group_reply_invite_response = 12;
 
-        //group list request
+        // group list request
         GroupListRequest group_list_request = 13;
-        //group list response
+        // group list response
         GroupListResponse group_list_response = 14;
 
         // group invited
@@ -63,7 +63,7 @@ message GroupCreateRequest {
 message GroupCreateResponse {
     // group id
     bytes group_id = 1;
-    // result 
+    // result
     GroupResult result = 2;
 }
 
@@ -81,7 +81,7 @@ message GroupRenameResponse {
     bytes group_id = 1;
     // group name
     string group_name = 2;
-    // result 
+    // result
     GroupResult result = 3;
 }
 
@@ -99,30 +99,25 @@ message GroupInviteMemberResponse {
     bytes group_id = 1;
     // user id
     bytes user_id = 2;
-    // result 
+    // result
     GroupResult result = 3;
 }
 
-// Reply Invite 
+// Reply Invite
 message GroupReplyInviteRequest {
     // group id
     bytes group_id = 1;
-    // user id
-    bytes user_id = 2;
     // accept
-    bool  accept = 3;  
+    bool accept = 3;
 }
 
 // Reply Invite Response
 message GroupReplyInviteResponse {
     // group id
     bytes group_id = 1;
-    // user id
-    bytes user_id = 2;
-    // result 
+    // result
     GroupResult result = 3;
 }
-
 
 // Remove member
 message GroupRemoveMemberRequest {
@@ -138,7 +133,7 @@ message GroupRemoveMemberResponse {
     bytes group_id = 1;
     // user id
     bytes user_id = 2;
-    // result 
+    // result
     GroupResult result = 3;
 }
 
@@ -148,85 +143,75 @@ message GroupInfoRequest {
     bytes group_id = 1;
 }
 
-
 // Group member state
 enum GroupMemberState {
-    /// invited
+    // invited
     Invited = 0;
-    /// activated
+    // activated
     Activated = 1;
 }
 
 // Group member role
 enum GroupMemberRole {
-    /// user
+    // user
     User = 0;
-    /// admin
+    // admin
     Admin = 255;
 }
 
-
 // Group member response
 message GroupMember {
-    //user id
+    // user id
     bytes user_id = 1;
-    //role
+    // role
     GroupMemberRole role = 2;
-    //joined at
+    // joined at
     uint64 joined_at = 3;
-    //state 
+    // state
     GroupMemberState state = 4;
-    //last message index 
+    // last message index
     uint32 last_message_index = 5;
 }
 
 // Group info response
-message GroupInfoResponse {
+message GroupInfo {
     // group id
     bytes group_id = 1;
     // group name
     string group_name = 2;
     // created at
     uint64 created_at = 3;
+    // group revision number
+    uint32 revision = 4;
     // is direct chat
-    bool is_direct_chat = 4;
+    bool is_direct_chat = 5;
     // members
-    repeated GroupMember members = 5;
+    repeated GroupMember members = 6;
 }
 
 // Group list request
-message GroupListRequest {
-}
+message GroupListRequest {}
 
 // Group info response
 message GroupListResponse {
     // group list
-    repeated GroupInfoResponse groups = 1;
+    repeated GroupInfo groups = 1;
 }
 
-message GroupInvited{
-    // group id
-    bytes group_id = 1;
+message GroupInvited {
     // sender id
-    bytes sender_id = 2;
+    bytes sender_id = 1;
     // received at
-    uint64 received_at = 3;
-    // group name
-    string group_name = 4;
-    // created at
-    uint64 created_at = 5;
-    // member count
-    uint32 member_count = 6;
+    uint64 received_at = 2;
+    // group info
+    GroupInfo group = 3;
 }
 
 // Group list request
-message GroupInvitedRequest {
-}
+message GroupInvitedRequest {}
 
 // Group info response
 message GroupInvitedResponse {
     // invited list
     repeated GroupInvited invited = 1;
 }
-
-

@@ -3,12 +3,11 @@
 
 //! Qaul Messaging Protocol
 
-use libp2p::core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo, upgrade};
 use futures::{
-    Future,
     io::{AsyncRead, AsyncWrite},
-    AsyncWriteExt,
+    AsyncWriteExt, Future,
 };
+use libp2p::core::{upgrade, InboundUpgrade, OutboundUpgrade, UpgradeInfo};
 use std::{io, iter, pin::Pin};
 
 use crate::types::QaulMessagingData;
@@ -44,14 +43,13 @@ where
     fn upgrade_inbound(self, mut substream: TSocket, _info: Self::Info) -> Self::Future {
         Box::pin(async move {
             // receive new QaulMessaging binary message
-            let data = upgrade::read_length_prefixed( &mut substream, 4096 ).await?;
+            let data = upgrade::read_length_prefixed(&mut substream, 65536).await?;
 
             // hand it directly to the internal message bus
             Ok(QaulMessagingData { data })
         })
     }
 }
-
 
 impl UpgradeInfo for QaulMessagingData {
     type Info = &'static [u8];

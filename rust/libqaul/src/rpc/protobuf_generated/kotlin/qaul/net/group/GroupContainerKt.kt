@@ -96,6 +96,42 @@ object GroupContainerKt {
 
     /**
      * <pre>
+     * group status update
+     * </pre>
+     *
+     * <code>.qaul.net.group.GroupInfo group_info = 3;</code>
+     */
+    var groupInfo: qaul.net.group.GroupNet.GroupInfo
+      @JvmName("getGroupInfo")
+      get() = _builder.getGroupInfo()
+      @JvmName("setGroupInfo")
+      set(value) {
+        _builder.setGroupInfo(value)
+      }
+    /**
+     * <pre>
+     * group status update
+     * </pre>
+     *
+     * <code>.qaul.net.group.GroupInfo group_info = 3;</code>
+     */
+    fun clearGroupInfo() {
+      _builder.clearGroupInfo()
+    }
+    /**
+     * <pre>
+     * group status update
+     * </pre>
+     *
+     * <code>.qaul.net.group.GroupInfo group_info = 3;</code>
+     * @return Whether the groupInfo field is set.
+     */
+    fun hasGroupInfo(): kotlin.Boolean {
+      return _builder.hasGroupInfo()
+    }
+
+    /**
+     * <pre>
      * member removed
      * </pre>
      *
@@ -147,6 +183,9 @@ val qaul.net.group.GroupNet.GroupContainerOrBuilder.inviteMemberOrNull: qaul.net
 
 val qaul.net.group.GroupNet.GroupContainerOrBuilder.replyInviteOrNull: qaul.net.group.GroupNet.ReplyInvite?
   get() = if (hasReplyInvite()) getReplyInvite() else null
+
+val qaul.net.group.GroupNet.GroupContainerOrBuilder.groupInfoOrNull: qaul.net.group.GroupNet.GroupInfo?
+  get() = if (hasGroupInfo()) getGroupInfo() else null
 
 val qaul.net.group.GroupNet.GroupContainerOrBuilder.removedOrNull: qaul.net.group.GroupNet.RemovedMember?
   get() = if (hasRemoved()) getRemoved() else null

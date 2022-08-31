@@ -45,11 +45,9 @@ uuid = { version = "1.1.2", features = ["v4"] }
 ed25519-dalek = "1.0.1"
 x25519-dalek = "1.2.0"
 curve25519-dalek = "3.2.0"
-# needs to be the same version as the one used in libp2p-noise:
-# libp2p v0.39.1 => sha2 0.9.1
-sha2 = "0.9.1"
-noise-protocol = { git = "https://github.com/MathJud/noise-rust.git" }
-noise-rust-crypto = { git = "https://github.com/MathJud/noise-rust.git", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
+sha2 = "0.10.2"
+noise-protocol = { git = "https://github.com/MathJud/noise-rust.git", branch = "libp2p-45" }
+noise-rust-crypto = { git = "https://github.com/MathJud/noise-rust.git", branch = "libp2p-45", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
 crc = "^1.0.0"
 
 # only for desktop platforms: Linux, Mac, Windows

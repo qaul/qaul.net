@@ -24,27 +24,27 @@ object ChatContentKt {
 
     /**
      * <pre>
-     *content
+     * message text
      * </pre>
      *
-     * <code>string content = 1;</code>
+     * <code>string text = 1;</code>
      */
-    var content: kotlin.String
-      @JvmName("getContent")
-      get() = _builder.getContent()
-      @JvmName("setContent")
+    var text: kotlin.String
+      @JvmName("getText")
+      get() = _builder.getText()
+      @JvmName("setText")
       set(value) {
-        _builder.setContent(value)
+        _builder.setText(value)
       }
     /**
      * <pre>
-     *content
+     * message text
      * </pre>
      *
-     * <code>string content = 1;</code>
+     * <code>string text = 1;</code>
      */
-    fun clearContent() {
-      _builder.clearContent()
+    fun clearText() {
+      _builder.clearText()
     }
   }
 }

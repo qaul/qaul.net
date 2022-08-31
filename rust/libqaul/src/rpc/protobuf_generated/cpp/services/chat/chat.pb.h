@@ -52,6 +52,9 @@ namespace chat {
 class Chat;
 struct ChatDefaultTypeInternal;
 extern ChatDefaultTypeInternal _Chat_default_instance_;
+class ChatContent;
+struct ChatContentDefaultTypeInternal;
+extern ChatContentDefaultTypeInternal _ChatContent_default_instance_;
 class ChatConversationList;
 struct ChatConversationListDefaultTypeInternal;
 extern ChatConversationListDefaultTypeInternal _ChatConversationList_default_instance_;
@@ -73,14 +76,21 @@ extern ChatOverviewListDefaultTypeInternal _ChatOverviewList_default_instance_;
 class ChatOverviewRequest;
 struct ChatOverviewRequestDefaultTypeInternal;
 extern ChatOverviewRequestDefaultTypeInternal _ChatOverviewRequest_default_instance_;
+class FileContent;
+struct FileContentDefaultTypeInternal;
+extern FileContentDefaultTypeInternal _FileContent_default_instance_;
 class GroupEvent;
 struct GroupEventDefaultTypeInternal;
 extern GroupEventDefaultTypeInternal _GroupEvent_default_instance_;
+class MessageReceptionConfirmed;
+struct MessageReceptionConfirmedDefaultTypeInternal;
+extern MessageReceptionConfirmedDefaultTypeInternal _MessageReceptionConfirmed_default_instance_;
 }  // namespace chat
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
 template<> ::qaul::rpc::chat::Chat* Arena::CreateMaybeMessage<::qaul::rpc::chat::Chat>(Arena*);
+template<> ::qaul::rpc::chat::ChatContent* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatContent>(Arena*);
 template<> ::qaul::rpc::chat::ChatConversationList* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatConversationList>(Arena*);
 template<> ::qaul::rpc::chat::ChatConversationRequest* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatConversationRequest>(Arena*);
 template<> ::qaul::rpc::chat::ChatMessage* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatMessage>(Arena*);
@@ -88,39 +98,41 @@ template<> ::qaul::rpc::chat::ChatMessageSend* Arena::CreateMaybeMessage<::qaul:
 template<> ::qaul::rpc::chat::ChatOverview* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatOverview>(Arena*);
 template<> ::qaul::rpc::chat::ChatOverviewList* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatOverviewList>(Arena*);
 template<> ::qaul::rpc::chat::ChatOverviewRequest* Arena::CreateMaybeMessage<::qaul::rpc::chat::ChatOverviewRequest>(Arena*);
+template<> ::qaul::rpc::chat::FileContent* Arena::CreateMaybeMessage<::qaul::rpc::chat::FileContent>(Arena*);
 template<> ::qaul::rpc::chat::GroupEvent* Arena::CreateMaybeMessage<::qaul::rpc::chat::GroupEvent>(Arena*);
+template<> ::qaul::rpc::chat::MessageReceptionConfirmed* Arena::CreateMaybeMessage<::qaul::rpc::chat::MessageReceptionConfirmed>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace qaul {
 namespace rpc {
 namespace chat {
 
-enum ContentType : int {
-  chat = 0,
-  group = 1,
-  file = 2,
-  rtc = 3,
-  group_event = 4,
-  ContentType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
-  ContentType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+enum ChatContentType : int {
+  NONE = 0,
+  CHAT = 1,
+  FILE = 2,
+  GROUP = 3,
+  RTC = 4,
+  ChatContentType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  ChatContentType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool ContentType_IsValid(int value);
-constexpr ContentType ContentType_MIN = chat;
-constexpr ContentType ContentType_MAX = group_event;
-constexpr int ContentType_ARRAYSIZE = ContentType_MAX + 1;
+bool ChatContentType_IsValid(int value);
+constexpr ChatContentType ChatContentType_MIN = NONE;
+constexpr ChatContentType ChatContentType_MAX = RTC;
+constexpr int ChatContentType_ARRAYSIZE = ChatContentType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ContentType_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ChatContentType_descriptor();
 template<typename T>
-inline const std::string& ContentType_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, ContentType>::value ||
+inline const std::string& ChatContentType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ChatContentType>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function ContentType_Name.");
+    "Incorrect type passed to function ChatContentType_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    ContentType_descriptor(), enum_t_value);
+    ChatContentType_descriptor(), enum_t_value);
 }
-inline bool ContentType_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, ContentType* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ContentType>(
-    ContentType_descriptor(), name, value);
+inline bool ChatContentType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, ChatContentType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ChatContentType>(
+    ChatContentType_descriptor(), name, value);
 }
 enum MessageStatus : int {
   SENDING = 0,
@@ -150,15 +162,17 @@ inline bool MessageStatus_Parse(
     MessageStatus_descriptor(), name, value);
 }
 enum GroupEventType : int {
-  NONE = 0,
-  GROUP_JOINED = 1,
-  GROUP_LEFT = 2,
+  DEFAULT = 0,
+  INVITED = 1,
+  JOINED = 2,
+  LEFT = 3,
+  CLOSED = 4,
   GroupEventType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   GroupEventType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool GroupEventType_IsValid(int value);
-constexpr GroupEventType GroupEventType_MIN = NONE;
-constexpr GroupEventType GroupEventType_MAX = GROUP_LEFT;
+constexpr GroupEventType GroupEventType_MIN = DEFAULT;
+constexpr GroupEventType GroupEventType_MAX = CLOSED;
 constexpr int GroupEventType_ARRAYSIZE = GroupEventType_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupEventType_descriptor();
@@ -927,13 +941,13 @@ class ChatOverview final :
   void _internal_set_unread(int32_t value);
   public:
 
-  // .qaul.rpc.chat.ContentType content_type = 6;
+  // .qaul.rpc.chat.ChatContentType content_type = 6;
   void clear_content_type();
-  ::qaul::rpc::chat::ContentType content_type() const;
-  void set_content_type(::qaul::rpc::chat::ContentType value);
+  ::qaul::rpc::chat::ChatContentType content_type() const;
+  void set_content_type(::qaul::rpc::chat::ChatContentType value);
   private:
-  ::qaul::rpc::chat::ContentType _internal_content_type() const;
-  void _internal_set_content_type(::qaul::rpc::chat::ContentType value);
+  ::qaul::rpc::chat::ChatContentType _internal_content_type() const;
+  void _internal_set_content_type(::qaul::rpc::chat::ChatContentType value);
   public:
 
   // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatOverview)
@@ -1417,6 +1431,7 @@ class ChatMessage final :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kMessageReceptionConfirmedFieldNumber = 10,
     kSenderIdFieldNumber = 2,
     kMessageIdFieldNumber = 3,
     kConversationIdFieldNumber = 5,
@@ -1427,6 +1442,24 @@ class ChatMessage final :
     kContentTypeFieldNumber = 8,
     kReceivedAtFieldNumber = 7,
   };
+  // repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;
+  int message_reception_confirmed_size() const;
+  private:
+  int _internal_message_reception_confirmed_size() const;
+  public:
+  void clear_message_reception_confirmed();
+  ::qaul::rpc::chat::MessageReceptionConfirmed* mutable_message_reception_confirmed(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed >*
+      mutable_message_reception_confirmed();
+  private:
+  const ::qaul::rpc::chat::MessageReceptionConfirmed& _internal_message_reception_confirmed(int index) const;
+  ::qaul::rpc::chat::MessageReceptionConfirmed* _internal_add_message_reception_confirmed();
+  public:
+  const ::qaul::rpc::chat::MessageReceptionConfirmed& message_reception_confirmed(int index) const;
+  ::qaul::rpc::chat::MessageReceptionConfirmed* add_message_reception_confirmed();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed >&
+      message_reception_confirmed() const;
+
   // bytes sender_id = 2;
   void clear_sender_id();
   const std::string& sender_id() const;
@@ -1510,13 +1543,13 @@ class ChatMessage final :
   void _internal_set_status(::qaul::rpc::chat::MessageStatus value);
   public:
 
-  // .qaul.rpc.chat.ContentType content_type = 8;
+  // .qaul.rpc.chat.ChatContentType content_type = 8;
   void clear_content_type();
-  ::qaul::rpc::chat::ContentType content_type() const;
-  void set_content_type(::qaul::rpc::chat::ContentType value);
+  ::qaul::rpc::chat::ChatContentType content_type() const;
+  void set_content_type(::qaul::rpc::chat::ChatContentType value);
   private:
-  ::qaul::rpc::chat::ContentType _internal_content_type() const;
-  void _internal_set_content_type(::qaul::rpc::chat::ContentType value);
+  ::qaul::rpc::chat::ChatContentType _internal_content_type() const;
+  void _internal_set_content_type(::qaul::rpc::chat::ChatContentType value);
   public:
 
   // uint64 received_at = 7;
@@ -1536,6 +1569,7 @@ class ChatMessage final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed > message_reception_confirmed_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
@@ -1545,6 +1579,694 @@ class ChatMessage final :
     int status_;
     int content_type_;
     uint64_t received_at_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MessageReceptionConfirmed final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.chat.MessageReceptionConfirmed) */ {
+ public:
+  inline MessageReceptionConfirmed() : MessageReceptionConfirmed(nullptr) {}
+  ~MessageReceptionConfirmed() override;
+  explicit PROTOBUF_CONSTEXPR MessageReceptionConfirmed(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MessageReceptionConfirmed(const MessageReceptionConfirmed& from);
+  MessageReceptionConfirmed(MessageReceptionConfirmed&& from) noexcept
+    : MessageReceptionConfirmed() {
+    *this = ::std::move(from);
+  }
+
+  inline MessageReceptionConfirmed& operator=(const MessageReceptionConfirmed& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MessageReceptionConfirmed& operator=(MessageReceptionConfirmed&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MessageReceptionConfirmed& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MessageReceptionConfirmed* internal_default_instance() {
+    return reinterpret_cast<const MessageReceptionConfirmed*>(
+               &_MessageReceptionConfirmed_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(MessageReceptionConfirmed& a, MessageReceptionConfirmed& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MessageReceptionConfirmed* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MessageReceptionConfirmed* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MessageReceptionConfirmed* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<MessageReceptionConfirmed>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const MessageReceptionConfirmed& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const MessageReceptionConfirmed& from) {
+    MessageReceptionConfirmed::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MessageReceptionConfirmed* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.chat.MessageReceptionConfirmed";
+  }
+  protected:
+  explicit MessageReceptionConfirmed(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kUserIdFieldNumber = 1,
+    kConfirmedAtFieldNumber = 2,
+  };
+  // bytes user_id = 1;
+  void clear_user_id();
+  const std::string& user_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_user_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_user_id();
+  PROTOBUF_NODISCARD std::string* release_user_id();
+  void set_allocated_user_id(std::string* user_id);
+  private:
+  const std::string& _internal_user_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_user_id(const std::string& value);
+  std::string* _internal_mutable_user_id();
+  public:
+
+  // uint64 confirmed_at = 2;
+  void clear_confirmed_at();
+  uint64_t confirmed_at() const;
+  void set_confirmed_at(uint64_t value);
+  private:
+  uint64_t _internal_confirmed_at() const;
+  void _internal_set_confirmed_at(uint64_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.chat.MessageReceptionConfirmed)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_id_;
+    uint64_t confirmed_at_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ChatContent final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.chat.ChatContent) */ {
+ public:
+  inline ChatContent() : ChatContent(nullptr) {}
+  ~ChatContent() override;
+  explicit PROTOBUF_CONSTEXPR ChatContent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ChatContent(const ChatContent& from);
+  ChatContent(ChatContent&& from) noexcept
+    : ChatContent() {
+    *this = ::std::move(from);
+  }
+
+  inline ChatContent& operator=(const ChatContent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ChatContent& operator=(ChatContent&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ChatContent& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ChatContent* internal_default_instance() {
+    return reinterpret_cast<const ChatContent*>(
+               &_ChatContent_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(ChatContent& a, ChatContent& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ChatContent* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ChatContent* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ChatContent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ChatContent>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const ChatContent& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const ChatContent& from) {
+    ChatContent::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ChatContent* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.chat.ChatContent";
+  }
+  protected:
+  explicit ChatContent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTextFieldNumber = 1,
+  };
+  // string text = 1;
+  void clear_text();
+  const std::string& text() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_text(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_text();
+  PROTOBUF_NODISCARD std::string* release_text();
+  void set_allocated_text(std::string* text);
+  private:
+  const std::string& _internal_text() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_text(const std::string& value);
+  std::string* _internal_mutable_text();
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatContent)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr text_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
+};
+// -------------------------------------------------------------------
+
+class FileContent final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.chat.FileContent) */ {
+ public:
+  inline FileContent() : FileContent(nullptr) {}
+  ~FileContent() override;
+  explicit PROTOBUF_CONSTEXPR FileContent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FileContent(const FileContent& from);
+  FileContent(FileContent&& from) noexcept
+    : FileContent() {
+    *this = ::std::move(from);
+  }
+
+  inline FileContent& operator=(const FileContent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FileContent& operator=(FileContent&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FileContent& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FileContent* internal_default_instance() {
+    return reinterpret_cast<const FileContent*>(
+               &_FileContent_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(FileContent& a, FileContent& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FileContent* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FileContent* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FileContent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FileContent>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FileContent& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FileContent& from) {
+    FileContent::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FileContent* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.chat.FileContent";
+  }
+  protected:
+  explicit FileContent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kFileNameFieldNumber = 2,
+    kFileExtensionFieldNumber = 3,
+    kFileDescriptionFieldNumber = 5,
+    kFileIdFieldNumber = 1,
+    kFileSizeFieldNumber = 4,
+  };
+  // string file_name = 2;
+  void clear_file_name();
+  const std::string& file_name() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_file_name(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_file_name();
+  PROTOBUF_NODISCARD std::string* release_file_name();
+  void set_allocated_file_name(std::string* file_name);
+  private:
+  const std::string& _internal_file_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_name(const std::string& value);
+  std::string* _internal_mutable_file_name();
+  public:
+
+  // string file_extension = 3;
+  void clear_file_extension();
+  const std::string& file_extension() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_file_extension(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_file_extension();
+  PROTOBUF_NODISCARD std::string* release_file_extension();
+  void set_allocated_file_extension(std::string* file_extension);
+  private:
+  const std::string& _internal_file_extension() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_extension(const std::string& value);
+  std::string* _internal_mutable_file_extension();
+  public:
+
+  // string file_description = 5;
+  void clear_file_description();
+  const std::string& file_description() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_file_description(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_file_description();
+  PROTOBUF_NODISCARD std::string* release_file_description();
+  void set_allocated_file_description(std::string* file_description);
+  private:
+  const std::string& _internal_file_description() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_description(const std::string& value);
+  std::string* _internal_mutable_file_description();
+  public:
+
+  // uint64 file_id = 1;
+  void clear_file_id();
+  uint64_t file_id() const;
+  void set_file_id(uint64_t value);
+  private:
+  uint64_t _internal_file_id() const;
+  void _internal_set_file_id(uint64_t value);
+  public:
+
+  // uint32 file_size = 4;
+  void clear_file_size();
+  uint32_t file_size() const;
+  void set_file_size(uint32_t value);
+  private:
+  uint32_t _internal_file_size() const;
+  void _internal_set_file_size(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.chat.FileContent)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr file_name_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr file_extension_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr file_description_;
+    uint64_t file_id_;
+    uint32_t file_size_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GroupEvent final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.chat.GroupEvent) */ {
+ public:
+  inline GroupEvent() : GroupEvent(nullptr) {}
+  ~GroupEvent() override;
+  explicit PROTOBUF_CONSTEXPR GroupEvent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GroupEvent(const GroupEvent& from);
+  GroupEvent(GroupEvent&& from) noexcept
+    : GroupEvent() {
+    *this = ::std::move(from);
+  }
+
+  inline GroupEvent& operator=(const GroupEvent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GroupEvent& operator=(GroupEvent&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GroupEvent& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GroupEvent* internal_default_instance() {
+    return reinterpret_cast<const GroupEvent*>(
+               &_GroupEvent_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(GroupEvent& a, GroupEvent& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GroupEvent* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GroupEvent* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GroupEvent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GroupEvent>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GroupEvent& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const GroupEvent& from) {
+    GroupEvent::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GroupEvent* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.chat.GroupEvent";
+  }
+  protected:
+  explicit GroupEvent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kUserIdFieldNumber = 2,
+    kEventTypeFieldNumber = 1,
+  };
+  // bytes user_id = 2;
+  void clear_user_id();
+  const std::string& user_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_user_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_user_id();
+  PROTOBUF_NODISCARD std::string* release_user_id();
+  void set_allocated_user_id(std::string* user_id);
+  private:
+  const std::string& _internal_user_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_user_id(const std::string& value);
+  std::string* _internal_mutable_user_id();
+  public:
+
+  // .qaul.rpc.chat.GroupEventType event_type = 1;
+  void clear_event_type();
+  ::qaul::rpc::chat::GroupEventType event_type() const;
+  void set_event_type(::qaul::rpc::chat::GroupEventType value);
+  private:
+  ::qaul::rpc::chat::GroupEventType _internal_event_type() const;
+  void _internal_set_event_type(::qaul::rpc::chat::GroupEventType value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.chat.GroupEvent)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_id_;
+    int event_type_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1600,7 +2322,7 @@ class ChatMessageSend final :
                &_ChatMessageSend_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    11;
 
   friend void swap(ChatMessageSend& a, ChatMessageSend& b) {
     a.Swap(&b);
@@ -1714,170 +2436,6 @@ class ChatMessageSend final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_services_2fchat_2fchat_2eproto;
-};
-// -------------------------------------------------------------------
-
-class GroupEvent final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.chat.GroupEvent) */ {
- public:
-  inline GroupEvent() : GroupEvent(nullptr) {}
-  ~GroupEvent() override;
-  explicit PROTOBUF_CONSTEXPR GroupEvent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GroupEvent(const GroupEvent& from);
-  GroupEvent(GroupEvent&& from) noexcept
-    : GroupEvent() {
-    *this = ::std::move(from);
-  }
-
-  inline GroupEvent& operator=(const GroupEvent& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GroupEvent& operator=(GroupEvent&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GroupEvent& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GroupEvent* internal_default_instance() {
-    return reinterpret_cast<const GroupEvent*>(
-               &_GroupEvent_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    8;
-
-  friend void swap(GroupEvent& a, GroupEvent& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GroupEvent* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GroupEvent* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GroupEvent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GroupEvent>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GroupEvent& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GroupEvent& from) {
-    GroupEvent::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GroupEvent* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "qaul.rpc.chat.GroupEvent";
-  }
-  protected:
-  explicit GroupEvent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kUserIdFieldNumber = 2,
-    kEventTypeFieldNumber = 1,
-  };
-  // bytes user_id = 2;
-  void clear_user_id();
-  const std::string& user_id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_user_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_user_id();
-  PROTOBUF_NODISCARD std::string* release_user_id();
-  void set_allocated_user_id(std::string* user_id);
-  private:
-  const std::string& _internal_user_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_user_id(const std::string& value);
-  std::string* _internal_mutable_user_id();
-  public:
-
-  // .qaul.rpc.chat.GroupEventType event_type = 1;
-  void clear_event_type();
-  ::qaul::rpc::chat::GroupEventType event_type() const;
-  void set_event_type(::qaul::rpc::chat::GroupEventType value);
-  private:
-  ::qaul::rpc::chat::GroupEventType _internal_event_type() const;
-  void _internal_set_event_type(::qaul::rpc::chat::GroupEventType value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:qaul.rpc.chat.GroupEvent)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr user_id_;
-    int event_type_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -2485,22 +3043,22 @@ inline void ChatOverview::set_unread(int32_t value) {
   // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatOverview.unread)
 }
 
-// .qaul.rpc.chat.ContentType content_type = 6;
+// .qaul.rpc.chat.ChatContentType content_type = 6;
 inline void ChatOverview::clear_content_type() {
   _impl_.content_type_ = 0;
 }
-inline ::qaul::rpc::chat::ContentType ChatOverview::_internal_content_type() const {
-  return static_cast< ::qaul::rpc::chat::ContentType >(_impl_.content_type_);
+inline ::qaul::rpc::chat::ChatContentType ChatOverview::_internal_content_type() const {
+  return static_cast< ::qaul::rpc::chat::ChatContentType >(_impl_.content_type_);
 }
-inline ::qaul::rpc::chat::ContentType ChatOverview::content_type() const {
+inline ::qaul::rpc::chat::ChatContentType ChatOverview::content_type() const {
   // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatOverview.content_type)
   return _internal_content_type();
 }
-inline void ChatOverview::_internal_set_content_type(::qaul::rpc::chat::ContentType value) {
+inline void ChatOverview::_internal_set_content_type(::qaul::rpc::chat::ChatContentType value) {
   
   _impl_.content_type_ = value;
 }
-inline void ChatOverview::set_content_type(::qaul::rpc::chat::ContentType value) {
+inline void ChatOverview::set_content_type(::qaul::rpc::chat::ChatContentType value) {
   _internal_set_content_type(value);
   // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatOverview.content_type)
 }
@@ -2917,6 +3475,46 @@ inline void ChatMessage::set_status(::qaul::rpc::chat::MessageStatus value) {
   // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessage.status)
 }
 
+// repeated .qaul.rpc.chat.MessageReceptionConfirmed message_reception_confirmed = 10;
+inline int ChatMessage::_internal_message_reception_confirmed_size() const {
+  return _impl_.message_reception_confirmed_.size();
+}
+inline int ChatMessage::message_reception_confirmed_size() const {
+  return _internal_message_reception_confirmed_size();
+}
+inline void ChatMessage::clear_message_reception_confirmed() {
+  _impl_.message_reception_confirmed_.Clear();
+}
+inline ::qaul::rpc::chat::MessageReceptionConfirmed* ChatMessage::mutable_message_reception_confirmed(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatMessage.message_reception_confirmed)
+  return _impl_.message_reception_confirmed_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed >*
+ChatMessage::mutable_message_reception_confirmed() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.rpc.chat.ChatMessage.message_reception_confirmed)
+  return &_impl_.message_reception_confirmed_;
+}
+inline const ::qaul::rpc::chat::MessageReceptionConfirmed& ChatMessage::_internal_message_reception_confirmed(int index) const {
+  return _impl_.message_reception_confirmed_.Get(index);
+}
+inline const ::qaul::rpc::chat::MessageReceptionConfirmed& ChatMessage::message_reception_confirmed(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessage.message_reception_confirmed)
+  return _internal_message_reception_confirmed(index);
+}
+inline ::qaul::rpc::chat::MessageReceptionConfirmed* ChatMessage::_internal_add_message_reception_confirmed() {
+  return _impl_.message_reception_confirmed_.Add();
+}
+inline ::qaul::rpc::chat::MessageReceptionConfirmed* ChatMessage::add_message_reception_confirmed() {
+  ::qaul::rpc::chat::MessageReceptionConfirmed* _add = _internal_add_message_reception_confirmed();
+  // @@protoc_insertion_point(field_add:qaul.rpc.chat.ChatMessage.message_reception_confirmed)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed >&
+ChatMessage::message_reception_confirmed() const {
+  // @@protoc_insertion_point(field_list:qaul.rpc.chat.ChatMessage.message_reception_confirmed)
+  return _impl_.message_reception_confirmed_;
+}
+
 // bytes conversation_id = 5;
 inline void ChatMessage::clear_conversation_id() {
   _impl_.conversation_id_.ClearToEmpty();
@@ -3007,22 +3605,22 @@ inline void ChatMessage::set_received_at(uint64_t value) {
   // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessage.received_at)
 }
 
-// .qaul.rpc.chat.ContentType content_type = 8;
+// .qaul.rpc.chat.ChatContentType content_type = 8;
 inline void ChatMessage::clear_content_type() {
   _impl_.content_type_ = 0;
 }
-inline ::qaul::rpc::chat::ContentType ChatMessage::_internal_content_type() const {
-  return static_cast< ::qaul::rpc::chat::ContentType >(_impl_.content_type_);
+inline ::qaul::rpc::chat::ChatContentType ChatMessage::_internal_content_type() const {
+  return static_cast< ::qaul::rpc::chat::ChatContentType >(_impl_.content_type_);
 }
-inline ::qaul::rpc::chat::ContentType ChatMessage::content_type() const {
+inline ::qaul::rpc::chat::ChatContentType ChatMessage::content_type() const {
   // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessage.content_type)
   return _internal_content_type();
 }
-inline void ChatMessage::_internal_set_content_type(::qaul::rpc::chat::ContentType value) {
+inline void ChatMessage::_internal_set_content_type(::qaul::rpc::chat::ChatContentType value) {
   
   _impl_.content_type_ = value;
 }
-inline void ChatMessage::set_content_type(::qaul::rpc::chat::ContentType value) {
+inline void ChatMessage::set_content_type(::qaul::rpc::chat::ChatContentType value) {
   _internal_set_content_type(value);
   // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessage.content_type)
 }
@@ -3075,6 +3673,402 @@ inline void ChatMessage::set_allocated_content(std::string* content) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessage.content)
+}
+
+// -------------------------------------------------------------------
+
+// MessageReceptionConfirmed
+
+// bytes user_id = 1;
+inline void MessageReceptionConfirmed::clear_user_id() {
+  _impl_.user_id_.ClearToEmpty();
+}
+inline const std::string& MessageReceptionConfirmed::user_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.MessageReceptionConfirmed.user_id)
+  return _internal_user_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void MessageReceptionConfirmed::set_user_id(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.user_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.MessageReceptionConfirmed.user_id)
+}
+inline std::string* MessageReceptionConfirmed::mutable_user_id() {
+  std::string* _s = _internal_mutable_user_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.MessageReceptionConfirmed.user_id)
+  return _s;
+}
+inline const std::string& MessageReceptionConfirmed::_internal_user_id() const {
+  return _impl_.user_id_.Get();
+}
+inline void MessageReceptionConfirmed::_internal_set_user_id(const std::string& value) {
+  
+  _impl_.user_id_.Set(value, GetArenaForAllocation());
+}
+inline std::string* MessageReceptionConfirmed::_internal_mutable_user_id() {
+  
+  return _impl_.user_id_.Mutable(GetArenaForAllocation());
+}
+inline std::string* MessageReceptionConfirmed::release_user_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.MessageReceptionConfirmed.user_id)
+  return _impl_.user_id_.Release();
+}
+inline void MessageReceptionConfirmed::set_allocated_user_id(std::string* user_id) {
+  if (user_id != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.user_id_.SetAllocated(user_id, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.user_id_.IsDefault()) {
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.MessageReceptionConfirmed.user_id)
+}
+
+// uint64 confirmed_at = 2;
+inline void MessageReceptionConfirmed::clear_confirmed_at() {
+  _impl_.confirmed_at_ = uint64_t{0u};
+}
+inline uint64_t MessageReceptionConfirmed::_internal_confirmed_at() const {
+  return _impl_.confirmed_at_;
+}
+inline uint64_t MessageReceptionConfirmed::confirmed_at() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.MessageReceptionConfirmed.confirmed_at)
+  return _internal_confirmed_at();
+}
+inline void MessageReceptionConfirmed::_internal_set_confirmed_at(uint64_t value) {
+  
+  _impl_.confirmed_at_ = value;
+}
+inline void MessageReceptionConfirmed::set_confirmed_at(uint64_t value) {
+  _internal_set_confirmed_at(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.MessageReceptionConfirmed.confirmed_at)
+}
+
+// -------------------------------------------------------------------
+
+// ChatContent
+
+// string text = 1;
+inline void ChatContent::clear_text() {
+  _impl_.text_.ClearToEmpty();
+}
+inline const std::string& ChatContent::text() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatContent.text)
+  return _internal_text();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void ChatContent::set_text(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.text_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatContent.text)
+}
+inline std::string* ChatContent::mutable_text() {
+  std::string* _s = _internal_mutable_text();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatContent.text)
+  return _s;
+}
+inline const std::string& ChatContent::_internal_text() const {
+  return _impl_.text_.Get();
+}
+inline void ChatContent::_internal_set_text(const std::string& value) {
+  
+  _impl_.text_.Set(value, GetArenaForAllocation());
+}
+inline std::string* ChatContent::_internal_mutable_text() {
+  
+  return _impl_.text_.Mutable(GetArenaForAllocation());
+}
+inline std::string* ChatContent::release_text() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatContent.text)
+  return _impl_.text_.Release();
+}
+inline void ChatContent::set_allocated_text(std::string* text) {
+  if (text != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.text_.SetAllocated(text, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.text_.IsDefault()) {
+    _impl_.text_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatContent.text)
+}
+
+// -------------------------------------------------------------------
+
+// FileContent
+
+// uint64 file_id = 1;
+inline void FileContent::clear_file_id() {
+  _impl_.file_id_ = uint64_t{0u};
+}
+inline uint64_t FileContent::_internal_file_id() const {
+  return _impl_.file_id_;
+}
+inline uint64_t FileContent::file_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.FileContent.file_id)
+  return _internal_file_id();
+}
+inline void FileContent::_internal_set_file_id(uint64_t value) {
+  
+  _impl_.file_id_ = value;
+}
+inline void FileContent::set_file_id(uint64_t value) {
+  _internal_set_file_id(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.FileContent.file_id)
+}
+
+// string file_name = 2;
+inline void FileContent::clear_file_name() {
+  _impl_.file_name_.ClearToEmpty();
+}
+inline const std::string& FileContent::file_name() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.FileContent.file_name)
+  return _internal_file_name();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FileContent::set_file_name(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.file_name_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.FileContent.file_name)
+}
+inline std::string* FileContent::mutable_file_name() {
+  std::string* _s = _internal_mutable_file_name();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.FileContent.file_name)
+  return _s;
+}
+inline const std::string& FileContent::_internal_file_name() const {
+  return _impl_.file_name_.Get();
+}
+inline void FileContent::_internal_set_file_name(const std::string& value) {
+  
+  _impl_.file_name_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FileContent::_internal_mutable_file_name() {
+  
+  return _impl_.file_name_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FileContent::release_file_name() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.FileContent.file_name)
+  return _impl_.file_name_.Release();
+}
+inline void FileContent::set_allocated_file_name(std::string* file_name) {
+  if (file_name != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.file_name_.SetAllocated(file_name, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.file_name_.IsDefault()) {
+    _impl_.file_name_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.FileContent.file_name)
+}
+
+// string file_extension = 3;
+inline void FileContent::clear_file_extension() {
+  _impl_.file_extension_.ClearToEmpty();
+}
+inline const std::string& FileContent::file_extension() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.FileContent.file_extension)
+  return _internal_file_extension();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FileContent::set_file_extension(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.file_extension_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.FileContent.file_extension)
+}
+inline std::string* FileContent::mutable_file_extension() {
+  std::string* _s = _internal_mutable_file_extension();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.FileContent.file_extension)
+  return _s;
+}
+inline const std::string& FileContent::_internal_file_extension() const {
+  return _impl_.file_extension_.Get();
+}
+inline void FileContent::_internal_set_file_extension(const std::string& value) {
+  
+  _impl_.file_extension_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FileContent::_internal_mutable_file_extension() {
+  
+  return _impl_.file_extension_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FileContent::release_file_extension() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.FileContent.file_extension)
+  return _impl_.file_extension_.Release();
+}
+inline void FileContent::set_allocated_file_extension(std::string* file_extension) {
+  if (file_extension != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.file_extension_.SetAllocated(file_extension, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.file_extension_.IsDefault()) {
+    _impl_.file_extension_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.FileContent.file_extension)
+}
+
+// uint32 file_size = 4;
+inline void FileContent::clear_file_size() {
+  _impl_.file_size_ = 0u;
+}
+inline uint32_t FileContent::_internal_file_size() const {
+  return _impl_.file_size_;
+}
+inline uint32_t FileContent::file_size() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.FileContent.file_size)
+  return _internal_file_size();
+}
+inline void FileContent::_internal_set_file_size(uint32_t value) {
+  
+  _impl_.file_size_ = value;
+}
+inline void FileContent::set_file_size(uint32_t value) {
+  _internal_set_file_size(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.FileContent.file_size)
+}
+
+// string file_description = 5;
+inline void FileContent::clear_file_description() {
+  _impl_.file_description_.ClearToEmpty();
+}
+inline const std::string& FileContent::file_description() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.FileContent.file_description)
+  return _internal_file_description();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FileContent::set_file_description(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.file_description_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.FileContent.file_description)
+}
+inline std::string* FileContent::mutable_file_description() {
+  std::string* _s = _internal_mutable_file_description();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.FileContent.file_description)
+  return _s;
+}
+inline const std::string& FileContent::_internal_file_description() const {
+  return _impl_.file_description_.Get();
+}
+inline void FileContent::_internal_set_file_description(const std::string& value) {
+  
+  _impl_.file_description_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FileContent::_internal_mutable_file_description() {
+  
+  return _impl_.file_description_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FileContent::release_file_description() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.FileContent.file_description)
+  return _impl_.file_description_.Release();
+}
+inline void FileContent::set_allocated_file_description(std::string* file_description) {
+  if (file_description != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.file_description_.SetAllocated(file_description, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.file_description_.IsDefault()) {
+    _impl_.file_description_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.FileContent.file_description)
+}
+
+// -------------------------------------------------------------------
+
+// GroupEvent
+
+// .qaul.rpc.chat.GroupEventType event_type = 1;
+inline void GroupEvent::clear_event_type() {
+  _impl_.event_type_ = 0;
+}
+inline ::qaul::rpc::chat::GroupEventType GroupEvent::_internal_event_type() const {
+  return static_cast< ::qaul::rpc::chat::GroupEventType >(_impl_.event_type_);
+}
+inline ::qaul::rpc::chat::GroupEventType GroupEvent::event_type() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.GroupEvent.event_type)
+  return _internal_event_type();
+}
+inline void GroupEvent::_internal_set_event_type(::qaul::rpc::chat::GroupEventType value) {
+  
+  _impl_.event_type_ = value;
+}
+inline void GroupEvent::set_event_type(::qaul::rpc::chat::GroupEventType value) {
+  _internal_set_event_type(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.GroupEvent.event_type)
+}
+
+// bytes user_id = 2;
+inline void GroupEvent::clear_user_id() {
+  _impl_.user_id_.ClearToEmpty();
+}
+inline const std::string& GroupEvent::user_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.GroupEvent.user_id)
+  return _internal_user_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void GroupEvent::set_user_id(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.user_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.GroupEvent.user_id)
+}
+inline std::string* GroupEvent::mutable_user_id() {
+  std::string* _s = _internal_mutable_user_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.GroupEvent.user_id)
+  return _s;
+}
+inline const std::string& GroupEvent::_internal_user_id() const {
+  return _impl_.user_id_.Get();
+}
+inline void GroupEvent::_internal_set_user_id(const std::string& value) {
+  
+  _impl_.user_id_.Set(value, GetArenaForAllocation());
+}
+inline std::string* GroupEvent::_internal_mutable_user_id() {
+  
+  return _impl_.user_id_.Mutable(GetArenaForAllocation());
+}
+inline std::string* GroupEvent::release_user_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.GroupEvent.user_id)
+  return _impl_.user_id_.Release();
+}
+inline void GroupEvent::set_allocated_user_id(std::string* user_id) {
+  if (user_id != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.user_id_.SetAllocated(user_id, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.user_id_.IsDefault()) {
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.GroupEvent.user_id)
 }
 
 // -------------------------------------------------------------------
@@ -3181,83 +4175,15 @@ inline void ChatMessageSend::set_allocated_content(std::string* content) {
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessageSend.content)
 }
 
-// -------------------------------------------------------------------
-
-// GroupEvent
-
-// .qaul.rpc.chat.GroupEventType event_type = 1;
-inline void GroupEvent::clear_event_type() {
-  _impl_.event_type_ = 0;
-}
-inline ::qaul::rpc::chat::GroupEventType GroupEvent::_internal_event_type() const {
-  return static_cast< ::qaul::rpc::chat::GroupEventType >(_impl_.event_type_);
-}
-inline ::qaul::rpc::chat::GroupEventType GroupEvent::event_type() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.GroupEvent.event_type)
-  return _internal_event_type();
-}
-inline void GroupEvent::_internal_set_event_type(::qaul::rpc::chat::GroupEventType value) {
-  
-  _impl_.event_type_ = value;
-}
-inline void GroupEvent::set_event_type(::qaul::rpc::chat::GroupEventType value) {
-  _internal_set_event_type(value);
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.GroupEvent.event_type)
-}
-
-// bytes user_id = 2;
-inline void GroupEvent::clear_user_id() {
-  _impl_.user_id_.ClearToEmpty();
-}
-inline const std::string& GroupEvent::user_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.GroupEvent.user_id)
-  return _internal_user_id();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void GroupEvent::set_user_id(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.user_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.GroupEvent.user_id)
-}
-inline std::string* GroupEvent::mutable_user_id() {
-  std::string* _s = _internal_mutable_user_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.GroupEvent.user_id)
-  return _s;
-}
-inline const std::string& GroupEvent::_internal_user_id() const {
-  return _impl_.user_id_.Get();
-}
-inline void GroupEvent::_internal_set_user_id(const std::string& value) {
-  
-  _impl_.user_id_.Set(value, GetArenaForAllocation());
-}
-inline std::string* GroupEvent::_internal_mutable_user_id() {
-  
-  return _impl_.user_id_.Mutable(GetArenaForAllocation());
-}
-inline std::string* GroupEvent::release_user_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.GroupEvent.user_id)
-  return _impl_.user_id_.Release();
-}
-inline void GroupEvent::set_allocated_user_id(std::string* user_id) {
-  if (user_id != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.user_id_.SetAllocated(user_id, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.user_id_.IsDefault()) {
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.GroupEvent.user_id)
-}
-
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -3283,10 +4209,10 @@ inline void GroupEvent::set_allocated_user_id(std::string* user_id) {
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::qaul::rpc::chat::ContentType> : ::std::true_type {};
+template <> struct is_proto_enum< ::qaul::rpc::chat::ChatContentType> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::qaul::rpc::chat::ContentType>() {
-  return ::qaul::rpc::chat::ContentType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::rpc::chat::ChatContentType>() {
+  return ::qaul::rpc::chat::ChatContentType_descriptor();
 }
 template <> struct is_proto_enum< ::qaul::rpc::chat::MessageStatus> : ::std::true_type {};
 template <>

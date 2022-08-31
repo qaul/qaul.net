@@ -232,17 +232,17 @@ class EnvelopPayload extends $pb.GeneratedMessage {
 
 class Encrypted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Encrypted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..pc<Data>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.PM, subBuilder: Data.create)
     ..hasRequiredFields = false
   ;
 
   Encrypted._() : super();
   factory Encrypted({
-    $core.List<$core.int>? data,
+    $core.Iterable<Data>? data,
   }) {
     final _result = create();
     if (data != null) {
-      _result.data = data;
+      _result.data.addAll(data);
     }
     return _result;
   }
@@ -268,13 +268,7 @@ class Encrypted extends $pb.GeneratedMessage {
   static Encrypted? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.int> get data => $_getN(0);
-  @$pb.TagNumber(1)
-  set data($core.List<$core.int> v) { $_setBytes(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasData() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearData() => clearField(1);
+  $core.List<Data> get data => $_getList(0);
 }
 
 class Data extends $pb.GeneratedMessage {
@@ -342,7 +336,7 @@ enum Messaging_Message {
   confirmationMessage, 
   cryptoService, 
   rtcStreamMessage, 
-  groupNotifyMessage, 
+  groupInviteMessage, 
   commonMessage, 
   notSet
 }
@@ -352,7 +346,7 @@ class Messaging extends $pb.GeneratedMessage {
     1 : Messaging_Message.confirmationMessage,
     2 : Messaging_Message.cryptoService,
     3 : Messaging_Message.rtcStreamMessage,
-    4 : Messaging_Message.groupNotifyMessage,
+    4 : Messaging_Message.groupInviteMessage,
     5 : Messaging_Message.commonMessage,
     0 : Messaging_Message.notSet
   };
@@ -361,7 +355,7 @@ class Messaging extends $pb.GeneratedMessage {
     ..aOM<Confirmation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmationMessage', subBuilder: Confirmation.create)
     ..aOM<CryptoService>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
     ..aOM<RtcStreamMessage>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtcStreamMessage', subBuilder: RtcStreamMessage.create)
-    ..aOM<GroupNotifyMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupNotifyMessage', subBuilder: GroupNotifyMessage.create)
+    ..aOM<GroupInviteMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInviteMessage', subBuilder: GroupInviteMessage.create)
     ..aOM<CommonMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'commonMessage', subBuilder: CommonMessage.create)
     ..hasRequiredFields = false
   ;
@@ -371,7 +365,7 @@ class Messaging extends $pb.GeneratedMessage {
     Confirmation? confirmationMessage,
     CryptoService? cryptoService,
     RtcStreamMessage? rtcStreamMessage,
-    GroupNotifyMessage? groupNotifyMessage,
+    GroupInviteMessage? groupInviteMessage,
     CommonMessage? commonMessage,
   }) {
     final _result = create();
@@ -384,8 +378,8 @@ class Messaging extends $pb.GeneratedMessage {
     if (rtcStreamMessage != null) {
       _result.rtcStreamMessage = rtcStreamMessage;
     }
-    if (groupNotifyMessage != null) {
-      _result.groupNotifyMessage = groupNotifyMessage;
+    if (groupInviteMessage != null) {
+      _result.groupInviteMessage = groupInviteMessage;
     }
     if (commonMessage != null) {
       _result.commonMessage = commonMessage;
@@ -450,15 +444,15 @@ class Messaging extends $pb.GeneratedMessage {
   RtcStreamMessage ensureRtcStreamMessage() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  GroupNotifyMessage get groupNotifyMessage => $_getN(3);
+  GroupInviteMessage get groupInviteMessage => $_getN(3);
   @$pb.TagNumber(4)
-  set groupNotifyMessage(GroupNotifyMessage v) { setField(4, v); }
+  set groupInviteMessage(GroupInviteMessage v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasGroupNotifyMessage() => $_has(3);
+  $core.bool hasGroupInviteMessage() => $_has(3);
   @$pb.TagNumber(4)
-  void clearGroupNotifyMessage() => clearField(4);
+  void clearGroupInviteMessage() => clearField(4);
   @$pb.TagNumber(4)
-  GroupNotifyMessage ensureGroupNotifyMessage() => $_ensure(3);
+  GroupInviteMessage ensureGroupInviteMessage() => $_ensure(3);
 
   @$pb.TagNumber(5)
   CommonMessage get commonMessage => $_getN(4);
@@ -470,35 +464,6 @@ class Messaging extends $pb.GeneratedMessage {
   void clearCommonMessage() => clearField(5);
   @$pb.TagNumber(5)
   CommonMessage ensureCommonMessage() => $_ensure(4);
-}
-
-class CryptoService extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CryptoService', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
-
-  CryptoService._() : super();
-  factory CryptoService() => create();
-  factory CryptoService.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CryptoService.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CryptoService clone() => CryptoService()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CryptoService copyWith(void Function(CryptoService) updates) => super.copyWith((message) => updates(message as CryptoService)) as CryptoService; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CryptoService create() => CryptoService._();
-  CryptoService createEmptyInstance() => create();
-  static $pb.PbList<CryptoService> createRepeated() => $pb.PbList<CryptoService>();
-  @$core.pragma('dart2js:noInline')
-  static CryptoService getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CryptoService>(create);
-  static CryptoService? _defaultInstance;
 }
 
 class Confirmation extends $pb.GeneratedMessage {
@@ -560,6 +525,129 @@ class Confirmation extends $pb.GeneratedMessage {
   $core.bool hasReceivedAt() => $_has(1);
   @$pb.TagNumber(2)
   void clearReceivedAt() => clearField(2);
+}
+
+class CryptoService extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CryptoService', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  CryptoService._() : super();
+  factory CryptoService() => create();
+  factory CryptoService.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CryptoService.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CryptoService clone() => CryptoService()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CryptoService copyWith(void Function(CryptoService) updates) => super.copyWith((message) => updates(message as CryptoService)) as CryptoService; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CryptoService create() => CryptoService._();
+  CryptoService createEmptyInstance() => create();
+  static $pb.PbList<CryptoService> createRepeated() => $pb.PbList<CryptoService>();
+  @$core.pragma('dart2js:noInline')
+  static CryptoService getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CryptoService>(create);
+  static CryptoService? _defaultInstance;
+}
+
+class RtcStreamMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RtcStreamMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  RtcStreamMessage._() : super();
+  factory RtcStreamMessage({
+    $core.List<$core.int>? content,
+  }) {
+    final _result = create();
+    if (content != null) {
+      _result.content = content;
+    }
+    return _result;
+  }
+  factory RtcStreamMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RtcStreamMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RtcStreamMessage clone() => RtcStreamMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RtcStreamMessage copyWith(void Function(RtcStreamMessage) updates) => super.copyWith((message) => updates(message as RtcStreamMessage)) as RtcStreamMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RtcStreamMessage create() => RtcStreamMessage._();
+  RtcStreamMessage createEmptyInstance() => create();
+  static $pb.PbList<RtcStreamMessage> createRepeated() => $pb.PbList<RtcStreamMessage>();
+  @$core.pragma('dart2js:noInline')
+  static RtcStreamMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RtcStreamMessage>(create);
+  static RtcStreamMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get content => $_getN(0);
+  @$pb.TagNumber(1)
+  set content($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContent() => clearField(1);
+}
+
+class GroupInviteMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupInviteMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  GroupInviteMessage._() : super();
+  factory GroupInviteMessage({
+    $core.List<$core.int>? content,
+  }) {
+    final _result = create();
+    if (content != null) {
+      _result.content = content;
+    }
+    return _result;
+  }
+  factory GroupInviteMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GroupInviteMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GroupInviteMessage clone() => GroupInviteMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GroupInviteMessage copyWith(void Function(GroupInviteMessage) updates) => super.copyWith((message) => updates(message as GroupInviteMessage)) as GroupInviteMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteMessage create() => GroupInviteMessage._();
+  GroupInviteMessage createEmptyInstance() => create();
+  static $pb.PbList<GroupInviteMessage> createRepeated() => $pb.PbList<GroupInviteMessage>();
+  @$core.pragma('dart2js:noInline')
+  static GroupInviteMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupInviteMessage>(create);
+  static GroupInviteMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get content => $_getN(0);
+  @$pb.TagNumber(1)
+  set content($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContent() => clearField(1);
 }
 
 enum CommonMessage_Payload {
@@ -814,100 +902,6 @@ class FileMessage extends $pb.GeneratedMessage {
   void clearContent() => clearField(1);
 }
 
-class RtcMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RtcMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  RtcMessage._() : super();
-  factory RtcMessage({
-    $core.List<$core.int>? content,
-  }) {
-    final _result = create();
-    if (content != null) {
-      _result.content = content;
-    }
-    return _result;
-  }
-  factory RtcMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RtcMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  RtcMessage clone() => RtcMessage()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  RtcMessage copyWith(void Function(RtcMessage) updates) => super.copyWith((message) => updates(message as RtcMessage)) as RtcMessage; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static RtcMessage create() => RtcMessage._();
-  RtcMessage createEmptyInstance() => create();
-  static $pb.PbList<RtcMessage> createRepeated() => $pb.PbList<RtcMessage>();
-  @$core.pragma('dart2js:noInline')
-  static RtcMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RtcMessage>(create);
-  static RtcMessage? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.List<$core.int> get content => $_getN(0);
-  @$pb.TagNumber(1)
-  set content($core.List<$core.int> v) { $_setBytes(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasContent() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearContent() => clearField(1);
-}
-
-class RtcStreamMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RtcStreamMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  RtcStreamMessage._() : super();
-  factory RtcStreamMessage({
-    $core.List<$core.int>? content,
-  }) {
-    final _result = create();
-    if (content != null) {
-      _result.content = content;
-    }
-    return _result;
-  }
-  factory RtcStreamMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RtcStreamMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  RtcStreamMessage clone() => RtcStreamMessage()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  RtcStreamMessage copyWith(void Function(RtcStreamMessage) updates) => super.copyWith((message) => updates(message as RtcStreamMessage)) as RtcStreamMessage; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static RtcStreamMessage create() => RtcStreamMessage._();
-  RtcStreamMessage createEmptyInstance() => create();
-  static $pb.PbList<RtcStreamMessage> createRepeated() => $pb.PbList<RtcStreamMessage>();
-  @$core.pragma('dart2js:noInline')
-  static RtcStreamMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RtcStreamMessage>(create);
-  static RtcStreamMessage? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.List<$core.int> get content => $_getN(0);
-  @$pb.TagNumber(1)
-  set content($core.List<$core.int> v) { $_setBytes(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasContent() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearContent() => clearField(1);
-}
-
 class GroupMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
@@ -955,14 +949,14 @@ class GroupMessage extends $pb.GeneratedMessage {
   void clearContent() => clearField(1);
 }
 
-class GroupNotifyMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GroupNotifyMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
+class RtcMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RtcMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
-  GroupNotifyMessage._() : super();
-  factory GroupNotifyMessage({
+  RtcMessage._() : super();
+  factory RtcMessage({
     $core.List<$core.int>? content,
   }) {
     final _result = create();
@@ -971,26 +965,26 @@ class GroupNotifyMessage extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory GroupNotifyMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GroupNotifyMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory RtcMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RtcMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  GroupNotifyMessage clone() => GroupNotifyMessage()..mergeFromMessage(this);
+  RtcMessage clone() => RtcMessage()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GroupNotifyMessage copyWith(void Function(GroupNotifyMessage) updates) => super.copyWith((message) => updates(message as GroupNotifyMessage)) as GroupNotifyMessage; // ignore: deprecated_member_use
+  RtcMessage copyWith(void Function(RtcMessage) updates) => super.copyWith((message) => updates(message as RtcMessage)) as RtcMessage; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static GroupNotifyMessage create() => GroupNotifyMessage._();
-  GroupNotifyMessage createEmptyInstance() => create();
-  static $pb.PbList<GroupNotifyMessage> createRepeated() => $pb.PbList<GroupNotifyMessage>();
+  static RtcMessage create() => RtcMessage._();
+  RtcMessage createEmptyInstance() => create();
+  static $pb.PbList<RtcMessage> createRepeated() => $pb.PbList<RtcMessage>();
   @$core.pragma('dart2js:noInline')
-  static GroupNotifyMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GroupNotifyMessage>(create);
-  static GroupNotifyMessage? _defaultInstance;
+  static RtcMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RtcMessage>(create);
+  static RtcMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.int> get content => $_getN(0);

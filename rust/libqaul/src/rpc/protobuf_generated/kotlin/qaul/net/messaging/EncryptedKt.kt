@@ -23,29 +23,111 @@ object EncryptedKt {
     internal fun _build(): qaul.net.messaging.MessagingOuterClass.Encrypted = _builder.build()
 
     /**
-     * <pre>
-     *repeated Data data = 1;
-     * </pre>
-     *
-     * <code>bytes data = 1;</code>
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
      */
-    var data: com.google.protobuf.ByteString
-      @JvmName("getData")
-      get() = _builder.getData()
-      @JvmName("setData")
-      set(value) {
-        _builder.setData(value)
-      }
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    class DataProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
      * <pre>
-     *repeated Data data = 1;
+     * one or several Data messages
+     * of maximally 64KB each.
      * </pre>
      *
-     * <code>bytes data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
      */
-    fun clearData() {
+     val data: com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.getDataList()
+      )
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * @param value The data to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addData")
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.add(value: qaul.net.messaging.MessagingOuterClass.Data) {
+      _builder.addData(value)
+    }
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * @param value The data to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignData")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(value: qaul.net.messaging.MessagingOuterClass.Data) {
+      add(value)
+    }
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * @param values The data to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllData")
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.addAll(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
+      _builder.addAllData(values)
+    }
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * @param values The data to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllData")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.net.messaging.MessagingOuterClass.Data>) {
+      addAll(values)
+    }
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * @param index The index to set the value at.
+     * @param value The data to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setData")
+    operator fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.set(index: kotlin.Int, value: qaul.net.messaging.MessagingOuterClass.Data) {
+      _builder.setData(index, value)
+    }
+    /**
+     * <pre>
+     * one or several Data messages
+     * of maximally 64KB each.
+     * </pre>
+     *
+     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearData")
+    fun com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>.clear() {
       _builder.clearData()
     }
+
   }
 }
 @kotlin.jvm.JvmSynthetic
