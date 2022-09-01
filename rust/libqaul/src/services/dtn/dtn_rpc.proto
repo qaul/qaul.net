@@ -1,0 +1,28 @@
+syntax = "proto3";
+package qaul.rpc.dtn;
+
+// DTN service RPC message container
+message DTN {
+    // message type
+    oneof message {
+        // dtn state request
+        DtnStateRequest dtn_state_request = 1;
+        // dtn state response
+        DtnStateResponse dtn_state_response = 2;
+    }
+}
+
+
+// Dtn State Request
+message DtnStateRequest {
+}
+
+// Dtn State Response
+message DtnStateResponse {
+    // used size
+    uint64 used_size = 1;
+    // dtn message count
+    uint32 dtn_message_count = 2;
+    // unconfirmed count
+    uint32 unconfirmed_count = 3;
+}

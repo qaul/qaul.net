@@ -82,6 +82,7 @@ fn main() {
                 "connections/ble/ble_net.proto",
                 "connections/ble/ble_rpc.proto",
                 "services/messaging/messaging.proto",
+                "services/dtn/dtn_rpc.proto",
             ],
             &["src"],
         )
@@ -146,6 +147,11 @@ fn main() {
     fs::copy(
         Path::new(&out_dir).join("qaul.rpc.group.rs"),
         to.join("qaul.rpc.group.rs"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new(&out_dir).join("qaul.rpc.dtn.rs"),
+        to.join("qaul.rpc.dtn.rs"),
     )
     .unwrap();
     fs::copy(
@@ -256,6 +262,11 @@ fn main() {
     fs::copy(
         &Path::new(&out_dir).join("qaul.rpc.group.rs"),
         Path::new("src/services/group/qaul.rpc.group.rs"),
+    )
+    .unwrap();
+    fs::copy(
+        &Path::new(&out_dir).join("qaul.rpc.dtn.rs"),
+        Path::new("src/services/dtn/qaul.rpc.dtn.rs"),
     )
     .unwrap();
     fs::copy(

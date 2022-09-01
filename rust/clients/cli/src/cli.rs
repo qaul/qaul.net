@@ -10,6 +10,7 @@ use super::chat::Chat;
 use super::chatfile::ChatFile;
 use super::connections::Connections;
 use super::debug::Debug;
+use super::dtn::Dtn;
 use super::feed::Feed;
 use super::group::Group;
 use super::node::Node;
@@ -72,6 +73,10 @@ impl Cli {
             // rtc functions
             cmd if cmd.starts_with("rtc ") => {
                 Rtc::cli(cmd.strip_prefix("rtc ").unwrap());
+            }
+            // dtn functions
+            cmd if cmd.starts_with("dtn ") => {
+                Dtn::cli(cmd.strip_prefix("dtn ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

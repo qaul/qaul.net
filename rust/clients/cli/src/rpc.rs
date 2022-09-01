@@ -109,6 +109,9 @@ impl Rpc {
                     Some(proto::Modules::Rtc) => {
                         super::rtc::Rtc::rpc(message.data);
                     }
+                    Some(proto::Modules::Dtn) => {
+                        super::dtn::Dtn::rpc(message.data);
+                    }
                     Some(proto::Modules::None) => {}
                     None => {}
                 }

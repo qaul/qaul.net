@@ -9,15 +9,8 @@ use libp2p::PeerId;
 use prost::Message;
 
 use crate::router;
-
-use crate::services::chat;
-use crate::services::crypto::Crypto;
-use crate::services::group;
-use crate::services::group::conversation_id::ConversationId;
-use crate::services::rtc;
-
 use crate::utilities::qaul_id::QaulId;
-use crate::utilities::timestamp::{self, Timestamp};
+use crate::utilities::timestamp::Timestamp;
 
 /// Qaul Messaging Structure
 pub struct MessagingRetransmit {}
@@ -41,6 +34,11 @@ impl MessagingRetransmit {
             if let Ok((signature, mut unconfirmed_message)) = entry {
                 // let's assume message transmit in 3 seconds
                 if cur_time < (unconfirmed_message.last_sent + 3000) {
+                    continue;
+                }
+
+                // message scheduled via DTN, ignore retrans
+                if unconfirmed_message.scheduled_dtn {
                     continue;
                 }
 

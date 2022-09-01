@@ -11,7 +11,7 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
 use state::Storage;
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::VecDeque;
 use std::sync::RwLock;
 
 #[cfg(emulate)]
@@ -175,7 +175,7 @@ impl Messaging {
         }
     }
 
-    // process confirmation message
+    /// process confirmation message and return (sender_id, message_id)
     pub fn on_confirmed_message(signature: &Vec<u8>) {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -396,7 +396,7 @@ impl Messaging {
                 container_dtn,
                 true,
                 false,
-                false,
+                true,
                 true,
             );
             // return signature
@@ -596,6 +596,7 @@ impl Messaging {
                                 ) {
                                     log::error!("DTN scheduling error!");
                                 } else {
+                                    log::error!("DTN scheduled...");
                                     // update unconfirmed table
                                     Self::on_scheduled_as_dtn_message(&message.container.signature);
                                 }
