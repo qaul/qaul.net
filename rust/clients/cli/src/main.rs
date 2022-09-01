@@ -21,6 +21,7 @@ mod chatfile;
 mod cli;
 mod connections;
 mod debug;
+mod dtn;
 mod feed;
 mod group;
 mod node;

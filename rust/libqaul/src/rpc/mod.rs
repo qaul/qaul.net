@@ -24,6 +24,7 @@ use crate::router::users::Users;
 use crate::router::Router;
 use crate::services::chat::Chat;
 use crate::services::chat::ChatFile;
+use crate::services::dtn::Dtn;
 use crate::services::feed::Feed;
 use crate::services::group::Group;
 use crate::services::rtc::Rtc;
@@ -179,6 +180,10 @@ impl Rpc {
                     Some(Modules::Rtc) => {
                         log::trace!("Message Modules::Group received");
                         Rtc::rpc(message.data, message.user_id);
+                    }
+                    Some(Modules::Dtn) => {
+                        log::info!("Message Modules::Group received");
+                        Dtn::rpc(message.data, message.user_id);
                     }
                     Some(Modules::None) => {
                         log::error!("Message Modules::None received");

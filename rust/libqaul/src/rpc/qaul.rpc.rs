@@ -61,6 +61,8 @@ pub enum Modules {
     Ble = 12,
     /// Real Time Communication handling
     Rtc = 13,
+    /// Delay Tolerant Networking
+    Dtn = 14,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -83,6 +85,7 @@ impl Modules {
             Modules::Chatfile => "CHATFILE",
             Modules::Ble => "BLE",
             Modules::Rtc => "RTC",
+            Modules::Dtn => "DTN",
         }
     }
 }

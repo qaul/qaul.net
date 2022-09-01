@@ -58,4 +58,6 @@ enum Modules {
     BLE = 12;
     // Real Time Communication handling
     RTC = 13;
+    // Delay Tolerant Networking
+    DTN = 14;
 }
