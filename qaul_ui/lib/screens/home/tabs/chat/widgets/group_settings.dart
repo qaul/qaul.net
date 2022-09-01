@@ -47,6 +47,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
           children: [
             CircleAvatar(
               radius: 80.0,
+              backgroundColor: colorGenerationStrategy(room.idBase58),
               child: Text(
                 initials(group.name ?? 'GROUP'),
                 style: const TextStyle(
@@ -55,7 +56,6 @@ class _GroupSettingsPage extends HookConsumerWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              backgroundColor: colorGenerationStrategy(room.idBase58),
             ),
             const SizedBox(height: 28.0),
             !isAdmin

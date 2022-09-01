@@ -49,4 +49,39 @@ class GroupTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data);
     }
   }
+
+  @override
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    if (res.module != type || res.data == null) return;
+
+    final state = reader(chatRoomsProvider.notifier);
+    final users = reader(usersProvider);
+    if (res.data is List<GroupDetails>) {
+      for (final groupInfo in res.data) {
+        final room = ChatRoom.fromGroupDetails(groupInfo, users);
+        if (!state.contains(room)) {
+          state.add(room);
+        } else {
+          state.update(room);
+        }
+      }
+      return;
+    } else if (res.data is GroupDetails) {
+      final room = ChatRoom.fromGroupDetails(res.data, users);
+      if (!state.contains(room)) {
+        state.add(room);
+      } else {
+        state.update(room);
+      }
+    } else if (res.data is List<GroupInvite>) {
+      final invites = reader(groupInvitesProvider.notifier);
+      for (final invite in res.data) {
+        if (!invites.contains(invite)) {
+          invites.add(invite);
+        } else {
+          invites.update(invite);
+        }
+      }
+    }
+  }
 }
