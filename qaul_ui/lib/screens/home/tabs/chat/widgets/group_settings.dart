@@ -40,23 +40,12 @@ class _GroupSettingsPage extends HookConsumerWidget {
                     ),
                   );
                 },
-                child: const Icon(Icons.person_add),
+                child: const Icon(Icons.person_add, color: Colors.white),
               ),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           children: [
-            CircleAvatar(
-              radius: 80.0,
-              backgroundColor: colorGenerationStrategy(room.idBase58),
-              child: Text(
-                initials(group.name ?? 'GROUP'),
-                style: const TextStyle(
-                  fontSize: 68,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            QaulAvatar.groupLarge(),
             const SizedBox(height: 28.0),
             !isAdmin
                 ? Text(room.name ?? '', style: theme.headline3)
@@ -93,7 +82,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
               itemBuilder: (c, i) {
                 final user = group.members[i];
                 // TODO add option to remove user (if admin)
-                return UserListTile(
+                return QaulListTile.user(
                   user,
                   trailingIcon:
                       Icon(_mapInvitationStateToIcon(user.invitationState)),

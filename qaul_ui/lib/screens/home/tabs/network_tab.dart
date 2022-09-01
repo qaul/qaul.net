@@ -104,7 +104,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
                           child: Container(
                             alignment: AlignmentDirectional.centerStart,
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: UserAvatar.tiny(user: usr),
+                            child: QaulAvatar.tiny(user: usr),
                           ),
                         ),
                         TableCell(

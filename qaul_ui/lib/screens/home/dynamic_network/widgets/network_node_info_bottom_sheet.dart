@@ -53,7 +53,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
                 child: const Icon(Icons.close_rounded),
               ),
             ),
-            UserListTile(
+            QaulListTile.user(
               node.user,
               content: Text(
                 'ID: ${node.user.idBase58}',

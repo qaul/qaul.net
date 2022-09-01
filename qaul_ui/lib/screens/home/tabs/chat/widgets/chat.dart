@@ -173,7 +173,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         leading: IconButtonFactory(onPressed: closeChat),
         title: Row(
           children: [
-            UserAvatar.small(badgeEnabled: false, user: otherUser),
+            (room.isGroupChatRoom)
+                ? QaulAvatar.groupSmall()
+                : QaulAvatar.small(badgeEnabled: false, user: otherUser),
             const SizedBox(width: 12),
             Text(otherUser?.name ?? room.name ?? 'Group'),
           ],

@@ -218,7 +218,7 @@ class QaulNavBarItem extends HookConsumerWidget {
               hoverColor: Colors.transparent,
               focusColor: Colors.transparent,
               highlightColor: Colors.transparent,
-              child: UserAvatar.small(badgeEnabled: false),
+              child: QaulAvatar.small(badgeEnabled: false),
             ),
           ),
         );

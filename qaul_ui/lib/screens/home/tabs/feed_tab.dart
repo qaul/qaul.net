@@ -72,7 +72,7 @@ class _FeedState extends _BaseTabState<_Feed> {
                 );
                 if (author == null) return const SizedBox.shrink();
 
-                return UserListTile(
+                return QaulListTile.user(
                   author,
                   content: Text(msg.content ?? '', style: theme.bodyText1),
                   trailingMetadata: Text(
