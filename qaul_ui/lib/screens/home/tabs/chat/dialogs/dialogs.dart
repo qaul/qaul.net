@@ -158,7 +158,7 @@ class InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
   final ChatRoom room;
 
   @override
-  _InviteUsersToGroupDialogState createState() =>
+  ConsumerState<InviteUsersToGroupDialog> createState() =>
       _InviteUsersToGroupDialogState();
 }
 

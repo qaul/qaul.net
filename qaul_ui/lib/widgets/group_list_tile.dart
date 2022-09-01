@@ -56,6 +56,7 @@ class GroupListTile extends StatelessWidget {
       isThreeLine: isThreeLine,
       leading: CircleAvatar(
         radius: 20.0,
+        backgroundColor: Colors.red.shade700,
         child: Text(
           initials(room.name!),
           style: const TextStyle(
@@ -64,7 +65,6 @@ class GroupListTile extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        backgroundColor: Colors.red.shade700,
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );

@@ -37,7 +37,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       final worker = ref.read(qaulWorkerProvider);
       worker.getAllChatRooms();
       worker.getGroupInvitesReceived();
-    }, [UniqueKey()]);
+    }, []);
 
     final l18ns = AppLocalizations.of(context);
 
@@ -52,9 +52,9 @@ class _ChatState extends _BaseTabState<_Chat> {
       }
 
       final otherUser = users
-          .firstWhereOrNull((u) => u.id.equals(currentOpenChat.conversationId));
+          .firstWhereOrNull((u) => u.conversationId?.equals(currentOpenChat.conversationId) ?? false);
 
-      if (otherUser == null) {
+      if (otherUser == null && !currentOpenChat.isGroupChatRoom) {
         _log.warning('single-person room with unknown otherUser');
         chatWidget.value = null;
         return () {};
@@ -63,13 +63,13 @@ class _ChatState extends _BaseTabState<_Chat> {
       chatWidget.value = ChatScreen(
         currentOpenChat,
         defaultUser,
-        otherUser,
+        otherUser: otherUser,
       );
 
       return () {};
     }, [currentOpenChat]);
 
-    final setOpenChat = useCallback((ChatRoom room, User otherUser) {
+    final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
       if (mobile) {
         openChat(room,
             ref: ref,
@@ -98,7 +98,7 @@ class _ChatState extends _BaseTabState<_Chat> {
               var theme = Theme.of(context).textTheme;
 
               if (i < groupInvites.length) {
-                return Text('group invite');
+                return const Text('group invite');
               }
 
               final room = filteredRooms[i - groupInvites.length];

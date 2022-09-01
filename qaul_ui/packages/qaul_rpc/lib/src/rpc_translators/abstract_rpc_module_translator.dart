@@ -72,6 +72,7 @@ abstract class RpcModuleTranslator {
     DebugTranslator(),
     FeedTranslator(),
     FileSharingTranslator(),
+    GroupTranslator(),
     NodeTranslator(),
     RouterTranslator(),
     UserAccountsTranslator(),

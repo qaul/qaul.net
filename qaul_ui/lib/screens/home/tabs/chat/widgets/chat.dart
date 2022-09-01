@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
     show Chat, DefaultChatTheme, InputOptions, SendButtonVisibilityMode;
-
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -26,8 +25,8 @@ import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
-import '../current_open_chat_notifier.dart';
 import '../../tab.dart';
+import '../current_open_chat_notifier.dart';
 import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
@@ -48,7 +47,6 @@ Future<void> openChat(
   required BuildContext context,
   required User user,
   User? otherUser,
-  VoidCallback? onBackButtonPressed,
 }) async {
   ref.read(uiOpenChatProvider.notifier).setCurrent(room);
 
@@ -64,7 +62,6 @@ Future<void> openChat(
       builder: (context) => ChatScreen(
         room,
         user,
-        onBackButtonPressed,
         otherUser: otherUser,
       ),
     ),
@@ -74,8 +71,7 @@ Future<void> openChat(
 class ChatScreen extends StatefulHookConsumerWidget {
   const ChatScreen(
     this.room,
-    this.user,
-    this.onBackButtonPressed, {
+    this.user, {
     Key? key,
     this.otherUser,
   }) : super(key: key);
@@ -87,9 +83,6 @@ class ChatScreen extends StatefulHookConsumerWidget {
 
   /// Someone the default user is having a conversation with. Leave null if group chat
   final User? otherUser;
-
-  /// If null, back button will pop the current route.
-  final VoidCallback? onBackButtonPressed;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -120,7 +113,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         Navigator.push(context, MaterialPageRoute(builder: (_) {
           return _GroupSettingsPage(room);
         }));
-
         break;
     }
   }
@@ -139,10 +131,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _overflowMenuOptions.addAll({'groupSettings': 'Group Settings'});
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(currentOpenChatRoom.notifier).state = room;
-      ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
-    });
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -167,7 +155,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         room.conversationId,
         lastIndex: room.lastMessageIndex ?? 1,
       );
-    }, [UniqueKey()]);
+    }, []);
 
     final closeChat = useCallback(() {
       ref.read(currentOpenChatRoom.notifier).state = null;
@@ -178,16 +166,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final sendMessage = useCallback((types.PartialText msg) {
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
-    }, [UniqueKey()]);
+    }, []);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButtonFactory(
-          onPressed: () {
-            ref.read(currentOpenChatRoom.notifier).state = null;
-            closeChat();
-          },
-        ),
+        leading: IconButtonFactory(onPressed: closeChat),
         title: Row(
           children: [
             UserAvatar.small(badgeEnabled: false, user: otherUser),

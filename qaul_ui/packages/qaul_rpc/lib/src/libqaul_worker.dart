@@ -24,7 +24,6 @@ import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
-import 'models/group_invite.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
@@ -150,7 +149,7 @@ class LibqaulWorker {
     dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
     await _sendMessage(Modules.CHAT, msg);
     msg = Group(groupListRequest: GroupListRequest());
-    await _sendMessage(Modules.GROUP, msg.writeToBuffer());
+    await _sendMessage(Modules.GROUP, msg);
   }
 
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
