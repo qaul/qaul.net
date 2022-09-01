@@ -58,7 +58,7 @@ class _UsersState extends _BaseTabState<_Users> {
                   return DisabledStateDecorator(
                     isDisabled: user.isBlocked ?? false,
                     ignorePointer: false,
-                    child: UserListTile(
+                    child: QaulListTile.user(
                       user,
                       content: content,
                       isThreeLine: hasConnections,

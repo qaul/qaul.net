@@ -82,7 +82,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      UserAvatar.large(user: user),
+                      QaulAvatar.large(user: user),
                       const SizedBox(height: 28.0),
                       Text(user.name, style: theme.headline3),
                       const SizedBox(height: 8.0),

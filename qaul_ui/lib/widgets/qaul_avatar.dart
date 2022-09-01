@@ -3,16 +3,26 @@ part of 'widgets.dart';
 /// If [user] is provided, it's used to populate this icon (Background color, initials, connection status).
 ///
 /// Otherwise, the user found in [defaultUserProvider] is used.
-abstract class UserAvatar extends ConsumerWidget {
-  const UserAvatar({Key? key, this.user}) : super(key: key);
+abstract class QaulAvatar extends ConsumerWidget {
+  const QaulAvatar({Key? key, this.user}) : super(key: key);
   final User? user;
 
-  factory UserAvatar.tiny({Key? key, User? user}) => _TinyUserAvatar(key: key, user: user);
+  factory QaulAvatar.tiny({Key? key, User? user}) =>
+      _TinyQaulAvatar(key: key, user: user);
 
-  factory UserAvatar.small({Key? key, User? user, bool badgeEnabled = true}) =>
-      _SmallUserAvatar(key: key, user: user, badgeEnabled: badgeEnabled);
+  factory QaulAvatar.small({Key? key, User? user, bool badgeEnabled = true}) =>
+      _SmallQaulAvatar(key: key, user: user, badgeEnabled: badgeEnabled);
 
-  factory UserAvatar.large({Key? key, User? user}) => _LargeUserAvatar(key: key, user: user);
+  factory QaulAvatar.large({Key? key, User? user}) =>
+      _LargeQaulAvatar(key: key, user: user);
+
+  factory QaulAvatar.groupSmall({Key? key}) => const _SmallQaulAvatar(
+        badgeEnabled: false,
+        isGroup: true,
+      );
+
+  factory QaulAvatar.groupLarge({Key? key}) =>
+      const _LargeQaulAvatar(isGroup: true);
 
   double get radius;
 
@@ -25,12 +35,14 @@ abstract class UserAvatar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultUser = ref.watch(defaultUserProvider);
-    final defaultUserColor =
-        defaultUser == null ? null : colorGenerationStrategy(defaultUser.idBase58);
+    final defaultUserColor = defaultUser == null
+        ? null
+        : colorGenerationStrategy(defaultUser.idBase58);
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
+      backgroundColor:
+          user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
       child: Text(
         user != null
             ? userInitials
@@ -54,8 +66,8 @@ abstract class UserAvatar extends ConsumerWidget {
   }
 }
 
-class _TinyUserAvatar extends UserAvatar {
-  const _TinyUserAvatar({Key? key, User? user}) : super(key: key, user: user);
+class _TinyQaulAvatar extends QaulAvatar {
+  const _TinyQaulAvatar({Key? key, User? user}) : super(key: key, user: user);
 
   @override
   double get radius => 14.0;
@@ -68,13 +80,15 @@ class _TinyUserAvatar extends UserAvatar {
       );
 }
 
-class _SmallUserAvatar extends UserAvatar {
-  const _SmallUserAvatar({
+class _SmallQaulAvatar extends QaulAvatar {
+  const _SmallQaulAvatar({
     Key? key,
     User? user,
     this.badgeEnabled = true,
+    this.isGroup = false,
   }) : super(key: key, user: user);
   final bool badgeEnabled;
+  final bool isGroup;
 
   @override
   double get radius => 20.0;
@@ -88,6 +102,18 @@ class _SmallUserAvatar extends UserAvatar {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (isGroup) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.lightBlue,
+        child: const FaIcon(
+          FontAwesomeIcons.users,
+          size: 16,
+          color: Colors.white,
+        ),
+      );
+    }
+
     if (!badgeEnabled || userIsOffline(user)) {
       return super.build(context, ref);
     }
@@ -106,8 +132,13 @@ class _SmallUserAvatar extends UserAvatar {
   bool userIsOffline(User? u) => u == null || !u.isConnected;
 }
 
-class _LargeUserAvatar extends UserAvatar {
-  const _LargeUserAvatar({Key? key, User? user}) : super(key: key, user: user);
+class _LargeQaulAvatar extends QaulAvatar {
+  const _LargeQaulAvatar({
+    Key? key,
+    User? user,
+    this.isGroup = false,
+  }) : super(key: key, user: user);
+  final bool isGroup;
 
   @override
   double get radius => 80.0;
@@ -118,4 +149,18 @@ class _LargeUserAvatar extends UserAvatar {
         color: Colors.white,
         fontWeight: FontWeight.w700,
       );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!isGroup) return super.build(context, ref);
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.lightBlue,
+      child: const FaIcon(
+        FontAwesomeIcons.users,
+        size: 48,
+        color: Colors.white,
+      ),
+    );
+  }
 }

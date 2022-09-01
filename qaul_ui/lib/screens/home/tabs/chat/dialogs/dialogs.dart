@@ -35,7 +35,10 @@ class _CreateNewRoomDialog extends StatelessWidget {
               );
             }
             final usr = users[i - 1];
-            return UserListTile(usr, onTap: () => Navigator.pop(context, usr));
+            return QaulListTile.user(
+              usr,
+              onTap: () => Navigator.pop(context, usr),
+            );
           },
         );
       },
@@ -179,7 +182,7 @@ class _InviteUsersToGroupDialogState
               separatorBuilder: (_, __) => const Divider(height: 12.0),
               itemBuilder: (context, i) {
                 final usr = users[i];
-                return UserListTile(
+                return QaulListTile.user(
                   usr,
                   trailingIcon: Checkbox(
                     value: selected.contains(usr),

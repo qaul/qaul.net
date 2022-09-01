@@ -103,7 +103,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
               final room = filteredRooms[i - groupInvites.length];
               if (room.isGroupChatRoom) {
-                return GroupListTile(
+                return QaulListTile.group(
                   room,
                   content: _contentFromOverview(
                     room.lastMessagePreview,
@@ -139,7 +139,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                 return const SizedBox.shrink();
               }
 
-              return UserListTile(
+              return QaulListTile.user(
                 otherUser,
                 content: _contentFromOverview(
                   room.lastMessagePreview,
