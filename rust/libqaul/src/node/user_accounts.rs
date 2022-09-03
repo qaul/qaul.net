@@ -68,13 +68,11 @@ impl UserAccounts {
             }
 
             // push to user accounts table
-            accounts.users.push(
-                UserAccount {
-                    name: user.name.clone(),
-                    id,
-                    keys: keys.clone(),
-                }
-            );
+            accounts.users.push(UserAccount {
+                name: user.name.clone(),
+                id,
+                keys: keys.clone(),
+            });
         }
 
         // save users to state
@@ -113,7 +111,7 @@ impl UserAccounts {
         crate::router::users::Users::add(id, keys.public(), name.clone(), false, false);
 
         // add user to routing table / connections table
-        crate::router::connections::ConnectionTable::add_local_user(id);        
+        crate::router::connections::ConnectionTable::add_local_user(id);
 
         // display id
         info!("created user account '{}' {:?}", name, id);
@@ -122,14 +120,14 @@ impl UserAccounts {
     }
 
     /// get user account by id
-    pub fn get_by_id(user_id: PeerId) -> Option<UserAccount> {
+    pub fn get_by_id(account_id: PeerId) -> Option<UserAccount> {
         // get state
         let accounts = USERACCOUNTS.get().read().unwrap();
 
         // search for ID in accounts
         let mut account_result = None;
         for item in &accounts.users {
-            if item.id == user_id {
+            if item.id == account_id {
                 account_result = Some(item.clone());
                 break;
             }

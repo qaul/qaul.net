@@ -278,13 +278,13 @@ impl Crypto {
     pub fn decrypt(
         data: Vec<u8>,
         nonce: u64,
-        user_account_id: PeerId,
+        user_account: UserAccount,
         remote_id: PeerId,
     ) -> Option<Vec<u8>> {
         Self::decrypt_noise_kk::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
             data,
             nonce,
-            user_account_id,
+            user_account,
             remote_id,
         )
     }
@@ -295,7 +295,7 @@ impl Crypto {
     fn decrypt_noise_kk<D, C, H, P>(
         data: Vec<u8>,
         nonce: u64,
-        user_account_id: PeerId,
+        user_account: UserAccount,
         remote_id: PeerId,
     ) -> Option<Vec<u8>>
     where
@@ -306,15 +306,6 @@ impl Crypto {
     {
         let mut state: CryptoState;
         let mut message: Option<Vec<u8>> = None;
-
-        // get user account
-        let user_account: UserAccount;
-        if let Some(result) = UserAccounts::get_by_id(user_account_id) {
-            user_account = result;
-        } else {
-            log::error!("user account not found");
-            return None;
-        }
 
         // check if there is already an entry
         if let Some(saved_state) = Self::get_handshake_state(user_account.clone(), remote_id) {

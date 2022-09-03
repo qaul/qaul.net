@@ -172,7 +172,7 @@ impl Messaging {
         match unconfirmed.unconfirmed.remove(signature) {
             Ok(v) => {
                 // TODO: is this needed here?
-                // -> only flush after it has been changed on main table too
+                //       Suggestion -> only flush after it has been changed on main table too
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
                     log::error!("Error unconfirmed table flush: {}", e);
                 }
@@ -418,12 +418,15 @@ impl Messaging {
                     match PeerId::from_bytes(&envelope.receiver_id) {
                         Ok(receiver_id) => {
                             // check if message is local user account
-                            if UserAccounts::is_account(receiver_id) {
-                                // save message
-                                MessagingProcess::process_received_message(container);
-                            } else {
+                            match UserAccounts::get_by_id(receiver_id) {
+                                // we are the receiving node,
+                                // process and save the message
+                                Some(user_account) => MessagingProcess::process_received_message(
+                                    user_account,
+                                    container,
+                                ),
                                 // schedule it for further sending otherwise
-                                Self::schedule_message(receiver_id, container);
+                                None => Self::schedule_message(receiver_id, container),
                             }
                         }
                         Err(e) => log::error!(

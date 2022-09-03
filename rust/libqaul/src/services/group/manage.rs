@@ -15,6 +15,32 @@ use crate::utilities::timestamp;
 /// Group Manage Structure
 pub struct Manage {}
 impl Manage {
+    /// Get a group from the data base
+    ///
+    /// If it is a direct chat group, and does not yet exist
+    /// this function will create a new direct chat group and
+    /// return it.
+    pub fn get_group(account_id: PeerId, group_id: Vec<u8>) -> Option<Group> {
+        // try to get group from data base
+        match GroupStorage::get_group(account_id.clone(), group_id.clone()) {
+            Some(group) => return Some(group),
+            None => {
+                // check if group id is a direct chat
+                if let Ok(conversation_id) = ConversationId::from_bytes(&group_id) {
+                    if let Some(peer_id_vec) = conversation_id.is_direct(account_id) {
+                        if let Ok(peer_id) = PeerId::from_bytes(&peer_id_vec) {
+                            // create a new direct chat group
+                            let group = Self::create_new_direct_chat_group(&account_id, &peer_id);
+                            return Some(group);
+                        }
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
     /// Create a new direct chat group
     ///
     /// The function expects two qaul user ID's:

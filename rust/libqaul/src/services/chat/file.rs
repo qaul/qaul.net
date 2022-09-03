@@ -87,8 +87,6 @@ static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
 
 /// Size of the biggest file data package
 pub const DEF_PACKAGE_SIZE: u32 = 64000;
-//pub const DEF_PACKAGE_SIZE: u32 = 1500;
-//pub const DEF_PACKAGE_SIZE: u32 = 1000;
 
 pub struct ChatFile {}
 /// File sharing module to process transfer, receive and RPC commands
@@ -182,33 +180,37 @@ impl ChatFile {
         user_files
     }
 
-    pub fn is_completed(user_id: &PeerId, msg_date: &Vec<u8>) -> Result<bool, String> {
-        let mut file_id: u64 = 0;
-        match proto_net::ChatFileContainer::decode(&msg_date[..]) {
-            Ok(messaging) => match messaging.message {
-                Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
-                    file_id = file_info.file_id;
-                }
-                Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
-                    file_id = file_data.file_id;
-                }
-                None => {
-                    return Err("not file data".to_string());
-                }
-            },
-            Err(_e) => {
-                return Err("file data decode error".to_string());
-            }
-        }
-        let db_ref = Self::get_db_ref(user_id);
+    // REMOVE
+    /*
+       /// Check if incoming file has been completed
+       pub fn is_completed(account_id: &PeerId, msg_date: &Vec<u8>) -> Result<bool, String> {
+           let mut file_id: u64 = 0;
+           match proto_net::ChatFileContainer::decode(&msg_date[..]) {
+               Ok(messaging) => match messaging.message {
+                   Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
+                       file_id = file_info.file_id;
+                   }
+                   Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
+                       file_id = file_data.file_id;
+                   }
+                   None => {
+                       return Err("not file data".to_string());
+                   }
+               },
+               Err(_e) => {
+                   return Err("file data decode error".to_string());
+               }
+           }
+           let db_ref = Self::get_db_ref(account_id);
 
-        let exists = db_ref
-            .file_ids
-            .contains_key(&file_id.to_be_bytes())
-            .unwrap();
-        Ok(exists)
-    }
+           let exists = db_ref
+               .file_ids
+               .contains_key(&file_id.to_be_bytes())
+               .unwrap();
 
+           Ok(exists)
+       }
+    */
     /// This function is called when file transfer or receiving finished successfully.
     fn on_completed(
         user_id: &PeerId,
@@ -331,34 +333,14 @@ impl ChatFile {
         path_name: String,
         description: String,
     ) -> Result<bool, String> {
-        // get group and my member
+        // get group
         let group;
-        match group::GroupStorage::get_group(user_account.id, group_id.to_owned()) {
-            Some(v) => {
-                group = v;
-            }
-            None => {
-                let error = "Group does not exist".to_string();
-                // check if group id is a direct chat
-                if let Ok(conversation_id) = ConversationId::from_bytes(group_id) {
-                    if let Some(peer_id_vec) = conversation_id.is_direct(user_account.id) {
-                        if let Ok(peer_id) = PeerId::from_bytes(&peer_id_vec) {
-                            group = group::Manage::create_new_direct_chat_group(
-                                &user_account.id,
-                                &peer_id,
-                            );
-                        } else {
-                            return Err(error);
-                        }
-                    } else {
-                        return Err(error);
-                    }
-                } else {
-                    return Err(error);
-                }
-            }
+        match group::Manage::get_group(user_account.id, group_id.to_owned()) {
+            Some(v) => group = v,
+            None => return Err("Group does not exist".to_string()),
         }
 
+        // get my group member
         let mut my_member;
         match group.get_member(&user_account.id.to_bytes()) {
             Some(v) => {
@@ -398,6 +380,7 @@ impl ChatFile {
         let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
 
         // copy file into files folder
+        // TODO: make it OS independent
         let mut file_path = crate::storage::Storage::get_path();
         if file_path.chars().last().unwrap() != '/' {
             file_path.push_str("/");
@@ -453,7 +436,7 @@ impl ChatFile {
         };
         messages.push(info);
 
-        // 2. filedata message
+        // 2. file data message
         // read file contents and make FileData messages
         let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
@@ -553,29 +536,6 @@ impl ChatFile {
         Ok(true)
     }
 
-    // REMOVE
-    /*
-       /// Send the file on the messaging service
-       /// This function is called from RPC command (file send conversation_id file_path_name)
-       pub fn send_to_user(
-           user_account: &UserAccount,
-           send_file_req: proto_rpc::SendFileRequest,
-       ) -> Result<bool, String> {
-           if !group::Group::group_exists(&user_account.id, &send_file_req.conversation_id.to_bytes())
-           {
-               group::Manage::create_new_direct_chat_group(&user_account.id, &peer_id);
-           }
-
-           conversation_id = send_file_req.conversation_id.clone();
-
-           Self::send(
-               user_account,
-               &send_file_req.conversation_id,
-               send_file_req.path_name.clone(),
-               send_file_req.description.clone(),
-           )
-       }
-    */
     /// Generate File id
     fn generate_file_id(group_id: &Vec<u8>, sender: &Vec<u8>, file_name: String, size: u32) -> u64 {
         let mut name_bytes = file_name.as_bytes().to_vec();
@@ -635,6 +595,7 @@ impl ChatFile {
                 return Err("file message container was damaged".to_string());
             }
         }
+
         // check content
         if start_index != file_info.start_index || message_count != file_info.message_count {
             return Err("file info message mismatched".to_string());
@@ -709,24 +670,18 @@ impl ChatFile {
     }
 
     /// process chat file container message from network
-    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, group_id: &Vec<u8>, data: &Vec<u8>) {
-        // check receiver id is in users list
-        let user;
-        match UserAccounts::get_by_id(receiver_id.clone()) {
-            Some(usr) => {
-                user = usr;
-            }
-            None => {
-                log::error!("no user id={}", receiver_id);
-                return;
-            }
-        }
-
+    pub fn process_net_chatfilecontainer(
+        sender_id: &PeerId,
+        user_account: UserAccount,
+        group_id: &Vec<u8>,
+        data: &Vec<u8>,
+    ) {
+        // decode protobuf file message container
         match proto_net::ChatFileContainer::decode(&data[..]) {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
                     if let Err(_) = Self::try_store_file(
-                        &user,
+                        &user_account,
                         sender_id,
                         group_id,
                         file_info.start_index,
@@ -735,7 +690,7 @@ impl ChatFile {
                 }
                 Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
                     if let Err(error) = Self::try_store_file(
-                        &user,
+                        &user_account,
                         sender_id,
                         group_id,
                         file_data.start_index,
@@ -755,7 +710,7 @@ impl ChatFile {
                 log::error!(
                     "Error decoding ChatFile Message from {} to {}: {}",
                     sender_id.to_base58(),
-                    receiver_id.to_base58(),
+                    user_account.id.to_base58(),
                     e
                 );
             }

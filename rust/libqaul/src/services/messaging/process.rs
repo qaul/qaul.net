@@ -9,8 +9,8 @@
 use libp2p::PeerId;
 use prost::Message;
 
+use crate::node::user_accounts::UserAccount;
 use crate::router;
-
 use crate::services::chat::{self, ChatFile, ChatStorage};
 use crate::services::crypto::Crypto;
 use crate::services::group;
@@ -27,10 +27,10 @@ use crate::services::rtc;
 pub struct MessagingProcess {}
 
 impl MessagingProcess {
-    /// process encrypted message
-    pub fn on_encrypted_message(
+    /// process decrypted message
+    pub fn on_decrypted_message(
         sender_id: &PeerId,
-        receiver_id: &PeerId,
+        user_account: UserAccount,
         data: &Vec<u8>,
         signature: &Vec<u8>,
     ) {
@@ -45,7 +45,7 @@ impl MessagingProcess {
                     "Error decoding Messaging Message {} from {} to {}",
                     bs58::encode(signature).into_string(),
                     sender_id.to_base58(),
-                    receiver_id.to_base58()
+                    user_account.id.to_base58()
                 );
                 return;
             }
@@ -61,20 +61,23 @@ impl MessagingProcess {
             }
             Some(super::proto::messaging::Message::CryptoService(_crypto)) => {
                 // send confirm message
+                // TODO: pass on the user_account
                 if let Err(e) =
-                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                    super::Messaging::send_confirmation(&user_account.id, sender_id, signature)
                 {
                     log::error!("send confirmation failed {}", e);
                 }
             }
             Some(super::proto::messaging::Message::RtcStreamMessage(_rtc_stream)) => {}
             Some(super::proto::messaging::Message::GroupInviteMessage(group_invite)) => {
-                group::Group::net(sender_id, receiver_id, &group_invite.content);
+                // TODO: pass on user_account
+                group::Group::net(sender_id, &user_account.id, &group_invite.content);
                 //group::Group::on_notify(sender_id, receiver_id, &group_notify.content);
 
                 // send confirm message
+                // TODO: pass on user_account
                 if let Err(e) =
-                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                    super::Messaging::send_confirmation(&user_account.id, sender_id, signature)
                 {
                     log::error!("send confirmation failed {}", e);
                 }
@@ -100,8 +103,9 @@ impl MessagingProcess {
 
                 match common.payload {
                     Some(super::proto::common_message::Payload::ChatMessage(ref chat_message)) => {
+                        // TODO: pass on user_account
                         ChatStorage::save_incoming_message(
-                            receiver_id,
+                            &user_account.id,
                             sender_id,
                             chat::rpc_proto::ChatContentType::Chat.try_into().unwrap(),
                             chat_message.content.encode_to_vec(),
@@ -112,29 +116,23 @@ impl MessagingProcess {
                         );
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
-                        // TODO: HOW TO DO THIS HERE?
-                        if let Ok(exist) =
-                            ChatFile::is_completed(&receiver_id, &file_message.content)
-                        {
-                            if !exist {
-                                ChatFile::net(
-                                    &sender_id,
-                                    &receiver_id,
-                                    &common.conversation_id,
-                                    &file_message.content,
-                                );
-                            }
-                        }
+                        ChatFile::process_net_chatfilecontainer(
+                            &sender_id,
+                            user_account.clone(),
+                            &common.conversation_id,
+                            &file_message.content,
+                        );
                     }
                     Some(super::proto::common_message::Payload::GroupMessage(
                         ref group_message,
                     )) => {
+                        // TODO: pass on user_account
                         // process group message
-                        group::Group::net(&sender_id, &receiver_id, &group_message.content);
+                        group::Group::net(&sender_id, &user_account.id, &group_message.content);
                     }
                     Some(super::proto::common_message::Payload::RtcMessage(ref rtc_message)) => {
                         // process message in RTC module
-                        rtc::Rtc::net(sender_id, receiver_id, &rtc_message.content);
+                        rtc::Rtc::net(sender_id, &user_account.id, &rtc_message.content);
                     }
                     _ => {
                         log::error!("process_direct_message: unknown common message type");
@@ -142,25 +140,27 @@ impl MessagingProcess {
                     }
                 }
 
-                log::error!(
+                log::trace!(
                     "sender={}, receiver={}",
                     sender_id.to_base58(),
-                    receiver_id.to_base58()
+                    user_account.id.to_base58()
                 );
 
+                // TODO: hand over user_id
                 // update group status
                 if let Err(e) = group::GroupMessage::on_message(
                     sender_id,
-                    receiver_id,
+                    &user_account.id,
                     &conversation_id.to_bytes(),
                     &common.message_id,
                 ) {
                     log::error!("group status processing error {}", e);
                 }
 
+                // TODO: hand over user_account
                 // send confirm message
                 if let Err(e) =
-                    super::Messaging::send_confirmation(receiver_id, sender_id, signature)
+                    super::Messaging::send_confirmation(&user_account.id, sender_id, signature)
                 {
                     log::error!("send confirmation failed {}", e);
                 }
@@ -173,7 +173,7 @@ impl MessagingProcess {
     }
 
     /// process received message
-    pub fn process_received_message(container: super::proto::Container) {
+    pub fn process_received_message(user_account: UserAccount, container: super::proto::Container) {
         // check envelop
         let envelope;
         match container.envelope {
@@ -242,7 +242,7 @@ impl MessagingProcess {
                             if let Some(mut decrypted_chunk) = Crypto::decrypt(
                                 data_message.data,
                                 data_message.nonce,
-                                receiver_id,
+                                user_account.clone(),
                                 sender_id.clone(),
                             ) {
                                 decrypted.append(&mut decrypted_chunk);
@@ -252,9 +252,9 @@ impl MessagingProcess {
                             }
                         }
 
-                        Self::on_encrypted_message(
+                        Self::on_decrypted_message(
                             &sender_id,
-                            &receiver_id,
+                            user_account,
                             &decrypted,
                             &container.signature,
                         );
