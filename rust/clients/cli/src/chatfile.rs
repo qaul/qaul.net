@@ -69,20 +69,23 @@ impl ChatFile {
             }
 
             // request chat file history list
-            cmd if cmd.starts_with("history ") => {
-                let command_string = cmd.strip_prefix("history ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
+            cmd if cmd.starts_with("history") => {
                 let mut offset: i32 = 0;
                 let mut limit: i32 = 10;
 
-                if let Some(offset_str) = iter.next() {
-                    offset = offset_str.to_string().parse().unwrap();
-                    if let Some(limit_str) = iter.next() {
-                        limit = limit_str.to_string().parse().unwrap();
+                if cmd.starts_with("history ") {
+                    let command_string = cmd.strip_prefix("history ").unwrap().to_string();
+                    let mut iter = command_string.split_whitespace();
+
+                    if let Some(offset_str) = iter.next() {
+                        offset = offset_str.to_string().parse().unwrap();
+                        if let Some(limit_str) = iter.next() {
+                            limit = limit_str.to_string().parse().unwrap();
+                        }
                     }
                 }
-                Self::send_file_history_commnad(offset as u32, limit as u32);
+
+                Self::send_file_history_command(offset as u32, limit as u32);
             }
             // unknown command
             _ => log::error!("unknown file command"),
@@ -142,7 +145,7 @@ impl ChatFile {
     }
 
     /// send file history list command via rpc
-    fn send_file_history_commnad(offset: u32, limit: u32) {
+    fn send_file_history_command(offset: u32, limit: u32) {
         // create file history message
         let proto_message = proto::ChatFile {
             message: Some(proto::chat_file::Message::FileHistory(

@@ -4,15 +4,13 @@
 
 This CLI client starts libqaul in an own thread, and uses the protobuf RPC interface to communicate with libqaul.
 
-
 ## Run qaul-cli
 
 Start at least two instances of this program. Either on different machines or start from different folders on the same machine.
 
 You can run as many instances on as many machines as you like. the machines just need to be in the same network, or interconnected via the Internet overlay network.
 
-
-**Start Program**
+### Start Program
 
 ```sh
 # start the program
@@ -20,7 +18,6 @@ cargo run --bin=qaul-cli
 ```
 
 Once the program is running, one can enter the commands documented in the CLI Manual below.
-
 
 ## CLI Commands when the Program is Running
 
@@ -67,7 +64,8 @@ The following commands are available:
   * `chat conversation {Conversation ID}` - displays all messages of the conversation with the ID {Conversation ID}
 * file sharing
   * `file send {Conversation ID} {File Path} {File Description}` - sends a file to the user with the ID {Conversation ID} and a {File Description} text.
-  * `file history 0` - displays the file history for the default user account
+  * `file history [{offset} {limit}]` - displays a paginated file history
+    * The page {offset} and {limit} values are optional. The default values are an offset of 0 and 10 results.
 * debug
   * all these commands are for debugging purposes only
   * `debug rpc sent` - displays the number of RPC messages sent to libqaul
