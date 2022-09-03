@@ -42,47 +42,6 @@ impl ChatMessage {
             true,
         )
     }
-    // REMOVE
-    /*
-       /// send the message to a specific user
-       pub fn send_to_user(
-           user_account: &UserAccount,
-           chat_message: rpc_proto::ChatMessageSend,
-       ) -> Result<bool, String> {
-           let conversation_id_binary;
-           // check if group exists
-           if !group::Group::group_exists(&user_account.id, &chat_message.conversation_id) {
-               match ConversationId::from_bytes(&chat_message.conversation_id) {
-                   Ok(conversation_id) => {
-                       // check if the conversation ID is a direct chat ID
-                       if let Some(peer_q8id) = conversation_id.is_direct(user_account.id) {
-                           // check if user exists
-                           if let Some(peer_id) = router::users::Users::get_user_id_by_q8id(peer_q8id)
-                           {
-                               // create direct chat room
-                               conversation_id_binary = group::Manage::create_new_direct_chat_group(
-                                   &user_account.id,
-                                   &peer_id,
-                               );
-                           } else {
-                               return Err("user for conversation id not found".to_string());
-                           }
-                       } else {
-                           return Err("coversation id, is not a direct chat".to_string());
-                       }
-                   }
-                   Err(e) => return Err(e),
-               }
-           } else {
-               conversation_id_binary = chat_message.conversation_id.clone();
-           }
-           Self::send_message(
-               &user_account.id,
-               &conversation_id_binary,
-               chat_message.content.clone(),
-           )
-       }
-    */
 
     /// send message
     pub fn send_chat_message(

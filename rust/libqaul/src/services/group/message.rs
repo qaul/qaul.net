@@ -7,7 +7,7 @@
 
 use libp2p::PeerId;
 
-use super::{Group, GroupStorage};
+use super::GroupStorage;
 
 /// Group Message Structure
 pub struct GroupMessage {}

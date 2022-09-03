@@ -122,7 +122,7 @@ impl Member {
         let receiver;
         match PeerId::from_bytes(&invite.sender_id) {
             Ok(sender) => receiver = sender,
-            Err(e) => return Err("invite sender_id not valid".to_string()),
+            Err(_e) => return Err("invite sender_id not valid".to_string()),
         }
 
         // send reply.
