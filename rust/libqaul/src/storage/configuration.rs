@@ -19,6 +19,8 @@ use std::{
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
+use crate::router::users::User;
+
 /// make configuration globally accessible mutable state
 static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 
@@ -91,6 +93,7 @@ pub struct UserAccount {
     pub name: String,
     pub id: String,
     pub keys: String,
+    pub storage: StorageOptions,
 }
 
 impl Default for UserAccount {
@@ -99,6 +102,7 @@ impl Default for UserAccount {
             name: String::from(""),
             id: String::from(""),
             keys: String::from(""),
+            storage: StorageOptions::default(),
         }
     }
 }
@@ -181,7 +185,6 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
-    pub storage: StorageOptions,
 }
 
 impl Default for Configuration {
@@ -193,7 +196,6 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
-            storage: StorageOptions::default(),
         }
     }
 }
@@ -240,6 +242,41 @@ impl Configuration {
     pub fn get<'a>() -> RwLockReadGuard<'a, Configuration> {
         let config = CONFIG.get().read().unwrap();
         config
+    }
+
+    /// get user account
+    pub fn get_user(user_id: String) -> Option<UserAccount> {
+        let config = CONFIG.get().read().unwrap();
+        for user in &config.user_accounts {
+            if user.id == user_id {
+                return Some(user.clone());
+            }
+        }
+        None
+    }
+
+    pub fn update_user_storage(user_id: String, opt: &StorageOptions) {
+        let mut config = CONFIG.get().write().unwrap();
+        for i in 0..config.user_accounts.len() {
+            if let Some(user) = config.user_accounts.get_mut(i) {
+                if user.id == user_id {
+                    user.storage = opt.clone();
+                    break;
+                }
+            }
+        }
+    }
+
+    pub fn update_total_size(user_id: String, size: u32) {
+        let mut config = CONFIG.get().write().unwrap();
+        for i in 0..config.user_accounts.len() {
+            if let Some(user) = config.user_accounts.get_mut(i) {
+                if user.id == user_id {
+                    user.storage.size_total = size;
+                    break;
+                }
+            }
+        }
     }
 
     /// lend configuration for writing

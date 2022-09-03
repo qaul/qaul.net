@@ -103,6 +103,7 @@ impl UserAccounts {
                 name: name.clone(),
                 id: id.to_string(),
                 keys: keys_config,
+                storage: configuration::StorageOptions::default(),
             });
         }
         Configuration::save();
