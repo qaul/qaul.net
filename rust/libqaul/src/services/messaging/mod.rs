@@ -581,12 +581,12 @@ impl Messaging {
                     && message.is_common
                 {
                     // get storage node id
-                    if let Some(storage_node_id) =
-                        super::dtn::Dtn::get_storage_user(&message.receiver)
+                    if let Ok(my_user_id) =
+                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
                     {
-                        if let Ok(my_user_id) = PeerId::from_bytes(
-                            &message.container.envelope.as_ref().unwrap().sender_id,
-                        ) {
+                        if let Some(storage_node_id) =
+                            super::dtn::Dtn::get_storage_user(&my_user_id)
+                        {
                             if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
                                 if let Err(_e) = Self::send_dtn_message(
                                     &user_account,

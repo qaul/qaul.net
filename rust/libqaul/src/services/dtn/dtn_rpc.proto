@@ -9,6 +9,22 @@ message DTN {
         DtnStateRequest dtn_state_request = 1;
         // dtn state response
         DtnStateResponse dtn_state_response = 2;
+        // dtn config request
+        DtnConfigRequest dtn_config_request = 3;
+        // dtn config response
+        DtnConfigResponse dtn_config_response = 4;
+        // dtn add user request
+        DtnAddUserRequest dtn_add_user_request = 5;
+        // dtn add user response
+        DtnAddUserResponse dtn_add_user_response = 6;
+        // dtn remove user request
+        DtnRemoveUserRequest dtn_remove_user_request = 7;
+        // dtn remove user response
+        DtnRemoveUserResponse dtn_remove_user_response = 8;
+        // dtn set total size request
+        DtnSetTotalSizeRequest dtn_set_total_size_request = 9;
+        // dtn set total size response
+        DtnSetTotalSizeResponse dtn_set_total_size_response = 10;
     }
 }
 
@@ -26,3 +42,58 @@ message DtnStateResponse {
     // unconfirmed count
     uint32 unconfirmed_count = 3;
 }
+
+// Dtn Config Request
+message DtnConfigRequest {
+}
+
+// Dtn Config Response
+message DtnConfigResponse {
+    // total_size
+    uint32 total_size = 1;
+    // users
+    repeated string users = 2;
+}
+
+// Dtn Add User Request
+message DtnAddUserRequest {
+    // user id
+    string user_id = 1;
+}
+
+// Dtn Add User Response
+message DtnAddUserResponse {
+    // total_size
+    bool status = 1;
+    // users
+    string message = 2;
+}
+
+// Dtn Remove User Request
+message DtnRemoveUserRequest {
+    // user id
+    string user_id = 1;
+}
+
+// Dtn Remove User Response
+message DtnRemoveUserResponse {
+    // total_size
+    bool status = 1;
+    // users
+    string message = 2;
+}
+
+// Dtn SetTotalSize Request
+message DtnSetTotalSizeRequest {
+    // total_size
+    uint32 total_size = 1;
+}
+
+// Dtn Remove User Response
+message DtnSetTotalSizeResponse {
+    // total_size
+    bool status = 1;
+    // users
+    string message = 2;
+}
+

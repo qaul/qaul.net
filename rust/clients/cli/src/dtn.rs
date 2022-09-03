@@ -5,6 +5,7 @@
 
 use super::rpc::Rpc;
 use prost::Message;
+use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -17,15 +18,75 @@ pub struct Dtn {}
 impl Dtn {
     /// CLI command interpretation
     ///
-    /// The CLI commands of group module are processed here
+    /// The CLI commands of dtn are processed here
     pub fn cli(command: &str) {
         match command {
-            // create group
+            // state
             cmd if cmd.starts_with("state") => {
                 Self::dtn_state();
             }
+            // config
+            cmd if cmd.starts_with("config") => {
+                Self::dtn_config();
+            }
+            // add user
+            cmd if cmd.starts_with("adduser ") => match cmd.strip_prefix("adduser ") {
+                Some(user_id_str) => {
+                    if let Ok(_id) = Self::id_string_to_bin(user_id_str.to_string()) {
+                        Self::dtn_add_user(user_id_str.to_string());
+                    } else {
+                        log::error!("invalid user id");
+                    }
+                }
+                None => {
+                    log::error!("invalid command parameter");
+                }
+            },
+            // remove user
+            cmd if cmd.starts_with("rmuser ") => match cmd.strip_prefix("rmuser ") {
+                Some(user_id_str) => {
+                    if let Ok(_id) = Self::id_string_to_bin(user_id_str.to_string()) {
+                        Self::dtn_remove_user(user_id_str.to_string());
+                    } else {
+                        log::error!("invalid user id");
+                    }
+                }
+                None => {
+                    log::error!("invalid command parameter");
+                }
+            },
+            // totalsize
+            cmd if cmd.starts_with("totalsize ") => match cmd.strip_prefix("totalsize ") {
+                Some(total_size_str) => {
+                    if let Ok(total_size) = total_size_str.parse::<u32>() {
+                        Self::dtn_total_size(total_size);
+                    } else {
+                        log::error!("invalid totalsize");
+                    }
+                }
+                None => {
+                    log::error!("invalid command parameter");
+                }
+            },
             // unknown command
-            _ => log::error!("unknown group command"),
+            _ => log::error!("unknown dtn command"),
+        }
+    }
+
+    /// Convert Conversation ID from String to Binary
+    fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
+        // check length
+        if id.len() < 52 {
+            return Err("Conversation ID not long enough".to_string());
+        }
+
+        // convert input
+        match bs58::decode(id).into_vec() {
+            Ok(id_bin) => Ok(id_bin),
+            Err(e) => {
+                let err = fmt::format(format_args!("{}", e));
+                Err(err)
+            }
         }
     }
 
@@ -35,6 +96,74 @@ impl Dtn {
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnStateRequest(
                 proto::DtnStateRequest {},
+            )),
+        };
+        // send message
+        Rpc::send_message(
+            proto_message.encode_to_vec(),
+            super::rpc::proto::Modules::Dtn.into(),
+            "".to_string(),
+        );
+    }
+
+    /// dtn state
+    fn dtn_config() {
+        // create group send message
+        let proto_message = proto::Dtn {
+            message: Some(proto::dtn::Message::DtnConfigRequest(
+                proto::DtnConfigRequest {},
+            )),
+        };
+        // send message
+        Rpc::send_message(
+            proto_message.encode_to_vec(),
+            super::rpc::proto::Modules::Dtn.into(),
+            "".to_string(),
+        );
+    }
+
+    /// dtn add user
+    fn dtn_add_user(user_id: String) {
+        // create group send message
+        let proto_message = proto::Dtn {
+            message: Some(proto::dtn::Message::DtnAddUserRequest(
+                proto::DtnAddUserRequest {
+                    user_id: user_id.clone(),
+                },
+            )),
+        };
+        // send message
+        Rpc::send_message(
+            proto_message.encode_to_vec(),
+            super::rpc::proto::Modules::Dtn.into(),
+            "".to_string(),
+        );
+    }
+
+    /// dtn remove user
+    fn dtn_remove_user(user_id: String) {
+        // create group send message
+        let proto_message = proto::Dtn {
+            message: Some(proto::dtn::Message::DtnRemoveUserRequest(
+                proto::DtnRemoveUserRequest {
+                    user_id: user_id.clone(),
+                },
+            )),
+        };
+        // send message
+        Rpc::send_message(
+            proto_message.encode_to_vec(),
+            super::rpc::proto::Modules::Dtn.into(),
+            "".to_string(),
+        );
+    }
+
+    /// dtn total_size
+    fn dtn_total_size(total_size: u32) {
+        // create group send message
+        let proto_message = proto::Dtn {
+            message: Some(proto::dtn::Message::DtnSetTotalSizeRequest(
+                proto::DtnSetTotalSizeRequest { total_size },
             )),
         };
         // send message
@@ -55,9 +184,48 @@ impl Dtn {
                 Some(proto::dtn::Message::DtnStateResponse(dtn_state)) => {
                     println!("====================================");
                     println!("DTN State");
-                    println!("\tUsed Size: {}", dtn_state.used_size);
+                    println!("\tUsed Size: {} MB", dtn_state.used_size);
                     println!("\tDTN Messages: {}", dtn_state.dtn_message_count);
                     println!("\tUnconfirmed Messages: {}", dtn_state.unconfirmed_count);
+                }
+                Some(proto::dtn::Message::DtnConfigResponse(dtn_config)) => {
+                    println!("====================================");
+                    println!("DTN Options");
+                    println!("\tTotal Size: {}", dtn_config.total_size);
+                    println!("\tUsers");
+                    for user in dtn_config.users {
+                        println!("\t\t{}", user);
+                    }
+                }
+                Some(proto::dtn::Message::DtnAddUserResponse(dtn_add_user_resp)) => {
+                    println!("====================================");
+                    println!("DTN Add User");
+                    if dtn_add_user_resp.status {
+                        println!("\tSuccess");
+                    } else {
+                        println!("\tFailed");
+                        println!("\t{}", dtn_add_user_resp.message);
+                    }
+                }
+                Some(proto::dtn::Message::DtnRemoveUserResponse(dtn_remove_user_resp)) => {
+                    println!("====================================");
+                    println!("DTN Add User");
+                    if dtn_remove_user_resp.status {
+                        println!("\tSuccess");
+                    } else {
+                        println!("\tFailed");
+                        println!("\t{}", dtn_remove_user_resp.message);
+                    }
+                }
+                Some(proto::dtn::Message::DtnSetTotalSizeResponse(resp)) => {
+                    println!("====================================");
+                    println!("DTN Add User");
+                    if resp.status {
+                        println!("\tSuccess");
+                    } else {
+                        println!("\tFailed");
+                        println!("\t{}", resp.message);
+                    }
                 }
                 _ => {
                     log::error!("unprocessable RPC group chat message");

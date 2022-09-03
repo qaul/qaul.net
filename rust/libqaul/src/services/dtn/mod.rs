@@ -100,9 +100,19 @@ impl Dtn {
     }
 
     /// Get storage node user id
-    pub fn get_storage_user(_receiver_id: &PeerId) -> Option<PeerId> {
-        let config = Configuration::get();
-        for user in &config.storage.users {
+    pub fn get_storage_user(user_id: &PeerId) -> Option<PeerId> {
+        let user_profile;
+        match Configuration::get_user(user_id.to_string()) {
+            Some(user_prof) => {
+                user_profile = user_prof.clone();
+            }
+            None => {
+                log::error!("dtn module: user profile no exists");
+                return None;
+            }
+        }
+
+        for user in &user_profile.storage.users {
             match Self::id_string_to_bin(user.clone()) {
                 Ok(v) => match PeerId::from_bytes(&v) {
                     Ok(id) => {
@@ -113,7 +123,6 @@ impl Dtn {
                 _ => {}
             }
         }
-
         None
     }
 
@@ -138,10 +147,27 @@ impl Dtn {
             );
         }
 
-        let config = Configuration::get();
+        let user_profile;
+        match Configuration::get_user(user_account.id.to_string()) {
+            Some(user_prof) => {
+                user_profile = user_prof.clone();
+            }
+            None => {
+                log::error!("dtn module: user profile no exists");
+                return (
+                    super::messaging::proto::dtn_response::ResponseType::Rejected
+                        .try_into()
+                        .unwrap(),
+                    super::messaging::proto::dtn_response::Reason::UserNotAccepted
+                        .try_into()
+                        .unwrap(),
+                );
+            }
+        }
+
         // check storage
         let new_size = storage_state.used_size + (dtn_payload.len() as u64);
-        let total_limit = (config.storage.size_total as u64) * 1024 * 1024;
+        let total_limit = (user_profile.storage.size_total as u64) * 1024 * 1024;
         if new_size > total_limit {
             return (
                 super::messaging::proto::dtn_response::ResponseType::Rejected
@@ -316,8 +342,8 @@ impl Dtn {
     }
 
     /// process commands from CLI
-    pub fn rpc(data: Vec<u8>, _user_id: Vec<u8>) {
-        //let my_user_id = PeerId::from_bytes(&user_id).unwrap();
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+        let my_user_id = PeerId::from_bytes(&user_id).unwrap();
         match proto_rpc::Dtn::decode(&data[..]) {
             Ok(dtn) => match dtn.message {
                 Some(proto_rpc::dtn::Message::DtnStateRequest(_req)) => {
@@ -342,6 +368,144 @@ impl Dtn {
                         "".to_string(),
                         Vec::new(),
                     );
+                }
+                Some(proto_rpc::dtn::Message::DtnConfigRequest(_req)) => {
+                    match Configuration::get_user(my_user_id.to_string()) {
+                        Some(user_profile) => {
+                            let proto_message = proto_rpc::Dtn {
+                                message: Some(proto_rpc::dtn::Message::DtnConfigResponse(
+                                    proto_rpc::DtnConfigResponse {
+                                        total_size: user_profile.storage.size_total,
+                                        users: user_profile.storage.users.clone(),
+                                    },
+                                )),
+                            };
+                            // send message
+                            Rpc::send_message(
+                                proto_message.encode_to_vec(),
+                                crate::rpc::proto::Modules::Dtn.into(),
+                                "".to_string(),
+                                Vec::new(),
+                            );
+                        }
+                        None => {
+                            log::error!("user profile does not exists");
+                        }
+                    }
+                }
+                Some(proto_rpc::dtn::Message::DtnAddUserRequest(req)) => {
+                    let mut status = true;
+                    let mut message: String = "".to_string();
+
+                    match Configuration::get_user(my_user_id.to_string()) {
+                        Some(user_profile) => {
+                            // check if already exist
+                            for user in &user_profile.storage.users {
+                                if *user == req.user_id {
+                                    status = false;
+                                    message = "User already exist".to_string();
+                                    break;
+                                }
+                            }
+                            if status {
+                                let mut opt = user_profile.storage.clone();
+                                opt.users.push(req.user_id);
+                                Configuration::update_user_storage(my_user_id.to_string(), &opt);
+                                Configuration::save();
+                            }
+
+                            let proto_message = proto_rpc::Dtn {
+                                message: Some(proto_rpc::dtn::Message::DtnAddUserResponse(
+                                    proto_rpc::DtnAddUserResponse { status, message },
+                                )),
+                            };
+                            // send message
+                            Rpc::send_message(
+                                proto_message.encode_to_vec(),
+                                crate::rpc::proto::Modules::Dtn.into(),
+                                "".to_string(),
+                                Vec::new(),
+                            );
+                        }
+                        None => {
+                            log::error!("user profile does not exists");
+                        }
+                    }
+                }
+                Some(proto_rpc::dtn::Message::DtnRemoveUserRequest(req)) => {
+                    let mut status = true;
+                    let mut message: String = "".to_string();
+
+                    match Configuration::get_user(my_user_id.to_string()) {
+                        Some(user_profile) => {
+                            let mut idx: Option<usize> = None;
+                            for i in 0..user_profile.storage.users.len() {
+                                if *user_profile.storage.users.get(i).unwrap() == req.user_id {
+                                    idx = Some(i);
+                                    break;
+                                }
+                            }
+                            match idx {
+                                None => {
+                                    status = false;
+                                    message = "User does not exist".to_string();
+                                }
+                                _ => {}
+                            }
+
+                            if status {
+                                let mut opt = user_profile.storage.clone();
+                                opt.users.remove(idx.unwrap());
+                                Configuration::update_user_storage(my_user_id.to_string(), &opt);
+                                Configuration::save();
+                            }
+
+                            let proto_message = proto_rpc::Dtn {
+                                message: Some(proto_rpc::dtn::Message::DtnRemoveUserResponse(
+                                    proto_rpc::DtnRemoveUserResponse { status, message },
+                                )),
+                            };
+                            // send message
+                            Rpc::send_message(
+                                proto_message.encode_to_vec(),
+                                crate::rpc::proto::Modules::Dtn.into(),
+                                "".to_string(),
+                                Vec::new(),
+                            );
+                        }
+                        None => {
+                            log::error!("user profile does not exists");
+                        }
+                    }
+                }
+                Some(proto_rpc::dtn::Message::DtnSetTotalSizeRequest(req)) => {
+                    let mut status = true;
+                    let mut message: String = "".to_string();
+
+                    match Configuration::get_user(my_user_id.to_string()) {
+                        Some(user_profile) => {
+                            Configuration::update_total_size(
+                                my_user_id.to_string(),
+                                req.total_size,
+                            );
+                            Configuration::save();
+                            let proto_message = proto_rpc::Dtn {
+                                message: Some(proto_rpc::dtn::Message::DtnSetTotalSizeResponse(
+                                    proto_rpc::DtnSetTotalSizeResponse { status, message },
+                                )),
+                            };
+                            // send message
+                            Rpc::send_message(
+                                proto_message.encode_to_vec(),
+                                crate::rpc::proto::Modules::Dtn.into(),
+                                "".to_string(),
+                                Vec::new(),
+                            );
+                        }
+                        None => {
+                            log::error!("user profile does not exists");
+                        }
+                    }
                 }
                 _ => {
                     log::error!("Unhandled Protobuf DTN RPC message");
