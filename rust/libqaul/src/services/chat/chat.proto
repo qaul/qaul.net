@@ -120,13 +120,17 @@ enum MessageStatus {
     //
     // this state is used for receiving files too
     SENDING = 0;
-    // message sent
+    // message successfully sent to another node
     SENT = 1;
+    // reciption has been confirmed
+    CONFIRMED = 2;
+    // all group members confirmed that they received
+    // the message
+    CONFIRMED_BY_ALL = 3;
+    // message receiving
+    RECEIVING = 4;
     // message received
-    RECEIVED = 2;
-    // all group members received the message successfully
-    // this option is only used for groups with more then 2 members
-    RECEIVED_BY_ALL = 3;
+    RECEIVED = 5;
 }
 
 // message reception confirmed

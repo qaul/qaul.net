@@ -229,13 +229,17 @@ pub enum MessageStatus {
     ///
     /// this state is used for receiving files too
     Sending = 0,
-    /// message sent
+    /// message successfully sent to another node
     Sent = 1,
+    /// reciption has been confirmed
+    Confirmed = 2,
+    /// all group members confirmed that they received
+    /// the message
+    ConfirmedByAll = 3,
+    /// message receiving
+    Receiving = 4,
     /// message received
-    Received = 2,
-    /// all group members received the message successfully
-    /// this option is only used for groups with more then 2 members
-    ReceivedByAll = 3,
+    Received = 5,
 }
 impl MessageStatus {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -246,8 +250,10 @@ impl MessageStatus {
         match self {
             MessageStatus::Sending => "SENDING",
             MessageStatus::Sent => "SENT",
+            MessageStatus::Confirmed => "CONFIRMED",
+            MessageStatus::ConfirmedByAll => "CONFIRMED_BY_ALL",
+            MessageStatus::Receiving => "RECEIVING",
             MessageStatus::Received => "RECEIVED",
-            MessageStatus::ReceivedByAll => "RECEIVED_BY_ALL",
         }
     }
 }
