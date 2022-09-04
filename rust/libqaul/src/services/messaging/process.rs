@@ -117,9 +117,11 @@ impl MessagingProcess {
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
                         ChatFile::process_net_chatfilecontainer(
-                            &sender_id,
+                            sender_id.to_owned(),
                             user_account.clone(),
-                            &common.conversation_id,
+                            common.conversation_id,
+                            common.message_id.clone(),
+                            common.sent_at,
                             &file_message.content,
                         );
                     }

@@ -2,11 +2,14 @@
 // This software is published under the AGPLv3 license.
 
 //! # Libqaul Storage Module
-//! 
+//!
 //! contains:
-//! 
+//!
 //! * configuration management
 //! * database handling
+
+use libp2p::PeerId;
+use std::path::{Path, PathBuf};
 
 pub mod configuration;
 pub mod database;
@@ -19,9 +22,7 @@ use state;
 static STORAGE_PATH: state::Storage<String> = state::Storage::new();
 
 /// storage module structure
-pub struct Storage {
-
-}
+pub struct Storage {}
 
 impl Storage {
     /// initialize storage module
@@ -35,15 +36,24 @@ impl Storage {
 
         // initialize data base
         DataBase::init();
-    } 
+    }
 
     /// get data storage path
-    /// 
-    /// This will return the absolute path to the storage folder 
+    ///
+    /// This will return the absolute path to the storage folder
     /// as a string, without a trailing slash.
     ///
     /// e.g. on Linux: /home/USERNAME/.config/qaul
     pub fn get_path() -> String {
         STORAGE_PATH.get().clone()
+    }
+
+    /// get data storage path for user account
+    pub fn get_account_path(account_id: PeerId) -> PathBuf {
+        let storage_path_string = STORAGE_PATH.get().clone();
+        let storage_path = Path::new(&storage_path_string);
+        let account_storage_path = storage_path.join(account_id.to_base58());
+
+        account_storage_path
     }
 }
