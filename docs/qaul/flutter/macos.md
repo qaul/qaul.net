@@ -106,14 +106,25 @@ cd qaul_ui
 flutter run -d macos
 ```
 
-## Build Distributable MacOS Application
+## Build Distributable (*.dmg) MacOS Application
 
-You can build the qaul flutter desktop app from the terminal:
+You can build the qaul flutter app from the terminal:
 
 ```sh
 # move into the flutter directory
 cd qaul_ui
 
-# build and run the MacOS desktop app
+# build the release version of the app
 flutter build macos
+```
+
+To build the dmg file, we'll make use of [appdmg](https://www.npmjs.com/package/appdmg):
+
+```sh
+# Install appdmg
+npx appdmg --version
+
+# Build dmg file
+cd ../utilities/installers/macos
+npx appdmg ./config.json ./qaul.dmg
 ```
