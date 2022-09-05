@@ -26,11 +26,17 @@ class GroupTranslator extends RpcModuleTranslator {
           ),
         );
       case Group_Message.groupRenameResponse:
+        final renameResult = message.ensureGroupRenameResponse().result;
+        return _receiveGroupResultResponse(renameResult);
       case Group_Message.groupInviteMemberResponse:
+        final inviteResult = message.ensureGroupInviteMemberResponse().result;
+        return _receiveGroupResultResponse(inviteResult);
       case Group_Message.groupRemoveMemberResponse:
+        final removeResult = message.ensureGroupRemoveMemberResponse().result;
+        return _receiveGroupResultResponse(removeResult);
       case Group_Message.groupReplyInviteResponse:
-        // TODO
-        throw UnimplementedError('unhandled group modification message');
+        final replyResult = message.ensureGroupReplyInviteResponse().result;
+        return _receiveGroupResultResponse(replyResult);
       case Group_Message.groupListResponse:
         final groups = message
             .ensureGroupListResponse()
@@ -50,9 +56,17 @@ class GroupTranslator extends RpcModuleTranslator {
     }
   }
 
+  RpcTranslatorResponse _receiveGroupResultResponse(GroupResult res) {
+    if (res.status == true) return RpcTranslatorResponse(Modules.GROUP, true);
+    throw ArgumentError.value(res.message, 'GroupTranslator');
+  }
+
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
     if (res.module != type || res.data == null) return;
+
+    // Means GroupResult yielded a success message.
+    if (res.data is bool && res.data == true) return;
 
     final state = reader(chatRoomsProvider.notifier);
     final users = reader(usersProvider);
