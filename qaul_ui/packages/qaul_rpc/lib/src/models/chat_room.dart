@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logging/logging.dart';
 
 import '../../qaul_rpc.dart';
 import '../generated/services/chat/chat.pb.dart';
@@ -18,7 +17,25 @@ enum InvitationState { sent, received, accepted, unknown }
 
 enum MessageStatus { sending, sent, received, receivedByAll }
 
-enum MessageContentType { chat, group, file, rtc, groupEvent }
+enum MessageContentType { none, chat, file, group, rtc }
+
+MessageContentType _messageContentTypeFactory(
+    {required ChatContentType contentType}) {
+  switch (contentType) {
+    case ChatContentType.CHAT:
+      return MessageContentType.chat;
+    case ChatContentType.FILE:
+      return MessageContentType.file;
+    case ChatContentType.GROUP:
+      return MessageContentType.group;
+    case ChatContentType.NONE:
+      return MessageContentType.none;
+    case ChatContentType.RTC:
+      return MessageContentType.rtc;
+  }
+  throw UnimplementedError(
+      '(_messageContentTypeFactory) Unmapped content type: $contentType');
+}
 
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
@@ -66,7 +83,7 @@ class ChatRoom with EquatableMixin implements Comparable {
       ),
       unreadCount: overview.unread,
       lastMessagePreview: MessageContent.fromBuffer(overview.content,
-          MessageContentType.values[overview.contentType.value]),
+          _messageContentTypeFactory(contentType: overview.contentType)),
     );
   }
 
@@ -224,7 +241,7 @@ class Message with EquatableMixin implements Comparable<Message> {
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(m.messageId),
       content: MessageContent.fromBuffer(
-          m.content, MessageContentType.values[m.contentType.value]),
+          m.content, _messageContentTypeFactory(contentType: m.contentType)),
       index: m.index.toInt(),
       status: MessageStatus.values[m.status.value],
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
@@ -295,15 +312,21 @@ abstract class MessageContent extends Equatable {
         final event = GroupEvent.fromBuffer(buffer);
         return GroupEventContent(
           userId: Uint8List.fromList(event.userId),
-          type: GroupEventContentType.values[event.eventType.value],
+          type: _groupEventContentTypeFactory(t: event.eventType),
         );
+      case MessageContentType.none:
+        return NoneMessageContent();
       case MessageContentType.rtc:
-      case MessageContentType.groupEvent:
-      default:
-        Logger.root.warning('(_messageContentFactory) Unmapped content type');
+        break;
     }
-    throw UnimplementedError('(_messageContentFactory) error building message');
+    throw UnimplementedError(
+        '(_messageContentFactory) error building message: content type: $t');
   }
+}
+
+class NoneMessageContent extends MessageContent {
+  @override
+  List<Object?> get props => [];
 }
 
 class TextMessageContent extends MessageContent {
@@ -315,7 +338,26 @@ class TextMessageContent extends MessageContent {
   List<Object?> get props => [content];
 }
 
-enum GroupEventContentType { none, joined, left }
+enum GroupEventContentType { none, invited, joined, left, closed }
+
+GroupEventContentType _groupEventContentTypeFactory({
+  required GroupEventType t,
+}) {
+  switch (t) {
+    case GroupEventType.CLOSED:
+      return GroupEventContentType.closed;
+    case GroupEventType.DEFAULT:
+      return GroupEventContentType.none;
+    case GroupEventType.INVITED:
+      return GroupEventContentType.invited;
+    case GroupEventType.JOINED:
+      return GroupEventContentType.joined;
+    case GroupEventType.LEFT:
+      return GroupEventContentType.left;
+  }
+  throw UnimplementedError(
+      '(_groupEventContentTypeFactory) unmpaped event type: $t');
+}
 
 class GroupEventContent extends MessageContent {
   const GroupEventContent({
