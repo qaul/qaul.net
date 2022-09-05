@@ -81,11 +81,33 @@ class _GroupSettingsPage extends HookConsumerWidget {
               separatorBuilder: (_, __) => const Divider(),
               itemBuilder: (c, i) {
                 final user = group.members[i];
-                // TODO add option to remove user (if admin)
+                final isNotDefaultUser = user.idBase58 != defaultUser.idBase58;
+
                 return QaulListTile.user(
                   user,
-                  trailingIcon:
-                      Icon(_mapInvitationStateToIcon(user.invitationState)),
+                  trailingIcon: !isNotDefaultUser
+                      ? const SizedBox()
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(_mapInvitationStateToIcon(
+                                user.invitationState)),
+                            const SizedBox(width: 12),
+                            if (isAdmin)
+                              IconButton(
+                                onPressed: () async {
+                                  var ok = await showConfirmDialog(context);
+                                  if (!(ok ?? false)) return;
+                                  var worker = ref.read(qaulWorkerProvider);
+                                  worker.removeUserFromGroup(user, room);
+                                },
+                                splashRadius: 18,
+                                color: Colors.red.shade400,
+                                icon: const Icon(Icons.person_remove_rounded),
+                              )
+                          ],
+                        ),
+                  allowTapRouteToUserDetailsScreen: isNotDefaultUser,
                 );
               },
             ),
@@ -106,5 +128,36 @@ class _GroupSettingsPage extends HookConsumerWidget {
       case InvitationState.unknown:
         return Icons.help;
     }
+  }
+
+  Future<bool?> showConfirmDialog(BuildContext context) async {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: const Text('Cancel'),
+      onPressed: () => Navigator.pop(context, false),
+    );
+    Widget continueButton = TextButton(
+      child: const Text('Continue'),
+      onPressed: () => Navigator.pop(context, true),
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text('Remove User'),
+      content: const Text(
+          "Are you sure you'd like to remove this user from the group?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    return showDialog<bool?>(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
