@@ -58,6 +58,8 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
     final loading = useState(false);
     final nameCtrl = useTextEditingController();
 
+    final isMounted = useIsMounted();
+
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -111,7 +113,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                       .read(chatRoomsProvider)
                       .firstWhereOrNull((g) => g.name == name);
                   if (group == null) {
-                    if (!useIsMounted()()) return;
+                    if (!isMounted()) return;
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('An error occurred. Please try again.'),
                     ));
@@ -119,7 +121,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     return;
                   }
 
-                  if (!useIsMounted()()) return;
+                  if (!isMounted()) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -127,7 +129,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     ),
                   );
 
-                  if (!useIsMounted()()) return;
+                  if (!isMounted()) return;
                   Navigator.pop(
                     context,
                     ref
