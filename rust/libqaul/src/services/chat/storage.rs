@@ -525,7 +525,15 @@ impl ChatStorage {
             {
                 match res {
                     Ok((_id, message)) => {
-                        message_list.push(message);
+                        // check message type and filter for all type none messages
+                        //
+                        // rpc_proto::ChatContentType::None = 0
+                        match message.content_type {
+                            0 => {
+                                log::error!("Content type was None")
+                            }
+                            _ => message_list.push(message),
+                        }
                     }
                     Err(e) => {
                         log::error!("get_messages error: {}", e);
