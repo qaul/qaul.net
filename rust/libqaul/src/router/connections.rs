@@ -180,6 +180,7 @@ impl ConnectionTable {
         rtt: u32,
         info: Vec<router_net_proto::RoutingInfoEntry>,
     ) {
+        log::info!("fill_received_routing_info {}", info.len());
         // loop through results and enter them to the table
         for entry in info {
             // calculate hop count
@@ -250,6 +251,7 @@ impl ConnectionTable {
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
+                log::info!("add_connection={}", connection.last_update);
                 user.connections.remove(&connection.id);
                 user.connections.insert(connection.id, connection);
             } else if pgid == user.pgid {
@@ -453,7 +455,8 @@ impl ConnectionTable {
                 let now = Timestamp::get_timestamp();
                 //if now - value.last_update < (20 * 1000 * (value.hc as u64)){
                 if now - value.last_update
-                    < (2 * (config.sending_table_period * 1000) * (value.hc as u64))
+                    //< (2 * (config.sending_table_period * 1000) * (value.hc as u64))
+                    < (config.sending_table_period * 1000 * (value.hc as u64 + 1))
                 {
                     expired = false;
 

@@ -113,7 +113,8 @@ impl RoutingTable {
                 }
             }
 
-            if neighbour != min_conn.node && min_conn.last_update >= last_sent {
+            if neighbour != min_conn.node && (min_conn.last_update >= last_sent || min_conn.hc == 0)
+            {
                 let mut hc = Vec::new();
                 hc.push(min_conn.hc);
 
