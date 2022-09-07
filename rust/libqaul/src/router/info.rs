@@ -41,6 +41,9 @@ use crate::feed_requester::FeedRequester;
 use crate::feed_requester::FeedResponser;
 use crate::services::feed::Feed;
 
+use crate::router::user_requester::UserRequester;
+use crate::router::user_requester::UserResponser;
+
 /// mutable state of Neighbours table per ConnectionModule
 static SCHEDULER: Storage<RwLock<Scheduler>> = Storage::new();
 
@@ -212,7 +215,7 @@ impl RouterInfo {
             users_last_sent = 0;
         }
         let online_user_ids = RoutingTable::get_online_user_ids(users_last_sent);
-        let users = Users::get_user_info_table_by_q8ids(&online_user_ids);
+        //let users = Users::get_user_info_table_by_q8ids(&online_user_ids);
 
         // create latest Feed ids table
         let mut feeds = router_net_proto::FeedIdsTable { ids: Vec::new() };
@@ -229,7 +232,7 @@ impl RouterInfo {
         let router_info = router_net_proto::RouterInfoMessage {
             node: node_id.clone().to_bytes(),
             routes: Some(routes),
-            users: Some(users),
+            //users: Some(users),
             feeds: Some(feeds),
             timestamp,
         };
@@ -376,6 +379,93 @@ impl RouterInfo {
         buf
     }
 
+    /// creating user request message
+    pub fn create_user_request(ids: &Vec<Vec<u8>>) -> Vec<u8> {
+        let node_id = Node::get_id();
+
+        //create latest Feed ids table
+        let users = router_net_proto::UserIdTable { ids: ids.clone() };
+
+        let timestamp = Timestamp::get_timestamp();
+        let mut buf = Vec::with_capacity(users.encoded_len());
+        users
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        let router_info_proto = router_net_proto::RouterInfoContent {
+            id: node_id.to_bytes(),
+            router_info_module: router_net_proto::RouterInfoModule::UserRequest as i32,
+            content: buf,
+            time: timestamp,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
+        router_info_proto
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // sign data
+        let keys = Node::get_keys();
+        let signature = keys.sign(&buf).unwrap();
+
+        // create signed container
+        let router_info_container = router_net_proto::RouterInfoContainer {
+            signature,
+            message: buf,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_container.encoded_len());
+        router_info_container
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        buf
+    }
+
+    /// create_user_response
+    pub fn create_user_response(users: &router_net_proto::UserInfoTable) -> Vec<u8> {
+        let node_id = Node::get_id();
+        let timestamp = Timestamp::get_timestamp();
+
+        let mut buf = Vec::with_capacity(users.encoded_len());
+        users
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        let router_info_proto = router_net_proto::RouterInfoContent {
+            id: node_id.to_bytes(),
+            router_info_module: router_net_proto::RouterInfoModule::UserResponse as i32,
+            content: buf,
+            time: timestamp,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_proto.encoded_len());
+        router_info_proto
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // sign data
+        let keys = Node::get_keys();
+        let signature = keys.sign(&buf).unwrap();
+
+        // create signed container
+        let router_info_container = router_net_proto::RouterInfoContainer {
+            signature,
+            message: buf,
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(router_info_container.encoded_len());
+        router_info_container
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        buf
+    }
+
     /// process received qaul_info message
     pub fn received(received: QaulInfoReceived) {
         // decode message to structure
@@ -384,7 +474,7 @@ impl RouterInfo {
         match decoding_result {
             Ok(container) => {
                 // TODO: check signature
-                //let signature = container.signature;
+                //let signature = container.signature;message.ids
 
                 // decode message
                 let message_result =
@@ -402,22 +492,36 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     // collect users and routes
                                     let messages = message;
-                                    let users = messages.users;
+                                    //let users = messages.users;
                                     let routes = messages.routes;
                                     let feeds = messages.feeds;
 
-                                    match users {
-                                        Some(router_net_proto::UserInfoTable { info }) => {
-                                            Users::add_user_info_table(info);
-                                        }
-                                        _ => {}
-                                    }
+                                    // match users {
+                                    //     Some(router_net_proto::UserInfoTable { info }) => {
+                                    //         Users::add_user_info_table(info);
+                                    //     }
+                                    //     _ => {}
+                                    // }
 
                                     match routes {
                                         Some(router_net_proto::RoutingInfoTable { entry }) => {
+                                            //check missed user ids
+                                            let mut user_ids: Vec<Vec<u8>> = vec![];
+                                            for e in &entry {
+                                                user_ids.push(e.user.clone());
+                                            }
+                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            if missed_users.len() > 0 {
+                                                UserRequester::add(
+                                                    &received.received_from,
+                                                    &missed_users,
+                                                );
+                                            }
+
+                                            //process routing table
                                             ConnectionTable::process_received_routing_info(
                                                 received.received_from,
-                                                entry,
+                                                &entry,
                                             );
                                         }
                                         _ => {}
@@ -470,6 +574,21 @@ impl RouterInfo {
                                         }
                                         _ => {}
                                     }
+                                }
+                            }
+                            Some(router_net_proto::RouterInfoModule::UserRequest) => {
+                                let message_info =
+                                    router_net_proto::UserIdTable::decode(&content.content[..]);
+                                if let Ok(message) = message_info {
+                                    let table = Users::get_user_info_table_by_q8ids(&message.ids);
+                                    UserResponser::add(&received.received_from, &table);
+                                }
+                            }
+                            Some(router_net_proto::RouterInfoModule::UserResponse) => {
+                                let message_info =
+                                    router_net_proto::UserInfoTable::decode(&content.content[..]);
+                                if let Ok(message) = message_info {
+                                    Users::add_user_info_table(&message.info);
                                 }
                             }
                             _ => {}
