@@ -143,7 +143,7 @@ impl ConnectionTable {
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info(
         neighbour_id: PeerId,
-        info: Vec<router_net_proto::RoutingInfoEntry>,
+        info: &Vec<router_net_proto::RoutingInfoEntry>,
     ) {
         // log::info!("process_received_routing_info count={}", info.len());
         // for inf in &info{
@@ -154,22 +154,12 @@ impl ConnectionTable {
 
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Lan) {
-            Self::fill_received_routing_info(
-                ConnectionModule::Lan,
-                neighbour_id,
-                rtt,
-                info.clone(),
-            );
+            Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info);
         }
 
         // try Internet module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Internet) {
-            Self::fill_received_routing_info(
-                ConnectionModule::Internet,
-                neighbour_id,
-                rtt,
-                info.clone(),
-            );
+            Self::fill_received_routing_info(ConnectionModule::Internet, neighbour_id, rtt, info);
         }
     }
 
@@ -178,7 +168,7 @@ impl ConnectionTable {
         conn: ConnectionModule,
         neighbour_id: PeerId,
         rtt: u32,
-        info: Vec<router_net_proto::RoutingInfoEntry>,
+        info: &Vec<router_net_proto::RoutingInfoEntry>,
     ) {
         log::info!("fill_received_routing_info {}", info.len());
         // loop through results and enter them to the table
@@ -202,7 +192,7 @@ impl ConnectionTable {
             };
 
             // add it to state
-            Self::add_connection(entry.user, entry.pgid, neighbour, conn.clone());
+            Self::add_connection(entry.user.clone(), entry.pgid, neighbour, conn.clone());
         }
     }
 

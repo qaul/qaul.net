@@ -33,9 +33,6 @@ pub struct RouterInfoMessage {
     /// Routing information table
     #[prost(message, optional, tag="2")]
     pub routes: ::core::option::Option<RoutingInfoTable>,
-    /// Users information table
-    #[prost(message, optional, tag="3")]
-    pub users: ::core::option::Option<UserInfoTable>,
     /// Latest Feed ids table
     #[prost(message, optional, tag="4")]
     pub feeds: ::core::option::Option<FeedIdsTable>,
@@ -64,6 +61,13 @@ pub struct RoutingInfoEntry {
     /// propagation id
     #[prost(uint32, tag="5")]
     pub pgid: u32,
+}
+/// User information table
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserIdTable {
+    /// user ids
+    #[prost(bytes="vec", repeated, tag="1")]
+    pub ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// User information table
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -140,6 +144,10 @@ pub enum RouterInfoModule {
     FeedRequest = 1,
     /// Message is a FeedResponseMessage
     FeedResponse = 2,
+    /// Message is a UserRequestMessage
+    UserRequest = 3,
+    /// Message is a UserResponseMessage
+    UserResponse = 4,
 }
 impl RouterInfoModule {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -151,6 +159,8 @@ impl RouterInfoModule {
             RouterInfoModule::RouterInfo => "ROUTER_INFO",
             RouterInfoModule::FeedRequest => "FEED_REQUEST",
             RouterInfoModule::FeedResponse => "FEED_RESPONSE",
+            RouterInfoModule::UserRequest => "USER_REQUEST",
+            RouterInfoModule::UserResponse => "USER_RESPONSE",
         }
     }
 }

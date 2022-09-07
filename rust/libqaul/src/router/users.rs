@@ -126,9 +126,20 @@ impl Users {
                 return;
             }
         }
-
         // add user
         Self::add(id, key, name, false, false);
+    }
+
+    /// check missed users from ids
+    pub fn get_missed_ids(ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>> {
+        let mut res: Vec<Vec<u8>> = vec![];
+        let users = USERS.get().read().unwrap();
+        for id in ids {
+            if !users.users.contains_key(id) {
+                res.push(id.clone());
+            }
+        }
+        return res;
     }
 
     /// get the public key of a known user
@@ -216,9 +227,9 @@ impl Users {
     }
 
     /// add new users from the received bytes of a UserInfoTable
-    pub fn add_user_info_table(users: Vec<router_net_proto::UserInfo>) {
+    pub fn add_user_info_table(users: &Vec<router_net_proto::UserInfo>) {
         // loop through it and add it to the users list
-        for value in users.iter() {
+        for value in users {
             let id_result = PeerId::from_bytes(&value.id);
             let key_result = PublicKey::from_protobuf_encoding(&value.key);
 

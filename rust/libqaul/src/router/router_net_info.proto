@@ -29,6 +29,10 @@ enum RouterInfoModule {
     FEED_REQUEST = 1;
     // Message is a FeedResponseMessage
     FEED_RESPONSE = 2;
+    // Message is a UserRequestMessage
+    USER_REQUEST = 3;
+    // Message is a UserResponseMessage
+    USER_RESPONSE = 4;
 }
 
 // Router information message
@@ -37,8 +41,6 @@ message RouterInfoMessage {
     bytes node = 1;
     // Routing information table
     RoutingInfoTable routes = 2;
-    // Users information table
-    UserInfoTable users = 3;
     // Latest Feed ids table
     FeedIdsTable feeds = 4;
     // timestamp
@@ -61,6 +63,14 @@ message RoutingInfoEntry {
     // propagation id
     uint32 pgid = 5;
 }
+
+
+// User information table
+message UserIdTable {
+    // user ids
+    repeated bytes ids = 1;
+}
+
 
 // User information table
 message UserInfoTable {
@@ -114,3 +124,5 @@ message FeedMessage {
     // timestamp in milli seconds
     uint64 time = 4;
 }
+
+
