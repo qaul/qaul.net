@@ -16,16 +16,16 @@
 //! table over one of the interfaces.
 //! The timer needs to be polled manually.
 
+use crate::utilities::qaul_id::QaulId;
 use libp2p::PeerId;
 use prost::Message;
+use qaul_info::QaulInfoReceived;
 use state::Storage;
 use std::{
     collections::HashMap,
     sync::RwLock,
     time::{Duration, SystemTime},
 };
-
-use qaul_info::QaulInfoReceived;
 
 use crate::{
     connections::ConnectionModule,
@@ -563,12 +563,24 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
+                                            let mut user_ids: Vec<Vec<u8>> = vec![];
                                             for feed in table.messages {
+                                                user_ids.push(QaulId::bytes_to_q8id(
+                                                    feed.sender_id.clone(),
+                                                ));
                                                 Feed::save_message_by_sync(
                                                     &feed.message_id,
                                                     &feed.sender_id,
                                                     feed.content,
                                                     feed.time,
+                                                );
+                                            }
+                                            // check missed users
+                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            if missed_users.len() > 0 {
+                                                UserRequester::add(
+                                                    &received.received_from,
+                                                    &missed_users,
                                                 );
                                             }
                                         }
