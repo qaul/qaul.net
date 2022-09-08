@@ -38,12 +38,13 @@ Color colorGenerationStrategy(String first) {
 /// * https://github.com/flutter/flutter/issues/52306
 /// * https://github.com/flutter/flutter/issues/43302
 String initials(String name) {
+  assert(name.isNotEmpty, 'name should have at least one character');
   if (hasEmojis(name)) {
     final emoji = retrieveFirstEmoji(name);
     if (emoji != null) return emoji;
     name = removeEmoji(name);
   }
-  if (name.replaceAll(' ', '').length < 2) {
+  if (name.replaceAll(' ', '').isEmpty) {
     throw ArgumentError.value(
         name, 'Name', 'not enough characters to form initials string');
   }
@@ -51,7 +52,7 @@ String initials(String name) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
     if (ws.length > 1) return '${ws.first[0]}${ws.last[0]}'.toUpperCase();
   }
-  return name.substring(0, 2).toUpperCase();
+  return name.substring(0, 1).toUpperCase();
 }
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
