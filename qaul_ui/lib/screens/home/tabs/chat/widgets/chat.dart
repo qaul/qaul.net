@@ -209,6 +209,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             inputOptions: const InputOptions(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             ),
+            avatarBuilder: (id) {
+              var user = room.members.firstWhereOrNull((u) => id == u.idBase58);
+              if (user == null) return const SizedBox();
+              return QaulAvatar.small(user: user, badgeEnabled: false);
+            },
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
