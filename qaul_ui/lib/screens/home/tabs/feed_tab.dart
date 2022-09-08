@@ -108,6 +108,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
     final loading = useState(false);
+    final isMounted = useIsMounted();
 
     final sendMessage = useCallback(() async {
       if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -115,7 +116,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
       final worker = ref.read(qaulWorkerProvider);
       await worker.sendFeedMessage(controller.text.trim());
       loading.value = false;
-      if (!useIsMounted()()) return;
+      if (!isMounted()) return;
       Navigator.pop(context); // ignore: use_build_context_synchronously
     }, [UniqueKey()]);
 
