@@ -53,7 +53,6 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.members = const [],
   });
 
-  /// The ID of the other user
   final Uint8List conversationId;
   final Uint8List? lastMessageSenderId;
   final int? lastMessageIndex;
@@ -107,7 +106,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   String get idBase58 => Base58Encode(conversationId);
 
-  bool get isGroupChatRoom => members.isNotEmpty || !isDirectChat;
+  bool get isGroupChatRoom => !isDirectChat;
 
   String? get groupAdminIdBase58 => members
       .firstWhereOrNull((m) => m.role == ChatRoomUserRole.admin)
@@ -130,6 +129,15 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   @override
   List<Object?> get props => [idBase58];
+
+  @override
+  String toString() {
+    var room = 'ChatRoom(';
+    room += 'id: $idBase58, name: $name, isDirect: $isDirectChat';
+    if (messages != null) room += ', messages: $messages';
+    if (members.isNotEmpty) ', members: $members';
+    return '$room)';
+  }
 
   ChatRoom copyWith({
     int? lastMessageIndex,

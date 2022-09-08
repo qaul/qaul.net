@@ -227,17 +227,6 @@ class LibqaulWorker {
     await _sendMessage(Modules.GROUP, msg);
   }
 
-  void sendGroupMessage(ChatRoom room, String content) async {
-    throw UnimplementedError('SendGroupMessage');
-    // final msg = Group(
-    //   groupSendRequest: GroupSendRequest(
-    //     groupId: room.conversationId.toList(),
-    //     message: content,
-    //   ),
-    // );
-    // await _sendMessage(Modules.GROUP, msg);
-  }
-
   // -------------------
   // CHATFILE Requests
   // -------------------
