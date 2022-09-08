@@ -16,10 +16,9 @@ class ResponsiveLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        if (width >= kTabletBreakpoint && width < kDesktopBreakpoint) {
+        if (Responsiveness.isTablet(context)) {
           return tabletBody ?? mobileBody;
-        } else if (width >= kDesktopBreakpoint) {
+        } else if (Responsiveness.isDesktop(context)) {
           return desktopBody ?? tabletBody ?? mobileBody;
         }
 
@@ -38,7 +37,7 @@ class MaxWidthContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: kMaxWidth),
+        constraints: const BoxConstraints(maxWidth: Responsiveness.kMaxWidth),
         child: child,
       ),
     );

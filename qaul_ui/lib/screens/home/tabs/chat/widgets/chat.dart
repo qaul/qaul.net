@@ -50,7 +50,8 @@ Future<void> openChat(
 }) async {
   ref.read(uiOpenChatProvider.notifier).setCurrent(room);
 
-  bool isMobile = MediaQuery.of(context).size.width < kTabletBreakpoint;
+  bool isMobile =
+      MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
   if (!isMobile) {
     ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
     return;
@@ -94,9 +95,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User get user => widget.user;
 
   User? get otherUser => widget.otherUser;
-
-  bool isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < kTabletBreakpoint;
 
   final Map<String, String> _overflowMenuOptions = {
     'showFiles': 'Show All Files',
@@ -160,7 +158,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final closeChat = useCallback(() {
       ref.read(currentOpenChatRoom.notifier).state = null;
       ref.read(uiOpenChatProvider.notifier).close();
-      if (isMobile(context)) Navigator.pop(context);
+      if (Responsiveness.isMobile(context)) Navigator.pop(context);
     }, []);
 
     final sendMessage = useCallback((types.PartialText msg) {
