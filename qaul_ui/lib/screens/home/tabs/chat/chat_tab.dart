@@ -10,9 +10,6 @@ class _Chat extends BaseTab {
 class _ChatState extends _BaseTabState<_Chat> {
   final _log = Logger('BaseTab.chat');
 
-  bool isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < kTabletBreakpoint;
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -41,7 +38,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final l18ns = AppLocalizations.of(context);
 
-    final mobile = isMobile(context); // MediaQuery on HookState.init throws
+    final mobile = Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
     final chatWidget = useState<Widget?>(null);
     final currentOpenChat = ref.watch(uiOpenChatProvider);
     useEffect(() {
@@ -67,7 +64,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       );
 
       return () {};
-    }, [currentOpenChat]);
+    }, [currentOpenChat, mobile]);
 
     final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
       if (mobile) {
@@ -79,7 +76,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       } else {
         ref.read(uiOpenChatProvider.notifier).setCurrent(room);
       }
-    }, []);
+    }, [mobile]);
 
     final chatRoomsListView = CronTaskDecorator(
       callback: () => refreshChatsAndInvites(),
@@ -198,7 +195,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       tabletBody: Row(
         children: [
           ConstrainedBox(
-            constraints: kSideMenuWidthConstraints,
+            constraints: Responsiveness.kSideMenuWidthConstraints,
             child: Stack(
               children: [
                 chatRoomsListView,
