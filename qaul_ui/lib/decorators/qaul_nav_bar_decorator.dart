@@ -28,7 +28,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         'about': AppLocalizations.of(context)!.about,
         // 'support': AppLocalizations.of(context)!.support,
         'support': 'Support',
-        'old-network': 'Classic Network View',
+        'old-network': 'Routing Data Table',
       };
 
   void _handleClick(String value) {
