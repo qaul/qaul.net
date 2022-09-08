@@ -18,6 +18,7 @@ class UserDetailsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loading = useState(false);
+    final isMounted = useIsMounted();
 
     var theme = Theme.of(context).textTheme;
     final l18ns = AppLocalizations.of(context)!;
@@ -120,7 +121,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                                       : await worker.verifyUser(user);
 
                                   loading.value = false;
-                                  if (!useIsMounted()()) return;
+                                  if (!isMounted()) return;
                                   Navigator.pop(context);
                                 },
                           child: Row(
@@ -153,7 +154,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                           blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
 
                           loading.value = false;
-                          if (!useIsMounted()()) return;
+                          if (!isMounted()) return;
                           Navigator.pop(context);
                         },
                         child: Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
