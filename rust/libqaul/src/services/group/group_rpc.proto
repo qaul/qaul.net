@@ -48,6 +48,12 @@ message Group {
 // Group Result
 message GroupResult {
     // status
+    //
+    // true = success
+    // false = an error happened
+    //
+    // if the result is false, the message will
+    // contain the error message.
     bool status = 1;
     // message
     string message = 2;

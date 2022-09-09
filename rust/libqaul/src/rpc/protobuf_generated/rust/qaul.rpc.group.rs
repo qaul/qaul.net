@@ -64,6 +64,12 @@ pub mod group {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupResult {
     /// status
+    ///
+    /// true = success
+    /// false = an error happened
+    ///
+    /// if the result is false, the message will
+    /// contain the error message.
     #[prost(bool, tag="1")]
     pub status: bool,
     /// message

@@ -19,8 +19,6 @@ use std::{
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
-use crate::router::users::User;
-
 /// make configuration globally accessible mutable state
 static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 

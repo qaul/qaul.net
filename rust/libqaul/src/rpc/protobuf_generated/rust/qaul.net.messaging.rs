@@ -45,14 +45,22 @@ pub mod envelop_payload {
     }
 }
 /// encrypted message data
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Encrypted {
+    /// state of the crypto session
+    #[prost(enumeration="CryptoState", tag="1")]
+    pub state: i32,
+    /// crypto session id
+    #[prost(uint32, tag="2")]
+    pub session_id: u32,
     /// one or several Data messages
     /// of maximally 64KB each.
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag="3")]
     pub data: ::prost::alloc::vec::Vec<Data>,
 }
 /// encrypted message data
+#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Data {
     /// message nonce for encryption
@@ -271,6 +279,30 @@ pub mod dtn_response {
                 Reason::OverallQuota => "OVERALL_QUOTA",
                 Reason::UserQuota => "USER_QUOTA",
             }
+        }
+    }
+}
+/// state of the crypto session
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum CryptoState {
+    /// no crypto at all
+    None = 0,
+    /// crypto session is in handshake state
+    Handshake = 1,
+    /// crypto session is in transport state
+    Transport = 2,
+}
+impl CryptoState {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            CryptoState::None => "NONE",
+            CryptoState::Handshake => "HANDSHAKE",
+            CryptoState::Transport => "TRANSPORT",
         }
     }
 }

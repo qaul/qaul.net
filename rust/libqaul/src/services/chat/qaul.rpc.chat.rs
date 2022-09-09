@@ -73,6 +73,7 @@ pub struct ChatOverview {
 /// request messages of a specific chat conversation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatConversationRequest {
+    /// conversation id
     #[prost(bytes="vec", tag="1")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
     /// send only changes that are newer than the last received
@@ -82,8 +83,10 @@ pub struct ChatConversationRequest {
 /// list of chat messages of a specific conversation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatConversationList {
+    /// conversation id
     #[prost(bytes="vec", tag="1")]
     pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    /// several messages
     #[prost(message, repeated, tag="2")]
     pub message_list: ::prost::alloc::vec::Vec<ChatMessage>,
 }
