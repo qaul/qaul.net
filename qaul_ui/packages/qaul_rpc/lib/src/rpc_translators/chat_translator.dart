@@ -18,23 +18,16 @@ class ChatTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
     if (res.module != type || res.data == null) return;
-    // TODO: not handling the proper data coming from [decodeMessageBytes]
-    if (res.data is List<ChatRoom>) {
+    if (res.data is ChatConversationList) {
       final state = reader(chatRoomsProvider.notifier);
-      for (final room in res.data) {
-        if (!state.contains(room)) {
-          state.add(room);
-        } else {
-          state.update(room);
-        }
+      final room = reader(chatRoomsProvider).firstWhereOrNull(
+          (r) => r.conversationId.equals(res.data.groupId));
+
+      if (room != null) {
+        state.update(room.mergeWithConversationList(res.data));
       }
-    }
-    if (res.data is ChatRoom) {
-      final currentRoom = reader(currentOpenChatRoom);
-      if (currentRoom != null &&
-          currentRoom.conversationId.equals(res.data.conversationId)) {
-        reader(currentOpenChatRoom.notifier).state = res.data;
-      }
+    } else {
+      super.processResponse(res, reader);
     }
   }
 }

@@ -100,7 +100,13 @@ abstract class RpcModuleTranslator {
     return null;
   }
 
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader);
+  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+    _log.severe(
+      'unprocessed response from module "$type": ${res.data.runtimeType}',
+      UnhandledRpcMessageException(res.toString()),
+      StackTrace.current,
+    );
+  }
 }
 
 class RpcTranslatorResponse {
