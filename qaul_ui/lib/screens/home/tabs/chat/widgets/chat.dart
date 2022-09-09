@@ -376,25 +376,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
 extension _MessageExtension on Message {
   types.Message toInternalMessage(User author, Reader read) {
-    var mappedStatus = status == MessageStatus.sent
+    var mappedState = status == MessageState.sent
         ? types.Status.sent
-        : status == MessageStatus.received
-            ? types.Status.delivered
+        : status == MessageState.received
+            ? types.Status.seen
             : null;
+
     if (content is TextMessageContent) {
       return types.TextMessage(
         id: messageIdBase58,
         text: (content as TextMessageContent).content,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
-        status: mappedStatus,
+        status: mappedState,
       );
     } else if (content is GroupEventContent) {
       return types.CustomMessage(
         id: messageIdBase58,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
-        status: mappedStatus,
+        status: mappedState,
         metadata: (content as GroupEventContent).toJson(),
       );
     } else if (content is FileShareContent) {
@@ -406,7 +407,7 @@ extension _MessageExtension on Message {
           id: messageIdBase58,
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
-          status: mappedStatus,
+          status: mappedState,
           uri: filePath,
           size: (content as FileShareContent).size,
           name: (content as FileShareContent).fileName,
@@ -423,7 +424,7 @@ extension _MessageExtension on Message {
         uri: filePath,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
-        status: mappedStatus,
+        status: mappedState,
         metadata: {
           'description': (content as FileShareContent).description,
         },
@@ -435,7 +436,7 @@ extension _MessageExtension on Message {
       text: 'THIS MESSAGE COULD NOT BE RENDERED. PLEASE CONTACT SUPPORT.',
       author: author.toInternalUser(),
       createdAt: receivedAt.millisecondsSinceEpoch,
-      status: mappedStatus,
+      status: mappedState,
     );
   }
 }
