@@ -15,7 +15,32 @@ enum ChatRoomUserRole { normal, admin, unknown }
 
 enum InvitationState { sent, received, accepted, unknown }
 
-enum MessageStatus { sending, sent, received, receivedByAll }
+enum MessageState {
+  sending,
+  sent,
+  confirmed,
+  confirmedByAll,
+  receiving,
+  received
+}
+
+MessageState _messageStateFactory({required MessageStatus status}) {
+  switch (status) {
+    case MessageStatus.CONFIRMED:
+      return MessageState.confirmed;
+    case MessageStatus.CONFIRMED_BY_ALL:
+      return MessageState.confirmedByAll;
+    case MessageStatus.RECEIVED:
+      return MessageState.received;
+    case MessageStatus.RECEIVING:
+      return MessageState.receiving;
+    case MessageStatus.SENDING:
+      return MessageState.sending;
+    case MessageStatus.SENT:
+      return MessageState.sent;
+  }
+  throw UnimplementedError('(_messageStatusFactory) Unmapped status: $status');
+}
 
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
@@ -203,13 +228,13 @@ class Message with EquatableMixin implements Comparable<Message> {
     required this.index,
     required this.sentAt,
     required this.receivedAt,
-    this.status = MessageStatus.sending,
+    this.status = MessageState.sending,
   });
 
   final Uint8List senderId;
   final Uint8List messageId;
   final int index;
-  final MessageStatus status;
+  final MessageState status;
   final DateTime sentAt;
   final DateTime receivedAt;
   final MessageContent content;
@@ -223,7 +248,7 @@ class Message with EquatableMixin implements Comparable<Message> {
       content: MessageContent.fromBuffer(
           m.content),
       index: m.index.toInt(),
-      status: MessageStatus.values[m.status.value],
+      status: _messageStateFactory(status: m.status),
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
       receivedAt: DateTime.fromMillisecondsSinceEpoch(m.receivedAt.toInt()),
     );
