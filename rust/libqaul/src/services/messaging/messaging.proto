@@ -32,11 +32,25 @@ message EnvelopPayload {
     }
 }
 
+// state of the crypto session
+enum CryptoState {
+    // no crypto at all
+    NONE = 0;
+    // crypto session is in handshake state
+    HANDSHAKE = 1;
+    // crypto session is in transport state
+    TRANSPORT = 2;
+}
+
 // encrypted message data
 message Encrypted {
+    // state of the crypto session
+    CryptoState state = 1;
+    // crypto session id
+    uint32 session_id = 2;
     // one or several Data messages
     // of maximally 64KB each.
-    repeated Data data = 1;
+    repeated Data data = 3;
 }
 
 // encrypted message data

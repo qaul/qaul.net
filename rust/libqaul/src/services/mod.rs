@@ -29,6 +29,7 @@ impl Services {
     ///
     /// This function needs to be called at startup
     pub fn init() {
+        crypto::Crypto::init();
         feed::Feed::init();
         messaging::Messaging::init();
         chat::Chat::init();

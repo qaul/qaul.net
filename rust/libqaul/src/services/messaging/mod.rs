@@ -20,6 +20,7 @@ mod network_emul;
 pub mod process;
 pub mod retransmit;
 
+use super::chat::ChatStorage;
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -70,7 +71,7 @@ pub struct UnConfirmedMessage {
     pub retry: u32,
     // flag that transferred on the network
     pub scheduled: bool,
-    // flag that transfered as DTN service
+    // flag that transferred as DTN service
     pub scheduled_dtn: bool,
     // flag that indicate DTN message
     pub is_dtn: bool,
@@ -176,14 +177,17 @@ impl Messaging {
     }
 
     /// process confirmation message and return (sender_id, message_id)
-    pub fn on_confirmed_message(signature: &Vec<u8>) {
+    pub fn on_confirmed_message(
+        signature: &Vec<u8>,
+        sender_id: PeerId,
+        user_account: UserAccount,
+        confirmation: proto::Confirmation,
+    ) {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
             Ok(v) => {
-                // TODO: is this needed here?
-                //       Suggestion -> only flush after it has been changed on main table too
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
                     log::error!("Error unconfirmed table flush: {}", e);
                 }
@@ -193,12 +197,27 @@ impl Messaging {
                         // check message and decide what to do
                         match unconfirmed.message_type {
                             MessagingServiceType::Unconfirmed => {}
-                            MessagingServiceType::DtnOrigin => {}
+                            MessagingServiceType::DtnOrigin => {
+                                // what kind of message do we have here?
+                                // TODO: check chat storage as sent ...
+                            }
                             MessagingServiceType::DtnStored => {}
                             MessagingServiceType::Crypto => {}
-                            MessagingServiceType::Group => {}
-                            MessagingServiceType::Chat => {}
-                            MessagingServiceType::ChatFile => {}
+                            MessagingServiceType::Group => {
+                                // don't do anything for group messages
+                            }
+                            MessagingServiceType::Chat => {
+                                // set received info in chat data base
+                                ChatStorage::update_confirmation(
+                                    user_account.id,
+                                    sender_id,
+                                    &unconfirmed.message_id,
+                                    confirmation.received_at,
+                                );
+                            }
+                            MessagingServiceType::ChatFile => {
+                                // confirm message reception in data base
+                            }
                             MessagingServiceType::Rtc => {
                                 // TODO CONFIRM RTC MESSAGE
                             }
@@ -272,35 +291,28 @@ impl Messaging {
         message_id: &Vec<u8>,
         is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
+        log::debug!("pack_and_send_message to {}", receiver.to_base58());
+
         // encrypt data
-        // TODO: slice data to 64K
-        let (encryption_result, nonce) =
-            Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
+        let encrypted_message: proto::Encrypted;
+        let encryption_result = Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
 
-        let mut encrypted: Vec<proto::Data> = Vec::new();
         match encryption_result {
-            Some(encrypted_chunk) => {
-                let data_message = proto::Data {
-                    nonce,
-                    data: encrypted_chunk,
-                };
-
-                log::trace!("data len: {}", data_message.encoded_len());
-
-                encrypted.push(data_message);
+            Some(encrypted) => {
+                encrypted_message = encrypted;
             }
             None => return Err("Encryption error occurred".to_string()),
         }
 
-        log::trace!(
+        log::info!(
             "sender_id: {}, receiver_id: {}",
-            user_account.id.to_bytes().len(),
-            receiver.to_bytes().len()
+            user_account.id.to_base58(),
+            receiver.to_base58()
         );
 
         let envelop_payload = proto::EnvelopPayload {
             payload: Some(proto::envelop_payload::Payload::Encrypted(
-                proto::Encrypted { data: encrypted },
+                encrypted_message,
             )),
         };
 
@@ -312,7 +324,7 @@ impl Messaging {
         };
 
         // debug
-        log::debug!("envelope len: {}", envelope.encoded_len());
+        log::info!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
@@ -414,33 +426,9 @@ impl Messaging {
         data: &Vec<u8>,
         message_id: Option<&Vec<u8>>,
     ) -> Result<Vec<u8>, String> {
-        // // encrypt data
-        // // TODO: slize data to 64K
-        // let (encryption_result, nonce) = Crypto::encrypt(data.clone(), user_account.to_owned(), receiver.clone());
-
-        // let mut encrypted: Vec<proto::Data> = Vec::new();
-        // match encryption_result {
-        //     Some(encrypted_chunk) => {
-        //         let data_message = proto::Data{ nonce, data: encrypted_chunk };
-
-        //         log::info!("data len: {}", data_message.encoded_len());
-
-        //         encrypted.push(data_message);
-        //     },
-        //     None => return Err("Encryption error occurred".to_string()),
-        // }
-
-        // log::info!("sender_id: {}, receiver_id: {}", user_account.id.to_bytes().len(), receiver.to_bytes().len());
-
         let envelop_payload = proto::EnvelopPayload {
             payload: Some(proto::envelop_payload::Payload::Dtn(data.clone())),
         };
-
-        // let payload = proto::Encrypted{data: data.clone()};
-        // let mut message_buf = Vec::with_capacity(payload.encoded_len());
-        // payload
-        //     .encode(&mut message_buf)
-        //     .expect("Vec<u8> provides capacity as needed");
 
         // create envelope
         let envelope = proto::Envelope {

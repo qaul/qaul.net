@@ -54,6 +54,7 @@ message ChatOverview {
 
 // request messages of a specific chat conversation
 message ChatConversationRequest {
+    // conversation id
     bytes conversation_id = 1;
     // send only changes that are newer than the last received
     uint64 last_index = 2;
@@ -61,7 +62,9 @@ message ChatConversationRequest {
 
 // list of chat messages of a specific conversation
 message ChatConversationList {
-    bytes conversation_id             = 1;
+    // conversation id
+    bytes conversation_id = 1;
+    // several messages
     repeated ChatMessage message_list = 2;
 }
 

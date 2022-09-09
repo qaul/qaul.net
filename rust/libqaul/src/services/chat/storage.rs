@@ -380,13 +380,30 @@ impl ChatStorage {
     }
 
     /// updating chat message status as confirmed
-    pub fn update_confirmation(user_id: &PeerId, message_id: &Vec<u8>, received_at: u64) {
+    pub fn update_confirmation(
+        account_id: PeerId,
+        receiver_id: PeerId,
+        message_id: &Vec<u8>,
+        received_at: u64,
+    ) {
         // get data base of user account
-        let db_ref = Self::get_db_ref(user_id.clone());
+        let db_ref = Self::get_db_ref(account_id.clone());
         if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
             if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap() {
-                chat_msg.status = 1;
+                chat_msg.status = rpc_proto::MessageStatus::Confirmed as i32;
                 chat_msg.received_at = received_at;
+
+                // TODO: check if receiver already exists
+
+                // receiving user
+                let mut confirmation = rpc_proto::MessageReceptionConfirmed {
+                    user_id: receiver_id.to_bytes(),
+                    confirmed_at: received_at,
+                };
+                chat_msg.message_reception_confirmed.push(confirmation);
+
+                // TODO: check if it was received by everyone
+                //       set received_by_all flag if yes
 
                 // save message in data base
                 if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {

@@ -249,10 +249,10 @@ impl Dtn {
 
     /// this function is called when receive DTN response
     pub fn on_dtn_response(dtn_response: &super::messaging::proto::DtnResponse) {
-        //check if storage node case
+        // check if storage node case
         let mut state = STORAGESTATE.get().write().unwrap();
         if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
-            //update storage node state
+            // update storage node state
             let entry = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
             if state.used_size > entry.size as u64 {
                 state.used_size = state.used_size + (entry.size as u64);
@@ -263,7 +263,7 @@ impl Dtn {
                 state.message_counts = state.message_counts - 1;
             }
 
-            //remove entry
+            // remove entry
             if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
                 log::error!("remove storage node entry error!");
             } else {

@@ -57,6 +57,14 @@ fn main() {
         "#[derive(serde::Serialize, serde::Deserialize)]",
     );
 
+    // make crypto message serializable
+    // in order to save them in the data base
+    prost_build.type_attribute(
+        "Encrypted",
+        "#[derive(serde::Serialize, serde::Deserialize)]",
+    );
+    prost_build.type_attribute("Data", "#[derive(serde::Serialize, serde::Deserialize)]");
+
     // compile these protobuf files
     prost_build
         .compile_protos(

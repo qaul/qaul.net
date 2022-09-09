@@ -58,6 +58,7 @@ impl RtcMessaging {
     }
 
     /// proccess message from network
+    #[allow(dead_code)]
     pub fn on_message(
         sender_id: &PeerId,
         _receiver_id: &PeerId,
