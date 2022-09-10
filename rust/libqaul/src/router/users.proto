@@ -28,10 +28,10 @@ message UserEntry {
     string name = 1;
     // user ID (38 Byte PeerID)
     bytes id = 2;
-    // direct chat conversation ID
+    // direct chat group id
     //
     // this is a predictable 16 bytes UUID
-    bytes conversation_id = 3;
+    bytes group_id = 3;
     // base58 string of public key
     string key_base58 = 7;
     // reachability of the user: online | reachable | offline

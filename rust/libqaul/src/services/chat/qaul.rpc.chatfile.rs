@@ -41,9 +41,9 @@ pub struct SendFileRequest {
     /// file path with file name to send
     #[prost(string, tag="1")]
     pub path_name: ::prost::alloc::string::String,
-    /// conversation id to receive file
+    /// group id to receive file
     #[prost(bytes="vec", tag="2")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// file description text to be sent in the message
     #[prost(string, tag="3")]
     pub description: ::prost::alloc::string::String,

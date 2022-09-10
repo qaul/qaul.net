@@ -129,7 +129,7 @@ class ChatFile extends $pb.GeneratedMessage {
 class SendFileRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendFileRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pathName')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description')
     ..hasRequiredFields = false
   ;
@@ -137,15 +137,15 @@ class SendFileRequest extends $pb.GeneratedMessage {
   SendFileRequest._() : super();
   factory SendFileRequest({
     $core.String? pathName,
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $core.String? description,
   }) {
     final _result = create();
     if (pathName != null) {
       _result.pathName = pathName;
     }
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (description != null) {
       _result.description = description;
@@ -183,13 +183,13 @@ class SendFileRequest extends $pb.GeneratedMessage {
   void clearPathName() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get conversationId => $_getN(1);
+  $core.List<$core.int> get groupId => $_getN(1);
   @$pb.TagNumber(2)
-  set conversationId($core.List<$core.int> v) { $_setBytes(1, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasConversationId() => $_has(1);
+  $core.bool hasGroupId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearConversationId() => clearField(2);
+  void clearGroupId() => clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get description => $_getSZ(2);

@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use super::rpc_proto;
-use crate::services::group::{self, conversation_id::ConversationId, GroupStorage};
+use crate::services::group::{self, group_id::GroupId, GroupStorage};
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use prost::Message;
@@ -121,7 +121,7 @@ impl ChatStorage {
         account_id: &PeerId,
         sender_id: &PeerId,
         content: rpc_proto::ChatContentMessage,
-        conversation_id: &ConversationId,
+        group_id: &GroupId,
     ) -> bool {
         // create timestamp
         let timestamp = Timestamp::get_timestamp();
@@ -130,11 +130,11 @@ impl ChatStorage {
         let db_ref = Self::get_db_ref(account_id.clone());
 
         // check if group exists
-        if !GroupStorage::group_exists(account_id.to_owned(), conversation_id.to_bytes()) {
-            let test_conversation_id = ConversationId::from_peers(account_id, sender_id);
+        if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
+            let test_group_id = GroupId::from_peers(account_id, sender_id);
 
             // check if it is a direct chat
-            if conversation_id == &test_conversation_id {
+            if group_id == &test_group_id {
                 // create new group
                 group::Manage::create_new_direct_chat_group(account_id, sender_id);
             } else {
@@ -146,14 +146,14 @@ impl ChatStorage {
         // update last message
         GroupStorage::group_update_last_chat_message(
             account_id.to_owned(),
-            conversation_id.to_bytes(),
+            group_id.to_bytes(),
             sender_id.to_owned(),
             content.encode_to_vec(),
             timestamp,
         );
 
         // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &conversation_id.to_bytes());
+        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
 
         // create chat message
         let chat_message = rpc_proto::ChatMessage {
@@ -162,14 +162,14 @@ impl ChatStorage {
             message_id: vec![],
             status: 0,
             message_reception_confirmed: Vec::new(),
-            conversation_id: conversation_id.to_bytes(),
+            group_id: group_id.to_bytes(),
             sent_at: timestamp,
             received_at: timestamp,
             content: content.encode_to_vec(),
         };
 
         // save message in data base
-        let db_key = Self::get_db_key_from_vec(&conversation_id.to_bytes(), index);
+        let db_key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
         if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message) {
             log::error!("Error saving chat message to data base: {}", e);
         }
@@ -189,7 +189,7 @@ impl ChatStorage {
         sender_id: &PeerId,
         content: super::rpc_proto::ChatContentMessage,
         sent_at: u64,
-        conversation_id: &ConversationId,
+        group_id: &GroupId,
         message_id: &Vec<u8>,
         status: rpc_proto::MessageStatus,
     ) -> bool {
@@ -205,11 +205,11 @@ impl ChatStorage {
         }
 
         // check if group message
-        let is_group = !(conversation_id == &ConversationId::from_peers(account_id, sender_id));
+        let is_group = !(group_id == &GroupId::from_peers(account_id, sender_id));
 
         // if direct chat, check group exist
         if !is_group {
-            if !GroupStorage::group_exists(account_id.to_owned(), conversation_id.to_bytes()) {
+            if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
                 group::Manage::create_new_direct_chat_group(account_id, sender_id);
             }
         }
@@ -219,17 +219,17 @@ impl ChatStorage {
         // update last message
         GroupStorage::group_update_last_chat_message(
             account_id.to_owned(),
-            conversation_id.to_bytes(),
+            group_id.to_bytes(),
             sender_id.to_owned(),
             content.encode_to_vec(),
             timestamp,
         );
 
         // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &conversation_id.to_bytes());
+        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
 
         // create data base key
-        let db_key = Self::get_db_key_from_vec(&conversation_id.to_bytes(), index);
+        let db_key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
 
         // create chat message
         let chat_message = rpc_proto::ChatMessage {
@@ -238,7 +238,7 @@ impl ChatStorage {
             message_id: message_id.clone(),
             status: status.try_into().unwrap(),
             message_reception_confirmed: Vec::new(),
-            conversation_id: conversation_id.to_bytes(),
+            group_id: group_id.to_bytes(),
             sent_at,
             received_at: timestamp,
             content: content.encode_to_vec(),
@@ -271,7 +271,7 @@ impl ChatStorage {
     pub fn save_outgoing_message(
         account_id: &PeerId,
         receiver_id: &PeerId,
-        conversation_id: &ConversationId,
+        group_id: &GroupId,
         message_id: &Vec<u8>,
         content: rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
@@ -288,11 +288,11 @@ impl ChatStorage {
         }
 
         // check if group message
-        let is_group = !(conversation_id == &ConversationId::from_peers(account_id, receiver_id));
+        let is_group = !(group_id == &GroupId::from_peers(account_id, receiver_id));
 
         // if direct chat, check group exist
         if !is_group {
-            if !GroupStorage::group_exists(account_id.to_owned(), conversation_id.to_bytes()) {
+            if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
                 group::Manage::create_new_direct_chat_group(account_id, receiver_id);
             }
         }
@@ -300,17 +300,17 @@ impl ChatStorage {
         // update last message
         GroupStorage::group_update_last_chat_message(
             account_id.to_owned(),
-            conversation_id.to_bytes(),
+            group_id.to_bytes(),
             account_id.to_owned(),
             content.encode_to_vec(),
             timestamp,
         );
 
         // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &conversation_id.to_bytes());
+        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
 
         // create data base key
-        let key = Self::get_db_key_from_vec(&conversation_id.to_bytes(), index);
+        let key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
 
         // create chat message
         let message = rpc_proto::ChatMessage {
@@ -319,7 +319,7 @@ impl ChatStorage {
             message_id: message_id.clone(),
             status: status.try_into().unwrap(),
             message_reception_confirmed: Vec::new(),
-            conversation_id: conversation_id.to_bytes(),
+            group_id: group_id.to_bytes(),
             sent_at: timestamp,
             received_at: timestamp,
             content: content.encode_to_vec(),
@@ -385,19 +385,16 @@ impl ChatStorage {
     }
 
     /// Get chat messages of a specific conversation from data base
-    pub fn get_messages(
-        account_id: PeerId,
-        conversation_id: Vec<u8>,
-    ) -> rpc_proto::ChatConversationList {
+    pub fn get_messages(account_id: PeerId, group_id: Vec<u8>) -> rpc_proto::ChatConversationList {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
-        if conversation_id.len() == 16 {
+        if group_id.len() == 16 {
             // get database references for this user account
             let db_ref = Self::get_db_ref(account_id);
 
             // create message keys
-            let (first_key, last_key) = Self::get_db_key_range(&conversation_id.clone());
+            let (first_key, last_key) = Self::get_db_key_range(&group_id.clone());
 
             // iterate over all values in chat_messages db
             for res in db_ref
@@ -415,39 +412,39 @@ impl ChatStorage {
             }
 
             // clear unread messages from group
-            GroupStorage::group_clear_unread(account_id, conversation_id.clone());
+            GroupStorage::group_clear_unread(account_id, group_id.clone());
         }
 
         rpc_proto::ChatConversationList {
-            conversation_id,
+            group_id,
             message_list,
         }
     }
 
-    /// get DB key range for a conversation ID
+    /// get DB key range for a group id
     ///
     /// returns a key tuple, which can be used to
     /// retrieve all messages for a user ID from the DB:
     ///
     /// (first_key, last_key)
-    fn get_db_key_range(conversation_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
-        let first_key = Self::get_db_key_from_vec(conversation_id, 0);
-        let last_key = Self::get_db_key_from_vec(conversation_id, 0xFFFFFFFFFFFFFFFF); // = 4294967295
+    fn get_db_key_range(group_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+        let first_key = Self::get_db_key_from_vec(group_id, 0);
+        let last_key = Self::get_db_key_from_vec(group_id, 0xFFFFFFFFFFFFFFFF); // = 4294967295
         (first_key, last_key)
     }
 
-    /// create DB key from conversation ID
-    fn get_db_key_from_vec(conversation_id: &Vec<u8>, index: u64) -> Vec<u8> {
+    /// create DB key from group id
+    fn get_db_key_from_vec(group_id: &Vec<u8>, index: u64) -> Vec<u8> {
         let mut index_bytes = index.to_be_bytes().to_vec();
-        let mut key_bytes = conversation_id.clone();
+        let mut key_bytes = group_id.clone();
         key_bytes.append(&mut index_bytes);
         key_bytes
     }
 
     /// get nex db_index key
-    fn get_next_db_index(db_ref: ChatAccountDb, conversation_id: &Vec<u8>) -> u64 {
+    fn get_next_db_index(db_ref: ChatAccountDb, group_id: &Vec<u8>) -> u64 {
         // get biggest existing index
-        let search_key = Self::get_db_key_from_vec(conversation_id, u64::MAX);
+        let search_key = Self::get_db_key_from_vec(group_id, u64::MAX);
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             return value.index + 1;

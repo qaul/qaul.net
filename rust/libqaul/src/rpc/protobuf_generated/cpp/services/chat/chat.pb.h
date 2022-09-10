@@ -495,21 +495,21 @@ class ChatConversationRequest final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kConversationIdFieldNumber = 1,
+    kGroupIdFieldNumber = 1,
     kLastIndexFieldNumber = 2,
   };
-  // bytes conversation_id = 1;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 1;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // uint64 last_index = 2;
@@ -529,7 +529,7 @@ class ChatConversationRequest final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     uint64_t last_index_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -660,7 +660,7 @@ class ChatConversationList final :
 
   enum : int {
     kMessageListFieldNumber = 2,
-    kConversationIdFieldNumber = 1,
+    kGroupIdFieldNumber = 1,
   };
   // repeated .qaul.rpc.chat.ChatMessage message_list = 2;
   int message_list_size() const;
@@ -680,18 +680,18 @@ class ChatConversationList final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::ChatMessage >&
       message_list() const;
 
-  // bytes conversation_id = 1;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 1;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // @@protoc_insertion_point(class_scope:qaul.rpc.chat.ChatConversationList)
@@ -703,7 +703,7 @@ class ChatConversationList final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::ChatMessage > message_list_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -835,7 +835,7 @@ class ChatMessage final :
     kMessageReceptionConfirmedFieldNumber = 10,
     kSenderIdFieldNumber = 2,
     kMessageIdFieldNumber = 3,
-    kConversationIdFieldNumber = 5,
+    kGroupIdFieldNumber = 5,
     kContentFieldNumber = 8,
     kIndexFieldNumber = 1,
     kSentAtFieldNumber = 6,
@@ -888,18 +888,18 @@ class ChatMessage final :
   std::string* _internal_mutable_message_id();
   public:
 
-  // bytes conversation_id = 5;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 5;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // bytes content = 8;
@@ -963,7 +963,7 @@ class ChatMessage final :
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::chat::MessageReceptionConfirmed > message_reception_confirmed_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_id_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
     uint64_t index_;
     uint64_t sent_at_;
@@ -2003,21 +2003,21 @@ class ChatMessageSend final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kConversationIdFieldNumber = 1,
+    kGroupIdFieldNumber = 1,
     kContentFieldNumber = 2,
   };
-  // bytes conversation_id = 1;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 1;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // string content = 2;
@@ -2042,7 +2042,7 @@ class ChatMessageSend final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr content_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -2295,54 +2295,54 @@ inline Chat::MessageCase Chat::message_case() const {
 
 // ChatConversationRequest
 
-// bytes conversation_id = 1;
-inline void ChatConversationRequest::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 1;
+inline void ChatConversationRequest::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& ChatConversationRequest::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationRequest.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& ChatConversationRequest::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationRequest.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void ChatConversationRequest::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void ChatConversationRequest::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationRequest.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationRequest.group_id)
 }
-inline std::string* ChatConversationRequest::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatConversationRequest.conversation_id)
+inline std::string* ChatConversationRequest::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatConversationRequest.group_id)
   return _s;
 }
-inline const std::string& ChatConversationRequest::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& ChatConversationRequest::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void ChatConversationRequest::_internal_set_conversation_id(const std::string& value) {
+inline void ChatConversationRequest::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* ChatConversationRequest::_internal_mutable_conversation_id() {
+inline std::string* ChatConversationRequest::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* ChatConversationRequest::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatConversationRequest.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* ChatConversationRequest::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatConversationRequest.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void ChatConversationRequest::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void ChatConversationRequest::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationRequest.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationRequest.group_id)
 }
 
 // uint64 last_index = 2;
@@ -2369,54 +2369,54 @@ inline void ChatConversationRequest::set_last_index(uint64_t value) {
 
 // ChatConversationList
 
-// bytes conversation_id = 1;
-inline void ChatConversationList::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 1;
+inline void ChatConversationList::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& ChatConversationList::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationList.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& ChatConversationList::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatConversationList.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void ChatConversationList::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void ChatConversationList::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationList.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatConversationList.group_id)
 }
-inline std::string* ChatConversationList::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatConversationList.conversation_id)
+inline std::string* ChatConversationList::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatConversationList.group_id)
   return _s;
 }
-inline const std::string& ChatConversationList::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& ChatConversationList::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void ChatConversationList::_internal_set_conversation_id(const std::string& value) {
+inline void ChatConversationList::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* ChatConversationList::_internal_mutable_conversation_id() {
+inline std::string* ChatConversationList::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* ChatConversationList::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatConversationList.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* ChatConversationList::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatConversationList.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void ChatConversationList::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void ChatConversationList::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationList.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatConversationList.group_id)
 }
 
 // repeated .qaul.rpc.chat.ChatMessage message_list = 2;
@@ -2643,54 +2643,54 @@ ChatMessage::message_reception_confirmed() const {
   return _impl_.message_reception_confirmed_;
 }
 
-// bytes conversation_id = 5;
-inline void ChatMessage::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 5;
+inline void ChatMessage::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& ChatMessage::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessage.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& ChatMessage::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessage.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void ChatMessage::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void ChatMessage::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessage.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessage.group_id)
 }
-inline std::string* ChatMessage::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatMessage.conversation_id)
+inline std::string* ChatMessage::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatMessage.group_id)
   return _s;
 }
-inline const std::string& ChatMessage::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& ChatMessage::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void ChatMessage::_internal_set_conversation_id(const std::string& value) {
+inline void ChatMessage::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* ChatMessage::_internal_mutable_conversation_id() {
+inline std::string* ChatMessage::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* ChatMessage::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatMessage.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* ChatMessage::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatMessage.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void ChatMessage::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void ChatMessage::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessage.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessage.group_id)
 }
 
 // uint64 sent_at = 6;
@@ -3418,54 +3418,54 @@ inline void GroupEvent::set_allocated_user_id(std::string* user_id) {
 
 // ChatMessageSend
 
-// bytes conversation_id = 1;
-inline void ChatMessageSend::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 1;
+inline void ChatMessageSend::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& ChatMessageSend::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessageSend.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& ChatMessageSend::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chat.ChatMessageSend.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void ChatMessageSend::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void ChatMessageSend::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessageSend.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chat.ChatMessageSend.group_id)
 }
-inline std::string* ChatMessageSend::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatMessageSend.conversation_id)
+inline std::string* ChatMessageSend::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chat.ChatMessageSend.group_id)
   return _s;
 }
-inline const std::string& ChatMessageSend::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& ChatMessageSend::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void ChatMessageSend::_internal_set_conversation_id(const std::string& value) {
+inline void ChatMessageSend::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* ChatMessageSend::_internal_mutable_conversation_id() {
+inline std::string* ChatMessageSend::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* ChatMessageSend::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatMessageSend.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* ChatMessageSend::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chat.ChatMessageSend.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void ChatMessageSend::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void ChatMessageSend::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessageSend.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chat.ChatMessageSend.group_id)
 }
 
 // string content = 2;

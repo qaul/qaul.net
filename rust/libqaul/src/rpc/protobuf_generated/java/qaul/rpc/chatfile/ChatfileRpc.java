@@ -1774,13 +1774,13 @@ public final class ChatfileRpc {
 
     /**
      * <pre>
-     * conversation id to receive file
+     * group id to receive file
      * </pre>
      *
-     * <code>bytes conversation_id = 2;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 2;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -1821,7 +1821,7 @@ public final class ChatfileRpc {
     }
     private SendFileRequest() {
       pathName_ = "";
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
       description_ = "";
     }
 
@@ -1863,7 +1863,7 @@ public final class ChatfileRpc {
             }
             case 18: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 26: {
@@ -1952,19 +1952,19 @@ public final class ChatfileRpc {
       }
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * conversation id to receive file
+     * group id to receive file
      * </pre>
      *
-     * <code>bytes conversation_id = 2;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 2;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int DESCRIPTION_FIELD_NUMBER = 3;
@@ -2030,8 +2030,8 @@ public final class ChatfileRpc {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pathName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pathName_);
       }
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(2, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(2, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, description_);
@@ -2048,9 +2048,9 @@ public final class ChatfileRpc {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pathName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pathName_);
       }
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, conversationId_);
+          .computeBytesSize(2, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, description_);
@@ -2072,8 +2072,8 @@ public final class ChatfileRpc {
 
       if (!getPathName()
           .equals(other.getPathName())) return false;
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (!getDescription()
           .equals(other.getDescription())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -2089,8 +2089,8 @@ public final class ChatfileRpc {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PATH_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getPathName().hashCode();
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
       hash = (53 * hash) + getDescription().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -2233,7 +2233,7 @@ public final class ChatfileRpc {
         super.clear();
         pathName_ = "";
 
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         description_ = "";
 
@@ -2264,7 +2264,7 @@ public final class ChatfileRpc {
       public qaul.rpc.chatfile.ChatfileRpc.SendFileRequest buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.SendFileRequest result = new qaul.rpc.chatfile.ChatfileRpc.SendFileRequest(this);
         result.pathName_ = pathName_;
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         result.description_ = description_;
         onBuilt();
         return result;
@@ -2318,8 +2318,8 @@ public final class ChatfileRpc {
           pathName_ = other.pathName_;
           onChanged();
         }
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (!other.getDescription().isEmpty()) {
           description_ = other.description_;
@@ -2450,48 +2450,48 @@ public final class ChatfileRpc {
         return this;
       }
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * conversation id to receive file
+       * group id to receive file
        * </pre>
        *
-       * <code>bytes conversation_id = 2;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 2;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * conversation id to receive file
+       * group id to receive file
        * </pre>
        *
-       * <code>bytes conversation_id = 2;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 2;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * conversation id to receive file
+       * group id to receive file
        * </pre>
        *
-       * <code>bytes conversation_id = 2;</code>
+       * <code>bytes group_id = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -6923,20 +6923,20 @@ public final class ChatfileRpc {
       "\n\014file_history\030\003 \001(\0132%.qaul.rpc.chatfile" +
       ".FileHistoryRequestH\000\022G\n\025file_history_re" +
       "sponse\030\004 \001(\0132&.qaul.rpc.chatfile.FileHis" +
-      "toryResponseH\000B\t\n\007message\"R\n\017SendFileReq" +
-      "uest\022\021\n\tpath_name\030\001 \001(\t\022\027\n\017conversation_" +
-      "id\030\002 \001(\014\022\023\n\013description\030\003 \001(\t\"C\n\020SendFil" +
-      "eResponse\022\017\n\007success\030\001 \001(\010\022\r\n\005error\030\002 \001(" +
-      "\t\022\017\n\007file_id\030\003 \001(\004\"3\n\022FileHistoryRequest" +
-      "\022\016\n\006offset\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\"\256\001\n\020File" +
-      "HistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_na" +
-      "me\030\002 \001(\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile" +
-      "_size\030\004 \001(\r\022\030\n\020file_description\030\005 \001(\t\022\014\n" +
-      "\004time\030\006 \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_" +
-      "id\030\010 \001(\t\"{\n\023FileHistoryResponse\022\016\n\006offse" +
-      "t\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0226\n" +
-      "\thistories\030\004 \003(\0132#.qaul.rpc.chatfile.Fil" +
-      "eHistoryEntryb\006proto3"
+      "toryResponseH\000B\t\n\007message\"K\n\017SendFileReq" +
+      "uest\022\021\n\tpath_name\030\001 \001(\t\022\020\n\010group_id\030\002 \001(" +
+      "\014\022\023\n\013description\030\003 \001(\t\"C\n\020SendFileRespon" +
+      "se\022\017\n\007success\030\001 \001(\010\022\r\n\005error\030\002 \001(\t\022\017\n\007fi" +
+      "le_id\030\003 \001(\004\"3\n\022FileHistoryRequest\022\016\n\006off" +
+      "set\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\"\256\001\n\020FileHistory" +
+      "Entry\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_name\030\002 \001(" +
+      "\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile_size\030\004" +
+      " \001(\r\022\030\n\020file_description\030\005 \001(\t\022\014\n\004time\030\006" +
+      " \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_id\030\010 \001(" +
+      "\t\"{\n\023FileHistoryResponse\022\016\n\006offset\030\001 \001(\r" +
+      "\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0226\n\thistor" +
+      "ies\030\004 \003(\0132#.qaul.rpc.chatfile.FileHistor" +
+      "yEntryb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -6953,7 +6953,7 @@ public final class ChatfileRpc {
     internal_static_qaul_rpc_chatfile_SendFileRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chatfile_SendFileRequest_descriptor,
-        new java.lang.String[] { "PathName", "ConversationId", "Description", });
+        new java.lang.String[] { "PathName", "GroupId", "Description", });
     internal_static_qaul_rpc_chatfile_SendFileResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_qaul_rpc_chatfile_SendFileResponse_fieldAccessorTable = new

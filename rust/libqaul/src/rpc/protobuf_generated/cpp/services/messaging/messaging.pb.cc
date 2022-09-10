@@ -163,7 +163,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR CommonMessage::CommonMessage(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.conversation_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.sent_at_)*/uint64_t{0u}
   , /*decltype(_impl_.payload_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
@@ -357,7 +357,7 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::CommonMessage, _impl_.message_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::CommonMessage, _impl_.conversation_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::CommonMessage, _impl_.group_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::CommonMessage, _impl_.sent_at_),
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
@@ -477,33 +477,33 @@ const char descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto[] 
   "ation\022\021\n\tsignature\030\001 \001(\014\022\023\n\013received_at\030"
   "\002 \001(\004\"\017\n\rCryptoService\"#\n\020RtcStreamMessa"
   "ge\022\017\n\007content\030\001 \001(\014\"%\n\022GroupInviteMessag"
-  "e\022\017\n\007content\030\001 \001(\014\"\274\002\n\rCommonMessage\022\022\n\n"
-  "message_id\030\001 \001(\014\022\027\n\017conversation_id\030\002 \001("
-  "\014\022\017\n\007sent_at\030\003 \001(\004\0227\n\014chat_message\030\004 \001(\013"
-  "2\037.qaul.net.messaging.ChatMessageH\000\0227\n\014f"
-  "ile_message\030\005 \001(\0132\037.qaul.net.messaging.F"
-  "ileMessageH\000\0229\n\rgroup_message\030\006 \001(\0132 .qa"
-  "ul.net.messaging.GroupMessageH\000\0225\n\013rtc_m"
-  "essage\030\007 \001(\0132\036.qaul.net.messaging.RtcMes"
-  "sageH\000B\t\n\007payload\"\036\n\013ChatMessage\022\017\n\007cont"
-  "ent\030\001 \001(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001("
-  "\014\"\037\n\014GroupMessage\022\017\n\007content\030\001 \001(\014\"\035\n\nRt"
-  "cMessage\022\017\n\007content\030\001 \001(\014\"Z\n\003Dtn\022\023\n\tcont"
-  "ainer\030\001 \001(\014H\000\0223\n\010response\030\002 \001(\0132\037.qaul.n"
-  "et.messaging.DtnResponseH\000B\t\n\007message\"\227\002"
-  "\n\013DtnResponse\022C\n\rresponse_type\030\001 \001(\0162,.q"
-  "aul.net.messaging.DtnResponse.ResponseTy"
-  "pe\022\021\n\tsignature\030\002 \001(\014\0226\n\006reason\030\003 \001(\0162&."
-  "qaul.net.messaging.DtnResponse.Reason\"*\n"
-  "\014ResponseType\022\014\n\010ACCEPTED\020\000\022\014\n\010REJECTED\020"
-  "\001\"L\n\006Reason\022\010\n\004NONE\020\000\022\025\n\021USER_NOT_ACCEPT"
-  "ED\020\001\022\021\n\rOVERALL_QUOTA\020\002\022\016\n\nUSER_QUOTA\020\003*"
-  "5\n\013CryptoState\022\010\n\004NONE\020\000\022\r\n\tHANDSHAKE\020\001\022"
-  "\r\n\tTRANSPORT\020\002b\006proto3"
+  "e\022\017\n\007content\030\001 \001(\014\"\265\002\n\rCommonMessage\022\022\n\n"
+  "message_id\030\001 \001(\014\022\020\n\010group_id\030\002 \001(\014\022\017\n\007se"
+  "nt_at\030\003 \001(\004\0227\n\014chat_message\030\004 \001(\0132\037.qaul"
+  ".net.messaging.ChatMessageH\000\0227\n\014file_mes"
+  "sage\030\005 \001(\0132\037.qaul.net.messaging.FileMess"
+  "ageH\000\0229\n\rgroup_message\030\006 \001(\0132 .qaul.net."
+  "messaging.GroupMessageH\000\0225\n\013rtc_message\030"
+  "\007 \001(\0132\036.qaul.net.messaging.RtcMessageH\000B"
+  "\t\n\007payload\"\036\n\013ChatMessage\022\017\n\007content\030\001 \001"
+  "(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001(\014\"\037\n\014Gr"
+  "oupMessage\022\017\n\007content\030\001 \001(\014\"\035\n\nRtcMessag"
+  "e\022\017\n\007content\030\001 \001(\014\"Z\n\003Dtn\022\023\n\tcontainer\030\001"
+  " \001(\014H\000\0223\n\010response\030\002 \001(\0132\037.qaul.net.mess"
+  "aging.DtnResponseH\000B\t\n\007message\"\227\002\n\013DtnRe"
+  "sponse\022C\n\rresponse_type\030\001 \001(\0162,.qaul.net"
+  ".messaging.DtnResponse.ResponseType\022\021\n\ts"
+  "ignature\030\002 \001(\014\0226\n\006reason\030\003 \001(\0162&.qaul.ne"
+  "t.messaging.DtnResponse.Reason\"*\n\014Respon"
+  "seType\022\014\n\010ACCEPTED\020\000\022\014\n\010REJECTED\020\001\"L\n\006Re"
+  "ason\022\010\n\004NONE\020\000\022\025\n\021USER_NOT_ACCEPTED\020\001\022\021\n"
+  "\rOVERALL_QUOTA\020\002\022\016\n\nUSER_QUOTA\020\003*5\n\013Cryp"
+  "toState\022\010\n\004NONE\020\000\022\r\n\tHANDSHAKE\020\001\022\r\n\tTRAN"
+  "SPORT\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fmessaging_2fmessaging_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fmessaging_2fmessaging_2eproto = {
-    false, false, 1902, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto,
+    false, false, 1895, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto,
     "services/messaging/messaging.proto",
     &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once, nullptr, 0, 17,
     schemas, file_default_instances, TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets,
@@ -3158,7 +3158,7 @@ CommonMessage::CommonMessage(const CommonMessage& from)
   CommonMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.message_id_){}
-    , decltype(_impl_.conversation_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.sent_at_){}
     , decltype(_impl_.payload_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -3173,12 +3173,12 @@ CommonMessage::CommonMessage(const CommonMessage& from)
     _this->_impl_.message_id_.Set(from._internal_message_id(), 
       _this->GetArenaForAllocation());
   }
-  _impl_.conversation_id_.InitDefault();
+  _impl_.group_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_conversation_id().empty()) {
-    _this->_impl_.conversation_id_.Set(from._internal_conversation_id(), 
+  if (!from._internal_group_id().empty()) {
+    _this->_impl_.group_id_.Set(from._internal_group_id(), 
       _this->GetArenaForAllocation());
   }
   _this->_impl_.sent_at_ = from._impl_.sent_at_;
@@ -3217,7 +3217,7 @@ inline void CommonMessage::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_id_){}
-    , decltype(_impl_.conversation_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.sent_at_){uint64_t{0u}}
     , decltype(_impl_.payload_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -3227,9 +3227,9 @@ inline void CommonMessage::SharedCtor(
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.message_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.conversation_id_.InitDefault();
+  _impl_.group_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   clear_has_payload();
 }
@@ -3246,7 +3246,7 @@ CommonMessage::~CommonMessage() {
 inline void CommonMessage::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.message_id_.Destroy();
-  _impl_.conversation_id_.Destroy();
+  _impl_.group_id_.Destroy();
   if (has_payload()) {
     clear_payload();
   }
@@ -3298,7 +3298,7 @@ void CommonMessage::Clear() {
   (void) cached_has_bits;
 
   _impl_.message_id_.ClearToEmpty();
-  _impl_.conversation_id_.ClearToEmpty();
+  _impl_.group_id_.ClearToEmpty();
   _impl_.sent_at_ = uint64_t{0u};
   clear_payload();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -3319,10 +3319,10 @@ const char* CommonMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext*
         } else
           goto handle_unusual;
         continue;
-      // bytes conversation_id = 2;
+      // bytes group_id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          auto str = _internal_mutable_conversation_id();
+          auto str = _internal_mutable_group_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
@@ -3403,10 +3403,10 @@ uint8_t* CommonMessage::_InternalSerialize(
         1, this->_internal_message_id(), target);
   }
 
-  // bytes conversation_id = 2;
-  if (!this->_internal_conversation_id().empty()) {
+  // bytes group_id = 2;
+  if (!this->_internal_group_id().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_conversation_id(), target);
+        2, this->_internal_group_id(), target);
   }
 
   // uint64 sent_at = 3;
@@ -3466,11 +3466,11 @@ size_t CommonMessage::ByteSizeLong() const {
         this->_internal_message_id());
   }
 
-  // bytes conversation_id = 2;
-  if (!this->_internal_conversation_id().empty()) {
+  // bytes group_id = 2;
+  if (!this->_internal_group_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_conversation_id());
+        this->_internal_group_id());
   }
 
   // uint64 sent_at = 3;
@@ -3532,8 +3532,8 @@ void CommonMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::
   if (!from._internal_message_id().empty()) {
     _this->_internal_set_message_id(from._internal_message_id());
   }
-  if (!from._internal_conversation_id().empty()) {
-    _this->_internal_set_conversation_id(from._internal_conversation_id());
+  if (!from._internal_group_id().empty()) {
+    _this->_internal_set_group_id(from._internal_group_id());
   }
   if (from._internal_sent_at() != 0) {
     _this->_internal_set_sent_at(from._internal_sent_at());
@@ -3587,8 +3587,8 @@ void CommonMessage::InternalSwap(CommonMessage* other) {
       &other->_impl_.message_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.conversation_id_, lhs_arena,
-      &other->_impl_.conversation_id_, rhs_arena
+      &_impl_.group_id_, lhs_arena,
+      &other->_impl_.group_id_, rhs_arena
   );
   swap(_impl_.sent_at_, other->_impl_.sent_at_);
   swap(_impl_.payload_, other->_impl_.payload_);

@@ -26,7 +26,7 @@ use std::{
     sync::RwLock,
 };
 
-use super::group::conversation_id::ConversationId;
+use super::group::group_id::GroupId;
 use super::{Chat, ChatStorage};
 use crate::rpc::Rpc;
 use crate::services::messaging::{self, Messaging, MessagingServiceType};
@@ -550,7 +550,7 @@ impl ChatFile {
             )),
         };
 
-        let conversation_id = ConversationId::from_bytes(group_id).unwrap();
+        let groupid = GroupId::from_bytes(group_id).unwrap();
 
         // save file state to data base
         let file_history = FileHistory {
@@ -603,7 +603,7 @@ impl ChatFile {
         ChatStorage::save_outgoing_message(
             &user_account.id,
             &user_account.id,
-            &conversation_id,
+            &groupid,
             &message_id,
             chat_message.clone(),
             super::rpc_proto::MessageStatus::Sending,
@@ -612,7 +612,7 @@ impl ChatFile {
         // update group last_message
         GroupStorage::group_update_last_chat_message(
             user_account.id.clone(),
-            conversation_id.to_bytes(),
+            group_id.to_owned(),
             user_account.id.clone(),
             chat_message.encode_to_vec(),
             file_history.sent_at,
@@ -670,7 +670,7 @@ impl ChatFile {
         // pack file container into common message
         let common_message = messaging::proto::CommonMessage {
             message_id: message_id.clone(),
-            conversation_id: group.id.clone(),
+            group_id: group.id.clone(),
             sent_at: timestamp,
             payload: Some(messaging::proto::common_message::Payload::FileMessage(
                 messaging::proto::FileMessage { content: data },
@@ -966,10 +966,10 @@ impl ChatFile {
         // save to file history
         user_files.save_filehistory(file_info.file_id, file_history.clone());
 
-        // create conversation id
-        let conversation_id;
-        match ConversationId::from_bytes(&group_id) {
-            Ok(result) => conversation_id = result,
+        // create group id
+        let groupid;
+        match GroupId::from_bytes(&group_id) {
+            Ok(result) => groupid = result,
             Err(e) => {
                 log::error!("{}", e);
                 return;
@@ -995,7 +995,7 @@ impl ChatFile {
             &sender_id,
             file_container,
             sent_at,
-            &conversation_id,
+            &groupid,
             &message_id,
             super::rpc_proto::MessageStatus::Receiving,
         );
@@ -1059,7 +1059,7 @@ impl ChatFile {
 
                         if let Err(e) = Self::send(
                             &user_account,
-                            &send_req.conversation_id,
+                            &send_req.group_id,
                             send_req.path_name,
                             send_req.description,
                         ) {

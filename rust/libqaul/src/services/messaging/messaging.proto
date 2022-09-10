@@ -117,8 +117,8 @@ message CommonMessage {
     // message ID
     bytes message_id = 1;
 
-    // conversation id
-    bytes conversation_id = 2;
+    // group id
+    bytes group_id = 2;
 
     // sent at timestamp
     uint64 sent_at = 3;

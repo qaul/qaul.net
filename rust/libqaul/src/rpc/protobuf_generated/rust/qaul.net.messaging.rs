@@ -145,9 +145,9 @@ pub struct CommonMessage {
     /// message ID
     #[prost(bytes="vec", tag="1")]
     pub message_id: ::prost::alloc::vec::Vec<u8>,
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="2")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// sent at timestamp
     #[prost(uint64, tag="3")]
     pub sent_at: u64,

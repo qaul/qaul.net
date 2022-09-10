@@ -13,7 +13,7 @@ impl RtcManaging {
         let sessions = super::RTCSESSIONS.get().read().unwrap();
         for (_id, session) in sessions.sessions.iter() {
             let entry = super::proto_rpc::RtcSession {
-                conversation_id: session.conversation_id.clone(),
+                group_id: session.group_id.clone(),
                 session_type: session.session_type,
                 state: session.state as u32,
                 created_at: session.created_at,
@@ -28,14 +28,14 @@ impl RtcManaging {
         req: &super::proto_rpc::RtcSessionRequest,
     ) -> Result<Vec<u8>, String> {
         //check if session already exists
-        if let Some(_session) = super::Rtc::get_session_from_id(&req.conversation_id) {
+        if let Some(_session) = super::Rtc::get_session_from_id(&req.group_id) {
             return Err("session alrady exists!".to_string());
         }
 
         //insert new session entry
         let session = super::RtcSession {
             user_id: my_user_id.to_bytes(),
-            conversation_id: req.conversation_id.clone(),
+            group_id: req.group_id.clone(),
             session_type: 1,
             state: 1, //sent request
             created_at: timestamp::Timestamp::get_timestamp(),
@@ -55,19 +55,19 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(&req.conversation_id).unwrap();
+            let receiver = PeerId::from_bytes(&req.group_id).unwrap();
             super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
         }
 
-        Ok(req.conversation_id.clone())
+        Ok(req.group_id.clone())
     }
 
     /// send session management message
     fn send_session_management(
         my_user_id: &PeerId,
-        conversation_id: &Vec<u8>,
+        group_id: &Vec<u8>,
         option: u32,
     ) -> Result<bool, String> {
         //send message on the messaging service
@@ -85,7 +85,7 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(conversation_id).unwrap();
+            let receiver = PeerId::from_bytes(group_id).unwrap();
             super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
@@ -99,7 +99,7 @@ impl RtcManaging {
         req: &super::proto_rpc::RtcSessionManagement,
     ) -> Result<Vec<u8>, String> {
         //check if session already exists
-        match super::Rtc::get_session_from_id(&req.conversation_id) {
+        match super::Rtc::get_session_from_id(&req.group_id) {
             Some(mut session) => {
                 match req.option {
                     1 => {
@@ -110,24 +110,22 @@ impl RtcManaging {
                     }
                     2 => {
                         //decline
-                        super::Rtc::remove_session(&req.conversation_id);
+                        super::Rtc::remove_session(&req.group_id);
                     }
                     3 => {
                         //end
-                        super::Rtc::remove_session(&req.conversation_id);
+                        super::Rtc::remove_session(&req.group_id);
                     }
                     _ => {
                         return Err("unknown session management option".to_string());
                     }
                 }
-                if let Err(error) = Self::send_session_management(
-                    my_user_id,
-                    &session.conversation_id.clone(),
-                    req.option,
-                ) {
+                if let Err(error) =
+                    Self::send_session_management(my_user_id, &session.group_id.clone(), req.option)
+                {
                     return Err(error);
                 }
-                Ok(session.conversation_id.clone())
+                Ok(session.group_id.clone())
             }
             None => Err("session dese not exists!".to_string()),
         }
@@ -148,7 +146,7 @@ impl RtcManaging {
         // make new entry
         let session = super::RtcSession {
             user_id: receiver_id.to_bytes(),
-            conversation_id: sender_id.to_bytes(),
+            group_id: sender_id.to_bytes(),
             session_type: 1,
             state: 2, //received state
             created_at: timestamp::Timestamp::get_timestamp(),

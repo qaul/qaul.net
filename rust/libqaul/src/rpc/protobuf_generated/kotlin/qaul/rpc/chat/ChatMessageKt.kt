@@ -252,27 +252,27 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 5;</code>
+     * <code>bytes group_id = 5;</code>
      */
-    var conversationId: com.google.protobuf.ByteString
-      @JvmName("getConversationId")
-      get() = _builder.getConversationId()
-      @JvmName("setConversationId")
+    var groupId: com.google.protobuf.ByteString
+      @JvmName("getGroupId")
+      get() = _builder.getGroupId()
+      @JvmName("setGroupId")
       set(value) {
-        _builder.setConversationId(value)
+        _builder.setGroupId(value)
       }
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 5;</code>
+     * <code>bytes group_id = 5;</code>
      */
-    fun clearConversationId() {
-      _builder.clearConversationId()
+    fun clearGroupId() {
+      _builder.clearGroupId()
     }
 
     /**

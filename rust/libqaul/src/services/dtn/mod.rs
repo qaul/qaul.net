@@ -82,11 +82,11 @@ impl Dtn {
         STORAGESTATE.set(RwLock::new(storage_state));
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
-            return Err("Conversation ID not long enough".to_string());
+            return Err("Group ID not long enough".to_string());
         }
 
         // convert input

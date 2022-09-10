@@ -141,7 +141,7 @@ const CommonMessage$json = const {
   '1': 'CommonMessage',
   '2': const [
     const {'1': 'message_id', '3': 1, '4': 1, '5': 12, '10': 'messageId'},
-    const {'1': 'conversation_id', '3': 2, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 2, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'sent_at', '3': 3, '4': 1, '5': 4, '10': 'sentAt'},
     const {'1': 'chat_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.ChatMessage', '9': 0, '10': 'chatMessage'},
     const {'1': 'file_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.FileMessage', '9': 0, '10': 'fileMessage'},
@@ -154,7 +154,7 @@ const CommonMessage$json = const {
 };
 
 /// Descriptor for `CommonMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List commonMessageDescriptor = $convert.base64Decode('Cg1Db21tb25NZXNzYWdlEh0KCm1lc3NhZ2VfaWQYASABKAxSCW1lc3NhZ2VJZBInCg9jb252ZXJzYXRpb25faWQYAiABKAxSDmNvbnZlcnNhdGlvbklkEhcKB3NlbnRfYXQYAyABKARSBnNlbnRBdBJECgxjaGF0X21lc3NhZ2UYBCABKAsyHy5xYXVsLm5ldC5tZXNzYWdpbmcuQ2hhdE1lc3NhZ2VIAFILY2hhdE1lc3NhZ2USRAoMZmlsZV9tZXNzYWdlGAUgASgLMh8ucWF1bC5uZXQubWVzc2FnaW5nLkZpbGVNZXNzYWdlSABSC2ZpbGVNZXNzYWdlEkcKDWdyb3VwX21lc3NhZ2UYBiABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuR3JvdXBNZXNzYWdlSABSDGdyb3VwTWVzc2FnZRJBCgtydGNfbWVzc2FnZRgHIAEoCzIeLnFhdWwubmV0Lm1lc3NhZ2luZy5SdGNNZXNzYWdlSABSCnJ0Y01lc3NhZ2VCCQoHcGF5bG9hZA==');
+final $typed_data.Uint8List commonMessageDescriptor = $convert.base64Decode('Cg1Db21tb25NZXNzYWdlEh0KCm1lc3NhZ2VfaWQYASABKAxSCW1lc3NhZ2VJZBIZCghncm91cF9pZBgCIAEoDFIHZ3JvdXBJZBIXCgdzZW50X2F0GAMgASgEUgZzZW50QXQSRAoMY2hhdF9tZXNzYWdlGAQgASgLMh8ucWF1bC5uZXQubWVzc2FnaW5nLkNoYXRNZXNzYWdlSABSC2NoYXRNZXNzYWdlEkQKDGZpbGVfbWVzc2FnZRgFIAEoCzIfLnFhdWwubmV0Lm1lc3NhZ2luZy5GaWxlTWVzc2FnZUgAUgtmaWxlTWVzc2FnZRJHCg1ncm91cF9tZXNzYWdlGAYgASgLMiAucWF1bC5uZXQubWVzc2FnaW5nLkdyb3VwTWVzc2FnZUgAUgxncm91cE1lc3NhZ2USQQoLcnRjX21lc3NhZ2UYByABKAsyHi5xYXVsLm5ldC5tZXNzYWdpbmcuUnRjTWVzc2FnZUgAUgpydGNNZXNzYWdlQgkKB3BheWxvYWQ=');
 @$core.Deprecated('Use chatMessageDescriptor instead')
 const ChatMessage$json = const {
   '1': 'ChatMessage',

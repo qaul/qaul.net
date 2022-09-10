@@ -407,8 +407,8 @@ struct Qaul_Net_Messaging_CommonMessage {
   /// message ID
   var messageID: Data = Data()
 
-  /// conversation id
-  var conversationID: Data = Data()
+  /// group id
+  var groupID: Data = Data()
 
   /// sent at timestamp
   var sentAt: UInt64 = 0
@@ -1236,7 +1236,7 @@ extension Qaul_Net_Messaging_CommonMessage: SwiftProtobuf.Message, SwiftProtobuf
   static let protoMessageName: String = _protobuf_package + ".CommonMessage"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "message_id"),
-    2: .standard(proto: "conversation_id"),
+    2: .standard(proto: "group_id"),
     3: .standard(proto: "sent_at"),
     4: .standard(proto: "chat_message"),
     5: .standard(proto: "file_message"),
@@ -1251,7 +1251,7 @@ extension Qaul_Net_Messaging_CommonMessage: SwiftProtobuf.Message, SwiftProtobuf
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.messageID) }()
-      case 2: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.sentAt) }()
       case 4: try {
         var v: Qaul_Net_Messaging_ChatMessage?
@@ -1318,8 +1318,8 @@ extension Qaul_Net_Messaging_CommonMessage: SwiftProtobuf.Message, SwiftProtobuf
     if !self.messageID.isEmpty {
       try visitor.visitSingularBytesField(value: self.messageID, fieldNumber: 1)
     }
-    if !self.conversationID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 2)
+    if !self.groupID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.groupID, fieldNumber: 2)
     }
     if self.sentAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.sentAt, fieldNumber: 3)
@@ -1348,7 +1348,7 @@ extension Qaul_Net_Messaging_CommonMessage: SwiftProtobuf.Message, SwiftProtobuf
 
   static func ==(lhs: Qaul_Net_Messaging_CommonMessage, rhs: Qaul_Net_Messaging_CommonMessage) -> Bool {
     if lhs.messageID != rhs.messageID {return false}
-    if lhs.conversationID != rhs.conversationID {return false}
+    if lhs.groupID != rhs.groupID {return false}
     if lhs.sentAt != rhs.sentAt {return false}
     if lhs.payload != rhs.payload {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

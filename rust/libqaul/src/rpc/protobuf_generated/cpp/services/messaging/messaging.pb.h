@@ -2105,7 +2105,7 @@ class CommonMessage final :
 
   enum : int {
     kMessageIdFieldNumber = 1,
-    kConversationIdFieldNumber = 2,
+    kGroupIdFieldNumber = 2,
     kSentAtFieldNumber = 3,
     kChatMessageFieldNumber = 4,
     kFileMessageFieldNumber = 5,
@@ -2126,18 +2126,18 @@ class CommonMessage final :
   std::string* _internal_mutable_message_id();
   public:
 
-  // bytes conversation_id = 2;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 2;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // uint64 sent_at = 3;
@@ -2239,7 +2239,7 @@ class CommonMessage final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_id_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     uint64_t sent_at_;
     union PayloadUnion {
       constexpr PayloadUnion() : _constinit_{} {}
@@ -4627,54 +4627,54 @@ inline void CommonMessage::set_allocated_message_id(std::string* message_id) {
   // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.CommonMessage.message_id)
 }
 
-// bytes conversation_id = 2;
-inline void CommonMessage::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 2;
+inline void CommonMessage::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& CommonMessage::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.CommonMessage.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& CommonMessage::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.CommonMessage.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void CommonMessage::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void CommonMessage::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.CommonMessage.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.CommonMessage.group_id)
 }
-inline std::string* CommonMessage::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.CommonMessage.conversation_id)
+inline std::string* CommonMessage::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.CommonMessage.group_id)
   return _s;
 }
-inline const std::string& CommonMessage::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& CommonMessage::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void CommonMessage::_internal_set_conversation_id(const std::string& value) {
+inline void CommonMessage::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* CommonMessage::_internal_mutable_conversation_id() {
+inline std::string* CommonMessage::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* CommonMessage::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.net.messaging.CommonMessage.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* CommonMessage::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.CommonMessage.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void CommonMessage::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void CommonMessage::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.CommonMessage.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.CommonMessage.group_id)
 }
 
 // uint64 sent_at = 3;

@@ -3279,14 +3279,14 @@ public final class UsersOuterClass {
 
     /**
      * <pre>
-     * direct chat conversation ID
+     * direct chat group id
      * this is a predictable 16 bytes UUID
      * </pre>
      *
-     * <code>bytes conversation_id = 3;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 3;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -3366,7 +3366,7 @@ public final class UsersOuterClass {
     private UserEntry() {
       name_ = "";
       id_ = com.google.protobuf.ByteString.EMPTY;
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
       keyBase58_ = "";
       connectivity_ = 0;
     }
@@ -3414,7 +3414,7 @@ public final class UsersOuterClass {
             }
             case 26: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 58: {
@@ -3534,20 +3534,20 @@ public final class UsersOuterClass {
       return id_;
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * direct chat conversation ID
+     * direct chat group id
      * this is a predictable 16 bytes UUID
      * </pre>
      *
-     * <code>bytes conversation_id = 3;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 3;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int KEY_BASE58_FIELD_NUMBER = 7;
@@ -3673,8 +3673,8 @@ public final class UsersOuterClass {
       if (!id_.isEmpty()) {
         output.writeBytes(2, id_);
       }
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(3, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(3, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, keyBase58_);
@@ -3704,9 +3704,9 @@ public final class UsersOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, id_);
       }
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, conversationId_);
+          .computeBytesSize(3, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyBase58_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, keyBase58_);
@@ -3742,8 +3742,8 @@ public final class UsersOuterClass {
           .equals(other.getName())) return false;
       if (!getId()
           .equals(other.getId())) return false;
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (!getKeyBase58()
           .equals(other.getKeyBase58())) return false;
       if (connectivity_ != other.connectivity_) return false;
@@ -3766,8 +3766,8 @@ public final class UsersOuterClass {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + getId().hashCode();
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + KEY_BASE58_FIELD_NUMBER;
       hash = (53 * hash) + getKeyBase58().hashCode();
       hash = (37 * hash) + CONNECTIVITY_FIELD_NUMBER;
@@ -3919,7 +3919,7 @@ public final class UsersOuterClass {
 
         id_ = com.google.protobuf.ByteString.EMPTY;
 
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         keyBase58_ = "";
 
@@ -3957,7 +3957,7 @@ public final class UsersOuterClass {
         qaul.rpc.users.UsersOuterClass.UserEntry result = new qaul.rpc.users.UsersOuterClass.UserEntry(this);
         result.name_ = name_;
         result.id_ = id_;
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         result.keyBase58_ = keyBase58_;
         result.connectivity_ = connectivity_;
         result.verified_ = verified_;
@@ -4017,8 +4017,8 @@ public final class UsersOuterClass {
         if (other.getId() != com.google.protobuf.ByteString.EMPTY) {
           setId(other.getId());
         }
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (!other.getKeyBase58().isEmpty()) {
           keyBase58_ = other.keyBase58_;
@@ -4204,51 +4204,51 @@ public final class UsersOuterClass {
         return this;
       }
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * direct chat conversation ID
+       * direct chat group id
        * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes conversation_id = 3;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 3;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * direct chat conversation ID
+       * direct chat group id
        * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes conversation_id = 3;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 3;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * direct chat conversation ID
+       * direct chat group id
        * this is a predictable 16 bytes UUID
        * </pre>
        *
-       * <code>bytes conversation_id = 3;</code>
+       * <code>bytes group_id = 3;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -4604,12 +4604,12 @@ public final class UsersOuterClass {
       ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use" +
       "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis" +
       "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt" +
-      "ry\"\251\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
-      "(\014\022\027\n\017conversation_id\030\003 \001(\014\022\022\n\nkey_base5" +
-      "8\030\007 \001(\t\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc" +
-      ".users.Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n" +
-      "\007blocked\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online" +
-      "\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto3"
+      "ry\"\242\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
+      "(\014\022\020\n\010group_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t" +
+      "\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc.users." +
+      "Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocke" +
+      "d\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tR" +
+      "eachable\020\001\022\013\n\007Offline\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4644,7 +4644,7 @@ public final class UsersOuterClass {
     internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserEntry_descriptor,
-        new java.lang.String[] { "Name", "Id", "ConversationId", "KeyBase58", "Connectivity", "Verified", "Blocked", });
+        new java.lang.String[] { "Name", "Id", "GroupId", "KeyBase58", "Connectivity", "Verified", "Blocked", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -56,24 +56,24 @@ final $typed_data.Uint8List chatDescriptor = $convert.base64Decode('CgRDaGF0ElsK
 const ChatConversationRequest$json = const {
   '1': 'ChatConversationRequest',
   '2': const [
-    const {'1': 'conversation_id', '3': 1, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'last_index', '3': 2, '4': 1, '5': 4, '10': 'lastIndex'},
   ],
 };
 
 /// Descriptor for `ChatConversationRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatConversationRequestDescriptor = $convert.base64Decode('ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBInCg9jb252ZXJzYXRpb25faWQYASABKAxSDmNvbnZlcnNhdGlvbklkEh0KCmxhc3RfaW5kZXgYAiABKARSCWxhc3RJbmRleA==');
+final $typed_data.Uint8List chatConversationRequestDescriptor = $convert.base64Decode('ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIdCgpsYXN0X2luZGV4GAIgASgEUglsYXN0SW5kZXg=');
 @$core.Deprecated('Use chatConversationListDescriptor instead')
 const ChatConversationList$json = const {
   '1': 'ChatConversationList',
   '2': const [
-    const {'1': 'conversation_id', '3': 1, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'message_list', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.chat.ChatMessage', '10': 'messageList'},
   ],
 };
 
 /// Descriptor for `ChatConversationList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatConversationListDescriptor = $convert.base64Decode('ChRDaGF0Q29udmVyc2F0aW9uTGlzdBInCg9jb252ZXJzYXRpb25faWQYASABKAxSDmNvbnZlcnNhdGlvbklkEj0KDG1lc3NhZ2VfbGlzdBgCIAMoCzIaLnFhdWwucnBjLmNoYXQuQ2hhdE1lc3NhZ2VSC21lc3NhZ2VMaXN0');
+final $typed_data.Uint8List chatConversationListDescriptor = $convert.base64Decode('ChRDaGF0Q29udmVyc2F0aW9uTGlzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBI9CgxtZXNzYWdlX2xpc3QYAiADKAsyGi5xYXVsLnJwYy5jaGF0LkNoYXRNZXNzYWdlUgttZXNzYWdlTGlzdA==');
 @$core.Deprecated('Use chatMessageDescriptor instead')
 const ChatMessage$json = const {
   '1': 'ChatMessage',
@@ -83,7 +83,7 @@ const ChatMessage$json = const {
     const {'1': 'message_id', '3': 3, '4': 1, '5': 12, '10': 'messageId'},
     const {'1': 'status', '3': 4, '4': 1, '5': 14, '6': '.qaul.rpc.chat.MessageStatus', '10': 'status'},
     const {'1': 'message_reception_confirmed', '3': 10, '4': 3, '5': 11, '6': '.qaul.rpc.chat.MessageReceptionConfirmed', '10': 'messageReceptionConfirmed'},
-    const {'1': 'conversation_id', '3': 5, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 5, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'sent_at', '3': 6, '4': 1, '5': 4, '10': 'sentAt'},
     const {'1': 'received_at', '3': 7, '4': 1, '5': 4, '10': 'receivedAt'},
     const {'1': 'content', '3': 8, '4': 1, '5': 12, '10': 'content'},
@@ -91,7 +91,7 @@ const ChatMessage$json = const {
 };
 
 /// Descriptor for `ChatMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatMessageDescriptor = $convert.base64Decode('CgtDaGF0TWVzc2FnZRIUCgVpbmRleBgBIAEoBFIFaW5kZXgSGwoJc2VuZGVyX2lkGAIgASgMUghzZW5kZXJJZBIdCgptZXNzYWdlX2lkGAMgASgMUgltZXNzYWdlSWQSNAoGc3RhdHVzGAQgASgOMhwucWF1bC5ycGMuY2hhdC5NZXNzYWdlU3RhdHVzUgZzdGF0dXMSaAobbWVzc2FnZV9yZWNlcHRpb25fY29uZmlybWVkGAogAygLMigucWF1bC5ycGMuY2hhdC5NZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkUhltZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkEicKD2NvbnZlcnNhdGlvbl9pZBgFIAEoDFIOY29udmVyc2F0aW9uSWQSFwoHc2VudF9hdBgGIAEoBFIGc2VudEF0Eh8KC3JlY2VpdmVkX2F0GAcgASgEUgpyZWNlaXZlZEF0EhgKB2NvbnRlbnQYCCABKAxSB2NvbnRlbnQ=');
+final $typed_data.Uint8List chatMessageDescriptor = $convert.base64Decode('CgtDaGF0TWVzc2FnZRIUCgVpbmRleBgBIAEoBFIFaW5kZXgSGwoJc2VuZGVyX2lkGAIgASgMUghzZW5kZXJJZBIdCgptZXNzYWdlX2lkGAMgASgMUgltZXNzYWdlSWQSNAoGc3RhdHVzGAQgASgOMhwucWF1bC5ycGMuY2hhdC5NZXNzYWdlU3RhdHVzUgZzdGF0dXMSaAobbWVzc2FnZV9yZWNlcHRpb25fY29uZmlybWVkGAogAygLMigucWF1bC5ycGMuY2hhdC5NZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkUhltZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkEhkKCGdyb3VwX2lkGAUgASgMUgdncm91cElkEhcKB3NlbnRfYXQYBiABKARSBnNlbnRBdBIfCgtyZWNlaXZlZF9hdBgHIAEoBFIKcmVjZWl2ZWRBdBIYCgdjb250ZW50GAggASgMUgdjb250ZW50');
 @$core.Deprecated('Use messageReceptionConfirmedDescriptor instead')
 const MessageReceptionConfirmed$json = const {
   '1': 'MessageReceptionConfirmed',
@@ -157,10 +157,10 @@ final $typed_data.Uint8List groupEventDescriptor = $convert.base64Decode('CgpHcm
 const ChatMessageSend$json = const {
   '1': 'ChatMessageSend',
   '2': const [
-    const {'1': 'conversation_id', '3': 1, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'content', '3': 2, '4': 1, '5': 9, '10': 'content'},
   ],
 };
 
 /// Descriptor for `ChatMessageSend`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatMessageSendDescriptor = $convert.base64Decode('Cg9DaGF0TWVzc2FnZVNlbmQSJwoPY29udmVyc2F0aW9uX2lkGAEgASgMUg5jb252ZXJzYXRpb25JZBIYCgdjb250ZW50GAIgASgJUgdjb250ZW50');
+final $typed_data.Uint8List chatMessageSendDescriptor = $convert.base64Decode('Cg9DaGF0TWVzc2FnZVNlbmQSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSGAoHY29udGVudBgCIAEoCVIHY29udGVudA==');

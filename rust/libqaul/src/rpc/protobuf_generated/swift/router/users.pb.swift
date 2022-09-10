@@ -200,10 +200,10 @@ struct Qaul_Rpc_Users_UserEntry {
   /// user ID (38 Byte PeerID)
   var id: Data = Data()
 
-  /// direct chat conversation ID
+  /// direct chat group id
   ///
   /// this is a predictable 16 bytes UUID
-  var conversationID: Data = Data()
+  var groupID: Data = Data()
 
   /// base58 string of public key
   var keyBase58: String = String()
@@ -415,7 +415,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "name"),
     2: .same(proto: "id"),
-    3: .standard(proto: "conversation_id"),
+    3: .standard(proto: "group_id"),
     7: .standard(proto: "key_base58"),
     8: .same(proto: "connectivity"),
     9: .same(proto: "verified"),
@@ -430,7 +430,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.id) }()
-      case 3: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.keyBase58) }()
       case 8: try { try decoder.decodeSingularEnumField(value: &self.connectivity) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.verified) }()
@@ -447,8 +447,8 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.id.isEmpty {
       try visitor.visitSingularBytesField(value: self.id, fieldNumber: 2)
     }
-    if !self.conversationID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 3)
+    if !self.groupID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.groupID, fieldNumber: 3)
     }
     if !self.keyBase58.isEmpty {
       try visitor.visitSingularStringField(value: self.keyBase58, fieldNumber: 7)
@@ -468,7 +468,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static func ==(lhs: Qaul_Rpc_Users_UserEntry, rhs: Qaul_Rpc_Users_UserEntry) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.id != rhs.id {return false}
-    if lhs.conversationID != rhs.conversationID {return false}
+    if lhs.groupID != rhs.groupID {return false}
     if lhs.keyBase58 != rhs.keyBase58 {return false}
     if lhs.connectivity != rhs.connectivity {return false}
     if lhs.verified != rhs.verified {return false}

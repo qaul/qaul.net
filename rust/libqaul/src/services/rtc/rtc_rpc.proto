@@ -24,49 +24,47 @@ message RtcRpc {
 
 // rtc session request
 message RtcSessionRequest {
-    // conversation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
 }
 
 // rtc session response
 message RtcSessionResponse {
-    // conversation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
 }
 
 // rtc session management
 message RtcSessionManagement {
-    // conversation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
     // option
     uint32 option = 2;
 }
 
 // rtc outgoing
 message RtcOutgoing {
-    // converssation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
     // content
     bytes content = 2;
 }
 
 // rtc incoming
 message RtcIncoming {
-    // converssation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
     // content
     bytes content = 2;
 }
 
 // rtc sessions
-message RtcSessionListRequest{
+message RtcSessionListRequest {}
 
-}
-
-// rtc session 
-message RtcSession{
-    // conversation Id
-    bytes conversation_id = 1;
+// rtc session
+message RtcSession {
+    // group id
+    bytes group_id = 1;
     // session type
     uint32 session_type = 2;
     // stste
@@ -76,8 +74,7 @@ message RtcSession{
 }
 
 // rtc session list response
-message RtcSessionListResponse{
+message RtcSessionListResponse {
     // session list
     repeated RtcSession sessions = 1;
 }
-

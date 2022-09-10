@@ -19,7 +19,7 @@ mod rtc_messaging;
 
 use super::chat::Chat;
 use super::group;
-use super::group::conversation_id::ConversationId;
+use super::group::group_id::GroupId;
 use super::messaging::{proto, Messaging, MessagingServiceType};
 use crate::utilities::timestamp;
 use rtc_managing::RtcManaging;
@@ -39,8 +39,8 @@ pub mod proto_net {
 pub struct RtcSession {
     // user id
     pub user_id: Vec<u8>,
-    // conversation id
-    pub conversation_id: Vec<u8>,
+    // group id
+    pub group_id: Vec<u8>,
     // session type
     pub session_type: u32,
     // created at
@@ -52,7 +52,7 @@ pub struct RtcSession {
 /// Structure to management for sessions.
 #[derive(Clone)]
 pub struct RtcSessions {
-    // id mapping conversation id => session
+    // id mapping group id => session
     pub sessions: BTreeMap<Vec<u8>, RtcSession>,
 }
 
@@ -72,10 +72,10 @@ impl Rtc {
     }
 
     /// get session from session_id
-    pub fn get_session_from_id(converssation_id: &Vec<u8>) -> Option<RtcSession> {
+    pub fn get_session_from_id(group_id: &Vec<u8>) -> Option<RtcSession> {
         let sessions = RTCSESSIONS.get().read().unwrap();
-        if sessions.sessions.contains_key(converssation_id) {
-            return Some(sessions.sessions.get(converssation_id).unwrap().clone());
+        if sessions.sessions.contains_key(group_id) {
+            return Some(sessions.sessions.get(group_id).unwrap().clone());
         }
         None
     }
@@ -83,9 +83,7 @@ impl Rtc {
     /// get session from session_id
     pub fn update_session(session: RtcSession) {
         let mut sessions = RTCSESSIONS.get().write().unwrap();
-        sessions
-            .sessions
-            .insert(session.conversation_id.clone(), session);
+        sessions.sessions.insert(session.group_id.clone(), session);
     }
 
     /// remove session on the storage
@@ -101,7 +99,7 @@ impl Rtc {
         data: &Vec<u8>,
     ) {
         // create direct chat room
-        let group_id = ConversationId::from_peers(&user_account.id, &receiver);
+        let group_id = GroupId::from_peers(&user_account.id, &receiver);
         if !group::GroupStorage::group_exists(user_account.id, group_id.to_bytes()) {
             group::Manage::create_new_direct_chat_group(&user_account.id, &receiver);
         }
@@ -127,7 +125,7 @@ impl Rtc {
         let message_id = Chat::generate_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
-            conversation_id: group_id.to_bytes(),
+            group_id: group_id.to_bytes(),
             sent_at: timestamp::Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::RtcMessage(
                 proto::RtcMessage {
@@ -215,7 +213,7 @@ impl Rtc {
                                 let proto_message = proto_rpc::RtcRpc {
                                     message: Some(proto_rpc::rtc_rpc::Message::RtcSessionResponse(
                                         proto_rpc::RtcSessionResponse {
-                                            conversation_id: session_req.conversation_id.clone(),
+                                            group_id: session_req.group_id.clone(),
                                         },
                                     )),
                                 };

@@ -1,9 +1,9 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Chat Conversation ID
+//! # Chat Group ID
 //!
-//! A conversation id is a 16 Byte UUID
+//! A group id is a 16 Byte UUID
 //!
 //! For group chats this is a random 16 Byte UUID
 //!
@@ -16,84 +16,82 @@ use uuid::Uuid;
 
 use crate::utilities::qaul_id::QaulId;
 
-/// Chat Conversation ID Structure
-pub struct ConversationId {
-    /// conversation ID byte vector
+/// Chat Group ID Structure
+pub struct GroupId {
+    /// group id byte vector
     pub id: Vec<u8>,
 }
 
-impl ConversationId {
-    /// creates a conversation ID from a bytes vector
-    pub fn from_bytes(id: &Vec<u8>) -> Result<ConversationId, String> {
+impl GroupId {
+    /// creates a group id from a bytes vector
+    pub fn from_bytes(id: &Vec<u8>) -> Result<GroupId, String> {
         if id.len() == 16 {
-            Ok(ConversationId { id: id.clone() })
+            Ok(GroupId { id: id.clone() })
         } else {
             Err("invalid length".to_string())
         }
     }
 
-    /// create conversation ID for a direct chat from two user ids
+    /// create group id for a direct chat from two user ids
     ///
-    /// This generates a predictable conversation ID which
+    /// This generates a predictable group id which
     /// is a combination of the q8id's of the users.
-    pub fn from_peers(user_id_1: &PeerId, user_id_2: &PeerId) -> ConversationId {
+    pub fn from_peers(user_id_1: &PeerId, user_id_2: &PeerId) -> GroupId {
         let q8id_1 = QaulId::to_q8id(user_id_1.to_owned());
         let q8id_2 = QaulId::to_q8id(user_id_2.to_owned());
 
         Self::from_q8ids(q8id_1, q8id_2)
     }
 
-    /// creates a conversation ID from two q8id's
-    pub fn from_q8ids(q8id_1: Vec<u8>, q8id_2: Vec<u8>) -> ConversationId {
+    /// creates a group id from two q8id's
+    pub fn from_q8ids(q8id_1: Vec<u8>, q8id_2: Vec<u8>) -> GroupId {
         let mut ids: Vec<Vec<u8>> = Vec::new();
         ids.push(q8id_1);
         ids.push(q8id_2);
 
         ids.sort();
 
-        let mut conversation_id: Vec<u8> = Vec::new();
-        conversation_id.extend(ids[0].clone());
-        conversation_id.extend(ids[1].clone());
+        let mut group_id: Vec<u8> = Vec::new();
+        group_id.extend(ids[0].clone());
+        group_id.extend(ids[1].clone());
 
-        ConversationId {
-            id: conversation_id,
-        }
+        GroupId { id: group_id }
     }
 
-    /// get the bytes vector from conversation ID
+    /// get the bytes vector from group id
     pub fn to_bytes(&self) -> Vec<u8> {
         self.id.clone()
     }
 
-    /// get the base58 encoded conversation ID
+    /// get the base58 encoded group id
     pub fn to_base58(&self) -> String {
         bs58::encode(self.to_bytes()).into_string()
     }
 
-    /// get the conversation ID as a hyphenated uuid string
+    /// get the group id as a hyphenated uuid string
     pub fn to_string(&self) -> String {
-        let conversation_uuid;
+        let group_uuid;
         match Uuid::from_slice(&self.id) {
             Ok(uuid) => {
-                conversation_uuid = uuid.hyphenated().to_string();
+                group_uuid = uuid.hyphenated().to_string();
             }
             Err(e) => {
                 log::error!("{}", e);
-                conversation_uuid = "UUID_ERROR".to_string();
+                group_uuid = "UUID_ERROR".to_string();
             }
         }
 
-        conversation_uuid
+        group_uuid
     }
 
-    /// split a direct conversation_id into it's q8id's
+    /// split a direct group_id into it's q8id's
     ///
     /// returns a tuple with both id's
     pub fn to_q8ids(&self) -> (Vec<u8>, Vec<u8>) {
         (self.id[0..8].to_owned(), self.id[8..16].to_owned())
     }
 
-    /// check if the conversation ID is a direct chat
+    /// check if the group id is a direct chat
     ///
     /// Returns the q8id of the chat partner if yes.
     /// Returns None if it is not a direct chat ID
@@ -134,7 +132,7 @@ impl ConversationId {
     }
 }
 
-impl PartialEq for ConversationId {
+impl PartialEq for GroupId {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }

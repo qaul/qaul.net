@@ -16,7 +16,7 @@ use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
-use crate::services::group::conversation_id::ConversationId;
+use crate::services::group::group_id::GroupId;
 use crate::storage::database::DbUsers;
 use crate::utilities::qaul_id::QaulId;
 
@@ -240,15 +240,15 @@ impl Users {
                                 let (_key_type, key_base58) =
                                     Self::get_protobuf_public_key(user.key.clone());
 
-                                // create conversation ID
-                                let conversation_id =
-                                    ConversationId::from_peers(&account.id, &user.id).to_bytes();
+                                // create group id
+                                let group_id =
+                                    GroupId::from_peers(&account.id, &user.id).to_bytes();
 
                                 // create user entry message
                                 let user_entry = proto::UserEntry {
                                     name: user.name.clone(),
                                     id: user.id.to_bytes(),
-                                    conversation_id,
+                                    group_id,
                                     key_base58,
                                     connectivity: 0,
                                     verified: user.verified,
@@ -298,16 +298,15 @@ impl Users {
                                     let (_key_type, key_base58) =
                                         Self::get_protobuf_public_key(user.key.clone());
 
-                                    // create conversation ID
-                                    let conversation_id =
-                                        ConversationId::from_peers(&account.id, &user.id)
-                                            .to_bytes();
+                                    // create group id
+                                    let group_id =
+                                        GroupId::from_peers(&account.id, &user.id).to_bytes();
 
                                     // create user entry message
                                     let user_entry = proto::UserEntry {
                                         name: user.name.clone(),
                                         id: user.id.to_bytes(),
-                                        conversation_id,
+                                        group_id,
                                         key_base58,
                                         connectivity: 0,
                                         verified: user.verified,

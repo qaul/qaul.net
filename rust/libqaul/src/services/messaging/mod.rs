@@ -115,7 +115,7 @@ pub struct Messaging {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FailedMessage {
     pub user_id: Vec<u8>,
-    pub conversation_id: Vec<u8>,
+    pub group_id: Vec<u8>,
     pub created_at: u64,
     pub last_try: u64,
     pub try_count: u32,

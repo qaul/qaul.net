@@ -41,11 +41,11 @@ pub struct UserEntry {
     /// user ID (38 Byte PeerID)
     #[prost(bytes="vec", tag="2")]
     pub id: ::prost::alloc::vec::Vec<u8>,
-    /// direct chat conversation ID
+    /// direct chat group id
     ///
     /// this is a predictable 16 bytes UUID
     #[prost(bytes="vec", tag="3")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// base58 string of public key
     #[prost(string, tag="7")]
     pub key_base58: ::prost::alloc::string::String,

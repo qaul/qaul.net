@@ -26,24 +26,22 @@ impl ChatFile {
                 let command_string = cmd.strip_prefix("send ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    let conversation_id;
-                    // convert conversation id from string to binary version
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
+                if let Some(group_id_str) = iter.next() {
+                    let group_id;
+                    // convert group id from string to binary version
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(id) => {
-                            conversation_id = id.clone();
+                            group_id = id.clone();
                         }
-                        Err(_e) => {
-                            match Self::uuid_string_to_bin(conversation_id_str.to_string()) {
-                                Ok(id) => {
-                                    conversation_id = id.clone();
-                                }
-                                _ => {
-                                    log::error!("Invalid conversation id");
-                                    return;
-                                }
+                        Err(_e) => match Self::uuid_string_to_bin(group_id_str.to_string()) {
+                            Ok(id) => {
+                                group_id = id.clone();
                             }
-                        }
+                            _ => {
+                                log::error!("Invalid group id");
+                                return;
+                            }
+                        },
                     }
 
                     if let Some(file_path_name) = iter.next() {
@@ -54,12 +52,12 @@ impl ChatFile {
 
                         log::info!(
                             "send file peerid= {}, file={}, descr={}",
-                            conversation_id_str,
+                            group_id_str,
                             file_path_name,
                             descr
                         );
 
-                        Self::send_file(conversation_id, file_path_name.to_string(), descr);
+                        Self::send_file(group_id, file_path_name.to_string(), descr);
                     } else {
                         log::error!("file pathname is not given");
                     }
@@ -92,11 +90,11 @@ impl ChatFile {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
-            return Err("Conversation ID not long enough".to_string());
+            return Err("Group ID not long enough".to_string());
         }
 
         // convert input
@@ -109,7 +107,7 @@ impl ChatFile {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id) => Ok(id.as_bytes().to_vec()),
@@ -118,13 +116,13 @@ impl ChatFile {
     }
 
     /// send file via rpc
-    fn send_file(conversation_id: Vec<u8>, file_name: String, description: String) {
+    fn send_file(group_id: Vec<u8>, file_name: String, description: String) {
         // create file send message
         let proto_message = proto::ChatFile {
             message: Some(proto::chat_file::Message::SendFileRequest(
                 proto::SendFileRequest {
                     path_name: file_name.clone(),
-                    conversation_id: conversation_id.clone(),
+                    group_id: group_id.clone(),
                     description: description.clone(),
                 },
             )),

@@ -40,7 +40,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR SendFileRequest::SendFileRequest(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.path_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.conversation_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.description_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct SendFileRequestDefaultTypeInternal {
@@ -143,7 +143,7 @@ const uint32_t TableStruct_services_2fchat_2fchatfile_5frpc_2eproto::offsets[] P
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chatfile::SendFileRequest, _impl_.path_name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::chatfile::SendFileRequest, _impl_.conversation_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::chatfile::SendFileRequest, _impl_.group_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chatfile::SendFileRequest, _impl_.description_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::chatfile::SendFileResponse, _internal_metadata_),
@@ -214,24 +214,24 @@ const char descriptor_table_protodef_services_2fchat_2fchatfile_5frpc_2eproto[] 
   "\n\014file_history\030\003 \001(\0132%.qaul.rpc.chatfile"
   ".FileHistoryRequestH\000\022G\n\025file_history_re"
   "sponse\030\004 \001(\0132&.qaul.rpc.chatfile.FileHis"
-  "toryResponseH\000B\t\n\007message\"R\n\017SendFileReq"
-  "uest\022\021\n\tpath_name\030\001 \001(\t\022\027\n\017conversation_"
-  "id\030\002 \001(\014\022\023\n\013description\030\003 \001(\t\"C\n\020SendFil"
-  "eResponse\022\017\n\007success\030\001 \001(\010\022\r\n\005error\030\002 \001("
-  "\t\022\017\n\007file_id\030\003 \001(\004\"3\n\022FileHistoryRequest"
-  "\022\016\n\006offset\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\"\256\001\n\020File"
-  "HistoryEntry\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_na"
-  "me\030\002 \001(\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile"
-  "_size\030\004 \001(\r\022\030\n\020file_description\030\005 \001(\t\022\014\n"
-  "\004time\030\006 \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_"
-  "id\030\010 \001(\t\"{\n\023FileHistoryResponse\022\016\n\006offse"
-  "t\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0226\n"
-  "\thistories\030\004 \003(\0132#.qaul.rpc.chatfile.Fil"
-  "eHistoryEntryb\006proto3"
+  "toryResponseH\000B\t\n\007message\"K\n\017SendFileReq"
+  "uest\022\021\n\tpath_name\030\001 \001(\t\022\020\n\010group_id\030\002 \001("
+  "\014\022\023\n\013description\030\003 \001(\t\"C\n\020SendFileRespon"
+  "se\022\017\n\007success\030\001 \001(\010\022\r\n\005error\030\002 \001(\t\022\017\n\007fi"
+  "le_id\030\003 \001(\004\"3\n\022FileHistoryRequest\022\016\n\006off"
+  "set\030\001 \001(\r\022\r\n\005limit\030\002 \001(\r\"\256\001\n\020FileHistory"
+  "Entry\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_name\030\002 \001("
+  "\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile_size\030\004"
+  " \001(\r\022\030\n\020file_description\030\005 \001(\t\022\014\n\004time\030\006"
+  " \001(\004\022\021\n\tsender_id\030\007 \001(\t\022\020\n\010group_id\030\010 \001("
+  "\t\"{\n\023FileHistoryResponse\022\016\n\006offset\030\001 \001(\r"
+  "\022\r\n\005limit\030\002 \001(\r\022\r\n\005total\030\003 \001(\004\0226\n\thistor"
+  "ies\030\004 \003(\0132#.qaul.rpc.chatfile.FileHistor"
+  "yEntryb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fchat_2fchatfile_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fchat_2fchatfile_5frpc_2eproto = {
-    false, false, 861, descriptor_table_protodef_services_2fchat_2fchatfile_5frpc_2eproto,
+    false, false, 854, descriptor_table_protodef_services_2fchat_2fchatfile_5frpc_2eproto,
     "services/chat/chatfile_rpc.proto",
     &descriptor_table_services_2fchat_2fchatfile_5frpc_2eproto_once, nullptr, 0, 6,
     schemas, file_default_instances, TableStruct_services_2fchat_2fchatfile_5frpc_2eproto::offsets,
@@ -686,7 +686,7 @@ SendFileRequest::SendFileRequest(const SendFileRequest& from)
   SendFileRequest* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.path_name_){}
-    , decltype(_impl_.conversation_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.description_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
@@ -699,12 +699,12 @@ SendFileRequest::SendFileRequest(const SendFileRequest& from)
     _this->_impl_.path_name_.Set(from._internal_path_name(), 
       _this->GetArenaForAllocation());
   }
-  _impl_.conversation_id_.InitDefault();
+  _impl_.group_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_conversation_id().empty()) {
-    _this->_impl_.conversation_id_.Set(from._internal_conversation_id(), 
+  if (!from._internal_group_id().empty()) {
+    _this->_impl_.group_id_.Set(from._internal_group_id(), 
       _this->GetArenaForAllocation());
   }
   _impl_.description_.InitDefault();
@@ -724,7 +724,7 @@ inline void SendFileRequest::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.path_name_){}
-    , decltype(_impl_.conversation_id_){}
+    , decltype(_impl_.group_id_){}
     , decltype(_impl_.description_){}
     , /*decltype(_impl_._cached_size_)*/{}
   };
@@ -732,9 +732,9 @@ inline void SendFileRequest::SharedCtor(
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.path_name_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.conversation_id_.InitDefault();
+  _impl_.group_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.description_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -754,7 +754,7 @@ SendFileRequest::~SendFileRequest() {
 inline void SendFileRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.path_name_.Destroy();
-  _impl_.conversation_id_.Destroy();
+  _impl_.group_id_.Destroy();
   _impl_.description_.Destroy();
 }
 
@@ -769,7 +769,7 @@ void SendFileRequest::Clear() {
   (void) cached_has_bits;
 
   _impl_.path_name_.ClearToEmpty();
-  _impl_.conversation_id_.ClearToEmpty();
+  _impl_.group_id_.ClearToEmpty();
   _impl_.description_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -790,10 +790,10 @@ const char* SendFileRequest::_InternalParse(const char* ptr, ::_pbi::ParseContex
         } else
           goto handle_unusual;
         continue;
-      // bytes conversation_id = 2;
+      // bytes group_id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          auto str = _internal_mutable_conversation_id();
+          auto str = _internal_mutable_group_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
@@ -848,10 +848,10 @@ uint8_t* SendFileRequest::_InternalSerialize(
         1, this->_internal_path_name(), target);
   }
 
-  // bytes conversation_id = 2;
-  if (!this->_internal_conversation_id().empty()) {
+  // bytes group_id = 2;
+  if (!this->_internal_group_id().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_conversation_id(), target);
+        2, this->_internal_group_id(), target);
   }
 
   // string description = 3;
@@ -887,11 +887,11 @@ size_t SendFileRequest::ByteSizeLong() const {
         this->_internal_path_name());
   }
 
-  // bytes conversation_id = 2;
-  if (!this->_internal_conversation_id().empty()) {
+  // bytes group_id = 2;
+  if (!this->_internal_group_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_conversation_id());
+        this->_internal_group_id());
   }
 
   // string description = 3;
@@ -922,8 +922,8 @@ void SendFileRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   if (!from._internal_path_name().empty()) {
     _this->_internal_set_path_name(from._internal_path_name());
   }
-  if (!from._internal_conversation_id().empty()) {
-    _this->_internal_set_conversation_id(from._internal_conversation_id());
+  if (!from._internal_group_id().empty()) {
+    _this->_internal_set_group_id(from._internal_group_id());
   }
   if (!from._internal_description().empty()) {
     _this->_internal_set_description(from._internal_description());
@@ -952,8 +952,8 @@ void SendFileRequest::InternalSwap(SendFileRequest* other) {
       &other->_impl_.path_name_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.conversation_id_, lhs_arena,
-      &other->_impl_.conversation_id_, rhs_arena
+      &_impl_.group_id_, lhs_arena,
+      &other->_impl_.group_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.description_, lhs_arena,

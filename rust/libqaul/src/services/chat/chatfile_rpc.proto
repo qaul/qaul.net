@@ -32,8 +32,8 @@ message ChatFile {
 message SendFileRequest {
     // file path with file name to send
     string path_name = 1;
-    // conversation id to receive file
-    bytes conversation_id = 2;
+    // group id to receive file
+    bytes group_id = 2;
     // file description text to be sent in the message
     string description = 3;
 }

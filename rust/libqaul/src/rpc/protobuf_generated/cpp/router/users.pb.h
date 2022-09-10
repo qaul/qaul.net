@@ -862,7 +862,7 @@ class UserEntry final :
   enum : int {
     kNameFieldNumber = 1,
     kIdFieldNumber = 2,
-    kConversationIdFieldNumber = 3,
+    kGroupIdFieldNumber = 3,
     kKeyBase58FieldNumber = 7,
     kConnectivityFieldNumber = 8,
     kVerifiedFieldNumber = 9,
@@ -896,18 +896,18 @@ class UserEntry final :
   std::string* _internal_mutable_id();
   public:
 
-  // bytes conversation_id = 3;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 3;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // string key_base58 = 7;
@@ -961,7 +961,7 @@ class UserEntry final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr key_base58_;
     int connectivity_;
     bool verified_;
@@ -1443,54 +1443,54 @@ inline void UserEntry::set_allocated_id(std::string* id) {
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.id)
 }
 
-// bytes conversation_id = 3;
-inline void UserEntry::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 3;
+inline void UserEntry::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& UserEntry::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& UserEntry::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void UserEntry::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void UserEntry::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.group_id)
 }
-inline std::string* UserEntry::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.conversation_id)
+inline std::string* UserEntry::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.group_id)
   return _s;
 }
-inline const std::string& UserEntry::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& UserEntry::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void UserEntry::_internal_set_conversation_id(const std::string& value) {
+inline void UserEntry::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* UserEntry::_internal_mutable_conversation_id() {
+inline std::string* UserEntry::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* UserEntry::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* UserEntry::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.users.UserEntry.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void UserEntry::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void UserEntry::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.UserEntry.group_id)
 }
 
 // string key_base58 = 7;
