@@ -131,7 +131,8 @@ enum GroupEventType : int {
   INVITED = 1,
   JOINED = 2,
   LEFT = 3,
-  CLOSED = 4,
+  REMOVED = 4,
+  CLOSED = 5,
   GroupEventType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   GroupEventType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };

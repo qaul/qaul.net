@@ -230,6 +230,10 @@ impl Chat {
                             );
                             return Ok(res);
                         }
+                        proto::GroupEventType::Removed => {
+                            res.push("You were removed from the group".to_string());
+                            return Ok(res);
+                        }
                         _ => {}
                     }
                 }

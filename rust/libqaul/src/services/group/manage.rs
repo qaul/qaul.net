@@ -141,6 +141,9 @@ impl Manage {
             // rename group
             group.name = name;
 
+            // update revision
+            group.revision = group.revision + 1;
+
             // save group
             GroupStorage::save_group(account_id.to_owned(), group);
 

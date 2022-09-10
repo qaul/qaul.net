@@ -109,8 +109,11 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
   /// user left group
   case left // = 3
 
+  /// your user was removed
+  case removed // = 4
+
   /// group was closed
-  case closed // = 4
+  case closed // = 5
   case UNRECOGNIZED(Int)
 
   init() {
@@ -123,7 +126,8 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
     case 1: self = .invited
     case 2: self = .joined
     case 3: self = .left
-    case 4: self = .closed
+    case 4: self = .removed
+    case 5: self = .closed
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -134,7 +138,8 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
     case .invited: return 1
     case .joined: return 2
     case .left: return 3
-    case .closed: return 4
+    case .removed: return 4
+    case .closed: return 5
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -150,6 +155,7 @@ extension Qaul_Rpc_Chat_GroupEventType: CaseIterable {
     .invited,
     .joined,
     .left,
+    .removed,
     .closed,
   ]
 }
@@ -492,7 +498,8 @@ extension Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf._ProtoNameProviding {
     1: .same(proto: "INVITED"),
     2: .same(proto: "JOINED"),
     3: .same(proto: "LEFT"),
-    4: .same(proto: "CLOSED"),
+    4: .same(proto: "REMOVED"),
+    5: .same(proto: "CLOSED"),
   ]
 }
 

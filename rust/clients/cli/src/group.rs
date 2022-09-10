@@ -575,10 +575,11 @@ impl Group {
                                     }
                                 }
                             }
+                            println!("\trevision: {}", group.revision);
                             println!("\tunread messages: {}", group.unread_messages);
                             println!("\tlast message:");
                             println!(
-                                "\tsent_at: {} from: {}",
+                                "\t\tsent_at: {} from: {}",
                                 group.last_message_at,
                                 bs58::encode(group.last_message_sender_id).into_string()
                             );
@@ -586,7 +587,7 @@ impl Group {
                         }
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
-                        // List groups
+                        // List of pending invites
                         println!("=============List Of Invited=================");
                         for invite in group_invited_response.invited {
                             if let Some(group) = invite.group {

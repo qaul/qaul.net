@@ -140,8 +140,10 @@ enum GroupEventType {
     JOINED = 2;
     // user left group
     LEFT = 3;
+    // your user was removed
+    REMOVED = 4;
     // group was closed
-    CLOSED = 4;
+    CLOSED = 5;
 }
 
 // send chat message

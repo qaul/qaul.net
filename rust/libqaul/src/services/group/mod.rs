@@ -135,14 +135,8 @@ impl Group {
             // insert member
             group.members.insert(member.user_id.clone(), member.clone());
 
-            // increase revision
-            group.revision = group.revision + 1;
-
             // update DB
             GroupStorage::save_group(account_id.to_owned(), group);
-
-            // send new state to all users
-            Group::post_group_update(account_id, group_id);
         }
     }
 
@@ -226,17 +220,6 @@ impl Group {
             true,
         ) {
             Ok(_) => {
-                // save
-                // ChatStorage::save_outgoing_message(
-                //     &user_account.id,
-                //     &receiver,
-                //     &group_id,
-                //     &message_id,
-                //     chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-                //     data,
-                //     chat::rpc_proto::MessageStatus::Sending,
-                // );
-
                 // update member state
                 my_member.last_message_index = last_index;
                 Self::update_group_member(&user_account.id, &group_id, &my_member);
@@ -330,8 +313,12 @@ impl Group {
                     log::info!("group::on_receive_invite");
                     Member::on_be_invited(&sender_id, &receiver_id, &invite_member);
                 }
-                Some(proto_net::group_container::Message::Removed(_removed)) => {
+                Some(proto_net::group_container::Message::Removed(removed)) => {
                     log::info!("group::on_removed");
+                    // remove user from group and deactivate group
+                    if let Err(error) = Member::on_removed(&sender_id, &receiver_id, &removed) {
+                        log::error!("group on_removed error {}", error);
+                    }
                 }
                 Some(proto_net::group_container::Message::ReplyInvite(reply_invite)) => {
                     log::info!("group::on_answered for invite");
