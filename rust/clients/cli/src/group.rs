@@ -12,6 +12,11 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
 }
 
+/// include chat protobuf RPC file
+mod proto_chat {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
+}
+
 /// Group module function handling
 pub struct Group {}
 
@@ -414,6 +419,45 @@ impl Group {
         );
     }
 
+    /// Process the last message & print it's content
+    fn print_last_message(data: Vec<u8>) {
+        if let Ok(content_message) = proto_chat::ChatContentMessage::decode(&data[..]) {
+            match content_message.message {
+                Some(proto_chat::chat_content_message::Message::ChatContent(chat_content)) => {
+                    println!("\t\t{}", chat_content.text);
+                }
+                Some(proto_chat::chat_content_message::Message::FileContent(file_content)) => {
+                    println!(
+                        "\t\tfile {}.{} [{}] ID {}",
+                        file_content.file_name,
+                        file_content.file_extension,
+                        file_content.file_size.to_string(),
+                        file_content.file_id.to_string()
+                    );
+                    println!("\t\t{}", file_content.file_description);
+                }
+                Some(proto_chat::chat_content_message::Message::GroupEvent(group_event)) => {
+                    match proto_chat::GroupEventType::from_i32(group_event.event_type).unwrap() {
+                        proto_chat::GroupEventType::Joined => {
+                            println!(
+                                "\t\tNew user joined group, user id: {}",
+                                bs58::encode(group_event.user_id).into_string()
+                            );
+                        }
+                        proto_chat::GroupEventType::Left => {
+                            println!(
+                                "\t\tUser left group, user id: {}",
+                                bs58::encode(group_event.user_id).into_string()
+                            );
+                        }
+                        _ => {}
+                    }
+                }
+                None => {}
+            }
+        }
+    }
+
     /// Process received RPC message
     ///
     /// Decodes received protobuf encoded binary RPC message
@@ -531,6 +575,14 @@ impl Group {
                                     }
                                 }
                             }
+                            println!("\tunread messages: {}", group.unread_messages);
+                            println!("\tlast message:");
+                            println!(
+                                "\tsent_at: {} from: {}",
+                                group.last_message_at,
+                                bs58::encode(group.last_message_sender_id).into_string()
+                            );
+                            Self::print_last_message(group.last_message);
                         }
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {

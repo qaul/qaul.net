@@ -26,10 +26,6 @@ fn main() {
         "MessageReceptionConfirmed",
         "#[derive(serde::Serialize, serde::Deserialize)]",
     );
-    prost_build.type_attribute(
-        "ChatOverview",
-        "#[derive(serde::Serialize, serde::Deserialize)]",
-    );
 
     // make network messaging serializable
     // in order to save them in the data base

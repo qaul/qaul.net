@@ -142,6 +142,49 @@ impl GroupStorage {
         }
     }
 
+    /// Update Last Chat Message sent to this Group
+    pub fn group_update_last_chat_message(
+        account_id: PeerId,
+        group_id: Vec<u8>,
+        sender_id: PeerId,
+        message: Vec<u8>,
+        received_at: u64,
+    ) {
+        log::debug!("group_update_last_chat_message");
+
+        if let Some(mut group) = Self::get_group(account_id, group_id) {
+            // update values
+            group.last_message_sender_id = sender_id.to_bytes();
+            group.last_message_at = received_at;
+            group.last_message_data = message;
+
+            // check if it is us who is sending the message
+            if sender_id != account_id {
+                group.unread_messages = group.unread_messages + 1;
+            }
+
+            // save group
+            Self::save_group(account_id, group);
+        } else {
+            log::error!("group_update_last_chat group not found");
+        }
+    }
+
+    /// Clear Unread Message Counter
+    pub fn group_clear_unread(account_id: PeerId, group_id: Vec<u8>) {
+        log::debug!("group_clear_unread");
+
+        if let Some(mut group) = Self::get_group(account_id, group_id) {
+            // clear unread value
+            group.unread_messages = 0;
+
+            // save group
+            Self::save_group(account_id, group);
+        } else {
+            log::error!("group_clear_unread group not found");
+        }
+    }
+
     /// get invite
     pub fn get_invite(account_id: PeerId, group_id: Vec<u8>) -> Option<GroupInvited> {
         // get DB ref

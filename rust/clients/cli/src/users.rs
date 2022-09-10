@@ -160,7 +160,7 @@ impl Users {
                                 conversation_uuid = uuid;
                                 println!(
                                     "   | {} | {}",
-                                    conversation_uuid.urn().to_string(),
+                                    conversation_uuid.hyphenated().to_string(),
                                     user.key_base58
                                 );
                             }

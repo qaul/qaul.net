@@ -124,12 +124,20 @@ impl MessagingProcess {
 
                 match common.payload {
                     Some(super::proto::common_message::Payload::ChatMessage(ref chat_message)) => {
+                        // create ChatContentMessage
+                        let content_message = rpc_proto::ChatContentMessage {
+                            message: Some(rpc_proto::chat_content_message::Message::ChatContent(
+                                rpc_proto::ChatContent {
+                                    text: chat_message.content.clone(),
+                                },
+                            )),
+                        };
+
                         // TODO: pass on user_account
                         ChatStorage::save_incoming_message(
                             &user_account.id,
                             sender_id,
-                            chat::rpc_proto::ChatContentType::Chat.try_into().unwrap(),
-                            chat_message.content.encode_to_vec(),
+                            content_message,
                             common.sent_at,
                             &conversation_id,
                             &common.message_id,

@@ -193,6 +193,14 @@ message GroupInfo {
     bool is_direct_chat = 5;
     // members
     repeated GroupMember members = 6;
+    // unread messages
+    uint32 unread_messages = 7;
+    // time when last message was sent
+    uint64 last_message_at = 8;
+    // content type
+    bytes last_message = 9;
+    // sender of the last message
+    bytes last_message_sender_id = 10;
 }
 
 // Group list request

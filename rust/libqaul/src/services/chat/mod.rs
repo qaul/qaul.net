@@ -72,28 +72,6 @@ impl Chat {
         match rpc_proto::Chat::decode(&data[..]) {
             Ok(chat) => {
                 match chat.message {
-                    Some(rpc_proto::chat::Message::OverviewRequest(_overview_request)) => {
-                        // get overview list from data base
-                        let overview_list = ChatStorage::get_overview(account_id);
-
-                        // pack message
-                        let proto_message = rpc_proto::Chat {
-                            message: Some(rpc_proto::chat::Message::OverviewList(overview_list)),
-                        };
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
-                        // send message
-                        Rpc::send_message(
-                            buf,
-                            crate::rpc::proto::Modules::Chat.into(),
-                            "".to_string(),
-                            Vec::new(),
-                        );
-                    }
                     Some(rpc_proto::chat::Message::ConversationRequest(conversation_request)) => {
                         // get messages of a conversation from data base
                         let conversation_list = ChatStorage::get_messages(

@@ -161,25 +161,6 @@ impl Users {
         }
     }
 
-    /// get the name of a known user
-    pub fn get_name(user_id: &PeerId) -> Option<String> {
-        // get q8id
-        let q8id = QaulId::to_q8id(user_id.to_owned());
-
-        // search for name
-        Self::get_name_by_q8id(&q8id)
-    }
-
-    /// get the name of a known user by it's q8id
-    pub fn get_name_by_q8id(q8id: &Vec<u8>) -> Option<String> {
-        let store = USERS.get().read().unwrap();
-        let result = store.users.get(q8id);
-        match result {
-            Some(user) => Some(user.name.clone()),
-            None => None,
-        }
-    }
-
     /// get user by q8id
     pub fn get_user_id_by_q8id(q8id: Vec<u8>) -> Option<PeerId> {
         let store = USERS.get().read().unwrap();

@@ -71,23 +71,6 @@ impl Chat {
                     log::error!("chat send command incorrectly formatted");
                 }
             }
-            // request chat overview
-            cmd if cmd.starts_with("overview") => {
-                match cmd.strip_prefix("overview ") {
-                    Some(index_str) => {
-                        if let Ok(index) = index_str.parse::<u64>() {
-                            // request chat overview
-                            Self::request_chat_overview(index);
-                        } else {
-                            log::error!("chat overview index is not a valid number");
-                        }
-                    }
-                    None => {
-                        // request all messages
-                        Self::request_chat_overview(0);
-                    }
-                }
-            }
             // request chat conversation
             cmd if cmd.starts_with("conversation") => {
                 match cmd.strip_prefix("conversation ") {
@@ -188,28 +171,6 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
-    /// Request chat overview via rpc
-    ///
-    /// Provides an overview over all conversations with the amount
-    /// of unread messages, and the last message.
-    fn request_chat_overview(_last_index: u64) {
-        // create feed list request message
-        let proto_message = proto::Chat {
-            message: Some(proto::chat::Message::OverviewRequest(
-                proto::ChatOverviewRequest {},
-            )),
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
-    }
-
     /// Request chat conversation via rpc
     ///
     /// This provides all chat messages of a specific conversation.
@@ -235,123 +196,52 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
-    fn analyze_content(
-        status: proto::MessageStatus,
-        content_type: i32,
-        content: &Vec<u8>,
-    ) -> Result<Vec<String>, String> {
+    fn analyze_content(content: &Vec<u8>) -> Result<Vec<String>, String> {
         let mut res: Vec<String> = vec![];
-        let tp;
-        match proto::ChatContentType::from_i32(content_type) {
-            Some(v) => tp = v,
-            _ => {
-                return Err("".to_string());
-            }
-        }
 
-        match tp {
-            proto::ChatContentType::None => {}
-            proto::ChatContentType::Chat => {
-                if let Ok(v) = String::decode(&content[..]) {
-                    res.push(v.clone());
+        if let Ok(content_message) = proto::ChatContentMessage::decode(&content[..]) {
+            match content_message.message {
+                Some(proto::chat_content_message::Message::ChatContent(chat_content)) => {
+                    res.push(chat_content.text);
                     return Ok(res);
                 }
-            }
-            proto::ChatContentType::File => {
-                if let Ok(v) = proto_file::ChatFileContainer::decode(&content[..]) {
-                    match v.message {
-                        Some(proto_file::chat_file_container::Message::FileInfo(file_info)) => {
-                            res.push(
-                                "file transfer id: ".to_string()
-                                    + file_info.file_id.to_string().as_str(),
-                            );
-                            res.push(
-                                " name: ".to_string()
-                                    + file_info.file_name.as_str()
-                                    + " size: "
-                                    + file_info.file_size.to_string().as_str(),
-                            );
-                            return Ok(res);
-                        }
-                        _ => {}
-                    }
+                Some(proto::chat_content_message::Message::FileContent(file_content)) => {
+                    res.push(
+                        "file transfer id: ".to_string()
+                            + file_content.file_id.to_string().as_str(),
+                    );
+                    res.push(
+                        " name: ".to_string()
+                            + file_content.file_name.as_str()
+                            + " size: "
+                            + file_content.file_size.to_string().as_str(),
+                    );
+                    return Ok(res);
                 }
-            }
-            // REMOVE
-            /*proto::ChatContentType::Group => {
-                if let Ok(v) = proto_group::GroupContainer::decode(&content[..]) {
-                    match v.message {
-                        Some(proto_group::group_container::Message::InviteMember(invite)) => {
-                            let group_id =
-                                uuid::Uuid::from_bytes(invite.group_id.try_into().unwrap());
-                            if status == proto::MessageStatus::Sending
-                                || status == proto::MessageStatus::Sent
-                            {
-                                res.push(
-                                    "Sent group invite group id: ".to_string()
-                                        + group_id.to_string().as_str(),
-                                );
-                            } else {
-                                res.push(
-                                    "Received group invite group id: ".to_string()
-                                        + group_id.to_string().as_str(),
-                                );
-                            }
-                            res.push(
-                                "name: ".to_string()
-                                    + invite.group_name.as_str()
-                                    + " members: "
-                                    + invite.members_count.to_string().as_str(),
-                            );
-                            return Ok(res);
-                        }
-                        Some(proto_group::group_container::Message::ReplyInvite(reply_invite)) => {
-                            let group_id =
-                                uuid::Uuid::from_bytes(reply_invite.group_id.try_into().unwrap());
-                            if status == proto::MessageStatus::Sending
-                                || status == proto::MessageStatus::Sent
-                            {
-                                res.push(
-                                    "Sent group accept group id: ".to_string()
-                                        + group_id.to_string().as_str(),
-                                );
-                            } else {
-                                res.push(
-                                    "Received group accept group id: ".to_string()
-                                        + group_id.to_string().as_str(),
-                                );
-                            }
-                            return Ok(res);
-                        }
-                        Some(proto_group::group_container::Message::Removed(_removed)) => {}
-                        _ => {}
-                    }
-                }
-            }*/
-            proto::ChatContentType::Group => {
-                if let Ok(v) = proto::GroupEvent::decode(&content[..]) {
-                    match proto::GroupEventType::from_i32(v.event_type).unwrap() {
+                Some(proto::chat_content_message::Message::GroupEvent(group_event)) => {
+                    match proto::GroupEventType::from_i32(group_event.event_type).unwrap() {
                         proto::GroupEventType::Joined => {
                             res.push(
                                 "New user joined group, user id: ".to_string()
-                                    + bs58::encode(v.user_id).into_string().as_str(),
+                                    + bs58::encode(group_event.user_id).into_string().as_str(),
                             );
                             return Ok(res);
                         }
                         proto::GroupEventType::Left => {
                             res.push(
                                 "User left group, user id: ".to_string()
-                                    + bs58::encode(v.user_id).into_string().as_str(),
+                                    + bs58::encode(group_event.user_id).into_string().as_str(),
                             );
                             return Ok(res);
                         }
                         _ => {}
                     }
                 }
+                None => {}
             }
-            proto::ChatContentType::Rtc => {}
         }
-        Err("".to_string())
+
+        Err("content decoding error".to_string())
     }
 
     /// Process received RPC message
@@ -362,33 +252,6 @@ impl Chat {
         match proto::Chat::decode(&data[..]) {
             Ok(chat) => {
                 match chat.message {
-                    Some(proto::chat::Message::OverviewList(proto_overview)) => {
-                        // Overview table
-                        println!("");
-                        println!("Conversations Overview");
-                        println!("");
-                        println!("[ CONVERSATION ID ] CONVERSATION NAME");
-                        println!("  Unread Messages | Last Message Index | Last Timestamp | Last Message Content");
-                        println!("");
-
-                        // print all messages in the feed list
-                        for message in proto_overview.overview_list {
-                            println! {"[ {} ] {}", bs58::encode(message.conversation_id).into_string(), message.name};
-                            print!("  {} | ", message.unread);
-                            print!("{} | ", message.last_message_index);
-                            print!("{} | ", message.last_message_at);
-                            if let Ok(ss) = Self::analyze_content(
-                                proto::MessageStatus::Sent,
-                                message.content_type,
-                                &message.content,
-                            ) {
-                                for s in ss {
-                                    println!("\t{}", s);
-                                }
-                            }
-                            println!("");
-                        }
-                    }
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
                         println!("");
@@ -405,16 +268,13 @@ impl Chat {
 
                         // print all messages in the feed list
                         for message in proto_conversation.message_list {
-                            if let Ok(ss) = Self::analyze_content(
-                                proto::MessageStatus::from_i32(message.status).unwrap(),
-                                message.content_type,
-                                &message.content,
-                            ) {
+                            if let Ok(ss) = Self::analyze_content(&message.content) {
                                 print! {"{} | ", message.index};
                                 match message.status {
                                     0 => print!(".. | "),
                                     1 => print!("✓. | "),
                                     2 => print!("✓✓ | "),
+                                    3 => print!("✓✓✓| "),
                                     _ => print!("   | "),
                                 }
 
