@@ -24,6 +24,7 @@ class Modules extends $pb.ProtobufEnum {
   static const Modules CHATFILE = Modules._(11, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHATFILE');
   static const Modules BLE = Modules._(12, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BLE');
   static const Modules RTC = Modules._(13, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RTC');
+  static const Modules DTN = Modules._(14, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DTN');
 
   static const $core.List<Modules> values = <Modules> [
     NONE,
@@ -40,6 +41,7 @@ class Modules extends $pb.ProtobufEnum {
     CHATFILE,
     BLE,
     RTC,
+    DTN,
   ];
 
   static final $core.Map<$core.int, Modules> _byValue = $pb.ProtobufEnum.initByValue(values);

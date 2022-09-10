@@ -327,35 +327,10 @@ object ChatMessageKt {
 
     /**
      * <pre>
-     * content type
+     * chat content message
      * </pre>
      *
-     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
-     */
-     var contentType: qaul.rpc.chat.ChatOuterClass.ChatContentType
-      @JvmName("getContentType")
-      get() = _builder.getContentType()
-      @JvmName("setContentType")
-      set(value) {
-        _builder.setContentType(value)
-      }
-    /**
-     * <pre>
-     * content type
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatContentType content_type = 8;</code>
-     */
-    fun clearContentType() {
-      _builder.clearContentType()
-    }
-
-    /**
-     * <pre>
-     * content of the message
-     * </pre>
-     *
-     * <code>bytes content = 9;</code>
+     * <code>bytes content = 8;</code>
      */
     var content: com.google.protobuf.ByteString
       @JvmName("getContent")
@@ -366,10 +341,10 @@ object ChatMessageKt {
       }
     /**
      * <pre>
-     * content of the message
+     * chat content message
      * </pre>
      *
-     * <code>bytes content = 9;</code>
+     * <code>bytes content = 8;</code>
      */
     fun clearContent() {
       _builder.clearContent()

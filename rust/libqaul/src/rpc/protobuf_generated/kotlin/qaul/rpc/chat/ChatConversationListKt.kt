@@ -23,6 +23,10 @@ object ChatConversationListKt {
     internal fun _build(): qaul.rpc.chat.ChatOuterClass.ChatConversationList = _builder.build()
 
     /**
+     * <pre>
+     * conversation id
+     * </pre>
+     *
      * <code>bytes conversation_id = 1;</code>
      */
     var conversationId: com.google.protobuf.ByteString
@@ -33,6 +37,10 @@ object ChatConversationListKt {
         _builder.setConversationId(value)
       }
     /**
+     * <pre>
+     * conversation id
+     * </pre>
+     *
      * <code>bytes conversation_id = 1;</code>
      */
     fun clearConversationId() {
@@ -46,6 +54,10 @@ object ChatConversationListKt {
     @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
     class MessageListProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      */
      val messageList: com.google.protobuf.kotlin.DslList<qaul.rpc.chat.ChatOuterClass.ChatMessage, MessageListProxy>
@@ -54,6 +66,10 @@ object ChatConversationListKt {
         _builder.getMessageListList()
       )
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param value The messageList to add.
      */
@@ -63,6 +79,10 @@ object ChatConversationListKt {
       _builder.addMessageList(value)
     }
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param value The messageList to add.
      */
@@ -73,6 +93,10 @@ object ChatConversationListKt {
       add(value)
     }
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param values The messageList to add.
      */
@@ -82,6 +106,10 @@ object ChatConversationListKt {
       _builder.addAllMessageList(values)
     }
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param values The messageList to add.
      */
@@ -92,6 +120,10 @@ object ChatConversationListKt {
       addAll(values)
     }
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      * @param index The index to set the value at.
      * @param value The messageList to set.
@@ -102,6 +134,10 @@ object ChatConversationListKt {
       _builder.setMessageList(index, value)
     }
     /**
+     * <pre>
+     * several messages
+     * </pre>
+     *
      * <code>repeated .qaul.rpc.chat.ChatMessage message_list = 2;</code>
      */
     @kotlin.jvm.JvmSynthetic

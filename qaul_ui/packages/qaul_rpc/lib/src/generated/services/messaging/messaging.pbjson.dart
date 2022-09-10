@@ -8,6 +8,18 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use cryptoStateDescriptor instead')
+const CryptoState$json = const {
+  '1': 'CryptoState',
+  '2': const [
+    const {'1': 'NONE', '2': 0},
+    const {'1': 'HANDSHAKE', '2': 1},
+    const {'1': 'TRANSPORT', '2': 2},
+  ],
+};
+
+/// Descriptor for `CryptoState`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List cryptoStateDescriptor = $convert.base64Decode('CgtDcnlwdG9TdGF0ZRIICgROT05FEAASDQoJSEFORFNIQUtFEAESDQoJVFJBTlNQT1JUEAI=');
 @$core.Deprecated('Use containerDescriptor instead')
 const Container$json = const {
   '1': 'Container',
@@ -49,12 +61,14 @@ final $typed_data.Uint8List envelopPayloadDescriptor = $convert.base64Decode('Cg
 const Encrypted$json = const {
   '1': 'Encrypted',
   '2': const [
-    const {'1': 'data', '3': 1, '4': 3, '5': 11, '6': '.qaul.net.messaging.Data', '10': 'data'},
+    const {'1': 'state', '3': 1, '4': 1, '5': 14, '6': '.qaul.net.messaging.CryptoState', '10': 'state'},
+    const {'1': 'session_id', '3': 2, '4': 1, '5': 13, '10': 'sessionId'},
+    const {'1': 'data', '3': 3, '4': 3, '5': 11, '6': '.qaul.net.messaging.Data', '10': 'data'},
   ],
 };
 
 /// Descriptor for `Encrypted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List encryptedDescriptor = $convert.base64Decode('CglFbmNyeXB0ZWQSLAoEZGF0YRgBIAMoCzIYLnFhdWwubmV0Lm1lc3NhZ2luZy5EYXRhUgRkYXRh');
+final $typed_data.Uint8List encryptedDescriptor = $convert.base64Decode('CglFbmNyeXB0ZWQSNQoFc3RhdGUYASABKA4yHy5xYXVsLm5ldC5tZXNzYWdpbmcuQ3J5cHRvU3RhdGVSBXN0YXRlEh0KCnNlc3Npb25faWQYAiABKA1SCXNlc3Npb25JZBIsCgRkYXRhGAMgAygLMhgucWF1bC5uZXQubWVzc2FnaW5nLkRhdGFSBGRhdGE=');
 @$core.Deprecated('Use dataDescriptor instead')
 const Data$json = const {
   '1': 'Data',
@@ -71,10 +85,11 @@ const Messaging$json = const {
   '1': 'Messaging',
   '2': const [
     const {'1': 'confirmation_message', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.messaging.Confirmation', '9': 0, '10': 'confirmationMessage'},
-    const {'1': 'crypto_service', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
-    const {'1': 'rtc_stream_message', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.RtcStreamMessage', '9': 0, '10': 'rtcStreamMessage'},
-    const {'1': 'group_invite_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupInviteMessage', '9': 0, '10': 'groupInviteMessage'},
-    const {'1': 'common_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.CommonMessage', '9': 0, '10': 'commonMessage'},
+    const {'1': 'dtn_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.DtnResponse', '9': 0, '10': 'dtnResponse'},
+    const {'1': 'crypto_service', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
+    const {'1': 'rtc_stream_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.RtcStreamMessage', '9': 0, '10': 'rtcStreamMessage'},
+    const {'1': 'group_invite_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupInviteMessage', '9': 0, '10': 'groupInviteMessage'},
+    const {'1': 'common_message', '3': 6, '4': 1, '5': 11, '6': '.qaul.net.messaging.CommonMessage', '9': 0, '10': 'commonMessage'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -82,7 +97,7 @@ const Messaging$json = const {
 };
 
 /// Descriptor for `Messaging`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USSgoOY3J5cHRvX3NlcnZpY2UYAiABKAsyIS5xYXVsLm5ldC5tZXNzYWdpbmcuQ3J5cHRvU2VydmljZUgAUg1jcnlwdG9TZXJ2aWNlElQKEnJ0Y19zdHJlYW1fbWVzc2FnZRgDIAEoCzIkLnFhdWwubmV0Lm1lc3NhZ2luZy5SdGNTdHJlYW1NZXNzYWdlSABSEHJ0Y1N0cmVhbU1lc3NhZ2USWgoUZ3JvdXBfaW52aXRlX21lc3NhZ2UYBCABKAsyJi5xYXVsLm5ldC5tZXNzYWdpbmcuR3JvdXBJbnZpdGVNZXNzYWdlSABSEmdyb3VwSW52aXRlTWVzc2FnZRJKCg5jb21tb25fbWVzc2FnZRgFIAEoCzIhLnFhdWwubmV0Lm1lc3NhZ2luZy5Db21tb25NZXNzYWdlSABSDWNvbW1vbk1lc3NhZ2VCCQoHbWVzc2FnZQ==');
+final $typed_data.Uint8List messagingDescriptor = $convert.base64Decode('CglNZXNzYWdpbmcSVQoUY29uZmlybWF0aW9uX21lc3NhZ2UYASABKAsyIC5xYXVsLm5ldC5tZXNzYWdpbmcuQ29uZmlybWF0aW9uSABSE2NvbmZpcm1hdGlvbk1lc3NhZ2USRAoMZHRuX3Jlc3BvbnNlGAIgASgLMh8ucWF1bC5uZXQubWVzc2FnaW5nLkR0blJlc3BvbnNlSABSC2R0blJlc3BvbnNlEkoKDmNyeXB0b19zZXJ2aWNlGAMgASgLMiEucWF1bC5uZXQubWVzc2FnaW5nLkNyeXB0b1NlcnZpY2VIAFINY3J5cHRvU2VydmljZRJUChJydGNfc3RyZWFtX21lc3NhZ2UYBCABKAsyJC5xYXVsLm5ldC5tZXNzYWdpbmcuUnRjU3RyZWFtTWVzc2FnZUgAUhBydGNTdHJlYW1NZXNzYWdlEloKFGdyb3VwX2ludml0ZV9tZXNzYWdlGAUgASgLMiYucWF1bC5uZXQubWVzc2FnaW5nLkdyb3VwSW52aXRlTWVzc2FnZUgAUhJncm91cEludml0ZU1lc3NhZ2USSgoOY29tbW9uX21lc3NhZ2UYBiABKAsyIS5xYXVsLm5ldC5tZXNzYWdpbmcuQ29tbW9uTWVzc2FnZUgAUg1jb21tb25NZXNzYWdlQgkKB21lc3NhZ2U=');
 @$core.Deprecated('Use confirmationDescriptor instead')
 const Confirmation$json = const {
   '1': 'Confirmation',
@@ -198,16 +213,16 @@ final $typed_data.Uint8List dtnDescriptor = $convert.base64Decode('CgNEdG4SHgoJY
 const DtnResponse$json = const {
   '1': 'DtnResponse',
   '2': const [
-    const {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.qaul.net.messaging.DtnResponse.Type', '10': 'type'},
+    const {'1': 'response_type', '3': 1, '4': 1, '5': 14, '6': '.qaul.net.messaging.DtnResponse.ResponseType', '10': 'responseType'},
     const {'1': 'signature', '3': 2, '4': 1, '5': 12, '10': 'signature'},
     const {'1': 'reason', '3': 3, '4': 1, '5': 14, '6': '.qaul.net.messaging.DtnResponse.Reason', '10': 'reason'},
   ],
-  '4': const [DtnResponse_Type$json, DtnResponse_Reason$json],
+  '4': const [DtnResponse_ResponseType$json, DtnResponse_Reason$json],
 };
 
 @$core.Deprecated('Use dtnResponseDescriptor instead')
-const DtnResponse_Type$json = const {
-  '1': 'Type',
+const DtnResponse_ResponseType$json = const {
+  '1': 'ResponseType',
   '2': const [
     const {'1': 'ACCEPTED', '2': 0},
     const {'1': 'REJECTED', '2': 1},
@@ -218,11 +233,12 @@ const DtnResponse_Type$json = const {
 const DtnResponse_Reason$json = const {
   '1': 'Reason',
   '2': const [
-    const {'1': 'USER_NOT_ACCEPTED', '2': 0},
-    const {'1': 'OVERALL_QUOTA', '2': 1},
-    const {'1': 'USER_QUOTA', '2': 2},
+    const {'1': 'NONE', '2': 0},
+    const {'1': 'USER_NOT_ACCEPTED', '2': 1},
+    const {'1': 'OVERALL_QUOTA', '2': 2},
+    const {'1': 'USER_QUOTA', '2': 3},
   ],
 };
 
 /// Descriptor for `DtnResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnResponseDescriptor = $convert.base64Decode('CgtEdG5SZXNwb25zZRI4CgR0eXBlGAEgASgOMiQucWF1bC5uZXQubWVzc2FnaW5nLkR0blJlc3BvbnNlLlR5cGVSBHR5cGUSHAoJc2lnbmF0dXJlGAIgASgMUglzaWduYXR1cmUSPgoGcmVhc29uGAMgASgOMiYucWF1bC5uZXQubWVzc2FnaW5nLkR0blJlc3BvbnNlLlJlYXNvblIGcmVhc29uIiIKBFR5cGUSDAoIQUNDRVBURUQQABIMCghSRUpFQ1RFRBABIkIKBlJlYXNvbhIVChFVU0VSX05PVF9BQ0NFUFRFRBAAEhEKDU9WRVJBTExfUVVPVEEQARIOCgpVU0VSX1FVT1RBEAI=');
+final $typed_data.Uint8List dtnResponseDescriptor = $convert.base64Decode('CgtEdG5SZXNwb25zZRJRCg1yZXNwb25zZV90eXBlGAEgASgOMiwucWF1bC5uZXQubWVzc2FnaW5nLkR0blJlc3BvbnNlLlJlc3BvbnNlVHlwZVIMcmVzcG9uc2VUeXBlEhwKCXNpZ25hdHVyZRgCIAEoDFIJc2lnbmF0dXJlEj4KBnJlYXNvbhgDIAEoDjImLnFhdWwubmV0Lm1lc3NhZ2luZy5EdG5SZXNwb25zZS5SZWFzb25SBnJlYXNvbiIqCgxSZXNwb25zZVR5cGUSDAoIQUNDRVBURUQQABIMCghSRUpFQ1RFRBABIkwKBlJlYXNvbhIICgROT05FEAASFQoRVVNFUl9OT1RfQUNDRVBURUQQARIRCg1PVkVSQUxMX1FVT1RBEAISDgoKVVNFUl9RVU9UQRAD');

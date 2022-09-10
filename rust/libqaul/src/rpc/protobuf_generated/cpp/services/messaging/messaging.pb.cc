@@ -69,6 +69,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR Encrypted::Encrypted(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.data_)*/{}
+  , /*decltype(_impl_.state_)*/0
+  , /*decltype(_impl_.session_id_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct EncryptedDefaultTypeInternal {
   PROTOBUF_CONSTEXPR EncryptedDefaultTypeInternal()
@@ -244,7 +246,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR DtnResponse::DtnResponse(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.signature_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.type_)*/0
+  , /*decltype(_impl_.response_type_)*/0
   , /*decltype(_impl_.reason_)*/0
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnResponseDefaultTypeInternal {
@@ -260,7 +262,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace net
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_services_2fmessaging_2fmessaging_2eproto[17];
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto[2];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto[3];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fmessaging_2fmessaging_2eproto = nullptr;
 
 const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -296,6 +298,8 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Encrypted, _impl_.state_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Encrypted, _impl_.session_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Encrypted, _impl_.data_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Data, _internal_metadata_),
@@ -311,6 +315,7 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::Messaging, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
@@ -402,7 +407,7 @@ const uint32_t TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets[] P
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::DtnResponse, _impl_.type_),
+  PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::DtnResponse, _impl_.response_type_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::DtnResponse, _impl_.signature_),
   PROTOBUF_FIELD_OFFSET(::qaul::net::messaging::DtnResponse, _impl_.reason_),
 };
@@ -411,19 +416,19 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 8, -1, -1, sizeof(::qaul::net::messaging::Envelope)},
   { 17, -1, -1, sizeof(::qaul::net::messaging::EnvelopPayload)},
   { 26, -1, -1, sizeof(::qaul::net::messaging::Encrypted)},
-  { 33, -1, -1, sizeof(::qaul::net::messaging::Data)},
-  { 41, -1, -1, sizeof(::qaul::net::messaging::Messaging)},
-  { 53, -1, -1, sizeof(::qaul::net::messaging::Confirmation)},
-  { 61, -1, -1, sizeof(::qaul::net::messaging::CryptoService)},
-  { 67, -1, -1, sizeof(::qaul::net::messaging::RtcStreamMessage)},
-  { 74, -1, -1, sizeof(::qaul::net::messaging::GroupInviteMessage)},
-  { 81, -1, -1, sizeof(::qaul::net::messaging::CommonMessage)},
-  { 95, -1, -1, sizeof(::qaul::net::messaging::ChatMessage)},
-  { 102, -1, -1, sizeof(::qaul::net::messaging::FileMessage)},
-  { 109, -1, -1, sizeof(::qaul::net::messaging::GroupMessage)},
-  { 116, -1, -1, sizeof(::qaul::net::messaging::RtcMessage)},
-  { 123, -1, -1, sizeof(::qaul::net::messaging::Dtn)},
-  { 132, -1, -1, sizeof(::qaul::net::messaging::DtnResponse)},
+  { 35, -1, -1, sizeof(::qaul::net::messaging::Data)},
+  { 43, -1, -1, sizeof(::qaul::net::messaging::Messaging)},
+  { 56, -1, -1, sizeof(::qaul::net::messaging::Confirmation)},
+  { 64, -1, -1, sizeof(::qaul::net::messaging::CryptoService)},
+  { 70, -1, -1, sizeof(::qaul::net::messaging::RtcStreamMessage)},
+  { 77, -1, -1, sizeof(::qaul::net::messaging::GroupInviteMessage)},
+  { 84, -1, -1, sizeof(::qaul::net::messaging::CommonMessage)},
+  { 98, -1, -1, sizeof(::qaul::net::messaging::ChatMessage)},
+  { 105, -1, -1, sizeof(::qaul::net::messaging::FileMessage)},
+  { 112, -1, -1, sizeof(::qaul::net::messaging::GroupMessage)},
+  { 119, -1, -1, sizeof(::qaul::net::messaging::RtcMessage)},
+  { 126, -1, -1, sizeof(::qaul::net::messaging::Dtn)},
+  { 135, -1, -1, sizeof(::qaul::net::messaging::DtnResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -454,46 +459,51 @@ const char descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto[] 
   "d\030\001 \001(\014\022\023\n\013receiver_id\030\002 \001(\014\022\017\n\007payload\030"
   "\003 \001(\014\"^\n\016EnvelopPayload\0222\n\tencrypted\030\001 \001"
   "(\0132\035.qaul.net.messaging.EncryptedH\000\022\r\n\003d"
-  "tn\030\002 \001(\014H\000B\t\n\007payload\"3\n\tEncrypted\022&\n\004da"
-  "ta\030\001 \003(\0132\030.qaul.net.messaging.Data\"#\n\004Da"
-  "ta\022\r\n\005nonce\030\001 \001(\004\022\014\n\004data\030\002 \001(\014\"\336\002\n\tMess"
-  "aging\022@\n\024confirmation_message\030\001 \001(\0132 .qa"
-  "ul.net.messaging.ConfirmationH\000\022;\n\016crypt"
-  "o_service\030\002 \001(\0132!.qaul.net.messaging.Cry"
-  "ptoServiceH\000\022B\n\022rtc_stream_message\030\003 \001(\013"
-  "2$.qaul.net.messaging.RtcStreamMessageH\000"
-  "\022F\n\024group_invite_message\030\004 \001(\0132&.qaul.ne"
-  "t.messaging.GroupInviteMessageH\000\022;\n\016comm"
-  "on_message\030\005 \001(\0132!.qaul.net.messaging.Co"
-  "mmonMessageH\000B\t\n\007message\"6\n\014Confirmation"
-  "\022\021\n\tsignature\030\001 \001(\014\022\023\n\013received_at\030\002 \001(\004"
-  "\"\017\n\rCryptoService\"#\n\020RtcStreamMessage\022\017\n"
-  "\007content\030\001 \001(\014\"%\n\022GroupInviteMessage\022\017\n\007"
-  "content\030\001 \001(\014\"\274\002\n\rCommonMessage\022\022\n\nmessa"
-  "ge_id\030\001 \001(\014\022\027\n\017conversation_id\030\002 \001(\014\022\017\n\007"
-  "sent_at\030\003 \001(\004\0227\n\014chat_message\030\004 \001(\0132\037.qa"
-  "ul.net.messaging.ChatMessageH\000\0227\n\014file_m"
-  "essage\030\005 \001(\0132\037.qaul.net.messaging.FileMe"
-  "ssageH\000\0229\n\rgroup_message\030\006 \001(\0132 .qaul.ne"
-  "t.messaging.GroupMessageH\000\0225\n\013rtc_messag"
-  "e\030\007 \001(\0132\036.qaul.net.messaging.RtcMessageH"
-  "\000B\t\n\007payload\"\036\n\013ChatMessage\022\017\n\007content\030\001"
-  " \001(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001(\014\"\037\n\014"
-  "GroupMessage\022\017\n\007content\030\001 \001(\014\"\035\n\nRtcMess"
-  "age\022\017\n\007content\030\001 \001(\014\"Z\n\003Dtn\022\023\n\tcontainer"
-  "\030\001 \001(\014H\000\0223\n\010response\030\002 \001(\0132\037.qaul.net.me"
-  "ssaging.DtnResponseH\000B\t\n\007message\"\364\001\n\013Dtn"
-  "Response\0222\n\004type\030\001 \001(\0162$.qaul.net.messag"
-  "ing.DtnResponse.Type\022\021\n\tsignature\030\002 \001(\014\022"
-  "6\n\006reason\030\003 \001(\0162&.qaul.net.messaging.Dtn"
-  "Response.Reason\"\"\n\004Type\022\014\n\010ACCEPTED\020\000\022\014\n"
-  "\010REJECTED\020\001\"B\n\006Reason\022\025\n\021USER_NOT_ACCEPT"
-  "ED\020\000\022\021\n\rOVERALL_QUOTA\020\001\022\016\n\nUSER_QUOTA\020\002b"
-  "\006proto3"
+  "tn\030\002 \001(\014H\000B\t\n\007payload\"w\n\tEncrypted\022.\n\005st"
+  "ate\030\001 \001(\0162\037.qaul.net.messaging.CryptoSta"
+  "te\022\022\n\nsession_id\030\002 \001(\r\022&\n\004data\030\003 \003(\0132\030.q"
+  "aul.net.messaging.Data\"#\n\004Data\022\r\n\005nonce\030"
+  "\001 \001(\004\022\014\n\004data\030\002 \001(\014\"\227\003\n\tMessaging\022@\n\024con"
+  "firmation_message\030\001 \001(\0132 .qaul.net.messa"
+  "ging.ConfirmationH\000\0227\n\014dtn_response\030\002 \001("
+  "\0132\037.qaul.net.messaging.DtnResponseH\000\022;\n\016"
+  "crypto_service\030\003 \001(\0132!.qaul.net.messagin"
+  "g.CryptoServiceH\000\022B\n\022rtc_stream_message\030"
+  "\004 \001(\0132$.qaul.net.messaging.RtcStreamMess"
+  "ageH\000\022F\n\024group_invite_message\030\005 \001(\0132&.qa"
+  "ul.net.messaging.GroupInviteMessageH\000\022;\n"
+  "\016common_message\030\006 \001(\0132!.qaul.net.messagi"
+  "ng.CommonMessageH\000B\t\n\007message\"6\n\014Confirm"
+  "ation\022\021\n\tsignature\030\001 \001(\014\022\023\n\013received_at\030"
+  "\002 \001(\004\"\017\n\rCryptoService\"#\n\020RtcStreamMessa"
+  "ge\022\017\n\007content\030\001 \001(\014\"%\n\022GroupInviteMessag"
+  "e\022\017\n\007content\030\001 \001(\014\"\274\002\n\rCommonMessage\022\022\n\n"
+  "message_id\030\001 \001(\014\022\027\n\017conversation_id\030\002 \001("
+  "\014\022\017\n\007sent_at\030\003 \001(\004\0227\n\014chat_message\030\004 \001(\013"
+  "2\037.qaul.net.messaging.ChatMessageH\000\0227\n\014f"
+  "ile_message\030\005 \001(\0132\037.qaul.net.messaging.F"
+  "ileMessageH\000\0229\n\rgroup_message\030\006 \001(\0132 .qa"
+  "ul.net.messaging.GroupMessageH\000\0225\n\013rtc_m"
+  "essage\030\007 \001(\0132\036.qaul.net.messaging.RtcMes"
+  "sageH\000B\t\n\007payload\"\036\n\013ChatMessage\022\017\n\007cont"
+  "ent\030\001 \001(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001("
+  "\014\"\037\n\014GroupMessage\022\017\n\007content\030\001 \001(\014\"\035\n\nRt"
+  "cMessage\022\017\n\007content\030\001 \001(\014\"Z\n\003Dtn\022\023\n\tcont"
+  "ainer\030\001 \001(\014H\000\0223\n\010response\030\002 \001(\0132\037.qaul.n"
+  "et.messaging.DtnResponseH\000B\t\n\007message\"\227\002"
+  "\n\013DtnResponse\022C\n\rresponse_type\030\001 \001(\0162,.q"
+  "aul.net.messaging.DtnResponse.ResponseTy"
+  "pe\022\021\n\tsignature\030\002 \001(\014\0226\n\006reason\030\003 \001(\0162&."
+  "qaul.net.messaging.DtnResponse.Reason\"*\n"
+  "\014ResponseType\022\014\n\010ACCEPTED\020\000\022\014\n\010REJECTED\020"
+  "\001\"L\n\006Reason\022\010\n\004NONE\020\000\022\025\n\021USER_NOT_ACCEPT"
+  "ED\020\001\022\021\n\rOVERALL_QUOTA\020\002\022\016\n\nUSER_QUOTA\020\003*"
+  "5\n\013CryptoState\022\010\n\004NONE\020\000\022\r\n\tHANDSHAKE\020\001\022"
+  "\r\n\tTRANSPORT\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fmessaging_2fmessaging_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fmessaging_2fmessaging_2eproto = {
-    false, false, 1687, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto,
+    false, false, 1902, descriptor_table_protodef_services_2fmessaging_2fmessaging_2eproto,
     "services/messaging/messaging.proto",
     &descriptor_table_services_2fmessaging_2fmessaging_2eproto_once, nullptr, 0, 17,
     schemas, file_default_instances, TableStruct_services_2fmessaging_2fmessaging_2eproto::offsets,
@@ -509,11 +519,11 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_in
 namespace qaul {
 namespace net {
 namespace messaging {
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DtnResponse_Type_descriptor() {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DtnResponse_ResponseType_descriptor() {
   ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fmessaging_2fmessaging_2eproto);
   return file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto[0];
 }
-bool DtnResponse_Type_IsValid(int value) {
+bool DtnResponse_ResponseType_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:
@@ -524,11 +534,11 @@ bool DtnResponse_Type_IsValid(int value) {
 }
 
 #if (__cplusplus < 201703) && (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-constexpr DtnResponse_Type DtnResponse::ACCEPTED;
-constexpr DtnResponse_Type DtnResponse::REJECTED;
-constexpr DtnResponse_Type DtnResponse::Type_MIN;
-constexpr DtnResponse_Type DtnResponse::Type_MAX;
-constexpr int DtnResponse::Type_ARRAYSIZE;
+constexpr DtnResponse_ResponseType DtnResponse::ACCEPTED;
+constexpr DtnResponse_ResponseType DtnResponse::REJECTED;
+constexpr DtnResponse_ResponseType DtnResponse::ResponseType_MIN;
+constexpr DtnResponse_ResponseType DtnResponse::ResponseType_MAX;
+constexpr int DtnResponse::ResponseType_ARRAYSIZE;
 #endif  // (__cplusplus < 201703) && (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DtnResponse_Reason_descriptor() {
   ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fmessaging_2fmessaging_2eproto);
@@ -539,6 +549,7 @@ bool DtnResponse_Reason_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -546,6 +557,7 @@ bool DtnResponse_Reason_IsValid(int value) {
 }
 
 #if (__cplusplus < 201703) && (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+constexpr DtnResponse_Reason DtnResponse::NONE;
 constexpr DtnResponse_Reason DtnResponse::USER_NOT_ACCEPTED;
 constexpr DtnResponse_Reason DtnResponse::OVERALL_QUOTA;
 constexpr DtnResponse_Reason DtnResponse::USER_QUOTA;
@@ -553,6 +565,21 @@ constexpr DtnResponse_Reason DtnResponse::Reason_MIN;
 constexpr DtnResponse_Reason DtnResponse::Reason_MAX;
 constexpr int DtnResponse::Reason_ARRAYSIZE;
 #endif  // (__cplusplus < 201703) && (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CryptoState_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fmessaging_2fmessaging_2eproto);
+  return file_level_enum_descriptors_services_2fmessaging_2fmessaging_2eproto[2];
+}
+bool CryptoState_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 // ===================================================================
 
@@ -1380,9 +1407,14 @@ Encrypted::Encrypted(const Encrypted& from)
   Encrypted* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.data_){from._impl_.data_}
+    , decltype(_impl_.state_){}
+    , decltype(_impl_.session_id_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.state_, &from._impl_.state_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.session_id_) -
+    reinterpret_cast<char*>(&_impl_.state_)) + sizeof(_impl_.session_id_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.messaging.Encrypted)
 }
 
@@ -1392,6 +1424,8 @@ inline void Encrypted::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.data_){arena}
+    , decltype(_impl_.state_){0}
+    , decltype(_impl_.session_id_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -1421,6 +1455,9 @@ void Encrypted::Clear() {
   (void) cached_has_bits;
 
   _impl_.data_.Clear();
+  ::memset(&_impl_.state_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.session_id_) -
+      reinterpret_cast<char*>(&_impl_.state_)) + sizeof(_impl_.session_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1430,16 +1467,33 @@ const char* Encrypted::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .qaul.net.messaging.Data data = 1;
+      // .qaul.net.messaging.CryptoState state = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_state(static_cast<::qaul::net::messaging::CryptoState>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 session_id = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.session_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated .qaul.net.messaging.Data data = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_data(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -1472,12 +1526,25 @@ uint8_t* Encrypted::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .qaul.net.messaging.Data data = 1;
+  // .qaul.net.messaging.CryptoState state = 1;
+  if (this->_internal_state() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_state(), target);
+  }
+
+  // uint32 session_id = 2;
+  if (this->_internal_session_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_session_id(), target);
+  }
+
+  // repeated .qaul.net.messaging.Data data = 3;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_data_size()); i < n; i++) {
     const auto& repfield = this->_internal_data(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-        InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
+        InternalWriteMessage(3, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1496,11 +1563,22 @@ size_t Encrypted::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .qaul.net.messaging.Data data = 1;
+  // repeated .qaul.net.messaging.Data data = 3;
   total_size += 1UL * this->_internal_data_size();
   for (const auto& msg : this->_impl_.data_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .qaul.net.messaging.CryptoState state = 1;
+  if (this->_internal_state() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_state());
+  }
+
+  // uint32 session_id = 2;
+  if (this->_internal_session_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_session_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1522,6 +1600,12 @@ void Encrypted::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROT
   (void) cached_has_bits;
 
   _this->_impl_.data_.MergeFrom(from._impl_.data_);
+  if (from._internal_state() != 0) {
+    _this->_internal_set_state(from._internal_state());
+  }
+  if (from._internal_session_id() != 0) {
+    _this->_internal_set_session_id(from._internal_session_id());
+  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1540,6 +1624,12 @@ void Encrypted::InternalSwap(Encrypted* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.data_.InternalSwap(&other->_impl_.data_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Encrypted, _impl_.session_id_)
+      + sizeof(Encrypted::_impl_.session_id_)
+      - PROTOBUF_FIELD_OFFSET(Encrypted, _impl_.state_)>(
+          reinterpret_cast<char*>(&_impl_.state_),
+          reinterpret_cast<char*>(&other->_impl_.state_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Encrypted::GetMetadata() const {
@@ -1778,6 +1868,7 @@ void Data::InternalSwap(Data* other) {
 class Messaging::_Internal {
  public:
   static const ::qaul::net::messaging::Confirmation& confirmation_message(const Messaging* msg);
+  static const ::qaul::net::messaging::DtnResponse& dtn_response(const Messaging* msg);
   static const ::qaul::net::messaging::CryptoService& crypto_service(const Messaging* msg);
   static const ::qaul::net::messaging::RtcStreamMessage& rtc_stream_message(const Messaging* msg);
   static const ::qaul::net::messaging::GroupInviteMessage& group_invite_message(const Messaging* msg);
@@ -1787,6 +1878,10 @@ class Messaging::_Internal {
 const ::qaul::net::messaging::Confirmation&
 Messaging::_Internal::confirmation_message(const Messaging* msg) {
   return *msg->_impl_.message_.confirmation_message_;
+}
+const ::qaul::net::messaging::DtnResponse&
+Messaging::_Internal::dtn_response(const Messaging* msg) {
+  return *msg->_impl_.message_.dtn_response_;
 }
 const ::qaul::net::messaging::CryptoService&
 Messaging::_Internal::crypto_service(const Messaging* msg) {
@@ -1818,6 +1913,21 @@ void Messaging::set_allocated_confirmation_message(::qaul::net::messaging::Confi
     _impl_.message_.confirmation_message_ = confirmation_message;
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Messaging.confirmation_message)
+}
+void Messaging::set_allocated_dtn_response(::qaul::net::messaging::DtnResponse* dtn_response) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (dtn_response) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(dtn_response);
+    if (message_arena != submessage_arena) {
+      dtn_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, dtn_response, submessage_arena);
+    }
+    set_has_dtn_response();
+    _impl_.message_.dtn_response_ = dtn_response;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.net.messaging.Messaging.dtn_response)
 }
 void Messaging::set_allocated_crypto_service(::qaul::net::messaging::CryptoService* crypto_service) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -1901,6 +2011,11 @@ Messaging::Messaging(const Messaging& from)
           from._internal_confirmation_message());
       break;
     }
+    case kDtnResponse: {
+      _this->_internal_mutable_dtn_response()->::qaul::net::messaging::DtnResponse::MergeFrom(
+          from._internal_dtn_response());
+      break;
+    }
     case kCryptoService: {
       _this->_internal_mutable_crypto_service()->::qaul::net::messaging::CryptoService::MergeFrom(
           from._internal_crypto_service());
@@ -1969,6 +2084,12 @@ void Messaging::clear_message() {
       }
       break;
     }
+    case kDtnResponse: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete _impl_.message_.dtn_response_;
+      }
+      break;
+    }
     case kCryptoService: {
       if (GetArenaForAllocation() == nullptr) {
         delete _impl_.message_.crypto_service_;
@@ -2025,33 +2146,41 @@ const char* Messaging::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
         } else
           goto handle_unusual;
         continue;
-      // .qaul.net.messaging.CryptoService crypto_service = 2;
+      // .qaul.net.messaging.DtnResponse dtn_response = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_dtn_response(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.net.messaging.CryptoService crypto_service = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_crypto_service(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+      // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_rtc_stream_message(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+      // .qaul.net.messaging.GroupInviteMessage group_invite_message = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_group_invite_message(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .qaul.net.messaging.CommonMessage common_message = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+      // .qaul.net.messaging.CommonMessage common_message = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_common_message(), ptr);
           CHK_(ptr);
         } else
@@ -2093,31 +2222,38 @@ uint8_t* Messaging::_InternalSerialize(
         _Internal::confirmation_message(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.net.messaging.CryptoService crypto_service = 2;
+  // .qaul.net.messaging.DtnResponse dtn_response = 2;
+  if (_internal_has_dtn_response()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::dtn_response(this),
+        _Internal::dtn_response(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.net.messaging.CryptoService crypto_service = 3;
   if (_internal_has_crypto_service()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::crypto_service(this),
+      InternalWriteMessage(3, _Internal::crypto_service(this),
         _Internal::crypto_service(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;
+  // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;
   if (_internal_has_rtc_stream_message()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::rtc_stream_message(this),
+      InternalWriteMessage(4, _Internal::rtc_stream_message(this),
         _Internal::rtc_stream_message(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+  // .qaul.net.messaging.GroupInviteMessage group_invite_message = 5;
   if (_internal_has_group_invite_message()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::group_invite_message(this),
+      InternalWriteMessage(5, _Internal::group_invite_message(this),
         _Internal::group_invite_message(this).GetCachedSize(), target, stream);
   }
 
-  // .qaul.net.messaging.CommonMessage common_message = 5;
+  // .qaul.net.messaging.CommonMessage common_message = 6;
   if (_internal_has_common_message()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::common_message(this),
+      InternalWriteMessage(6, _Internal::common_message(this),
         _Internal::common_message(this).GetCachedSize(), target, stream);
   }
 
@@ -2145,28 +2281,35 @@ size_t Messaging::ByteSizeLong() const {
           *_impl_.message_.confirmation_message_);
       break;
     }
-    // .qaul.net.messaging.CryptoService crypto_service = 2;
+    // .qaul.net.messaging.DtnResponse dtn_response = 2;
+    case kDtnResponse: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.message_.dtn_response_);
+      break;
+    }
+    // .qaul.net.messaging.CryptoService crypto_service = 3;
     case kCryptoService: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.message_.crypto_service_);
       break;
     }
-    // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;
+    // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;
     case kRtcStreamMessage: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.message_.rtc_stream_message_);
       break;
     }
-    // .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+    // .qaul.net.messaging.GroupInviteMessage group_invite_message = 5;
     case kGroupInviteMessage: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.message_.group_invite_message_);
       break;
     }
-    // .qaul.net.messaging.CommonMessage common_message = 5;
+    // .qaul.net.messaging.CommonMessage common_message = 6;
     case kCommonMessage: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -2199,6 +2342,11 @@ void Messaging::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROT
     case kConfirmationMessage: {
       _this->_internal_mutable_confirmation_message()->::qaul::net::messaging::Confirmation::MergeFrom(
           from._internal_confirmation_message());
+      break;
+    }
+    case kDtnResponse: {
+      _this->_internal_mutable_dtn_response()->::qaul::net::messaging::DtnResponse::MergeFrom(
+          from._internal_dtn_response());
       break;
     }
     case kCryptoService: {
@@ -4548,7 +4696,7 @@ DtnResponse::DtnResponse(const DtnResponse& from)
   DtnResponse* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.signature_){}
-    , decltype(_impl_.type_){}
+    , decltype(_impl_.response_type_){}
     , decltype(_impl_.reason_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
@@ -4561,9 +4709,9 @@ DtnResponse::DtnResponse(const DtnResponse& from)
     _this->_impl_.signature_.Set(from._internal_signature(), 
       _this->GetArenaForAllocation());
   }
-  ::memcpy(&_impl_.type_, &from._impl_.type_,
+  ::memcpy(&_impl_.response_type_, &from._impl_.response_type_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.reason_) -
-    reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.reason_));
+    reinterpret_cast<char*>(&_impl_.response_type_)) + sizeof(_impl_.reason_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.messaging.DtnResponse)
 }
 
@@ -4573,7 +4721,7 @@ inline void DtnResponse::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.signature_){}
-    , decltype(_impl_.type_){0}
+    , decltype(_impl_.response_type_){0}
     , decltype(_impl_.reason_){0}
     , /*decltype(_impl_._cached_size_)*/{}
   };
@@ -4608,9 +4756,9 @@ void DtnResponse::Clear() {
   (void) cached_has_bits;
 
   _impl_.signature_.ClearToEmpty();
-  ::memset(&_impl_.type_, 0, static_cast<size_t>(
+  ::memset(&_impl_.response_type_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&_impl_.reason_) -
-      reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.reason_));
+      reinterpret_cast<char*>(&_impl_.response_type_)) + sizeof(_impl_.reason_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -4620,12 +4768,12 @@ const char* DtnResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .qaul.net.messaging.DtnResponse.Type type = 1;
+      // .qaul.net.messaging.DtnResponse.ResponseType response_type = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
           uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-          _internal_set_type(static_cast<::qaul::net::messaging::DtnResponse_Type>(val));
+          _internal_set_response_type(static_cast<::qaul::net::messaging::DtnResponse_ResponseType>(val));
         } else
           goto handle_unusual;
         continue;
@@ -4676,11 +4824,11 @@ uint8_t* DtnResponse::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .qaul.net.messaging.DtnResponse.Type type = 1;
-  if (this->_internal_type() != 0) {
+  // .qaul.net.messaging.DtnResponse.ResponseType response_type = 1;
+  if (this->_internal_response_type() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-      1, this->_internal_type(), target);
+      1, this->_internal_response_type(), target);
   }
 
   // bytes signature = 2;
@@ -4719,10 +4867,10 @@ size_t DtnResponse::ByteSizeLong() const {
         this->_internal_signature());
   }
 
-  // .qaul.net.messaging.DtnResponse.Type type = 1;
-  if (this->_internal_type() != 0) {
+  // .qaul.net.messaging.DtnResponse.ResponseType response_type = 1;
+  if (this->_internal_response_type() != 0) {
     total_size += 1 +
-      ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_response_type());
   }
 
   // .qaul.net.messaging.DtnResponse.Reason reason = 3;
@@ -4752,8 +4900,8 @@ void DtnResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PR
   if (!from._internal_signature().empty()) {
     _this->_internal_set_signature(from._internal_signature());
   }
-  if (from._internal_type() != 0) {
-    _this->_internal_set_type(from._internal_type());
+  if (from._internal_response_type() != 0) {
+    _this->_internal_set_response_type(from._internal_response_type());
   }
   if (from._internal_reason() != 0) {
     _this->_internal_set_reason(from._internal_reason());
@@ -4784,9 +4932,9 @@ void DtnResponse::InternalSwap(DtnResponse* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(DtnResponse, _impl_.reason_)
       + sizeof(DtnResponse::_impl_.reason_)
-      - PROTOBUF_FIELD_OFFSET(DtnResponse, _impl_.type_)>(
-          reinterpret_cast<char*>(&_impl_.type_),
-          reinterpret_cast<char*>(&other->_impl_.type_));
+      - PROTOBUF_FIELD_OFFSET(DtnResponse, _impl_.response_type_)>(
+          reinterpret_cast<char*>(&_impl_.response_type_),
+          reinterpret_cast<char*>(&other->_impl_.response_type_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DtnResponse::GetMetadata() const {

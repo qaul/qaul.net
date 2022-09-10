@@ -60,10 +60,46 @@ object MessagingKt {
 
     /**
      * <pre>
+     * dtn response message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.DtnResponse dtn_response = 2;</code>
+     */
+    var dtnResponse: qaul.net.messaging.MessagingOuterClass.DtnResponse
+      @JvmName("getDtnResponse")
+      get() = _builder.getDtnResponse()
+      @JvmName("setDtnResponse")
+      set(value) {
+        _builder.setDtnResponse(value)
+      }
+    /**
+     * <pre>
+     * dtn response message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.DtnResponse dtn_response = 2;</code>
+     */
+    fun clearDtnResponse() {
+      _builder.clearDtnResponse()
+    }
+    /**
+     * <pre>
+     * dtn response message
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.DtnResponse dtn_response = 2;</code>
+     * @return Whether the dtnResponse field is set.
+     */
+    fun hasDtnResponse(): kotlin.Boolean {
+      return _builder.hasDtnResponse()
+    }
+
+    /**
+     * <pre>
      * crypto service
      * </pre>
      *
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
      */
     var cryptoService: qaul.net.messaging.MessagingOuterClass.CryptoService
       @JvmName("getCryptoService")
@@ -77,7 +113,7 @@ object MessagingKt {
      * crypto service
      * </pre>
      *
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
      */
     fun clearCryptoService() {
       _builder.clearCryptoService()
@@ -87,7 +123,7 @@ object MessagingKt {
      * crypto service
      * </pre>
      *
-     * <code>.qaul.net.messaging.CryptoService crypto_service = 2;</code>
+     * <code>.qaul.net.messaging.CryptoService crypto_service = 3;</code>
      * @return Whether the cryptoService field is set.
      */
     fun hasCryptoService(): kotlin.Boolean {
@@ -99,7 +135,7 @@ object MessagingKt {
      * rtc stream
      * </pre>
      *
-     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;</code>
      */
     var rtcStreamMessage: qaul.net.messaging.MessagingOuterClass.RtcStreamMessage
       @JvmName("getRtcStreamMessage")
@@ -113,7 +149,7 @@ object MessagingKt {
      * rtc stream
      * </pre>
      *
-     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;</code>
      */
     fun clearRtcStreamMessage() {
       _builder.clearRtcStreamMessage()
@@ -123,7 +159,7 @@ object MessagingKt {
      * rtc stream
      * </pre>
      *
-     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;</code>
+     * <code>.qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;</code>
      * @return Whether the rtcStreamMessage field is set.
      */
     fun hasRtcStreamMessage(): kotlin.Boolean {
@@ -135,7 +171,7 @@ object MessagingKt {
      * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 5;</code>
      */
     var groupInviteMessage: qaul.net.messaging.MessagingOuterClass.GroupInviteMessage
       @JvmName("getGroupInviteMessage")
@@ -149,7 +185,7 @@ object MessagingKt {
      * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 5;</code>
      */
     fun clearGroupInviteMessage() {
       _builder.clearGroupInviteMessage()
@@ -159,7 +195,7 @@ object MessagingKt {
      * group invite messages
      * </pre>
      *
-     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 4;</code>
+     * <code>.qaul.net.messaging.GroupInviteMessage group_invite_message = 5;</code>
      * @return Whether the groupInviteMessage field is set.
      */
     fun hasGroupInviteMessage(): kotlin.Boolean {
@@ -171,7 +207,7 @@ object MessagingKt {
      * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
+     * <code>.qaul.net.messaging.CommonMessage common_message = 6;</code>
      */
     var commonMessage: qaul.net.messaging.MessagingOuterClass.CommonMessage
       @JvmName("getCommonMessage")
@@ -185,7 +221,7 @@ object MessagingKt {
      * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
+     * <code>.qaul.net.messaging.CommonMessage common_message = 6;</code>
      */
     fun clearCommonMessage() {
       _builder.clearCommonMessage()
@@ -195,7 +231,7 @@ object MessagingKt {
      * common message
      * </pre>
      *
-     * <code>.qaul.net.messaging.CommonMessage common_message = 5;</code>
+     * <code>.qaul.net.messaging.CommonMessage common_message = 6;</code>
      * @return Whether the commonMessage field is set.
      */
     fun hasCommonMessage(): kotlin.Boolean {
@@ -216,6 +252,9 @@ inline fun qaul.net.messaging.MessagingOuterClass.Messaging.copy(block: qaul.net
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.confirmationMessageOrNull: qaul.net.messaging.MessagingOuterClass.Confirmation?
   get() = if (hasConfirmationMessage()) getConfirmationMessage() else null
+
+val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.dtnResponseOrNull: qaul.net.messaging.MessagingOuterClass.DtnResponse?
+  get() = if (hasDtnResponse()) getDtnResponse() else null
 
 val qaul.net.messaging.MessagingOuterClass.MessagingOrBuilder.cryptoServiceOrNull: qaul.net.messaging.MessagingOuterClass.CryptoService?
   get() = if (hasCryptoService()) getCryptoService() else null

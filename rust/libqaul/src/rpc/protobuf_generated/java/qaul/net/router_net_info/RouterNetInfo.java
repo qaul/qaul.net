@@ -47,6 +47,22 @@ public final class RouterNetInfo {
      * <code>FEED_RESPONSE = 2;</code>
      */
     FEED_RESPONSE(2),
+    /**
+     * <pre>
+     * Message is a UserRequestMessage
+     * </pre>
+     *
+     * <code>USER_REQUEST = 3;</code>
+     */
+    USER_REQUEST(3),
+    /**
+     * <pre>
+     * Message is a UserResponseMessage
+     * </pre>
+     *
+     * <code>USER_RESPONSE = 4;</code>
+     */
+    USER_RESPONSE(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -74,6 +90,22 @@ public final class RouterNetInfo {
      * <code>FEED_RESPONSE = 2;</code>
      */
     public static final int FEED_RESPONSE_VALUE = 2;
+    /**
+     * <pre>
+     * Message is a UserRequestMessage
+     * </pre>
+     *
+     * <code>USER_REQUEST = 3;</code>
+     */
+    public static final int USER_REQUEST_VALUE = 3;
+    /**
+     * <pre>
+     * Message is a UserResponseMessage
+     * </pre>
+     *
+     * <code>USER_RESPONSE = 4;</code>
+     */
+    public static final int USER_RESPONSE_VALUE = 4;
 
 
     public final int getNumber() {
@@ -103,6 +135,8 @@ public final class RouterNetInfo {
         case 0: return ROUTER_INFO;
         case 1: return FEED_REQUEST;
         case 2: return FEED_RESPONSE;
+        case 3: return USER_REQUEST;
+        case 4: return USER_RESPONSE;
         default: return null;
       }
     }
@@ -1668,33 +1702,6 @@ public final class RouterNetInfo {
 
     /**
      * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     * @return Whether the users field is set.
-     */
-    boolean hasUsers();
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     * @return The users.
-     */
-    qaul.net.router_net_info.RouterNetInfo.UserInfoTable getUsers();
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     */
-    qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder getUsersOrBuilder();
-
-    /**
-     * <pre>
      * Latest Feed ids table
      * </pre>
      *
@@ -1794,19 +1801,6 @@ public final class RouterNetInfo {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(routes_);
                 routes_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder subBuilder = null;
-              if (users_ != null) {
-                subBuilder = users_.toBuilder();
-              }
-              users_ = input.readMessage(qaul.net.router_net_info.RouterNetInfo.UserInfoTable.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(users_);
-                users_ = subBuilder.buildPartial();
               }
 
               break;
@@ -1916,44 +1910,6 @@ public final class RouterNetInfo {
       return getRoutes();
     }
 
-    public static final int USERS_FIELD_NUMBER = 3;
-    private qaul.net.router_net_info.RouterNetInfo.UserInfoTable users_;
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     * @return Whether the users field is set.
-     */
-    @java.lang.Override
-    public boolean hasUsers() {
-      return users_ != null;
-    }
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     * @return The users.
-     */
-    @java.lang.Override
-    public qaul.net.router_net_info.RouterNetInfo.UserInfoTable getUsers() {
-      return users_ == null ? qaul.net.router_net_info.RouterNetInfo.UserInfoTable.getDefaultInstance() : users_;
-    }
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     */
-    @java.lang.Override
-    public qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder getUsersOrBuilder() {
-      return getUsers();
-    }
-
     public static final int FEEDS_FIELD_NUMBER = 4;
     private qaul.net.router_net_info.RouterNetInfo.FeedIdsTable feeds_;
     /**
@@ -2027,9 +1983,6 @@ public final class RouterNetInfo {
       if (routes_ != null) {
         output.writeMessage(2, getRoutes());
       }
-      if (users_ != null) {
-        output.writeMessage(3, getUsers());
-      }
       if (feeds_ != null) {
         output.writeMessage(4, getFeeds());
       }
@@ -2052,10 +2005,6 @@ public final class RouterNetInfo {
       if (routes_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getRoutes());
-      }
-      if (users_ != null) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getUsers());
       }
       if (feeds_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -2087,11 +2036,6 @@ public final class RouterNetInfo {
         if (!getRoutes()
             .equals(other.getRoutes())) return false;
       }
-      if (hasUsers() != other.hasUsers()) return false;
-      if (hasUsers()) {
-        if (!getUsers()
-            .equals(other.getUsers())) return false;
-      }
       if (hasFeeds() != other.hasFeeds()) return false;
       if (hasFeeds()) {
         if (!getFeeds()
@@ -2115,10 +2059,6 @@ public final class RouterNetInfo {
       if (hasRoutes()) {
         hash = (37 * hash) + ROUTES_FIELD_NUMBER;
         hash = (53 * hash) + getRoutes().hashCode();
-      }
-      if (hasUsers()) {
-        hash = (37 * hash) + USERS_FIELD_NUMBER;
-        hash = (53 * hash) + getUsers().hashCode();
       }
       if (hasFeeds()) {
         hash = (37 * hash) + FEEDS_FIELD_NUMBER;
@@ -2272,12 +2212,6 @@ public final class RouterNetInfo {
           routes_ = null;
           routesBuilder_ = null;
         }
-        if (usersBuilder_ == null) {
-          users_ = null;
-        } else {
-          users_ = null;
-          usersBuilder_ = null;
-        }
         if (feedsBuilder_ == null) {
           feeds_ = null;
         } else {
@@ -2317,11 +2251,6 @@ public final class RouterNetInfo {
           result.routes_ = routes_;
         } else {
           result.routes_ = routesBuilder_.build();
-        }
-        if (usersBuilder_ == null) {
-          result.users_ = users_;
-        } else {
-          result.users_ = usersBuilder_.build();
         }
         if (feedsBuilder_ == null) {
           result.feeds_ = feeds_;
@@ -2382,9 +2311,6 @@ public final class RouterNetInfo {
         }
         if (other.hasRoutes()) {
           mergeRoutes(other.getRoutes());
-        }
-        if (other.hasUsers()) {
-          mergeUsers(other.getUsers());
         }
         if (other.hasFeeds()) {
           mergeFeeds(other.getFeeds());
@@ -2620,161 +2546,6 @@ public final class RouterNetInfo {
           routes_ = null;
         }
         return routesBuilder_;
-      }
-
-      private qaul.net.router_net_info.RouterNetInfo.UserInfoTable users_;
-      private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.router_net_info.RouterNetInfo.UserInfoTable, qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder, qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder> usersBuilder_;
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       * @return Whether the users field is set.
-       */
-      public boolean hasUsers() {
-        return usersBuilder_ != null || users_ != null;
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       * @return The users.
-       */
-      public qaul.net.router_net_info.RouterNetInfo.UserInfoTable getUsers() {
-        if (usersBuilder_ == null) {
-          return users_ == null ? qaul.net.router_net_info.RouterNetInfo.UserInfoTable.getDefaultInstance() : users_;
-        } else {
-          return usersBuilder_.getMessage();
-        }
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public Builder setUsers(qaul.net.router_net_info.RouterNetInfo.UserInfoTable value) {
-        if (usersBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          users_ = value;
-          onChanged();
-        } else {
-          usersBuilder_.setMessage(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public Builder setUsers(
-          qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder builderForValue) {
-        if (usersBuilder_ == null) {
-          users_ = builderForValue.build();
-          onChanged();
-        } else {
-          usersBuilder_.setMessage(builderForValue.build());
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public Builder mergeUsers(qaul.net.router_net_info.RouterNetInfo.UserInfoTable value) {
-        if (usersBuilder_ == null) {
-          if (users_ != null) {
-            users_ =
-              qaul.net.router_net_info.RouterNetInfo.UserInfoTable.newBuilder(users_).mergeFrom(value).buildPartial();
-          } else {
-            users_ = value;
-          }
-          onChanged();
-        } else {
-          usersBuilder_.mergeFrom(value);
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public Builder clearUsers() {
-        if (usersBuilder_ == null) {
-          users_ = null;
-          onChanged();
-        } else {
-          users_ = null;
-          usersBuilder_ = null;
-        }
-
-        return this;
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder getUsersBuilder() {
-        
-        onChanged();
-        return getUsersFieldBuilder().getBuilder();
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      public qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder getUsersOrBuilder() {
-        if (usersBuilder_ != null) {
-          return usersBuilder_.getMessageOrBuilder();
-        } else {
-          return users_ == null ?
-              qaul.net.router_net_info.RouterNetInfo.UserInfoTable.getDefaultInstance() : users_;
-        }
-      }
-      /**
-       * <pre>
-       * Users information table
-       * </pre>
-       *
-       * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          qaul.net.router_net_info.RouterNetInfo.UserInfoTable, qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder, qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder> 
-          getUsersFieldBuilder() {
-        if (usersBuilder_ == null) {
-          usersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              qaul.net.router_net_info.RouterNetInfo.UserInfoTable, qaul.net.router_net_info.RouterNetInfo.UserInfoTable.Builder, qaul.net.router_net_info.RouterNetInfo.UserInfoTableOrBuilder>(
-                  getUsers(),
-                  getParentForChildren(),
-                  isClean());
-          users_ = null;
-        }
-        return usersBuilder_;
       }
 
       private qaul.net.router_net_info.RouterNetInfo.FeedIdsTable feeds_;
@@ -4621,6 +4392,665 @@ public final class RouterNetInfo {
 
     @java.lang.Override
     public qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UserIdTableOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.net.router_net_info.UserIdTable)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @return A list containing the ids.
+     */
+    java.util.List<com.google.protobuf.ByteString> getIdsList();
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @return The count of ids.
+     */
+    int getIdsCount();
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @param index The index of the element to return.
+     * @return The ids at the given index.
+     */
+    com.google.protobuf.ByteString getIds(int index);
+  }
+  /**
+   * <pre>
+   * User information table
+   * </pre>
+   *
+   * Protobuf type {@code qaul.net.router_net_info.UserIdTable}
+   */
+  public static final class UserIdTable extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.net.router_net_info.UserIdTable)
+      UserIdTableOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UserIdTable.newBuilder() to construct.
+    private UserIdTable(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UserIdTable() {
+      ids_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UserIdTable();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserIdTable(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                ids_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              ids_.add(input.readBytes());
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          ids_ = java.util.Collections.unmodifiableList(ids_); // C
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.net.router_net_info.RouterNetInfo.UserIdTable.class, qaul.net.router_net_info.RouterNetInfo.UserIdTable.Builder.class);
+    }
+
+    public static final int IDS_FIELD_NUMBER = 1;
+    private java.util.List<com.google.protobuf.ByteString> ids_;
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @return A list containing the ids.
+     */
+    @java.lang.Override
+    public java.util.List<com.google.protobuf.ByteString>
+        getIdsList() {
+      return ids_;
+    }
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @return The count of ids.
+     */
+    public int getIdsCount() {
+      return ids_.size();
+    }
+    /**
+     * <pre>
+     * user ids
+     * </pre>
+     *
+     * <code>repeated bytes ids = 1;</code>
+     * @param index The index of the element to return.
+     * @return The ids at the given index.
+     */
+    public com.google.protobuf.ByteString getIds(int index) {
+      return ids_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < ids_.size(); i++) {
+        output.writeBytes(1, ids_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < ids_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(ids_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getIdsList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.net.router_net_info.RouterNetInfo.UserIdTable)) {
+        return super.equals(obj);
+      }
+      qaul.net.router_net_info.RouterNetInfo.UserIdTable other = (qaul.net.router_net_info.RouterNetInfo.UserIdTable) obj;
+
+      if (!getIdsList()
+          .equals(other.getIdsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getIdsCount() > 0) {
+        hash = (37 * hash) + IDS_FIELD_NUMBER;
+        hash = (53 * hash) + getIdsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.net.router_net_info.RouterNetInfo.UserIdTable prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * User information table
+     * </pre>
+     *
+     * Protobuf type {@code qaul.net.router_net_info.UserIdTable}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.net.router_net_info.UserIdTable)
+        qaul.net.router_net_info.RouterNetInfo.UserIdTableOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.net.router_net_info.RouterNetInfo.UserIdTable.class, qaul.net.router_net_info.RouterNetInfo.UserIdTable.Builder.class);
+      }
+
+      // Construct using qaul.net.router_net_info.RouterNetInfo.UserIdTable.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        ids_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.net.router_net_info.RouterNetInfo.UserIdTable getDefaultInstanceForType() {
+        return qaul.net.router_net_info.RouterNetInfo.UserIdTable.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.net.router_net_info.RouterNetInfo.UserIdTable build() {
+        qaul.net.router_net_info.RouterNetInfo.UserIdTable result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.net.router_net_info.RouterNetInfo.UserIdTable buildPartial() {
+        qaul.net.router_net_info.RouterNetInfo.UserIdTable result = new qaul.net.router_net_info.RouterNetInfo.UserIdTable(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          ids_ = java.util.Collections.unmodifiableList(ids_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.ids_ = ids_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.net.router_net_info.RouterNetInfo.UserIdTable) {
+          return mergeFrom((qaul.net.router_net_info.RouterNetInfo.UserIdTable)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.net.router_net_info.RouterNetInfo.UserIdTable other) {
+        if (other == qaul.net.router_net_info.RouterNetInfo.UserIdTable.getDefaultInstance()) return this;
+        if (!other.ids_.isEmpty()) {
+          if (ids_.isEmpty()) {
+            ids_ = other.ids_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureIdsIsMutable();
+            ids_.addAll(other.ids_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.net.router_net_info.RouterNetInfo.UserIdTable parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.net.router_net_info.RouterNetInfo.UserIdTable) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.google.protobuf.ByteString> ids_ = java.util.Collections.emptyList();
+      private void ensureIdsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          ids_ = new java.util.ArrayList<com.google.protobuf.ByteString>(ids_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @return A list containing the ids.
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getIdsList() {
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(ids_) : ids_;
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @return The count of ids.
+       */
+      public int getIdsCount() {
+        return ids_.size();
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @param index The index of the element to return.
+       * @return The ids at the given index.
+       */
+      public com.google.protobuf.ByteString getIds(int index) {
+        return ids_.get(index);
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The ids to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIds(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureIdsIsMutable();
+        ids_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @param value The ids to add.
+       * @return This builder for chaining.
+       */
+      public Builder addIds(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureIdsIsMutable();
+        ids_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @param values The ids to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllIds(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureIdsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, ids_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user ids
+       * </pre>
+       *
+       * <code>repeated bytes ids = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIds() {
+        ids_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.net.router_net_info.UserIdTable)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.net.router_net_info.UserIdTable)
+    private static final qaul.net.router_net_info.RouterNetInfo.UserIdTable DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.net.router_net_info.RouterNetInfo.UserIdTable();
+    }
+
+    public static qaul.net.router_net_info.RouterNetInfo.UserIdTable getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UserIdTable>
+        PARSER = new com.google.protobuf.AbstractParser<UserIdTable>() {
+      @java.lang.Override
+      public UserIdTable parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserIdTable(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<UserIdTable> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserIdTable> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.net.router_net_info.RouterNetInfo.UserIdTable getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -10220,6 +10650,11 @@ public final class RouterNetInfo {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_net_router_net_info_RoutingInfoEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_net_router_net_info_UserIdTable_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_net_router_net_info_UserIdTable_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_net_router_net_info_UserInfoTable_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -10269,30 +10704,30 @@ public final class RouterNetInfo {
       "RouterInfoContent\022\n\n\002id\030\001 \001(\014\022D\n\020routerI" +
       "nfoModule\030\002 \001(\0162*.qaul.net.router_net_in" +
       "fo.RouterInfoModule\022\017\n\007content\030\003 \001(\014\022\014\n\004" +
-      "time\030\004 \001(\004\"\337\001\n\021RouterInfoMessage\022\014\n\004node" +
+      "time\030\004 \001(\004\"\247\001\n\021RouterInfoMessage\022\014\n\004node" +
       "\030\001 \001(\014\022:\n\006routes\030\002 \001(\0132*.qaul.net.router" +
-      "_net_info.RoutingInfoTable\0226\n\005users\030\003 \001(" +
-      "\0132\'.qaul.net.router_net_info.UserInfoTab" +
-      "le\0225\n\005feeds\030\004 \001(\0132&.qaul.net.router_net_" +
-      "info.FeedIdsTable\022\021\n\ttimestamp\030\005 \001(\004\"M\n\020" +
-      "RoutingInfoTable\0229\n\005entry\030\001 \003(\0132*.qaul.n" +
-      "et.router_net_info.RoutingInfoEntry\"G\n\020R" +
-      "outingInfoEntry\022\014\n\004user\030\001 \001(\014\022\013\n\003rtt\030\002 \001" +
-      "(\r\022\n\n\002hc\030\003 \001(\014\022\014\n\004pgid\030\005 \001(\r\"A\n\rUserInfo" +
-      "Table\0220\n\004info\030\001 \003(\0132\".qaul.net.router_ne" +
-      "t_info.UserInfo\"1\n\010UserInfo\022\n\n\002id\030\001 \001(\014\022" +
-      "\013\n\003key\030\002 \001(\014\022\014\n\004name\030\003 \001(\t\"\033\n\014FeedIdsTab" +
-      "le\022\013\n\003ids\030\001 \003(\014\"K\n\022FeedRequestMessage\0225\n" +
-      "\005feeds\030\001 \001(\0132&.qaul.net.router_net_info." +
-      "FeedIdsTable\"Q\n\023FeedResponseMessage\022:\n\005f" +
-      "eeds\030\001 \001(\0132+.qaul.net.router_net_info.Fe" +
-      "edResponseTable\"L\n\021FeedResponseTable\0227\n\010" +
-      "messages\030\001 \003(\0132%.qaul.net.router_net_inf" +
-      "o.FeedMessage\"S\n\013FeedMessage\022\022\n\nmessage_" +
-      "id\030\001 \001(\014\022\021\n\tsender_id\030\002 \001(\014\022\017\n\007content\030\003" +
-      " \001(\t\022\014\n\004time\030\004 \001(\004*H\n\020RouterInfoModule\022\017" +
-      "\n\013ROUTER_INFO\020\000\022\020\n\014FEED_REQUEST\020\001\022\021\n\rFEE" +
-      "D_RESPONSE\020\002b\006proto3"
+      "_net_info.RoutingInfoTable\0225\n\005feeds\030\004 \001(" +
+      "\0132&.qaul.net.router_net_info.FeedIdsTabl" +
+      "e\022\021\n\ttimestamp\030\005 \001(\004\"M\n\020RoutingInfoTable" +
+      "\0229\n\005entry\030\001 \003(\0132*.qaul.net.router_net_in" +
+      "fo.RoutingInfoEntry\"G\n\020RoutingInfoEntry\022" +
+      "\014\n\004user\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r\022\n\n\002hc\030\003 \001(\014\022\014" +
+      "\n\004pgid\030\005 \001(\r\"\032\n\013UserIdTable\022\013\n\003ids\030\001 \003(\014" +
+      "\"A\n\rUserInfoTable\0220\n\004info\030\001 \003(\0132\".qaul.n" +
+      "et.router_net_info.UserInfo\"1\n\010UserInfo\022" +
+      "\n\n\002id\030\001 \001(\014\022\013\n\003key\030\002 \001(\014\022\014\n\004name\030\003 \001(\t\"\033" +
+      "\n\014FeedIdsTable\022\013\n\003ids\030\001 \003(\014\"K\n\022FeedReque" +
+      "stMessage\0225\n\005feeds\030\001 \001(\0132&.qaul.net.rout" +
+      "er_net_info.FeedIdsTable\"Q\n\023FeedResponse" +
+      "Message\022:\n\005feeds\030\001 \001(\0132+.qaul.net.router" +
+      "_net_info.FeedResponseTable\"L\n\021FeedRespo" +
+      "nseTable\0227\n\010messages\030\001 \003(\0132%.qaul.net.ro" +
+      "uter_net_info.FeedMessage\"S\n\013FeedMessage" +
+      "\022\022\n\nmessage_id\030\001 \001(\014\022\021\n\tsender_id\030\002 \001(\014\022" +
+      "\017\n\007content\030\003 \001(\t\022\014\n\004time\030\004 \001(\004*m\n\020Router" +
+      "InfoModule\022\017\n\013ROUTER_INFO\020\000\022\020\n\014FEED_REQU" +
+      "EST\020\001\022\021\n\rFEED_RESPONSE\020\002\022\020\n\014USER_REQUEST" +
+      "\020\003\022\021\n\rUSER_RESPONSE\020\004b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10315,7 +10750,7 @@ public final class RouterNetInfo {
     internal_static_qaul_net_router_net_info_RouterInfoMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_RouterInfoMessage_descriptor,
-        new java.lang.String[] { "Node", "Routes", "Users", "Feeds", "Timestamp", });
+        new java.lang.String[] { "Node", "Routes", "Feeds", "Timestamp", });
     internal_static_qaul_net_router_net_info_RoutingInfoTable_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_qaul_net_router_net_info_RoutingInfoTable_fieldAccessorTable = new
@@ -10328,44 +10763,50 @@ public final class RouterNetInfo {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_RoutingInfoEntry_descriptor,
         new java.lang.String[] { "User", "Rtt", "Hc", "Pgid", });
-    internal_static_qaul_net_router_net_info_UserInfoTable_descriptor =
+    internal_static_qaul_net_router_net_info_UserIdTable_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_qaul_net_router_net_info_UserIdTable_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_net_router_net_info_UserIdTable_descriptor,
+        new java.lang.String[] { "Ids", });
+    internal_static_qaul_net_router_net_info_UserInfoTable_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_qaul_net_router_net_info_UserInfoTable_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_UserInfoTable_descriptor,
         new java.lang.String[] { "Info", });
     internal_static_qaul_net_router_net_info_UserInfo_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_qaul_net_router_net_info_UserInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_UserInfo_descriptor,
         new java.lang.String[] { "Id", "Key", "Name", });
     internal_static_qaul_net_router_net_info_FeedIdsTable_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_qaul_net_router_net_info_FeedIdsTable_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_FeedIdsTable_descriptor,
         new java.lang.String[] { "Ids", });
     internal_static_qaul_net_router_net_info_FeedRequestMessage_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_qaul_net_router_net_info_FeedRequestMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_FeedRequestMessage_descriptor,
         new java.lang.String[] { "Feeds", });
     internal_static_qaul_net_router_net_info_FeedResponseMessage_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_qaul_net_router_net_info_FeedResponseMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_FeedResponseMessage_descriptor,
         new java.lang.String[] { "Feeds", });
     internal_static_qaul_net_router_net_info_FeedResponseTable_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_qaul_net_router_net_info_FeedResponseTable_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_FeedResponseTable_descriptor,
         new java.lang.String[] { "Messages", });
     internal_static_qaul_net_router_net_info_FeedMessage_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_qaul_net_router_net_info_FeedMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_router_net_info_FeedMessage_descriptor,

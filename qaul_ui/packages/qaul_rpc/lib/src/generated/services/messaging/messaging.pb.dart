@@ -232,15 +232,25 @@ class EnvelopPayload extends $pb.GeneratedMessage {
 
 class Encrypted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Encrypted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..pc<Data>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.PM, subBuilder: Data.create)
+    ..e<CryptoState>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'state', $pb.PbFieldType.OE, defaultOrMaker: CryptoState.NONE, valueOf: CryptoState.valueOf, enumValues: CryptoState.values)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId', $pb.PbFieldType.OU3)
+    ..pc<Data>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.PM, subBuilder: Data.create)
     ..hasRequiredFields = false
   ;
 
   Encrypted._() : super();
   factory Encrypted({
+    CryptoState? state,
+    $core.int? sessionId,
     $core.Iterable<Data>? data,
   }) {
     final _result = create();
+    if (state != null) {
+      _result.state = state;
+    }
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
     if (data != null) {
       _result.data.addAll(data);
     }
@@ -268,7 +278,25 @@ class Encrypted extends $pb.GeneratedMessage {
   static Encrypted? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<Data> get data => $_getList(0);
+  CryptoState get state => $_getN(0);
+  @$pb.TagNumber(1)
+  set state(CryptoState v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearState() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get sessionId => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set sessionId($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasSessionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSessionId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<Data> get data => $_getList(2);
 }
 
 class Data extends $pb.GeneratedMessage {
@@ -334,6 +362,7 @@ class Data extends $pb.GeneratedMessage {
 
 enum Messaging_Message {
   confirmationMessage, 
+  dtnResponse, 
   cryptoService, 
   rtcStreamMessage, 
   groupInviteMessage, 
@@ -344,25 +373,28 @@ enum Messaging_Message {
 class Messaging extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, Messaging_Message> _Messaging_MessageByTag = {
     1 : Messaging_Message.confirmationMessage,
-    2 : Messaging_Message.cryptoService,
-    3 : Messaging_Message.rtcStreamMessage,
-    4 : Messaging_Message.groupInviteMessage,
-    5 : Messaging_Message.commonMessage,
+    2 : Messaging_Message.dtnResponse,
+    3 : Messaging_Message.cryptoService,
+    4 : Messaging_Message.rtcStreamMessage,
+    5 : Messaging_Message.groupInviteMessage,
+    6 : Messaging_Message.commonMessage,
     0 : Messaging_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Messaging', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5])
+    ..oo(0, [1, 2, 3, 4, 5, 6])
     ..aOM<Confirmation>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'confirmationMessage', subBuilder: Confirmation.create)
-    ..aOM<CryptoService>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
-    ..aOM<RtcStreamMessage>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtcStreamMessage', subBuilder: RtcStreamMessage.create)
-    ..aOM<GroupInviteMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInviteMessage', subBuilder: GroupInviteMessage.create)
-    ..aOM<CommonMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'commonMessage', subBuilder: CommonMessage.create)
+    ..aOM<DtnResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnResponse', subBuilder: DtnResponse.create)
+    ..aOM<CryptoService>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cryptoService', subBuilder: CryptoService.create)
+    ..aOM<RtcStreamMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtcStreamMessage', subBuilder: RtcStreamMessage.create)
+    ..aOM<GroupInviteMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupInviteMessage', subBuilder: GroupInviteMessage.create)
+    ..aOM<CommonMessage>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'commonMessage', subBuilder: CommonMessage.create)
     ..hasRequiredFields = false
   ;
 
   Messaging._() : super();
   factory Messaging({
     Confirmation? confirmationMessage,
+    DtnResponse? dtnResponse,
     CryptoService? cryptoService,
     RtcStreamMessage? rtcStreamMessage,
     GroupInviteMessage? groupInviteMessage,
@@ -371,6 +403,9 @@ class Messaging extends $pb.GeneratedMessage {
     final _result = create();
     if (confirmationMessage != null) {
       _result.confirmationMessage = confirmationMessage;
+    }
+    if (dtnResponse != null) {
+      _result.dtnResponse = dtnResponse;
     }
     if (cryptoService != null) {
       _result.cryptoService = cryptoService;
@@ -422,48 +457,59 @@ class Messaging extends $pb.GeneratedMessage {
   Confirmation ensureConfirmationMessage() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  CryptoService get cryptoService => $_getN(1);
+  DtnResponse get dtnResponse => $_getN(1);
   @$pb.TagNumber(2)
-  set cryptoService(CryptoService v) { setField(2, v); }
+  set dtnResponse(DtnResponse v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasCryptoService() => $_has(1);
+  $core.bool hasDtnResponse() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCryptoService() => clearField(2);
+  void clearDtnResponse() => clearField(2);
   @$pb.TagNumber(2)
-  CryptoService ensureCryptoService() => $_ensure(1);
+  DtnResponse ensureDtnResponse() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  RtcStreamMessage get rtcStreamMessage => $_getN(2);
+  CryptoService get cryptoService => $_getN(2);
   @$pb.TagNumber(3)
-  set rtcStreamMessage(RtcStreamMessage v) { setField(3, v); }
+  set cryptoService(CryptoService v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasRtcStreamMessage() => $_has(2);
+  $core.bool hasCryptoService() => $_has(2);
   @$pb.TagNumber(3)
-  void clearRtcStreamMessage() => clearField(3);
+  void clearCryptoService() => clearField(3);
   @$pb.TagNumber(3)
-  RtcStreamMessage ensureRtcStreamMessage() => $_ensure(2);
+  CryptoService ensureCryptoService() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  GroupInviteMessage get groupInviteMessage => $_getN(3);
+  RtcStreamMessage get rtcStreamMessage => $_getN(3);
   @$pb.TagNumber(4)
-  set groupInviteMessage(GroupInviteMessage v) { setField(4, v); }
+  set rtcStreamMessage(RtcStreamMessage v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasGroupInviteMessage() => $_has(3);
+  $core.bool hasRtcStreamMessage() => $_has(3);
   @$pb.TagNumber(4)
-  void clearGroupInviteMessage() => clearField(4);
+  void clearRtcStreamMessage() => clearField(4);
   @$pb.TagNumber(4)
-  GroupInviteMessage ensureGroupInviteMessage() => $_ensure(3);
+  RtcStreamMessage ensureRtcStreamMessage() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  CommonMessage get commonMessage => $_getN(4);
+  GroupInviteMessage get groupInviteMessage => $_getN(4);
   @$pb.TagNumber(5)
-  set commonMessage(CommonMessage v) { setField(5, v); }
+  set groupInviteMessage(GroupInviteMessage v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasCommonMessage() => $_has(4);
+  $core.bool hasGroupInviteMessage() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCommonMessage() => clearField(5);
+  void clearGroupInviteMessage() => clearField(5);
   @$pb.TagNumber(5)
-  CommonMessage ensureCommonMessage() => $_ensure(4);
+  GroupInviteMessage ensureGroupInviteMessage() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  CommonMessage get commonMessage => $_getN(5);
+  @$pb.TagNumber(6)
+  set commonMessage(CommonMessage v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasCommonMessage() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearCommonMessage() => clearField(6);
+  @$pb.TagNumber(6)
+  CommonMessage ensureCommonMessage() => $_ensure(5);
 }
 
 class Confirmation extends $pb.GeneratedMessage {
@@ -1076,21 +1122,21 @@ class Dtn extends $pb.GeneratedMessage {
 
 class DtnResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
-    ..e<DtnResponse_Type>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: DtnResponse_Type.ACCEPTED, valueOf: DtnResponse_Type.valueOf, enumValues: DtnResponse_Type.values)
+    ..e<DtnResponse_ResponseType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'responseType', $pb.PbFieldType.OE, defaultOrMaker: DtnResponse_ResponseType.ACCEPTED, valueOf: DtnResponse_ResponseType.valueOf, enumValues: DtnResponse_ResponseType.values)
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
-    ..e<DtnResponse_Reason>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: DtnResponse_Reason.USER_NOT_ACCEPTED, valueOf: DtnResponse_Reason.valueOf, enumValues: DtnResponse_Reason.values)
+    ..e<DtnResponse_Reason>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: DtnResponse_Reason.NONE, valueOf: DtnResponse_Reason.valueOf, enumValues: DtnResponse_Reason.values)
     ..hasRequiredFields = false
   ;
 
   DtnResponse._() : super();
   factory DtnResponse({
-    DtnResponse_Type? type,
+    DtnResponse_ResponseType? responseType,
     $core.List<$core.int>? signature,
     DtnResponse_Reason? reason,
   }) {
     final _result = create();
-    if (type != null) {
-      _result.type = type;
+    if (responseType != null) {
+      _result.responseType = responseType;
     }
     if (signature != null) {
       _result.signature = signature;
@@ -1122,13 +1168,13 @@ class DtnResponse extends $pb.GeneratedMessage {
   static DtnResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  DtnResponse_Type get type => $_getN(0);
+  DtnResponse_ResponseType get responseType => $_getN(0);
   @$pb.TagNumber(1)
-  set type(DtnResponse_Type v) { setField(1, v); }
+  set responseType(DtnResponse_ResponseType v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasType() => $_has(0);
+  $core.bool hasResponseType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearType() => clearField(1);
+  void clearResponseType() => clearField(1);
 
   @$pb.TagNumber(2)
   $core.List<$core.int> get signature => $_getN(1);

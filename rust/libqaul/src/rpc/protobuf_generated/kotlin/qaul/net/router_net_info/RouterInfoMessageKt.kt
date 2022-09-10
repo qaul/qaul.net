@@ -85,42 +85,6 @@ object RouterInfoMessageKt {
 
     /**
      * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     */
-    var users: qaul.net.router_net_info.RouterNetInfo.UserInfoTable
-      @JvmName("getUsers")
-      get() = _builder.getUsers()
-      @JvmName("setUsers")
-      set(value) {
-        _builder.setUsers(value)
-      }
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     */
-    fun clearUsers() {
-      _builder.clearUsers()
-    }
-    /**
-     * <pre>
-     * Users information table
-     * </pre>
-     *
-     * <code>.qaul.net.router_net_info.UserInfoTable users = 3;</code>
-     * @return Whether the users field is set.
-     */
-    fun hasUsers(): kotlin.Boolean {
-      return _builder.hasUsers()
-    }
-
-    /**
-     * <pre>
      * Latest Feed ids table
      * </pre>
      *
@@ -187,9 +151,6 @@ inline fun qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage.copy(block: 
 
 val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.routesOrNull: qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable?
   get() = if (hasRoutes()) getRoutes() else null
-
-val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.usersOrNull: qaul.net.router_net_info.RouterNetInfo.UserInfoTable?
-  get() = if (hasUsers()) getUsers() else null
 
 val qaul.net.router_net_info.RouterNetInfo.RouterInfoMessageOrBuilder.feedsOrNull: qaul.net.router_net_info.RouterNetInfo.FeedIdsTable?
   get() = if (hasFeeds()) getFeeds() else null

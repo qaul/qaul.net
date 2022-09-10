@@ -144,6 +144,14 @@ public final class QaulRpcOuterClass {
      * <code>RTC = 13;</code>
      */
     RTC(13),
+    /**
+     * <pre>
+     * Delay Tolerant Networking
+     * </pre>
+     *
+     * <code>DTN = 14;</code>
+     */
+    DTN(14),
     UNRECOGNIZED(-1),
     ;
 
@@ -267,6 +275,14 @@ public final class QaulRpcOuterClass {
      * <code>RTC = 13;</code>
      */
     public static final int RTC_VALUE = 13;
+    /**
+     * <pre>
+     * Delay Tolerant Networking
+     * </pre>
+     *
+     * <code>DTN = 14;</code>
+     */
+    public static final int DTN_VALUE = 14;
 
 
     public final int getNumber() {
@@ -307,6 +323,7 @@ public final class QaulRpcOuterClass {
         case 11: return CHATFILE;
         case 12: return BLE;
         case 13: return RTC;
+        case 14: return DTN;
         default: return null;
       }
     }
@@ -1339,11 +1356,11 @@ public final class QaulRpcOuterClass {
       "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp" +
       "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n" +
       "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat" +
-      "a\030\004 \001(\014*\252\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
+      "a\030\004 \001(\014*\263\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010" +
       "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n" +
       "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005" +
       "DEBUG\020\010\022\t\n\005GROUP\020\t\022\010\n\004CHAT\020\n\022\014\n\010CHATFILE" +
-      "\020\013\022\007\n\003BLE\020\014\022\007\n\003RTC\020\rb\006proto3"
+      "\020\013\022\007\n\003BLE\020\014\022\007\n\003RTC\020\r\022\007\n\003DTN\020\016b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -32,6 +32,12 @@ enum Qaul_Net_RouterNetInfo_RouterInfoModule: SwiftProtobuf.Enum {
 
   /// Message is a FeedResponseMessage
   case feedResponse // = 2
+
+  /// Message is a UserRequestMessage
+  case userRequest // = 3
+
+  /// Message is a UserResponseMessage
+  case userResponse // = 4
   case UNRECOGNIZED(Int)
 
   init() {
@@ -43,6 +49,8 @@ enum Qaul_Net_RouterNetInfo_RouterInfoModule: SwiftProtobuf.Enum {
     case 0: self = .routerInfo
     case 1: self = .feedRequest
     case 2: self = .feedResponse
+    case 3: self = .userRequest
+    case 4: self = .userResponse
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -52,6 +60,8 @@ enum Qaul_Net_RouterNetInfo_RouterInfoModule: SwiftProtobuf.Enum {
     case .routerInfo: return 0
     case .feedRequest: return 1
     case .feedResponse: return 2
+    case .userRequest: return 3
+    case .userResponse: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -66,6 +76,8 @@ extension Qaul_Net_RouterNetInfo_RouterInfoModule: CaseIterable {
     .routerInfo,
     .feedRequest,
     .feedResponse,
+    .userRequest,
+    .userResponse,
   ]
 }
 
@@ -130,16 +142,6 @@ struct Qaul_Net_RouterNetInfo_RouterInfoMessage {
   /// Clears the value of `routes`. Subsequent reads from it will return its default value.
   mutating func clearRoutes() {self._routes = nil}
 
-  /// Users information table
-  var users: Qaul_Net_RouterNetInfo_UserInfoTable {
-    get {return _users ?? Qaul_Net_RouterNetInfo_UserInfoTable()}
-    set {_users = newValue}
-  }
-  /// Returns true if `users` has been explicitly set.
-  var hasUsers: Bool {return self._users != nil}
-  /// Clears the value of `users`. Subsequent reads from it will return its default value.
-  mutating func clearUsers() {self._users = nil}
-
   /// Latest Feed ids table
   var feeds: Qaul_Net_RouterNetInfo_FeedIdsTable {
     get {return _feeds ?? Qaul_Net_RouterNetInfo_FeedIdsTable()}
@@ -158,7 +160,6 @@ struct Qaul_Net_RouterNetInfo_RouterInfoMessage {
   init() {}
 
   fileprivate var _routes: Qaul_Net_RouterNetInfo_RoutingInfoTable? = nil
-  fileprivate var _users: Qaul_Net_RouterNetInfo_UserInfoTable? = nil
   fileprivate var _feeds: Qaul_Net_RouterNetInfo_FeedIdsTable? = nil
 }
 
@@ -192,6 +193,20 @@ struct Qaul_Net_RouterNetInfo_RoutingInfoEntry {
 
   /// propagation id
   var pgid: UInt32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// User information table
+struct Qaul_Net_RouterNetInfo_UserIdTable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// user ids
+  var ids: [Data] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -339,6 +354,8 @@ extension Qaul_Net_RouterNetInfo_RouterInfoModule: SwiftProtobuf._ProtoNameProvi
     0: .same(proto: "ROUTER_INFO"),
     1: .same(proto: "FEED_REQUEST"),
     2: .same(proto: "FEED_RESPONSE"),
+    3: .same(proto: "USER_REQUEST"),
+    4: .same(proto: "USER_RESPONSE"),
   ]
 }
 
@@ -435,7 +452,6 @@ extension Qaul_Net_RouterNetInfo_RouterInfoMessage: SwiftProtobuf.Message, Swift
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "node"),
     2: .same(proto: "routes"),
-    3: .same(proto: "users"),
     4: .same(proto: "feeds"),
     5: .same(proto: "timestamp"),
   ]
@@ -448,7 +464,6 @@ extension Qaul_Net_RouterNetInfo_RouterInfoMessage: SwiftProtobuf.Message, Swift
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularBytesField(value: &self.node) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._routes) }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._users) }()
       case 4: try { try decoder.decodeSingularMessageField(value: &self._feeds) }()
       case 5: try { try decoder.decodeSingularUInt64Field(value: &self.timestamp) }()
       default: break
@@ -467,9 +482,6 @@ extension Qaul_Net_RouterNetInfo_RouterInfoMessage: SwiftProtobuf.Message, Swift
     try { if let v = self._routes {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
-    try { if let v = self._users {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    } }()
     try { if let v = self._feeds {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     } }()
@@ -482,7 +494,6 @@ extension Qaul_Net_RouterNetInfo_RouterInfoMessage: SwiftProtobuf.Message, Swift
   static func ==(lhs: Qaul_Net_RouterNetInfo_RouterInfoMessage, rhs: Qaul_Net_RouterNetInfo_RouterInfoMessage) -> Bool {
     if lhs.node != rhs.node {return false}
     if lhs._routes != rhs._routes {return false}
-    if lhs._users != rhs._users {return false}
     if lhs._feeds != rhs._feeds {return false}
     if lhs.timestamp != rhs.timestamp {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -567,6 +578,38 @@ extension Qaul_Net_RouterNetInfo_RoutingInfoEntry: SwiftProtobuf.Message, SwiftP
     if lhs.rtt != rhs.rtt {return false}
     if lhs.hc != rhs.hc {return false}
     if lhs.pgid != rhs.pgid {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Net_RouterNetInfo_UserIdTable: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".UserIdTable"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ids"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedBytesField(value: &self.ids) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.ids.isEmpty {
+      try visitor.visitRepeatedBytesField(value: self.ids, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Net_RouterNetInfo_UserIdTable, rhs: Qaul_Net_RouterNetInfo_UserIdTable) -> Bool {
+    if lhs.ids != rhs.ids {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -76,6 +76,9 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
 
   /// Real Time Communication handling
   case rtc // = 13
+
+  /// Delay Tolerant Networking
+  case dtn // = 14
   case UNRECOGNIZED(Int)
 
   init() {
@@ -98,6 +101,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case 11: self = .chatfile
     case 12: self = .ble
     case 13: self = .rtc
+    case 14: self = .dtn
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -118,6 +122,7 @@ enum Qaul_Rpc_Modules: SwiftProtobuf.Enum {
     case .chatfile: return 11
     case .ble: return 12
     case .rtc: return 13
+    case .dtn: return 14
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -143,6 +148,7 @@ extension Qaul_Rpc_Modules: CaseIterable {
     .chatfile,
     .ble,
     .rtc,
+    .dtn,
   ]
 }
 
@@ -195,6 +201,7 @@ extension Qaul_Rpc_Modules: SwiftProtobuf._ProtoNameProviding {
     11: .same(proto: "CHATFILE"),
     12: .same(proto: "BLE"),
     13: .same(proto: "RTC"),
+    14: .same(proto: "DTN"),
   ]
 }
 
