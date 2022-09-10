@@ -15,7 +15,7 @@ use crate::services::chat::{self, rpc_proto, ChatFile, ChatStorage};
 use crate::services::crypto::Crypto;
 use crate::services::dtn;
 use crate::services::group;
-use crate::services::group::conversation_id::ConversationId;
+use crate::services::group::group_id::GroupId;
 use crate::services::rtc;
 use crate::utilities::timestamp::Timestamp;
 
@@ -104,22 +104,22 @@ impl MessagingProcess {
                 }
             }
             Some(super::proto::messaging::Message::CommonMessage(common)) => {
-                // check conversation id
-                let conversation_id;
-                match ConversationId::from_bytes(&common.conversation_id) {
+                // check group id
+                let group_id;
+                match GroupId::from_bytes(&common.group_id) {
                     Ok(v) => {
-                        conversation_id = v;
+                        group_id = v;
                     }
                     _ => {
-                        log::error!("invalid conversation id");
+                        log::error!("invalid group id");
                         return;
                     }
                 }
 
                 log::trace!(
-                    "common msg_id={}, conversation_id={}",
+                    "common msg_id={}, group_id={}",
                     bs58::encode(common.message_id.clone()).into_string(),
-                    conversation_id.to_base58()
+                    group_id.to_base58()
                 );
 
                 match common.payload {
@@ -139,7 +139,7 @@ impl MessagingProcess {
                             sender_id,
                             content_message,
                             common.sent_at,
-                            &conversation_id,
+                            &group_id,
                             &common.message_id,
                             chat::rpc_proto::MessageStatus::Received,
                         );
@@ -148,7 +148,7 @@ impl MessagingProcess {
                         ChatFile::process_net_chatfilecontainer(
                             sender_id.to_owned(),
                             user_account.clone(),
-                            common.conversation_id,
+                            common.group_id,
                             common.message_id.clone(),
                             common.sent_at,
                             &file_message.content,
@@ -182,7 +182,7 @@ impl MessagingProcess {
                 if let Err(e) = group::GroupMessage::on_message(
                     sender_id,
                     &user_account.id,
-                    &conversation_id.to_bytes(),
+                    &group_id.to_bytes(),
                     &common.message_id,
                 ) {
                     log::error!("group status processing error {}", e);

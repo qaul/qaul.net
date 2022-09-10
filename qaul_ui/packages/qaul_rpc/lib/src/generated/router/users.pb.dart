@@ -232,7 +232,7 @@ class UserEntry extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyBase58')
     ..e<Connectivity>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
     ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verified')
@@ -244,7 +244,7 @@ class UserEntry extends $pb.GeneratedMessage {
   factory UserEntry({
     $core.String? name,
     $core.List<$core.int>? id,
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $core.String? keyBase58,
     Connectivity? connectivity,
     $core.bool? verified,
@@ -257,8 +257,8 @@ class UserEntry extends $pb.GeneratedMessage {
     if (id != null) {
       _result.id = id;
     }
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (keyBase58 != null) {
       _result.keyBase58 = keyBase58;
@@ -314,13 +314,13 @@ class UserEntry extends $pb.GeneratedMessage {
   void clearId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.int> get conversationId => $_getN(2);
+  $core.List<$core.int> get groupId => $_getN(2);
   @$pb.TagNumber(3)
-  set conversationId($core.List<$core.int> v) { $_setBytes(2, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasConversationId() => $_has(2);
+  $core.bool hasGroupId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearConversationId() => clearField(3);
+  void clearGroupId() => clearField(3);
 
   @$pb.TagNumber(7)
   $core.String get keyBase58 => $_getSZ(3);

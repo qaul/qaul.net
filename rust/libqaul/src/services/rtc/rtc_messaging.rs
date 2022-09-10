@@ -13,7 +13,7 @@ impl RtcMessaging {
         my_user_id: &PeerId,
         req: &super::proto_rpc::RtcOutgoing,
     ) -> Result<bool, String> {
-        match super::Rtc::get_session_from_id(&req.conversation_id) {
+        match super::Rtc::get_session_from_id(&req.group_id) {
             Some(session) => {
                 if session.state != 3 {
                     return Err("session is not established".to_string());
@@ -35,7 +35,7 @@ impl RtcMessaging {
 
                 let message_id: Vec<u8> = Vec::new();
                 if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-                    let receiver = PeerId::from_bytes(&req.conversation_id).unwrap();
+                    let receiver = PeerId::from_bytes(&req.group_id).unwrap();
                     if let Err(e) = messaging::Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
@@ -77,7 +77,7 @@ impl RtcMessaging {
                 let proto_message = super::proto_rpc::RtcRpc {
                     message: Some(super::proto_rpc::rtc_rpc::Message::RtcIncoming(
                         super::proto_rpc::RtcIncoming {
-                            conversation_id: sender_id.to_bytes(),
+                            group_id: sender_id.to_bytes(),
                             content: req.content.clone(),
                         },
                     )),

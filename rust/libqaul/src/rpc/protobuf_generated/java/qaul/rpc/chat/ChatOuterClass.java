@@ -1770,13 +1770,13 @@ public final class ChatOuterClass {
 
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -1805,7 +1805,7 @@ public final class ChatOuterClass {
       super(builder);
     }
     private ChatConversationRequest() {
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -1840,7 +1840,7 @@ public final class ChatOuterClass {
               break;
             case 10: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 16: {
@@ -1882,19 +1882,19 @@ public final class ChatOuterClass {
               qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.class, qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.Builder.class);
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int LAST_INDEX_FIELD_NUMBER = 2;
@@ -1926,8 +1926,8 @@ public final class ChatOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(1, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(1, groupId_);
       }
       if (lastIndex_ != 0L) {
         output.writeUInt64(2, lastIndex_);
@@ -1941,9 +1941,9 @@ public final class ChatOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, conversationId_);
+          .computeBytesSize(1, groupId_);
       }
       if (lastIndex_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -1964,8 +1964,8 @@ public final class ChatOuterClass {
       }
       qaul.rpc.chat.ChatOuterClass.ChatConversationRequest other = (qaul.rpc.chat.ChatOuterClass.ChatConversationRequest) obj;
 
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (getLastIndex()
           != other.getLastIndex()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -1979,8 +1979,8 @@ public final class ChatOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + LAST_INDEX_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getLastIndex());
@@ -2121,7 +2121,7 @@ public final class ChatOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         lastIndex_ = 0L;
 
@@ -2151,7 +2151,7 @@ public final class ChatOuterClass {
       @java.lang.Override
       public qaul.rpc.chat.ChatOuterClass.ChatConversationRequest buildPartial() {
         qaul.rpc.chat.ChatOuterClass.ChatConversationRequest result = new qaul.rpc.chat.ChatOuterClass.ChatConversationRequest(this);
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         result.lastIndex_ = lastIndex_;
         onBuilt();
         return result;
@@ -2201,8 +2201,8 @@ public final class ChatOuterClass {
 
       public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatConversationRequest other) {
         if (other == qaul.rpc.chat.ChatOuterClass.ChatConversationRequest.getDefaultInstance()) return this;
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (other.getLastIndex() != 0L) {
           setLastIndex(other.getLastIndex());
@@ -2236,48 +2236,48 @@ public final class ChatOuterClass {
         return this;
       }
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 1;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 1;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
+       * <code>bytes group_id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -2383,13 +2383,13 @@ public final class ChatOuterClass {
 
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -2452,7 +2452,7 @@ public final class ChatOuterClass {
       super(builder);
     }
     private ChatConversationList() {
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
       messageList_ = java.util.Collections.emptyList();
     }
 
@@ -2489,7 +2489,7 @@ public final class ChatOuterClass {
               break;
             case 10: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 18: {
@@ -2538,19 +2538,19 @@ public final class ChatOuterClass {
               qaul.rpc.chat.ChatOuterClass.ChatConversationList.class, qaul.rpc.chat.ChatOuterClass.ChatConversationList.Builder.class);
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int MESSAGE_LIST_FIELD_NUMBER = 2;
@@ -2627,8 +2627,8 @@ public final class ChatOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(1, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(1, groupId_);
       }
       for (int i = 0; i < messageList_.size(); i++) {
         output.writeMessage(2, messageList_.get(i));
@@ -2642,9 +2642,9 @@ public final class ChatOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, conversationId_);
+          .computeBytesSize(1, groupId_);
       }
       for (int i = 0; i < messageList_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -2665,8 +2665,8 @@ public final class ChatOuterClass {
       }
       qaul.rpc.chat.ChatOuterClass.ChatConversationList other = (qaul.rpc.chat.ChatOuterClass.ChatConversationList) obj;
 
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (!getMessageListList()
           .equals(other.getMessageListList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -2680,8 +2680,8 @@ public final class ChatOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       if (getMessageListCount() > 0) {
         hash = (37 * hash) + MESSAGE_LIST_FIELD_NUMBER;
         hash = (53 * hash) + getMessageListList().hashCode();
@@ -2824,7 +2824,7 @@ public final class ChatOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         if (messageListBuilder_ == null) {
           messageList_ = java.util.Collections.emptyList();
@@ -2859,7 +2859,7 @@ public final class ChatOuterClass {
       public qaul.rpc.chat.ChatOuterClass.ChatConversationList buildPartial() {
         qaul.rpc.chat.ChatOuterClass.ChatConversationList result = new qaul.rpc.chat.ChatOuterClass.ChatConversationList(this);
         int from_bitField0_ = bitField0_;
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         if (messageListBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             messageList_ = java.util.Collections.unmodifiableList(messageList_);
@@ -2917,8 +2917,8 @@ public final class ChatOuterClass {
 
       public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatConversationList other) {
         if (other == qaul.rpc.chat.ChatOuterClass.ChatConversationList.getDefaultInstance()) return this;
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (messageListBuilder_ == null) {
           if (!other.messageList_.isEmpty()) {
@@ -2976,48 +2976,48 @@ public final class ChatOuterClass {
       }
       private int bitField0_;
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 1;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 1;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
+       * <code>bytes group_id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -3505,13 +3505,13 @@ public final class ChatOuterClass {
 
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 5;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 5;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -3564,7 +3564,7 @@ public final class ChatOuterClass {
       messageId_ = com.google.protobuf.ByteString.EMPTY;
       status_ = 0;
       messageReceptionConfirmed_ = java.util.Collections.emptyList();
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
       content_ = com.google.protobuf.ByteString.EMPTY;
     }
 
@@ -3622,7 +3622,7 @@ public final class ChatOuterClass {
             }
             case 42: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 48: {
@@ -3838,19 +3838,19 @@ public final class ChatOuterClass {
       return messageReceptionConfirmed_.get(index);
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 5;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 5;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * conversation id
+     * group id
      * </pre>
      *
-     * <code>bytes conversation_id = 5;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 5;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int SENT_AT_FIELD_NUMBER = 6;
@@ -3924,8 +3924,8 @@ public final class ChatOuterClass {
       if (status_ != qaul.rpc.chat.ChatOuterClass.MessageStatus.SENDING.getNumber()) {
         output.writeEnum(4, status_);
       }
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(5, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(5, groupId_);
       }
       if (sentAt_ != 0L) {
         output.writeUInt64(6, sentAt_);
@@ -3964,9 +3964,9 @@ public final class ChatOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, status_);
       }
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(5, conversationId_);
+          .computeBytesSize(5, groupId_);
       }
       if (sentAt_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -4008,8 +4008,8 @@ public final class ChatOuterClass {
       if (status_ != other.status_) return false;
       if (!getMessageReceptionConfirmedList()
           .equals(other.getMessageReceptionConfirmedList())) return false;
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (getSentAt()
           != other.getSentAt()) return false;
       if (getReceivedAt()
@@ -4040,8 +4040,8 @@ public final class ChatOuterClass {
         hash = (37 * hash) + MESSAGE_RECEPTION_CONFIRMED_FIELD_NUMBER;
         hash = (53 * hash) + getMessageReceptionConfirmedList().hashCode();
       }
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + SENT_AT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getSentAt());
@@ -4202,7 +4202,7 @@ public final class ChatOuterClass {
         } else {
           messageReceptionConfirmedBuilder_.clear();
         }
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         sentAt_ = 0L;
 
@@ -4250,7 +4250,7 @@ public final class ChatOuterClass {
         } else {
           result.messageReceptionConfirmed_ = messageReceptionConfirmedBuilder_.build();
         }
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         result.sentAt_ = sentAt_;
         result.receivedAt_ = receivedAt_;
         result.content_ = content_;
@@ -4340,8 +4340,8 @@ public final class ChatOuterClass {
             }
           }
         }
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (other.getSentAt() != 0L) {
           setSentAt(other.getSentAt());
@@ -4975,48 +4975,48 @@ public final class ChatOuterClass {
         return messageReceptionConfirmedBuilder_;
       }
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 5;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 5;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 5;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 5;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * conversation id
+       * group id
        * </pre>
        *
-       * <code>bytes conversation_id = 5;</code>
+       * <code>bytes group_id = 5;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -9641,13 +9641,13 @@ public final class ChatOuterClass {
 
     /**
      * <pre>
-     * conversation id to which this message is sent
+     * group id to which this message is sent
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
-    com.google.protobuf.ByteString getConversationId();
+    com.google.protobuf.ByteString getGroupId();
 
     /**
      * <pre>
@@ -9686,7 +9686,7 @@ public final class ChatOuterClass {
       super(builder);
     }
     private ChatMessageSend() {
-      conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      groupId_ = com.google.protobuf.ByteString.EMPTY;
       content_ = "";
     }
 
@@ -9722,7 +9722,7 @@ public final class ChatOuterClass {
               break;
             case 10: {
 
-              conversationId_ = input.readBytes();
+              groupId_ = input.readBytes();
               break;
             }
             case 18: {
@@ -9765,19 +9765,19 @@ public final class ChatOuterClass {
               qaul.rpc.chat.ChatOuterClass.ChatMessageSend.class, qaul.rpc.chat.ChatOuterClass.ChatMessageSend.Builder.class);
     }
 
-    public static final int CONVERSATION_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString conversationId_;
+    public static final int GROUP_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString groupId_;
     /**
      * <pre>
-     * conversation id to which this message is sent
+     * group id to which this message is sent
      * </pre>
      *
-     * <code>bytes conversation_id = 1;</code>
-     * @return The conversationId.
+     * <code>bytes group_id = 1;</code>
+     * @return The groupId.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getConversationId() {
-      return conversationId_;
+    public com.google.protobuf.ByteString getGroupId() {
+      return groupId_;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 2;
@@ -9840,8 +9840,8 @@ public final class ChatOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!conversationId_.isEmpty()) {
-        output.writeBytes(1, conversationId_);
+      if (!groupId_.isEmpty()) {
+        output.writeBytes(1, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, content_);
@@ -9855,9 +9855,9 @@ public final class ChatOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!conversationId_.isEmpty()) {
+      if (!groupId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, conversationId_);
+          .computeBytesSize(1, groupId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, content_);
@@ -9877,8 +9877,8 @@ public final class ChatOuterClass {
       }
       qaul.rpc.chat.ChatOuterClass.ChatMessageSend other = (qaul.rpc.chat.ChatOuterClass.ChatMessageSend) obj;
 
-      if (!getConversationId()
-          .equals(other.getConversationId())) return false;
+      if (!getGroupId()
+          .equals(other.getGroupId())) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -9892,8 +9892,8 @@ public final class ChatOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CONVERSATION_ID_FIELD_NUMBER;
-      hash = (53 * hash) + getConversationId().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getGroupId().hashCode();
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -10033,7 +10033,7 @@ public final class ChatOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        conversationId_ = com.google.protobuf.ByteString.EMPTY;
+        groupId_ = com.google.protobuf.ByteString.EMPTY;
 
         content_ = "";
 
@@ -10063,7 +10063,7 @@ public final class ChatOuterClass {
       @java.lang.Override
       public qaul.rpc.chat.ChatOuterClass.ChatMessageSend buildPartial() {
         qaul.rpc.chat.ChatOuterClass.ChatMessageSend result = new qaul.rpc.chat.ChatOuterClass.ChatMessageSend(this);
-        result.conversationId_ = conversationId_;
+        result.groupId_ = groupId_;
         result.content_ = content_;
         onBuilt();
         return result;
@@ -10113,8 +10113,8 @@ public final class ChatOuterClass {
 
       public Builder mergeFrom(qaul.rpc.chat.ChatOuterClass.ChatMessageSend other) {
         if (other == qaul.rpc.chat.ChatOuterClass.ChatMessageSend.getDefaultInstance()) return this;
-        if (other.getConversationId() != com.google.protobuf.ByteString.EMPTY) {
-          setConversationId(other.getConversationId());
+        if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
+          setGroupId(other.getGroupId());
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
@@ -10149,48 +10149,48 @@ public final class ChatOuterClass {
         return this;
       }
 
-      private com.google.protobuf.ByteString conversationId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
-       * conversation id to which this message is sent
+       * group id to which this message is sent
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @return The conversationId.
+       * <code>bytes group_id = 1;</code>
+       * @return The groupId.
        */
       @java.lang.Override
-      public com.google.protobuf.ByteString getConversationId() {
-        return conversationId_;
+      public com.google.protobuf.ByteString getGroupId() {
+        return groupId_;
       }
       /**
        * <pre>
-       * conversation id to which this message is sent
+       * group id to which this message is sent
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
-       * @param value The conversationId to set.
+       * <code>bytes group_id = 1;</code>
+       * @param value The groupId to set.
        * @return This builder for chaining.
        */
-      public Builder setConversationId(com.google.protobuf.ByteString value) {
+      public Builder setGroupId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        conversationId_ = value;
+        groupId_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * conversation id to which this message is sent
+       * group id to which this message is sent
        * </pre>
        *
-       * <code>bytes conversation_id = 1;</code>
+       * <code>bytes group_id = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearConversationId() {
+      public Builder clearGroupId() {
         
-        conversationId_ = getDefaultInstance().getConversationId();
+        groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
       }
@@ -10408,36 +10408,36 @@ public final class ChatOuterClass {
       "H\000\022@\n\021conversation_list\030\004 \001(\0132#.qaul.rpc" +
       ".chat.ChatConversationListH\000\022.\n\004send\030\005 \001" +
       "(\0132\036.qaul.rpc.chat.ChatMessageSendH\000B\t\n\007" +
-      "message\"F\n\027ChatConversationRequest\022\027\n\017co" +
-      "nversation_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"" +
-      "a\n\024ChatConversationList\022\027\n\017conversation_" +
-      "id\030\001 \001(\014\0220\n\014message_list\030\002 \003(\0132\032.qaul.rp" +
-      "c.chat.ChatMessage\"\220\002\n\013ChatMessage\022\r\n\005in" +
-      "dex\030\001 \001(\004\022\021\n\tsender_id\030\002 \001(\014\022\022\n\nmessage_" +
-      "id\030\003 \001(\014\022,\n\006status\030\004 \001(\0162\034.qaul.rpc.chat" +
-      ".MessageStatus\022M\n\033message_reception_conf" +
-      "irmed\030\n \003(\0132(.qaul.rpc.chat.MessageRecep" +
-      "tionConfirmed\022\027\n\017conversation_id\030\005 \001(\014\022\017" +
-      "\n\007sent_at\030\006 \001(\004\022\023\n\013received_at\030\007 \001(\004\022\017\n\007" +
-      "content\030\010 \001(\014\"B\n\031MessageReceptionConfirm" +
-      "ed\022\017\n\007user_id\030\001 \001(\014\022\024\n\014confirmed_at\030\002 \001(" +
-      "\004\"\271\001\n\022ChatContentMessage\0222\n\014chat_content" +
-      "\030\001 \001(\0132\032.qaul.rpc.chat.ChatContentH\000\0222\n\014" +
-      "file_content\030\002 \001(\0132\032.qaul.rpc.chat.FileC" +
-      "ontentH\000\0220\n\013group_event\030\003 \001(\0132\031.qaul.rpc" +
-      ".chat.GroupEventH\000B\t\n\007message\"\033\n\013ChatCon" +
-      "tent\022\014\n\004text\030\001 \001(\t\"v\n\013FileContent\022\017\n\007fil" +
-      "e_id\030\001 \001(\004\022\021\n\tfile_name\030\002 \001(\t\022\026\n\016file_ex" +
-      "tension\030\003 \001(\t\022\021\n\tfile_size\030\004 \001(\r\022\030\n\020file" +
-      "_description\030\005 \001(\t\"P\n\nGroupEvent\0221\n\neven" +
-      "t_type\030\001 \001(\0162\035.qaul.rpc.chat.GroupEventT" +
-      "ype\022\017\n\007user_id\030\002 \001(\014\";\n\017ChatMessageSend\022" +
-      "\027\n\017conversation_id\030\001 \001(\014\022\017\n\007content\030\002 \001(" +
-      "\t*h\n\rMessageStatus\022\013\n\007SENDING\020\000\022\010\n\004SENT\020" +
-      "\001\022\r\n\tCONFIRMED\020\002\022\024\n\020CONFIRMED_BY_ALL\020\003\022\r" +
-      "\n\tRECEIVING\020\004\022\014\n\010RECEIVED\020\005*L\n\016GroupEven" +
-      "tType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITED\020\001\022\n\n\006JOINE" +
-      "D\020\002\022\010\n\004LEFT\020\003\022\n\n\006CLOSED\020\004b\006proto3"
+      "message\"?\n\027ChatConversationRequest\022\020\n\010gr" +
+      "oup_id\030\001 \001(\014\022\022\n\nlast_index\030\002 \001(\004\"Z\n\024Chat" +
+      "ConversationList\022\020\n\010group_id\030\001 \001(\014\0220\n\014me" +
+      "ssage_list\030\002 \003(\0132\032.qaul.rpc.chat.ChatMes" +
+      "sage\"\211\002\n\013ChatMessage\022\r\n\005index\030\001 \001(\004\022\021\n\ts" +
+      "ender_id\030\002 \001(\014\022\022\n\nmessage_id\030\003 \001(\014\022,\n\006st" +
+      "atus\030\004 \001(\0162\034.qaul.rpc.chat.MessageStatus" +
+      "\022M\n\033message_reception_confirmed\030\n \003(\0132(." +
+      "qaul.rpc.chat.MessageReceptionConfirmed\022" +
+      "\020\n\010group_id\030\005 \001(\014\022\017\n\007sent_at\030\006 \001(\004\022\023\n\013re" +
+      "ceived_at\030\007 \001(\004\022\017\n\007content\030\010 \001(\014\"B\n\031Mess" +
+      "ageReceptionConfirmed\022\017\n\007user_id\030\001 \001(\014\022\024" +
+      "\n\014confirmed_at\030\002 \001(\004\"\271\001\n\022ChatContentMess" +
+      "age\0222\n\014chat_content\030\001 \001(\0132\032.qaul.rpc.cha" +
+      "t.ChatContentH\000\0222\n\014file_content\030\002 \001(\0132\032." +
+      "qaul.rpc.chat.FileContentH\000\0220\n\013group_eve" +
+      "nt\030\003 \001(\0132\031.qaul.rpc.chat.GroupEventH\000B\t\n" +
+      "\007message\"\033\n\013ChatContent\022\014\n\004text\030\001 \001(\t\"v\n" +
+      "\013FileContent\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_na" +
+      "me\030\002 \001(\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile" +
+      "_size\030\004 \001(\r\022\030\n\020file_description\030\005 \001(\t\"P\n" +
+      "\nGroupEvent\0221\n\nevent_type\030\001 \001(\0162\035.qaul.r" +
+      "pc.chat.GroupEventType\022\017\n\007user_id\030\002 \001(\014\"" +
+      "4\n\017ChatMessageSend\022\020\n\010group_id\030\001 \001(\014\022\017\n\007" +
+      "content\030\002 \001(\t*h\n\rMessageStatus\022\013\n\007SENDIN" +
+      "G\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020CONFIRME" +
+      "D_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010RECEIVED\020\005*" +
+      "L\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE" +
+      "D\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\n\n\006CLOSED\020\004b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10454,19 +10454,19 @@ public final class ChatOuterClass {
     internal_static_qaul_rpc_chat_ChatConversationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatConversationRequest_descriptor,
-        new java.lang.String[] { "ConversationId", "LastIndex", });
+        new java.lang.String[] { "GroupId", "LastIndex", });
     internal_static_qaul_rpc_chat_ChatConversationList_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_qaul_rpc_chat_ChatConversationList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatConversationList_descriptor,
-        new java.lang.String[] { "ConversationId", "MessageList", });
+        new java.lang.String[] { "GroupId", "MessageList", });
     internal_static_qaul_rpc_chat_ChatMessage_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_qaul_rpc_chat_ChatMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatMessage_descriptor,
-        new java.lang.String[] { "Index", "SenderId", "MessageId", "Status", "MessageReceptionConfirmed", "ConversationId", "SentAt", "ReceivedAt", "Content", });
+        new java.lang.String[] { "Index", "SenderId", "MessageId", "Status", "MessageReceptionConfirmed", "GroupId", "SentAt", "ReceivedAt", "Content", });
     internal_static_qaul_rpc_chat_MessageReceptionConfirmed_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_qaul_rpc_chat_MessageReceptionConfirmed_fieldAccessorTable = new
@@ -10502,7 +10502,7 @@ public final class ChatOuterClass {
     internal_static_qaul_rpc_chat_ChatMessageSend_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_chat_ChatMessageSend_descriptor,
-        new java.lang.String[] { "ConversationId", "Content", });
+        new java.lang.String[] { "GroupId", "Content", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

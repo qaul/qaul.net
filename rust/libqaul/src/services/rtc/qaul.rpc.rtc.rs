@@ -36,23 +36,23 @@ pub mod rtc_rpc {
 /// rtc session request
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcSessionRequest {
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc session response
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcSessionResponse {
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc session management
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcSessionManagement {
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// option
     #[prost(uint32, tag="2")]
     pub option: u32,
@@ -60,9 +60,9 @@ pub struct RtcSessionManagement {
 /// rtc outgoing
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcOutgoing {
-    /// converssation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// content
     #[prost(bytes="vec", tag="2")]
     pub content: ::prost::alloc::vec::Vec<u8>,
@@ -70,9 +70,9 @@ pub struct RtcOutgoing {
 /// rtc incoming
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcIncoming {
-    /// converssation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// content
     #[prost(bytes="vec", tag="2")]
     pub content: ::prost::alloc::vec::Vec<u8>,
@@ -81,12 +81,12 @@ pub struct RtcIncoming {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcSessionListRequest {
 }
-/// rtc session 
+/// rtc session
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RtcSession {
-    /// conversation Id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// session type
     #[prost(uint32, tag="2")]
     pub session_type: u32,

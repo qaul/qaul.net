@@ -138,8 +138,8 @@ struct Qaul_Rpc_Chatfile_SendFileRequest {
   /// file path with file name to send
   var pathName: String = String()
 
-  /// conversation id to receive file
-  var conversationID: Data = Data()
+  /// group id to receive file
+  var groupID: Data = Data()
 
   /// file description text to be sent in the message
   var description_p: String = String()
@@ -363,7 +363,7 @@ extension Qaul_Rpc_Chatfile_SendFileRequest: SwiftProtobuf.Message, SwiftProtobu
   static let protoMessageName: String = _protobuf_package + ".SendFileRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "path_name"),
-    2: .standard(proto: "conversation_id"),
+    2: .standard(proto: "group_id"),
     3: .same(proto: "description"),
   ]
 
@@ -374,7 +374,7 @@ extension Qaul_Rpc_Chatfile_SendFileRequest: SwiftProtobuf.Message, SwiftProtobu
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.pathName) }()
-      case 2: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.description_p) }()
       default: break
       }
@@ -385,8 +385,8 @@ extension Qaul_Rpc_Chatfile_SendFileRequest: SwiftProtobuf.Message, SwiftProtobu
     if !self.pathName.isEmpty {
       try visitor.visitSingularStringField(value: self.pathName, fieldNumber: 1)
     }
-    if !self.conversationID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 2)
+    if !self.groupID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.groupID, fieldNumber: 2)
     }
     if !self.description_p.isEmpty {
       try visitor.visitSingularStringField(value: self.description_p, fieldNumber: 3)
@@ -396,7 +396,7 @@ extension Qaul_Rpc_Chatfile_SendFileRequest: SwiftProtobuf.Message, SwiftProtobu
 
   static func ==(lhs: Qaul_Rpc_Chatfile_SendFileRequest, rhs: Qaul_Rpc_Chatfile_SendFileRequest) -> Bool {
     if lhs.pathName != rhs.pathName {return false}
-    if lhs.conversationID != rhs.conversationID {return false}
+    if lhs.groupID != rhs.groupID {return false}
     if lhs.description_p != rhs.description_p {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

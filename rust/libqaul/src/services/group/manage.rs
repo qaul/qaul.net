@@ -8,7 +8,7 @@ use prost::Message;
 use std::collections::BTreeMap;
 
 use super::chat::{self, ChatStorage};
-use super::conversation_id::ConversationId;
+use super::group_id::GroupId;
 use super::{Group, GroupStorage};
 use crate::utilities::timestamp::Timestamp;
 
@@ -26,8 +26,8 @@ impl Manage {
             Some(group) => return Some(group),
             None => {
                 // check if group id is a direct chat
-                if let Ok(conversation_id) = ConversationId::from_bytes(&group_id) {
-                    if let Some(peer_id_vec) = conversation_id.is_direct(account_id) {
+                if let Ok(group_id) = GroupId::from_bytes(&group_id) {
+                    if let Some(peer_id_vec) = group_id.is_direct(account_id) {
                         if let Ok(peer_id) = PeerId::from_bytes(&peer_id_vec) {
                             // create a new direct chat group
                             let group = Self::create_new_direct_chat_group(&account_id, &peer_id);
@@ -48,7 +48,7 @@ impl Manage {
     /// * `account_id` your user account ID
     /// * `user_id` the user ID of the other user
     pub fn create_new_direct_chat_group(account_id: &PeerId, user_id: &PeerId) -> Group {
-        let group_id = ConversationId::from_peers(account_id, user_id).to_bytes();
+        let group_id = GroupId::from_peers(account_id, user_id).to_bytes();
 
         // check if group already exists
         if let Some(group) = GroupStorage::get_group(account_id.to_owned(), group_id.clone()) {
@@ -285,9 +285,9 @@ impl Manage {
         notify: &super::proto_net::GroupInfo,
     ) {
         // check for valid group ID
-        let conversation_id;
-        match ConversationId::from_bytes(&notify.group_id) {
-            Ok(id) => conversation_id = id,
+        let group_id;
+        match GroupId::from_bytes(&notify.group_id) {
+            Ok(id) => group_id = id,
             Err(e) => {
                 log::error!("invalid group id: {}", e);
                 return;
@@ -325,7 +325,7 @@ impl Manage {
                     log::error!(
                         "illegitimate update from user {} for group {}",
                         sender_id.to_base58(),
-                        conversation_id.to_string(),
+                        group_id.to_string(),
                     );
                     return;
                 }
@@ -380,12 +380,12 @@ impl Manage {
             };
 
             // save group event to chat
-            ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+            ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
 
             // update group last_message
             GroupStorage::group_update_last_chat_message(
                 account_id,
-                conversation_id.to_bytes(),
+                group_id.to_bytes(),
                 sender_id,
                 event.encode_to_vec(),
                 Timestamp::get_timestamp(),
@@ -402,12 +402,12 @@ impl Manage {
                 };
 
                 // save group event to chat
-                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
 
                 // update group last_message
                 GroupStorage::group_update_last_chat_message(
                     account_id,
-                    conversation_id.to_bytes(),
+                    group_id.to_bytes(),
                     sender_id,
                     event.encode_to_vec(),
                     Timestamp::get_timestamp(),
@@ -425,12 +425,12 @@ impl Manage {
                 };
 
                 // save group event to chat
-                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
 
                 // update group last_message
                 GroupStorage::group_update_last_chat_message(
                     account_id,
-                    conversation_id.to_bytes(),
+                    group_id.to_bytes(),
                     sender_id,
                     event.encode_to_vec(),
                     Timestamp::get_timestamp(),

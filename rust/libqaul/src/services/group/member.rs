@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::chat::{self, ChatStorage};
-use super::conversation_id::ConversationId;
+use super::group_id::GroupId;
 use super::{Group, GroupMember, GroupStorage};
 use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
@@ -220,7 +220,7 @@ impl Member {
             account_id,
             account_id,
             event,
-            &ConversationId::from_bytes(group_id).unwrap(),
+            &GroupId::from_bytes(group_id).unwrap(),
         );
 
         Ok(true)
@@ -320,7 +320,7 @@ impl Member {
             &account_id,
             &sender_id,
             event,
-            &ConversationId::from_bytes(&resp.group_id).unwrap(),
+            &GroupId::from_bytes(&resp.group_id).unwrap(),
         );
 
         Ok(true)

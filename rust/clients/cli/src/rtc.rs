@@ -49,10 +49,10 @@ impl Rtc {
                 let command_string = cmd.strip_prefix("accept ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
-                        Ok(conversation_id) => {
-                            Self::accept_session(conversation_id);
+                if let Some(group_id_str) = iter.next() {
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                        Ok(group_id) => {
+                            Self::accept_session(group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -69,10 +69,10 @@ impl Rtc {
                 let command_string = cmd.strip_prefix("decline ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
-                        Ok(conversation_id) => {
-                            Self::decline_session(conversation_id);
+                if let Some(group_id_str) = iter.next() {
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                        Ok(group_id) => {
+                            Self::decline_session(group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -89,10 +89,10 @@ impl Rtc {
                 let command_string = cmd.strip_prefix("end ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
-                        Ok(conversation_id) => {
-                            Self::end_session(conversation_id);
+                if let Some(group_id_str) = iter.next() {
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                        Ok(group_id) => {
+                            Self::end_session(group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -109,11 +109,11 @@ impl Rtc {
                 let command_string = cmd.strip_prefix("send ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
-                        Ok(conversation_id) => {
+                if let Some(group_id_str) = iter.next() {
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
+                        Ok(group_id) => {
                             if let Some(message_str) = iter.next() {
-                                Self::send_session(conversation_id, message_str.to_string());
+                                Self::send_session(group_id, message_str.to_string());
                             } else {
                                 log::error!("rtc send command no contents");
                             }
@@ -138,11 +138,11 @@ impl Rtc {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
-            return Err("Conversation ID not long enough".to_string());
+            return Err("Group ID not long enough".to_string());
         }
 
         // convert input
@@ -161,7 +161,7 @@ impl Rtc {
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionRequest(
                 proto::RtcSessionRequest {
-                    conversation_id: user_id.clone(),
+                    group_id: user_id.clone(),
                 },
             )),
         };
@@ -177,12 +177,12 @@ impl Rtc {
     }
 
     /// accept session
-    fn accept_session(conversation_id: Vec<u8>) {
+    fn accept_session(group_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
                 proto::RtcSessionManagement {
-                    conversation_id: conversation_id.clone(),
+                    group_id: group_id.clone(),
                     option: 1,
                 },
             )),
@@ -199,12 +199,12 @@ impl Rtc {
     }
 
     /// decline session
-    fn decline_session(conversation_id: Vec<u8>) {
+    fn decline_session(group_id: Vec<u8>) {
         // decline session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
                 proto::RtcSessionManagement {
-                    conversation_id: conversation_id.clone(),
+                    group_id: group_id.clone(),
                     option: 2,
                 },
             )),
@@ -221,12 +221,12 @@ impl Rtc {
     }
 
     /// end session
-    fn end_session(conversation_id: Vec<u8>) {
+    fn end_session(group_id: Vec<u8>) {
         // end session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
                 proto::RtcSessionManagement {
-                    conversation_id: conversation_id.clone(),
+                    group_id: group_id.clone(),
                     option: 3,
                 },
             )),
@@ -243,7 +243,7 @@ impl Rtc {
     }
 
     /// send session
-    fn send_session(conversation_id: Vec<u8>, message: String) {
+    fn send_session(group_id: Vec<u8>, message: String) {
         let rtc_content = proto_net::RtcContent {
             content: Some(proto_net::rtc_content::Content::ChatContent(
                 proto_net::RtcChatContent {
@@ -260,7 +260,7 @@ impl Rtc {
 
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcOutgoing(proto::RtcOutgoing {
-                conversation_id: conversation_id.clone(),
+                group_id: group_id.clone(),
                 content: buf0,
             })),
         };
@@ -304,19 +304,13 @@ impl Rtc {
                     Some(proto::rtc_rpc::Message::RtcSessionResponse(resp)) => {
                         println!("====================================");
                         println!("Session was created");
-                        println!(
-                            "\tconversation id: {}",
-                            bs58::encode(resp.conversation_id).into_string()
-                        );
+                        println!("\tgroup id: {}", bs58::encode(resp.group_id).into_string());
                     }
                     Some(proto::rtc_rpc::Message::RtcIncoming(resp)) => {
                         //
                         println!("====================================");
                         println!("Rtc Incoming");
-                        println!(
-                            "\tconversation id: {}",
-                            bs58::encode(resp.conversation_id).into_string()
-                        );
+                        println!("\tgroup id: {}", bs58::encode(resp.group_id).into_string());
 
                         match proto_net::RtcContent::decode(&resp.content[..])
                             .unwrap()
@@ -332,10 +326,7 @@ impl Rtc {
                         // List sessions
                         println!("=============List Of Sessions=================");
                         for session in resp.sessions {
-                            println!(
-                                "conversation id: {}",
-                                bs58::encode(session.conversation_id).into_string()
-                            );
+                            println!("group id: {}", bs58::encode(session.group_id).into_string());
                             println!(
                                 "\ttype: {} , state: {} , created at: {}",
                                 session.session_type, session.state, session.created_at

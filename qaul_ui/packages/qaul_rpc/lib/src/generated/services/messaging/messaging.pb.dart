@@ -715,7 +715,7 @@ class CommonMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CommonMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.messaging'), createEmptyInstance: create)
     ..oo(0, [4, 5, 6, 7])
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sentAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..aOM<ChatMessage>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatMessage', subBuilder: ChatMessage.create)
     ..aOM<FileMessage>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileMessage', subBuilder: FileMessage.create)
@@ -727,7 +727,7 @@ class CommonMessage extends $pb.GeneratedMessage {
   CommonMessage._() : super();
   factory CommonMessage({
     $core.List<$core.int>? messageId,
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $fixnum.Int64? sentAt,
     ChatMessage? chatMessage,
     FileMessage? fileMessage,
@@ -738,8 +738,8 @@ class CommonMessage extends $pb.GeneratedMessage {
     if (messageId != null) {
       _result.messageId = messageId;
     }
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (sentAt != null) {
       _result.sentAt = sentAt;
@@ -792,13 +792,13 @@ class CommonMessage extends $pb.GeneratedMessage {
   void clearMessageId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get conversationId => $_getN(1);
+  $core.List<$core.int> get groupId => $_getN(1);
   @$pb.TagNumber(2)
-  set conversationId($core.List<$core.int> v) { $_setBytes(1, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasConversationId() => $_has(1);
+  $core.bool hasGroupId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearConversationId() => clearField(2);
+  void clearGroupId() => clearField(2);
 
   @$pb.TagNumber(3)
   $fixnum.Int64 get sentAt => $_getI64(2);

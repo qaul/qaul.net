@@ -24,9 +24,9 @@ pub mod chat {
 /// request messages of a specific chat conversation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatConversationRequest {
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// send only changes that are newer than the last received
     #[prost(uint64, tag="2")]
     pub last_index: u64,
@@ -34,9 +34,9 @@ pub struct ChatConversationRequest {
 /// list of chat messages of a specific conversation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatConversationList {
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// several messages
     #[prost(message, repeated, tag="2")]
     pub message_list: ::prost::alloc::vec::Vec<ChatMessage>,
@@ -65,9 +65,9 @@ pub struct ChatMessage {
     /// message.
     #[prost(message, repeated, tag="10")]
     pub message_reception_confirmed: ::prost::alloc::vec::Vec<MessageReceptionConfirmed>,
-    /// conversation id
+    /// group id
     #[prost(bytes="vec", tag="5")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// time when the message was sent
     #[prost(uint64, tag="6")]
     pub sent_at: u64,
@@ -150,9 +150,9 @@ pub struct GroupEvent {
 /// send chat message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ChatMessageSend {
-    /// conversation id to which this message is sent
+    /// group id to which this message is sent
     #[prost(bytes="vec", tag="1")]
-    pub conversation_id: ::prost::alloc::vec::Vec<u8>,
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
     /// content of the message
     #[prost(string, tag="2")]
     pub content: ::prost::alloc::string::String,

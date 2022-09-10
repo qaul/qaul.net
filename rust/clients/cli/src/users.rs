@@ -101,7 +101,7 @@ impl Users {
                 name: String::from(""),
                 id: user_id,
                 key_base58: String::from(""),
-                conversation_id: Vec::new(),
+                group_id: Vec::new(),
                 connectivity: 0,
                 verified,
                 blocked,
@@ -134,7 +134,7 @@ impl Users {
                     println!("");
                     println!("All known Users");
                     println!("No. | User Name | User Id | Veryfied | Blocked");
-                    println!("    | Conversation ID | Public Key");
+                    println!("    | Group ID | Public Key");
 
                     for user in proto_userlist.user {
                         let mut verified = "N";
@@ -154,13 +154,13 @@ impl Users {
                             verified,
                             blocked
                         );
-                        let conversation_uuid;
-                        match Uuid::from_slice(&user.conversation_id) {
+                        let group_uuid;
+                        match Uuid::from_slice(&user.group_id) {
                             Ok(uuid) => {
-                                conversation_uuid = uuid;
+                                group_uuid = uuid;
                                 println!(
                                     "   | {} | {}",
-                                    conversation_uuid.hyphenated().to_string(),
+                                    group_uuid.hyphenated().to_string(),
                                     user.key_base58
                                 );
                             }

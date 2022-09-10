@@ -45,7 +45,7 @@ impl Chat {
     ///
     /// This ID is created from the following things
     ///
-    /// * the conversation_id (group_id)
+    /// * the group_id (group_id)
     /// * the sender id
     /// * the message index of the sender
     pub fn generate_message_id(group_id: &Vec<u8>, sender_id: &PeerId, index: u32) -> Vec<u8> {
@@ -74,10 +74,8 @@ impl Chat {
                 match chat.message {
                     Some(rpc_proto::chat::Message::ConversationRequest(conversation_request)) => {
                         // get messages of a conversation from data base
-                        let conversation_list = ChatStorage::get_messages(
-                            account_id,
-                            conversation_request.conversation_id,
-                        );
+                        let conversation_list =
+                            ChatStorage::get_messages(account_id, conversation_request.group_id);
 
                         // pack message
                         let proto_message = rpc_proto::Chat {
@@ -127,7 +125,7 @@ impl Chat {
                         // send the message
                         if let Err(error) = ChatMessage::send_chat_message(
                             &user_account.id,
-                            &message.conversation_id,
+                            &message.group_id,
                             message.content,
                         ) {
                             log::error!("Outgoing chat message error: {}", error)

@@ -444,7 +444,7 @@ class SendFileRequest final :
 
   enum : int {
     kPathNameFieldNumber = 1,
-    kConversationIdFieldNumber = 2,
+    kGroupIdFieldNumber = 2,
     kDescriptionFieldNumber = 3,
   };
   // string path_name = 1;
@@ -461,18 +461,18 @@ class SendFileRequest final :
   std::string* _internal_mutable_path_name();
   public:
 
-  // bytes conversation_id = 2;
-  void clear_conversation_id();
-  const std::string& conversation_id() const;
+  // bytes group_id = 2;
+  void clear_group_id();
+  const std::string& group_id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_conversation_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_conversation_id();
-  PROTOBUF_NODISCARD std::string* release_conversation_id();
-  void set_allocated_conversation_id(std::string* conversation_id);
+  void set_group_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_group_id();
+  PROTOBUF_NODISCARD std::string* release_group_id();
+  void set_allocated_group_id(std::string* group_id);
   private:
-  const std::string& _internal_conversation_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_conversation_id(const std::string& value);
-  std::string* _internal_mutable_conversation_id();
+  const std::string& _internal_group_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_group_id(const std::string& value);
+  std::string* _internal_mutable_group_id();
   public:
 
   // string description = 3;
@@ -498,7 +498,7 @@ class SendFileRequest final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr path_name_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr conversation_id_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr description_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -1649,54 +1649,54 @@ inline void SendFileRequest::set_allocated_path_name(std::string* path_name) {
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chatfile.SendFileRequest.path_name)
 }
 
-// bytes conversation_id = 2;
-inline void SendFileRequest::clear_conversation_id() {
-  _impl_.conversation_id_.ClearToEmpty();
+// bytes group_id = 2;
+inline void SendFileRequest::clear_group_id() {
+  _impl_.group_id_.ClearToEmpty();
 }
-inline const std::string& SendFileRequest::conversation_id() const {
-  // @@protoc_insertion_point(field_get:qaul.rpc.chatfile.SendFileRequest.conversation_id)
-  return _internal_conversation_id();
+inline const std::string& SendFileRequest::group_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.chatfile.SendFileRequest.group_id)
+  return _internal_group_id();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void SendFileRequest::set_conversation_id(ArgT0&& arg0, ArgT... args) {
+void SendFileRequest::set_group_id(ArgT0&& arg0, ArgT... args) {
  
- _impl_.conversation_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:qaul.rpc.chatfile.SendFileRequest.conversation_id)
+ _impl_.group_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.chatfile.SendFileRequest.group_id)
 }
-inline std::string* SendFileRequest::mutable_conversation_id() {
-  std::string* _s = _internal_mutable_conversation_id();
-  // @@protoc_insertion_point(field_mutable:qaul.rpc.chatfile.SendFileRequest.conversation_id)
+inline std::string* SendFileRequest::mutable_group_id() {
+  std::string* _s = _internal_mutable_group_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.chatfile.SendFileRequest.group_id)
   return _s;
 }
-inline const std::string& SendFileRequest::_internal_conversation_id() const {
-  return _impl_.conversation_id_.Get();
+inline const std::string& SendFileRequest::_internal_group_id() const {
+  return _impl_.group_id_.Get();
 }
-inline void SendFileRequest::_internal_set_conversation_id(const std::string& value) {
+inline void SendFileRequest::_internal_set_group_id(const std::string& value) {
   
-  _impl_.conversation_id_.Set(value, GetArenaForAllocation());
+  _impl_.group_id_.Set(value, GetArenaForAllocation());
 }
-inline std::string* SendFileRequest::_internal_mutable_conversation_id() {
+inline std::string* SendFileRequest::_internal_mutable_group_id() {
   
-  return _impl_.conversation_id_.Mutable(GetArenaForAllocation());
+  return _impl_.group_id_.Mutable(GetArenaForAllocation());
 }
-inline std::string* SendFileRequest::release_conversation_id() {
-  // @@protoc_insertion_point(field_release:qaul.rpc.chatfile.SendFileRequest.conversation_id)
-  return _impl_.conversation_id_.Release();
+inline std::string* SendFileRequest::release_group_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.chatfile.SendFileRequest.group_id)
+  return _impl_.group_id_.Release();
 }
-inline void SendFileRequest::set_allocated_conversation_id(std::string* conversation_id) {
-  if (conversation_id != nullptr) {
+inline void SendFileRequest::set_allocated_group_id(std::string* group_id) {
+  if (group_id != nullptr) {
     
   } else {
     
   }
-  _impl_.conversation_id_.SetAllocated(conversation_id, GetArenaForAllocation());
+  _impl_.group_id_.SetAllocated(group_id, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.conversation_id_.IsDefault()) {
-    _impl_.conversation_id_.Set("", GetArenaForAllocation());
+  if (_impl_.group_id_.IsDefault()) {
+    _impl_.group_id_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chatfile.SendFileRequest.conversation_id)
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.chatfile.SendFileRequest.group_id)
 }
 
 // string description = 3;

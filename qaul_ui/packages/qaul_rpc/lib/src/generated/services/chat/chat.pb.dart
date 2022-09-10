@@ -114,19 +114,19 @@ class Chat extends $pb.GeneratedMessage {
 
 class ChatConversationRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatConversationRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
   ChatConversationRequest._() : super();
   factory ChatConversationRequest({
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $fixnum.Int64? lastIndex,
   }) {
     final _result = create();
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (lastIndex != null) {
       _result.lastIndex = lastIndex;
@@ -155,13 +155,13 @@ class ChatConversationRequest extends $pb.GeneratedMessage {
   static ChatConversationRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.int> get conversationId => $_getN(0);
+  $core.List<$core.int> get groupId => $_getN(0);
   @$pb.TagNumber(1)
-  set conversationId($core.List<$core.int> v) { $_setBytes(0, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasConversationId() => $_has(0);
+  $core.bool hasGroupId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearConversationId() => clearField(1);
+  void clearGroupId() => clearField(1);
 
   @$pb.TagNumber(2)
   $fixnum.Int64 get lastIndex => $_getI64(1);
@@ -175,19 +175,19 @@ class ChatConversationRequest extends $pb.GeneratedMessage {
 
 class ChatConversationList extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatConversationList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..pc<ChatMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageList', $pb.PbFieldType.PM, subBuilder: ChatMessage.create)
     ..hasRequiredFields = false
   ;
 
   ChatConversationList._() : super();
   factory ChatConversationList({
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $core.Iterable<ChatMessage>? messageList,
   }) {
     final _result = create();
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (messageList != null) {
       _result.messageList.addAll(messageList);
@@ -216,13 +216,13 @@ class ChatConversationList extends $pb.GeneratedMessage {
   static ChatConversationList? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.int> get conversationId => $_getN(0);
+  $core.List<$core.int> get groupId => $_getN(0);
   @$pb.TagNumber(1)
-  set conversationId($core.List<$core.int> v) { $_setBytes(0, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasConversationId() => $_has(0);
+  $core.bool hasGroupId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearConversationId() => clearField(1);
+  void clearGroupId() => clearField(1);
 
   @$pb.TagNumber(2)
   $core.List<ChatMessage> get messageList => $_getList(1);
@@ -234,7 +234,7 @@ class ChatMessage extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
     ..e<MessageStatus>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: MessageStatus.SENDING, valueOf: MessageStatus.valueOf, enumValues: MessageStatus.values)
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sentAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.List<$core.int>>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content', $pb.PbFieldType.OY)
@@ -248,7 +248,7 @@ class ChatMessage extends $pb.GeneratedMessage {
     $core.List<$core.int>? senderId,
     $core.List<$core.int>? messageId,
     MessageStatus? status,
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $fixnum.Int64? sentAt,
     $fixnum.Int64? receivedAt,
     $core.List<$core.int>? content,
@@ -267,8 +267,8 @@ class ChatMessage extends $pb.GeneratedMessage {
     if (status != null) {
       _result.status = status;
     }
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (sentAt != null) {
       _result.sentAt = sentAt;
@@ -342,13 +342,13 @@ class ChatMessage extends $pb.GeneratedMessage {
   void clearStatus() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.List<$core.int> get conversationId => $_getN(4);
+  $core.List<$core.int> get groupId => $_getN(4);
   @$pb.TagNumber(5)
-  set conversationId($core.List<$core.int> v) { $_setBytes(4, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasConversationId() => $_has(4);
+  $core.bool hasGroupId() => $_has(4);
   @$pb.TagNumber(5)
-  void clearConversationId() => clearField(5);
+  void clearGroupId() => clearField(5);
 
   @$pb.TagNumber(6)
   $fixnum.Int64 get sentAt => $_getI64(5);
@@ -753,19 +753,19 @@ class GroupEvent extends $pb.GeneratedMessage {
 
 class ChatMessageSend extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatMessageSend', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chat'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conversationId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
     ..hasRequiredFields = false
   ;
 
   ChatMessageSend._() : super();
   factory ChatMessageSend({
-    $core.List<$core.int>? conversationId,
+    $core.List<$core.int>? groupId,
     $core.String? content,
   }) {
     final _result = create();
-    if (conversationId != null) {
-      _result.conversationId = conversationId;
+    if (groupId != null) {
+      _result.groupId = groupId;
     }
     if (content != null) {
       _result.content = content;
@@ -794,13 +794,13 @@ class ChatMessageSend extends $pb.GeneratedMessage {
   static ChatMessageSend? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.int> get conversationId => $_getN(0);
+  $core.List<$core.int> get groupId => $_getN(0);
   @$pb.TagNumber(1)
-  set conversationId($core.List<$core.int> v) { $_setBytes(0, v); }
+  set groupId($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasConversationId() => $_has(0);
+  $core.bool hasGroupId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearConversationId() => clearField(1);
+  void clearGroupId() => clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get content => $_getSZ(1);

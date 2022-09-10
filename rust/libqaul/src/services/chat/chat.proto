@@ -17,16 +17,16 @@ message Chat {
 
 // request messages of a specific chat conversation
 message ChatConversationRequest {
-    // conversation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
     // send only changes that are newer than the last received
     uint64 last_index = 2;
 }
 
 // list of chat messages of a specific conversation
 message ChatConversationList {
-    // conversation id
-    bytes conversation_id = 1;
+    // group id
+    bytes group_id = 1;
     // several messages
     repeated ChatMessage message_list = 2;
 }
@@ -48,8 +48,8 @@ message ChatMessage {
     // We are only getting this confirmation if we are the sender of this
     // message.
     repeated MessageReceptionConfirmed message_reception_confirmed = 10;
-    // conversation id
-    bytes conversation_id = 5;
+    // group id
+    bytes group_id = 5;
     // time when the message was sent
     uint64 sent_at = 6;
     // time when the message was received
@@ -146,8 +146,8 @@ enum GroupEventType {
 
 // send chat message
 message ChatMessageSend {
-    // conversation id to which this message is sent
-    bytes conversation_id = 1;
+    // group id to which this message is sent
+    bytes group_id = 1;
     // content of the message
     string content = 2;
 }

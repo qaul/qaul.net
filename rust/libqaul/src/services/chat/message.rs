@@ -14,7 +14,7 @@ use prost::Message;
 use super::rpc_proto;
 use super::{Chat, ChatStorage};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::services::group::{self, conversation_id::ConversationId, GroupStorage};
+use crate::services::group::{self, group_id::GroupId, GroupStorage};
 use crate::services::messaging::{proto, Messaging, MessagingServiceType};
 use crate::utilities::timestamp::Timestamp;
 
@@ -49,14 +49,14 @@ impl ChatMessage {
         group_id: &Vec<u8>,
         message: String,
     ) -> Result<bool, String> {
-        let conversation_id = ConversationId::from_bytes(&group_id).unwrap();
+        let groupid = GroupId::from_bytes(&group_id).unwrap();
         let group;
         match group::GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
             Some(v) => group = v,
             None => {
                 let error_string = "Group not found".to_string();
                 // check if group is direct message
-                match conversation_id.is_direct(account_id.to_owned()) {
+                match groupid.is_direct(account_id.to_owned()) {
                     // get user id from q8id
                     Some(user_q8id) => {
                         // create direct chat
@@ -91,7 +91,7 @@ impl ChatMessage {
         // pack message
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
-            conversation_id: conversation_id.to_bytes(),
+            group_id: groupid.to_bytes(),
             sent_at: timestamp,
             payload: Some(proto::common_message::Payload::ChatMessage(
                 proto::ChatMessage {
@@ -112,7 +112,7 @@ impl ChatMessage {
         ChatStorage::save_outgoing_message(
             account_id,
             account_id,
-            &conversation_id,
+            &groupid,
             &message_id,
             message_content.clone(),
             rpc_proto::MessageStatus::Sending,
@@ -123,7 +123,7 @@ impl ChatMessage {
             for user_id in group.members.keys() {
                 let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
                 if receiver != *account_id {
-                    log::error!("send message to {}", receiver.to_base58());
+                    log::trace!("send message to {}", receiver.to_base58());
                     if let Err(error) = Self::send(&user_account, &receiver, &common_message) {
                         log::error!("chat message send error {}", error);
                     }

@@ -18,7 +18,7 @@ use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
-pub mod conversation_id;
+pub mod group_id;
 mod manage;
 mod member;
 mod message;
@@ -201,7 +201,7 @@ impl Group {
         let message_id = Chat::generate_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
-            conversation_id: group.id.clone(),
+            group_id: group.id.clone(),
             sent_at: Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::GroupMessage(
                 proto::GroupMessage {

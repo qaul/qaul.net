@@ -34,37 +34,34 @@ impl Chat {
         match command {
             // send chat message
             cmd if cmd.starts_with("send ") => {
-                // get conversation id
+                // get group id
                 let command_string = cmd.strip_prefix("send ").unwrap().to_string();
                 let mut iter = command_string.split_whitespace();
 
-                if let Some(conversation_id_str) = iter.next() {
-                    // convert conversation id from string to binary version
-                    let mut conversation_id = vec![];
-                    match Self::id_string_to_bin(conversation_id_str.to_string()) {
+                if let Some(group_id_str) = iter.next() {
+                    // convert group id from string to binary version
+                    let mut group_id = vec![];
+                    match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(v) => {
-                            conversation_id = v.clone();
+                            group_id = v.clone();
                         }
-                        _ => match Self::uuid_string_to_bin(conversation_id_str.to_string()) {
+                        _ => match Self::uuid_string_to_bin(group_id_str.to_string()) {
                             Ok(v) => {
-                                conversation_id = v.clone();
+                                group_id = v.clone();
                             }
                             _ => {
-                                log::error!("invalid conversation id format");
+                                log::error!("invalid group id format");
                             }
                         },
                     }
                     // get message string
-                    if let Some(message) = command_string.strip_prefix(conversation_id_str) {
+                    if let Some(message) = command_string.strip_prefix(group_id_str) {
                         // send message
-                        Self::send_chat_message(
-                            conversation_id,
-                            message.to_string().trim().to_string(),
-                        );
-                        println!("chat message sent [{}] {}", conversation_id_str, message);
+                        Self::send_chat_message(group_id, message.to_string().trim().to_string());
+                        println!("chat message sent [{}] {}", group_id_str, message);
                         return;
                     } else {
-                        log::error!("prefix '{}' not found", conversation_id_str);
+                        log::error!("prefix '{}' not found", group_id_str);
                         return;
                     }
                 } else {
@@ -77,20 +74,19 @@ impl Chat {
                     Some(command_str) => {
                         let command_string = command_str.to_string();
                         let mut iter = command_string.split_whitespace();
-                        let mut conversation_id = Vec::new();
+                        let mut group_id = Vec::new();
                         let mut last_index = 0;
 
-                        // convert conversation id from string to binary version
-                        if let Some(conversation_id_str) = iter.next() {
-                            match Self::id_string_to_bin(conversation_id_str.to_string()) {
+                        // convert group id from string to binary version
+                        if let Some(group_id_str) = iter.next() {
+                            match Self::id_string_to_bin(group_id_str.to_string()) {
                                 Ok(id) => {
-                                    conversation_id = id;
+                                    group_id = id;
                                 }
                                 Err(_e) => {
-                                    match Self::uuid_string_to_bin(conversation_id_str.to_string())
-                                    {
+                                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
                                         Ok(id) => {
-                                            conversation_id = id;
+                                            group_id = id;
                                         }
                                         _ => {
                                             log::error!("invalid converstion id");
@@ -113,7 +109,7 @@ impl Chat {
                         }
 
                         // request chat conversation
-                        Self::request_chat_conversation(conversation_id, last_index);
+                        Self::request_chat_conversation(group_id, last_index);
                     }
                     None => {
                         // request all messages
@@ -126,11 +122,11 @@ impl Chat {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
-            return Err("Conversation ID not long enough".to_string());
+            return Err("Group ID not long enough".to_string());
         }
 
         // convert input
@@ -143,7 +139,7 @@ impl Chat {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id) => Ok(id.as_bytes().to_vec()),
@@ -152,11 +148,11 @@ impl Chat {
     }
 
     /// Create and send feed message via rpc
-    fn send_chat_message(conversation_id: Vec<u8>, message_text: String) {
+    fn send_chat_message(group_id: Vec<u8>, message_text: String) {
         // create feed send message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::Send(proto::ChatMessageSend {
-                conversation_id,
+                group_id,
                 content: message_text,
             })),
         };
@@ -174,13 +170,13 @@ impl Chat {
     /// Request chat conversation via rpc
     ///
     /// This provides all chat messages of a specific conversation.
-    /// The conversation is addressed via it's conversation id
-    fn request_chat_conversation(conversation_id: Vec<u8>, last_index: u64) {
+    /// The conversation is addressed via it's group id
+    fn request_chat_conversation(group_id: Vec<u8>, last_index: u64) {
         // create feed list request message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::ConversationRequest(
                 proto::ChatConversationRequest {
-                    conversation_id,
+                    group_id,
                     last_index,
                 },
             )),
@@ -255,11 +251,10 @@ impl Chat {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
                         println!("");
-                        let conversation_id = uuid::Uuid::from_bytes(
-                            proto_conversation.conversation_id.try_into().unwrap(),
-                        );
+                        let group_id =
+                            uuid::Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
 
-                        println!("Conversation [ {} ]", conversation_id.to_string());
+                        println!("Conversation [ {} ]", group_id.to_string());
                         println!("");
                         println!("No. | Status | Sent At | Sender ID");
                         println!("  [Message ID] Received At");

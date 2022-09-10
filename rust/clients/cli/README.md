@@ -59,11 +59,10 @@ The following commands are available:
   * `group rename {Group ID} {New Name}` - rename a group
   * `group send {Group ID} {Message Content}` - send a message to a group
 * chat
-  * `chat send {Conversation ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Conversation ID}
-  * `chat overview` - displays an overview of all conversations and the last messages within them
-  * `chat conversation {Conversation ID}` - displays all messages of the conversation with the ID {Conversation ID}
+  * `chat send {Group ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Group ID}
+  * `chat conversation {Group ID}` - displays all messages of the conversation with the ID {Group ID}
 * file sharing
-  * `file send {Conversation ID} {File Path} {File Description}` - sends a file to the user with the ID {Conversation ID} and a {File Description} text.
+  * `file send {Group ID} {File Path} {File Description}` - sends a file to the user with the ID {Group ID} and a {File Description} text.
   * `file history [{offset} {limit}]` - displays a paginated file history
     * The page {offset} and {limit} values are optional. The default values are an offset of 0 and 10 results.
 * debug

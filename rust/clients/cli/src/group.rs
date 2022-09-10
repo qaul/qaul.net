@@ -200,11 +200,11 @@ impl Group {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
-            return Err("Conversation ID not long enough".to_string());
+            return Err("Group ID not long enough".to_string());
         }
 
         // convert input
@@ -217,7 +217,7 @@ impl Group {
         }
     }
 
-    /// Convert Conversation ID from String to Binary
+    /// Convert Group ID from String to Binary
     fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id) => Ok(id.as_bytes().to_vec()),

@@ -29,13 +29,13 @@ const SendFileRequest$json = const {
   '1': 'SendFileRequest',
   '2': const [
     const {'1': 'path_name', '3': 1, '4': 1, '5': 9, '10': 'pathName'},
-    const {'1': 'conversation_id', '3': 2, '4': 1, '5': 12, '10': 'conversationId'},
+    const {'1': 'group_id', '3': 2, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'description', '3': 3, '4': 1, '5': 9, '10': 'description'},
   ],
 };
 
 /// Descriptor for `SendFileRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sendFileRequestDescriptor = $convert.base64Decode('Cg9TZW5kRmlsZVJlcXVlc3QSGwoJcGF0aF9uYW1lGAEgASgJUghwYXRoTmFtZRInCg9jb252ZXJzYXRpb25faWQYAiABKAxSDmNvbnZlcnNhdGlvbklkEiAKC2Rlc2NyaXB0aW9uGAMgASgJUgtkZXNjcmlwdGlvbg==');
+final $typed_data.Uint8List sendFileRequestDescriptor = $convert.base64Decode('Cg9TZW5kRmlsZVJlcXVlc3QSGwoJcGF0aF9uYW1lGAEgASgJUghwYXRoTmFtZRIZCghncm91cF9pZBgCIAEoDFIHZ3JvdXBJZBIgCgtkZXNjcmlwdGlvbhgDIAEoCVILZGVzY3JpcHRpb24=');
 @$core.Deprecated('Use sendFileResponseDescriptor instead')
 const SendFileResponse$json = const {
   '1': 'SendFileResponse',
