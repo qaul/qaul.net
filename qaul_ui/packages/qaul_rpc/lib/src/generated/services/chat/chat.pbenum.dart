@@ -37,13 +37,15 @@ class GroupEventType extends $pb.ProtobufEnum {
   static const GroupEventType INVITED = GroupEventType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INVITED');
   static const GroupEventType JOINED = GroupEventType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'JOINED');
   static const GroupEventType LEFT = GroupEventType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LEFT');
-  static const GroupEventType CLOSED = GroupEventType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSED');
+  static const GroupEventType REMOVED = GroupEventType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REMOVED');
+  static const GroupEventType CLOSED = GroupEventType._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSED');
 
   static const $core.List<GroupEventType> values = <GroupEventType> [
     DEFAULT,
     INVITED,
     JOINED,
     LEFT,
+    REMOVED,
     CLOSED,
   ];
 

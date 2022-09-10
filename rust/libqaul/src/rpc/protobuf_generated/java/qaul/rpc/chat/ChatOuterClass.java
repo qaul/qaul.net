@@ -258,12 +258,20 @@ public final class ChatOuterClass {
     LEFT(3),
     /**
      * <pre>
+     * your user was removed
+     * </pre>
+     *
+     * <code>REMOVED = 4;</code>
+     */
+    REMOVED(4),
+    /**
+     * <pre>
      * group was closed
      * </pre>
      *
-     * <code>CLOSED = 4;</code>
+     * <code>CLOSED = 5;</code>
      */
-    CLOSED(4),
+    CLOSED(5),
     UNRECOGNIZED(-1),
     ;
 
@@ -302,12 +310,20 @@ public final class ChatOuterClass {
     public static final int LEFT_VALUE = 3;
     /**
      * <pre>
+     * your user was removed
+     * </pre>
+     *
+     * <code>REMOVED = 4;</code>
+     */
+    public static final int REMOVED_VALUE = 4;
+    /**
+     * <pre>
      * group was closed
      * </pre>
      *
-     * <code>CLOSED = 4;</code>
+     * <code>CLOSED = 5;</code>
      */
-    public static final int CLOSED_VALUE = 4;
+    public static final int CLOSED_VALUE = 5;
 
 
     public final int getNumber() {
@@ -338,7 +354,8 @@ public final class ChatOuterClass {
         case 1: return INVITED;
         case 2: return JOINED;
         case 3: return LEFT;
-        case 4: return CLOSED;
+        case 4: return REMOVED;
+        case 5: return CLOSED;
         default: return null;
       }
     }
@@ -10435,9 +10452,9 @@ public final class ChatOuterClass {
       "content\030\002 \001(\t*h\n\rMessageStatus\022\013\n\007SENDIN" +
       "G\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020CONFIRME" +
       "D_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010RECEIVED\020\005*" +
-      "L\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE" +
-      "D\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\n\n\006CLOSED\020\004b\006p" +
-      "roto3"
+      "Y\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE" +
+      "D\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\013\n\007REMOVED\020\004\022\n" +
+      "\n\006CLOSED\020\005b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -57,7 +57,6 @@ The following commands are available:
     * `group decline {Group ID}` - decline group invitation
   * `group remove {Group ID} {User ID}` - remove a group member from the group
   * `group rename {Group ID} {New Name}` - rename a group
-  * `group send {Group ID} {Message Content}` - send a message to a group
 * chat
   * `chat send {Group ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Group ID}
   * `chat conversation {Group ID}` - displays all messages of the conversation with the ID {Group ID}

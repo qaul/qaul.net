@@ -278,7 +278,7 @@ impl Member {
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
         // get group from data base
-        let group;
+        let mut group;
         match GroupStorage::get_group(account_id.to_owned(), resp.group_id.clone()) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
@@ -300,11 +300,15 @@ impl Member {
             return Err("member has already joined".to_string());
         }
 
-        // update group member state & send update to all users
-        member.state = super::proto_rpc::GroupMemberState::Activated
-            .try_into()
-            .unwrap();
-        Group::update_group_member(account_id, &resp.group_id, &member);
+        // update group member state
+        member.state = super::proto_rpc::GroupMemberState::Activated as i32;
+        group.members.insert(member.user_id.clone(), member);
+
+        // update revision
+        group.revision = group.revision + 1;
+
+        // save group
+        GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -373,5 +377,61 @@ impl Member {
             }
             Ok(false)
         }
+    }
+
+    /// user has been removed from group by administrator
+    pub fn on_removed(
+        sender_id: &PeerId,
+        account_id: &PeerId,
+        message: &super::proto_net::RemovedMember,
+    ) -> Result<bool, String> {
+        // get group from data base
+        let mut group;
+        match GroupStorage::get_group(account_id.to_owned(), message.group_id.clone()) {
+            Some(my_group) => group = my_group,
+            None => return Err("group not found".to_string()),
+        }
+
+        // check it's direct chat room
+        if group.is_direct_chat {
+            return Err("direct chat room does not allow user removal".to_string());
+        }
+
+        // check if sender is administrator
+        match group.members.get(&sender_id.to_bytes()) {
+            Some(admin) => {
+                if admin.role != super::proto_rpc::GroupMemberRole::Admin as i32 {
+                    return Err("sender is not administrator".to_string());
+                }
+            }
+            None => return Err("sender is not in group".to_string()),
+        }
+
+        // remove self from group
+        group.members.remove(&account_id.to_bytes());
+
+        // TODO: create a group deactivation state
+
+        // save group
+        GroupStorage::save_group(account_id.to_owned(), group);
+
+        // save event
+        let event = chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::Removed as i32,
+                    user_id: account_id.to_bytes(),
+                },
+            )),
+        };
+
+        ChatStorage::save_event(
+            &account_id,
+            &sender_id,
+            event,
+            &GroupId::from_bytes(&message.group_id).unwrap(),
+        );
+
+        Ok(true)
     }
 }

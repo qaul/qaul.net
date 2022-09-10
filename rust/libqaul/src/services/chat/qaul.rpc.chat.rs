@@ -206,8 +206,10 @@ pub enum GroupEventType {
     Joined = 2,
     /// user left group
     Left = 3,
+    /// your user was removed
+    Removed = 4,
     /// group was closed
-    Closed = 4,
+    Closed = 5,
 }
 impl GroupEventType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -220,6 +222,7 @@ impl GroupEventType {
             GroupEventType::Invited => "INVITED",
             GroupEventType::Joined => "JOINED",
             GroupEventType::Left => "LEFT",
+            GroupEventType::Removed => "REMOVED",
             GroupEventType::Closed => "CLOSED",
         }
     }
