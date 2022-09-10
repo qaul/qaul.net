@@ -6,8 +6,6 @@
 //! Invite new group members.
 //! Accept or reject invitations.
 
-use std::collections::BTreeMap;
-
 use libp2p::PeerId;
 use prost::Message;
 
@@ -209,15 +207,19 @@ impl Member {
         Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
         // save group event
-        let event = chat::rpc_proto::GroupEvent {
-            event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
-            user_id: user_id.to_bytes(),
+        let event = chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
+                    user_id: user_id.to_bytes(),
+                },
+            )),
         };
+
         ChatStorage::save_event(
             account_id,
             account_id,
-            chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-            &event.encode_to_vec(),
+            event,
             &ConversationId::from_bytes(group_id).unwrap(),
         );
 
@@ -230,18 +232,20 @@ impl Member {
         account_id: &PeerId,
         invite_message: &super::proto_net::InviteMember,
     ) {
-        let group;
+        let group_info;
         match invite_message.group.to_owned() {
-            Some(my_group) => group = my_group,
+            Some(my_group) => group_info = my_group,
             None => {
                 log::error!("invite message contains no group");
                 return;
             }
         }
 
-        let mut members: BTreeMap<Vec<u8>, GroupMember> = BTreeMap::new();
-        for member in group.members {
-            members.insert(
+        // create new group
+        let mut group = Group::new();
+
+        for member in group_info.members {
+            group.members.insert(
                 member.user_id.clone(),
                 GroupMember {
                     user_id: member.user_id.clone(),
@@ -253,17 +257,15 @@ impl Member {
             );
         }
 
+        group.id = group_info.group_id.clone();
+        group.name = group_info.group_name.clone();
+        group.created_at = group_info.created_at;
+        group.revision = group_info.revision;
+
         let invited = super::GroupInvited {
             sender_id: sender_id.to_bytes(),
             received_at: timestamp::Timestamp::get_timestamp(),
-            group: super::Group {
-                id: group.group_id.clone(),
-                name: group.group_name.clone(),
-                is_direct_chat: false,
-                created_at: group.created_at,
-                revision: group.revision,
-                members,
-            },
+            group,
         };
 
         GroupStorage::save_invite(account_id.to_owned(), invited);
@@ -305,15 +307,19 @@ impl Member {
         Group::update_group_member(account_id, &resp.group_id, &member);
 
         // save event
-        let event = chat::rpc_proto::GroupEvent {
-            event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-            user_id: sender_id.to_bytes(),
+        let event = chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
+                    user_id: sender_id.to_bytes(),
+                },
+            )),
         };
+
         ChatStorage::save_event(
             &account_id,
             &sender_id,
-            chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-            &event.encode_to_vec(),
+            event,
             &ConversationId::from_bytes(&resp.group_id).unwrap(),
         );
 

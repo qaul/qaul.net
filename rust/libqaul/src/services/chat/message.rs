@@ -14,7 +14,7 @@ use prost::Message;
 use super::rpc_proto;
 use super::{Chat, ChatStorage};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::services::group::{self, conversation_id::ConversationId};
+use crate::services::group::{self, conversation_id::ConversationId, GroupStorage};
 use crate::services::messaging::{proto, Messaging, MessagingServiceType};
 use crate::utilities::timestamp::Timestamp;
 
@@ -100,14 +100,21 @@ impl ChatMessage {
             )),
         };
 
+        let message_content = super::rpc_proto::ChatContentMessage {
+            message: Some(
+                super::rpc_proto::chat_content_message::Message::ChatContent(
+                    super::rpc_proto::ChatContent { text: message },
+                ),
+            ),
+        };
+
         // save outgoing message
         ChatStorage::save_outgoing_message(
             account_id,
             account_id,
             &conversation_id,
             &message_id,
-            rpc_proto::ChatContentType::Chat.try_into().unwrap(),
-            &message.encode_to_vec(),
+            message_content.clone(),
             rpc_proto::MessageStatus::Sending,
         );
 
@@ -127,6 +134,16 @@ impl ChatMessage {
         // update member state
         my_member.last_message_index = last_index;
         group::Group::update_group_member(account_id, group_id, &my_member);
+
+        // update last message sent
+        GroupStorage::group_update_last_chat_message(
+            account_id.to_owned(),
+            group_id.to_owned(),
+            account_id.to_owned(),
+            message_content.encode_to_vec(),
+            common_message.sent_at,
+        );
+
         Ok(true)
     }
 }

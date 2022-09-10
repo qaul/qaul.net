@@ -5,11 +5,6 @@ package qaul.rpc.chat;
 message Chat {
     // message type
     oneof message {
-        // request an overview over the last conversations
-        ChatOverviewRequest overview_request = 1;
-        // contains the overview list
-        ChatOverviewList overview_list = 2;
-
         // request a specific conversation
         ChatConversationRequest conversation_request = 3;
         // list of a chat conversation
@@ -18,38 +13,6 @@ message Chat {
         // send a new chat message
         ChatMessageSend send = 5;
     }
-}
-
-// request for overview list of all conversations
-// this request shall be sent continuously when the view is open
-//
-// at the moment always the entire list is sent
-message ChatOverviewRequest {}
-
-// overview list of conversations
-// this can eighter be the entire list or the last updates
-message ChatOverviewList {
-    repeated ChatOverview overview_list = 1;
-}
-
-// a chat conversation overview item
-message ChatOverview {
-    // id of the user
-    bytes conversation_id = 1;
-    // last message id
-    uint64 last_message_index = 2;
-    // name of the conversation
-    string name = 3;
-    // time when last message was sent or received
-    uint64 last_message_at = 4;
-    // unread messages
-    int32 unread = 5;
-    // content type
-    ChatContentType content_type = 6;
-    // preview text of the last message
-    bytes content = 7;
-    // sender of the last message
-    bytes last_message_sender_id = 8;
 }
 
 // request messages of a specific chat conversation
@@ -91,30 +54,8 @@ message ChatMessage {
     uint64 sent_at = 6;
     // time when the message was received
     uint64 received_at = 7;
-    // content type
-    ChatContentType content_type = 8;
-    // content of the message
-    bytes content = 9;
-}
-
-// Chat Content Type
-//
-// describes the message content type
-// of the message encoded in the ChatMessage content field
-enum ChatContentType {
-    // Undefined / Error
-    NONE = 0;
     // chat content message
-    // ChatContent
-    CHAT = 1;
-    // file content message
-    // FileContent
-    FILE = 2;
-    // group event information
-    // GroupEvent
-    GROUP = 3;
-    // RTC event information
-    RTC = 4;
+    bytes content = 8;
 }
 
 // Sending status of sent messages
@@ -142,6 +83,18 @@ message MessageReceptionConfirmed {
     bytes user_id = 1;
     // time of confirmation
     uint64 confirmed_at = 2;
+}
+
+// chat content message
+message ChatContentMessage {
+    oneof message {
+        // a chat content message
+        ChatContent chat_content = 1;
+        // a file content message
+        FileContent file_content = 2;
+        // a group event information
+        GroupEvent group_event = 3;
+    }
 }
 
 // chat content

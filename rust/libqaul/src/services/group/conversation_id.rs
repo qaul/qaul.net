@@ -122,6 +122,7 @@ impl ConversationId {
     ///
     /// If the bytes are not a valid UUID, it will convert them into
     /// bs58 encoding.
+    #[allow(dead_code)]
     pub fn slice_to_string(bytes: &Vec<u8>) -> String {
         let string;
         match uuid::Uuid::from_slice(bytes) {

@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use super::chat::{self, ChatStorage};
 use super::conversation_id::ConversationId;
 use super::{Group, GroupStorage};
-use crate::utilities::timestamp;
+use crate::utilities::timestamp::Timestamp;
 
 /// Group Manage Structure
 pub struct Manage {}
@@ -55,25 +55,26 @@ impl Manage {
             return group;
         }
 
-        let mut members = BTreeMap::new();
-        members.insert(
+        // create new group
+        let mut group = Group::new();
+        group.members.insert(
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
-                joined_at: timestamp::Timestamp::get_timestamp(),
+                joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
                     .try_into()
                     .unwrap(),
                 last_message_index: 0,
             },
         );
-        members.insert(
+        group.members.insert(
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
-                joined_at: timestamp::Timestamp::get_timestamp(),
+                joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
                     .try_into()
                     .unwrap(),
@@ -81,32 +82,27 @@ impl Manage {
             },
         );
 
-        let new_group = super::Group {
-            id: group_id.clone(),
-            name: "".to_string(),
-            revision: 0,
-            is_direct_chat: true,
-            created_at: timestamp::Timestamp::get_timestamp(),
-            members,
-        };
+        group.id = group_id.clone();
+        group.is_direct_chat = true;
 
         // save group to data base
-        GroupStorage::save_group(account_id.to_owned(), new_group.clone());
+        GroupStorage::save_group(account_id.to_owned(), group.clone());
 
-        new_group
+        group
     }
 
     /// create new group from rpc command
     pub fn create_new_group(account_id: &PeerId, name: String) -> Vec<u8> {
-        let id = uuid::Uuid::new_v4().as_bytes().to_vec();
+        let mut group = Group::new();
 
-        let mut members = BTreeMap::new();
-        members.insert(
+        group.id = uuid::Uuid::new_v4().as_bytes().to_vec();
+
+        group.members.insert(
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
-                joined_at: timestamp::Timestamp::get_timestamp(),
+                joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated
                     .try_into()
                     .unwrap(),
@@ -114,19 +110,12 @@ impl Manage {
             },
         );
 
-        let new_group = super::Group {
-            id: id.clone(),
-            name,
-            revision: 0,
-            is_direct_chat: false,
-            created_at: timestamp::Timestamp::get_timestamp(),
-            members,
-        };
+        group.name = name;
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), new_group);
+        GroupStorage::save_group(account_id.to_owned(), group.clone());
 
-        return id;
+        return group.id;
     }
 
     /// rename group from RPC command
@@ -193,6 +182,10 @@ impl Manage {
             revision: group.revision,
             is_direct_chat: group.is_direct_chat,
             members,
+            unread_messages: group.unread_messages,
+            last_message_at: group.last_message_at,
+            last_message: group.last_message_data,
+            last_message_sender_id: group.last_message_sender_id,
         };
         Ok(res)
     }
@@ -227,6 +220,10 @@ impl Manage {
                         revision: group.revision,
                         is_direct_chat: group.is_direct_chat,
                         members,
+                        unread_messages: group.unread_messages,
+                        last_message_at: group.last_message_at,
+                        last_message: group.last_message_data,
+                        last_message_sender_id: group.last_message_sender_id,
                     };
                     res.groups.push(grp);
                 }
@@ -266,6 +263,10 @@ impl Manage {
                             revision: invite.group.revision,
                             is_direct_chat: invite.group.is_direct_chat,
                             members,
+                            unread_messages: 0,
+                            last_message_at: 0,
+                            last_message: Vec::new(),
+                            last_message_sender_id: Vec::new(),
                         }),
                     };
 
@@ -278,8 +279,6 @@ impl Manage {
     }
 
     /// process group notify message from network
-    ///
-    /// RISK: Someone could force us into a group without our invitation agreement.
     pub fn on_group_notify(
         sender_id: PeerId,
         account_id: PeerId,
@@ -300,8 +299,19 @@ impl Manage {
         let mut new_members: Vec<Vec<u8>> = vec![];
 
         // get group
+        let mut group: Group;
         match GroupStorage::get_group(account_id, notify.group_id.clone()) {
-            Some(group) => {
+            Some(my_group) => {
+                group = my_group;
+
+                // check if the sent revision is higher then the one we already have
+                // return otherwise
+                if group.revision >= notify.revision {
+                    log::warn!("group update: got a smaller revision");
+                    return;
+                }
+
+                // check if sender is administrator, otherwise return
                 let mut sender_is_admin = false;
                 for (member_id, member) in &group.members {
                     orign_members.insert(member_id.clone(), true);
@@ -311,7 +321,6 @@ impl Manage {
                     }
                 }
 
-                // check if sender is administrator, otherwise return
                 if !sender_is_admin {
                     log::error!(
                         "illegitimate update from user {} for group {}",
@@ -321,7 +330,11 @@ impl Manage {
                     return;
                 }
             }
-            None => first_join = true,
+            None => {
+                first_join = true;
+
+                group = Group::new();
+            }
         }
 
         // check for new members
@@ -345,57 +358,82 @@ impl Manage {
             );
         }
 
-        let group = super::Group {
-            id: notify.group_id.clone(),
-            name: notify.group_name.clone(),
-            is_direct_chat: false,
-            created_at: notify.created_at,
-            revision: notify.revision,
-            members,
-        };
+        // update group
+        group.id = notify.group_id.clone();
+        group.name = notify.group_name.clone();
+        group.created_at = notify.created_at;
+        group.revision = notify.revision;
+        group.members = members;
 
         // save group
         GroupStorage::save_group(account_id, group);
 
         // save events
         if first_join {
-            let event = chat::rpc_proto::GroupEvent {
-                event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                user_id: account_id.to_bytes(),
+            let event = chat::rpc_proto::ChatContentMessage {
+                message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                    chat::rpc_proto::GroupEvent {
+                        event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
+                        user_id: account_id.to_bytes(),
+                    },
+                )),
             };
-            ChatStorage::save_event(
-                &account_id,
-                &sender_id,
-                chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-                &event.encode_to_vec(),
-                &conversation_id,
+
+            // save group event to chat
+            ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+
+            // update group last_message
+            GroupStorage::group_update_last_chat_message(
+                account_id,
+                conversation_id.to_bytes(),
+                sender_id,
+                event.encode_to_vec(),
+                Timestamp::get_timestamp(),
             );
         } else {
             for new_member in &new_members {
-                let event = chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                    user_id: new_member.clone(),
+                let event = chat::rpc_proto::ChatContentMessage {
+                    message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                        chat::rpc_proto::GroupEvent {
+                            event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
+                            user_id: new_member.clone(),
+                        },
+                    )),
                 };
-                ChatStorage::save_event(
-                    &account_id,
-                    &sender_id,
-                    chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-                    &event.encode_to_vec(),
-                    &conversation_id,
+
+                // save group event to chat
+                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+
+                // update group last_message
+                GroupStorage::group_update_last_chat_message(
+                    account_id,
+                    conversation_id.to_bytes(),
+                    sender_id,
+                    event.encode_to_vec(),
+                    Timestamp::get_timestamp(),
                 );
             }
 
             for left_member in orign_members.keys() {
-                let event = chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
-                    user_id: left_member.clone(),
+                let event = chat::rpc_proto::ChatContentMessage {
+                    message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                        chat::rpc_proto::GroupEvent {
+                            event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
+                            user_id: left_member.clone(),
+                        },
+                    )),
                 };
-                ChatStorage::save_event(
-                    &account_id,
-                    &sender_id,
-                    chat::rpc_proto::ChatContentType::Group.try_into().unwrap(),
-                    &event.encode_to_vec(),
-                    &conversation_id,
+
+                // save group event to chat
+                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &conversation_id);
+
+                // update group last_message
+                GroupStorage::group_update_last_chat_message(
+                    account_id,
+                    conversation_id.to_bytes(),
+                    sender_id,
+                    event.encode_to_vec(),
+                    Timestamp::get_timestamp(),
                 );
             }
         }

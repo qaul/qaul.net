@@ -16,7 +16,7 @@ use super::chat::{self, Chat};
 use super::messaging::{proto, Messaging, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
-use crate::utilities::timestamp;
+use crate::utilities::timestamp::Timestamp;
 
 pub mod conversation_id;
 mod manage;
@@ -81,6 +81,17 @@ pub struct Group {
     pub revision: u32,
     /// members
     pub members: BTreeMap<Vec<u8>, GroupMember>,
+    /// how many unread messages are there
+    pub unread_messages: u32,
+    /// last message update
+    pub last_message_at: u64,
+    /// last message
+    ///
+    /// This field contains the data of the
+    /// qaul.rpc.chat message `ChatContentMessage`
+    pub last_message_data: Vec<u8>,
+    /// last message sender id
+    pub last_message_sender_id: Vec<u8>,
 }
 
 /// Group module to process transfer, receive and RPC commands
@@ -89,6 +100,24 @@ impl Group {
     pub fn init() {
         // initialize group storage
         GroupStorage::init();
+    }
+
+    /// creates a new empty group
+    ///
+    /// to be filled with content
+    pub fn new() -> Group {
+        Group {
+            id: Vec::new(),
+            name: "".to_string(),
+            is_direct_chat: false,
+            created_at: Timestamp::get_timestamp(),
+            revision: 0,
+            members: BTreeMap::new(),
+            unread_messages: 0,
+            last_message_at: 0,
+            last_message_data: Vec::new(),
+            last_message_sender_id: Vec::new(),
+        }
     }
 
     /// get a group member
@@ -115,14 +144,6 @@ impl Group {
             // send new state to all users
             Group::post_group_update(account_id, group_id);
         }
-    }
-
-    /// get group name
-    pub fn get_group_name(account_id: &PeerId, group_id: &Vec<u8>) -> Option<String> {
-        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
-            return Some(group.name.clone());
-        }
-        None
     }
 
     /// Send packed notify message directly
@@ -152,6 +173,7 @@ impl Group {
     }
 
     /// Send capsuled group message through messaging service
+    #[allow(dead_code)]
     pub fn send_group_message(
         user_account: &UserAccount,
         receiver: &PeerId,
@@ -180,7 +202,7 @@ impl Group {
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
             conversation_id: group.id.clone(),
-            sent_at: timestamp::Timestamp::get_timestamp(),
+            sent_at: Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::GroupMessage(
                 proto::GroupMessage {
                     content: data.clone(),

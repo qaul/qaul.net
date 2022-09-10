@@ -231,6 +231,18 @@ pub struct GroupInfo {
     /// members
     #[prost(message, repeated, tag="6")]
     pub members: ::prost::alloc::vec::Vec<GroupMember>,
+    /// unread messages
+    #[prost(uint32, tag="7")]
+    pub unread_messages: u32,
+    /// time when last message was sent
+    #[prost(uint64, tag="8")]
+    pub last_message_at: u64,
+    /// content type
+    #[prost(bytes="vec", tag="9")]
+    pub last_message: ::prost::alloc::vec::Vec<u8>,
+    /// sender of the last message
+    #[prost(bytes="vec", tag="10")]
+    pub last_message_sender_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Group list request
 #[derive(Clone, PartialEq, ::prost::Message)]
