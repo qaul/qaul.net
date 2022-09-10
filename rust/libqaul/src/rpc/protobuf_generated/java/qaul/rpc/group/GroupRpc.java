@@ -5416,6 +5416,10 @@ public final class GroupRpc {
     /**
      * <pre>
      * status
+     * true = success
+     * false = an error happened
+     * if the result is false, the message will
+     * contain the error message.
      * </pre>
      *
      * <code>bool status = 1;</code>
@@ -5543,6 +5547,10 @@ public final class GroupRpc {
     /**
      * <pre>
      * status
+     * true = success
+     * false = an error happened
+     * if the result is false, the message will
+     * contain the error message.
      * </pre>
      *
      * <code>bool status = 1;</code>
@@ -5927,6 +5935,10 @@ public final class GroupRpc {
       /**
        * <pre>
        * status
+       * true = success
+       * false = an error happened
+       * if the result is false, the message will
+       * contain the error message.
        * </pre>
        *
        * <code>bool status = 1;</code>
@@ -5939,6 +5951,10 @@ public final class GroupRpc {
       /**
        * <pre>
        * status
+       * true = success
+       * false = an error happened
+       * if the result is false, the message will
+       * contain the error message.
        * </pre>
        *
        * <code>bool status = 1;</code>
@@ -5954,6 +5970,10 @@ public final class GroupRpc {
       /**
        * <pre>
        * status
+       * true = success
+       * false = an error happened
+       * if the result is false, the message will
+       * contain the error message.
        * </pre>
        *
        * <code>bool status = 1;</code>
@@ -15198,6 +15218,46 @@ public final class GroupRpc {
      */
     qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * unread messages
+     * </pre>
+     *
+     * <code>uint32 unread_messages = 7;</code>
+     * @return The unreadMessages.
+     */
+    int getUnreadMessages();
+
+    /**
+     * <pre>
+     * time when last message was sent
+     * </pre>
+     *
+     * <code>uint64 last_message_at = 8;</code>
+     * @return The lastMessageAt.
+     */
+    long getLastMessageAt();
+
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>bytes last_message = 9;</code>
+     * @return The lastMessage.
+     */
+    com.google.protobuf.ByteString getLastMessage();
+
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 10;</code>
+     * @return The lastMessageSenderId.
+     */
+    com.google.protobuf.ByteString getLastMessageSenderId();
   }
   /**
    * <pre>
@@ -15219,6 +15279,8 @@ public final class GroupRpc {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
       groupName_ = "";
       members_ = java.util.Collections.emptyList();
+      lastMessage_ = com.google.protobuf.ByteString.EMPTY;
+      lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -15285,6 +15347,26 @@ public final class GroupRpc {
               }
               members_.add(
                   input.readMessage(qaul.rpc.group.GroupRpc.GroupMember.parser(), extensionRegistry));
+              break;
+            }
+            case 56: {
+
+              unreadMessages_ = input.readUInt32();
+              break;
+            }
+            case 64: {
+
+              lastMessageAt_ = input.readUInt64();
+              break;
+            }
+            case 74: {
+
+              lastMessage_ = input.readBytes();
+              break;
+            }
+            case 82: {
+
+              lastMessageSenderId_ = input.readBytes();
               break;
             }
             default: {
@@ -15490,6 +15572,66 @@ public final class GroupRpc {
       return members_.get(index);
     }
 
+    public static final int UNREAD_MESSAGES_FIELD_NUMBER = 7;
+    private int unreadMessages_;
+    /**
+     * <pre>
+     * unread messages
+     * </pre>
+     *
+     * <code>uint32 unread_messages = 7;</code>
+     * @return The unreadMessages.
+     */
+    @java.lang.Override
+    public int getUnreadMessages() {
+      return unreadMessages_;
+    }
+
+    public static final int LAST_MESSAGE_AT_FIELD_NUMBER = 8;
+    private long lastMessageAt_;
+    /**
+     * <pre>
+     * time when last message was sent
+     * </pre>
+     *
+     * <code>uint64 last_message_at = 8;</code>
+     * @return The lastMessageAt.
+     */
+    @java.lang.Override
+    public long getLastMessageAt() {
+      return lastMessageAt_;
+    }
+
+    public static final int LAST_MESSAGE_FIELD_NUMBER = 9;
+    private com.google.protobuf.ByteString lastMessage_;
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>bytes last_message = 9;</code>
+     * @return The lastMessage.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getLastMessage() {
+      return lastMessage_;
+    }
+
+    public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 10;
+    private com.google.protobuf.ByteString lastMessageSenderId_;
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 10;</code>
+     * @return The lastMessageSenderId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getLastMessageSenderId() {
+      return lastMessageSenderId_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -15521,6 +15663,18 @@ public final class GroupRpc {
       }
       for (int i = 0; i < members_.size(); i++) {
         output.writeMessage(6, members_.get(i));
+      }
+      if (unreadMessages_ != 0) {
+        output.writeUInt32(7, unreadMessages_);
+      }
+      if (lastMessageAt_ != 0L) {
+        output.writeUInt64(8, lastMessageAt_);
+      }
+      if (!lastMessage_.isEmpty()) {
+        output.writeBytes(9, lastMessage_);
+      }
+      if (!lastMessageSenderId_.isEmpty()) {
+        output.writeBytes(10, lastMessageSenderId_);
       }
       unknownFields.writeTo(output);
     }
@@ -15554,6 +15708,22 @@ public final class GroupRpc {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, members_.get(i));
       }
+      if (unreadMessages_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(7, unreadMessages_);
+      }
+      if (lastMessageAt_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(8, lastMessageAt_);
+      }
+      if (!lastMessage_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(9, lastMessage_);
+      }
+      if (!lastMessageSenderId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(10, lastMessageSenderId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -15581,6 +15751,14 @@ public final class GroupRpc {
           != other.getIsDirectChat()) return false;
       if (!getMembersList()
           .equals(other.getMembersList())) return false;
+      if (getUnreadMessages()
+          != other.getUnreadMessages()) return false;
+      if (getLastMessageAt()
+          != other.getLastMessageAt()) return false;
+      if (!getLastMessage()
+          .equals(other.getLastMessage())) return false;
+      if (!getLastMessageSenderId()
+          .equals(other.getLastMessageSenderId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -15608,6 +15786,15 @@ public final class GroupRpc {
         hash = (37 * hash) + MEMBERS_FIELD_NUMBER;
         hash = (53 * hash) + getMembersList().hashCode();
       }
+      hash = (37 * hash) + UNREAD_MESSAGES_FIELD_NUMBER;
+      hash = (53 * hash) + getUnreadMessages();
+      hash = (37 * hash) + LAST_MESSAGE_AT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLastMessageAt());
+      hash = (37 * hash) + LAST_MESSAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getLastMessage().hashCode();
+      hash = (37 * hash) + LAST_MESSAGE_SENDER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getLastMessageSenderId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15762,6 +15949,14 @@ public final class GroupRpc {
         } else {
           membersBuilder_.clear();
         }
+        unreadMessages_ = 0;
+
+        lastMessageAt_ = 0L;
+
+        lastMessage_ = com.google.protobuf.ByteString.EMPTY;
+
+        lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
+
         return this;
       }
 
@@ -15803,6 +15998,10 @@ public final class GroupRpc {
         } else {
           result.members_ = membersBuilder_.build();
         }
+        result.unreadMessages_ = unreadMessages_;
+        result.lastMessageAt_ = lastMessageAt_;
+        result.lastMessage_ = lastMessage_;
+        result.lastMessageSenderId_ = lastMessageSenderId_;
         onBuilt();
         return result;
       }
@@ -15892,6 +16091,18 @@ public final class GroupRpc {
               membersBuilder_.addAllMessages(other.members_);
             }
           }
+        }
+        if (other.getUnreadMessages() != 0) {
+          setUnreadMessages(other.getUnreadMessages());
+        }
+        if (other.getLastMessageAt() != 0L) {
+          setLastMessageAt(other.getLastMessageAt());
+        }
+        if (other.getLastMessage() != com.google.protobuf.ByteString.EMPTY) {
+          setLastMessage(other.getLastMessage());
+        }
+        if (other.getLastMessageSenderId() != com.google.protobuf.ByteString.EMPTY) {
+          setLastMessageSenderId(other.getLastMessageSenderId());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -16504,6 +16715,184 @@ public final class GroupRpc {
           members_ = null;
         }
         return membersBuilder_;
+      }
+
+      private int unreadMessages_ ;
+      /**
+       * <pre>
+       * unread messages
+       * </pre>
+       *
+       * <code>uint32 unread_messages = 7;</code>
+       * @return The unreadMessages.
+       */
+      @java.lang.Override
+      public int getUnreadMessages() {
+        return unreadMessages_;
+      }
+      /**
+       * <pre>
+       * unread messages
+       * </pre>
+       *
+       * <code>uint32 unread_messages = 7;</code>
+       * @param value The unreadMessages to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUnreadMessages(int value) {
+        
+        unreadMessages_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * unread messages
+       * </pre>
+       *
+       * <code>uint32 unread_messages = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUnreadMessages() {
+        
+        unreadMessages_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long lastMessageAt_ ;
+      /**
+       * <pre>
+       * time when last message was sent
+       * </pre>
+       *
+       * <code>uint64 last_message_at = 8;</code>
+       * @return The lastMessageAt.
+       */
+      @java.lang.Override
+      public long getLastMessageAt() {
+        return lastMessageAt_;
+      }
+      /**
+       * <pre>
+       * time when last message was sent
+       * </pre>
+       *
+       * <code>uint64 last_message_at = 8;</code>
+       * @param value The lastMessageAt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastMessageAt(long value) {
+        
+        lastMessageAt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * time when last message was sent
+       * </pre>
+       *
+       * <code>uint64 last_message_at = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastMessageAt() {
+        
+        lastMessageAt_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString lastMessage_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * content type
+       * </pre>
+       *
+       * <code>bytes last_message = 9;</code>
+       * @return The lastMessage.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getLastMessage() {
+        return lastMessage_;
+      }
+      /**
+       * <pre>
+       * content type
+       * </pre>
+       *
+       * <code>bytes last_message = 9;</code>
+       * @param value The lastMessage to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastMessage(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        lastMessage_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * content type
+       * </pre>
+       *
+       * <code>bytes last_message = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastMessage() {
+        
+        lastMessage_ = getDefaultInstance().getLastMessage();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 10;</code>
+       * @return The lastMessageSenderId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getLastMessageSenderId() {
+        return lastMessageSenderId_;
+      }
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 10;</code>
+       * @param value The lastMessageSenderId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastMessageSenderId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        lastMessageSenderId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * sender of the last message
+       * </pre>
+       *
+       * <code>bytes last_message_sender_id = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastMessageSenderId() {
+        
+        lastMessageSenderId_ = getDefaultInstance().getLastMessageSenderId();
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -20278,20 +20667,22 @@ public final class GroupRpc {
       "c.group.GroupMemberRole\022\021\n\tjoined_at\030\003 \001" +
       "(\004\022/\n\005state\030\004 \001(\0162 .qaul.rpc.group.Group" +
       "MemberState\022\032\n\022last_message_index\030\005 \001(\r\"" +
-      "\235\001\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup" +
+      "\205\002\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup" +
       "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022\020\n\010revis" +
       "ion\030\004 \001(\r\022\026\n\016is_direct_chat\030\005 \001(\010\022,\n\007mem" +
-      "bers\030\006 \003(\0132\033.qaul.rpc.group.GroupMember\"" +
-      "\022\n\020GroupListRequest\">\n\021GroupListResponse" +
-      "\022)\n\006groups\030\001 \003(\0132\031.qaul.rpc.group.GroupI" +
-      "nfo\"`\n\014GroupInvited\022\021\n\tsender_id\030\001 \001(\014\022\023" +
-      "\n\013received_at\030\002 \001(\004\022(\n\005group\030\003 \001(\0132\031.qau" +
-      "l.rpc.group.GroupInfo\"\025\n\023GroupInvitedReq" +
-      "uest\"E\n\024GroupInvitedResponse\022-\n\007invited\030" +
-      "\001 \003(\0132\034.qaul.rpc.group.GroupInvited*.\n\020G" +
-      "roupMemberState\022\013\n\007Invited\020\000\022\r\n\tActivate" +
-      "d\020\001*\'\n\017GroupMemberRole\022\010\n\004User\020\000\022\n\n\005Admi" +
-      "n\020\377\001b\006proto3"
+      "bers\030\006 \003(\0132\033.qaul.rpc.group.GroupMember\022" +
+      "\027\n\017unread_messages\030\007 \001(\r\022\027\n\017last_message" +
+      "_at\030\010 \001(\004\022\024\n\014last_message\030\t \001(\014\022\036\n\026last_" +
+      "message_sender_id\030\n \001(\014\"\022\n\020GroupListRequ" +
+      "est\">\n\021GroupListResponse\022)\n\006groups\030\001 \003(\013" +
+      "2\031.qaul.rpc.group.GroupInfo\"`\n\014GroupInvi" +
+      "ted\022\021\n\tsender_id\030\001 \001(\014\022\023\n\013received_at\030\002 " +
+      "\001(\004\022(\n\005group\030\003 \001(\0132\031.qaul.rpc.group.Grou" +
+      "pInfo\"\025\n\023GroupInvitedRequest\"E\n\024GroupInv" +
+      "itedResponse\022-\n\007invited\030\001 \003(\0132\034.qaul.rpc" +
+      ".group.GroupInvited*.\n\020GroupMemberState\022" +
+      "\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017GroupMemb" +
+      "erRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -20386,7 +20777,7 @@ public final class GroupRpc {
     internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupInfo_descriptor,
-        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "Revision", "IsDirectChat", "Members", });
+        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "Revision", "IsDirectChat", "Members", "UnreadMessages", "LastMessageAt", "LastMessage", "LastMessageSenderId", });
     internal_static_qaul_rpc_group_GroupListRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_qaul_rpc_group_GroupListRequest_fieldAccessorTable = new

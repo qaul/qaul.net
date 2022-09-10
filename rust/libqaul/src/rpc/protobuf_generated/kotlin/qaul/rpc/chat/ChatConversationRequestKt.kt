@@ -23,6 +23,10 @@ object ChatConversationRequestKt {
     internal fun _build(): qaul.rpc.chat.ChatOuterClass.ChatConversationRequest = _builder.build()
 
     /**
+     * <pre>
+     * conversation id
+     * </pre>
+     *
      * <code>bytes conversation_id = 1;</code>
      */
     var conversationId: com.google.protobuf.ByteString
@@ -33,6 +37,10 @@ object ChatConversationRequestKt {
         _builder.setConversationId(value)
       }
     /**
+     * <pre>
+     * conversation id
+     * </pre>
+     *
      * <code>bytes conversation_id = 1;</code>
      */
     fun clearConversationId() {

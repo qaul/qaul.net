@@ -246,6 +246,106 @@ object GroupInfoKt {
       _builder.clearMembers()
     }
 
+
+    /**
+     * <pre>
+     * unread messages
+     * </pre>
+     *
+     * <code>uint32 unread_messages = 7;</code>
+     */
+    var unreadMessages: kotlin.Int
+      @JvmName("getUnreadMessages")
+      get() = _builder.getUnreadMessages()
+      @JvmName("setUnreadMessages")
+      set(value) {
+        _builder.setUnreadMessages(value)
+      }
+    /**
+     * <pre>
+     * unread messages
+     * </pre>
+     *
+     * <code>uint32 unread_messages = 7;</code>
+     */
+    fun clearUnreadMessages() {
+      _builder.clearUnreadMessages()
+    }
+
+    /**
+     * <pre>
+     * time when last message was sent
+     * </pre>
+     *
+     * <code>uint64 last_message_at = 8;</code>
+     */
+    var lastMessageAt: kotlin.Long
+      @JvmName("getLastMessageAt")
+      get() = _builder.getLastMessageAt()
+      @JvmName("setLastMessageAt")
+      set(value) {
+        _builder.setLastMessageAt(value)
+      }
+    /**
+     * <pre>
+     * time when last message was sent
+     * </pre>
+     *
+     * <code>uint64 last_message_at = 8;</code>
+     */
+    fun clearLastMessageAt() {
+      _builder.clearLastMessageAt()
+    }
+
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>bytes last_message = 9;</code>
+     */
+    var lastMessage: com.google.protobuf.ByteString
+      @JvmName("getLastMessage")
+      get() = _builder.getLastMessage()
+      @JvmName("setLastMessage")
+      set(value) {
+        _builder.setLastMessage(value)
+      }
+    /**
+     * <pre>
+     * content type
+     * </pre>
+     *
+     * <code>bytes last_message = 9;</code>
+     */
+    fun clearLastMessage() {
+      _builder.clearLastMessage()
+    }
+
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 10;</code>
+     */
+    var lastMessageSenderId: com.google.protobuf.ByteString
+      @JvmName("getLastMessageSenderId")
+      get() = _builder.getLastMessageSenderId()
+      @JvmName("setLastMessageSenderId")
+      set(value) {
+        _builder.setLastMessageSenderId(value)
+      }
+    /**
+     * <pre>
+     * sender of the last message
+     * </pre>
+     *
+     * <code>bytes last_message_sender_id = 10;</code>
+     */
+    fun clearLastMessageSenderId() {
+      _builder.clearLastMessageSenderId()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

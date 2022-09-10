@@ -15,11 +15,13 @@ const RouterInfoModule$json = const {
     const {'1': 'ROUTER_INFO', '2': 0},
     const {'1': 'FEED_REQUEST', '2': 1},
     const {'1': 'FEED_RESPONSE', '2': 2},
+    const {'1': 'USER_REQUEST', '2': 3},
+    const {'1': 'USER_RESPONSE', '2': 4},
   ],
 };
 
 /// Descriptor for `RouterInfoModule`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List routerInfoModuleDescriptor = $convert.base64Decode('ChBSb3V0ZXJJbmZvTW9kdWxlEg8KC1JPVVRFUl9JTkZPEAASEAoMRkVFRF9SRVFVRVNUEAESEQoNRkVFRF9SRVNQT05TRRAC');
+final $typed_data.Uint8List routerInfoModuleDescriptor = $convert.base64Decode('ChBSb3V0ZXJJbmZvTW9kdWxlEg8KC1JPVVRFUl9JTkZPEAASEAoMRkVFRF9SRVFVRVNUEAESEQoNRkVFRF9SRVNQT05TRRACEhAKDFVTRVJfUkVRVUVTVBADEhEKDVVTRVJfUkVTUE9OU0UQBA==');
 @$core.Deprecated('Use routerInfoContainerDescriptor instead')
 const RouterInfoContainer$json = const {
   '1': 'RouterInfoContainer',
@@ -50,14 +52,13 @@ const RouterInfoMessage$json = const {
   '2': const [
     const {'1': 'node', '3': 1, '4': 1, '5': 12, '10': 'node'},
     const {'1': 'routes', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.RoutingInfoTable', '10': 'routes'},
-    const {'1': 'users', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.UserInfoTable', '10': 'users'},
     const {'1': 'feeds', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.FeedIdsTable', '10': 'feeds'},
     const {'1': 'timestamp', '3': 5, '4': 1, '5': 4, '10': 'timestamp'},
   ],
 };
 
 /// Descriptor for `RouterInfoMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List routerInfoMessageDescriptor = $convert.base64Decode('ChFSb3V0ZXJJbmZvTWVzc2FnZRISCgRub2RlGAEgASgMUgRub2RlEkIKBnJvdXRlcxgCIAEoCzIqLnFhdWwubmV0LnJvdXRlcl9uZXRfaW5mby5Sb3V0aW5nSW5mb1RhYmxlUgZyb3V0ZXMSPQoFdXNlcnMYAyABKAsyJy5xYXVsLm5ldC5yb3V0ZXJfbmV0X2luZm8uVXNlckluZm9UYWJsZVIFdXNlcnMSPAoFZmVlZHMYBCABKAsyJi5xYXVsLm5ldC5yb3V0ZXJfbmV0X2luZm8uRmVlZElkc1RhYmxlUgVmZWVkcxIcCgl0aW1lc3RhbXAYBSABKARSCXRpbWVzdGFtcA==');
+final $typed_data.Uint8List routerInfoMessageDescriptor = $convert.base64Decode('ChFSb3V0ZXJJbmZvTWVzc2FnZRISCgRub2RlGAEgASgMUgRub2RlEkIKBnJvdXRlcxgCIAEoCzIqLnFhdWwubmV0LnJvdXRlcl9uZXRfaW5mby5Sb3V0aW5nSW5mb1RhYmxlUgZyb3V0ZXMSPAoFZmVlZHMYBCABKAsyJi5xYXVsLm5ldC5yb3V0ZXJfbmV0X2luZm8uRmVlZElkc1RhYmxlUgVmZWVkcxIcCgl0aW1lc3RhbXAYBSABKARSCXRpbWVzdGFtcA==');
 @$core.Deprecated('Use routingInfoTableDescriptor instead')
 const RoutingInfoTable$json = const {
   '1': 'RoutingInfoTable',
@@ -81,6 +82,16 @@ const RoutingInfoEntry$json = const {
 
 /// Descriptor for `RoutingInfoEntry`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List routingInfoEntryDescriptor = $convert.base64Decode('ChBSb3V0aW5nSW5mb0VudHJ5EhIKBHVzZXIYASABKAxSBHVzZXISEAoDcnR0GAIgASgNUgNydHQSDgoCaGMYAyABKAxSAmhjEhIKBHBnaWQYBSABKA1SBHBnaWQ=');
+@$core.Deprecated('Use userIdTableDescriptor instead')
+const UserIdTable$json = const {
+  '1': 'UserIdTable',
+  '2': const [
+    const {'1': 'ids', '3': 1, '4': 3, '5': 12, '10': 'ids'},
+  ],
+};
+
+/// Descriptor for `UserIdTable`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userIdTableDescriptor = $convert.base64Decode('CgtVc2VySWRUYWJsZRIQCgNpZHMYASADKAxSA2lkcw==');
 @$core.Deprecated('Use userInfoTableDescriptor instead')
 const UserInfoTable$json = const {
   '1': 'UserInfoTable',

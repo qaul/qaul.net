@@ -215,11 +215,15 @@ const GroupInfo$json = const {
     const {'1': 'revision', '3': 4, '4': 1, '5': 13, '10': 'revision'},
     const {'1': 'is_direct_chat', '3': 5, '4': 1, '5': 8, '10': 'isDirectChat'},
     const {'1': 'members', '3': 6, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
+    const {'1': 'unread_messages', '3': 7, '4': 1, '5': 13, '10': 'unreadMessages'},
+    const {'1': 'last_message_at', '3': 8, '4': 1, '5': 4, '10': 'lastMessageAt'},
+    const {'1': 'last_message', '3': 9, '4': 1, '5': 12, '10': 'lastMessage'},
+    const {'1': 'last_message_sender_id', '3': 10, '4': 1, '5': 12, '10': 'lastMessageSenderId'},
   ],
 };
 
 /// Descriptor for `GroupInfo`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode('CglHcm91cEluZm8SGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSHQoKZ3JvdXBfbmFtZRgCIAEoCVIJZ3JvdXBOYW1lEh0KCmNyZWF0ZWRfYXQYAyABKARSCWNyZWF0ZWRBdBIaCghyZXZpc2lvbhgEIAEoDVIIcmV2aXNpb24SJAoOaXNfZGlyZWN0X2NoYXQYBSABKAhSDGlzRGlyZWN0Q2hhdBI1CgdtZW1iZXJzGAYgAygLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBNZW1iZXJSB21lbWJlcnM=');
+final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode('CglHcm91cEluZm8SGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSHQoKZ3JvdXBfbmFtZRgCIAEoCVIJZ3JvdXBOYW1lEh0KCmNyZWF0ZWRfYXQYAyABKARSCWNyZWF0ZWRBdBIaCghyZXZpc2lvbhgEIAEoDVIIcmV2aXNpb24SJAoOaXNfZGlyZWN0X2NoYXQYBSABKAhSDGlzRGlyZWN0Q2hhdBI1CgdtZW1iZXJzGAYgAygLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBNZW1iZXJSB21lbWJlcnMSJwoPdW5yZWFkX21lc3NhZ2VzGAcgASgNUg51bnJlYWRNZXNzYWdlcxImCg9sYXN0X21lc3NhZ2VfYXQYCCABKARSDWxhc3RNZXNzYWdlQXQSIQoMbGFzdF9tZXNzYWdlGAkgASgMUgtsYXN0TWVzc2FnZRIzChZsYXN0X21lc3NhZ2Vfc2VuZGVyX2lkGAogASgMUhNsYXN0TWVzc2FnZVNlbmRlcklk');
 @$core.Deprecated('Use groupListRequestDescriptor instead')
 const GroupListRequest$json = const {
   '1': 'GroupListRequest',

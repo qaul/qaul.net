@@ -3069,9 +3069,13 @@ class GroupInfo final :
     kMembersFieldNumber = 6,
     kGroupIdFieldNumber = 1,
     kGroupNameFieldNumber = 2,
+    kLastMessageFieldNumber = 9,
+    kLastMessageSenderIdFieldNumber = 10,
     kCreatedAtFieldNumber = 3,
     kRevisionFieldNumber = 4,
     kIsDirectChatFieldNumber = 5,
+    kLastMessageAtFieldNumber = 8,
+    kUnreadMessagesFieldNumber = 7,
   };
   // repeated .qaul.rpc.group.GroupMember members = 6;
   int members_size() const;
@@ -3119,6 +3123,34 @@ class GroupInfo final :
   std::string* _internal_mutable_group_name();
   public:
 
+  // bytes last_message = 9;
+  void clear_last_message();
+  const std::string& last_message() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_last_message(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_last_message();
+  PROTOBUF_NODISCARD std::string* release_last_message();
+  void set_allocated_last_message(std::string* last_message);
+  private:
+  const std::string& _internal_last_message() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_last_message(const std::string& value);
+  std::string* _internal_mutable_last_message();
+  public:
+
+  // bytes last_message_sender_id = 10;
+  void clear_last_message_sender_id();
+  const std::string& last_message_sender_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_last_message_sender_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_last_message_sender_id();
+  PROTOBUF_NODISCARD std::string* release_last_message_sender_id();
+  void set_allocated_last_message_sender_id(std::string* last_message_sender_id);
+  private:
+  const std::string& _internal_last_message_sender_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_last_message_sender_id(const std::string& value);
+  std::string* _internal_mutable_last_message_sender_id();
+  public:
+
   // uint64 created_at = 3;
   void clear_created_at();
   uint64_t created_at() const;
@@ -3146,6 +3178,24 @@ class GroupInfo final :
   void _internal_set_is_direct_chat(bool value);
   public:
 
+  // uint64 last_message_at = 8;
+  void clear_last_message_at();
+  uint64_t last_message_at() const;
+  void set_last_message_at(uint64_t value);
+  private:
+  uint64_t _internal_last_message_at() const;
+  void _internal_set_last_message_at(uint64_t value);
+  public:
+
+  // uint32 unread_messages = 7;
+  void clear_unread_messages();
+  uint32_t unread_messages() const;
+  void set_unread_messages(uint32_t value);
+  private:
+  uint32_t _internal_unread_messages() const;
+  void _internal_set_unread_messages(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.rpc.group.GroupInfo)
  private:
   class _Internal;
@@ -3157,9 +3207,13 @@ class GroupInfo final :
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::group::GroupMember > members_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_name_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_message_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr last_message_sender_id_;
     uint64_t created_at_;
     uint32_t revision_;
     bool is_direct_chat_;
+    uint64_t last_message_at_;
+    uint32_t unread_messages_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -6877,6 +6931,146 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::group::Grou
 GroupInfo::members() const {
   // @@protoc_insertion_point(field_list:qaul.rpc.group.GroupInfo.members)
   return _impl_.members_;
+}
+
+// uint32 unread_messages = 7;
+inline void GroupInfo::clear_unread_messages() {
+  _impl_.unread_messages_ = 0u;
+}
+inline uint32_t GroupInfo::_internal_unread_messages() const {
+  return _impl_.unread_messages_;
+}
+inline uint32_t GroupInfo::unread_messages() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.group.GroupInfo.unread_messages)
+  return _internal_unread_messages();
+}
+inline void GroupInfo::_internal_set_unread_messages(uint32_t value) {
+  
+  _impl_.unread_messages_ = value;
+}
+inline void GroupInfo::set_unread_messages(uint32_t value) {
+  _internal_set_unread_messages(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.group.GroupInfo.unread_messages)
+}
+
+// uint64 last_message_at = 8;
+inline void GroupInfo::clear_last_message_at() {
+  _impl_.last_message_at_ = uint64_t{0u};
+}
+inline uint64_t GroupInfo::_internal_last_message_at() const {
+  return _impl_.last_message_at_;
+}
+inline uint64_t GroupInfo::last_message_at() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.group.GroupInfo.last_message_at)
+  return _internal_last_message_at();
+}
+inline void GroupInfo::_internal_set_last_message_at(uint64_t value) {
+  
+  _impl_.last_message_at_ = value;
+}
+inline void GroupInfo::set_last_message_at(uint64_t value) {
+  _internal_set_last_message_at(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.group.GroupInfo.last_message_at)
+}
+
+// bytes last_message = 9;
+inline void GroupInfo::clear_last_message() {
+  _impl_.last_message_.ClearToEmpty();
+}
+inline const std::string& GroupInfo::last_message() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.group.GroupInfo.last_message)
+  return _internal_last_message();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void GroupInfo::set_last_message(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.last_message_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.group.GroupInfo.last_message)
+}
+inline std::string* GroupInfo::mutable_last_message() {
+  std::string* _s = _internal_mutable_last_message();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.group.GroupInfo.last_message)
+  return _s;
+}
+inline const std::string& GroupInfo::_internal_last_message() const {
+  return _impl_.last_message_.Get();
+}
+inline void GroupInfo::_internal_set_last_message(const std::string& value) {
+  
+  _impl_.last_message_.Set(value, GetArenaForAllocation());
+}
+inline std::string* GroupInfo::_internal_mutable_last_message() {
+  
+  return _impl_.last_message_.Mutable(GetArenaForAllocation());
+}
+inline std::string* GroupInfo::release_last_message() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.group.GroupInfo.last_message)
+  return _impl_.last_message_.Release();
+}
+inline void GroupInfo::set_allocated_last_message(std::string* last_message) {
+  if (last_message != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.last_message_.SetAllocated(last_message, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.last_message_.IsDefault()) {
+    _impl_.last_message_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.group.GroupInfo.last_message)
+}
+
+// bytes last_message_sender_id = 10;
+inline void GroupInfo::clear_last_message_sender_id() {
+  _impl_.last_message_sender_id_.ClearToEmpty();
+}
+inline const std::string& GroupInfo::last_message_sender_id() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.group.GroupInfo.last_message_sender_id)
+  return _internal_last_message_sender_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void GroupInfo::set_last_message_sender_id(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.last_message_sender_id_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.group.GroupInfo.last_message_sender_id)
+}
+inline std::string* GroupInfo::mutable_last_message_sender_id() {
+  std::string* _s = _internal_mutable_last_message_sender_id();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.group.GroupInfo.last_message_sender_id)
+  return _s;
+}
+inline const std::string& GroupInfo::_internal_last_message_sender_id() const {
+  return _impl_.last_message_sender_id_.Get();
+}
+inline void GroupInfo::_internal_set_last_message_sender_id(const std::string& value) {
+  
+  _impl_.last_message_sender_id_.Set(value, GetArenaForAllocation());
+}
+inline std::string* GroupInfo::_internal_mutable_last_message_sender_id() {
+  
+  return _impl_.last_message_sender_id_.Mutable(GetArenaForAllocation());
+}
+inline std::string* GroupInfo::release_last_message_sender_id() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.group.GroupInfo.last_message_sender_id)
+  return _impl_.last_message_sender_id_.Release();
+}
+inline void GroupInfo::set_allocated_last_message_sender_id(std::string* last_message_sender_id) {
+  if (last_message_sender_id != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.last_message_sender_id_.SetAllocated(last_message_sender_id, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.last_message_sender_id_.IsDefault()) {
+    _impl_.last_message_sender_id_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.group.GroupInfo.last_message_sender_id)
 }
 
 // -------------------------------------------------------------------

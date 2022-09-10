@@ -24,78 +24,6 @@ object ChatKt {
 
     /**
      * <pre>
-     * request an overview over the last conversations
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
-     */
-    var overviewRequest: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest
-      @JvmName("getOverviewRequest")
-      get() = _builder.getOverviewRequest()
-      @JvmName("setOverviewRequest")
-      set(value) {
-        _builder.setOverviewRequest(value)
-      }
-    /**
-     * <pre>
-     * request an overview over the last conversations
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
-     */
-    fun clearOverviewRequest() {
-      _builder.clearOverviewRequest()
-    }
-    /**
-     * <pre>
-     * request an overview over the last conversations
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewRequest overview_request = 1;</code>
-     * @return Whether the overviewRequest field is set.
-     */
-    fun hasOverviewRequest(): kotlin.Boolean {
-      return _builder.hasOverviewRequest()
-    }
-
-    /**
-     * <pre>
-     * contains the overview list
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
-     */
-    var overviewList: qaul.rpc.chat.ChatOuterClass.ChatOverviewList
-      @JvmName("getOverviewList")
-      get() = _builder.getOverviewList()
-      @JvmName("setOverviewList")
-      set(value) {
-        _builder.setOverviewList(value)
-      }
-    /**
-     * <pre>
-     * contains the overview list
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
-     */
-    fun clearOverviewList() {
-      _builder.clearOverviewList()
-    }
-    /**
-     * <pre>
-     * contains the overview list
-     * </pre>
-     *
-     * <code>.qaul.rpc.chat.ChatOverviewList overview_list = 2;</code>
-     * @return Whether the overviewList field is set.
-     */
-    fun hasOverviewList(): kotlin.Boolean {
-      return _builder.hasOverviewList()
-    }
-
-    /**
-     * <pre>
      * request a specific conversation
      * </pre>
      *
@@ -213,12 +141,6 @@ object ChatKt {
 @kotlin.jvm.JvmSynthetic
 inline fun qaul.rpc.chat.ChatOuterClass.Chat.copy(block: qaul.rpc.chat.ChatKt.Dsl.() -> kotlin.Unit): qaul.rpc.chat.ChatOuterClass.Chat =
   qaul.rpc.chat.ChatKt.Dsl._create(this.toBuilder()).apply { block() }._build()
-
-val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.overviewRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatOverviewRequest?
-  get() = if (hasOverviewRequest()) getOverviewRequest() else null
-
-val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.overviewListOrNull: qaul.rpc.chat.ChatOuterClass.ChatOverviewList?
-  get() = if (hasOverviewList()) getOverviewList() else null
 
 val qaul.rpc.chat.ChatOuterClass.ChatOrBuilder.conversationRequestOrNull: qaul.rpc.chat.ChatOuterClass.ChatConversationRequest?
   get() = if (hasConversationRequest()) getConversationRequest() else null

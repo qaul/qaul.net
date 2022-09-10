@@ -126,40 +126,41 @@ namespace qaul {
 namespace net {
 namespace messaging {
 
-enum DtnResponse_Type : int {
-  DtnResponse_Type_ACCEPTED = 0,
-  DtnResponse_Type_REJECTED = 1,
-  DtnResponse_Type_DtnResponse_Type_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
-  DtnResponse_Type_DtnResponse_Type_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+enum DtnResponse_ResponseType : int {
+  DtnResponse_ResponseType_ACCEPTED = 0,
+  DtnResponse_ResponseType_REJECTED = 1,
+  DtnResponse_ResponseType_DtnResponse_ResponseType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  DtnResponse_ResponseType_DtnResponse_ResponseType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool DtnResponse_Type_IsValid(int value);
-constexpr DtnResponse_Type DtnResponse_Type_Type_MIN = DtnResponse_Type_ACCEPTED;
-constexpr DtnResponse_Type DtnResponse_Type_Type_MAX = DtnResponse_Type_REJECTED;
-constexpr int DtnResponse_Type_Type_ARRAYSIZE = DtnResponse_Type_Type_MAX + 1;
+bool DtnResponse_ResponseType_IsValid(int value);
+constexpr DtnResponse_ResponseType DtnResponse_ResponseType_ResponseType_MIN = DtnResponse_ResponseType_ACCEPTED;
+constexpr DtnResponse_ResponseType DtnResponse_ResponseType_ResponseType_MAX = DtnResponse_ResponseType_REJECTED;
+constexpr int DtnResponse_ResponseType_ResponseType_ARRAYSIZE = DtnResponse_ResponseType_ResponseType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DtnResponse_Type_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* DtnResponse_ResponseType_descriptor();
 template<typename T>
-inline const std::string& DtnResponse_Type_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, DtnResponse_Type>::value ||
+inline const std::string& DtnResponse_ResponseType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, DtnResponse_ResponseType>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function DtnResponse_Type_Name.");
+    "Incorrect type passed to function DtnResponse_ResponseType_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    DtnResponse_Type_descriptor(), enum_t_value);
+    DtnResponse_ResponseType_descriptor(), enum_t_value);
 }
-inline bool DtnResponse_Type_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, DtnResponse_Type* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<DtnResponse_Type>(
-    DtnResponse_Type_descriptor(), name, value);
+inline bool DtnResponse_ResponseType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, DtnResponse_ResponseType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<DtnResponse_ResponseType>(
+    DtnResponse_ResponseType_descriptor(), name, value);
 }
 enum DtnResponse_Reason : int {
-  DtnResponse_Reason_USER_NOT_ACCEPTED = 0,
-  DtnResponse_Reason_OVERALL_QUOTA = 1,
-  DtnResponse_Reason_USER_QUOTA = 2,
+  DtnResponse_Reason_NONE = 0,
+  DtnResponse_Reason_USER_NOT_ACCEPTED = 1,
+  DtnResponse_Reason_OVERALL_QUOTA = 2,
+  DtnResponse_Reason_USER_QUOTA = 3,
   DtnResponse_Reason_DtnResponse_Reason_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   DtnResponse_Reason_DtnResponse_Reason_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool DtnResponse_Reason_IsValid(int value);
-constexpr DtnResponse_Reason DtnResponse_Reason_Reason_MIN = DtnResponse_Reason_USER_NOT_ACCEPTED;
+constexpr DtnResponse_Reason DtnResponse_Reason_Reason_MIN = DtnResponse_Reason_NONE;
 constexpr DtnResponse_Reason DtnResponse_Reason_Reason_MAX = DtnResponse_Reason_USER_QUOTA;
 constexpr int DtnResponse_Reason_Reason_ARRAYSIZE = DtnResponse_Reason_Reason_MAX + 1;
 
@@ -176,6 +177,32 @@ inline bool DtnResponse_Reason_Parse(
     ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, DtnResponse_Reason* value) {
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<DtnResponse_Reason>(
     DtnResponse_Reason_descriptor(), name, value);
+}
+enum CryptoState : int {
+  NONE = 0,
+  HANDSHAKE = 1,
+  TRANSPORT = 2,
+  CryptoState_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  CryptoState_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool CryptoState_IsValid(int value);
+constexpr CryptoState CryptoState_MIN = NONE;
+constexpr CryptoState CryptoState_MAX = TRANSPORT;
+constexpr int CryptoState_ARRAYSIZE = CryptoState_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CryptoState_descriptor();
+template<typename T>
+inline const std::string& CryptoState_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, CryptoState>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function CryptoState_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    CryptoState_descriptor(), enum_t_value);
+}
+inline bool CryptoState_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, CryptoState* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<CryptoState>(
+    CryptoState_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -854,9 +881,11 @@ class Encrypted final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDataFieldNumber = 1,
+    kDataFieldNumber = 3,
+    kStateFieldNumber = 1,
+    kSessionIdFieldNumber = 2,
   };
-  // repeated .qaul.net.messaging.Data data = 1;
+  // repeated .qaul.net.messaging.Data data = 3;
   int data_size() const;
   private:
   int _internal_data_size() const;
@@ -874,6 +903,24 @@ class Encrypted final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data >&
       data() const;
 
+  // .qaul.net.messaging.CryptoState state = 1;
+  void clear_state();
+  ::qaul::net::messaging::CryptoState state() const;
+  void set_state(::qaul::net::messaging::CryptoState value);
+  private:
+  ::qaul::net::messaging::CryptoState _internal_state() const;
+  void _internal_set_state(::qaul::net::messaging::CryptoState value);
+  public:
+
+  // uint32 session_id = 2;
+  void clear_session_id();
+  uint32_t session_id() const;
+  void set_session_id(uint32_t value);
+  private:
+  uint32_t _internal_session_id() const;
+  void _internal_set_session_id(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:qaul.net.messaging.Encrypted)
  private:
   class _Internal;
@@ -883,6 +930,8 @@ class Encrypted final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::net::messaging::Data > data_;
+    int state_;
+    uint32_t session_id_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1099,10 +1148,11 @@ class Messaging final :
   }
   enum MessageCase {
     kConfirmationMessage = 1,
-    kCryptoService = 2,
-    kRtcStreamMessage = 3,
-    kGroupInviteMessage = 4,
-    kCommonMessage = 5,
+    kDtnResponse = 2,
+    kCryptoService = 3,
+    kRtcStreamMessage = 4,
+    kGroupInviteMessage = 5,
+    kCommonMessage = 6,
     MESSAGE_NOT_SET = 0,
   };
 
@@ -1185,10 +1235,11 @@ class Messaging final :
 
   enum : int {
     kConfirmationMessageFieldNumber = 1,
-    kCryptoServiceFieldNumber = 2,
-    kRtcStreamMessageFieldNumber = 3,
-    kGroupInviteMessageFieldNumber = 4,
-    kCommonMessageFieldNumber = 5,
+    kDtnResponseFieldNumber = 2,
+    kCryptoServiceFieldNumber = 3,
+    kRtcStreamMessageFieldNumber = 4,
+    kGroupInviteMessageFieldNumber = 5,
+    kCommonMessageFieldNumber = 6,
   };
   // .qaul.net.messaging.Confirmation confirmation_message = 1;
   bool has_confirmation_message() const;
@@ -1208,7 +1259,25 @@ class Messaging final :
       ::qaul::net::messaging::Confirmation* confirmation_message);
   ::qaul::net::messaging::Confirmation* unsafe_arena_release_confirmation_message();
 
-  // .qaul.net.messaging.CryptoService crypto_service = 2;
+  // .qaul.net.messaging.DtnResponse dtn_response = 2;
+  bool has_dtn_response() const;
+  private:
+  bool _internal_has_dtn_response() const;
+  public:
+  void clear_dtn_response();
+  const ::qaul::net::messaging::DtnResponse& dtn_response() const;
+  PROTOBUF_NODISCARD ::qaul::net::messaging::DtnResponse* release_dtn_response();
+  ::qaul::net::messaging::DtnResponse* mutable_dtn_response();
+  void set_allocated_dtn_response(::qaul::net::messaging::DtnResponse* dtn_response);
+  private:
+  const ::qaul::net::messaging::DtnResponse& _internal_dtn_response() const;
+  ::qaul::net::messaging::DtnResponse* _internal_mutable_dtn_response();
+  public:
+  void unsafe_arena_set_allocated_dtn_response(
+      ::qaul::net::messaging::DtnResponse* dtn_response);
+  ::qaul::net::messaging::DtnResponse* unsafe_arena_release_dtn_response();
+
+  // .qaul.net.messaging.CryptoService crypto_service = 3;
   bool has_crypto_service() const;
   private:
   bool _internal_has_crypto_service() const;
@@ -1226,7 +1295,7 @@ class Messaging final :
       ::qaul::net::messaging::CryptoService* crypto_service);
   ::qaul::net::messaging::CryptoService* unsafe_arena_release_crypto_service();
 
-  // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;
+  // .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;
   bool has_rtc_stream_message() const;
   private:
   bool _internal_has_rtc_stream_message() const;
@@ -1244,7 +1313,7 @@ class Messaging final :
       ::qaul::net::messaging::RtcStreamMessage* rtc_stream_message);
   ::qaul::net::messaging::RtcStreamMessage* unsafe_arena_release_rtc_stream_message();
 
-  // .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+  // .qaul.net.messaging.GroupInviteMessage group_invite_message = 5;
   bool has_group_invite_message() const;
   private:
   bool _internal_has_group_invite_message() const;
@@ -1262,7 +1331,7 @@ class Messaging final :
       ::qaul::net::messaging::GroupInviteMessage* group_invite_message);
   ::qaul::net::messaging::GroupInviteMessage* unsafe_arena_release_group_invite_message();
 
-  // .qaul.net.messaging.CommonMessage common_message = 5;
+  // .qaul.net.messaging.CommonMessage common_message = 6;
   bool has_common_message() const;
   private:
   bool _internal_has_common_message() const;
@@ -1286,6 +1355,7 @@ class Messaging final :
  private:
   class _Internal;
   void set_has_confirmation_message();
+  void set_has_dtn_response();
   void set_has_crypto_service();
   void set_has_rtc_stream_message();
   void set_has_group_invite_message();
@@ -1302,6 +1372,7 @@ class Messaging final :
       constexpr MessageUnion() : _constinit_{} {}
         ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
       ::qaul::net::messaging::Confirmation* confirmation_message_;
+      ::qaul::net::messaging::DtnResponse* dtn_response_;
       ::qaul::net::messaging::CryptoService* crypto_service_;
       ::qaul::net::messaging::RtcStreamMessage* rtc_stream_message_;
       ::qaul::net::messaging::GroupInviteMessage* group_invite_message_;
@@ -3113,37 +3184,39 @@ class DtnResponse final :
 
   // nested types ----------------------------------------------------
 
-  typedef DtnResponse_Type Type;
-  static constexpr Type ACCEPTED =
-    DtnResponse_Type_ACCEPTED;
-  static constexpr Type REJECTED =
-    DtnResponse_Type_REJECTED;
-  static inline bool Type_IsValid(int value) {
-    return DtnResponse_Type_IsValid(value);
+  typedef DtnResponse_ResponseType ResponseType;
+  static constexpr ResponseType ACCEPTED =
+    DtnResponse_ResponseType_ACCEPTED;
+  static constexpr ResponseType REJECTED =
+    DtnResponse_ResponseType_REJECTED;
+  static inline bool ResponseType_IsValid(int value) {
+    return DtnResponse_ResponseType_IsValid(value);
   }
-  static constexpr Type Type_MIN =
-    DtnResponse_Type_Type_MIN;
-  static constexpr Type Type_MAX =
-    DtnResponse_Type_Type_MAX;
-  static constexpr int Type_ARRAYSIZE =
-    DtnResponse_Type_Type_ARRAYSIZE;
+  static constexpr ResponseType ResponseType_MIN =
+    DtnResponse_ResponseType_ResponseType_MIN;
+  static constexpr ResponseType ResponseType_MAX =
+    DtnResponse_ResponseType_ResponseType_MAX;
+  static constexpr int ResponseType_ARRAYSIZE =
+    DtnResponse_ResponseType_ResponseType_ARRAYSIZE;
   static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  Type_descriptor() {
-    return DtnResponse_Type_descriptor();
+  ResponseType_descriptor() {
+    return DtnResponse_ResponseType_descriptor();
   }
   template<typename T>
-  static inline const std::string& Type_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, Type>::value ||
+  static inline const std::string& ResponseType_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, ResponseType>::value ||
       ::std::is_integral<T>::value,
-      "Incorrect type passed to function Type_Name.");
-    return DtnResponse_Type_Name(enum_t_value);
+      "Incorrect type passed to function ResponseType_Name.");
+    return DtnResponse_ResponseType_Name(enum_t_value);
   }
-  static inline bool Type_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
-      Type* value) {
-    return DtnResponse_Type_Parse(name, value);
+  static inline bool ResponseType_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      ResponseType* value) {
+    return DtnResponse_ResponseType_Parse(name, value);
   }
 
   typedef DtnResponse_Reason Reason;
+  static constexpr Reason NONE =
+    DtnResponse_Reason_NONE;
   static constexpr Reason USER_NOT_ACCEPTED =
     DtnResponse_Reason_USER_NOT_ACCEPTED;
   static constexpr Reason OVERALL_QUOTA =
@@ -3179,7 +3252,7 @@ class DtnResponse final :
 
   enum : int {
     kSignatureFieldNumber = 2,
-    kTypeFieldNumber = 1,
+    kResponseTypeFieldNumber = 1,
     kReasonFieldNumber = 3,
   };
   // bytes signature = 2;
@@ -3196,13 +3269,13 @@ class DtnResponse final :
   std::string* _internal_mutable_signature();
   public:
 
-  // .qaul.net.messaging.DtnResponse.Type type = 1;
-  void clear_type();
-  ::qaul::net::messaging::DtnResponse_Type type() const;
-  void set_type(::qaul::net::messaging::DtnResponse_Type value);
+  // .qaul.net.messaging.DtnResponse.ResponseType response_type = 1;
+  void clear_response_type();
+  ::qaul::net::messaging::DtnResponse_ResponseType response_type() const;
+  void set_response_type(::qaul::net::messaging::DtnResponse_ResponseType value);
   private:
-  ::qaul::net::messaging::DtnResponse_Type _internal_type() const;
-  void _internal_set_type(::qaul::net::messaging::DtnResponse_Type value);
+  ::qaul::net::messaging::DtnResponse_ResponseType _internal_response_type() const;
+  void _internal_set_response_type(::qaul::net::messaging::DtnResponse_ResponseType value);
   public:
 
   // .qaul.net.messaging.DtnResponse.Reason reason = 3;
@@ -3223,7 +3296,7 @@ class DtnResponse final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signature_;
-    int type_;
+    int response_type_;
     int reason_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -3703,7 +3776,47 @@ inline EnvelopPayload::PayloadCase EnvelopPayload::payload_case() const {
 
 // Encrypted
 
-// repeated .qaul.net.messaging.Data data = 1;
+// .qaul.net.messaging.CryptoState state = 1;
+inline void Encrypted::clear_state() {
+  _impl_.state_ = 0;
+}
+inline ::qaul::net::messaging::CryptoState Encrypted::_internal_state() const {
+  return static_cast< ::qaul::net::messaging::CryptoState >(_impl_.state_);
+}
+inline ::qaul::net::messaging::CryptoState Encrypted::state() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Encrypted.state)
+  return _internal_state();
+}
+inline void Encrypted::_internal_set_state(::qaul::net::messaging::CryptoState value) {
+  
+  _impl_.state_ = value;
+}
+inline void Encrypted::set_state(::qaul::net::messaging::CryptoState value) {
+  _internal_set_state(value);
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.Encrypted.state)
+}
+
+// uint32 session_id = 2;
+inline void Encrypted::clear_session_id() {
+  _impl_.session_id_ = 0u;
+}
+inline uint32_t Encrypted::_internal_session_id() const {
+  return _impl_.session_id_;
+}
+inline uint32_t Encrypted::session_id() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Encrypted.session_id)
+  return _internal_session_id();
+}
+inline void Encrypted::_internal_set_session_id(uint32_t value) {
+  
+  _impl_.session_id_ = value;
+}
+inline void Encrypted::set_session_id(uint32_t value) {
+  _internal_set_session_id(value);
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.Encrypted.session_id)
+}
+
+// repeated .qaul.net.messaging.Data data = 3;
 inline int Encrypted::_internal_data_size() const {
   return _impl_.data_.size();
 }
@@ -3895,7 +4008,81 @@ inline ::qaul::net::messaging::Confirmation* Messaging::mutable_confirmation_mes
   return _msg;
 }
 
-// .qaul.net.messaging.CryptoService crypto_service = 2;
+// .qaul.net.messaging.DtnResponse dtn_response = 2;
+inline bool Messaging::_internal_has_dtn_response() const {
+  return message_case() == kDtnResponse;
+}
+inline bool Messaging::has_dtn_response() const {
+  return _internal_has_dtn_response();
+}
+inline void Messaging::set_has_dtn_response() {
+  _impl_._oneof_case_[0] = kDtnResponse;
+}
+inline void Messaging::clear_dtn_response() {
+  if (_internal_has_dtn_response()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete _impl_.message_.dtn_response_;
+    }
+    clear_has_message();
+  }
+}
+inline ::qaul::net::messaging::DtnResponse* Messaging::release_dtn_response() {
+  // @@protoc_insertion_point(field_release:qaul.net.messaging.Messaging.dtn_response)
+  if (_internal_has_dtn_response()) {
+    clear_has_message();
+    ::qaul::net::messaging::DtnResponse* temp = _impl_.message_.dtn_response_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.message_.dtn_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::qaul::net::messaging::DtnResponse& Messaging::_internal_dtn_response() const {
+  return _internal_has_dtn_response()
+      ? *_impl_.message_.dtn_response_
+      : reinterpret_cast< ::qaul::net::messaging::DtnResponse&>(::qaul::net::messaging::_DtnResponse_default_instance_);
+}
+inline const ::qaul::net::messaging::DtnResponse& Messaging::dtn_response() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.Messaging.dtn_response)
+  return _internal_dtn_response();
+}
+inline ::qaul::net::messaging::DtnResponse* Messaging::unsafe_arena_release_dtn_response() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:qaul.net.messaging.Messaging.dtn_response)
+  if (_internal_has_dtn_response()) {
+    clear_has_message();
+    ::qaul::net::messaging::DtnResponse* temp = _impl_.message_.dtn_response_;
+    _impl_.message_.dtn_response_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void Messaging::unsafe_arena_set_allocated_dtn_response(::qaul::net::messaging::DtnResponse* dtn_response) {
+  clear_message();
+  if (dtn_response) {
+    set_has_dtn_response();
+    _impl_.message_.dtn_response_ = dtn_response;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:qaul.net.messaging.Messaging.dtn_response)
+}
+inline ::qaul::net::messaging::DtnResponse* Messaging::_internal_mutable_dtn_response() {
+  if (!_internal_has_dtn_response()) {
+    clear_message();
+    set_has_dtn_response();
+    _impl_.message_.dtn_response_ = CreateMaybeMessage< ::qaul::net::messaging::DtnResponse >(GetArenaForAllocation());
+  }
+  return _impl_.message_.dtn_response_;
+}
+inline ::qaul::net::messaging::DtnResponse* Messaging::mutable_dtn_response() {
+  ::qaul::net::messaging::DtnResponse* _msg = _internal_mutable_dtn_response();
+  // @@protoc_insertion_point(field_mutable:qaul.net.messaging.Messaging.dtn_response)
+  return _msg;
+}
+
+// .qaul.net.messaging.CryptoService crypto_service = 3;
 inline bool Messaging::_internal_has_crypto_service() const {
   return message_case() == kCryptoService;
 }
@@ -3969,7 +4156,7 @@ inline ::qaul::net::messaging::CryptoService* Messaging::mutable_crypto_service(
   return _msg;
 }
 
-// .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 3;
+// .qaul.net.messaging.RtcStreamMessage rtc_stream_message = 4;
 inline bool Messaging::_internal_has_rtc_stream_message() const {
   return message_case() == kRtcStreamMessage;
 }
@@ -4043,7 +4230,7 @@ inline ::qaul::net::messaging::RtcStreamMessage* Messaging::mutable_rtc_stream_m
   return _msg;
 }
 
-// .qaul.net.messaging.GroupInviteMessage group_invite_message = 4;
+// .qaul.net.messaging.GroupInviteMessage group_invite_message = 5;
 inline bool Messaging::_internal_has_group_invite_message() const {
   return message_case() == kGroupInviteMessage;
 }
@@ -4117,7 +4304,7 @@ inline ::qaul::net::messaging::GroupInviteMessage* Messaging::mutable_group_invi
   return _msg;
 }
 
-// .qaul.net.messaging.CommonMessage common_message = 5;
+// .qaul.net.messaging.CommonMessage common_message = 6;
 inline bool Messaging::_internal_has_common_message() const {
   return message_case() == kCommonMessage;
 }
@@ -5199,24 +5386,24 @@ inline Dtn::MessageCase Dtn::message_case() const {
 
 // DtnResponse
 
-// .qaul.net.messaging.DtnResponse.Type type = 1;
-inline void DtnResponse::clear_type() {
-  _impl_.type_ = 0;
+// .qaul.net.messaging.DtnResponse.ResponseType response_type = 1;
+inline void DtnResponse::clear_response_type() {
+  _impl_.response_type_ = 0;
 }
-inline ::qaul::net::messaging::DtnResponse_Type DtnResponse::_internal_type() const {
-  return static_cast< ::qaul::net::messaging::DtnResponse_Type >(_impl_.type_);
+inline ::qaul::net::messaging::DtnResponse_ResponseType DtnResponse::_internal_response_type() const {
+  return static_cast< ::qaul::net::messaging::DtnResponse_ResponseType >(_impl_.response_type_);
 }
-inline ::qaul::net::messaging::DtnResponse_Type DtnResponse::type() const {
-  // @@protoc_insertion_point(field_get:qaul.net.messaging.DtnResponse.type)
-  return _internal_type();
+inline ::qaul::net::messaging::DtnResponse_ResponseType DtnResponse::response_type() const {
+  // @@protoc_insertion_point(field_get:qaul.net.messaging.DtnResponse.response_type)
+  return _internal_response_type();
 }
-inline void DtnResponse::_internal_set_type(::qaul::net::messaging::DtnResponse_Type value) {
+inline void DtnResponse::_internal_set_response_type(::qaul::net::messaging::DtnResponse_ResponseType value) {
   
-  _impl_.type_ = value;
+  _impl_.response_type_ = value;
 }
-inline void DtnResponse::set_type(::qaul::net::messaging::DtnResponse_Type value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:qaul.net.messaging.DtnResponse.type)
+inline void DtnResponse::set_response_type(::qaul::net::messaging::DtnResponse_ResponseType value) {
+  _internal_set_response_type(value);
+  // @@protoc_insertion_point(field_set:qaul.net.messaging.DtnResponse.response_type)
 }
 
 // bytes signature = 2;
@@ -5333,15 +5520,20 @@ inline void DtnResponse::set_reason(::qaul::net::messaging::DtnResponse_Reason v
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::qaul::net::messaging::DtnResponse_Type> : ::std::true_type {};
+template <> struct is_proto_enum< ::qaul::net::messaging::DtnResponse_ResponseType> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::messaging::DtnResponse_Type>() {
-  return ::qaul::net::messaging::DtnResponse_Type_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::messaging::DtnResponse_ResponseType>() {
+  return ::qaul::net::messaging::DtnResponse_ResponseType_descriptor();
 }
 template <> struct is_proto_enum< ::qaul::net::messaging::DtnResponse_Reason> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::messaging::DtnResponse_Reason>() {
   return ::qaul::net::messaging::DtnResponse_Reason_descriptor();
+}
+template <> struct is_proto_enum< ::qaul::net::messaging::CryptoState> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::net::messaging::CryptoState>() {
+  return ::qaul::net::messaging::CryptoState_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

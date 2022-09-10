@@ -25,6 +25,10 @@ object GroupResultKt {
     /**
      * <pre>
      * status
+     * true = success
+     * false = an error happened
+     * if the result is false, the message will
+     * contain the error message.
      * </pre>
      *
      * <code>bool status = 1;</code>
@@ -39,6 +43,10 @@ object GroupResultKt {
     /**
      * <pre>
      * status
+     * true = success
+     * false = an error happened
+     * if the result is false, the message will
+     * contain the error message.
      * </pre>
      *
      * <code>bool status = 1;</code>

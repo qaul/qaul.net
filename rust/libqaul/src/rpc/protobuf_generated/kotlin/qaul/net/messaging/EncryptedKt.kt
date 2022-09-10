@@ -23,6 +23,56 @@ object EncryptedKt {
     internal fun _build(): qaul.net.messaging.MessagingOuterClass.Encrypted = _builder.build()
 
     /**
+     * <pre>
+     * state of the crypto session
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.CryptoState state = 1;</code>
+     */
+     var state: qaul.net.messaging.MessagingOuterClass.CryptoState
+      @JvmName("getState")
+      get() = _builder.getState()
+      @JvmName("setState")
+      set(value) {
+        _builder.setState(value)
+      }
+    /**
+     * <pre>
+     * state of the crypto session
+     * </pre>
+     *
+     * <code>.qaul.net.messaging.CryptoState state = 1;</code>
+     */
+    fun clearState() {
+      _builder.clearState()
+    }
+
+    /**
+     * <pre>
+     * crypto session id
+     * </pre>
+     *
+     * <code>uint32 session_id = 2;</code>
+     */
+    var sessionId: kotlin.Int
+      @JvmName("getSessionId")
+      get() = _builder.getSessionId()
+      @JvmName("setSessionId")
+      set(value) {
+        _builder.setSessionId(value)
+      }
+    /**
+     * <pre>
+     * crypto session id
+     * </pre>
+     *
+     * <code>uint32 session_id = 2;</code>
+     */
+    fun clearSessionId() {
+      _builder.clearSessionId()
+    }
+
+    /**
      * An uninstantiable, behaviorless type to represent the field in
      * generics.
      */
@@ -34,7 +84,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      */
      val data: com.google.protobuf.kotlin.DslList<qaul.net.messaging.MessagingOuterClass.Data, DataProxy>
       @kotlin.jvm.JvmSynthetic
@@ -47,7 +97,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      * @param value The data to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -61,7 +111,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      * @param value The data to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -76,7 +126,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      * @param values The data to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -90,7 +140,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      * @param values The data to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -105,7 +155,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      * @param index The index to set the value at.
      * @param value The data to set.
      */
@@ -120,7 +170,7 @@ object EncryptedKt {
      * of maximally 64KB each.
      * </pre>
      *
-     * <code>repeated .qaul.net.messaging.Data data = 1;</code>
+     * <code>repeated .qaul.net.messaging.Data data = 3;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearData")

@@ -168,7 +168,6 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RouterInfoMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node', $pb.PbFieldType.OY)
     ..aOM<RoutingInfoTable>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routes', subBuilder: RoutingInfoTable.create)
-    ..aOM<UserInfoTable>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', subBuilder: UserInfoTable.create)
     ..aOM<FeedIdsTable>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feeds', subBuilder: FeedIdsTable.create)
     ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
@@ -178,7 +177,6 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
   factory RouterInfoMessage({
     $core.List<$core.int>? node,
     RoutingInfoTable? routes,
-    UserInfoTable? users,
     FeedIdsTable? feeds,
     $fixnum.Int64? timestamp,
   }) {
@@ -188,9 +186,6 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
     }
     if (routes != null) {
       _result.routes = routes;
-    }
-    if (users != null) {
-      _result.users = users;
     }
     if (feeds != null) {
       _result.feeds = feeds;
@@ -241,34 +236,23 @@ class RouterInfoMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   RoutingInfoTable ensureRoutes() => $_ensure(1);
 
-  @$pb.TagNumber(3)
-  UserInfoTable get users => $_getN(2);
-  @$pb.TagNumber(3)
-  set users(UserInfoTable v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasUsers() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearUsers() => clearField(3);
-  @$pb.TagNumber(3)
-  UserInfoTable ensureUsers() => $_ensure(2);
-
   @$pb.TagNumber(4)
-  FeedIdsTable get feeds => $_getN(3);
+  FeedIdsTable get feeds => $_getN(2);
   @$pb.TagNumber(4)
   set feeds(FeedIdsTable v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasFeeds() => $_has(3);
+  $core.bool hasFeeds() => $_has(2);
   @$pb.TagNumber(4)
   void clearFeeds() => clearField(4);
   @$pb.TagNumber(4)
-  FeedIdsTable ensureFeeds() => $_ensure(3);
+  FeedIdsTable ensureFeeds() => $_ensure(2);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get timestamp => $_getI64(4);
+  $fixnum.Int64 get timestamp => $_getI64(3);
   @$pb.TagNumber(5)
-  set timestamp($fixnum.Int64 v) { $_setInt64(4, v); }
+  set timestamp($fixnum.Int64 v) { $_setInt64(3, v); }
   @$pb.TagNumber(5)
-  $core.bool hasTimestamp() => $_has(4);
+  $core.bool hasTimestamp() => $_has(3);
   @$pb.TagNumber(5)
   void clearTimestamp() => clearField(5);
 }
@@ -401,6 +385,47 @@ class RoutingInfoEntry extends $pb.GeneratedMessage {
   $core.bool hasPgid() => $_has(3);
   @$pb.TagNumber(5)
   void clearPgid() => clearField(5);
+}
+
+class UserIdTable extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserIdTable', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.router_net_info'), createEmptyInstance: create)
+    ..p<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ids', $pb.PbFieldType.PY)
+    ..hasRequiredFields = false
+  ;
+
+  UserIdTable._() : super();
+  factory UserIdTable({
+    $core.Iterable<$core.List<$core.int>>? ids,
+  }) {
+    final _result = create();
+    if (ids != null) {
+      _result.ids.addAll(ids);
+    }
+    return _result;
+  }
+  factory UserIdTable.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserIdTable.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UserIdTable clone() => UserIdTable()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UserIdTable copyWith(void Function(UserIdTable) updates) => super.copyWith((message) => updates(message as UserIdTable)) as UserIdTable; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UserIdTable create() => UserIdTable._();
+  UserIdTable createEmptyInstance() => create();
+  static $pb.PbList<UserIdTable> createRepeated() => $pb.PbList<UserIdTable>();
+  @$core.pragma('dart2js:noInline')
+  static UserIdTable getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserIdTable>(create);
+  static UserIdTable? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.List<$core.int>> get ids => $_getList(0);
 }
 
 class UserInfoTable extends $pb.GeneratedMessage {

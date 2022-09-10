@@ -9,27 +9,46 @@
 import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class DtnResponse_Type extends $pb.ProtobufEnum {
-  static const DtnResponse_Type ACCEPTED = DtnResponse_Type._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ACCEPTED');
-  static const DtnResponse_Type REJECTED = DtnResponse_Type._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REJECTED');
+class CryptoState extends $pb.ProtobufEnum {
+  static const CryptoState NONE = CryptoState._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
+  static const CryptoState HANDSHAKE = CryptoState._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'HANDSHAKE');
+  static const CryptoState TRANSPORT = CryptoState._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSPORT');
 
-  static const $core.List<DtnResponse_Type> values = <DtnResponse_Type> [
+  static const $core.List<CryptoState> values = <CryptoState> [
+    NONE,
+    HANDSHAKE,
+    TRANSPORT,
+  ];
+
+  static final $core.Map<$core.int, CryptoState> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static CryptoState? valueOf($core.int value) => _byValue[value];
+
+  const CryptoState._($core.int v, $core.String n) : super(v, n);
+}
+
+class DtnResponse_ResponseType extends $pb.ProtobufEnum {
+  static const DtnResponse_ResponseType ACCEPTED = DtnResponse_ResponseType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ACCEPTED');
+  static const DtnResponse_ResponseType REJECTED = DtnResponse_ResponseType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REJECTED');
+
+  static const $core.List<DtnResponse_ResponseType> values = <DtnResponse_ResponseType> [
     ACCEPTED,
     REJECTED,
   ];
 
-  static final $core.Map<$core.int, DtnResponse_Type> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static DtnResponse_Type? valueOf($core.int value) => _byValue[value];
+  static final $core.Map<$core.int, DtnResponse_ResponseType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static DtnResponse_ResponseType? valueOf($core.int value) => _byValue[value];
 
-  const DtnResponse_Type._($core.int v, $core.String n) : super(v, n);
+  const DtnResponse_ResponseType._($core.int v, $core.String n) : super(v, n);
 }
 
 class DtnResponse_Reason extends $pb.ProtobufEnum {
-  static const DtnResponse_Reason USER_NOT_ACCEPTED = DtnResponse_Reason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_NOT_ACCEPTED');
-  static const DtnResponse_Reason OVERALL_QUOTA = DtnResponse_Reason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'OVERALL_QUOTA');
-  static const DtnResponse_Reason USER_QUOTA = DtnResponse_Reason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_QUOTA');
+  static const DtnResponse_Reason NONE = DtnResponse_Reason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
+  static const DtnResponse_Reason USER_NOT_ACCEPTED = DtnResponse_Reason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_NOT_ACCEPTED');
+  static const DtnResponse_Reason OVERALL_QUOTA = DtnResponse_Reason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'OVERALL_QUOTA');
+  static const DtnResponse_Reason USER_QUOTA = DtnResponse_Reason._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_QUOTA');
 
   static const $core.List<DtnResponse_Reason> values = <DtnResponse_Reason> [
+    NONE,
     USER_NOT_ACCEPTED,
     OVERALL_QUOTA,
     USER_QUOTA,

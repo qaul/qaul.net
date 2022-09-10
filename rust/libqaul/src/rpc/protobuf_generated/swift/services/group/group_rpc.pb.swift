@@ -386,6 +386,12 @@ struct Qaul_Rpc_Group_GroupResult {
   // methods supported on all messages.
 
   /// status
+  ///
+  /// true = success
+  /// false = an error happened
+  ///
+  /// if the result is false, the message will
+  /// contain the error message.
   var status: Bool = false
 
   /// message
@@ -680,6 +686,18 @@ struct Qaul_Rpc_Group_GroupInfo {
 
   /// members
   var members: [Qaul_Rpc_Group_GroupMember] = []
+
+  /// unread messages
+  var unreadMessages: UInt32 = 0
+
+  /// time when last message was sent
+  var lastMessageAt: UInt64 = 0
+
+  /// content type
+  var lastMessage: Data = Data()
+
+  /// sender of the last message
+  var lastMessageSenderID: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1651,6 +1669,10 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     4: .same(proto: "revision"),
     5: .standard(proto: "is_direct_chat"),
     6: .same(proto: "members"),
+    7: .standard(proto: "unread_messages"),
+    8: .standard(proto: "last_message_at"),
+    9: .standard(proto: "last_message"),
+    10: .standard(proto: "last_message_sender_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1665,6 +1687,10 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 4: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
       case 5: try { try decoder.decodeSingularBoolField(value: &self.isDirectChat) }()
       case 6: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
+      case 7: try { try decoder.decodeSingularUInt32Field(value: &self.unreadMessages) }()
+      case 8: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageAt) }()
+      case 9: try { try decoder.decodeSingularBytesField(value: &self.lastMessage) }()
+      case 10: try { try decoder.decodeSingularBytesField(value: &self.lastMessageSenderID) }()
       default: break
       }
     }
@@ -1689,6 +1715,18 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.members.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.members, fieldNumber: 6)
     }
+    if self.unreadMessages != 0 {
+      try visitor.visitSingularUInt32Field(value: self.unreadMessages, fieldNumber: 7)
+    }
+    if self.lastMessageAt != 0 {
+      try visitor.visitSingularUInt64Field(value: self.lastMessageAt, fieldNumber: 8)
+    }
+    if !self.lastMessage.isEmpty {
+      try visitor.visitSingularBytesField(value: self.lastMessage, fieldNumber: 9)
+    }
+    if !self.lastMessageSenderID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.lastMessageSenderID, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1699,6 +1737,10 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.revision != rhs.revision {return false}
     if lhs.isDirectChat != rhs.isDirectChat {return false}
     if lhs.members != rhs.members {return false}
+    if lhs.unreadMessages != rhs.unreadMessages {return false}
+    if lhs.lastMessageAt != rhs.lastMessageAt {return false}
+    if lhs.lastMessage != rhs.lastMessage {return false}
+    if lhs.lastMessageSenderID != rhs.lastMessageSenderID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

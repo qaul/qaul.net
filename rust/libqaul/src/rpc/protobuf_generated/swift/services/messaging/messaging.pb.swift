@@ -20,6 +20,57 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+/// state of the crypto session
+enum Qaul_Net_Messaging_CryptoState: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// no crypto at all
+  case none // = 0
+
+  /// crypto session is in handshake state
+  case handshake // = 1
+
+  /// crypto session is in transport state
+  case transport // = 2
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .none
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .none
+    case 1: self = .handshake
+    case 2: self = .transport
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .none: return 0
+    case .handshake: return 1
+    case .transport: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Net_Messaging_CryptoState: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Net_Messaging_CryptoState] = [
+    .none,
+    .handshake,
+    .transport,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// qaul network messaging service
 ///
 /// is responsible to distribute messages to users
@@ -132,6 +183,12 @@ struct Qaul_Net_Messaging_Encrypted {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// state of the crypto session
+  var state: Qaul_Net_Messaging_CryptoState = .none
+
+  /// crypto session id
+  var sessionID: UInt32 = 0
+
   /// one or several Data messages
   /// of maximally 64KB each.
   var data: [Qaul_Net_Messaging_Data] = []
@@ -180,6 +237,15 @@ struct Qaul_Net_Messaging_Messaging {
     set {message = .confirmationMessage(newValue)}
   }
 
+  /// dtn response message
+  var dtnResponse: Qaul_Net_Messaging_DtnResponse {
+    get {
+      if case .dtnResponse(let v)? = message {return v}
+      return Qaul_Net_Messaging_DtnResponse()
+    }
+    set {message = .dtnResponse(newValue)}
+  }
+
   /// crypto service
   var cryptoService: Qaul_Net_Messaging_CryptoService {
     get {
@@ -221,6 +287,8 @@ struct Qaul_Net_Messaging_Messaging {
   enum OneOf_Message: Equatable {
     /// confirm chat message
     case confirmationMessage(Qaul_Net_Messaging_Confirmation)
+    /// dtn response message
+    case dtnResponse(Qaul_Net_Messaging_DtnResponse)
     /// crypto service
     case cryptoService(Qaul_Net_Messaging_CryptoService)
     /// rtc stream
@@ -238,6 +306,10 @@ struct Qaul_Net_Messaging_Messaging {
       switch (lhs, rhs) {
       case (.confirmationMessage, .confirmationMessage): return {
         guard case .confirmationMessage(let l) = lhs, case .confirmationMessage(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.dtnResponse, .dtnResponse): return {
+        guard case .dtnResponse(let l) = lhs, case .dtnResponse(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       case (.cryptoService, .cryptoService): return {
@@ -541,18 +613,18 @@ struct Qaul_Net_Messaging_DtnResponse {
   // methods supported on all messages.
 
   /// the type of the message
-  var type: Qaul_Net_Messaging_DtnResponse.TypeEnum = .accepted
+  var responseType: Qaul_Net_Messaging_DtnResponse.ResponseType = .accepted
 
   /// message signature reference
   var signature: Data = Data()
 
   /// reason of rejection
-  var reason: Qaul_Net_Messaging_DtnResponse.Reason = .userNotAccepted
+  var reason: Qaul_Net_Messaging_DtnResponse.Reason = .none
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   /// the enum definition of the type
-  enum TypeEnum: SwiftProtobuf.Enum {
+  enum ResponseType: SwiftProtobuf.Enum {
     typealias RawValue = Int
 
     /// the message was accepted for storage
@@ -588,34 +660,39 @@ struct Qaul_Net_Messaging_DtnResponse {
   enum Reason: SwiftProtobuf.Enum {
     typealias RawValue = Int
 
+    /// none
+    case none // = 0
+
     /// this user is not accepted
-    case userNotAccepted // = 0
+    case userNotAccepted // = 1
 
     /// overall quota reached
-    case overallQuota // = 1
+    case overallQuota // = 2
 
     /// user quota reached
-    case userQuota // = 2
+    case userQuota // = 3
     case UNRECOGNIZED(Int)
 
     init() {
-      self = .userNotAccepted
+      self = .none
     }
 
     init?(rawValue: Int) {
       switch rawValue {
-      case 0: self = .userNotAccepted
-      case 1: self = .overallQuota
-      case 2: self = .userQuota
+      case 0: self = .none
+      case 1: self = .userNotAccepted
+      case 2: self = .overallQuota
+      case 3: self = .userQuota
       default: self = .UNRECOGNIZED(rawValue)
       }
     }
 
     var rawValue: Int {
       switch self {
-      case .userNotAccepted: return 0
-      case .overallQuota: return 1
-      case .userQuota: return 2
+      case .none: return 0
+      case .userNotAccepted: return 1
+      case .overallQuota: return 2
+      case .userQuota: return 3
       case .UNRECOGNIZED(let i): return i
       }
     }
@@ -627,9 +704,9 @@ struct Qaul_Net_Messaging_DtnResponse {
 
 #if swift(>=4.2)
 
-extension Qaul_Net_Messaging_DtnResponse.TypeEnum: CaseIterable {
+extension Qaul_Net_Messaging_DtnResponse.ResponseType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Qaul_Net_Messaging_DtnResponse.TypeEnum] = [
+  static var allCases: [Qaul_Net_Messaging_DtnResponse.ResponseType] = [
     .accepted,
     .rejected,
   ]
@@ -638,6 +715,7 @@ extension Qaul_Net_Messaging_DtnResponse.TypeEnum: CaseIterable {
 extension Qaul_Net_Messaging_DtnResponse.Reason: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static var allCases: [Qaul_Net_Messaging_DtnResponse.Reason] = [
+    .none,
     .userNotAccepted,
     .overallQuota,
     .userQuota,
@@ -649,6 +727,14 @@ extension Qaul_Net_Messaging_DtnResponse.Reason: CaseIterable {
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.net.messaging"
+
+extension Qaul_Net_Messaging_CryptoState: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "NONE"),
+    1: .same(proto: "HANDSHAKE"),
+    2: .same(proto: "TRANSPORT"),
+  ]
+}
 
 extension Qaul_Net_Messaging_Container: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Container"
@@ -804,7 +890,9 @@ extension Qaul_Net_Messaging_EnvelopPayload: SwiftProtobuf.Message, SwiftProtobu
 extension Qaul_Net_Messaging_Encrypted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Encrypted"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "data"),
+    1: .same(proto: "state"),
+    2: .standard(proto: "session_id"),
+    3: .same(proto: "data"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -813,20 +901,30 @@ extension Qaul_Net_Messaging_Encrypted: SwiftProtobuf.Message, SwiftProtobuf._Me
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.data) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.state) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.sessionID) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.data) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.state != .none {
+      try visitor.visitSingularEnumField(value: self.state, fieldNumber: 1)
+    }
+    if self.sessionID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.sessionID, fieldNumber: 2)
+    }
     if !self.data.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.data, fieldNumber: 1)
+      try visitor.visitRepeatedMessageField(value: self.data, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Messaging_Encrypted, rhs: Qaul_Net_Messaging_Encrypted) -> Bool {
+    if lhs.state != rhs.state {return false}
+    if lhs.sessionID != rhs.sessionID {return false}
     if lhs.data != rhs.data {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -875,10 +973,11 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
   static let protoMessageName: String = _protobuf_package + ".Messaging"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "confirmation_message"),
-    2: .standard(proto: "crypto_service"),
-    3: .standard(proto: "rtc_stream_message"),
-    4: .standard(proto: "group_invite_message"),
-    5: .standard(proto: "common_message"),
+    2: .standard(proto: "dtn_response"),
+    3: .standard(proto: "crypto_service"),
+    4: .standard(proto: "rtc_stream_message"),
+    5: .standard(proto: "group_invite_message"),
+    6: .standard(proto: "common_message"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -901,6 +1000,19 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
         }
       }()
       case 2: try {
+        var v: Qaul_Net_Messaging_DtnResponse?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .dtnResponse(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .dtnResponse(v)
+        }
+      }()
+      case 3: try {
         var v: Qaul_Net_Messaging_CryptoService?
         var hadOneofValue = false
         if let current = self.message {
@@ -913,7 +1025,7 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
           self.message = .cryptoService(v)
         }
       }()
-      case 3: try {
+      case 4: try {
         var v: Qaul_Net_Messaging_RtcStreamMessage?
         var hadOneofValue = false
         if let current = self.message {
@@ -926,7 +1038,7 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
           self.message = .rtcStreamMessage(v)
         }
       }()
-      case 4: try {
+      case 5: try {
         var v: Qaul_Net_Messaging_GroupInviteMessage?
         var hadOneofValue = false
         if let current = self.message {
@@ -939,7 +1051,7 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
           self.message = .groupInviteMessage(v)
         }
       }()
-      case 5: try {
+      case 6: try {
         var v: Qaul_Net_Messaging_CommonMessage?
         var hadOneofValue = false
         if let current = self.message {
@@ -967,21 +1079,25 @@ extension Qaul_Net_Messaging_Messaging: SwiftProtobuf.Message, SwiftProtobuf._Me
       guard case .confirmationMessage(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }()
+    case .dtnResponse?: try {
+      guard case .dtnResponse(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
     case .cryptoService?: try {
       guard case .cryptoService(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     }()
     case .rtcStreamMessage?: try {
       guard case .rtcStreamMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     }()
     case .groupInviteMessage?: try {
       guard case .groupInviteMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case .commonMessage?: try {
       guard case .commonMessage(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     }()
     case nil: break
     }
@@ -1436,7 +1552,7 @@ extension Qaul_Net_Messaging_Dtn: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 extension Qaul_Net_Messaging_DtnResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DtnResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "type"),
+    1: .standard(proto: "response_type"),
     2: .same(proto: "signature"),
     3: .same(proto: "reason"),
   ]
@@ -1447,7 +1563,7 @@ extension Qaul_Net_Messaging_DtnResponse: SwiftProtobuf.Message, SwiftProtobuf._
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularEnumField(value: &self.type) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.responseType) }()
       case 2: try { try decoder.decodeSingularBytesField(value: &self.signature) }()
       case 3: try { try decoder.decodeSingularEnumField(value: &self.reason) }()
       default: break
@@ -1456,20 +1572,20 @@ extension Qaul_Net_Messaging_DtnResponse: SwiftProtobuf.Message, SwiftProtobuf._
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.type != .accepted {
-      try visitor.visitSingularEnumField(value: self.type, fieldNumber: 1)
+    if self.responseType != .accepted {
+      try visitor.visitSingularEnumField(value: self.responseType, fieldNumber: 1)
     }
     if !self.signature.isEmpty {
       try visitor.visitSingularBytesField(value: self.signature, fieldNumber: 2)
     }
-    if self.reason != .userNotAccepted {
+    if self.reason != .none {
       try visitor.visitSingularEnumField(value: self.reason, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Net_Messaging_DtnResponse, rhs: Qaul_Net_Messaging_DtnResponse) -> Bool {
-    if lhs.type != rhs.type {return false}
+    if lhs.responseType != rhs.responseType {return false}
     if lhs.signature != rhs.signature {return false}
     if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1477,7 +1593,7 @@ extension Qaul_Net_Messaging_DtnResponse: SwiftProtobuf.Message, SwiftProtobuf._
   }
 }
 
-extension Qaul_Net_Messaging_DtnResponse.TypeEnum: SwiftProtobuf._ProtoNameProviding {
+extension Qaul_Net_Messaging_DtnResponse.ResponseType: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "ACCEPTED"),
     1: .same(proto: "REJECTED"),
@@ -1486,8 +1602,9 @@ extension Qaul_Net_Messaging_DtnResponse.TypeEnum: SwiftProtobuf._ProtoNameProvi
 
 extension Qaul_Net_Messaging_DtnResponse.Reason: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "USER_NOT_ACCEPTED"),
-    1: .same(proto: "OVERALL_QUOTA"),
-    2: .same(proto: "USER_QUOTA"),
+    0: .same(proto: "NONE"),
+    1: .same(proto: "USER_NOT_ACCEPTED"),
+    2: .same(proto: "OVERALL_QUOTA"),
+    3: .same(proto: "USER_QUOTA"),
   ]
 }

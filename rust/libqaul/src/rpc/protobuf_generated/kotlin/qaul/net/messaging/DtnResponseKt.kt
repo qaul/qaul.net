@@ -27,24 +27,24 @@ object DtnResponseKt {
      * the type of the message
      * </pre>
      *
-     * <code>.qaul.net.messaging.DtnResponse.Type type = 1;</code>
+     * <code>.qaul.net.messaging.DtnResponse.ResponseType response_type = 1;</code>
      */
-     var type: qaul.net.messaging.MessagingOuterClass.DtnResponse.Type
-      @JvmName("getType")
-      get() = _builder.getType()
-      @JvmName("setType")
+     var responseType: qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType
+      @JvmName("getResponseType")
+      get() = _builder.getResponseType()
+      @JvmName("setResponseType")
       set(value) {
-        _builder.setType(value)
+        _builder.setResponseType(value)
       }
     /**
      * <pre>
      * the type of the message
      * </pre>
      *
-     * <code>.qaul.net.messaging.DtnResponse.Type type = 1;</code>
+     * <code>.qaul.net.messaging.DtnResponse.ResponseType response_type = 1;</code>
      */
-    fun clearType() {
-      _builder.clearType()
+    fun clearResponseType() {
+      _builder.clearResponseType()
     }
 
     /**

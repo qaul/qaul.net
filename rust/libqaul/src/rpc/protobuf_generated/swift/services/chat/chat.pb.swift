@@ -20,75 +20,6 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-/// Chat Content Type
-///
-/// describes the message content type
-/// of the message encoded in the ChatMessage content field
-enum Qaul_Rpc_Chat_ChatContentType: SwiftProtobuf.Enum {
-  typealias RawValue = Int
-
-  /// Undefined / Error
-  case none // = 0
-
-  /// chat content message
-  /// ChatContent
-  case chat // = 1
-
-  /// file content message
-  /// FileContent
-  case file // = 2
-
-  /// group event information
-  /// GroupEvent
-  case group // = 3
-
-  /// RTC event information
-  case rtc // = 4
-  case UNRECOGNIZED(Int)
-
-  init() {
-    self = .none
-  }
-
-  init?(rawValue: Int) {
-    switch rawValue {
-    case 0: self = .none
-    case 1: self = .chat
-    case 2: self = .file
-    case 3: self = .group
-    case 4: self = .rtc
-    default: self = .UNRECOGNIZED(rawValue)
-    }
-  }
-
-  var rawValue: Int {
-    switch self {
-    case .none: return 0
-    case .chat: return 1
-    case .file: return 2
-    case .group: return 3
-    case .rtc: return 4
-    case .UNRECOGNIZED(let i): return i
-    }
-  }
-
-}
-
-#if swift(>=4.2)
-
-extension Qaul_Rpc_Chat_ChatContentType: CaseIterable {
-  // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Qaul_Rpc_Chat_ChatContentType] = [
-    .none,
-    .chat,
-    .file,
-    .group,
-    .rtc,
-  ]
-}
-
-#endif  // swift(>=4.2)
-
 /// Sending status of sent messages
 enum Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf.Enum {
   typealias RawValue = Int
@@ -234,24 +165,6 @@ struct Qaul_Rpc_Chat_Chat {
   /// message type
   var message: Qaul_Rpc_Chat_Chat.OneOf_Message? = nil
 
-  /// request an overview over the last conversations
-  var overviewRequest: Qaul_Rpc_Chat_ChatOverviewRequest {
-    get {
-      if case .overviewRequest(let v)? = message {return v}
-      return Qaul_Rpc_Chat_ChatOverviewRequest()
-    }
-    set {message = .overviewRequest(newValue)}
-  }
-
-  /// contains the overview list
-  var overviewList: Qaul_Rpc_Chat_ChatOverviewList {
-    get {
-      if case .overviewList(let v)? = message {return v}
-      return Qaul_Rpc_Chat_ChatOverviewList()
-    }
-    set {message = .overviewList(newValue)}
-  }
-
   /// request a specific conversation
   var conversationRequest: Qaul_Rpc_Chat_ChatConversationRequest {
     get {
@@ -283,10 +196,6 @@ struct Qaul_Rpc_Chat_Chat {
 
   /// message type
   enum OneOf_Message: Equatable {
-    /// request an overview over the last conversations
-    case overviewRequest(Qaul_Rpc_Chat_ChatOverviewRequest)
-    /// contains the overview list
-    case overviewList(Qaul_Rpc_Chat_ChatOverviewList)
     /// request a specific conversation
     case conversationRequest(Qaul_Rpc_Chat_ChatConversationRequest)
     /// list of a chat conversation
@@ -300,14 +209,6 @@ struct Qaul_Rpc_Chat_Chat {
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch (lhs, rhs) {
-      case (.overviewRequest, .overviewRequest): return {
-        guard case .overviewRequest(let l) = lhs, case .overviewRequest(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.overviewList, .overviewList): return {
-        guard case .overviewList(let l) = lhs, case .overviewList(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
       case (.conversationRequest, .conversationRequest): return {
         guard case .conversationRequest(let l) = lhs, case .conversationRequest(let r) = rhs else { preconditionFailure() }
         return l == r
@@ -329,75 +230,13 @@ struct Qaul_Rpc_Chat_Chat {
   init() {}
 }
 
-/// request for overview list of all conversations
-/// this request shall be sent continuously when the view is open
-///
-/// at the moment always the entire list is sent
-struct Qaul_Rpc_Chat_ChatOverviewRequest {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// overview list of conversations
-/// this can eighter be the entire list or the last updates
-struct Qaul_Rpc_Chat_ChatOverviewList {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var overviewList: [Qaul_Rpc_Chat_ChatOverview] = []
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
-/// a chat conversation overview item
-struct Qaul_Rpc_Chat_ChatOverview {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// id of the user
-  var conversationID: Data = Data()
-
-  /// last message id
-  var lastMessageIndex: UInt64 = 0
-
-  /// name of the conversation
-  var name: String = String()
-
-  /// time when last message was sent or received
-  var lastMessageAt: UInt64 = 0
-
-  /// unread messages
-  var unread: Int32 = 0
-
-  /// content type
-  var contentType: Qaul_Rpc_Chat_ChatContentType = .none
-
-  /// preview text of the last message
-  var content: Data = Data()
-
-  /// sender of the last message
-  var lastMessageSenderID: Data = Data()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 /// request messages of a specific chat conversation
 struct Qaul_Rpc_Chat_ChatConversationRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// conversation id
   var conversationID: Data = Data()
 
   /// send only changes that are newer than the last received
@@ -414,8 +253,10 @@ struct Qaul_Rpc_Chat_ChatConversationList {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// conversation id
   var conversationID: Data = Data()
 
+  /// several messages
   var messageList: [Qaul_Rpc_Chat_ChatMessage] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -458,10 +299,7 @@ struct Qaul_Rpc_Chat_ChatMessage {
   /// time when the message was received
   var receivedAt: UInt64 = 0
 
-  /// content type
-  var contentType: Qaul_Rpc_Chat_ChatContentType = .none
-
-  /// content of the message
+  /// chat content message
   var content: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -482,6 +320,78 @@ struct Qaul_Rpc_Chat_MessageReceptionConfirmed {
   var confirmedAt: UInt64 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// chat content message
+struct Qaul_Rpc_Chat_ChatContentMessage {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var message: Qaul_Rpc_Chat_ChatContentMessage.OneOf_Message? = nil
+
+  /// a chat content message
+  var chatContent: Qaul_Rpc_Chat_ChatContent {
+    get {
+      if case .chatContent(let v)? = message {return v}
+      return Qaul_Rpc_Chat_ChatContent()
+    }
+    set {message = .chatContent(newValue)}
+  }
+
+  /// a file content message
+  var fileContent: Qaul_Rpc_Chat_FileContent {
+    get {
+      if case .fileContent(let v)? = message {return v}
+      return Qaul_Rpc_Chat_FileContent()
+    }
+    set {message = .fileContent(newValue)}
+  }
+
+  /// a group event information
+  var groupEvent: Qaul_Rpc_Chat_GroupEvent {
+    get {
+      if case .groupEvent(let v)? = message {return v}
+      return Qaul_Rpc_Chat_GroupEvent()
+    }
+    set {message = .groupEvent(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_Message: Equatable {
+    /// a chat content message
+    case chatContent(Qaul_Rpc_Chat_ChatContent)
+    /// a file content message
+    case fileContent(Qaul_Rpc_Chat_FileContent)
+    /// a group event information
+    case groupEvent(Qaul_Rpc_Chat_GroupEvent)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Qaul_Rpc_Chat_ChatContentMessage.OneOf_Message, rhs: Qaul_Rpc_Chat_ChatContentMessage.OneOf_Message) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.chatContent, .chatContent): return {
+        guard case .chatContent(let l) = lhs, case .chatContent(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.fileContent, .fileContent): return {
+        guard case .fileContent(let l) = lhs, case .fileContent(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.groupEvent, .groupEvent): return {
+        guard case .groupEvent(let l) = lhs, case .groupEvent(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
 
   init() {}
 }
@@ -565,16 +475,6 @@ struct Qaul_Rpc_Chat_ChatMessageSend {
 
 fileprivate let _protobuf_package = "qaul.rpc.chat"
 
-extension Qaul_Rpc_Chat_ChatContentType: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "NONE"),
-    1: .same(proto: "CHAT"),
-    2: .same(proto: "FILE"),
-    3: .same(proto: "GROUP"),
-    4: .same(proto: "RTC"),
-  ]
-}
-
 extension Qaul_Rpc_Chat_MessageStatus: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "SENDING"),
@@ -599,8 +499,6 @@ extension Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf._ProtoNameProviding {
 extension Qaul_Rpc_Chat_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Chat"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "overview_request"),
-    2: .standard(proto: "overview_list"),
     3: .standard(proto: "conversation_request"),
     4: .standard(proto: "conversation_list"),
     5: .same(proto: "send"),
@@ -612,32 +510,6 @@ extension Qaul_Rpc_Chat_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try {
-        var v: Qaul_Rpc_Chat_ChatOverviewRequest?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .overviewRequest(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .overviewRequest(v)
-        }
-      }()
-      case 2: try {
-        var v: Qaul_Rpc_Chat_ChatOverviewList?
-        var hadOneofValue = false
-        if let current = self.message {
-          hadOneofValue = true
-          if case .overviewList(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.message = .overviewList(v)
-        }
-      }()
       case 3: try {
         var v: Qaul_Rpc_Chat_ChatConversationRequest?
         var hadOneofValue = false
@@ -688,14 +560,6 @@ extension Qaul_Rpc_Chat_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
     switch self.message {
-    case .overviewRequest?: try {
-      guard case .overviewRequest(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    }()
-    case .overviewList?: try {
-      guard case .overviewList(let v)? = self.message else { preconditionFailure() }
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    }()
     case .conversationRequest?: try {
       guard case .conversationRequest(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
@@ -715,131 +579,6 @@ extension Qaul_Rpc_Chat_Chat: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
   static func ==(lhs: Qaul_Rpc_Chat_Chat, rhs: Qaul_Rpc_Chat_Chat) -> Bool {
     if lhs.message != rhs.message {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Rpc_Chat_ChatOverviewRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ChatOverviewRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let _ = try decoder.nextFieldNumber() {
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Rpc_Chat_ChatOverviewRequest, rhs: Qaul_Rpc_Chat_ChatOverviewRequest) -> Bool {
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Rpc_Chat_ChatOverviewList: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ChatOverviewList"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "overview_list"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.overviewList) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.overviewList.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.overviewList, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Rpc_Chat_ChatOverviewList, rhs: Qaul_Rpc_Chat_ChatOverviewList) -> Bool {
-    if lhs.overviewList != rhs.overviewList {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Qaul_Rpc_Chat_ChatOverview: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ChatOverview"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "conversation_id"),
-    2: .standard(proto: "last_message_index"),
-    3: .same(proto: "name"),
-    4: .standard(proto: "last_message_at"),
-    5: .same(proto: "unread"),
-    6: .standard(proto: "content_type"),
-    7: .same(proto: "content"),
-    8: .standard(proto: "last_message_sender_id"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
-      case 2: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageIndex) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.name) }()
-      case 4: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageAt) }()
-      case 5: try { try decoder.decodeSingularInt32Field(value: &self.unread) }()
-      case 6: try { try decoder.decodeSingularEnumField(value: &self.contentType) }()
-      case 7: try { try decoder.decodeSingularBytesField(value: &self.content) }()
-      case 8: try { try decoder.decodeSingularBytesField(value: &self.lastMessageSenderID) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.conversationID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.conversationID, fieldNumber: 1)
-    }
-    if self.lastMessageIndex != 0 {
-      try visitor.visitSingularUInt64Field(value: self.lastMessageIndex, fieldNumber: 2)
-    }
-    if !self.name.isEmpty {
-      try visitor.visitSingularStringField(value: self.name, fieldNumber: 3)
-    }
-    if self.lastMessageAt != 0 {
-      try visitor.visitSingularUInt64Field(value: self.lastMessageAt, fieldNumber: 4)
-    }
-    if self.unread != 0 {
-      try visitor.visitSingularInt32Field(value: self.unread, fieldNumber: 5)
-    }
-    if self.contentType != .none {
-      try visitor.visitSingularEnumField(value: self.contentType, fieldNumber: 6)
-    }
-    if !self.content.isEmpty {
-      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 7)
-    }
-    if !self.lastMessageSenderID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.lastMessageSenderID, fieldNumber: 8)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Qaul_Rpc_Chat_ChatOverview, rhs: Qaul_Rpc_Chat_ChatOverview) -> Bool {
-    if lhs.conversationID != rhs.conversationID {return false}
-    if lhs.lastMessageIndex != rhs.lastMessageIndex {return false}
-    if lhs.name != rhs.name {return false}
-    if lhs.lastMessageAt != rhs.lastMessageAt {return false}
-    if lhs.unread != rhs.unread {return false}
-    if lhs.contentType != rhs.contentType {return false}
-    if lhs.content != rhs.content {return false}
-    if lhs.lastMessageSenderID != rhs.lastMessageSenderID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -932,8 +671,7 @@ extension Qaul_Rpc_Chat_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     5: .standard(proto: "conversation_id"),
     6: .standard(proto: "sent_at"),
     7: .standard(proto: "received_at"),
-    8: .standard(proto: "content_type"),
-    9: .same(proto: "content"),
+    8: .same(proto: "content"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -949,8 +687,7 @@ extension Qaul_Rpc_Chat_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
       case 5: try { try decoder.decodeSingularBytesField(value: &self.conversationID) }()
       case 6: try { try decoder.decodeSingularUInt64Field(value: &self.sentAt) }()
       case 7: try { try decoder.decodeSingularUInt64Field(value: &self.receivedAt) }()
-      case 8: try { try decoder.decodeSingularEnumField(value: &self.contentType) }()
-      case 9: try { try decoder.decodeSingularBytesField(value: &self.content) }()
+      case 8: try { try decoder.decodeSingularBytesField(value: &self.content) }()
       case 10: try { try decoder.decodeRepeatedMessageField(value: &self.messageReceptionConfirmed) }()
       default: break
       }
@@ -979,11 +716,8 @@ extension Qaul_Rpc_Chat_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if self.receivedAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.receivedAt, fieldNumber: 7)
     }
-    if self.contentType != .none {
-      try visitor.visitSingularEnumField(value: self.contentType, fieldNumber: 8)
-    }
     if !self.content.isEmpty {
-      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 9)
+      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 8)
     }
     if !self.messageReceptionConfirmed.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.messageReceptionConfirmed, fieldNumber: 10)
@@ -1000,7 +734,6 @@ extension Qaul_Rpc_Chat_ChatMessage: SwiftProtobuf.Message, SwiftProtobuf._Messa
     if lhs.conversationID != rhs.conversationID {return false}
     if lhs.sentAt != rhs.sentAt {return false}
     if lhs.receivedAt != rhs.receivedAt {return false}
-    if lhs.contentType != rhs.contentType {return false}
     if lhs.content != rhs.content {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1040,6 +773,94 @@ extension Qaul_Rpc_Chat_MessageReceptionConfirmed: SwiftProtobuf.Message, SwiftP
   static func ==(lhs: Qaul_Rpc_Chat_MessageReceptionConfirmed, rhs: Qaul_Rpc_Chat_MessageReceptionConfirmed) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.confirmedAt != rhs.confirmedAt {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Chat_ChatContentMessage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ChatContentMessage"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "chat_content"),
+    2: .standard(proto: "file_content"),
+    3: .standard(proto: "group_event"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Qaul_Rpc_Chat_ChatContent?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .chatContent(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .chatContent(v)
+        }
+      }()
+      case 2: try {
+        var v: Qaul_Rpc_Chat_FileContent?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .fileContent(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .fileContent(v)
+        }
+      }()
+      case 3: try {
+        var v: Qaul_Rpc_Chat_GroupEvent?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .groupEvent(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .groupEvent(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.message {
+    case .chatContent?: try {
+      guard case .chatContent(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .fileContent?: try {
+      guard case .fileContent(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .groupEvent?: try {
+      guard case .groupEvent(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Chat_ChatContentMessage, rhs: Qaul_Rpc_Chat_ChatContentMessage) -> Bool {
+    if lhs.message != rhs.message {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
