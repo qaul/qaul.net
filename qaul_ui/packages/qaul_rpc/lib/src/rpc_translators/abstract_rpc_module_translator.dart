@@ -91,7 +91,7 @@ abstract class RpcModuleTranslator {
   Modules get type;
 
   @mustCallSuper
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     _log.severe(
       'Received libqaul message from module "$type" which could not be translated',
       UnhandledRpcMessageException(type.toString()),

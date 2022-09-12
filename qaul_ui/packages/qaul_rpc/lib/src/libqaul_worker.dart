@@ -144,18 +144,15 @@ class LibqaulWorker {
     await _sendMessage(Modules.USERACCOUNTS, msg);
   }
 
-  /// Requests both [ChatOverviewRequest] and [GroupListRequest]
   void getAllChatRooms() async {
-    dynamic msg = Chat(overviewRequest: ChatOverviewRequest());
-    await _sendMessage(Modules.CHAT, msg);
-    msg = Group(groupListRequest: GroupListRequest());
+    final msg = Group(groupListRequest: GroupListRequest());
     await _sendMessage(Modules.GROUP, msg);
   }
 
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) async {
     final msg = Chat(
       conversationRequest: ChatConversationRequest(
-        conversationId: chatId,
+        groupId: chatId,
         lastIndex: Int64(lastIndex),
       ),
     );
@@ -164,7 +161,7 @@ class LibqaulWorker {
 
   void sendMessage(Uint8List chatId, String content) async {
     final msg = Chat(
-      send: ChatMessageSend(conversationId: chatId, content: content),
+      send: ChatMessageSend(groupId: chatId, content: content),
     );
     await _sendMessage(Modules.CHAT, msg);
   }
@@ -311,7 +308,7 @@ class LibqaulWorker {
 
     final m = QaulRpc.fromBuffer(response);
     final translator = RpcModuleTranslator.translatorFactory(m.module);
-    final res = await translator.decodeMessageBytes(m.data);
+    final res = await translator.decodeMessageBytes(m.data, _reader);
     if (res == null) return;
 
     if (res.module != Modules.DEBUG) {

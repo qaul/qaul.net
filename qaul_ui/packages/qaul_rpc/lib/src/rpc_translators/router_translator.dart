@@ -5,7 +5,7 @@ class RouterTranslator extends RpcModuleTranslator {
   Modules get type => Modules.ROUTER;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = Router.fromBuffer(data);
     switch (message.whichMessage()) {
       case Router_Message.routingTable:
@@ -26,7 +26,7 @@ class RouterTranslator extends RpcModuleTranslator {
 
         return RpcTranslatorResponse(type, data);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 

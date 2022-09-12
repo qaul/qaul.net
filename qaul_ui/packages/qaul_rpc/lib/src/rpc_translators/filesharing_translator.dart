@@ -5,7 +5,7 @@ class FileSharingTranslator extends RpcModuleTranslator {
   Modules get type => Modules.CHATFILE;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = FileSharing.fromBuffer(data);
     switch (message.whichMessage()) {
       case FileSharing_Message.fileHistoryResponse:
@@ -16,7 +16,7 @@ class FileSharingTranslator extends RpcModuleTranslator {
             .toList();
         return RpcTranslatorResponse(Modules.CHATFILE, entities);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 

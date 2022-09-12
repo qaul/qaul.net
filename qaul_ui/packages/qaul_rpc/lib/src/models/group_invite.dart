@@ -16,13 +16,13 @@ class GroupInvite extends Equatable {
 
   final Uint8List senderId;
   final DateTime receivedAt;
-  final GroupDetails groupDetails;
+  final ChatRoom groupDetails;
 
-  factory GroupInvite.fromRpcGroupInvited(GroupInvited i) {
+  factory GroupInvite.fromRpcGroupInvited(GroupInvited i, List<User> users) {
     return GroupInvite(
       senderId: Uint8List.fromList(i.senderId),
       receivedAt: DateTime.fromMillisecondsSinceEpoch(i.receivedAt.toInt()),
-      groupDetails: GroupDetails.fromRpcGroupInfo(i.group),
+      groupDetails: ChatRoom.fromRpcGroupInfo(i.group, users),
     );
   }
 

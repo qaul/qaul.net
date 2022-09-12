@@ -35,7 +35,7 @@ class UserDetailsScreen extends HookConsumerWidget {
                   splashRadius: 26,
                   onPressed: () {
                     final defaultUser = ref.watch(defaultUserProvider)!;
-                    final newRoom = ChatRoom.blank(user: defaultUser, otherUser: user);
+                    final newRoom = ChatRoom.blank(otherUser: user);
                     Navigator.pop(context);
                     openChat(
                       newRoom,

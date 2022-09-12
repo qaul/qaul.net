@@ -5,26 +5,19 @@ class GroupTranslator extends RpcModuleTranslator {
   Modules get type => Modules.GROUP;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+    final users = reader(usersProvider);
     final message = Group.fromBuffer(data);
+
     switch (message.whichMessage()) {
       case Group_Message.groupInfoResponse:
         return RpcTranslatorResponse(
           Modules.GROUP,
-          GroupDetails.fromRpcGroupInfo(message.ensureGroupInfoResponse()),
+          ChatRoom.fromRpcGroupInfo(message.ensureGroupInfoResponse(), users),
         );
       case Group_Message.groupCreateResponse:
-        final group = message.ensureGroupCreateResponse();
-        return RpcTranslatorResponse(
-          Modules.GROUP,
-          GroupDetails(
-            id: Uint8List.fromList(group.groupId),
-            // groupName: group.groupName,
-            groupName: '',
-            createdAt: DateTime.now(),
-            members: const [],
-          ),
-        );
+        final createResult = message.ensureGroupCreateResponse().result;
+        return _receiveGroupResultResponse(createResult);
       case Group_Message.groupRenameResponse:
         final renameResult = message.ensureGroupRenameResponse().result;
         return _receiveGroupResultResponse(renameResult);
@@ -41,18 +34,18 @@ class GroupTranslator extends RpcModuleTranslator {
         final groups = message
             .ensureGroupListResponse()
             .groups
-            .map((e) => GroupDetails.fromRpcGroupInfo(e))
+            .map((g) => ChatRoom.fromRpcGroupInfo(g, users))
             .toList();
         return RpcTranslatorResponse(Modules.GROUP, groups);
       case Group_Message.groupInvitedResponse:
         final invites = message
             .ensureGroupInvitedResponse()
             .invited
-            .map((e) => GroupInvite.fromRpcGroupInvited(e))
+            .map((e) => GroupInvite.fromRpcGroupInvited(e, users))
             .toList();
         return RpcTranslatorResponse(Modules.GROUP, invites);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 
@@ -69,10 +62,8 @@ class GroupTranslator extends RpcModuleTranslator {
     if (res.data is bool && res.data == true) return;
 
     final state = reader(chatRoomsProvider.notifier);
-    final users = reader(usersProvider);
-    if (res.data is List<GroupDetails>) {
-      for (final groupInfo in res.data) {
-        final room = ChatRoom.fromGroupDetails(groupInfo, users);
+    if (res.data is List<ChatRoom>) {
+      for (final room in res.data) {
         if (!state.contains(room)) {
           state.add(room);
         } else {
@@ -80,12 +71,11 @@ class GroupTranslator extends RpcModuleTranslator {
         }
       }
       return;
-    } else if (res.data is GroupDetails) {
-      final room = ChatRoom.fromGroupDetails(res.data, users);
-      if (!state.contains(room)) {
-        state.add(room);
+    } else if (res.data is ChatRoom) {
+      if (!state.contains(res.data)) {
+        state.add(res.data);
       } else {
-        state.update(room);
+        state.update(res.data);
       }
     } else if (res.data is List<GroupInvite>) {
       final invites = reader(groupInvitesProvider.notifier);

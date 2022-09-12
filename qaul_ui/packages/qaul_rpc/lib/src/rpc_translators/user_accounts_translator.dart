@@ -5,7 +5,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
   Modules get type => Modules.USERACCOUNTS;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = UserAccounts.fromBuffer(data);
     switch (message.whichMessage()) {
       case UserAccounts_Message.defaultUserAccount:
@@ -17,7 +17,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
         final acc = message.ensureMyUserAccount();
         return _buildResponseWithUser(acc);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
     return null;
   }
