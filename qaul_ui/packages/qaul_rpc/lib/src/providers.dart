@@ -1,7 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../qaul_rpc.dart';
-import 'models/chat_room_list_notifier.dart';
 import 'models/feed_post_list_notifier.dart';
 import 'models/file_history_entity_notifier.dart';
 import 'models/group_invite.dart';
