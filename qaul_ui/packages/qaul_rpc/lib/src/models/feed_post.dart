@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
 
@@ -40,4 +41,23 @@ extension FMExtension on FeedMessage {
         sendTime: DateTime.fromMillisecondsSinceEpoch(timestampSent.toInt()),
         receiveTime: DateTime.fromMillisecondsSinceEpoch(timestampReceived.toInt()),
       );
+}
+
+// Maybe using a Stream would be simpler. Just creating this class to facilitate manipulating StateNotifierProvider
+class FeedPostListNotifier extends StateNotifier<List<FeedPost>> {
+  FeedPostListNotifier({List<FeedPost>? messages}) : super(messages ?? []);
+
+  void add(FeedPost message) {
+    state = [message, ...state];
+  }
+
+  bool contains(FeedPost message) {
+    return !state
+        .indexWhere(
+          (m) =>
+      m.senderIdBase58 == message.senderIdBase58 &&
+          m.messageIdBase58 == message.messageIdBase58,
+    )
+        .isNegative;
+  }
 }

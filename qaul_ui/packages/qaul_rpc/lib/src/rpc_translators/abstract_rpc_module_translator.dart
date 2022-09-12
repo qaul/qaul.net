@@ -19,7 +19,6 @@ import '../generated/services/chat/chat.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../generated/services/filesharing/filesharing_rpc.pb.dart';
 import '../generated/services/group/group_rpc.pb.dart';
-import '../models/group_invite.dart';
 import '../models/models.dart';
 import '../providers.dart';
 
