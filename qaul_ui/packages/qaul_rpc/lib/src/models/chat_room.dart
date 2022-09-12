@@ -17,26 +17,6 @@ enum InvitationState { sent, received, accepted, unknown }
 
 enum MessageStatus { sending, sent, received, receivedByAll }
 
-enum MessageContentType { none, chat, file, group, rtc }
-
-MessageContentType _messageContentTypeFactory(
-    {required ChatContentType contentType}) {
-  switch (contentType) {
-    case ChatContentType.CHAT:
-      return MessageContentType.chat;
-    case ChatContentType.FILE:
-      return MessageContentType.file;
-    case ChatContentType.GROUP:
-      return MessageContentType.group;
-    case ChatContentType.NONE:
-      return MessageContentType.none;
-    case ChatContentType.RTC:
-      return MessageContentType.rtc;
-  }
-  throw UnimplementedError(
-      '(_messageContentTypeFactory) Unmapped content type: $contentType');
-}
-
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
   const ChatRoom._({
@@ -51,6 +31,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.createdAt,
     this.isDirectChat = true,
     this.members = const [],
+    this.revisionNumber = 0,
   });
 
   final Uint8List conversationId;
@@ -64,29 +45,15 @@ class ChatRoom with EquatableMixin implements Comparable {
   final DateTime? createdAt;
   final bool isDirectChat;
   final List<ChatRoomUser> members;
+  final int revisionNumber;
 
-  factory ChatRoom.blank({required User user, required User otherUser}) {
+  factory ChatRoom.blank({required User otherUser}) {
     assert(otherUser.conversationId != null);
     return ChatRoom._(
         conversationId: otherUser.conversationId!, name: otherUser.name);
   }
 
-  factory ChatRoom.fromOverview(ChatOverview overview) {
-    return ChatRoom._(
-      conversationId: Uint8List.fromList(overview.conversationId),
-      name: overview.name,
-      lastMessageSenderId: Uint8List.fromList(overview.lastMessageSenderId),
-      lastMessageIndex: overview.lastMessageIndex.toInt(),
-      lastMessageTime: DateTime.fromMillisecondsSinceEpoch(
-        overview.lastMessageAt.toInt(),
-      ),
-      unreadCount: overview.unread,
-      lastMessagePreview: MessageContent.fromBuffer(overview.content,
-          _messageContentTypeFactory(contentType: overview.contentType)),
-    );
-  }
-
-  factory ChatRoom.fromGroupDetails(GroupDetails g, List<User> users) {
+  factory ChatRoom.fromRpcGroupInfo(GroupInfo g, List<User> users) {
     final members = <ChatRoomUser>[];
 
     for (final user in users) {
@@ -96,11 +63,16 @@ class ChatRoom with EquatableMixin implements Comparable {
     }
 
     return ChatRoom._(
-      conversationId: g.id,
-      name: g.groupName.isNotEmpty ? g.groupName : 'Unknown Group Name',
-      createdAt: g.createdAt,
-      isDirectChat: false,
+      conversationId: Uint8List.fromList(g.groupId),
+      name: g.groupName,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(g.createdAt.toInt()),
+      revisionNumber: g.revision,
+      isDirectChat: g.isDirectChat,
       members: members,
+      unreadCount: g.unreadMessages,
+      lastMessageTime: DateTime.fromMillisecondsSinceEpoch(g.lastMessageAt.toInt()),
+      lastMessagePreview: MessageContent.fromBuffer(g.lastMessage),
+      lastMessageSenderId: Uint8List.fromList(g.lastMessageSenderId),
     );
   }
 
@@ -159,7 +131,7 @@ class ChatRoom with EquatableMixin implements Comparable {
   }
 
   ChatRoom mergeWithConversationList(ChatConversationList c) {
-    assert(conversationId.equals(Uint8List.fromList(c.conversationId)));
+    assert(conversationId.equals(Uint8List.fromList(c.groupId)));
     return ChatRoom._(
       conversationId: conversationId,
       messages: c.messageList.map((e) => Message.fromChatMessage(e)).toList(),
@@ -249,7 +221,7 @@ class Message with EquatableMixin implements Comparable<Message> {
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(m.messageId),
       content: MessageContent.fromBuffer(
-          m.content, _messageContentTypeFactory(contentType: m.contentType)),
+          m.content),
       index: m.index.toInt(),
       status: MessageStatus.values[m.status.value],
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
@@ -271,43 +243,15 @@ class Message with EquatableMixin implements Comparable<Message> {
   List<Object?> get props => [senderId, messageId, content];
 }
 
-@immutable
-class GroupDetails extends Equatable {
-  final Uint8List id;
-  final String groupName;
-  final DateTime createdAt;
-  final List<GroupMember> members;
-
-  const GroupDetails({
-    required this.id,
-    required this.groupName,
-    required this.createdAt,
-    required this.members,
-  });
-
-  get idBase58 => Base58Encode(id);
-
-  @override
-  List<Object?> get props => [groupName, createdAt];
-
-  factory GroupDetails.fromRpcGroupInfo(GroupInfo group) {
-    return GroupDetails(
-      id: Uint8List.fromList(group.groupId),
-      groupName: group.groupName,
-      createdAt: DateTime.now(),
-      members: group.members,
-    );
-  }
-}
-
 abstract class MessageContent extends Equatable {
   const MessageContent();
 
-  factory MessageContent.fromBuffer(List<int> buffer, MessageContentType t) {
-    switch (t) {
-      case MessageContentType.chat:
+  factory MessageContent.fromBuffer(List<int> buffer) {
+    final content = ChatContentMessage.fromBuffer(buffer);
+    switch (content.whichMessage()) {
+      case ChatContentMessage_Message.chatContent:
         return TextMessageContent(String.fromCharCodes(buffer));
-      case MessageContentType.file:
+      case ChatContentMessage_Message.fileContent:
         final file = FileSharingContainer.fromBuffer(buffer).fileInfo;
         return FileShareContent(
           historyIndex: file.startIndex,
@@ -316,19 +260,16 @@ abstract class MessageContent extends Equatable {
           size: file.fileSize,
           description: file.fileDescr,
         );
-      case MessageContentType.group:
+      case ChatContentMessage_Message.groupEvent:
         final event = GroupEvent.fromBuffer(buffer);
         return GroupEventContent(
           userId: Uint8List.fromList(event.userId),
           type: _groupEventContentTypeFactory(t: event.eventType),
         );
-      case MessageContentType.none:
+      case ChatContentMessage_Message.notSet:
+        print('here');
         return NoneMessageContent();
-      case MessageContentType.rtc:
-        break;
     }
-    throw UnimplementedError(
-        '(_messageContentFactory) error building message: content type: $t');
   }
 }
 
@@ -346,7 +287,7 @@ class TextMessageContent extends MessageContent {
   List<Object?> get props => [content];
 }
 
-enum GroupEventContentType { none, invited, joined, left, closed }
+enum GroupEventContentType { none, invited, joined, left, closed, removed }
 
 GroupEventContentType _groupEventContentTypeFactory({
   required GroupEventType t,
@@ -362,6 +303,8 @@ GroupEventContentType _groupEventContentTypeFactory({
       return GroupEventContentType.joined;
     case GroupEventType.LEFT:
       return GroupEventContentType.left;
+    case GroupEventType.REMOVED:
+      return GroupEventContentType.removed;
   }
   throw UnimplementedError(
       '(_groupEventContentTypeFactory) unmpaped event type: $t');

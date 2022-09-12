@@ -5,7 +5,7 @@ class UsersTranslator extends RpcModuleTranslator {
   Modules get type => Modules.USERS;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = Users.fromBuffer(data);
     switch (message.whichMessage()) {
       case Users_Message.userList:
@@ -15,7 +15,7 @@ class UsersTranslator extends RpcModuleTranslator {
             .map((u) => User(
                   name: u.name,
                   id: Uint8List.fromList(u.id),
-                  conversationId: Uint8List.fromList(u.conversationId),
+                  conversationId: Uint8List.fromList(u.groupId),
                   keyBase58: u.keyBase58,
                   isBlocked: u.blocked,
                   isVerified: u.verified,
@@ -28,7 +28,7 @@ class UsersTranslator extends RpcModuleTranslator {
         final user = User(
           name: userEntry.name,
           id: Uint8List.fromList(userEntry.id),
-          conversationId: Uint8List.fromList(userEntry.conversationId),
+          conversationId: Uint8List.fromList(userEntry.groupId),
           keyBase58: userEntry.keyBase58,
           isBlocked: userEntry.blocked,
           isVerified: userEntry.verified,
@@ -36,7 +36,7 @@ class UsersTranslator extends RpcModuleTranslator {
         );
         return RpcTranslatorResponse(type, user);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 

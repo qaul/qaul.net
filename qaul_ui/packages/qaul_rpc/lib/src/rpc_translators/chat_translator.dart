@@ -5,26 +5,20 @@ class ChatTranslator extends RpcModuleTranslator {
   Modules get type => Modules.CHAT;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = Chat.fromBuffer(data);
     switch (message.whichMessage()) {
-      case Chat_Message.overviewList:
-        final rooms = message
-            .ensureOverviewList()
-            .overviewList
-            .map((e) => ChatRoom.fromOverview(e))
-            .toList();
-        return RpcTranslatorResponse(Modules.CHAT, rooms);
       case Chat_Message.conversationList:
         return RpcTranslatorResponse(Modules.CHAT, message.ensureConversationList());
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
     if (res.module != type || res.data == null) return;
+    // TODO: not handling the proper data coming from [decodeMessageBytes]
     if (res.data is List<ChatRoom>) {
       final state = reader(chatRoomsProvider.notifier);
       for (final room in res.data) {

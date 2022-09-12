@@ -5,7 +5,7 @@ class BleTranslator extends RpcModuleTranslator {
   Modules get type => Modules.BLE;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
     final message = Ble.fromBuffer(data);
     switch (message.whichMessage()) {
       case Ble_Message.infoResponse:
@@ -25,7 +25,7 @@ class BleTranslator extends RpcModuleTranslator {
         );
         return RpcTranslatorResponse(Modules.BLE, status);
       default:
-        return super.decodeMessageBytes(data);
+        return super.decodeMessageBytes(data, reader);
     }
   }
 
