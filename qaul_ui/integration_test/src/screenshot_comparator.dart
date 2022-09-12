@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -9,12 +8,12 @@ import 'package:path/path.dart' as path;
 const double _kGoldenDiffTolerance = 0.18;
 
 Future<void> expectGoldenMatches(
-    dynamic actual,
-    String goldenFileNameWithExtension, {
-      String? subPath,
-      String? reason,
-      dynamic skip = false, // true or a String
-    }) {
+  dynamic actual,
+  String goldenFileNameWithExtension, {
+  String? subPath,
+  String? reason,
+  dynamic skip = false, // true or a String
+}) {
   String goldenPath;
   if (subPath == null || subPath.isEmpty) {
     goldenPath = path.join('goldens', goldenFileNameWithExtension);
@@ -25,7 +24,8 @@ Future<void> expectGoldenMatches(
     (goldenFileComparator as LocalFileComparator).basedir.toString(),
     goldenFileNameWithExtension,
   ));
-  return expectLater(actual, matchesGoldenFile(goldenPath), reason: reason, skip: skip);
+  return expectLater(actual, matchesGoldenFile(goldenPath),
+      reason: reason, skip: skip);
 }
 
 class _CustomFileComparator extends LocalFileComparator {

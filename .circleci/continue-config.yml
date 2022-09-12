@@ -115,7 +115,7 @@ commands:
 executors:
     flutter:
         docker:
-            - image: cirrusci/flutter:3.0.5
+            - image: cirrusci/flutter:3.3.1
         working_directory: ~/qaul-libp2p/qaul_ui
     flutter-android:
         docker:
@@ -124,7 +124,7 @@ executors:
             _JAVA_OPTIONS: -Xmx2048m
             FASTLANE_LANE: upload_beta_playstore
             FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.0.5
+            FLUTTER_VERSION: 3.3.1
             GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m"
             LANG: en_US.UTF-8
             LC_ALL: en_US.UTF-8
@@ -137,7 +137,7 @@ executors:
         environment:
             FASTLANE_LANE: upload_testflight
             FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.0.5
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 13.0.0
@@ -147,12 +147,12 @@ executors:
         docker:
             - image: snapcore/snapcraft:edge
         environment:
-            FLUTTER_VERSION: 3.0.5
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         working_directory: ~/qaul-libp2p/qaul_ui
     flutter-macos:
         environment:
-            FLUTTER_VERSION: 3.0.5
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 13.0.0
@@ -325,7 +325,7 @@ jobs:
                 root: ~/qaul-libp2p
     build-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.0.1
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022
@@ -500,7 +500,7 @@ jobs:
     integration-test-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx3g
-            FLUTTER_VERSION: 3.0.1
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: android/android-machine
@@ -594,7 +594,7 @@ jobs:
                 path: ~/qaul-libp2p/qaul_ui/integration_test/failures
     integration-test-flutter-linux:
         environment:
-            FLUTTER_VERSION: 3.0.1
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         executor: flutter-ubuntu-lean
         steps:
@@ -657,7 +657,7 @@ jobs:
                 path: ~/qaul-libp2p/qaul_ui/integration_test/failures
     integration-test-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.0.1
+            FLUTTER_VERSION: 3.3.1
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022
