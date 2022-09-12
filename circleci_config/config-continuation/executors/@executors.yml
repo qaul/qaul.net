@@ -29,7 +29,7 @@ rust-macos:
 # --------------------
 flutter:
   docker:
-    - image: cirrusci/flutter:3.0.5
+    - image: cirrusci/flutter:3.3.1
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter-android:
   docker:
@@ -45,7 +45,7 @@ flutter-android:
     _JAVA_OPTIONS: "-Xmx2048m"
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
     SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
-    FLUTTER_VERSION: "3.0.5"
+    FLUTTER_VERSION: "3.3.1"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
   macos:
@@ -55,14 +55,14 @@ flutter-ios:
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_testflight
-    FLUTTER_VERSION: "3.0.5"
+    FLUTTER_VERSION: "3.3.1"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux:
   docker:
     - image: snapcore/snapcraft:edge
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.0.5"
+    FLUTTER_VERSION: "3.3.1"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
@@ -70,7 +70,7 @@ flutter-macos:
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.0.5"
+    FLUTTER_VERSION: "3.3.1"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ubuntu-lean:
   working_directory: ~/qaul-libp2p/qaul_ui

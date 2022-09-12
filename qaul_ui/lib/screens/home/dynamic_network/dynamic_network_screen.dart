@@ -1,6 +1,5 @@
 import 'dart:async' as async;
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
