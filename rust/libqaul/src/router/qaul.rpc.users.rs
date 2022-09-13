@@ -1,7 +1,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof="users::Message", tags="1, 2, 3, 4")]
+    #[prost(oneof="users::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -16,6 +16,10 @@ pub mod users {
         UserList(super::UserList),
         #[prost(message, tag="4")]
         UserUpdate(super::UserEntry),
+        #[prost(message, tag="5")]
+        SecurityNumberRequest(super::SecurityNumberRequest),
+        #[prost(message, tag="6")]
+        SecurityNumberResponse(super::SecurityNumberResponse),
     }
 }
 /// UI request for some users
@@ -58,6 +62,27 @@ pub struct UserEntry {
     /// user is blocked
     #[prost(bool, tag="10")]
     pub blocked: bool,
+}
+/// security number request
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SecurityNumberRequest {
+    /// user id
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// security number response
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SecurityNumberResponse {
+    /// the user id of the remote user
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// deliver the full bytes of the hash
+    #[prost(bytes="vec", tag="2")]
+    pub security_hash: ::prost::alloc::vec::Vec<u8>,
+    /// fill in 8 numbers of 16bits
+    /// uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+    #[prost(uint32, repeated, tag="3")]
+    pub security_number_blocks: ::prost::alloc::vec::Vec<u32>,
 }
 /// how is the user connected
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
