@@ -114,6 +114,22 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userUpdate(newValue)}
   }
 
+  var securityNumberRequest: Qaul_Rpc_Users_SecurityNumberRequest {
+    get {
+      if case .securityNumberRequest(let v)? = message {return v}
+      return Qaul_Rpc_Users_SecurityNumberRequest()
+    }
+    set {message = .securityNumberRequest(newValue)}
+  }
+
+  var securityNumberResponse: Qaul_Rpc_Users_SecurityNumberResponse {
+    get {
+      if case .securityNumberResponse(let v)? = message {return v}
+      return Qaul_Rpc_Users_SecurityNumberResponse()
+    }
+    set {message = .securityNumberResponse(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
@@ -121,6 +137,8 @@ struct Qaul_Rpc_Users_Users {
     case userOnlineRequest(Qaul_Rpc_Users_UserOnlineRequest)
     case userList(Qaul_Rpc_Users_UserList)
     case userUpdate(Qaul_Rpc_Users_UserEntry)
+    case securityNumberRequest(Qaul_Rpc_Users_SecurityNumberRequest)
+    case securityNumberResponse(Qaul_Rpc_Users_SecurityNumberResponse)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Users_Users.OneOf_Message, rhs: Qaul_Rpc_Users_Users.OneOf_Message) -> Bool {
@@ -142,6 +160,14 @@ struct Qaul_Rpc_Users_Users {
       }()
       case (.userUpdate, .userUpdate): return {
         guard case .userUpdate(let l) = lhs, case .userUpdate(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.securityNumberRequest, .securityNumberRequest): return {
+        guard case .securityNumberRequest(let l) = lhs, case .securityNumberRequest(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.securityNumberResponse, .securityNumberResponse): return {
+        guard case .securityNumberResponse(let l) = lhs, case .securityNumberResponse(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -222,6 +248,41 @@ struct Qaul_Rpc_Users_UserEntry {
   init() {}
 }
 
+/// security number request
+struct Qaul_Rpc_Users_SecurityNumberRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// user id
+  var userID: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// security number response
+struct Qaul_Rpc_Users_SecurityNumberResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the user id of the remote user
+  var userID: Data = Data()
+
+  /// deliver the full bytes of the hash
+  var securityHash: Data = Data()
+
+  /// fill in 8 numbers of 16bits
+  /// uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+  var securityNumberBlocks: [UInt32] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.users"
@@ -241,6 +302,8 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     2: .standard(proto: "user_online_request"),
     3: .standard(proto: "user_list"),
     4: .standard(proto: "user_update"),
+    5: .standard(proto: "security_number_request"),
+    6: .standard(proto: "security_number_response"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -301,6 +364,32 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
           self.message = .userUpdate(v)
         }
       }()
+      case 5: try {
+        var v: Qaul_Rpc_Users_SecurityNumberRequest?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .securityNumberRequest(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .securityNumberRequest(v)
+        }
+      }()
+      case 6: try {
+        var v: Qaul_Rpc_Users_SecurityNumberResponse?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .securityNumberResponse(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .securityNumberResponse(v)
+        }
+      }()
       default: break
       }
     }
@@ -327,6 +416,14 @@ extension Qaul_Rpc_Users_Users: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
     case .userUpdate?: try {
       guard case .userUpdate(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .securityNumberRequest?: try {
+      guard case .securityNumberRequest(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }()
+    case .securityNumberResponse?: try {
+      guard case .securityNumberResponse(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     }()
     case nil: break
     }
@@ -473,6 +570,82 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.connectivity != rhs.connectivity {return false}
     if lhs.verified != rhs.verified {return false}
     if lhs.blocked != rhs.blocked {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Users_SecurityNumberRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SecurityNumberRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.userID) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.userID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Users_SecurityNumberRequest, rhs: Qaul_Rpc_Users_SecurityNumberRequest) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Users_SecurityNumberResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".SecurityNumberResponse"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .standard(proto: "security_hash"),
+    3: .standard(proto: "security_number_blocks"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.securityHash) }()
+      case 3: try { try decoder.decodeRepeatedUInt32Field(value: &self.securityNumberBlocks) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularBytesField(value: self.userID, fieldNumber: 1)
+    }
+    if !self.securityHash.isEmpty {
+      try visitor.visitSingularBytesField(value: self.securityHash, fieldNumber: 2)
+    }
+    if !self.securityNumberBlocks.isEmpty {
+      try visitor.visitPackedUInt32Field(value: self.securityNumberBlocks, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Users_SecurityNumberResponse, rhs: Qaul_Rpc_Users_SecurityNumberResponse) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.securityHash != rhs.securityHash {return false}
+    if lhs.securityNumberBlocks != rhs.securityNumberBlocks {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

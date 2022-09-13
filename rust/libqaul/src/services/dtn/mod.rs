@@ -341,9 +341,18 @@ impl Dtn {
         }
     }
 
-    /// process commands from CLI
+    /// process commands from RPC
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
-        let my_user_id = PeerId::from_bytes(&user_id).unwrap();
+        // create peer ID from bytes
+        let my_user_id;
+        match PeerId::from_bytes(&user_id) {
+            Ok(peer_id) => my_user_id = peer_id,
+            Err(e) => {
+                log::error!("invalid user id: {}", e);
+                return;
+            }
+        }
+
         match proto_rpc::Dtn::decode(&data[..]) {
             Ok(dtn) => match dtn.message {
                 Some(proto_rpc::dtn::Message::DtnStateRequest(_req)) => {
@@ -372,14 +381,29 @@ impl Dtn {
                 Some(proto_rpc::dtn::Message::DtnConfigRequest(_req)) => {
                     match Configuration::get_user(my_user_id.to_string()) {
                         Some(user_profile) => {
+                            let mut users: Vec<Vec<u8>> = Vec::new();
+                            // create users list
+                            for user in user_profile.storage.users {
+                                // convert string to bytes id
+                                match bs58::decode(user).into_vec() {
+                                    Ok(user_id) => users.push(user_id),
+                                    Err(e) => log::error!(
+                                        "invalid bs58 DTN storage user configuration: {}",
+                                        e
+                                    ),
+                                }
+                            }
+
+                            // create message
                             let proto_message = proto_rpc::Dtn {
                                 message: Some(proto_rpc::dtn::Message::DtnConfigResponse(
                                     proto_rpc::DtnConfigResponse {
                                         total_size: user_profile.storage.size_total,
-                                        users: user_profile.storage.users.clone(),
+                                        users: users,
                                     },
                                 )),
                             };
+
                             // send message
                             Rpc::send_message(
                                 proto_message.encode_to_vec(),
@@ -399,9 +423,21 @@ impl Dtn {
 
                     match Configuration::get_user(my_user_id.to_string()) {
                         Some(user_profile) => {
+                            // CHANGE: save it to user account and not to configuration directly
+
+                            // convert binary data to user string
+                            let user_id_string;
+                            match PeerId::from_bytes(&req.user_id) {
+                                Ok(user_id) => user_id_string = user_id.to_base58(),
+                                Err(e) => {
+                                    log::error!("configuration error reading account it: {}", e);
+                                    return;
+                                }
+                            }
+
                             // check if already exist
                             for user in &user_profile.storage.users {
-                                if *user == req.user_id {
+                                if *user == user_id_string {
                                     status = false;
                                     message = "User already exist".to_string();
                                     break;
@@ -409,7 +445,7 @@ impl Dtn {
                             }
                             if status {
                                 let mut opt = user_profile.storage.clone();
-                                opt.users.push(req.user_id);
+                                opt.users.push(user_id_string);
                                 Configuration::update_user_storage(my_user_id.to_string(), &opt);
                                 Configuration::save();
                             }
@@ -438,9 +474,22 @@ impl Dtn {
 
                     match Configuration::get_user(my_user_id.to_string()) {
                         Some(user_profile) => {
+                            // CHANGE: save it to user_account and not to configuration directly
+
+                            // convert binary data to user string
+                            let user_id_string;
+                            match PeerId::from_bytes(&req.user_id) {
+                                Ok(user_id) => user_id_string = user_id.to_base58(),
+                                Err(e) => {
+                                    log::error!("configuration error reading account it: {}", e);
+                                    return;
+                                }
+                            }
+
+                            // check if user storage exists
                             let mut idx: Option<usize> = None;
                             for i in 0..user_profile.storage.users.len() {
-                                if *user_profile.storage.users.get(i).unwrap() == req.user_id {
+                                if *user_profile.storage.users.get(i).unwrap() == user_id_string {
                                     idx = Some(i);
                                     break;
                                 }
@@ -479,19 +528,21 @@ impl Dtn {
                     }
                 }
                 Some(proto_rpc::dtn::Message::DtnSetTotalSizeRequest(req)) => {
-                    let mut status = true;
-                    let mut message: String = "".to_string();
-
                     match Configuration::get_user(my_user_id.to_string()) {
-                        Some(user_profile) => {
+                        // CHANGE: save it in user profile, not to configuration directly.
+                        Some(_user_profile) => {
                             Configuration::update_total_size(
                                 my_user_id.to_string(),
                                 req.total_size,
                             );
                             Configuration::save();
+
                             let proto_message = proto_rpc::Dtn {
                                 message: Some(proto_rpc::dtn::Message::DtnSetTotalSizeResponse(
-                                    proto_rpc::DtnSetTotalSizeResponse { status, message },
+                                    proto_rpc::DtnSetTotalSizeResponse {
+                                        status: true,
+                                        message: "".to_string(),
+                                    },
                                 )),
                             };
                             // send message

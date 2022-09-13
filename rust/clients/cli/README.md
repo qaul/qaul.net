@@ -33,6 +33,7 @@ The following commands are available:
   * `users online` - display all online users known to this router
   * `users verify {User ID}` - verify user with {User ID}
   * `users block {User ID}` - block user with {User ID}
+  * `users secure {User ID}` - get the security number for a specific user
 * router
   * `router table list` - request and display routing table with per module connectivity per user.
   * `router neighbours list` - request and display neighbours list of all neighbouring nodes.
@@ -64,6 +65,12 @@ The following commands are available:
   * `file send {Group ID} {File Path} {File Description}` - sends a file to the user with the ID {Group ID} and a {File Description} text.
   * `file history [{offset} {limit}]` - displays a paginated file history
     * The page {offset} and {limit} values are optional. The default values are an offset of 0 and 10 results.
+* DTN - Delay Tolerant Networking
+  * `dtn state` - display the state of the local DTN storage. Displays the number of messages and the used bytes.
+  * `dtn config` - displays the DTN configuration: Max storage size & storage users
+  * `dtn add {user ID}` - add a storage user to the DTN list
+  * `dtn remove {user ID}` - remove a storage user
+  * `dtn size {size in MB}` - set the maximal total storage size in mega bytes
 * debug
   * all these commands are for debugging purposes only
   * `debug rpc sent` - displays the number of RPC messages sent to libqaul

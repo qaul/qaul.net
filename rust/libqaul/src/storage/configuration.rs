@@ -253,6 +253,7 @@ impl Configuration {
         None
     }
 
+    // CHANGE: remove this function & save configuration directly via UserAccount
     pub fn update_user_storage(user_id: String, opt: &StorageOptions) {
         let mut config = CONFIG.get().write().unwrap();
         for i in 0..config.user_accounts.len() {
@@ -265,6 +266,7 @@ impl Configuration {
         }
     }
 
+    // CHANGE: remove this function and save configuration directly via UserAccount
     pub fn update_total_size(user_id: String, size: u32) {
         let mut config = CONFIG.get().write().unwrap();
         for i in 0..config.user_accounts.len() {

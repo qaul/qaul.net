@@ -117,6 +117,54 @@ object UsersKt {
     fun hasUserUpdate(): kotlin.Boolean {
       return _builder.hasUserUpdate()
     }
+
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     */
+    var securityNumberRequest: qaul.rpc.users.UsersOuterClass.SecurityNumberRequest
+      @JvmName("getSecurityNumberRequest")
+      get() = _builder.getSecurityNumberRequest()
+      @JvmName("setSecurityNumberRequest")
+      set(value) {
+        _builder.setSecurityNumberRequest(value)
+      }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     */
+    fun clearSecurityNumberRequest() {
+      _builder.clearSecurityNumberRequest()
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     * @return Whether the securityNumberRequest field is set.
+     */
+    fun hasSecurityNumberRequest(): kotlin.Boolean {
+      return _builder.hasSecurityNumberRequest()
+    }
+
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     */
+    var securityNumberResponse: qaul.rpc.users.UsersOuterClass.SecurityNumberResponse
+      @JvmName("getSecurityNumberResponse")
+      get() = _builder.getSecurityNumberResponse()
+      @JvmName("setSecurityNumberResponse")
+      set(value) {
+        _builder.setSecurityNumberResponse(value)
+      }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     */
+    fun clearSecurityNumberResponse() {
+      _builder.clearSecurityNumberResponse()
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     * @return Whether the securityNumberResponse field is set.
+     */
+    fun hasSecurityNumberResponse(): kotlin.Boolean {
+      return _builder.hasSecurityNumberResponse()
+    }
     val messageCase: qaul.rpc.users.UsersOuterClass.Users.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -141,4 +189,10 @@ val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.userListOrNull: qaul.rpc.users
 
 val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.userUpdateOrNull: qaul.rpc.users.UsersOuterClass.UserEntry?
   get() = if (hasUserUpdate()) getUserUpdate() else null
+
+val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.securityNumberRequestOrNull: qaul.rpc.users.UsersOuterClass.SecurityNumberRequest?
+  get() = if (hasSecurityNumberRequest()) getSecurityNumberRequest() else null
+
+val qaul.rpc.users.UsersOuterClass.UsersOrBuilder.securityNumberResponseOrNull: qaul.rpc.users.UsersOuterClass.SecurityNumberResponse?
+  get() = if (hasSecurityNumberResponse()) getSecurityNumberResponse() else null
 

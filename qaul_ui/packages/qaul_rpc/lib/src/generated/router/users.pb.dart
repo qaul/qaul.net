@@ -18,6 +18,8 @@ enum Users_Message {
   userOnlineRequest, 
   userList, 
   userUpdate, 
+  securityNumberRequest, 
+  securityNumberResponse, 
   notSet
 }
 
@@ -27,14 +29,18 @@ class Users extends $pb.GeneratedMessage {
     2 : Users_Message.userOnlineRequest,
     3 : Users_Message.userList,
     4 : Users_Message.userUpdate,
+    5 : Users_Message.securityNumberRequest,
+    6 : Users_Message.securityNumberResponse,
     0 : Users_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Users', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4])
+    ..oo(0, [1, 2, 3, 4, 5, 6])
     ..aOM<UserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userRequest', subBuilder: UserRequest.create)
     ..aOM<UserOnlineRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userOnlineRequest', subBuilder: UserOnlineRequest.create)
     ..aOM<UserList>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userList', subBuilder: UserList.create)
     ..aOM<UserEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdate', subBuilder: UserEntry.create)
+    ..aOM<SecurityNumberRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberRequest', subBuilder: SecurityNumberRequest.create)
+    ..aOM<SecurityNumberResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberResponse', subBuilder: SecurityNumberResponse.create)
     ..hasRequiredFields = false
   ;
 
@@ -44,6 +50,8 @@ class Users extends $pb.GeneratedMessage {
     UserOnlineRequest? userOnlineRequest,
     UserList? userList,
     UserEntry? userUpdate,
+    SecurityNumberRequest? securityNumberRequest,
+    SecurityNumberResponse? securityNumberResponse,
   }) {
     final _result = create();
     if (userRequest != null) {
@@ -57,6 +65,12 @@ class Users extends $pb.GeneratedMessage {
     }
     if (userUpdate != null) {
       _result.userUpdate = userUpdate;
+    }
+    if (securityNumberRequest != null) {
+      _result.securityNumberRequest = securityNumberRequest;
+    }
+    if (securityNumberResponse != null) {
+      _result.securityNumberResponse = securityNumberResponse;
     }
     return _result;
   }
@@ -127,6 +141,28 @@ class Users extends $pb.GeneratedMessage {
   void clearUserUpdate() => clearField(4);
   @$pb.TagNumber(4)
   UserEntry ensureUserUpdate() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  SecurityNumberRequest get securityNumberRequest => $_getN(4);
+  @$pb.TagNumber(5)
+  set securityNumberRequest(SecurityNumberRequest v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasSecurityNumberRequest() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearSecurityNumberRequest() => clearField(5);
+  @$pb.TagNumber(5)
+  SecurityNumberRequest ensureSecurityNumberRequest() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  SecurityNumberResponse get securityNumberResponse => $_getN(5);
+  @$pb.TagNumber(6)
+  set securityNumberResponse(SecurityNumberResponse v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasSecurityNumberResponse() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSecurityNumberResponse() => clearField(6);
+  @$pb.TagNumber(6)
+  SecurityNumberResponse ensureSecurityNumberResponse() => $_ensure(5);
 }
 
 class UserRequest extends $pb.GeneratedMessage {
@@ -357,5 +393,121 @@ class UserEntry extends $pb.GeneratedMessage {
   $core.bool hasBlocked() => $_has(6);
   @$pb.TagNumber(10)
   void clearBlocked() => clearField(10);
+}
+
+class SecurityNumberRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SecurityNumberRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  SecurityNumberRequest._() : super();
+  factory SecurityNumberRequest({
+    $core.List<$core.int>? userId,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory SecurityNumberRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SecurityNumberRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SecurityNumberRequest clone() => SecurityNumberRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SecurityNumberRequest copyWith(void Function(SecurityNumberRequest) updates) => super.copyWith((message) => updates(message as SecurityNumberRequest)) as SecurityNumberRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SecurityNumberRequest create() => SecurityNumberRequest._();
+  SecurityNumberRequest createEmptyInstance() => create();
+  static $pb.PbList<SecurityNumberRequest> createRepeated() => $pb.PbList<SecurityNumberRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SecurityNumberRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SecurityNumberRequest>(create);
+  static SecurityNumberRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get userId => $_getN(0);
+  @$pb.TagNumber(1)
+  set userId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+}
+
+class SecurityNumberResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SecurityNumberResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityHash', $pb.PbFieldType.OY)
+    ..p<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberBlocks', $pb.PbFieldType.KU3)
+    ..hasRequiredFields = false
+  ;
+
+  SecurityNumberResponse._() : super();
+  factory SecurityNumberResponse({
+    $core.List<$core.int>? userId,
+    $core.List<$core.int>? securityHash,
+    $core.Iterable<$core.int>? securityNumberBlocks,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (securityHash != null) {
+      _result.securityHash = securityHash;
+    }
+    if (securityNumberBlocks != null) {
+      _result.securityNumberBlocks.addAll(securityNumberBlocks);
+    }
+    return _result;
+  }
+  factory SecurityNumberResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SecurityNumberResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SecurityNumberResponse clone() => SecurityNumberResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SecurityNumberResponse copyWith(void Function(SecurityNumberResponse) updates) => super.copyWith((message) => updates(message as SecurityNumberResponse)) as SecurityNumberResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SecurityNumberResponse create() => SecurityNumberResponse._();
+  SecurityNumberResponse createEmptyInstance() => create();
+  static $pb.PbList<SecurityNumberResponse> createRepeated() => $pb.PbList<SecurityNumberResponse>();
+  @$core.pragma('dart2js:noInline')
+  static SecurityNumberResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SecurityNumberResponse>(create);
+  static SecurityNumberResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get userId => $_getN(0);
+  @$pb.TagNumber(1)
+  set userId($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get securityHash => $_getN(1);
+  @$pb.TagNumber(2)
+  set securityHash($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasSecurityHash() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSecurityHash() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get securityNumberBlocks => $_getList(2);
 }
 

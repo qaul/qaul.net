@@ -28,10 +28,8 @@ message DTN {
     }
 }
 
-
 // Dtn State Request
-message DtnStateRequest {
-}
+message DtnStateRequest {}
 
 // Dtn State Response
 message DtnStateResponse {
@@ -44,21 +42,20 @@ message DtnStateResponse {
 }
 
 // Dtn Config Request
-message DtnConfigRequest {
-}
+message DtnConfigRequest {}
 
 // Dtn Config Response
 message DtnConfigResponse {
     // total_size
     uint32 total_size = 1;
     // users
-    repeated string users = 2;
+    repeated bytes users = 2;
 }
 
 // Dtn Add User Request
 message DtnAddUserRequest {
     // user id
-    string user_id = 1;
+    bytes user_id = 1;
 }
 
 // Dtn Add User Response
@@ -72,7 +69,7 @@ message DtnAddUserResponse {
 // Dtn Remove User Request
 message DtnRemoveUserRequest {
     // user id
-    string user_id = 1;
+    bytes user_id = 1;
 }
 
 // Dtn Remove User Response
@@ -96,4 +93,3 @@ message DtnSetTotalSizeResponse {
     // users
     string message = 2;
 }
-

@@ -229,6 +229,36 @@ public final class UsersOuterClass {
      */
     qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder getUserUpdateOrBuilder();
 
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     * @return Whether the securityNumberRequest field is set.
+     */
+    boolean hasSecurityNumberRequest();
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     * @return The securityNumberRequest.
+     */
+    qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getSecurityNumberRequest();
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     */
+    qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder getSecurityNumberRequestOrBuilder();
+
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     * @return Whether the securityNumberResponse field is set.
+     */
+    boolean hasSecurityNumberResponse();
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     * @return The securityNumberResponse.
+     */
+    qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getSecurityNumberResponse();
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     */
+    qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder getSecurityNumberResponseOrBuilder();
+
     public qaul.rpc.users.UsersOuterClass.Users.MessageCase getMessageCase();
   }
   /**
@@ -336,6 +366,34 @@ public final class UsersOuterClass {
               messageCase_ = 4;
               break;
             }
+            case 42: {
+              qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder subBuilder = null;
+              if (messageCase_ == 5) {
+                subBuilder = ((qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 5;
+              break;
+            }
+            case 50: {
+              qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder subBuilder = null;
+              if (messageCase_ == 6) {
+                subBuilder = ((qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 6;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -379,6 +437,8 @@ public final class UsersOuterClass {
       USER_ONLINE_REQUEST(2),
       USER_LIST(3),
       USER_UPDATE(4),
+      SECURITY_NUMBER_REQUEST(5),
+      SECURITY_NUMBER_RESPONSE(6),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -400,6 +460,8 @@ public final class UsersOuterClass {
           case 2: return USER_ONLINE_REQUEST;
           case 3: return USER_LIST;
           case 4: return USER_UPDATE;
+          case 5: return SECURITY_NUMBER_REQUEST;
+          case 6: return SECURITY_NUMBER_RESPONSE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -539,6 +601,68 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
     }
 
+    public static final int SECURITY_NUMBER_REQUEST_FIELD_NUMBER = 5;
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     * @return Whether the securityNumberRequest field is set.
+     */
+    @java.lang.Override
+    public boolean hasSecurityNumberRequest() {
+      return messageCase_ == 5;
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     * @return The securityNumberRequest.
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getSecurityNumberRequest() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder getSecurityNumberRequestOrBuilder() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+    }
+
+    public static final int SECURITY_NUMBER_RESPONSE_FIELD_NUMBER = 6;
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     * @return Whether the securityNumberResponse field is set.
+     */
+    @java.lang.Override
+    public boolean hasSecurityNumberResponse() {
+      return messageCase_ == 6;
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     * @return The securityNumberResponse.
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getSecurityNumberResponse() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+    }
+    /**
+     * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder getSecurityNumberResponseOrBuilder() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_;
+      }
+      return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -565,6 +689,12 @@ public final class UsersOuterClass {
       if (messageCase_ == 4) {
         output.writeMessage(4, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
       }
+      if (messageCase_ == 5) {
+        output.writeMessage(5, (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        output.writeMessage(6, (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -589,6 +719,14 @@ public final class UsersOuterClass {
       if (messageCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (qaul.rpc.users.UsersOuterClass.UserEntry) message_);
+      }
+      if (messageCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_);
+      }
+      if (messageCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -623,6 +761,14 @@ public final class UsersOuterClass {
           if (!getUserUpdate()
               .equals(other.getUserUpdate())) return false;
           break;
+        case 5:
+          if (!getSecurityNumberRequest()
+              .equals(other.getSecurityNumberRequest())) return false;
+          break;
+        case 6:
+          if (!getSecurityNumberResponse()
+              .equals(other.getSecurityNumberResponse())) return false;
+          break;
         case 0:
         default:
       }
@@ -653,6 +799,14 @@ public final class UsersOuterClass {
         case 4:
           hash = (37 * hash) + USER_UPDATE_FIELD_NUMBER;
           hash = (53 * hash) + getUserUpdate().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + SECURITY_NUMBER_REQUEST_FIELD_NUMBER;
+          hash = (53 * hash) + getSecurityNumberRequest().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + SECURITY_NUMBER_RESPONSE_FIELD_NUMBER;
+          hash = (53 * hash) + getSecurityNumberResponse().hashCode();
           break;
         case 0:
         default:
@@ -850,6 +1004,20 @@ public final class UsersOuterClass {
             result.message_ = userUpdateBuilder_.build();
           }
         }
+        if (messageCase_ == 5) {
+          if (securityNumberRequestBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = securityNumberRequestBuilder_.build();
+          }
+        }
+        if (messageCase_ == 6) {
+          if (securityNumberResponseBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = securityNumberResponseBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -914,6 +1082,14 @@ public final class UsersOuterClass {
           }
           case USER_UPDATE: {
             mergeUserUpdate(other.getUserUpdate());
+            break;
+          }
+          case SECURITY_NUMBER_REQUEST: {
+            mergeSecurityNumberRequest(other.getSecurityNumberRequest());
+            break;
+          }
+          case SECURITY_NUMBER_RESPONSE: {
+            mergeSecurityNumberResponse(other.getSecurityNumberResponse());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -1530,6 +1706,290 @@ public final class UsersOuterClass {
         messageCase_ = 4;
         onChanged();;
         return userUpdateBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.SecurityNumberRequest, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder> securityNumberRequestBuilder_;
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       * @return Whether the securityNumberRequest field is set.
+       */
+      @java.lang.Override
+      public boolean hasSecurityNumberRequest() {
+        return messageCase_ == 5;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       * @return The securityNumberRequest.
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getSecurityNumberRequest() {
+        if (securityNumberRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+        } else {
+          if (messageCase_ == 5) {
+            return securityNumberRequestBuilder_.getMessage();
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      public Builder setSecurityNumberRequest(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest value) {
+        if (securityNumberRequestBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          securityNumberRequestBuilder_.setMessage(value);
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      public Builder setSecurityNumberRequest(
+          qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder builderForValue) {
+        if (securityNumberRequestBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          securityNumberRequestBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      public Builder mergeSecurityNumberRequest(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest value) {
+        if (securityNumberRequestBuilder_ == null) {
+          if (messageCase_ == 5 &&
+              message_ != qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance()) {
+            message_ = qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.newBuilder((qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 5) {
+            securityNumberRequestBuilder_.mergeFrom(value);
+          } else {
+            securityNumberRequestBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      public Builder clearSecurityNumberRequest() {
+        if (securityNumberRequestBuilder_ == null) {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          securityNumberRequestBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder getSecurityNumberRequestBuilder() {
+        return getSecurityNumberRequestFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder getSecurityNumberRequestOrBuilder() {
+        if ((messageCase_ == 5) && (securityNumberRequestBuilder_ != null)) {
+          return securityNumberRequestBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.SecurityNumberRequest, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder> 
+          getSecurityNumberRequestFieldBuilder() {
+        if (securityNumberRequestBuilder_ == null) {
+          if (!(messageCase_ == 5)) {
+            message_ = qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+          }
+          securityNumberRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.users.UsersOuterClass.SecurityNumberRequest, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder>(
+                  (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 5;
+        onChanged();;
+        return securityNumberRequestBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.SecurityNumberResponse, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder> securityNumberResponseBuilder_;
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       * @return Whether the securityNumberResponse field is set.
+       */
+      @java.lang.Override
+      public boolean hasSecurityNumberResponse() {
+        return messageCase_ == 6;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       * @return The securityNumberResponse.
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getSecurityNumberResponse() {
+        if (securityNumberResponseBuilder_ == null) {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+        } else {
+          if (messageCase_ == 6) {
+            return securityNumberResponseBuilder_.getMessage();
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      public Builder setSecurityNumberResponse(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse value) {
+        if (securityNumberResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          securityNumberResponseBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      public Builder setSecurityNumberResponse(
+          qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder builderForValue) {
+        if (securityNumberResponseBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          securityNumberResponseBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      public Builder mergeSecurityNumberResponse(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse value) {
+        if (securityNumberResponseBuilder_ == null) {
+          if (messageCase_ == 6 &&
+              message_ != qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance()) {
+            message_ = qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.newBuilder((qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 6) {
+            securityNumberResponseBuilder_.mergeFrom(value);
+          } else {
+            securityNumberResponseBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      public Builder clearSecurityNumberResponse() {
+        if (securityNumberResponseBuilder_ == null) {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          securityNumberResponseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder getSecurityNumberResponseBuilder() {
+        return getSecurityNumberResponseFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder getSecurityNumberResponseOrBuilder() {
+        if ((messageCase_ == 6) && (securityNumberResponseBuilder_ != null)) {
+          return securityNumberResponseBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_;
+          }
+          return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.SecurityNumberResponse, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder> 
+          getSecurityNumberResponseFieldBuilder() {
+        if (securityNumberResponseBuilder_ == null) {
+          if (!(messageCase_ == 6)) {
+            message_ = qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+          }
+          securityNumberResponseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.users.UsersOuterClass.SecurityNumberResponse, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder>(
+                  (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 6;
+        onChanged();;
+        return securityNumberResponseBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -4561,6 +5021,1406 @@ public final class UsersOuterClass {
 
   }
 
+  public interface SecurityNumberRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.users.SecurityNumberRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * user id
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    com.google.protobuf.ByteString getUserId();
+  }
+  /**
+   * <pre>
+   * security number request
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.users.SecurityNumberRequest}
+   */
+  public static final class SecurityNumberRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.users.SecurityNumberRequest)
+      SecurityNumberRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SecurityNumberRequest.newBuilder() to construct.
+    private SecurityNumberRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SecurityNumberRequest() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SecurityNumberRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SecurityNumberRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.class, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder.class);
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <pre>
+     * user id
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!userId_.isEmpty()) {
+        output.writeBytes(1, userId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.users.UsersOuterClass.SecurityNumberRequest)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.users.UsersOuterClass.SecurityNumberRequest other = (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) obj;
+
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * security number request
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.users.SecurityNumberRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.users.SecurityNumberRequest)
+        qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.class, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder.class);
+      }
+
+      // Construct using qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getDefaultInstanceForType() {
+        return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest build() {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest buildPartial() {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberRequest result = new qaul.rpc.users.UsersOuterClass.SecurityNumberRequest(this);
+        result.userId_ = userId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) {
+          return mergeFrom((qaul.rpc.users.UsersOuterClass.SecurityNumberRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest other) {
+        if (other == qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance()) return this;
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.users.UsersOuterClass.SecurityNumberRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * user id
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.users.SecurityNumberRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.users.SecurityNumberRequest)
+    private static final qaul.rpc.users.UsersOuterClass.SecurityNumberRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.users.UsersOuterClass.SecurityNumberRequest();
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SecurityNumberRequest>
+        PARSER = new com.google.protobuf.AbstractParser<SecurityNumberRequest>() {
+      @java.lang.Override
+      public SecurityNumberRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SecurityNumberRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SecurityNumberRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SecurityNumberRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SecurityNumberResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.users.SecurityNumberResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the user id of the remote user
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    com.google.protobuf.ByteString getUserId();
+
+    /**
+     * <pre>
+     * deliver the full bytes of the hash
+     * </pre>
+     *
+     * <code>bytes security_hash = 2;</code>
+     * @return The securityHash.
+     */
+    com.google.protobuf.ByteString getSecurityHash();
+
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @return A list containing the securityNumberBlocks.
+     */
+    java.util.List<java.lang.Integer> getSecurityNumberBlocksList();
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @return The count of securityNumberBlocks.
+     */
+    int getSecurityNumberBlocksCount();
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @param index The index of the element to return.
+     * @return The securityNumberBlocks at the given index.
+     */
+    int getSecurityNumberBlocks(int index);
+  }
+  /**
+   * <pre>
+   * security number response
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.users.SecurityNumberResponse}
+   */
+  public static final class SecurityNumberResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.users.SecurityNumberResponse)
+      SecurityNumberResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SecurityNumberResponse.newBuilder() to construct.
+    private SecurityNumberResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SecurityNumberResponse() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+      securityHash_ = com.google.protobuf.ByteString.EMPTY;
+      securityNumberBlocks_ = emptyIntList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SecurityNumberResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SecurityNumberResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+
+              userId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+
+              securityHash_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                securityNumberBlocks_ = newIntList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              securityNumberBlocks_.addInt(input.readUInt32());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                securityNumberBlocks_ = newIntList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                securityNumberBlocks_.addInt(input.readUInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          securityNumberBlocks_.makeImmutable(); // C
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.class, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder.class);
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <pre>
+     * the user id of the remote user
+     * </pre>
+     *
+     * <code>bytes user_id = 1;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    public static final int SECURITY_HASH_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString securityHash_;
+    /**
+     * <pre>
+     * deliver the full bytes of the hash
+     * </pre>
+     *
+     * <code>bytes security_hash = 2;</code>
+     * @return The securityHash.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getSecurityHash() {
+      return securityHash_;
+    }
+
+    public static final int SECURITY_NUMBER_BLOCKS_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.IntList securityNumberBlocks_;
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @return A list containing the securityNumberBlocks.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Integer>
+        getSecurityNumberBlocksList() {
+      return securityNumberBlocks_;
+    }
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @return The count of securityNumberBlocks.
+     */
+    public int getSecurityNumberBlocksCount() {
+      return securityNumberBlocks_.size();
+    }
+    /**
+     * <pre>
+     * fill in 8 numbers of 16bits
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * </pre>
+     *
+     * <code>repeated uint32 security_number_blocks = 3;</code>
+     * @param index The index of the element to return.
+     * @return The securityNumberBlocks at the given index.
+     */
+    public int getSecurityNumberBlocks(int index) {
+      return securityNumberBlocks_.getInt(index);
+    }
+    private int securityNumberBlocksMemoizedSerializedSize = -1;
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (!userId_.isEmpty()) {
+        output.writeBytes(1, userId_);
+      }
+      if (!securityHash_.isEmpty()) {
+        output.writeBytes(2, securityHash_);
+      }
+      if (getSecurityNumberBlocksList().size() > 0) {
+        output.writeUInt32NoTag(26);
+        output.writeUInt32NoTag(securityNumberBlocksMemoizedSerializedSize);
+      }
+      for (int i = 0; i < securityNumberBlocks_.size(); i++) {
+        output.writeUInt32NoTag(securityNumberBlocks_.getInt(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!userId_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      if (!securityHash_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, securityHash_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < securityNumberBlocks_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(securityNumberBlocks_.getInt(i));
+        }
+        size += dataSize;
+        if (!getSecurityNumberBlocksList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        securityNumberBlocksMemoizedSerializedSize = dataSize;
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.users.UsersOuterClass.SecurityNumberResponse)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.users.UsersOuterClass.SecurityNumberResponse other = (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) obj;
+
+      if (!getUserId()
+          .equals(other.getUserId())) return false;
+      if (!getSecurityHash()
+          .equals(other.getSecurityHash())) return false;
+      if (!getSecurityNumberBlocksList()
+          .equals(other.getSecurityNumberBlocksList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      hash = (37 * hash) + SECURITY_HASH_FIELD_NUMBER;
+      hash = (53 * hash) + getSecurityHash().hashCode();
+      if (getSecurityNumberBlocksCount() > 0) {
+        hash = (37 * hash) + SECURITY_NUMBER_BLOCKS_FIELD_NUMBER;
+        hash = (53 * hash) + getSecurityNumberBlocksList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * security number response
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.users.SecurityNumberResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.users.SecurityNumberResponse)
+        qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.class, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder.class);
+      }
+
+      // Construct using qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+
+        securityHash_ = com.google.protobuf.ByteString.EMPTY;
+
+        securityNumberBlocks_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getDefaultInstanceForType() {
+        return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse build() {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse buildPartial() {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberResponse result = new qaul.rpc.users.UsersOuterClass.SecurityNumberResponse(this);
+        int from_bitField0_ = bitField0_;
+        result.userId_ = userId_;
+        result.securityHash_ = securityHash_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          securityNumberBlocks_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.securityNumberBlocks_ = securityNumberBlocks_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) {
+          return mergeFrom((qaul.rpc.users.UsersOuterClass.SecurityNumberResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse other) {
+        if (other == qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance()) return this;
+        if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
+          setUserId(other.getUserId());
+        }
+        if (other.getSecurityHash() != com.google.protobuf.ByteString.EMPTY) {
+          setSecurityHash(other.getSecurityHash());
+        }
+        if (!other.securityNumberBlocks_.isEmpty()) {
+          if (securityNumberBlocks_.isEmpty()) {
+            securityNumberBlocks_ = other.securityNumberBlocks_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureSecurityNumberBlocksIsMutable();
+            securityNumberBlocks_.addAll(other.securityNumberBlocks_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.users.UsersOuterClass.SecurityNumberResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * the user id of the remote user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <pre>
+       * the user id of the remote user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the user id of the remote user
+       * </pre>
+       *
+       * <code>bytes user_id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString securityHash_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * deliver the full bytes of the hash
+       * </pre>
+       *
+       * <code>bytes security_hash = 2;</code>
+       * @return The securityHash.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getSecurityHash() {
+        return securityHash_;
+      }
+      /**
+       * <pre>
+       * deliver the full bytes of the hash
+       * </pre>
+       *
+       * <code>bytes security_hash = 2;</code>
+       * @param value The securityHash to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSecurityHash(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        securityHash_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * deliver the full bytes of the hash
+       * </pre>
+       *
+       * <code>bytes security_hash = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSecurityHash() {
+        
+        securityHash_ = getDefaultInstance().getSecurityHash();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList securityNumberBlocks_ = emptyIntList();
+      private void ensureSecurityNumberBlocksIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          securityNumberBlocks_ = mutableCopy(securityNumberBlocks_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @return A list containing the securityNumberBlocks.
+       */
+      public java.util.List<java.lang.Integer>
+          getSecurityNumberBlocksList() {
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(securityNumberBlocks_) : securityNumberBlocks_;
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @return The count of securityNumberBlocks.
+       */
+      public int getSecurityNumberBlocksCount() {
+        return securityNumberBlocks_.size();
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @param index The index of the element to return.
+       * @return The securityNumberBlocks at the given index.
+       */
+      public int getSecurityNumberBlocks(int index) {
+        return securityNumberBlocks_.getInt(index);
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The securityNumberBlocks to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSecurityNumberBlocks(
+          int index, int value) {
+        ensureSecurityNumberBlocksIsMutable();
+        securityNumberBlocks_.setInt(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @param value The securityNumberBlocks to add.
+       * @return This builder for chaining.
+       */
+      public Builder addSecurityNumberBlocks(int value) {
+        ensureSecurityNumberBlocksIsMutable();
+        securityNumberBlocks_.addInt(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @param values The securityNumberBlocks to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllSecurityNumberBlocks(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureSecurityNumberBlocksIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, securityNumberBlocks_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * fill in 8 numbers of 16bits
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * </pre>
+       *
+       * <code>repeated uint32 security_number_blocks = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSecurityNumberBlocks() {
+        securityNumberBlocks_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.users.SecurityNumberResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.users.SecurityNumberResponse)
+    private static final qaul.rpc.users.UsersOuterClass.SecurityNumberResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.users.UsersOuterClass.SecurityNumberResponse();
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SecurityNumberResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SecurityNumberResponse>() {
+      @java.lang.Override
+      public SecurityNumberResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SecurityNumberResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SecurityNumberResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SecurityNumberResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_users_Users_descriptor;
   private static final 
@@ -4586,6 +6446,16 @@ public final class UsersOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_users_SecurityNumberRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_users_SecurityNumberResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -4595,21 +6465,29 @@ public final class UsersOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022router/users.proto\022\016qaul.rpc.users\"\352\001\n" +
+      "\n\022router/users.proto\022\016qaul.rpc.users\"\200\003\n" +
       "\005Users\0223\n\014user_request\030\001 \001(\0132\033.qaul.rpc." +
       "users.UserRequestH\000\022@\n\023user_online_reque" +
       "st\030\002 \001(\0132!.qaul.rpc.users.UserOnlineRequ" +
       "estH\000\022-\n\tuser_list\030\003 \001(\0132\030.qaul.rpc.user" +
       "s.UserListH\000\0220\n\013user_update\030\004 \001(\0132\031.qaul" +
-      ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use" +
-      "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis" +
-      "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt" +
-      "ry\"\242\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001" +
-      "(\014\022\020\n\010group_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t" +
-      "\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc.users." +
-      "Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocke" +
-      "d\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tR" +
-      "eachable\020\001\022\013\n\007Offline\020\002b\006proto3"
+      ".rpc.users.UserEntryH\000\022H\n\027security_numbe" +
+      "r_request\030\005 \001(\0132%.qaul.rpc.users.Securit" +
+      "yNumberRequestH\000\022J\n\030security_number_resp" +
+      "onse\030\006 \001(\0132&.qaul.rpc.users.SecurityNumb" +
+      "erResponseH\000B\t\n\007message\"\r\n\013UserRequest\"\023" +
+      "\n\021UserOnlineRequest\"3\n\010UserList\022\'\n\004user\030" +
+      "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\242\001\n\tUse" +
+      "rEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\020\n\010grou" +
+      "p_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connec" +
+      "tivity\030\010 \001(\0162\034.qaul.rpc.users.Connectivi" +
+      "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\"(\n" +
+      "\025SecurityNumberRequest\022\017\n\007user_id\030\001 \001(\014\"" +
+      "`\n\026SecurityNumberResponse\022\017\n\007user_id\030\001 \001" +
+      "(\014\022\025\n\rsecurity_hash\030\002 \001(\014\022\036\n\026security_nu" +
+      "mber_blocks\030\003 \003(\r*6\n\014Connectivity\022\n\n\006Onl" +
+      "ine\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4620,7 +6498,7 @@ public final class UsersOuterClass {
     internal_static_qaul_rpc_users_Users_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_Users_descriptor,
-        new java.lang.String[] { "UserRequest", "UserOnlineRequest", "UserList", "UserUpdate", "Message", });
+        new java.lang.String[] { "UserRequest", "UserOnlineRequest", "UserList", "UserUpdate", "SecurityNumberRequest", "SecurityNumberResponse", "Message", });
     internal_static_qaul_rpc_users_UserRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_users_UserRequest_fieldAccessorTable = new
@@ -4645,6 +6523,18 @@ public final class UsersOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserEntry_descriptor,
         new java.lang.String[] { "Name", "Id", "GroupId", "KeyBase58", "Connectivity", "Verified", "Blocked", });
+    internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_qaul_rpc_users_SecurityNumberRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor,
+        new java.lang.String[] { "UserId", });
+    internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_qaul_rpc_users_SecurityNumberResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor,
+        new java.lang.String[] { "UserId", "SecurityHash", "SecurityNumberBlocks", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

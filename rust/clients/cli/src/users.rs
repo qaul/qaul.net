@@ -203,8 +203,13 @@ impl Users {
                 }
                 Some(proto::users::Message::SecurityNumberResponse(resp)) => {
                     println!("Security Number:");
+                    let mut counter = 0;
                     for number in resp.security_number_blocks {
                         print!("{:#05} ", number);
+                        if counter == 3 {
+                            println!("");
+                        }
+                        counter = counter + 1;
                     }
                     println!("");
                 }

@@ -70,15 +70,15 @@ pub struct DtnConfigResponse {
     #[prost(uint32, tag="1")]
     pub total_size: u32,
     /// users
-    #[prost(string, repeated, tag="2")]
-    pub users: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(bytes="vec", repeated, tag="2")]
+    pub users: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// Dtn Add User Request
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DtnAddUserRequest {
     /// user id
-    #[prost(string, tag="1")]
-    pub user_id: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Dtn Add User Response
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -94,8 +94,8 @@ pub struct DtnAddUserResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DtnRemoveUserRequest {
     /// user id
-    #[prost(string, tag="1")]
-    pub user_id: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Dtn Remove User Response
 #[derive(Clone, PartialEq, ::prost::Message)]

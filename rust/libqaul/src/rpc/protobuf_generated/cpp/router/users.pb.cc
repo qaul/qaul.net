@@ -91,10 +91,39 @@ struct UserEntryDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserEntryDefaultTypeInternal _UserEntry_default_instance_;
+PROTOBUF_CONSTEXPR SecurityNumberRequest::SecurityNumberRequest(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SecurityNumberRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SecurityNumberRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SecurityNumberRequestDefaultTypeInternal() {}
+  union {
+    SecurityNumberRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SecurityNumberRequestDefaultTypeInternal _SecurityNumberRequest_default_instance_;
+PROTOBUF_CONSTEXPR SecurityNumberResponse::SecurityNumberResponse(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.security_number_blocks_)*/{}
+  , /*decltype(_impl_._security_number_blocks_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.security_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SecurityNumberResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SecurityNumberResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SecurityNumberResponseDefaultTypeInternal() {}
+  union {
+    SecurityNumberResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SecurityNumberResponseDefaultTypeInternal _SecurityNumberResponse_default_instance_;
 }  // namespace users
 }  // namespace rpc
 }  // namespace qaul
-static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[5];
+static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[7];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2fusers_2eproto[1];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_router_2fusers_2eproto = nullptr;
 
@@ -105,6 +134,8 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::Users, _impl_._oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::_pbi::kInvalidFieldOffsetTag,
+  ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
   ::_pbi::kInvalidFieldOffsetTag,
@@ -142,13 +173,31 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.connectivity_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.verified_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.blocked_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberRequest, _impl_.user_id_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberResponse, _impl_.user_id_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberResponse, _impl_.security_hash_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberResponse, _impl_.security_number_blocks_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::qaul::rpc::users::Users)},
-  { 11, -1, -1, sizeof(::qaul::rpc::users::UserRequest)},
-  { 17, -1, -1, sizeof(::qaul::rpc::users::UserOnlineRequest)},
-  { 23, -1, -1, sizeof(::qaul::rpc::users::UserList)},
-  { 30, -1, -1, sizeof(::qaul::rpc::users::UserEntry)},
+  { 13, -1, -1, sizeof(::qaul::rpc::users::UserRequest)},
+  { 19, -1, -1, sizeof(::qaul::rpc::users::UserOnlineRequest)},
+  { 25, -1, -1, sizeof(::qaul::rpc::users::UserList)},
+  { 32, -1, -1, sizeof(::qaul::rpc::users::UserEntry)},
+  { 45, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberRequest)},
+  { 52, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -157,30 +206,40 @@ static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::rpc::users::_UserOnlineRequest_default_instance_._instance,
   &::qaul::rpc::users::_UserList_default_instance_._instance,
   &::qaul::rpc::users::_UserEntry_default_instance_._instance,
+  &::qaul::rpc::users::_SecurityNumberRequest_default_instance_._instance,
+  &::qaul::rpc::users::_SecurityNumberResponse_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_router_2fusers_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022router/users.proto\022\016qaul.rpc.users\"\352\001\n"
+  "\n\022router/users.proto\022\016qaul.rpc.users\"\200\003\n"
   "\005Users\0223\n\014user_request\030\001 \001(\0132\033.qaul.rpc."
   "users.UserRequestH\000\022@\n\023user_online_reque"
   "st\030\002 \001(\0132!.qaul.rpc.users.UserOnlineRequ"
   "estH\000\022-\n\tuser_list\030\003 \001(\0132\030.qaul.rpc.user"
   "s.UserListH\000\0220\n\013user_update\030\004 \001(\0132\031.qaul"
-  ".rpc.users.UserEntryH\000B\t\n\007message\"\r\n\013Use"
-  "rRequest\"\023\n\021UserOnlineRequest\"3\n\010UserLis"
-  "t\022\'\n\004user\030\001 \003(\0132\031.qaul.rpc.users.UserEnt"
-  "ry\"\242\001\n\tUserEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001"
-  "(\014\022\020\n\010group_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t"
-  "\0222\n\014connectivity\030\010 \001(\0162\034.qaul.rpc.users."
-  "Connectivity\022\020\n\010verified\030\t \001(\010\022\017\n\007blocke"
-  "d\030\n \001(\010*6\n\014Connectivity\022\n\n\006Online\020\000\022\r\n\tR"
-  "eachable\020\001\022\013\n\007Offline\020\002b\006proto3"
+  ".rpc.users.UserEntryH\000\022H\n\027security_numbe"
+  "r_request\030\005 \001(\0132%.qaul.rpc.users.Securit"
+  "yNumberRequestH\000\022J\n\030security_number_resp"
+  "onse\030\006 \001(\0132&.qaul.rpc.users.SecurityNumb"
+  "erResponseH\000B\t\n\007message\"\r\n\013UserRequest\"\023"
+  "\n\021UserOnlineRequest\"3\n\010UserList\022\'\n\004user\030"
+  "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\242\001\n\tUse"
+  "rEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\020\n\010grou"
+  "p_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connec"
+  "tivity\030\010 \001(\0162\034.qaul.rpc.users.Connectivi"
+  "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\"(\n"
+  "\025SecurityNumberRequest\022\017\n\007user_id\030\001 \001(\014\""
+  "`\n\026SecurityNumberResponse\022\017\n\007user_id\030\001 \001"
+  "(\014\022\025\n\rsecurity_hash\030\002 \001(\014\022\036\n\026security_nu"
+  "mber_blocks\030\003 \003(\r*6\n\014Connectivity\022\n\n\006Onl"
+  "ine\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto"
+  "3"
   ;
 static ::_pbi::once_flag descriptor_table_router_2fusers_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2fusers_2eproto = {
-    false, false, 591, descriptor_table_protodef_router_2fusers_2eproto,
+    false, false, 881, descriptor_table_protodef_router_2fusers_2eproto,
     "router/users.proto",
-    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 5,
+    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 7,
     schemas, file_default_instances, TableStruct_router_2fusers_2eproto::offsets,
     file_level_metadata_router_2fusers_2eproto, file_level_enum_descriptors_router_2fusers_2eproto,
     file_level_service_descriptors_router_2fusers_2eproto,
@@ -218,6 +277,8 @@ class Users::_Internal {
   static const ::qaul::rpc::users::UserOnlineRequest& user_online_request(const Users* msg);
   static const ::qaul::rpc::users::UserList& user_list(const Users* msg);
   static const ::qaul::rpc::users::UserEntry& user_update(const Users* msg);
+  static const ::qaul::rpc::users::SecurityNumberRequest& security_number_request(const Users* msg);
+  static const ::qaul::rpc::users::SecurityNumberResponse& security_number_response(const Users* msg);
 };
 
 const ::qaul::rpc::users::UserRequest&
@@ -235,6 +296,14 @@ Users::_Internal::user_list(const Users* msg) {
 const ::qaul::rpc::users::UserEntry&
 Users::_Internal::user_update(const Users* msg) {
   return *msg->_impl_.message_.user_update_;
+}
+const ::qaul::rpc::users::SecurityNumberRequest&
+Users::_Internal::security_number_request(const Users* msg) {
+  return *msg->_impl_.message_.security_number_request_;
+}
+const ::qaul::rpc::users::SecurityNumberResponse&
+Users::_Internal::security_number_response(const Users* msg) {
+  return *msg->_impl_.message_.security_number_response_;
 }
 void Users::set_allocated_user_request(::qaul::rpc::users::UserRequest* user_request) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -296,6 +365,36 @@ void Users::set_allocated_user_update(::qaul::rpc::users::UserEntry* user_update
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.user_update)
 }
+void Users::set_allocated_security_number_request(::qaul::rpc::users::SecurityNumberRequest* security_number_request) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (security_number_request) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(security_number_request);
+    if (message_arena != submessage_arena) {
+      security_number_request = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, security_number_request, submessage_arena);
+    }
+    set_has_security_number_request();
+    _impl_.message_.security_number_request_ = security_number_request;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.security_number_request)
+}
+void Users::set_allocated_security_number_response(::qaul::rpc::users::SecurityNumberResponse* security_number_response) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_message();
+  if (security_number_response) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(security_number_response);
+    if (message_arena != submessage_arena) {
+      security_number_response = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, security_number_response, submessage_arena);
+    }
+    set_has_security_number_response();
+    _impl_.message_.security_number_response_ = security_number_response;
+  }
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.Users.security_number_response)
+}
 Users::Users(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -331,6 +430,16 @@ Users::Users(const Users& from)
     case kUserUpdate: {
       _this->_internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(
           from._internal_user_update());
+      break;
+    }
+    case kSecurityNumberRequest: {
+      _this->_internal_mutable_security_number_request()->::qaul::rpc::users::SecurityNumberRequest::MergeFrom(
+          from._internal_security_number_request());
+      break;
+    }
+    case kSecurityNumberResponse: {
+      _this->_internal_mutable_security_number_response()->::qaul::rpc::users::SecurityNumberResponse::MergeFrom(
+          from._internal_security_number_response());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -399,6 +508,18 @@ void Users::clear_message() {
       }
       break;
     }
+    case kSecurityNumberRequest: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete _impl_.message_.security_number_request_;
+      }
+      break;
+    }
+    case kSecurityNumberResponse: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete _impl_.message_.security_number_response_;
+      }
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -451,6 +572,22 @@ const char* Users::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_user_update(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.users.SecurityNumberRequest security_number_request = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          ptr = ctx->ParseMessage(_internal_mutable_security_number_request(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .qaul.rpc.users.SecurityNumberResponse security_number_response = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          ptr = ctx->ParseMessage(_internal_mutable_security_number_response(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -512,6 +649,20 @@ uint8_t* Users::_InternalSerialize(
         _Internal::user_update(this).GetCachedSize(), target, stream);
   }
 
+  // .qaul.rpc.users.SecurityNumberRequest security_number_request = 5;
+  if (_internal_has_security_number_request()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, _Internal::security_number_request(this),
+        _Internal::security_number_request(this).GetCachedSize(), target, stream);
+  }
+
+  // .qaul.rpc.users.SecurityNumberResponse security_number_response = 6;
+  if (_internal_has_security_number_response()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(6, _Internal::security_number_response(this),
+        _Internal::security_number_response(this).GetCachedSize(), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -557,6 +708,20 @@ size_t Users::ByteSizeLong() const {
           *_impl_.message_.user_update_);
       break;
     }
+    // .qaul.rpc.users.SecurityNumberRequest security_number_request = 5;
+    case kSecurityNumberRequest: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.message_.security_number_request_);
+      break;
+    }
+    // .qaul.rpc.users.SecurityNumberResponse security_number_response = 6;
+    case kSecurityNumberResponse: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.message_.security_number_response_);
+      break;
+    }
     case MESSAGE_NOT_SET: {
       break;
     }
@@ -598,6 +763,16 @@ void Users::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF
     case kUserUpdate: {
       _this->_internal_mutable_user_update()->::qaul::rpc::users::UserEntry::MergeFrom(
           from._internal_user_update());
+      break;
+    }
+    case kSecurityNumberRequest: {
+      _this->_internal_mutable_security_number_request()->::qaul::rpc::users::SecurityNumberRequest::MergeFrom(
+          from._internal_security_number_request());
+      break;
+    }
+    case kSecurityNumberResponse: {
+      _this->_internal_mutable_security_number_response()->::qaul::rpc::users::SecurityNumberResponse::MergeFrom(
+          from._internal_security_number_response());
       break;
     }
     case MESSAGE_NOT_SET: {
@@ -1326,6 +1501,489 @@ void UserEntry::InternalSwap(UserEntry* other) {
       file_level_metadata_router_2fusers_2eproto[4]);
 }
 
+// ===================================================================
+
+class SecurityNumberRequest::_Internal {
+ public:
+};
+
+SecurityNumberRequest::SecurityNumberRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.SecurityNumberRequest)
+}
+SecurityNumberRequest::SecurityNumberRequest(const SecurityNumberRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SecurityNumberRequest* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_user_id().empty()) {
+    _this->_impl_.user_id_.Set(from._internal_user_id(), 
+      _this->GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.SecurityNumberRequest)
+}
+
+inline void SecurityNumberRequest::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.user_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+SecurityNumberRequest::~SecurityNumberRequest() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.users.SecurityNumberRequest)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SecurityNumberRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.user_id_.Destroy();
+}
+
+void SecurityNumberRequest::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SecurityNumberRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.users.SecurityNumberRequest)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.user_id_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SecurityNumberRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bytes user_id = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_user_id();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SecurityNumberRequest::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.users.SecurityNumberRequest)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bytes user_id = 1;
+  if (!this->_internal_user_id().empty()) {
+    target = stream->WriteBytesMaybeAliased(
+        1, this->_internal_user_id(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.users.SecurityNumberRequest)
+  return target;
+}
+
+size_t SecurityNumberRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.users.SecurityNumberRequest)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bytes user_id = 1;
+  if (!this->_internal_user_id().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_user_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SecurityNumberRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SecurityNumberRequest::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SecurityNumberRequest::GetClassData() const { return &_class_data_; }
+
+
+void SecurityNumberRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SecurityNumberRequest*>(&to_msg);
+  auto& from = static_cast<const SecurityNumberRequest&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.SecurityNumberRequest)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_user_id().empty()) {
+    _this->_internal_set_user_id(from._internal_user_id());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SecurityNumberRequest::CopyFrom(const SecurityNumberRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.users.SecurityNumberRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SecurityNumberRequest::IsInitialized() const {
+  return true;
+}
+
+void SecurityNumberRequest::InternalSwap(SecurityNumberRequest* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.user_id_, lhs_arena,
+      &other->_impl_.user_id_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SecurityNumberRequest::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
+      file_level_metadata_router_2fusers_2eproto[5]);
+}
+
+// ===================================================================
+
+class SecurityNumberResponse::_Internal {
+ public:
+};
+
+SecurityNumberResponse::SecurityNumberResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.SecurityNumberResponse)
+}
+SecurityNumberResponse::SecurityNumberResponse(const SecurityNumberResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SecurityNumberResponse* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.security_number_blocks_){from._impl_.security_number_blocks_}
+    , /*decltype(_impl_._security_number_blocks_cached_byte_size_)*/{0}
+    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.security_hash_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_user_id().empty()) {
+    _this->_impl_.user_id_.Set(from._internal_user_id(), 
+      _this->GetArenaForAllocation());
+  }
+  _impl_.security_hash_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.security_hash_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_security_hash().empty()) {
+    _this->_impl_.security_hash_.Set(from._internal_security_hash(), 
+      _this->GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.SecurityNumberResponse)
+}
+
+inline void SecurityNumberResponse::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.security_number_blocks_){arena}
+    , /*decltype(_impl_._security_number_blocks_cached_byte_size_)*/{0}
+    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.security_hash_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.user_id_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.security_hash_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.security_hash_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+SecurityNumberResponse::~SecurityNumberResponse() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.users.SecurityNumberResponse)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SecurityNumberResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.security_number_blocks_.~RepeatedField();
+  _impl_.user_id_.Destroy();
+  _impl_.security_hash_.Destroy();
+}
+
+void SecurityNumberResponse::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SecurityNumberResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.users.SecurityNumberResponse)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.security_number_blocks_.Clear();
+  _impl_.user_id_.ClearToEmpty();
+  _impl_.security_hash_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SecurityNumberResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bytes user_id = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_user_id();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bytes security_hash = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_security_hash();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated uint32 security_number_blocks = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_security_number_blocks(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<uint8_t>(tag) == 24) {
+          _internal_add_security_number_blocks(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SecurityNumberResponse::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.users.SecurityNumberResponse)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bytes user_id = 1;
+  if (!this->_internal_user_id().empty()) {
+    target = stream->WriteBytesMaybeAliased(
+        1, this->_internal_user_id(), target);
+  }
+
+  // bytes security_hash = 2;
+  if (!this->_internal_security_hash().empty()) {
+    target = stream->WriteBytesMaybeAliased(
+        2, this->_internal_security_hash(), target);
+  }
+
+  // repeated uint32 security_number_blocks = 3;
+  {
+    int byte_size = _impl_._security_number_blocks_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteUInt32Packed(
+          3, _internal_security_number_blocks(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.users.SecurityNumberResponse)
+  return target;
+}
+
+size_t SecurityNumberResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.users.SecurityNumberResponse)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated uint32 security_number_blocks = 3;
+  {
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt32Size(this->_impl_.security_number_blocks_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
+    }
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._security_number_blocks_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // bytes user_id = 1;
+  if (!this->_internal_user_id().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_user_id());
+  }
+
+  // bytes security_hash = 2;
+  if (!this->_internal_security_hash().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_security_hash());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SecurityNumberResponse::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SecurityNumberResponse::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SecurityNumberResponse::GetClassData() const { return &_class_data_; }
+
+
+void SecurityNumberResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SecurityNumberResponse*>(&to_msg);
+  auto& from = static_cast<const SecurityNumberResponse&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.SecurityNumberResponse)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.security_number_blocks_.MergeFrom(from._impl_.security_number_blocks_);
+  if (!from._internal_user_id().empty()) {
+    _this->_internal_set_user_id(from._internal_user_id());
+  }
+  if (!from._internal_security_hash().empty()) {
+    _this->_internal_set_security_hash(from._internal_security_hash());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SecurityNumberResponse::CopyFrom(const SecurityNumberResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.users.SecurityNumberResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SecurityNumberResponse::IsInitialized() const {
+  return true;
+}
+
+void SecurityNumberResponse::InternalSwap(SecurityNumberResponse* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.security_number_blocks_.InternalSwap(&other->_impl_.security_number_blocks_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.user_id_, lhs_arena,
+      &other->_impl_.user_id_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.security_hash_, lhs_arena,
+      &other->_impl_.security_hash_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SecurityNumberResponse::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
+      file_level_metadata_router_2fusers_2eproto[6]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace users
 }  // namespace rpc
@@ -1350,6 +2008,14 @@ Arena::CreateMaybeMessage< ::qaul::rpc::users::UserList >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::qaul::rpc::users::UserEntry*
 Arena::CreateMaybeMessage< ::qaul::rpc::users::UserEntry >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::users::UserEntry >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::users::SecurityNumberRequest*
+Arena::CreateMaybeMessage< ::qaul::rpc::users::SecurityNumberRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::users::SecurityNumberRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::users::SecurityNumberResponse*
+Arena::CreateMaybeMessage< ::qaul::rpc::users::SecurityNumberResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::users::SecurityNumberResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

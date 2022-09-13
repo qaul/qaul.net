@@ -28,6 +28,8 @@ const Users$json = const {
     const {'1': 'user_online_request', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserOnlineRequest', '9': 0, '10': 'userOnlineRequest'},
     const {'1': 'user_list', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserList', '9': 0, '10': 'userList'},
     const {'1': 'user_update', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.users.UserEntry', '9': 0, '10': 'userUpdate'},
+    const {'1': 'security_number_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.users.SecurityNumberRequest', '9': 0, '10': 'securityNumberRequest'},
+    const {'1': 'security_number_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.users.SecurityNumberResponse', '9': 0, '10': 'securityNumberResponse'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -35,7 +37,7 @@ const Users$json = const {
 };
 
 /// Descriptor for `Users`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List usersDescriptor = $convert.base64Decode('CgVVc2VycxJACgx1c2VyX3JlcXVlc3QYASABKAsyGy5xYXVsLnJwYy51c2Vycy5Vc2VyUmVxdWVzdEgAUgt1c2VyUmVxdWVzdBJTChN1c2VyX29ubGluZV9yZXF1ZXN0GAIgASgLMiEucWF1bC5ycGMudXNlcnMuVXNlck9ubGluZVJlcXVlc3RIAFIRdXNlck9ubGluZVJlcXVlc3QSNwoJdXNlcl9saXN0GAMgASgLMhgucWF1bC5ycGMudXNlcnMuVXNlckxpc3RIAFIIdXNlckxpc3QSPAoLdXNlcl91cGRhdGUYBCABKAsyGS5xYXVsLnJwYy51c2Vycy5Vc2VyRW50cnlIAFIKdXNlclVwZGF0ZUIJCgdtZXNzYWdl');
+final $typed_data.Uint8List usersDescriptor = $convert.base64Decode('CgVVc2VycxJACgx1c2VyX3JlcXVlc3QYASABKAsyGy5xYXVsLnJwYy51c2Vycy5Vc2VyUmVxdWVzdEgAUgt1c2VyUmVxdWVzdBJTChN1c2VyX29ubGluZV9yZXF1ZXN0GAIgASgLMiEucWF1bC5ycGMudXNlcnMuVXNlck9ubGluZVJlcXVlc3RIAFIRdXNlck9ubGluZVJlcXVlc3QSNwoJdXNlcl9saXN0GAMgASgLMhgucWF1bC5ycGMudXNlcnMuVXNlckxpc3RIAFIIdXNlckxpc3QSPAoLdXNlcl91cGRhdGUYBCABKAsyGS5xYXVsLnJwYy51c2Vycy5Vc2VyRW50cnlIAFIKdXNlclVwZGF0ZRJfChdzZWN1cml0eV9udW1iZXJfcmVxdWVzdBgFIAEoCzIlLnFhdWwucnBjLnVzZXJzLlNlY3VyaXR5TnVtYmVyUmVxdWVzdEgAUhVzZWN1cml0eU51bWJlclJlcXVlc3QSYgoYc2VjdXJpdHlfbnVtYmVyX3Jlc3BvbnNlGAYgASgLMiYucWF1bC5ycGMudXNlcnMuU2VjdXJpdHlOdW1iZXJSZXNwb25zZUgAUhZzZWN1cml0eU51bWJlclJlc3BvbnNlQgkKB21lc3NhZ2U=');
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = const {
   '1': 'UserRequest',
@@ -76,3 +78,25 @@ const UserEntry$json = const {
 
 /// Descriptor for `UserEntry`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List userEntryDescriptor = $convert.base64Decode('CglVc2VyRW50cnkSEgoEbmFtZRgBIAEoCVIEbmFtZRIOCgJpZBgCIAEoDFICaWQSGQoIZ3JvdXBfaWQYAyABKAxSB2dyb3VwSWQSHQoKa2V5X2Jhc2U1OBgHIAEoCVIJa2V5QmFzZTU4EkAKDGNvbm5lY3Rpdml0eRgIIAEoDjIcLnFhdWwucnBjLnVzZXJzLkNvbm5lY3Rpdml0eVIMY29ubmVjdGl2aXR5EhoKCHZlcmlmaWVkGAkgASgIUgh2ZXJpZmllZBIYCgdibG9ja2VkGAogASgIUgdibG9ja2Vk');
+@$core.Deprecated('Use securityNumberRequestDescriptor instead')
+const SecurityNumberRequest$json = const {
+  '1': 'SecurityNumberRequest',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
+  ],
+};
+
+/// Descriptor for `SecurityNumberRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List securityNumberRequestDescriptor = $convert.base64Decode('ChVTZWN1cml0eU51bWJlclJlcXVlc3QSFwoHdXNlcl9pZBgBIAEoDFIGdXNlcklk');
+@$core.Deprecated('Use securityNumberResponseDescriptor instead')
+const SecurityNumberResponse$json = const {
+  '1': 'SecurityNumberResponse',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
+    const {'1': 'security_hash', '3': 2, '4': 1, '5': 12, '10': 'securityHash'},
+    const {'1': 'security_number_blocks', '3': 3, '4': 3, '5': 13, '10': 'securityNumberBlocks'},
+  ],
+};
+
+/// Descriptor for `SecurityNumberResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List securityNumberResponseDescriptor = $convert.base64Decode('ChZTZWN1cml0eU51bWJlclJlc3BvbnNlEhcKB3VzZXJfaWQYASABKAxSBnVzZXJJZBIjCg1zZWN1cml0eV9oYXNoGAIgASgMUgxzZWN1cml0eUhhc2gSNAoWc2VjdXJpdHlfbnVtYmVyX2Jsb2NrcxgDIAMoDVIUc2VjdXJpdHlOdW1iZXJCbG9ja3M=');

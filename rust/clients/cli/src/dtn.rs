@@ -30,10 +30,10 @@ impl Dtn {
                 Self::dtn_config();
             }
             // add user
-            cmd if cmd.starts_with("adduser ") => match cmd.strip_prefix("adduser ") {
+            cmd if cmd.starts_with("add ") => match cmd.strip_prefix("add ") {
                 Some(user_id_str) => {
-                    if let Ok(_id) = Self::id_string_to_bin(user_id_str.to_string()) {
-                        Self::dtn_add_user(user_id_str.to_string());
+                    if let Ok(id) = Self::id_string_to_bin(user_id_str.to_string()) {
+                        Self::dtn_add_user(id);
                     } else {
                         log::error!("invalid user id");
                     }
@@ -43,10 +43,10 @@ impl Dtn {
                 }
             },
             // remove user
-            cmd if cmd.starts_with("rmuser ") => match cmd.strip_prefix("rmuser ") {
+            cmd if cmd.starts_with("remove ") => match cmd.strip_prefix("remove ") {
                 Some(user_id_str) => {
-                    if let Ok(_id) = Self::id_string_to_bin(user_id_str.to_string()) {
-                        Self::dtn_remove_user(user_id_str.to_string());
+                    if let Ok(id) = Self::id_string_to_bin(user_id_str.to_string()) {
+                        Self::dtn_remove_user(id);
                     } else {
                         log::error!("invalid user id");
                     }
@@ -55,13 +55,13 @@ impl Dtn {
                     log::error!("invalid command parameter");
                 }
             },
-            // totalsize
-            cmd if cmd.starts_with("totalsize ") => match cmd.strip_prefix("totalsize ") {
+            // set maximum storage size
+            cmd if cmd.starts_with("size ") => match cmd.strip_prefix("size ") {
                 Some(total_size_str) => {
                     if let Ok(total_size) = total_size_str.parse::<u32>() {
                         Self::dtn_total_size(total_size);
                     } else {
-                        log::error!("invalid totalsize");
+                        log::error!("invalid storage size");
                     }
                 }
                 None => {
@@ -123,13 +123,11 @@ impl Dtn {
     }
 
     /// dtn add user
-    fn dtn_add_user(user_id: String) {
+    fn dtn_add_user(user_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnAddUserRequest(
-                proto::DtnAddUserRequest {
-                    user_id: user_id.clone(),
-                },
+                proto::DtnAddUserRequest { user_id },
             )),
         };
         // send message
@@ -141,13 +139,11 @@ impl Dtn {
     }
 
     /// dtn remove user
-    fn dtn_remove_user(user_id: String) {
+    fn dtn_remove_user(user_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnRemoveUserRequest(
-                proto::DtnRemoveUserRequest {
-                    user_id: user_id.clone(),
-                },
+                proto::DtnRemoveUserRequest { user_id },
             )),
         };
         // send message
@@ -184,17 +180,17 @@ impl Dtn {
                 Some(proto::dtn::Message::DtnStateResponse(dtn_state)) => {
                     println!("====================================");
                     println!("DTN State");
-                    println!("\tUsed Size: {} MB", dtn_state.used_size);
+                    println!("\tUsed Storage Size: {} MB", dtn_state.used_size);
                     println!("\tDTN Messages: {}", dtn_state.dtn_message_count);
                     println!("\tUnconfirmed Messages: {}", dtn_state.unconfirmed_count);
                 }
                 Some(proto::dtn::Message::DtnConfigResponse(dtn_config)) => {
                     println!("====================================");
                     println!("DTN Options");
-                    println!("\tTotal Size: {}", dtn_config.total_size);
+                    println!("\tMaximum Storage Size: {} MB", dtn_config.total_size);
                     println!("\tUsers");
                     for user in dtn_config.users {
-                        println!("\t\t{}", user);
+                        println!("\t\t{}", bs58::encode(user).into_string());
                     }
                 }
                 Some(proto::dtn::Message::DtnAddUserResponse(dtn_add_user_resp)) => {
