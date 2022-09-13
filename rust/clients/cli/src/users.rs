@@ -163,12 +163,13 @@ impl Users {
                     let mut line = 1;
                     println!("");
                     println!("All known Users");
-                    println!("No. | User Name | User Id | Veryfied | Blocked");
+                    println!("No. | User Name | User Id | Veryfied | Blocked | Connectivity");
                     println!("    | Group ID | Public Key");
 
                     for user in proto_userlist.user {
                         let mut verified = "N";
                         let mut blocked = "N";
+                        let mut onlined = "Offline";
 
                         if user.verified {
                             verified = "Y";
@@ -176,13 +177,17 @@ impl Users {
                         if user.blocked {
                             blocked = "Y";
                         }
+                        if user.connectivity == 1 {
+                            onlined = "Online";
+                        }
                         println!(
-                            "{} | {} | {:?} | {} | {}",
+                            "{} | {} | {:?} | {} | {} | {}",
                             line,
                             user.name,
                             bs58::encode(user.id).into_string(),
                             verified,
-                            blocked
+                            blocked,
+                            onlined
                         );
                         let group_uuid;
                         match Uuid::from_slice(&user.group_id) {

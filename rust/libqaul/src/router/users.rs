@@ -300,8 +300,11 @@ impl Users {
 
                         // get user account
                         if let Some(account) = UserAccounts::get_default_user() {
+                            // get online users
+                            let online_users = super::RoutingTable::get_online_users();
+
                             // fill them into the list
-                            for (_id, user) in &users.users {
+                            for (id, user) in &users.users {
                                 // get RPC key values
                                 let (_key_type, key_base58) =
                                     Self::get_protobuf_public_key(user.key.clone());
@@ -310,13 +313,18 @@ impl Users {
                                 let group_id =
                                     GroupId::from_peers(&account.id, &user.id).to_bytes();
 
+                                let mut connectivity: i32 = 0;
+                                if online_users.contains_key(id) {
+                                    connectivity = 1;
+                                }
+
                                 // create user entry message
                                 let user_entry = proto::UserEntry {
                                     name: user.name.clone(),
                                     id: user.id.to_bytes(),
                                     group_id,
                                     key_base58,
-                                    connectivity: 0,
+                                    connectivity: connectivity,
                                     verified: user.verified,
                                     blocked: user.blocked,
                                 };
