@@ -26,20 +26,33 @@ class QaulApp extends PlatformAwareBuilder {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
         ),
-        tooltipTheme: const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
           color: Colors.transparent,
           elevation: 0.0,
           // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
           shadowColor: Colors.grey.shade300,
-          titleTextStyle:
-              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.lightBlue),
+          titleTextStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.lightBlue),
           iconTheme: const IconThemeData(color: Colors.lightBlue),
           actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
-          shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
+          shape: BorderDirectional(
+              bottom: BorderSide(color: Colors.grey.shade300)),
         ),
-        buttonTheme: const ButtonThemeData(),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            foregroundColor: Colors.black,
+            // fixedSize: Size(80, 36),
+            side: const BorderSide(width: 1, color: Colors.black),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           floatingLabelBehavior: FloatingLabelBehavior.never,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
@@ -61,11 +74,22 @@ class QaulApp extends PlatformAwareBuilder {
           backgroundColor: Colors.lightBlue,
           foregroundColor: Colors.black,
         ),
-        tooltipTheme: const TooltipThemeData(waitDuration: Duration(seconds: 1)),
+        tooltipTheme:
+            const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         appBarTheme: const AppBarTheme(
           elevation: 0.0,
           color: Color(0xff212121),
           shadowColor: Color(0xff212121),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            foregroundColor: Colors.white,
+            // fixedSize: Size(80, 36),
+            side: const BorderSide(width: 1, color: Colors.white),
+          ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -115,9 +139,11 @@ class QaulApp extends PlatformAwareBuilder {
                   maxWidth: 828,
                   minWidth: 370,
                   breakpoints: const [
-                    ResponsiveBreakpoint.resize(350.0, name: 'ANDROID', scaleFactor: 0.8),
+                    ResponsiveBreakpoint.resize(350.0,
+                        name: 'ANDROID', scaleFactor: 0.8),
                     ResponsiveBreakpoint.resize(480, name: MOBILE),
-                    ResponsiveBreakpoint.resize(680, name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
+                    ResponsiveBreakpoint.resize(680,
+                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
                     ResponsiveBreakpoint.autoScale(800, name: TABLET),
                     ResponsiveBreakpoint.resize(1000, name: DESKTOP),
                   ],

@@ -1,7 +1,7 @@
 {
   "languageName": "Українська",
 
-  "createAccountHeading": "Оберіть\nпсевдонім",
+  "createAccountHeading": "Оберіть псевдонім",
   "@createAccountHeading": {
     "description": "Вузол показано над текстовим полем"
   },
@@ -10,6 +10,9 @@
   "backButtonTooltip": "Назад",
   "sendTooltip": "Надіслати",
   "sendFileTooltip": "Надіслати файл",
+  "start": "почати",
+  "createUserAccount": "Створити профіль користувача",
+  "learnMore": "Дізнайтеся про qaul.net",
 
   "userAccountNavButtonTooltip": "Ваш обліковий запис",
   "feedNavButtonTooltip": "Стрічка",

@@ -20,7 +20,7 @@ import '../helpers/user_prefs_helper.dart';
 import '../screens/home/user_details_screen.dart';
 import '../utils.dart';
 
-part 'icon_button_factory.dart';
+part 'button_factory.dart';
 
 part 'language_select_dropdown.dart';
 

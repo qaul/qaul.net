@@ -25,3 +25,26 @@ class IconButtonFactory extends StatelessWidget {
     );
   }
 }
+
+class QaulButton extends StatelessWidget {
+  const QaulButton({Key? key, required this.label, this.style, this.onPressed})
+      : super(key: key);
+
+  final String label;
+  final TextStyle? style;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed ?? () {},
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Text(
+          label,
+          style: style ?? const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
