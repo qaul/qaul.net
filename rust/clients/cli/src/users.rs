@@ -43,6 +43,11 @@ impl Users {
 
                 Self::send_user_update(user_id, false, true);
             }
+            // security number for a user
+            cmd if cmd.starts_with("secure ") => {
+                let user_id = cmd.strip_prefix("secure ").unwrap();
+                Self::send_user_secure_number(user_id);
+            }
             // unknown command
             _ => log::error!("unknown users command"),
         }
@@ -74,6 +79,31 @@ impl Users {
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserOnlineRequest(
                 proto::UserOnlineRequest {},
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(
+            buf,
+            super::rpc::proto::Modules::Users.into(),
+            "".to_string(),
+        );
+    }
+
+    /// create rpc user security number message
+    fn send_user_secure_number(user_id_base58: &str) {
+        let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+
+        // create request message
+        let proto_message = proto::Users {
+            message: Some(proto::users::Message::SecurityNumberRequest(
+                proto::SecurityNumberRequest { user_id },
             )),
         };
 
@@ -169,6 +199,13 @@ impl Users {
                         line += 1;
                     }
 
+                    println!("");
+                }
+                Some(proto::users::Message::SecurityNumberResponse(resp)) => {
+                    println!("Security Number:");
+                    for number in resp.security_number_blocks {
+                        print!("{:#05} ", number);
+                    }
                     println!("");
                 }
                 _ => {
