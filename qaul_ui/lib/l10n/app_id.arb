@@ -10,6 +10,9 @@
   "backButtonTooltip": "Kembali",
   "sendTooltip": "Kirim",
   "sendFileTooltip": "Kirim Berkas",
+  "start": "Mulailah",
+  "createUserAccount": "Buat profil pengguna",
+  "learnMore": "Pelajari tentang qaul.net",
 
   "userAccountNavButtonTooltip": "Akun Anda",
   "feedNavButtonTooltip": "Umpan",

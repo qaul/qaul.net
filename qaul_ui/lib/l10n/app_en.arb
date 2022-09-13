@@ -1,7 +1,7 @@
 {
   "languageName": "English",
 
-  "createAccountHeading": "Choose a\nuser name",
+  "createAccountHeading": "Choose a user name",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"
   },
@@ -10,6 +10,9 @@
   "backButtonTooltip": "Back",
   "sendTooltip": "Send",
   "sendFileTooltip": "Send File",
+  "start": "Start",
+  "createUserAccount": "Create user profile",
+  "learnMore": "Learn about qaul.net",
 
   "userAccountNavButtonTooltip": "Your account",
   "feedNavButtonTooltip": "Feed",

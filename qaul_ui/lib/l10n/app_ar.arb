@@ -5,6 +5,9 @@
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"
   },
+  "start": "بداية",
+  "createUserAccount": "إنشاء ملف تعريف المستخدم",
+  "learnMore": "تعرف على موقع qaul.net",
   "okDialogButton": "نص بسيط",
   "cancelDialogButton": "نص بسيط",
   "backButtonTooltip": "نص بسيط",

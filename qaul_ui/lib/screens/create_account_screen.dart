@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -82,55 +83,43 @@ class CreateAccountScreen extends HookConsumerWidget {
       },
     );
 
+    const userIcon = 'assets/icons/user.svg';
+    final i10n = AppLocalizations.of(context)!;
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: LanguageSelectDropDown(),
-                  ),
-                  const SizedBox(height: 24.0),
-                  Text(
-                    AppLocalizations.of(context)!.createAccountHeading,
-                    style: Theme.of(context).textTheme.headline4,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12.0),
-                  TextFormField(
-                    key: _fieldKey,
-                    controller: nameCtrl,
-                    validator: (s) => _validateUserName(context, s),
-                    onFieldSubmitted: (_) {
-                      _submitUsername(ref, nameCtrl, loading);
-                    },
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  Material(
-                      key: submitButtonKey,
-                      type: MaterialType.transparency,
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black38),
-                          shape: BoxShape.circle,
+                  const SizedBox(width: double.maxFinite),
+                  SvgPicture.asset(userIcon),
+                  const SizedBox(height: 28),
+                  LayoutBuilder(builder: (context, constraints) {
+                    return SizedBox(
+                      width: constraints.constrainWidth(400),
+                      child: TextFormField(
+                        key: _fieldKey,
+                        controller: nameCtrl,
+                        validator: (s) => _validateUserName(context, s),
+                        onFieldSubmitted: (_) {
+                          _submitUsername(ref, nameCtrl, loading);
+                        },
+                        decoration: InputDecoration(
+                          hintText: i10n.createAccountHeading,
                         ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(80.0),
-                          onTap: () => _submitUsername(ref, nameCtrl, loading),
-                          child: const Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: Icon(Icons.arrow_forward_ios_rounded),
-                          ),
-                        ),
-                      )),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 28),
+                  QaulButton(
+                    key: submitButtonKey,
+                    label: i10n.start,
+                    onPressed: () => _submitUsername(ref, nameCtrl, loading),
+                  ),
                 ],
               ),
             ),
@@ -152,7 +141,8 @@ class CreateAccountScreen extends HookConsumerWidget {
   String? _validateUserName(BuildContext context, String? value) {
     if (value == null || value.isEmpty) {
       return AppLocalizations.of(context)!.fieldRequiredErrorMessage;
-    } if (value.length < 2) {
+    }
+    if (value.length < 2) {
       return AppLocalizations.of(context)!.usernameLengthMessage;
     }
     return null;
