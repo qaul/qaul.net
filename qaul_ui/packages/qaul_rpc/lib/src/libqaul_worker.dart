@@ -96,6 +96,13 @@ class LibqaulWorker {
         Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()));
   }
 
+  void getUserSecurityNumber(User u) async {
+    final msg = Users(
+      securityNumberRequest: SecurityNumberRequest(userId: u.id.toList()),
+    );
+    _sendMessage(Modules.USERS, msg);
+  }
+
   Future<void> verifyUser(User u) async {
     var entry = _baseUserEntryFrom(u);
     entry.verified = true;

@@ -5,7 +5,8 @@ class UsersTranslator extends RpcModuleTranslator {
   Modules get type => Modules.USERS;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(
+      List<int> data, Reader reader) async {
     final message = Users.fromBuffer(data);
     switch (message.whichMessage()) {
       case Users_Message.userList:
@@ -23,6 +24,14 @@ class UsersTranslator extends RpcModuleTranslator {
             .toList();
 
         return RpcTranslatorResponse(type, users);
+      case Users_Message.securityNumberResponse:
+        final res = message.ensureSecurityNumberResponse();
+        final secNo = SecurityNumber(
+          userId: Uint8List.fromList(res.userId),
+          securityHash: Uint8List.fromList(res.securityHash),
+          securityNumberBlocks: res.securityNumberBlocks,
+        );
+        return RpcTranslatorResponse(type, secNo);
       case Users_Message.userUpdate:
         final userEntry = message.ensureUserUpdate();
         final user = User(
@@ -56,6 +65,9 @@ class UsersTranslator extends RpcModuleTranslator {
       }
     } else if (res.data is User) {
       if (provider.contains(res.data)) provider.update(res.data);
+    }
+    if (res.data is SecurityNumber) {
+      reader(currentSecurityNoProvider.notifier).state = res.data;
     }
   }
 }
