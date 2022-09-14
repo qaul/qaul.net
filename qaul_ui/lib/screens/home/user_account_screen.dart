@@ -143,77 +143,87 @@ class _DTNNodesList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(dtnConfigurationProvider);
 
+    final refreshDTN = useCallback(() {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.getDTNConfiguration();
+    }, []);
+
     final removeUser = useCallback((Uint8List userId) async {
       final worker = ref.read(qaulWorkerProvider);
       worker.removeDTNUser(userId);
-    }, [UniqueKey()]);
+    }, []);
 
     final addUser = useCallback((Uint8List userId) async {
       final worker = ref.read(qaulWorkerProvider);
       worker.addDTNUser(userId);
-    }, [UniqueKey()]);
+    }, []);
 
     useMemoized(() async {
       final worker = ref.read(qaulWorkerProvider);
       worker.getDTNConfiguration();
     });
 
-    return Column(
-      children: [
-        Row(
-          children: const [
-            Icon(Icons.storage),
-            SizedBox(width: 8.0),
-            // Text(l18ns!.dtnNodes),
-            Text('DTN Nodes'),
-          ],
-        ),
-        const SizedBox(height: 8.0),
-        if (config == null || config.users.isEmpty)
-          const Text('No user nodes yet')
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.symmetric(
-                  horizontal:
-                      BorderSide(color: Theme.of(context).dividerColor)),
-            ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: config.users.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
-              itemBuilder: (context, i) {
-                var user = config.users[i];
-                return QaulListTile.user(
-                  user,
-                  trailingIcon: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => removeUser(user.id),
-                  ),
-                );
-              },
-            ),
+    return CronTaskDecorator(
+      callback: refreshDTN,
+      schedule: const Duration(milliseconds: 200),
+      child: Column(
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.storage),
+              SizedBox(width: 8.0),
+              // Text(l18ns!.dtnNodes),
+              Text('DTN Nodes'),
+            ],
           ),
-        const SizedBox(height: 12.0),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              splashRadius: 24,
-              onPressed: () async {
-                final res = await Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const _AddUserDialog()));
-                if (res is! User) return;
-                addUser(res.id);
-              },
+          const SizedBox(height: 8.0),
+          if (config == null || config.users.isEmpty)
+            const Text('No user nodes yet')
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                    horizontal:
+                        BorderSide(color: Theme.of(context).dividerColor)),
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: config.users.length,
+                separatorBuilder: (_, __) => const Divider(height: 12.0),
+                itemBuilder: (context, i) {
+                  var user = config.users[i];
+                  return QaulListTile.user(
+                    user,
+                    trailingIcon: IconButton(
+                      splashRadius: 20,
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => removeUser(user.id),
+                    ),
+                  );
+                },
+              ),
             ),
-            const SizedBox(width: 12.0),
-            const Text('Add user node'),
-          ],
-        ),
-      ],
+          const SizedBox(height: 12.0),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add),
+                splashRadius: 24,
+                onPressed: () async {
+                  final res = await Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const _AddUserDialog()));
+                  if (res is! User) return;
+                  addUser(res.id);
+                },
+              ),
+              const SizedBox(width: 12.0),
+              const Text('Add user node'),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
