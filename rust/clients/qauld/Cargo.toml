@@ -1,8 +1,13 @@
 [package]
 name = "qauld"
-version = "0.1.0"
+version = "2.0.0-beta+8"
 authors = ["qaul.net community <contact@qaul.net>"]
 edition = "2021"
+description = "qaul.net community server daemon"
+license = "AGPL-3.0"
+readme = "README.md"
+homepage = "https://qaul.net"
+repository = "https://github.com/qaul/qaul.net"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,7 +17,25 @@ async-std = { version = "1.10.0", features = ["attributes"] }
 futures = "0.3.21"
 log = "0.4"
 pretty_env_logger = "0.4"
-prost = "0.9.0"
-futures-ticker = "0.0.1"
+prost = "0.11.0"
+futures-ticker = "0.0.2"
 state = "0.5"
 bs58 = "0.4"
+
+
+[package.metadata.deb]
+maintainer = "Open Community Projects Association <develop@ocpa.ch>"
+copyright = "2021 Open Community Projects Association <contact@ocpa.ch>, Christoph Wachter & Mathias Jud <contact@wachter-jud.net>"
+license-file = ["../../../LICENSE", "0"]
+extended-description = """\
+qaul.net – قول project https://qaul.net \
+Internet Independent Wireless Mesh Communication \
+\
+Contains the qauld server daemon & qaul-cli binaries \
+"""
+depends = "$auto"
+section = "network"
+priority = "optional"
+assets = [
+   ["target/release/qauld", "/usr/bin/", "755"],
+]
