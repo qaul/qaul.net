@@ -16,9 +16,11 @@ import '../generated/router/users.pb.dart';
 import '../generated/rpc/debug.pb.dart';
 import '../generated/rpc/qaul_rpc.pb.dart';
 import '../generated/services/chat/chat.pb.dart';
+import '../generated/services/dtn/dtn_rpc.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../generated/services/filesharing/filesharing_rpc.pb.dart';
 import '../generated/services/group/group_rpc.pb.dart';
+import '../models/dtn_configuration.dart';
 import '../models/models.dart';
 import '../providers.dart';
 
@@ -29,6 +31,8 @@ part 'chat_translator.dart';
 part 'connection_translator.dart';
 
 part 'debug_translator.dart';
+
+part 'dtn_translator.dart';
 
 part 'feed_translator.dart';
 
@@ -69,6 +73,7 @@ abstract class RpcModuleTranslator {
     ChatTranslator(),
     ConnectionTranslator(),
     DebugTranslator(),
+    DTNTranslator(),
     FeedTranslator(),
     FileSharingTranslator(),
     GroupTranslator(),
