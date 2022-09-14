@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../qaul_rpc.dart';
+import 'models/dtn_configuration.dart';
 
 final qaulWorkerProvider =
     Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
@@ -38,3 +39,5 @@ final fileHistoryEntitiesProvider =
 final groupInvitesProvider =
     StateNotifierProvider<GroupInviteListNotifier, List<GroupInvite>>(
         (_) => GroupInviteListNotifier());
+
+final dtnConfigurationProvider = StateProvider<DTNConfiguration?>((_) => null);
