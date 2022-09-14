@@ -15,7 +15,6 @@ import 'generated/connections/ble/ble_rpc.pb.dart';
 import 'generated/connections/connections.pb.dart';
 import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
-import 'generated/router/router.pb.dart';
 import 'generated/router/users.pb.dart';
 import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
@@ -92,9 +91,7 @@ class LibqaulWorker {
 
   Future<void> getUsers() async {
     await _sendMessage(Modules.USERS, Users(userRequest: UserRequest()));
-
-    _sendMessage(
-        Modules.ROUTER, Router(routingTableRequest: RoutingTableRequest()));
+    _sendMessage(Modules.USERS, Users(userOnlineRequest: UserOnlineRequest()));
   }
 
   void getUserSecurityNumber(User u) async {

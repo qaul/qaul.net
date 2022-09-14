@@ -11,7 +11,6 @@ import '../generated/connections/ble/ble_rpc.pb.dart';
 import '../generated/connections/connections.pb.dart';
 import '../generated/node/node.pb.dart';
 import '../generated/node/user_accounts.pb.dart';
-import '../generated/router/router.pb.dart';
 import '../generated/router/users.pb.dart';
 import '../generated/rpc/debug.pb.dart';
 import '../generated/rpc/qaul_rpc.pb.dart';
@@ -41,8 +40,6 @@ part 'filesharing_translator.dart';
 part 'group_translator.dart';
 
 part 'node_translator.dart';
-
-part 'router_translator.dart';
 
 part 'user_accounts_translator.dart';
 
@@ -78,7 +75,6 @@ abstract class RpcModuleTranslator {
     FileSharingTranslator(),
     GroupTranslator(),
     NodeTranslator(),
-    RouterTranslator(),
     UserAccountsTranslator(),
     UsersTranslator(),
   ];

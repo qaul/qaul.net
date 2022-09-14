@@ -20,6 +20,8 @@ class UsersTranslator extends RpcModuleTranslator {
                   keyBase58: u.keyBase58,
                   isBlocked: u.blocked,
                   isVerified: u.verified,
+                  status: _mapFrom(u.connectivity),
+                  availableTypes: _mapFromRoutingTable(u.connections),
                 ))
             .toList();
 
@@ -55,16 +57,44 @@ class UsersTranslator extends RpcModuleTranslator {
     return ConnectionStatus.offline;
   }
 
+  Map<ConnectionType, ConnectionInfo> _mapFromRoutingTable(
+      List<RoutingTableConnection> connections) {
+    ConnectionType toType(RoutingTableConnection c) {
+      if (c.module == ConnectionModule.LOCAL) {
+        return ConnectionType.local;
+      }
+      if (c.module == ConnectionModule.LAN) {
+        return ConnectionType.lan;
+      }
+      if (c.module == ConnectionModule.INTERNET) {
+        return ConnectionType.internet;
+      }
+      if (c.module == ConnectionModule.BLE) {
+        return ConnectionType.ble;
+      }
+      throw ArgumentError.value(c, 'ConnectionModule', 'value not mapped');
+    }
+
+    ConnectionInfo toConnectionInfo(RoutingTableConnection c) => ConnectionInfo(
+          ping: c.rtt ~/ 1000,
+          hopCount: c.hopCount == 0 ? 1 : c.hopCount,
+          nodeID: Uint8List.fromList(c.via),
+          nodeIDBase58: Base58Encode(c.via),
+        );
+
+    return Map.fromEntries(connections
+        .where((c) => c.module != ConnectionModule.NONE)
+        .map((e) => MapEntry(toType(e), toConnectionInfo(e))));
+  }
+
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
     if (res.module != type) return;
-    final provider = reader(usersProvider.notifier);
     if (res.data is List<User>) {
+      final provider = reader(usersProvider.notifier);
       for (final user in res.data) {
         provider.contains(user) ? provider.update(user) : provider.add(user);
       }
-    } else if (res.data is User) {
-      if (provider.contains(res.data)) provider.update(res.data);
     }
     if (res.data is SecurityNumber) {
       reader(currentSecurityNoProvider.notifier).state = res.data;

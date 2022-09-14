@@ -27,7 +27,7 @@ pub mod users {
         UserList(super::UserList),
         /// User Update
         ///
-        /// Sent to libqaul to update the verification & blocked field
+        /// Sent to libqaul to update the verification & blocked fields
         /// of a user.
         /// All other fields will be ignored.
         #[prost(message, tag="4")]
@@ -48,7 +48,8 @@ pub mod users {
         /// with leading zeros.
         ///
         /// example rendering of security number:
-        ///
+        /// 13246 42369 46193 12484
+        /// 12142 31101 09874 34545
         #[prost(message, tag="6")]
         SecurityNumberResponse(super::SecurityNumberResponse),
     }
