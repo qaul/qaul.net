@@ -8,7 +8,6 @@
 use libp2p::{identity::PublicKey, PeerId};
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use sha2::digest::DynDigest;
 use sha2::{Digest, Sha512};
 use state::Storage;
 use std::cmp::Ordering;
@@ -301,7 +300,7 @@ impl Users {
                         // get user account
                         if let Some(account) = UserAccounts::get_default_user() {
                             // get online users
-                            let online_users = super::RoutingTable::get_online_users();
+                            let online_users = super::RoutingTable::get_online_users_info();
 
                             // fill them into the list
                             for (id, user) in &users.users {
@@ -314,7 +313,18 @@ impl Users {
                                     GroupId::from_peers(&account.id, &user.id).to_bytes();
 
                                 let mut connectivity: i32 = 0;
-                                if online_users.contains_key(id) {
+                                let mut connections: Vec<proto::RoutingTableConnection> =
+                                    Vec::new();
+
+                                if let Some(entries) = online_users.get(id) {
+                                    for entry in entries {
+                                        connections.push(proto::RoutingTableConnection {
+                                            module: entry.module.as_int(),
+                                            hop_count: entry.hc as u32,
+                                            rtt: entry.rtt,
+                                            via: entry.node.to_bytes(),
+                                        });
+                                    }
                                     connectivity = 1;
                                 }
 
@@ -327,7 +337,7 @@ impl Users {
                                     connectivity: connectivity,
                                     verified: user.verified,
                                     blocked: user.blocked,
-                                    connections: vec![],
+                                    connections,
                                 };
 
                                 // add entry to list

@@ -14,7 +14,6 @@ use libp2p::PeerId;
 use prost::Message;
 use state::Storage;
 use std::collections::{BTreeMap, HashMap};
-use std::convert::TryInto;
 use std::sync::RwLock;
 
 use super::proto;
