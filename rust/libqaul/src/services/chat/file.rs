@@ -47,6 +47,12 @@ pub mod proto_net {
     include!("qaul.net.chatfile.rs");
 }
 
+/// Size of the biggest file data package
+pub const DEF_PACKAGE_SIZE: u32 = 64000;
+
+/// mutable state of all file
+static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
+
 /// Structure to management for file histories based on the each user_id.
 pub struct AllFiles {
     pub db_ref: BTreeMap<Vec<u8>, UserFiles>,
@@ -61,6 +67,8 @@ pub struct UserFiles {
     pub histories: Tree<FileHistory>,
     /// file data chunks
     ///
+    /// Storage of incoming chunks until receiving is completed.
+    ///
     /// index: file_id & chunk_index
     pub file_chunks: Tree<Vec<u8>>,
 }
@@ -69,7 +77,7 @@ impl UserFiles {
     /// get file history
     pub fn get_filehistory(&self, file_id: u64) -> Option<FileHistory> {
         // get invite
-        match self.histories.get(file_id.to_be_bytes()) {
+        match self.histories.get(file_id.to_be_bytes().to_vec()) {
             Ok(file_history) => {
                 return file_history;
             }
@@ -79,10 +87,27 @@ impl UserFiles {
         None
     }
 
+    /// get file history iterator
+    pub fn get_filehistory_iterator(&self) -> Iter<FileHistory, BincodeEncoding> {
+        // get key range
+        let first_key: u64 = 0;
+        let last_key: u64 = u64::MAX;
+
+        // get results from data base
+        let result = self
+            .histories
+            .range(first_key.to_be_bytes().to_vec()..last_key.to_be_bytes().to_vec());
+
+        result
+    }
+
     /// save file history
     pub fn save_filehistory(&self, file_id: u64, file_history: FileHistory) {
         // save file history into data base
-        if let Err(e) = self.histories.insert(&file_id.to_be_bytes(), file_history) {
+        if let Err(e) = self
+            .histories
+            .insert(file_id.to_be_bytes().to_vec(), file_history)
+        {
             log::error!("Error saving file history to data base: {}", e);
             return;
         }
@@ -209,11 +234,44 @@ pub struct FileHistory {
     pub received_at: u64,
 }
 
-/// mutable state of all file
-static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
+impl FileHistory {
+    /// the reception of a file message has successfully been confirmed
+    ///
+    /// the function returns a boolean that indicates, whether the user finished receiving
+    /// {user completed}
+    pub fn reception_confirmed(&mut self, receiver_id: PeerId) -> bool {
+        // set received state
+        let key = receiver_id.to_bytes();
+        if let Some(tracking) = self.reception_tracking.get_mut(&key) {
+            tracking.package_count = tracking.package_count + 1;
+            log::debug!("package_count {}", tracking.package_count);
 
-/// Size of the biggest file data package
-pub const DEF_PACKAGE_SIZE: u32 = 64000;
+            // check if user has received all messages
+            if tracking.package_count >= self.message_count {
+                tracking.received = true;
+                self.file_state = FileState::Confirmed;
+
+                // check if all users have received all messages
+                let mut done = true;
+                for (_, v) in &self.reception_tracking {
+                    if v.received == false {
+                        done = false;
+                        break;
+                    }
+                }
+
+                // set file reception state
+                if done {
+                    self.file_state = FileState::ConfirmedByAll;
+                }
+
+                return true;
+            }
+        }
+
+        false
+    }
+}
 
 pub struct ChatFile {}
 /// File sharing module to process transfer, receive and RPC commands
@@ -280,101 +338,31 @@ impl ChatFile {
         user_files
     }
 
-    // REMOVE
-    /*
-       /// Check if incoming file has been completed
-       pub fn is_completed(account_id: &PeerId, msg_date: &Vec<u8>) -> Result<bool, String> {
-           let mut file_id: u64 = 0;
-           match proto_net::ChatFileContainer::decode(&msg_date[..]) {
-               Ok(messaging) => match messaging.message {
-                   Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
-                       file_id = file_info.file_id;
-                   }
-                   Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
-                       file_id = file_data.file_id;
-                   }
-                   None => {
-                       return Err("not file data".to_string());
-                   }
-               },
-               Err(_e) => {
-                   return Err("file data decode error".to_string());
-               }
-           }
-           let db_ref = Self::get_db_ref(account_id);
-
-           let exists = db_ref
-               .file_ids
-               .contains_key(&file_id.to_be_bytes())
-               .unwrap();
-
-           Ok(exists)
-       }
-    */
-    /// This function is called when file transfer or receiving finished successfully.
-    fn on_completed(
-        user_id: &PeerId,
-        sender_id: &PeerId,
-        group_id: &Vec<u8>,
-        sent_at: u64,
-        info: &proto_net::ChatFileInfo,
+    pub fn update_confirmation(
+        account_id: PeerId,
+        receiver_id: PeerId,
+        file_id: u64,
+        received_at: u64,
     ) {
-        /*
-           let db_ref = Self::get_db_ref(user_id);
+        // get db reference
+        let user_files = ChatFile::get_db_ref(&account_id);
 
-           // get file from db
+        // get file history
+        if let Some(mut file_history) = user_files.get_filehistory(file_id) {
+            // update reception & check if user finished
+            if file_history.reception_confirmed(receiver_id) {
+                // update chat message
+                ChatStorage::update_confirmation(
+                    account_id,
+                    receiver_id,
+                    &file_history.message_id,
+                    received_at,
+                );
+            }
 
-
-           // update file entry
-           let history = FileHistory {
-               group_id: group_id.clone(),
-               sender_id: sender_id.to_bytes(),
-               start_index: info.start_index,
-               message_count: info.message_count,
-               name: info.file_name.clone(),
-               descr: info.file_description.clone(),
-               extension: info.file_extension.clone(),
-               size: info.file_size,
-               file_id: info.file_id,
-               message_id: Vec::new(),
-               chunk_size: info.data_chunk_size,
-               file_state: FileState::Receiving,
-               reception_tracking: todo!(),
-               sent_at,
-               received_at: timestamp::Timestamp::get_timestamp(),
-           };
-
-           let last_file = db_ref.last_file + 1;
-
-           // save to data base
-           if let Err(e) = db_ref.histories.insert(&last_file.to_be_bytes(), history) {
-               log::error!("Error saving file history to data base: {}", e);
-           } else {
-               if let Err(e) = db_ref.histories.flush() {
-                   log::error!("Error when flushing data base to disk: {}", e);
-               }
-           }
-
-           // save file id
-           if let Err(e) = db_ref
-               .file_ids
-               .insert(&info.file_id.to_be_bytes(), last_file)
-           {
-               log::error!("Error saving file ids to data base: {}", e);
-           } else {
-               if let Err(e) = db_ref.file_ids.flush() {
-                   log::error!("Error when flushing data base to disk: {}", e);
-               }
-           }
-
-           // update last_file
-           let mut all_files = ALLFILES.get().write().unwrap();
-
-           // check if user ID is in map
-           if let Some(user_files) = all_files.db_ref.get_mut(&user_id.to_bytes()) {
-               user_files.last_file = last_file;
-           }
-        */
+            // save file history
+            user_files.save_filehistory(file_id, file_history);
+        }
     }
 
     /// getting file extension from given filename
@@ -404,44 +392,36 @@ impl ChatFile {
     pub fn file_history(
         user_account: &UserAccount,
         history_req: &proto_rpc::FileHistoryRequest,
-    ) -> (u64, Vec<FileHistory>) {
-        /*
+    ) -> Vec<FileHistory> {
+        // get DB references
         let db_ref = Self::get_db_ref(&user_account.id);
 
         let mut histories: Vec<FileHistory> = vec![];
 
-        let mut count = history_req.limit;
-        if (history_req.offset + count) as u64 >= db_ref.last_file {
-            count = (db_ref.last_file - (history_req.offset as u64)) as u32;
-        }
+        // loop through results
+        let mut counter: u32 = 0;
 
-        if count == 0 {
-            // no histories from offset
-            return (db_ref.last_file, histories);
-        }
-
-        let first_file = db_ref.last_file - ((history_req.offset + count) as u64) + 1;
-        let end_file = first_file + (count as u64);
-        let first_file_bytes = first_file.to_be_bytes().to_vec();
-        let end_file_bytes = end_file.to_be_bytes().to_vec();
-
-        for res in db_ref
-            .histories
-            .range(first_file_bytes.as_slice()..end_file_bytes.as_slice())
-        {
-            match res {
+        let iterator = db_ref.get_filehistory_iterator();
+        for history_result in iterator {
+            match history_result {
                 Ok((_id, message)) => {
-                    histories.push(message.clone());
+                    // stop when we reached our limit
+                    if counter >= history_req.offset + history_req.limit {
+                        break;
+                    }
+
+                    // check if we collect the result
+                    if counter >= history_req.offset {
+                        histories.push(message);
+                    }
+
+                    counter = counter + 1;
                 }
-                Err(e) => {
-                    log::error!("Error retrieving file history from data base: {}", e);
-                }
+                Err(e) => log::error!("{}", e),
             }
         }
 
-        (db_ref.last_file, histories)
-         */
-        (0, Vec::new())
+        histories
     }
 
     /// send a file from RPC to users
@@ -513,6 +493,8 @@ impl ChatFile {
             log::error!("creating folder error {}", e.to_string());
         }
 
+        // TODO: start in new async thread here
+
         // copy file
         if let Err(e) = fs::copy(path_name.clone(), file_path) {
             log::error!("copy file error {}", e.to_string());
@@ -542,6 +524,7 @@ impl ChatFile {
             message_count: mesage_count,
             data_chunk_size: DEF_PACKAGE_SIZE,
         };
+        // ? WHAT IS THIS DOING?
         //Self::on_completed(&user_account.id, &user_account.id, group_id, &file_info);
 
         let info = proto_net::ChatFileContainer {
@@ -550,6 +533,16 @@ impl ChatFile {
             )),
         };
 
+        // send message to all group members
+        Self::send_filecontainer_to_group(
+            user_account,
+            &group,
+            &message_id,
+            timestamp,
+            info.encode_to_vec(),
+        );
+
+        // create group ID object
         let groupid = GroupId::from_bytes(group_id).unwrap();
 
         // save file state to data base
@@ -717,122 +710,7 @@ impl ChatFile {
         key_bytes.append(&mut time_bytes);
         crc::crc64::checksum_iso(&key_bytes)
     }
-    /*
-        /// try to store the received file
-        pub fn try_store_file(
-            user_account: &UserAccount,
-            sender_id: &PeerId,
-            group_id: &Vec<u8>,
-            start_index: u32,
-            message_count: u32,
-        ) -> Result<bool, String> {
-            // check if all messages have arrived
-            let mut message_ids: Vec<Vec<u8>> = vec![];
-            for i in 0..message_count {
-                let msg_id = Chat::generate_message_id(group_id, sender_id, start_index + i);
-                message_ids.push(msg_id.clone());
-            }
-            if !ChatStorage::is_messages_exist(&user_account.id, &message_ids) {
-                // all content are not arrived
-                return Err("all content are not arrived".to_string());
-            }
 
-            // get file info message
-            let info_msg =
-                ChatStorage::get_messages_by_id(&user_account.id, &vec![message_ids[0].clone()]);
-            if info_msg.len() == 0 {
-                return Err("file info message does not exist".to_string());
-            }
-
-            // decode file info
-            let file_info;
-            match proto_net::ChatFileContainer::decode(&info_msg[0].1[..]) {
-                Ok(container) => match container.message {
-                    Some(proto_net::chat_file_container::Message::FileInfo(info)) => {
-                        file_info = info;
-                    }
-                    _ => {
-                        return Err("file info message damaged".to_string());
-                    }
-                },
-                _ => {
-                    return Err("file message container was damaged".to_string());
-                }
-            }
-
-            // check content
-            if start_index != file_info.start_index || message_count != file_info.message_count {
-                return Err("file info message mismatched".to_string());
-            }
-
-            // get all data messages
-            message_ids.remove(0);
-            let file_datas = ChatStorage::get_messages_by_id(&user_account.id, &message_ids);
-
-            // check validate
-            if file_datas.len() != message_ids.len() {
-                return Err("there are some missed file data messages".to_string());
-            }
-
-            // check directory
-            let storage_path_string = crate::storage::Storage::get_path();
-            let storage_path = Path::new(&storage_path_string);
-            let user_storage_path = storage_path.join(user_account.id.to_base58());
-            let files_storage_path = user_storage_path.join("files");
-
-            // create files directory if it doesn't exist yet
-            if let Err(_e) = fs::create_dir_all(files_storage_path.clone()) {
-                return Err("creating folder error".to_string());
-            }
-
-            // create file name
-            let mut file_name = file_info.file_id.to_string();
-            if file_info.file_extension.len() > 0 {
-                file_name.push_str(".");
-                file_name.push_str(&file_info.file_extension.as_str());
-            }
-
-            // create file path
-            let file_path = files_storage_path.join(file_name);
-
-            log::info!("save file {:?}", file_path);
-            let mut file: File = File::create(file_path.clone()).unwrap();
-            for (_content_type, content) in &file_datas {
-                // if chat::rpc_proto::ChatContentType::from_i32(*content_type).unwrap()
-                //     != chat::rpc_proto::ChatContentType::File
-                // {
-                //     return Err("file data message invalid content type".to_string());
-                // }
-
-                match proto_net::ChatFileContainer::decode(&content[..]) {
-                    Ok(container) => match container.message {
-                        Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
-                            if let Err(e) = file.write(&file_data.data) {
-                                log::error!("file storing failed {}", e.to_string());
-                            }
-                        }
-                        _ => {
-                            return Err("file data message invalid content type".to_string());
-                        }
-                    },
-                    _ => {
-                        return Err("file data message container is dirty".to_string());
-                    }
-                }
-            }
-
-            if let Err(_e) = file.flush() {
-                log::error!("file service storing error");
-            }
-
-            Self::on_completed(&user_account.id, sender_id, group_id, &file_info);
-
-            // remove file data messages
-            ChatStorage::remove_messages(&user_account.id, &message_ids);
-
-            Ok(true)
-        }
-    */
     /// Try to store the file
     ///
     /// This function will check if the file is fully downloaded,
@@ -881,8 +759,8 @@ impl ChatFile {
     /// process chat file data message
     fn process_data_message(
         user_account: &UserAccount,
-        sender_id: PeerId,
-        group_id: Vec<u8>,
+        _sender_id: PeerId,
+        _group_id: Vec<u8>,
         file_data: proto_net::ChatFileData,
     ) {
         // get DB references
@@ -1067,9 +945,19 @@ impl ChatFile {
                         }
                     }
                     Some(proto_rpc::chat_file::Message::FileHistory(history_req)) => {
-                        let user_account = UserAccounts::get_by_id(account_id).unwrap();
                         log::trace!("lib->file->history");
-                        let (total, list) = Self::file_history(&user_account, &history_req);
+
+                        // get user account
+                        let user_account;
+                        match UserAccounts::get_by_id(account_id) {
+                            Some(account) => user_account = account,
+                            None => {
+                                log::error!("user account not found");
+                                return;
+                            }
+                        }
+
+                        let list = Self::file_history(&user_account, &history_req);
 
                         let mut histories: Vec<proto_rpc::FileHistoryEntry> = vec![];
                         for entry in list {
@@ -1095,7 +983,7 @@ impl ChatFile {
                                 proto_rpc::FileHistoryResponse {
                                     offset: history_req.offset,
                                     limit: history_req.limit,
-                                    total,
+                                    total: histories.len() as u64,
                                     histories,
                                 },
                             )),

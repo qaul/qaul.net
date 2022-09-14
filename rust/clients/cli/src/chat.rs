@@ -269,12 +269,13 @@ impl Chat {
                         for message in proto_conversation.message_list {
                             if let Ok(ss) = Self::analyze_content(&message.content) {
                                 print! {"{} | ", message.index};
-                                match message.status {
-                                    0 => print!(".. | "),
-                                    1 => print!("✓. | "),
-                                    2 => print!("✓✓ | "),
-                                    3 => print!("✓✓✓| "),
-                                    _ => print!("   | "),
+                                match proto::MessageStatus::from_i32(message.status).unwrap() {
+                                    proto::MessageStatus::Sending => print!(".. | "),
+                                    proto::MessageStatus::Sent => print!("✓. | "),
+                                    proto::MessageStatus::Confirmed => print!("✓✓ | "),
+                                    proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
+                                    proto::MessageStatus::Receiving => print!("📨 | "),
+                                    proto::MessageStatus::Received => print!("📨 | "),
                                 }
 
                                 print!("{} | ", message.sent_at);

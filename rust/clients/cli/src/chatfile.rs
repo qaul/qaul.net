@@ -51,7 +51,7 @@ impl ChatFile {
                         };
 
                         log::info!(
-                            "send file peerid= {}, file={}, descr={}",
+                            "send file to group={}, file path={}, description={}",
                             group_id_str,
                             file_path_name,
                             descr

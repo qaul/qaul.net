@@ -20,7 +20,7 @@ mod network_emul;
 pub mod process;
 pub mod retransmit;
 
-use super::chat::ChatStorage;
+use super::chat::{ChatFile, ChatStorage};
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -196,17 +196,26 @@ impl Messaging {
                     Some(unconfirmed) => {
                         // check message and decide what to do
                         match unconfirmed.message_type {
-                            MessagingServiceType::Unconfirmed => {}
+                            MessagingServiceType::Unconfirmed => {
+                                log::debug!("Confirmation: Unconfirmed");
+                            }
                             MessagingServiceType::DtnOrigin => {
+                                log::debug!("Confirmation: DtnOrigin");
                                 // what kind of message do we have here?
                                 // TODO: check chat storage as sent ...
                             }
-                            MessagingServiceType::DtnStored => {}
-                            MessagingServiceType::Crypto => {}
+                            MessagingServiceType::DtnStored => {
+                                log::debug!("Confirmation: DtnStored");
+                            }
+                            MessagingServiceType::Crypto => {
+                                log::debug!("Confirmation: Crypto");
+                            }
                             MessagingServiceType::Group => {
+                                log::debug!("Confirmation: Group");
                                 // don't do anything for group messages
                             }
                             MessagingServiceType::Chat => {
+                                log::debug!("Confirmation: Chat");
                                 // set received info in chat data base
                                 ChatStorage::update_confirmation(
                                     user_account.id,
@@ -216,9 +225,26 @@ impl Messaging {
                                 );
                             }
                             MessagingServiceType::ChatFile => {
-                                // confirm message reception in data base
+                                log::debug!("Confirmation: ChatFile");
+                                match unconfirmed.message_id.try_into() {
+                                    Ok(arr) => {
+                                        let file_id = u64::from_be_bytes(arr);
+
+                                        // confirm message reception in data base
+                                        ChatFile::update_confirmation(
+                                            user_account.id,
+                                            sender_id,
+                                            file_id,
+                                            confirmation.received_at,
+                                        );
+                                    }
+                                    Err(e) => {
+                                        log::error!("couldn't convert file_id to u64: {:?}", e);
+                                    }
+                                }
                             }
                             MessagingServiceType::Rtc => {
+                                log::debug!("Confirmation: Rtc");
                                 // TODO CONFIRM RTC MESSAGE
                             }
                         }
