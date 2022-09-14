@@ -49,8 +49,7 @@ class User with EquatableMixin implements Comparable<User> {
 
   String get idBase58 => Base58Encode(id);
 
-  bool get isConnected =>
-      availableTypes?.isNotEmpty ?? status == ConnectionStatus.online;
+  bool get isConnected => status == ConnectionStatus.online;
 
   User copyWith({required Map<ConnectionType, ConnectionInfo> availableTypes}) {
     return User(

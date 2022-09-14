@@ -34,18 +34,6 @@ class UsersTranslator extends RpcModuleTranslator {
           securityNumberBlocks: res.securityNumberBlocks,
         );
         return RpcTranslatorResponse(type, secNo);
-      case Users_Message.userUpdate:
-        final userEntry = message.ensureUserUpdate();
-        final user = User(
-          name: userEntry.name,
-          id: Uint8List.fromList(userEntry.id),
-          conversationId: Uint8List.fromList(userEntry.groupId),
-          keyBase58: userEntry.keyBase58,
-          isBlocked: userEntry.blocked,
-          isVerified: userEntry.verified,
-          status: _mapFrom(userEntry.connectivity),
-        );
-        return RpcTranslatorResponse(type, user);
       default:
         return super.decodeMessageBytes(data, reader);
     }
