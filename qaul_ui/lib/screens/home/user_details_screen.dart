@@ -1,9 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intersperse/intersperse.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/disabled_state_decorator.dart';
@@ -105,20 +107,12 @@ class UserDetailsScreen extends HookConsumerWidget {
                           onPressed: blocked
                               ? null
                               : () async {
-                                  final res = await _confirmAction(
-                                    context,
-                                    description: verified
-                                        ? l18ns.unverifyUserConfirmationMessage
-                                        : l18ns.verifyUserConfirmationMessage,
-                                  );
-
-                                  if (res is! bool || !res) return;
                                   loading.value = true;
 
                                   final worker = ref.read(qaulWorkerProvider);
                                   verified
                                       ? await worker.unverifyUser(user)
-                                      : await worker.verifyUser(user);
+                                      : await _verifyUser(context, user: user);
 
                                   loading.value = false;
                                   if (!isMounted()) return;
@@ -220,6 +214,150 @@ class UserDetailsScreen extends HookConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+Future<void> _verifyUser(BuildContext context, {required User user}) async {
+  return await showDialog(
+    context: context,
+    builder: (c) => _VerifyUserDialog(user),
+  );
+}
+
+class _VerifyUserDialog extends HookConsumerWidget {
+  const _VerifyUserDialog(this.user, {Key? key}) : super(key: key);
+  final User user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final securityNo = ref.watch(currentSecurityNoProvider);
+
+    final isLoading = useState(false);
+
+    final fetchSecurityNo = useCallback(
+      () async {
+        isLoading.value = true;
+        final worker = ref.read(qaulWorkerProvider);
+        for (var i = 0; i < 60; i++) {
+          if (i % 10 == 0) worker.getUserSecurityNumber(user);
+
+          await worker.getDefaultUserAccount();
+          await Future.delayed(const Duration(milliseconds: 1000));
+          final no = ref.read(currentSecurityNoProvider);
+          if (no != null) break;
+        }
+        isLoading.value = false;
+      },
+      [],
+    );
+
+    useEffect(() {
+      if (!(securityNo?.userId.equals(user.id) ?? false)) fetchSecurityNo();
+      return () {};
+    }, []);
+
+    final l18ns = AppLocalizations.of(context)!;
+
+    return LoadingDecorator(
+      isLoading: isLoading.value,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Please ensure that the person you're trying to verify sees the same security number on their screen when attempting to verify you.",
+                style: Theme.of(context).textTheme.subtitle1,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              if (securityNo != null && securityNo.userId.equals(user.id)) ...[
+                _SecurityNumberDisplay(securityNo: securityNo),
+              ],
+              const SizedBox(height: 24),
+              _RoundedRectButton(
+                color: Colors.lightBlue,
+                size: const Size(280, 80),
+                onPressed: () {
+                  final worker = ref.read(qaulWorkerProvider);
+                  worker.verifyUser(user);
+                  Navigator.pop(context);
+                },
+                child: Text(l18ns.okDialogButton),
+              ),
+              const SizedBox(height: 12),
+              _RoundedRectButton(
+                color: Colors.red.shade400,
+                size: const Size(280, 80),
+                onPressed: () => Navigator.pop(context),
+                child: Text(l18ns.cancelDialogButton),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SecurityNumberDisplay extends StatelessWidget {
+  const _SecurityNumberDisplay({
+    Key? key,
+    required this.securityNo,
+  }) : super(key: key);
+
+  final SecurityNumber securityNo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Security Number:',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildSecurityCodeRow(0)
+              .intersperse(const SizedBox(width: 16))
+              .toList(),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _buildSecurityCodeRow(1)
+              .intersperse(const SizedBox(width: 16))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildSecurityCodeRow(int row) {
+    return List<Widget>.generate(
+      4,
+      (index) => Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.withOpacity(.5)),
+        ),
+        child: Text(securityNo.securityCode[(row * 4) + index]),
+      ),
     );
   }
 }
