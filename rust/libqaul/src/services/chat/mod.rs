@@ -24,7 +24,6 @@ pub use storage::ChatStorage;
 pub mod rpc_proto {
     include!("qaul.rpc.chat.rs");
 }
-use super::group;
 
 /// qaul Chat module general logic
 pub struct Chat {}

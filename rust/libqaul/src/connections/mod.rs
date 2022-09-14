@@ -53,6 +53,7 @@ impl ConnectionModule {
     ///
     /// The values are not transformed in any way and thus are considered stable
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    #[allow(dead_code)]
     pub fn as_str_name(&self) -> &'static str {
         match self {
             ConnectionModule::None => "NONE",

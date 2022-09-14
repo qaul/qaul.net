@@ -12,6 +12,8 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+use self::proto_net::GroupMemberRole;
+
 use super::chat::{self, Chat};
 use super::messaging::{proto, Messaging, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -24,7 +26,8 @@ mod member;
 mod message;
 pub mod storage;
 
-pub use manage::Manage;
+pub use group_id::GroupId;
+pub use manage::GroupManage;
 use member::Member;
 pub use message::GroupMessage;
 pub use storage::GroupStorage;
@@ -126,6 +129,33 @@ impl Group {
             return self.members.get(user_id);
         }
         None
+    }
+
+    /// Verify if a user is the administrator of the group
+    #[allow(dead_code)]
+    pub fn is_administrator(&self, user_id: &Vec<u8>) -> bool {
+        if let Some(member) = self.members.get(user_id) {
+            if member.role == GroupMemberRole::Admin as i32 {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Verify if a user is a member of the group
+    pub fn is_member(&self, user_id: &Vec<u8>) -> bool {
+        self.members.contains_key(user_id)
+    }
+
+    /// Verify if both user_id's are members of the group
+    ///
+    /// This is a convenient function to verify incoming messages.
+    pub fn are_members(&self, user_id_1: &Vec<u8>, user_id_2: &Vec<u8>) -> bool {
+        if self.is_member(user_id_1) {
+            return self.is_member(user_id_2);
+        }
+
+        false
     }
 
     /// update group member
@@ -334,7 +364,7 @@ impl Group {
                 }
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::info!("group info arrived");
-                    manage::Manage::on_group_notify(
+                    manage::GroupManage::on_group_notify(
                         sender_id.to_owned(),
                         receiver_id.to_owned(),
                         &group_info,
@@ -363,11 +393,11 @@ impl Group {
             Ok(group) => {
                 match group.message {
                     Some(proto_rpc::group::Message::GroupCreateRequest(group_create_req)) => {
-                        let id = Manage::create_new_group(
+                        let id = GroupManage::create_new_group(
                             &my_user_id,
                             group_create_req.group_name.clone(),
                         );
-                        //make response
+                        // create response
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupCreateResponse(
                                 proto_rpc::GroupCreateResponse {
@@ -391,7 +421,7 @@ impl Group {
                     Some(proto_rpc::group::Message::GroupRenameRequest(group_rename_req)) => {
                         let mut status = true;
                         let mut message: String = "".to_string();
-                        if let Err(err) = Manage::rename_group(
+                        if let Err(err) = GroupManage::rename_group(
                             &my_user_id,
                             &group_rename_req.group_id,
                             group_rename_req.group_name.clone(),
@@ -418,13 +448,13 @@ impl Group {
                             Vec::new(),
                         );
 
-                        //post updates
+                        // post updates
                         if status {
                             Self::post_group_update(&my_user_id, &group_rename_req.group_id);
                         }
                     }
                     Some(proto_rpc::group::Message::GroupInfoRequest(group_info_req)) => {
-                        match Manage::group_info(&my_user_id, &group_info_req.group_id) {
+                        match GroupManage::group_info(&my_user_id, &group_info_req.group_id) {
                             Ok(res) => {
                                 let proto_message = proto_rpc::Group {
                                     message: Some(proto_rpc::group::Message::GroupInfoResponse(
@@ -446,7 +476,7 @@ impl Group {
                         }
                     }
                     Some(proto_rpc::group::Message::GroupListRequest(_group_list_req)) => {
-                        let list = Manage::group_list(&my_user_id);
+                        let list = GroupManage::group_list(&my_user_id);
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
                         };
@@ -459,7 +489,7 @@ impl Group {
                         );
                     }
                     Some(proto_rpc::group::Message::GroupInvitedRequest(_group_invited_req)) => {
-                        let invited = Manage::invited_list(&my_user_id);
+                        let invited = GroupManage::invited_list(&my_user_id);
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupInvitedResponse(invited)),
                         };

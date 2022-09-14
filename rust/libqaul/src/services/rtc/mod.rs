@@ -101,7 +101,7 @@ impl Rtc {
         // create direct chat room
         let group_id = GroupId::from_peers(&user_account.id, &receiver);
         if !group::GroupStorage::group_exists(user_account.id, group_id.to_bytes()) {
-            group::Manage::create_new_direct_chat_group(&user_account.id, &receiver);
+            group::GroupManage::create_new_direct_chat_group(&user_account.id, &receiver);
         }
 
         //get last index

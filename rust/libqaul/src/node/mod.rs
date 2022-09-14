@@ -24,7 +24,6 @@ use crate::connections::{internet::Internet, lan::Lan};
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::utilities::qaul_id::QaulId;
-use crate::utilities::timestamp::Timestamp;
 use user_accounts::UserAccounts;
 
 /// central state of this instances Node struct

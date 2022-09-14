@@ -428,9 +428,8 @@ impl Group {
                 }
                 Some(proto_chat::chat_content_message::Message::FileContent(file_content)) => {
                     println!(
-                        "\t\tfile {}.{} [{}] ID {}",
+                        "\t\tfile {} [{}] ID {}",
                         file_content.file_name,
-                        file_content.file_extension,
                         file_content.file_size.to_string(),
                         file_content.file_id.to_string()
                     );
@@ -477,7 +476,7 @@ impl Group {
                     Some(proto::group::Message::GroupRenameResponse(rename_group_response)) => {
                         let result = rename_group_response.result.unwrap();
                         println!("====================================");
-                        println!("Group Reanme status: {}", result.status);
+                        println!("Group Rename status: {}", result.status);
                         let group_id = uuid::Uuid::from_bytes(
                             rename_group_response.group_id.try_into().unwrap(),
                         );

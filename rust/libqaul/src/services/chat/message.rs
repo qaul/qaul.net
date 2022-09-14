@@ -14,7 +14,7 @@ use prost::Message;
 use super::rpc_proto;
 use super::{Chat, ChatStorage};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::services::group::{self, group_id::GroupId, GroupStorage};
+use crate::services::group::{Group, GroupId, GroupManage, GroupStorage};
 use crate::services::messaging::{proto, Messaging, MessagingServiceType};
 use crate::utilities::timestamp::Timestamp;
 
@@ -51,7 +51,7 @@ impl ChatMessage {
     ) -> Result<bool, String> {
         let groupid = GroupId::from_bytes(&group_id).unwrap();
         let group;
-        match group::GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
             Some(v) => group = v,
             None => {
                 let error_string = "Group not found".to_string();
@@ -62,9 +62,8 @@ impl ChatMessage {
                         // create direct chat
                         match crate::router::users::Users::get_user_id_by_q8id(user_q8id) {
                             Some(user_id) => {
-                                group = group::Manage::create_new_direct_chat_group(
-                                    account_id, &user_id,
-                                )
+                                group =
+                                    GroupManage::create_new_direct_chat_group(account_id, &user_id)
                             }
                             None => return Err(error_string),
                         }
@@ -109,11 +108,12 @@ impl ChatMessage {
         };
 
         // save outgoing message
-        ChatStorage::save_outgoing_message(
-            account_id,
+        ChatStorage::save_message(
             account_id,
             &groupid,
+            account_id,
             &message_id,
+            timestamp,
             message_content.clone(),
             rpc_proto::MessageStatus::Sending,
         );
@@ -133,16 +133,7 @@ impl ChatMessage {
 
         // update member state
         my_member.last_message_index = last_index;
-        group::Group::update_group_member(account_id, group_id, &my_member);
-
-        // update last message sent
-        GroupStorage::group_update_last_chat_message(
-            account_id.to_owned(),
-            group_id.to_owned(),
-            account_id.to_owned(),
-            message_content.encode_to_vec(),
-            common_message.sent_at,
-        );
+        Group::update_group_member(account_id, group_id, &my_member);
 
         Ok(true)
     }

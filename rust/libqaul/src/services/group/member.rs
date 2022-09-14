@@ -12,6 +12,7 @@ use prost::Message;
 use super::chat::{self, ChatStorage};
 use super::group_id::GroupId;
 use super::{Group, GroupMember, GroupStorage};
+use crate::utilities::timestamp::Timestamp;
 use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
 /// Group Member Structure
@@ -216,11 +217,14 @@ impl Member {
             )),
         };
 
-        ChatStorage::save_event(
+        ChatStorage::save_message(
             account_id,
-            account_id,
-            event,
             &GroupId::from_bytes(group_id).unwrap(),
+            user_id,
+            &Vec::new(),
+            Timestamp::get_timestamp(),
+            event,
+            chat::rpc_proto::MessageStatus::Received,
         );
 
         Ok(true)
@@ -308,7 +312,7 @@ impl Member {
         group.revision = group.revision + 1;
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), group);
+        GroupStorage::save_group(account_id.to_owned(), group.clone());
 
         // save event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -320,11 +324,14 @@ impl Member {
             )),
         };
 
-        ChatStorage::save_event(
-            &account_id,
-            &sender_id,
+        ChatStorage::save_message(
+            account_id,
+            &GroupId::from_bytes(&group.id).unwrap(),
+            sender_id,
+            &Vec::new(),
+            Timestamp::get_timestamp(),
             event,
-            &GroupId::from_bytes(&resp.group_id).unwrap(),
+            chat::rpc_proto::MessageStatus::Received,
         );
 
         Ok(true)
@@ -413,7 +420,7 @@ impl Member {
         // TODO: create a group deactivation state
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), group);
+        GroupStorage::save_group(account_id.to_owned(), group.clone());
 
         // save event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -425,11 +432,14 @@ impl Member {
             )),
         };
 
-        ChatStorage::save_event(
-            &account_id,
-            &sender_id,
+        ChatStorage::save_message(
+            account_id,
+            &GroupId::from_bytes(&group.id).unwrap(),
+            sender_id,
+            &Vec::new(),
+            Timestamp::get_timestamp(),
             event,
-            &GroupId::from_bytes(&message.group_id).unwrap(),
+            chat::rpc_proto::MessageStatus::Received,
         );
 
         Ok(true)

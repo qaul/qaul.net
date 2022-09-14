@@ -183,6 +183,8 @@ impl Messaging {
         user_account: UserAccount,
         confirmation: proto::Confirmation,
     ) {
+        log::info!("messgae confirmed");
+
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
         // check and remove unconfirmed from DB
@@ -225,7 +227,7 @@ impl Messaging {
                                 );
                             }
                             MessagingServiceType::ChatFile => {
-                                log::debug!("Confirmation: ChatFile");
+                                log::info!("Confirmation: ChatFile");
                                 match unconfirmed.message_id.try_into() {
                                     Ok(arr) => {
                                         let file_id = u64::from_be_bytes(arr);
@@ -248,8 +250,6 @@ impl Messaging {
                                 // TODO CONFIRM RTC MESSAGE
                             }
                         }
-                        // REMOVE
-                        //return Some(unconfirmed.message_id.clone());
                     }
                     _ => {}
                 }
@@ -313,7 +313,7 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
-        message_type: MessagingServiceType,
+        _message_type: MessagingServiceType,
         message_id: &Vec<u8>,
         is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
@@ -399,7 +399,6 @@ impl Messaging {
         user_account: &UserAccount,
         storage_node_id: &PeerId,
         org_container: &proto::Container,
-        message_id: Option<&Vec<u8>>,
     ) -> Result<Vec<u8>, String> {
         // create Dtn message
         let dtn_payload = proto::EnvelopPayload {
@@ -419,6 +418,7 @@ impl Messaging {
                 signature: signature_dtn.clone(),
                 envelope: Some(envelope_dtn),
             };
+
             // in common message case, save into unconfirmed table
             Self::save_unconfirmed_message(
                 MessagingServiceType::Chat,
@@ -437,6 +437,7 @@ impl Messaging {
                 true,
                 true,
             );
+
             // return signature
             Ok(signature_dtn)
         } else {
@@ -444,90 +445,6 @@ impl Messaging {
         }
     }
 
-    // REMOVE
-    /*
-       /// pack, sign and schedule a message for sending
-       pub fn pack_and_send_dtn_message(
-           user_account: &UserAccount,
-           receiver: &PeerId,
-           storage_node_id: &PeerId,
-           data: &Vec<u8>,
-           message_id: Option<&Vec<u8>>,
-       ) -> Result<Vec<u8>, String> {
-           let envelop_payload = proto::EnvelopPayload {
-               payload: Some(proto::envelop_payload::Payload::Dtn(data.clone())),
-           };
-
-           // create envelope
-           let envelope = proto::Envelope {
-               sender_id: user_account.id.to_bytes(),
-               receiver_id: receiver.to_bytes(),
-               //payload: proto::Encrypted{data: encrypted}.encode_to_vec(),
-               //payload: proto::Encrypted{data: data.clone()}.encode_to_vec(),
-               payload: envelop_payload.encode_to_vec(),
-           };
-
-           // encode envelope
-           let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-           envelope
-               .encode(&mut envelope_buf)
-               .expect("Vec<u8> provides capacity as needed");
-
-           // sign message
-           if let Ok(signature) = user_account.keys.sign(&envelope_buf) {
-               // create container
-               let container = proto::Container {
-                   signature: signature.clone(),
-                   envelope: Some(envelope),
-               };
-
-               // create Dtn message
-               let dtn_payload = proto::EnvelopPayload {
-                   payload: Some(proto::envelop_payload::Payload::Dtn(
-                       container.encode_to_vec(),
-                   )),
-               };
-
-               let envelope_dtn = proto::Envelope {
-                   sender_id: user_account.id.to_bytes(),
-                   receiver_id: storage_node_id.to_bytes(),
-                   payload: dtn_payload.encode_to_vec(),
-               };
-               if let Ok(signature_dtn) = user_account.keys.sign(&envelope_dtn.encode_to_vec()) {
-                   // create dtn container
-                   let container_dtn = proto::Container {
-                       signature: signature_dtn.clone(),
-                       envelope: Some(envelope_dtn),
-                   };
-                   // in common message case, save into unconfirmed table
-                   Self::save_unconfirmed_message(
-                       MessagingServiceType::DtnOrigin,
-                       message_id.unwrap(),
-                       storage_node_id,
-                       &container,
-                       true,
-                   );
-
-                   // schedule message for sending
-                   Self::schedule_message(
-                       storage_node_id.clone(),
-                       container_dtn,
-                       true,
-                       false,
-                       false,
-                       true,
-                   );
-
-                   // return signature
-                   Ok(signature_dtn)
-               } else {
-                   return Err("dtn messaging signing error".to_string());
-               }
-           } else {
-               return Err("messaging signing error".to_string());
-           }
-       }
-    */
     /// schedule a message
     ///
     /// schedule a message for sending.
@@ -608,7 +525,6 @@ impl Messaging {
                                     &user_account,
                                     &storage_node_id,
                                     &message.container,
-                                    Some(&vec![]),
                                 ) {
                                     log::error!("DTN scheduling error!");
                                 } else {
@@ -620,9 +536,6 @@ impl Messaging {
                         }
                     }
                 }
-                // log::trace!("No route found to user {}", message.receiver.to_base58());
-                // reschedule if no route is found
-                //Self::schedule_message(message.receiver, message.container);
             }
         }
 

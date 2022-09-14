@@ -17,6 +17,7 @@ use uuid::Uuid;
 use crate::utilities::qaul_id::QaulId;
 
 /// Chat Group ID Structure
+#[derive(Clone, Debug)]
 pub struct GroupId {
     /// group id byte vector
     pub id: Vec<u8>,
@@ -64,6 +65,7 @@ impl GroupId {
     }
 
     /// get the base58 encoded group id
+    #[allow(dead_code)]
     pub fn to_base58(&self) -> String {
         bs58::encode(self.to_bytes()).into_string()
     }

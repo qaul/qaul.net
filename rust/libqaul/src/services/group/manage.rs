@@ -4,36 +4,35 @@
 //! # Group Management
 
 use libp2p::PeerId;
-use prost::Message;
 use std::collections::BTreeMap;
 
-use super::chat::{self, ChatStorage};
 use super::group_id::GroupId;
 use super::{Group, GroupStorage};
+use crate::services::chat::{self, Chat, ChatStorage};
 use crate::utilities::timestamp::Timestamp;
 
 /// Group Manage Structure
-pub struct Manage {}
-impl Manage {
+pub struct GroupManage {}
+impl GroupManage {
     /// Get a group from the data base
     ///
     /// If it is a direct chat group, and does not yet exist
     /// this function will create a new direct chat group and
     /// return it.
-    pub fn get_group(account_id: PeerId, group_id: Vec<u8>) -> Option<Group> {
+    pub fn get_group_create_direct(
+        account_id: PeerId,
+        group_id: GroupId,
+        remote_id: &PeerId,
+    ) -> Option<Group> {
         // try to get group from data base
-        match GroupStorage::get_group(account_id.clone(), group_id.clone()) {
+        match GroupStorage::get_group(account_id.clone(), group_id.to_bytes()) {
             Some(group) => return Some(group),
             None => {
-                // check if group id is a direct chat
-                if let Ok(group_id) = GroupId::from_bytes(&group_id) {
-                    if let Some(peer_id_vec) = group_id.is_direct(account_id) {
-                        if let Ok(peer_id) = PeerId::from_bytes(&peer_id_vec) {
-                            // create a new direct chat group
-                            let group = Self::create_new_direct_chat_group(&account_id, &peer_id);
-                            return Some(group);
-                        }
-                    }
+                // check if it is the direct chat group for the connection
+                if group_id == GroupId::from_peers(&account_id, remote_id) {
+                    // create a new direct chat group
+                    let group = Self::create_new_direct_chat_group(&account_id, &remote_id);
+                    return Some(group);
                 }
             }
         }
@@ -151,6 +150,28 @@ impl Manage {
         }
 
         Err("can not find group".to_string())
+    }
+
+    /// get a new message ID
+    pub fn get_new_message_id(account_id: &PeerId, group_id: &Vec<u8>) -> Vec<u8> {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
+        {
+            // get my member
+            if let Some(member) = group.members.get(&account_id.to_bytes()) {
+                let new_index = member.last_message_index + 1;
+
+                // update & save last_index in group
+                let mut member_updated = member.to_owned();
+                member_updated.last_message_index = new_index;
+                group.members.insert(account_id.to_bytes(), member_updated);
+                GroupStorage::save_group(account_id.to_owned(), group);
+
+                // create message id
+                return Chat::generate_message_id(group_id, account_id, new_index);
+            }
+        }
+
+        Vec::new()
     }
 
     /// get group information from rpc command
@@ -382,16 +403,14 @@ impl Manage {
                 )),
             };
 
-            // save group event to chat
-            ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
-
-            // update group last_message
-            GroupStorage::group_update_last_chat_message(
-                account_id,
-                group_id.to_bytes(),
-                sender_id,
-                event.encode_to_vec(),
+            ChatStorage::save_message(
+                &account_id,
+                &group_id,
+                &sender_id,
+                &Vec::new(),
                 Timestamp::get_timestamp(),
+                event,
+                chat::rpc_proto::MessageStatus::Received,
             );
         } else {
             for new_member in &new_members {
@@ -404,16 +423,14 @@ impl Manage {
                     )),
                 };
 
-                // save group event to chat
-                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
-
-                // update group last_message
-                GroupStorage::group_update_last_chat_message(
-                    account_id,
-                    group_id.to_bytes(),
-                    sender_id,
-                    event.encode_to_vec(),
+                ChatStorage::save_message(
+                    &account_id,
+                    &group_id,
+                    &sender_id,
+                    &Vec::new(),
                     Timestamp::get_timestamp(),
+                    event,
+                    chat::rpc_proto::MessageStatus::Received,
                 );
             }
 
@@ -427,16 +444,14 @@ impl Manage {
                     )),
                 };
 
-                // save group event to chat
-                ChatStorage::save_event(&account_id, &sender_id, event.clone(), &group_id);
-
-                // update group last_message
-                GroupStorage::group_update_last_chat_message(
-                    account_id,
-                    group_id.to_bytes(),
-                    sender_id,
-                    event.encode_to_vec(),
+                ChatStorage::save_message(
+                    &account_id,
+                    &group_id,
+                    &sender_id,
+                    &Vec::new(),
                     Timestamp::get_timestamp(),
+                    event,
+                    chat::rpc_proto::MessageStatus::Received,
                 );
             }
         }

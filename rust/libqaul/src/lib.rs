@@ -630,9 +630,9 @@ pub async fn start(storage_path: String) -> () {
                         Messaging::check_scheduler()
                     {
                         log::info!(
-                            "sending messaging message via {:?} to {:?}",
+                            "sending messaging message via {:?} to {}",
                             connection_module,
-                            neighbour_id
+                            neighbour_id.to_base58()
                         );
                         // send messaging message via the best module
                         match connection_module {

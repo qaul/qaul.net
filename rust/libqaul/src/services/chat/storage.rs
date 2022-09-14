@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use super::rpc_proto;
-use crate::services::group::{self, group_id::GroupId, GroupStorage};
+use crate::services::group::{group_id::GroupId, GroupStorage};
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use prost::Message;
@@ -114,107 +114,37 @@ impl ChatStorage {
         }
     }
 
-    /// Save message
+    /// Save a Chat Message
     ///
-    /// This function saves a message into the data base
-    pub fn save_event(
-        account_id: &PeerId,
-        sender_id: &PeerId,
-        content: rpc_proto::ChatContentMessage,
-        group_id: &GroupId,
-    ) -> bool {
-        // create timestamp
-        let timestamp = Timestamp::get_timestamp();
-
-        // get data base of user account
-        let db_ref = Self::get_db_ref(account_id.clone());
-
-        // check if group exists
-        if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
-            let test_group_id = GroupId::from_peers(account_id, sender_id);
-
-            // check if it is a direct chat
-            if group_id == &test_group_id {
-                // create new group
-                group::Manage::create_new_direct_chat_group(account_id, sender_id);
-            } else {
-                // group is unknown
-                return false;
-            }
-        }
-
-        // update last message
-        GroupStorage::group_update_last_chat_message(
-            account_id.to_owned(),
-            group_id.to_bytes(),
-            sender_id.to_owned(),
-            content.encode_to_vec(),
-            timestamp,
-        );
-
-        // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
-
-        // create chat message
-        let chat_message = rpc_proto::ChatMessage {
-            index,
-            sender_id: sender_id.to_bytes(),
-            message_id: vec![],
-            status: 0,
-            message_reception_confirmed: Vec::new(),
-            group_id: group_id.to_bytes(),
-            sent_at: timestamp,
-            received_at: timestamp,
-            content: content.encode_to_vec(),
-        };
-
-        // save message in data base
-        let db_key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
-        if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message) {
-            log::error!("Error saving chat message to data base: {}", e);
-        }
-        // flush trees to disk
-        if let Err(e) = db_ref.messages.flush() {
-            log::error!("Error chat messages flush: {}", e);
-        }
-
-        true
-    }
-
-    /// Save a new incoming Message
+    /// This general function saves a chat message to data base,
+    /// writes it into the chat overview.
     ///
-    /// This function saves an incoming chat message in the data base
-    pub fn save_incoming_message(
+    /// The message ID is optional.
+    /// If there is a chat message ID set, it also references it in the
+    /// chat id data base.
+    pub fn save_message(
         account_id: &PeerId,
-        sender_id: &PeerId,
-        content: super::rpc_proto::ChatContentMessage,
-        sent_at: u64,
         group_id: &GroupId,
+        sender_id: &PeerId,
         message_id: &Vec<u8>,
+        sent_at: u64,
+        content: super::rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
-    ) -> bool {
-        // create timestamp
-        let timestamp = Timestamp::get_timestamp();
+    ) {
+        log::info!("chat save_message");
 
         // get data base of user account
         let db_ref = Self::get_db_ref(account_id.clone());
 
-        // check if message_id is already exist
+        // check if message_id already exists
+        // this protects the double saving of incoming messages
         if db_ref.message_ids.contains_key(message_id).unwrap() {
-            return true;
+            log::warn!("chat message already exists");
+            return;
         }
 
-        // check if group message
-        let is_group = !(group_id == &GroupId::from_peers(account_id, sender_id));
-
-        // if direct chat, check group exist
-        if !is_group {
-            if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
-                group::Manage::create_new_direct_chat_group(account_id, sender_id);
-            }
-        }
-
-        log::trace!("save incoming is_group={}", is_group);
+        // create received at timestamp
+        let received_at = Timestamp::get_timestamp();
 
         // update last message
         GroupStorage::group_update_last_chat_message(
@@ -222,7 +152,7 @@ impl ChatStorage {
             group_id.to_bytes(),
             sender_id.to_owned(),
             content.encode_to_vec(),
-            timestamp,
+            received_at,
         );
 
         // get next index
@@ -236,11 +166,11 @@ impl ChatStorage {
             index,
             sender_id: sender_id.to_bytes(),
             message_id: message_id.clone(),
-            status: status.try_into().unwrap(),
+            status: status as i32,
             message_reception_confirmed: Vec::new(),
             group_id: group_id.to_bytes(),
             sent_at,
-            received_at: timestamp,
+            received_at,
             content: content.encode_to_vec(),
         };
 
@@ -260,86 +190,6 @@ impl ChatStorage {
         {
             log::error!("Error saving chat messageid to data base: {}", e);
         }
-        // flush trees to disk
-        if let Err(e) = db_ref.message_ids.flush() {
-            log::error!("Error chat message_ids flush: {}", e);
-        }
-        true
-    }
-
-    /// save an outgoing message to the data base
-    pub fn save_outgoing_message(
-        account_id: &PeerId,
-        receiver_id: &PeerId,
-        group_id: &GroupId,
-        message_id: &Vec<u8>,
-        content: rpc_proto::ChatContentMessage,
-        status: rpc_proto::MessageStatus,
-    ) {
-        // create timestamp
-        let timestamp = Timestamp::get_timestamp();
-
-        // get data base of user account
-        let db_ref = Self::get_db_ref(account_id.clone());
-
-        // check if message_id is already exist
-        if db_ref.message_ids.contains_key(message_id).unwrap() {
-            return;
-        }
-
-        // check if group message
-        let is_group = !(group_id == &GroupId::from_peers(account_id, receiver_id));
-
-        // if direct chat, check group exist
-        if !is_group {
-            if !GroupStorage::group_exists(account_id.to_owned(), group_id.to_bytes()) {
-                group::Manage::create_new_direct_chat_group(account_id, receiver_id);
-            }
-        }
-
-        // update last message
-        GroupStorage::group_update_last_chat_message(
-            account_id.to_owned(),
-            group_id.to_bytes(),
-            account_id.to_owned(),
-            content.encode_to_vec(),
-            timestamp,
-        );
-
-        // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
-
-        // create data base key
-        let key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
-
-        // create chat message
-        let message = rpc_proto::ChatMessage {
-            index,
-            sender_id: account_id.to_bytes(),
-            message_id: message_id.clone(),
-            status: status.try_into().unwrap(),
-            message_reception_confirmed: Vec::new(),
-            group_id: group_id.to_bytes(),
-            sent_at: timestamp,
-            received_at: timestamp,
-            content: content.encode_to_vec(),
-        };
-
-        // save message in data base
-        if let Err(e) = db_ref.messages.insert(key.clone(), message) {
-            log::error!("Error saving chat message to data base: {}", e);
-        }
-
-        // flush trees to disk
-        if let Err(e) = db_ref.messages.flush() {
-            log::error!("Error chat messages flush: {}", e);
-        }
-
-        // save message id table
-        if let Err(e) = db_ref.message_ids.insert(message_id.clone(), key.clone()) {
-            log::error!("Error saving chat messageid to data base: {}", e);
-        }
-
         // flush trees to disk
         if let Err(e) = db_ref.message_ids.flush() {
             log::error!("Error chat message_ids flush: {}", e);
@@ -371,6 +221,30 @@ impl ChatStorage {
 
                 // TODO: check if it was received by everyone
                 //       set received_by_all flag if yes
+
+                // save message in data base
+                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {
+                    log::error!("Error saving chat message to data base: {}", e);
+                }
+                // flush trees to disk
+                if let Err(e) = db_ref.messages.flush() {
+                    log::error!("Error chat messages flush: {}", e);
+                }
+            }
+        }
+    }
+
+    /// update message status
+    pub fn udate_status(
+        account_id: &PeerId,
+        message_id: &Vec<u8>,
+        status: super::rpc_proto::MessageStatus,
+    ) {
+        // get data base of user account
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
+            if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap() {
+                chat_msg.status = status as i32;
 
                 // save message in data base
                 if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {

@@ -230,7 +230,7 @@ impl Users {
             }
         }
 
-        /* if every single element was equal, compare length */
+        // if every single element was equal, compare length
         a.len().cmp(&b.len())
     }
 

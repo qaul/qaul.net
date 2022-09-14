@@ -209,14 +209,6 @@ impl RouterInfo {
         // create routing table
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
-        // create users list
-        let mut users_last_sent = last_sent;
-        if is_first {
-            users_last_sent = 0;
-        }
-        let online_user_ids = RoutingTable::get_online_user_ids(users_last_sent);
-        //let users = Users::get_user_info_table_by_q8ids(&online_user_ids);
-
         // create latest Feed ids table
         let mut feeds = router_net_proto::FeedIdsTable { ids: Vec::new() };
 
