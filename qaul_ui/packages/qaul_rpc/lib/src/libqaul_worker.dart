@@ -89,10 +89,8 @@ class LibqaulWorker {
     _sendMessage(Modules.FEED, msg);
   }
 
-  Future<void> getUsers() async {
-    await _sendMessage(Modules.USERS, Users(userRequest: UserRequest()));
-    _sendMessage(Modules.USERS, Users(userOnlineRequest: UserOnlineRequest()));
-  }
+  Future<void> getUsers() async =>
+      await _sendMessage(Modules.USERS, Users(userRequest: UserRequest()));
 
   void getUserSecurityNumber(User u) async {
     final msg = Users(
