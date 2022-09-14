@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,17 +16,6 @@ class UserAccountScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(defaultUserProvider);
     final nodeInfo = ref.watch(nodeInfoProvider);
-    final bleStatus = ref.watch(bleStatusProvider);
-
-    final bleData = useMemoized<List<String>>(() {
-      return [
-        'BLE ID: ${bleStatus?.idBase58 ?? 'Unknown'}',
-        'BLE Status: ${bleStatus?.status ?? 'Unknown'}',
-        'Node Info ID: ${bleStatus?.deviceInfoBase58 ?? 'Unknown'}',
-        'Discovered Nodes: ${bleStatus?.discoveredNodes ?? '0'}',
-        'Nodes Pending Confirmation: ${bleStatus?.nodesPendingConfirmation ?? '0'}',
-      ];
-    }, [bleStatus]);
 
     final refreshConnectionData = useCallback(() {
       ref.read(qaulWorkerProvider).sendBleInfoRequest();
@@ -84,21 +71,7 @@ class UserAccountScreen extends HookConsumerWidget {
                 : _notFound(l18ns, l18ns.publicKey),
           ),
           const SizedBox(height: 60),
-          Text('Bluetooth Connection Status', style: theme.headline5),
-          const SizedBox(height: 20),
-          if (Platform.isAndroid)
-            ListView.separated(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: bleData.length,
-              itemBuilder: (_, i) => Text(bleData[i]),
-              separatorBuilder: (_, __) => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Divider(),
-              ),
-            )
-          else
-            const Text('Currently not supported'),
+          const _DTNNodesList(),
           const SizedBox(height: 60),
           Text('Node Info', style: theme.headline4),
           const SizedBox(height: 20),
@@ -125,8 +98,6 @@ class UserAccountScreen extends HookConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 20),
-          const _DTNNodesList(),
         ],
       ),
     );
@@ -212,8 +183,10 @@ class _DTNNodesList extends HookConsumerWidget {
                 icon: const Icon(Icons.add),
                 splashRadius: 24,
                 onPressed: () async {
-                  final res = await Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const _AddUserDialog()));
+                  final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _AddUserDialog()));
                   if (res is! User) return;
                   addUser(res.id);
                 },
