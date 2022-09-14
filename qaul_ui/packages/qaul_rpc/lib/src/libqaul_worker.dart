@@ -20,6 +20,7 @@ import 'generated/router/users.pb.dart';
 import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
+import 'generated/services/dtn/dtn_rpc.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
@@ -251,6 +252,24 @@ class LibqaulWorker {
       fileHistory: FileHistoryRequest(offset: offset, limit: limit),
     );
     await _sendMessage(Modules.CHATFILE, msg);
+  }
+
+  // -------------------
+  // DTN Requests
+  // -------------------
+  void getDTNConfiguration() async {
+    final msg = DTN(dtnConfigRequest: DtnConfigRequest());
+    await _sendMessage(Modules.DTN, msg);
+  }
+
+  void addDTNUser(Uint8List userId) async {
+    final msg = DTN(dtnAddUserRequest: DtnAddUserRequest(userId: userId.toList()));
+    await _sendMessage(Modules.DTN, msg);
+  }
+
+  void removeDTNUser(Uint8List userId) async {
+    final msg = DTN(dtnRemoveUserRequest: DtnRemoveUserRequest(userId: userId));
+    await _sendMessage(Modules.DTN, msg);
   }
 
   // -------------------
