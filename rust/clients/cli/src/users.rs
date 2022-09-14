@@ -135,6 +135,7 @@ impl Users {
                 connectivity: 0,
                 verified,
                 blocked,
+                connections: vec![],
             })),
         };
 
@@ -200,6 +201,21 @@ impl Users {
                                 );
                             }
                             Err(e) => log::error!("{}", e),
+                        }
+                        if user.connections.len() > 0 {
+                            println!("  Connections: module | hc | rtt | via");
+                            for cnn in user.connections {
+                                let module = proto::ConnectionModule::from_i32(cnn.module)
+                                    .unwrap()
+                                    .as_str_name();
+                                println!(
+                                    "      {} | {} | {} | {}",
+                                    module,
+                                    cnn.hop_count,
+                                    cnn.rtt,
+                                    bs58::encode(cnn.via.clone()).into_string()
+                                );
+                            }
                         }
                         line += 1;
                     }

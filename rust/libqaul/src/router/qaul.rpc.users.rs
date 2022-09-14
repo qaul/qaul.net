@@ -62,6 +62,27 @@ pub struct UserEntry {
     /// user is blocked
     #[prost(bool, tag="10")]
     pub blocked: bool,
+    /// routing connection entries
+    /// RoutingTableConnection connections = 11;
+    #[prost(message, repeated, tag="11")]
+    pub connections: ::prost::alloc::vec::Vec<RoutingTableConnection>,
+}
+/// Routing table connection entry.
+/// This message contains a connection to a specific user.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RoutingTableConnection {
+    /// the connection module (LAN, Internet, BLE, etc.)
+    #[prost(enumeration="ConnectionModule", tag="2")]
+    pub module: i32,
+    /// the round trip time for this connection
+    #[prost(uint32, tag="3")]
+    pub rtt: u32,
+    /// hop count
+    #[prost(uint32, tag="5")]
+    pub hop_count: u32,
+    /// node id via which this connection is routed
+    #[prost(bytes="vec", tag="4")]
+    pub via: ::prost::alloc::vec::Vec<u8>,
 }
 /// security number request
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -83,6 +104,31 @@ pub struct SecurityNumberResponse {
     /// uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
     #[prost(uint32, repeated, tag="3")]
     pub security_number_blocks: ::prost::alloc::vec::Vec<u32>,
+}
+/// Connection modules
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ConnectionModule {
+    None = 0,
+    Lan = 1,
+    Internet = 2,
+    Ble = 3,
+    Local = 4,
+}
+impl ConnectionModule {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            ConnectionModule::None => "NONE",
+            ConnectionModule::Lan => "LAN",
+            ConnectionModule::Internet => "INTERNET",
+            ConnectionModule::Ble => "BLE",
+            ConnectionModule::Local => "LOCAL",
+        }
+    }
 }
 /// how is the user connected
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

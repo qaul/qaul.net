@@ -42,7 +42,34 @@ message UserEntry {
     bool verified = 9;
     // user is blocked
     bool blocked = 10;
+    // routing connection entries
+    //RoutingTableConnection connections = 11;
+    repeated RoutingTableConnection connections = 11;
 }
+
+// Connection modules
+enum ConnectionModule {
+    NONE = 0;
+    LAN = 1;
+    INTERNET = 2;
+    BLE = 3;
+    LOCAL = 4;
+}
+
+
+// Routing table connection entry.
+// This message contains a connection to a specific user.
+message RoutingTableConnection {
+    // the connection module (LAN, Internet, BLE, etc.)
+    ConnectionModule module = 2;
+    // the round trip time for this connection
+    uint32 rtt = 3;
+    // hop count
+    uint32 hop_count = 5;
+    // node id via which this connection is routed
+    bytes via = 4;
+}
+
 
 // how is the user connected
 enum Connectivity {

@@ -327,6 +327,7 @@ impl Users {
                                     connectivity: connectivity,
                                     verified: user.verified,
                                     blocked: user.blocked,
+                                    connections: vec![],
                                 };
 
                                 // add entry to list
@@ -365,6 +366,8 @@ impl Users {
 
                         // get user account
                         if let Some(account) = UserAccounts::get_default_user() {
+                            // get online uses info
+                            let online_users = super::RoutingTable::get_online_users_info();
                             // fill them into the list
                             for id in &online_user_ids {
                                 if let Some(user) = users.users.get(id) {
@@ -376,15 +379,32 @@ impl Users {
                                     let group_id =
                                         GroupId::from_peers(&account.id, &user.id).to_bytes();
 
+                                    let mut connectivity: i32 = 0;
+                                    let mut connections: Vec<proto::RoutingTableConnection> =
+                                        vec![];
+                                    if online_users.contains_key(id) {
+                                        connectivity = 1;
+                                        let cnns = online_users.get(id).unwrap();
+                                        for cnn in cnns {
+                                            connections.push(proto::RoutingTableConnection {
+                                                module: cnn.module.as_int(),
+                                                hop_count: cnn.hc as u32,
+                                                rtt: cnn.rtt,
+                                                via: cnn.node.to_bytes(),
+                                            });
+                                        }
+                                    }
+
                                     // create user entry message
                                     let user_entry = proto::UserEntry {
                                         name: user.name.clone(),
                                         id: user.id.to_bytes(),
                                         group_id,
                                         key_base58,
-                                        connectivity: 0,
+                                        connectivity,
                                         verified: user.verified,
                                         blocked: user.blocked,
+                                        connections,
                                     };
 
                                     // add entry to list
