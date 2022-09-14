@@ -81,7 +81,8 @@ object SecurityNumberResponseKt {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -94,7 +95,8 @@ object SecurityNumberResponseKt {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -107,7 +109,8 @@ object SecurityNumberResponseKt {
     }/**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -121,7 +124,8 @@ object SecurityNumberResponseKt {
     }/**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -134,7 +138,8 @@ object SecurityNumberResponseKt {
     }/**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -148,7 +153,8 @@ object SecurityNumberResponseKt {
     }/**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -162,7 +168,8 @@ object SecurityNumberResponseKt {
     }/**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>

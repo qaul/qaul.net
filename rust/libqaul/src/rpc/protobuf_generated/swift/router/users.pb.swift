@@ -20,6 +20,59 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+/// Connection modules
+enum Qaul_Rpc_Users_ConnectionModule: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case none // = 0
+  case lan // = 1
+  case internet // = 2
+  case ble // = 3
+  case local // = 4
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .none
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .none
+    case 1: self = .lan
+    case 2: self = .internet
+    case 3: self = .ble
+    case 4: self = .local
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .none: return 0
+    case .lan: return 1
+    case .internet: return 2
+    case .ble: return 3
+    case .local: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Rpc_Users_ConnectionModule: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Rpc_Users_ConnectionModule] = [
+    .none,
+    .lan,
+    .internet,
+    .ble,
+    .local,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// how is the user connected
 enum Qaul_Rpc_Users_Connectivity: SwiftProtobuf.Enum {
   typealias RawValue = Int
@@ -82,6 +135,10 @@ struct Qaul_Rpc_Users_Users {
 
   var message: Qaul_Rpc_Users_Users.OneOf_Message? = nil
 
+  /// User Request returns a user list
+  /// containing all users with their connectivity
+  /// field set to either online or offline.
+  /// The connections are not set.
   var userRequest: Qaul_Rpc_Users_UserRequest {
     get {
       if case .userRequest(let v)? = message {return v}
@@ -90,6 +147,9 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userRequest(newValue)}
   }
 
+  /// User Online Request returns a user list
+  /// of all users currently online in the network.
+  /// Each user has
   var userOnlineRequest: Qaul_Rpc_Users_UserOnlineRequest {
     get {
       if case .userOnlineRequest(let v)? = message {return v}
@@ -98,6 +158,10 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userOnlineRequest(newValue)}
   }
 
+  /// User List
+  ///
+  /// Libqaul's return message for  'UserRequest' and
+  /// 'UserOnlineRequest', containing a list of UserEntry's
   var userList: Qaul_Rpc_Users_UserList {
     get {
       if case .userList(let v)? = message {return v}
@@ -106,6 +170,11 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userList(newValue)}
   }
 
+  /// User Update
+  ///
+  /// Sent to libqaul to update the verification & blocked fields
+  /// of a user.
+  /// All other fields will be ignored.
   var userUpdate: Qaul_Rpc_Users_UserEntry {
     get {
       if case .userUpdate(let v)? = message {return v}
@@ -114,6 +183,10 @@ struct Qaul_Rpc_Users_Users {
     set {message = .userUpdate(newValue)}
   }
 
+  /// Security Number Request
+  ///
+  /// Requests the specific security number for
+  /// for the connection with this user.
   var securityNumberRequest: Qaul_Rpc_Users_SecurityNumberRequest {
     get {
       if case .securityNumberRequest(let v)? = message {return v}
@@ -122,6 +195,18 @@ struct Qaul_Rpc_Users_Users {
     set {message = .securityNumberRequest(newValue)}
   }
 
+  /// Security Number Response
+  ///
+  /// Libqaul's response containing the security number.
+  ///
+  /// The security number contains 8 blocks of 5 digit numbers.
+  /// They shall be rendered in two rows. If a number is
+  /// smaller then five-digits, the missing digits shall be filled
+  /// with leading zeros.
+  ///
+  /// example rendering of security number:
+  /// 13246 42369 46193 12484
+  /// 12142 31101 09874 34545
   var securityNumberResponse: Qaul_Rpc_Users_SecurityNumberResponse {
     get {
       if case .securityNumberResponse(let v)? = message {return v}
@@ -133,11 +218,43 @@ struct Qaul_Rpc_Users_Users {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
+    /// User Request returns a user list
+    /// containing all users with their connectivity
+    /// field set to either online or offline.
+    /// The connections are not set.
     case userRequest(Qaul_Rpc_Users_UserRequest)
+    /// User Online Request returns a user list
+    /// of all users currently online in the network.
+    /// Each user has
     case userOnlineRequest(Qaul_Rpc_Users_UserOnlineRequest)
+    /// User List
+    ///
+    /// Libqaul's return message for  'UserRequest' and
+    /// 'UserOnlineRequest', containing a list of UserEntry's
     case userList(Qaul_Rpc_Users_UserList)
+    /// User Update
+    ///
+    /// Sent to libqaul to update the verification & blocked fields
+    /// of a user.
+    /// All other fields will be ignored.
     case userUpdate(Qaul_Rpc_Users_UserEntry)
+    /// Security Number Request
+    ///
+    /// Requests the specific security number for
+    /// for the connection with this user.
     case securityNumberRequest(Qaul_Rpc_Users_SecurityNumberRequest)
+    /// Security Number Response
+    ///
+    /// Libqaul's response containing the security number.
+    ///
+    /// The security number contains 8 blocks of 5 digit numbers.
+    /// They shall be rendered in two rows. If a number is
+    /// smaller then five-digits, the missing digits shall be filled
+    /// with leading zeros.
+    ///
+    /// example rendering of security number:
+    /// 13246 42369 46193 12484
+    /// 12142 31101 09874 34545
     case securityNumberResponse(Qaul_Rpc_Users_SecurityNumberResponse)
 
   #if !swift(>=4.1)
@@ -243,6 +360,34 @@ struct Qaul_Rpc_Users_UserEntry {
   /// user is blocked
   var blocked: Bool = false
 
+  /// routing connection entries
+  /// RoutingTableConnection connections = 11;
+  var connections: [Qaul_Rpc_Users_RoutingTableConnection] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// Routing table connection entry.
+/// This message contains a connection to a specific user.
+struct Qaul_Rpc_Users_RoutingTableConnection {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the connection module (LAN, Internet, BLE, etc.)
+  var module: Qaul_Rpc_Users_ConnectionModule = .none
+
+  /// the round trip time for this connection
+  var rtt: UInt32 = 0
+
+  /// hop count
+  var hopCount: UInt32 = 0
+
+  /// node id via which this connection is routed
+  var via: Data = Data()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -275,7 +420,8 @@ struct Qaul_Rpc_Users_SecurityNumberResponse {
   var securityHash: Data = Data()
 
   /// fill in 8 numbers of 16bits
-  /// uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+  /// uint16 data type does not exist in protobuf, just fill them in the u16 as
+  /// u32.
   var securityNumberBlocks: [UInt32] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -286,6 +432,16 @@ struct Qaul_Rpc_Users_SecurityNumberResponse {
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "qaul.rpc.users"
+
+extension Qaul_Rpc_Users_ConnectionModule: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "NONE"),
+    1: .same(proto: "LAN"),
+    2: .same(proto: "INTERNET"),
+    3: .same(proto: "BLE"),
+    4: .same(proto: "LOCAL"),
+  ]
+}
 
 extension Qaul_Rpc_Users_Connectivity: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -517,6 +673,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     8: .same(proto: "connectivity"),
     9: .same(proto: "verified"),
     10: .same(proto: "blocked"),
+    11: .same(proto: "connections"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -532,6 +689,7 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 8: try { try decoder.decodeSingularEnumField(value: &self.connectivity) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self.verified) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self.blocked) }()
+      case 11: try { try decoder.decodeRepeatedMessageField(value: &self.connections) }()
       default: break
       }
     }
@@ -559,6 +717,9 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if self.blocked != false {
       try visitor.visitSingularBoolField(value: self.blocked, fieldNumber: 10)
     }
+    if !self.connections.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.connections, fieldNumber: 11)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -570,6 +731,57 @@ extension Qaul_Rpc_Users_UserEntry: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.connectivity != rhs.connectivity {return false}
     if lhs.verified != rhs.verified {return false}
     if lhs.blocked != rhs.blocked {return false}
+    if lhs.connections != rhs.connections {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Users_RoutingTableConnection: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".RoutingTableConnection"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    2: .same(proto: "module"),
+    3: .same(proto: "rtt"),
+    5: .standard(proto: "hop_count"),
+    4: .same(proto: "via"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.module) }()
+      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.rtt) }()
+      case 4: try { try decoder.decodeSingularBytesField(value: &self.via) }()
+      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.hopCount) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.module != .none {
+      try visitor.visitSingularEnumField(value: self.module, fieldNumber: 2)
+    }
+    if self.rtt != 0 {
+      try visitor.visitSingularUInt32Field(value: self.rtt, fieldNumber: 3)
+    }
+    if !self.via.isEmpty {
+      try visitor.visitSingularBytesField(value: self.via, fieldNumber: 4)
+    }
+    if self.hopCount != 0 {
+      try visitor.visitSingularUInt32Field(value: self.hopCount, fieldNumber: 5)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Users_RoutingTableConnection, rhs: Qaul_Rpc_Users_RoutingTableConnection) -> Bool {
+    if lhs.module != rhs.module {return false}
+    if lhs.rtt != rhs.rtt {return false}
+    if lhs.hopCount != rhs.hopCount {return false}
+    if lhs.via != rhs.via {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -49,6 +49,9 @@ extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table
 namespace qaul {
 namespace rpc {
 namespace users {
+class RoutingTableConnection;
+struct RoutingTableConnectionDefaultTypeInternal;
+extern RoutingTableConnectionDefaultTypeInternal _RoutingTableConnection_default_instance_;
 class SecurityNumberRequest;
 struct SecurityNumberRequestDefaultTypeInternal;
 extern SecurityNumberRequestDefaultTypeInternal _SecurityNumberRequest_default_instance_;
@@ -74,6 +77,7 @@ extern UsersDefaultTypeInternal _Users_default_instance_;
 }  // namespace rpc
 }  // namespace qaul
 PROTOBUF_NAMESPACE_OPEN
+template<> ::qaul::rpc::users::RoutingTableConnection* Arena::CreateMaybeMessage<::qaul::rpc::users::RoutingTableConnection>(Arena*);
 template<> ::qaul::rpc::users::SecurityNumberRequest* Arena::CreateMaybeMessage<::qaul::rpc::users::SecurityNumberRequest>(Arena*);
 template<> ::qaul::rpc::users::SecurityNumberResponse* Arena::CreateMaybeMessage<::qaul::rpc::users::SecurityNumberResponse>(Arena*);
 template<> ::qaul::rpc::users::UserEntry* Arena::CreateMaybeMessage<::qaul::rpc::users::UserEntry>(Arena*);
@@ -86,6 +90,34 @@ namespace qaul {
 namespace rpc {
 namespace users {
 
+enum ConnectionModule : int {
+  NONE = 0,
+  LAN = 1,
+  INTERNET = 2,
+  BLE = 3,
+  LOCAL = 4,
+  ConnectionModule_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  ConnectionModule_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool ConnectionModule_IsValid(int value);
+constexpr ConnectionModule ConnectionModule_MIN = NONE;
+constexpr ConnectionModule ConnectionModule_MAX = LOCAL;
+constexpr int ConnectionModule_ARRAYSIZE = ConnectionModule_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ConnectionModule_descriptor();
+template<typename T>
+inline const std::string& ConnectionModule_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ConnectionModule>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function ConnectionModule_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    ConnectionModule_descriptor(), enum_t_value);
+}
+inline bool ConnectionModule_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, ConnectionModule* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ConnectionModule>(
+    ConnectionModule_descriptor(), name, value);
+}
 enum Connectivity : int {
   Online = 0,
   Reachable = 1,
@@ -912,6 +944,7 @@ class UserEntry final :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kConnectionsFieldNumber = 11,
     kNameFieldNumber = 1,
     kIdFieldNumber = 2,
     kGroupIdFieldNumber = 3,
@@ -920,6 +953,24 @@ class UserEntry final :
     kVerifiedFieldNumber = 9,
     kBlockedFieldNumber = 10,
   };
+  // repeated .qaul.rpc.users.RoutingTableConnection connections = 11;
+  int connections_size() const;
+  private:
+  int _internal_connections_size() const;
+  public:
+  void clear_connections();
+  ::qaul::rpc::users::RoutingTableConnection* mutable_connections(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::users::RoutingTableConnection >*
+      mutable_connections();
+  private:
+  const ::qaul::rpc::users::RoutingTableConnection& _internal_connections(int index) const;
+  ::qaul::rpc::users::RoutingTableConnection* _internal_add_connections();
+  public:
+  const ::qaul::rpc::users::RoutingTableConnection& connections(int index) const;
+  ::qaul::rpc::users::RoutingTableConnection* add_connections();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::users::RoutingTableConnection >&
+      connections() const;
+
   // string name = 1;
   void clear_name();
   const std::string& name() const;
@@ -1011,6 +1062,7 @@ class UserEntry final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::users::RoutingTableConnection > connections_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr group_id_;
@@ -1018,6 +1070,192 @@ class UserEntry final :
     int connectivity_;
     bool verified_;
     bool blocked_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_router_2fusers_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RoutingTableConnection final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:qaul.rpc.users.RoutingTableConnection) */ {
+ public:
+  inline RoutingTableConnection() : RoutingTableConnection(nullptr) {}
+  ~RoutingTableConnection() override;
+  explicit PROTOBUF_CONSTEXPR RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RoutingTableConnection(const RoutingTableConnection& from);
+  RoutingTableConnection(RoutingTableConnection&& from) noexcept
+    : RoutingTableConnection() {
+    *this = ::std::move(from);
+  }
+
+  inline RoutingTableConnection& operator=(const RoutingTableConnection& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RoutingTableConnection& operator=(RoutingTableConnection&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RoutingTableConnection& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RoutingTableConnection* internal_default_instance() {
+    return reinterpret_cast<const RoutingTableConnection*>(
+               &_RoutingTableConnection_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(RoutingTableConnection& a, RoutingTableConnection& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RoutingTableConnection* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RoutingTableConnection* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RoutingTableConnection* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RoutingTableConnection>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RoutingTableConnection& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const RoutingTableConnection& from) {
+    RoutingTableConnection::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RoutingTableConnection* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "qaul.rpc.users.RoutingTableConnection";
+  }
+  protected:
+  explicit RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kViaFieldNumber = 4,
+    kModuleFieldNumber = 2,
+    kRttFieldNumber = 3,
+    kHopCountFieldNumber = 5,
+  };
+  // bytes via = 4;
+  void clear_via();
+  const std::string& via() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_via(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_via();
+  PROTOBUF_NODISCARD std::string* release_via();
+  void set_allocated_via(std::string* via);
+  private:
+  const std::string& _internal_via() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_via(const std::string& value);
+  std::string* _internal_mutable_via();
+  public:
+
+  // .qaul.rpc.users.ConnectionModule module = 2;
+  void clear_module();
+  ::qaul::rpc::users::ConnectionModule module() const;
+  void set_module(::qaul::rpc::users::ConnectionModule value);
+  private:
+  ::qaul::rpc::users::ConnectionModule _internal_module() const;
+  void _internal_set_module(::qaul::rpc::users::ConnectionModule value);
+  public:
+
+  // uint32 rtt = 3;
+  void clear_rtt();
+  uint32_t rtt() const;
+  void set_rtt(uint32_t value);
+  private:
+  uint32_t _internal_rtt() const;
+  void _internal_set_rtt(uint32_t value);
+  public:
+
+  // uint32 hop_count = 5;
+  void clear_hop_count();
+  uint32_t hop_count() const;
+  void set_hop_count(uint32_t value);
+  private:
+  uint32_t _internal_hop_count() const;
+  void _internal_set_hop_count(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:qaul.rpc.users.RoutingTableConnection)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr via_;
+    int module_;
+    uint32_t rtt_;
+    uint32_t hop_count_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1073,7 +1311,7 @@ class SecurityNumberRequest final :
                &_SecurityNumberRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(SecurityNumberRequest& a, SecurityNumberRequest& b) {
     a.Swap(&b);
@@ -1226,7 +1464,7 @@ class SecurityNumberResponse final :
                &_SecurityNumberResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(SecurityNumberResponse& a, SecurityNumberResponse& b) {
     a.Swap(&b);
@@ -2150,6 +2388,160 @@ inline void UserEntry::set_blocked(bool value) {
   // @@protoc_insertion_point(field_set:qaul.rpc.users.UserEntry.blocked)
 }
 
+// repeated .qaul.rpc.users.RoutingTableConnection connections = 11;
+inline int UserEntry::_internal_connections_size() const {
+  return _impl_.connections_.size();
+}
+inline int UserEntry::connections_size() const {
+  return _internal_connections_size();
+}
+inline void UserEntry::clear_connections() {
+  _impl_.connections_.Clear();
+}
+inline ::qaul::rpc::users::RoutingTableConnection* UserEntry::mutable_connections(int index) {
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.UserEntry.connections)
+  return _impl_.connections_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::users::RoutingTableConnection >*
+UserEntry::mutable_connections() {
+  // @@protoc_insertion_point(field_mutable_list:qaul.rpc.users.UserEntry.connections)
+  return &_impl_.connections_;
+}
+inline const ::qaul::rpc::users::RoutingTableConnection& UserEntry::_internal_connections(int index) const {
+  return _impl_.connections_.Get(index);
+}
+inline const ::qaul::rpc::users::RoutingTableConnection& UserEntry::connections(int index) const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.UserEntry.connections)
+  return _internal_connections(index);
+}
+inline ::qaul::rpc::users::RoutingTableConnection* UserEntry::_internal_add_connections() {
+  return _impl_.connections_.Add();
+}
+inline ::qaul::rpc::users::RoutingTableConnection* UserEntry::add_connections() {
+  ::qaul::rpc::users::RoutingTableConnection* _add = _internal_add_connections();
+  // @@protoc_insertion_point(field_add:qaul.rpc.users.UserEntry.connections)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::qaul::rpc::users::RoutingTableConnection >&
+UserEntry::connections() const {
+  // @@protoc_insertion_point(field_list:qaul.rpc.users.UserEntry.connections)
+  return _impl_.connections_;
+}
+
+// -------------------------------------------------------------------
+
+// RoutingTableConnection
+
+// .qaul.rpc.users.ConnectionModule module = 2;
+inline void RoutingTableConnection::clear_module() {
+  _impl_.module_ = 0;
+}
+inline ::qaul::rpc::users::ConnectionModule RoutingTableConnection::_internal_module() const {
+  return static_cast< ::qaul::rpc::users::ConnectionModule >(_impl_.module_);
+}
+inline ::qaul::rpc::users::ConnectionModule RoutingTableConnection::module() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.RoutingTableConnection.module)
+  return _internal_module();
+}
+inline void RoutingTableConnection::_internal_set_module(::qaul::rpc::users::ConnectionModule value) {
+  
+  _impl_.module_ = value;
+}
+inline void RoutingTableConnection::set_module(::qaul::rpc::users::ConnectionModule value) {
+  _internal_set_module(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.RoutingTableConnection.module)
+}
+
+// uint32 rtt = 3;
+inline void RoutingTableConnection::clear_rtt() {
+  _impl_.rtt_ = 0u;
+}
+inline uint32_t RoutingTableConnection::_internal_rtt() const {
+  return _impl_.rtt_;
+}
+inline uint32_t RoutingTableConnection::rtt() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.RoutingTableConnection.rtt)
+  return _internal_rtt();
+}
+inline void RoutingTableConnection::_internal_set_rtt(uint32_t value) {
+  
+  _impl_.rtt_ = value;
+}
+inline void RoutingTableConnection::set_rtt(uint32_t value) {
+  _internal_set_rtt(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.RoutingTableConnection.rtt)
+}
+
+// uint32 hop_count = 5;
+inline void RoutingTableConnection::clear_hop_count() {
+  _impl_.hop_count_ = 0u;
+}
+inline uint32_t RoutingTableConnection::_internal_hop_count() const {
+  return _impl_.hop_count_;
+}
+inline uint32_t RoutingTableConnection::hop_count() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.RoutingTableConnection.hop_count)
+  return _internal_hop_count();
+}
+inline void RoutingTableConnection::_internal_set_hop_count(uint32_t value) {
+  
+  _impl_.hop_count_ = value;
+}
+inline void RoutingTableConnection::set_hop_count(uint32_t value) {
+  _internal_set_hop_count(value);
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.RoutingTableConnection.hop_count)
+}
+
+// bytes via = 4;
+inline void RoutingTableConnection::clear_via() {
+  _impl_.via_.ClearToEmpty();
+}
+inline const std::string& RoutingTableConnection::via() const {
+  // @@protoc_insertion_point(field_get:qaul.rpc.users.RoutingTableConnection.via)
+  return _internal_via();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void RoutingTableConnection::set_via(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.via_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:qaul.rpc.users.RoutingTableConnection.via)
+}
+inline std::string* RoutingTableConnection::mutable_via() {
+  std::string* _s = _internal_mutable_via();
+  // @@protoc_insertion_point(field_mutable:qaul.rpc.users.RoutingTableConnection.via)
+  return _s;
+}
+inline const std::string& RoutingTableConnection::_internal_via() const {
+  return _impl_.via_.Get();
+}
+inline void RoutingTableConnection::_internal_set_via(const std::string& value) {
+  
+  _impl_.via_.Set(value, GetArenaForAllocation());
+}
+inline std::string* RoutingTableConnection::_internal_mutable_via() {
+  
+  return _impl_.via_.Mutable(GetArenaForAllocation());
+}
+inline std::string* RoutingTableConnection::release_via() {
+  // @@protoc_insertion_point(field_release:qaul.rpc.users.RoutingTableConnection.via)
+  return _impl_.via_.Release();
+}
+inline void RoutingTableConnection::set_allocated_via(std::string* via) {
+  if (via != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.via_.SetAllocated(via, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.via_.IsDefault()) {
+    _impl_.via_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:qaul.rpc.users.RoutingTableConnection.via)
+}
+
 // -------------------------------------------------------------------
 
 // SecurityNumberRequest
@@ -2370,6 +2762,8 @@ SecurityNumberResponse::mutable_security_number_blocks() {
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 
@@ -2379,6 +2773,11 @@ SecurityNumberResponse::mutable_security_number_blocks() {
 
 PROTOBUF_NAMESPACE_OPEN
 
+template <> struct is_proto_enum< ::qaul::rpc::users::ConnectionModule> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::qaul::rpc::users::ConnectionModule>() {
+  return ::qaul::rpc::users::ConnectionModule_descriptor();
+}
 template <> struct is_proto_enum< ::qaul::rpc::users::Connectivity> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::qaul::rpc::users::Connectivity>() {

@@ -198,6 +198,113 @@ object UserEntryKt {
     fun clearBlocked() {
       _builder.clearBlocked()
     }
+
+    /**
+     * An uninstantiable, behaviorless type to represent the field in
+     * generics.
+     */
+    @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
+    class ConnectionsProxy private constructor() : com.google.protobuf.kotlin.DslProxy()
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+     val connections: com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>
+      @kotlin.jvm.JvmSynthetic
+      get() = com.google.protobuf.kotlin.DslList(
+        _builder.getConnectionsList()
+      )
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     * @param value The connections to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addConnections")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.add(value: qaul.rpc.users.UsersOuterClass.RoutingTableConnection) {
+      _builder.addConnections(value)
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     * @param value The connections to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignConnections")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(value: qaul.rpc.users.UsersOuterClass.RoutingTableConnection) {
+      add(value)
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     * @param values The connections to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("addAllConnections")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.addAll(values: kotlin.collections.Iterable<qaul.rpc.users.UsersOuterClass.RoutingTableConnection>) {
+      _builder.addAllConnections(values)
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     * @param values The connections to add.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("plusAssignAllConnections")
+    @Suppress("NOTHING_TO_INLINE")
+    inline operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.plusAssign(values: kotlin.collections.Iterable<qaul.rpc.users.UsersOuterClass.RoutingTableConnection>) {
+      addAll(values)
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     * @param index The index to set the value at.
+     * @param value The connections to set.
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("setConnections")
+    operator fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.set(index: kotlin.Int, value: qaul.rpc.users.UsersOuterClass.RoutingTableConnection) {
+      _builder.setConnections(index, value)
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @kotlin.jvm.JvmSynthetic
+    @kotlin.jvm.JvmName("clearConnections")
+    fun com.google.protobuf.kotlin.DslList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection, ConnectionsProxy>.clear() {
+      _builder.clearConnections()
+    }
+
   }
 }
 @kotlin.jvm.JvmSynthetic

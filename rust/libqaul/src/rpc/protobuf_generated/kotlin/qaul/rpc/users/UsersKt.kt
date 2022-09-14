@@ -23,6 +23,13 @@ object UsersKt {
     internal fun _build(): qaul.rpc.users.UsersOuterClass.Users = _builder.build()
 
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
     var userRequest: qaul.rpc.users.UsersOuterClass.UserRequest
@@ -33,12 +40,26 @@ object UsersKt {
         _builder.setUserRequest(value)
       }
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
     fun clearUserRequest() {
       _builder.clearUserRequest()
     }
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return Whether the userRequest field is set.
      */
@@ -47,6 +68,12 @@ object UsersKt {
     }
 
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      */
     var userOnlineRequest: qaul.rpc.users.UsersOuterClass.UserOnlineRequest
@@ -57,12 +84,24 @@ object UsersKt {
         _builder.setUserOnlineRequest(value)
       }
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      */
     fun clearUserOnlineRequest() {
       _builder.clearUserOnlineRequest()
     }
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      * @return Whether the userOnlineRequest field is set.
      */
@@ -71,6 +110,12 @@ object UsersKt {
     }
 
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     var userList: qaul.rpc.users.UsersOuterClass.UserList
@@ -81,12 +126,24 @@ object UsersKt {
         _builder.setUserList(value)
       }
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     fun clearUserList() {
       _builder.clearUserList()
     }
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return Whether the userList field is set.
      */
@@ -95,6 +152,13 @@ object UsersKt {
     }
 
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     var userUpdate: qaul.rpc.users.UsersOuterClass.UserEntry
@@ -105,12 +169,26 @@ object UsersKt {
         _builder.setUserUpdate(value)
       }
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     fun clearUserUpdate() {
       _builder.clearUserUpdate()
     }
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return Whether the userUpdate field is set.
      */
@@ -119,6 +197,12 @@ object UsersKt {
     }
 
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      */
     var securityNumberRequest: qaul.rpc.users.UsersOuterClass.SecurityNumberRequest
@@ -129,12 +213,24 @@ object UsersKt {
         _builder.setSecurityNumberRequest(value)
       }
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      */
     fun clearSecurityNumberRequest() {
       _builder.clearSecurityNumberRequest()
     }
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      * @return Whether the securityNumberRequest field is set.
      */
@@ -143,6 +239,18 @@ object UsersKt {
     }
 
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      */
     var securityNumberResponse: qaul.rpc.users.UsersOuterClass.SecurityNumberResponse
@@ -153,12 +261,36 @@ object UsersKt {
         _builder.setSecurityNumberResponse(value)
       }
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      */
     fun clearSecurityNumberResponse() {
       _builder.clearSecurityNumberResponse()
     }
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      * @return Whether the securityNumberResponse field is set.
      */

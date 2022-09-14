@@ -273,6 +273,7 @@ class UserEntry extends $pb.GeneratedMessage {
     ..e<Connectivity>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
     ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verified')
     ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'blocked')
+    ..pc<RoutingTableConnection>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
     ..hasRequiredFields = false
   ;
 
@@ -285,6 +286,7 @@ class UserEntry extends $pb.GeneratedMessage {
     Connectivity? connectivity,
     $core.bool? verified,
     $core.bool? blocked,
+    $core.Iterable<RoutingTableConnection>? connections,
   }) {
     final _result = create();
     if (name != null) {
@@ -307,6 +309,9 @@ class UserEntry extends $pb.GeneratedMessage {
     }
     if (blocked != null) {
       _result.blocked = blocked;
+    }
+    if (connections != null) {
+      _result.connections.addAll(connections);
     }
     return _result;
   }
@@ -393,6 +398,98 @@ class UserEntry extends $pb.GeneratedMessage {
   $core.bool hasBlocked() => $_has(6);
   @$pb.TagNumber(10)
   void clearBlocked() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.List<RoutingTableConnection> get connections => $_getList(7);
+}
+
+class RoutingTableConnection extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableConnection', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..e<ConnectionModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
+  RoutingTableConnection._() : super();
+  factory RoutingTableConnection({
+    ConnectionModule? module,
+    $core.int? rtt,
+    $core.List<$core.int>? via,
+    $core.int? hopCount,
+  }) {
+    final _result = create();
+    if (module != null) {
+      _result.module = module;
+    }
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    if (via != null) {
+      _result.via = via;
+    }
+    if (hopCount != null) {
+      _result.hopCount = hopCount;
+    }
+    return _result;
+  }
+  factory RoutingTableConnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableConnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RoutingTableConnection clone() => RoutingTableConnection()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RoutingTableConnection create() => RoutingTableConnection._();
+  RoutingTableConnection createEmptyInstance() => create();
+  static $pb.PbList<RoutingTableConnection> createRepeated() => $pb.PbList<RoutingTableConnection>();
+  @$core.pragma('dart2js:noInline')
+  static RoutingTableConnection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableConnection>(create);
+  static RoutingTableConnection? _defaultInstance;
+
+  @$pb.TagNumber(2)
+  ConnectionModule get module => $_getN(0);
+  @$pb.TagNumber(2)
+  set module(ConnectionModule v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasModule() => $_has(0);
+  @$pb.TagNumber(2)
+  void clearModule() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get rtt => $_getIZ(1);
+  @$pb.TagNumber(3)
+  set rtt($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRtt() => $_has(1);
+  @$pb.TagNumber(3)
+  void clearRtt() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.List<$core.int> get via => $_getN(2);
+  @$pb.TagNumber(4)
+  set via($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasVia() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearVia() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get hopCount => $_getIZ(3);
+  @$pb.TagNumber(5)
+  set hopCount($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasHopCount() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearHopCount() => clearField(5);
 }
 
 class SecurityNumberRequest extends $pb.GeneratedMessage {

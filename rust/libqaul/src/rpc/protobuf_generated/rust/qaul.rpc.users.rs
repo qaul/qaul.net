@@ -8,16 +8,47 @@ pub struct Users {
 pub mod users {
     #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
+        /// User Request returns a user list
+        /// containing all users with their connectivity
+        /// field set to either online or offline.
+        /// The connections are not set.
         #[prost(message, tag="1")]
         UserRequest(super::UserRequest),
+        /// User Online Request returns a user list
+        /// of all users currently online in the network.
+        /// Each user has
         #[prost(message, tag="2")]
         UserOnlineRequest(super::UserOnlineRequest),
+        /// User List
+        ///
+        /// Libqaul's return message for  'UserRequest' and
+        /// 'UserOnlineRequest', containing a list of UserEntry's
         #[prost(message, tag="3")]
         UserList(super::UserList),
+        /// User Update
+        ///
+        /// Sent to libqaul to update the verification & blocked field
+        /// of a user.
+        /// All other fields will be ignored.
         #[prost(message, tag="4")]
         UserUpdate(super::UserEntry),
+        /// Security Number Request
+        ///
+        /// Requests the specific security number for
+        /// for the connection with this user.
         #[prost(message, tag="5")]
         SecurityNumberRequest(super::SecurityNumberRequest),
+        /// Security Number Response
+        ///
+        /// Libqaul's response containing the security number.
+        ///
+        /// The security number contains 8 blocks of 5 digit numbers.
+        /// They shall be rendered in two rows. If a number is
+        /// smaller then five-digits, the missing digits shall be filled
+        /// with leading zeros.
+        ///
+        /// example rendering of security number:
+        ///
         #[prost(message, tag="6")]
         SecurityNumberResponse(super::SecurityNumberResponse),
     }
@@ -101,7 +132,8 @@ pub struct SecurityNumberResponse {
     #[prost(bytes="vec", tag="2")]
     pub security_hash: ::prost::alloc::vec::Vec<u8>,
     /// fill in 8 numbers of 16bits
-    /// uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+    /// uint16 data type does not exist in protobuf, just fill them in the u16 as
+    /// u32.
     #[prost(uint32, repeated, tag="3")]
     pub security_number_blocks: ::prost::alloc::vec::Vec<u32>,
 }

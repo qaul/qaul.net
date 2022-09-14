@@ -4,11 +4,43 @@ package qaul.rpc.users;
 // users rpc message container
 message Users {
     oneof message {
-        UserRequest user_request              = 1;
+        // User Request returns a user list
+        // containing all users with their connectivity
+        // field set to either online or offline.
+        // The connections are not set.
+        UserRequest user_request = 1;
+        // User Online Request returns a user list
+        // of all users currently online in the network.
+        // Each user has
         UserOnlineRequest user_online_request = 2;
-        UserList user_list                    = 3;
-        UserEntry user_update                 = 4;
+        // User List
+        //
+        // Libqaul's return message for  'UserRequest' and
+        // 'UserOnlineRequest', containing a list of UserEntry's
+        UserList user_list = 3;
+        // User Update
+        //
+        // Sent to libqaul to update the verification & blocked fields
+        // of a user.
+        // All other fields will be ignored.
+        UserEntry user_update = 4;
+        // Security Number Request
+        //
+        // Requests the specific security number for
+        // for the connection with this user.
         SecurityNumberRequest security_number_request = 5;
+        // Security Number Response
+        //
+        // Libqaul's response containing the security number.
+        //
+        // The security number contains 8 blocks of 5 digit numbers.
+        // They shall be rendered in two rows. If a number is
+        // smaller then five-digits, the missing digits shall be filled
+        // with leading zeros.
+        //
+        // example rendering of security number:
+        // 13246 42369 46193 12484
+        // 12142 31101 09874 34545
         SecurityNumberResponse security_number_response = 6;
     }
 }
@@ -43,19 +75,18 @@ message UserEntry {
     // user is blocked
     bool blocked = 10;
     // routing connection entries
-    //RoutingTableConnection connections = 11;
+    // RoutingTableConnection connections = 11;
     repeated RoutingTableConnection connections = 11;
 }
 
 // Connection modules
 enum ConnectionModule {
-    NONE = 0;
-    LAN = 1;
+    NONE     = 0;
+    LAN      = 1;
     INTERNET = 2;
-    BLE = 3;
-    LOCAL = 4;
+    BLE      = 3;
+    LOCAL    = 4;
 }
-
 
 // Routing table connection entry.
 // This message contains a connection to a specific user.
@@ -70,7 +101,6 @@ message RoutingTableConnection {
     bytes via = 4;
 }
 
-
 // how is the user connected
 enum Connectivity {
     // The user is actively connected to the node
@@ -84,15 +114,14 @@ enum Connectivity {
     Offline = 2;
 }
 
-
 // security number request
-message SecurityNumberRequest{
+message SecurityNumberRequest {
     // user id
-    bytes user_id = 1;    
+    bytes user_id = 1;
 }
 
 // security number response
-message SecurityNumberResponse{
+message SecurityNumberResponse {
     // the user id of the remote user
     bytes user_id = 1;
 
@@ -100,6 +129,7 @@ message SecurityNumberResponse{
     bytes security_hash = 2;
 
     // fill in 8 numbers of 16bits
-    // uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+    // uint16 data type does not exist in protobuf, just fill them in the u16 as
+    // u32.
     repeated uint32 security_number_blocks = 3;
 }

@@ -16,6 +16,145 @@ public final class UsersOuterClass {
   }
   /**
    * <pre>
+   * Connection modules
+   * </pre>
+   *
+   * Protobuf enum {@code qaul.rpc.users.ConnectionModule}
+   */
+  public enum ConnectionModule
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>NONE = 0;</code>
+     */
+    NONE(0),
+    /**
+     * <code>LAN = 1;</code>
+     */
+    LAN(1),
+    /**
+     * <code>INTERNET = 2;</code>
+     */
+    INTERNET(2),
+    /**
+     * <code>BLE = 3;</code>
+     */
+    BLE(3),
+    /**
+     * <code>LOCAL = 4;</code>
+     */
+    LOCAL(4),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>NONE = 0;</code>
+     */
+    public static final int NONE_VALUE = 0;
+    /**
+     * <code>LAN = 1;</code>
+     */
+    public static final int LAN_VALUE = 1;
+    /**
+     * <code>INTERNET = 2;</code>
+     */
+    public static final int INTERNET_VALUE = 2;
+    /**
+     * <code>BLE = 3;</code>
+     */
+    public static final int BLE_VALUE = 3;
+    /**
+     * <code>LOCAL = 4;</code>
+     */
+    public static final int LOCAL_VALUE = 4;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static ConnectionModule valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static ConnectionModule forNumber(int value) {
+      switch (value) {
+        case 0: return NONE;
+        case 1: return LAN;
+        case 2: return INTERNET;
+        case 3: return BLE;
+        case 4: return LOCAL;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ConnectionModule>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        ConnectionModule> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ConnectionModule>() {
+            public ConnectionModule findValueByNumber(int number) {
+              return ConnectionModule.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return qaul.rpc.users.UsersOuterClass.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final ConnectionModule[] VALUES = values();
+
+    public static ConnectionModule valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private ConnectionModule(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:qaul.rpc.users.ConnectionModule)
+  }
+
+  /**
+   * <pre>
    * how is the user connected
    * </pre>
    *
@@ -139,7 +278,7 @@ public final class UsersOuterClass {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return qaul.rpc.users.UsersOuterClass.getDescriptor().getEnumTypes().get(0);
+      return qaul.rpc.users.UsersOuterClass.getDescriptor().getEnumTypes().get(1);
     }
 
     private static final Connectivity[] VALUES = values();
@@ -170,91 +309,223 @@ public final class UsersOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return Whether the userRequest field is set.
      */
     boolean hasUserRequest();
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return The userRequest.
      */
     qaul.rpc.users.UsersOuterClass.UserRequest getUserRequest();
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserRequestOrBuilder getUserRequestOrBuilder();
 
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      * @return Whether the userOnlineRequest field is set.
      */
     boolean hasUserOnlineRequest();
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      * @return The userOnlineRequest.
      */
     qaul.rpc.users.UsersOuterClass.UserOnlineRequest getUserOnlineRequest();
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder getUserOnlineRequestOrBuilder();
 
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return Whether the userList field is set.
      */
     boolean hasUserList();
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return The userList.
      */
     qaul.rpc.users.UsersOuterClass.UserList getUserList();
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserListOrBuilder getUserListOrBuilder();
 
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return Whether the userUpdate field is set.
      */
     boolean hasUserUpdate();
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return The userUpdate.
      */
     qaul.rpc.users.UsersOuterClass.UserEntry getUserUpdate();
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder getUserUpdateOrBuilder();
 
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      * @return Whether the securityNumberRequest field is set.
      */
     boolean hasSecurityNumberRequest();
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      * @return The securityNumberRequest.
      */
     qaul.rpc.users.UsersOuterClass.SecurityNumberRequest getSecurityNumberRequest();
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      */
     qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder getSecurityNumberRequestOrBuilder();
 
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      * @return Whether the securityNumberResponse field is set.
      */
     boolean hasSecurityNumberResponse();
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      * @return The securityNumberResponse.
      */
     qaul.rpc.users.UsersOuterClass.SecurityNumberResponse getSecurityNumberResponse();
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      */
     qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder getSecurityNumberResponseOrBuilder();
@@ -479,6 +750,13 @@ public final class UsersOuterClass {
 
     public static final int USER_REQUEST_FIELD_NUMBER = 1;
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return Whether the userRequest field is set.
      */
@@ -487,6 +765,13 @@ public final class UsersOuterClass {
       return messageCase_ == 1;
     }
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      * @return The userRequest.
      */
@@ -498,6 +783,13 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserRequest.getDefaultInstance();
     }
     /**
+     * <pre>
+     * User Request returns a user list
+     * containing all users with their connectivity
+     * field set to either online or offline.
+     * The connections are not set.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
      */
     @java.lang.Override
@@ -510,6 +802,12 @@ public final class UsersOuterClass {
 
     public static final int USER_ONLINE_REQUEST_FIELD_NUMBER = 2;
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      * @return Whether the userOnlineRequest field is set.
      */
@@ -518,6 +816,12 @@ public final class UsersOuterClass {
       return messageCase_ == 2;
     }
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      * @return The userOnlineRequest.
      */
@@ -529,6 +833,12 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserOnlineRequest.getDefaultInstance();
     }
     /**
+     * <pre>
+     * User Online Request returns a user list
+     * of all users currently online in the network.
+     * Each user has
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
      */
     @java.lang.Override
@@ -541,6 +851,12 @@ public final class UsersOuterClass {
 
     public static final int USER_LIST_FIELD_NUMBER = 3;
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return Whether the userList field is set.
      */
@@ -549,6 +865,12 @@ public final class UsersOuterClass {
       return messageCase_ == 3;
     }
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      * @return The userList.
      */
@@ -560,6 +882,12 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserList.getDefaultInstance();
     }
     /**
+     * <pre>
+     * User List
+     * Libqaul's return message for  'UserRequest' and
+     * 'UserOnlineRequest', containing a list of UserEntry's
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserList user_list = 3;</code>
      */
     @java.lang.Override
@@ -572,6 +900,13 @@ public final class UsersOuterClass {
 
     public static final int USER_UPDATE_FIELD_NUMBER = 4;
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return Whether the userUpdate field is set.
      */
@@ -580,6 +915,13 @@ public final class UsersOuterClass {
       return messageCase_ == 4;
     }
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      * @return The userUpdate.
      */
@@ -591,6 +933,13 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance();
     }
     /**
+     * <pre>
+     * User Update
+     * Sent to libqaul to update the verification &amp; blocked fields
+     * of a user.
+     * All other fields will be ignored.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
      */
     @java.lang.Override
@@ -603,6 +952,12 @@ public final class UsersOuterClass {
 
     public static final int SECURITY_NUMBER_REQUEST_FIELD_NUMBER = 5;
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      * @return Whether the securityNumberRequest field is set.
      */
@@ -611,6 +966,12 @@ public final class UsersOuterClass {
       return messageCase_ == 5;
     }
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      * @return The securityNumberRequest.
      */
@@ -622,6 +983,12 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Security Number Request
+     * Requests the specific security number for
+     * for the connection with this user.
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
      */
     @java.lang.Override
@@ -634,6 +1001,18 @@ public final class UsersOuterClass {
 
     public static final int SECURITY_NUMBER_RESPONSE_FIELD_NUMBER = 6;
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      * @return Whether the securityNumberResponse field is set.
      */
@@ -642,6 +1021,18 @@ public final class UsersOuterClass {
       return messageCase_ == 6;
     }
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      * @return The securityNumberResponse.
      */
@@ -653,6 +1044,18 @@ public final class UsersOuterClass {
       return qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.getDefaultInstance();
     }
     /**
+     * <pre>
+     * Security Number Response
+     * Libqaul's response containing the security number.
+     * The security number contains 8 blocks of 5 digit numbers.
+     * They shall be rendered in two rows. If a number is
+     * smaller then five-digits, the missing digits shall be filled
+     * with leading zeros.
+     * example rendering of security number:
+     * 13246 42369 46193 12484
+     * 12142 31101 09874 34545
+     * </pre>
+     *
      * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
      */
     @java.lang.Override
@@ -1143,6 +1546,13 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserRequest, qaul.rpc.users.UsersOuterClass.UserRequest.Builder, qaul.rpc.users.UsersOuterClass.UserRequestOrBuilder> userRequestBuilder_;
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        * @return Whether the userRequest field is set.
        */
@@ -1151,6 +1561,13 @@ public final class UsersOuterClass {
         return messageCase_ == 1;
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        * @return The userRequest.
        */
@@ -1169,6 +1586,13 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       public Builder setUserRequest(qaul.rpc.users.UsersOuterClass.UserRequest value) {
@@ -1185,6 +1609,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       public Builder setUserRequest(
@@ -1199,6 +1630,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       public Builder mergeUserRequest(qaul.rpc.users.UsersOuterClass.UserRequest value) {
@@ -1222,6 +1660,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       public Builder clearUserRequest() {
@@ -1241,12 +1686,26 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserRequest.Builder getUserRequestBuilder() {
         return getUserRequestFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       @java.lang.Override
@@ -1261,6 +1720,13 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Request returns a user list
+       * containing all users with their connectivity
+       * field set to either online or offline.
+       * The connections are not set.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserRequest user_request = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1285,6 +1751,12 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserOnlineRequest, qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder, qaul.rpc.users.UsersOuterClass.UserOnlineRequestOrBuilder> userOnlineRequestBuilder_;
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        * @return Whether the userOnlineRequest field is set.
        */
@@ -1293,6 +1765,12 @@ public final class UsersOuterClass {
         return messageCase_ == 2;
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        * @return The userOnlineRequest.
        */
@@ -1311,6 +1789,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       public Builder setUserOnlineRequest(qaul.rpc.users.UsersOuterClass.UserOnlineRequest value) {
@@ -1327,6 +1811,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       public Builder setUserOnlineRequest(
@@ -1341,6 +1831,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       public Builder mergeUserOnlineRequest(qaul.rpc.users.UsersOuterClass.UserOnlineRequest value) {
@@ -1364,6 +1860,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       public Builder clearUserOnlineRequest() {
@@ -1383,12 +1885,24 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserOnlineRequest.Builder getUserOnlineRequestBuilder() {
         return getUserOnlineRequestFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       @java.lang.Override
@@ -1403,6 +1917,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Online Request returns a user list
+       * of all users currently online in the network.
+       * Each user has
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserOnlineRequest user_online_request = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1427,6 +1947,12 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserList, qaul.rpc.users.UsersOuterClass.UserList.Builder, qaul.rpc.users.UsersOuterClass.UserListOrBuilder> userListBuilder_;
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        * @return Whether the userList field is set.
        */
@@ -1435,6 +1961,12 @@ public final class UsersOuterClass {
         return messageCase_ == 3;
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        * @return The userList.
        */
@@ -1453,6 +1985,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder setUserList(qaul.rpc.users.UsersOuterClass.UserList value) {
@@ -1469,6 +2007,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder setUserList(
@@ -1483,6 +2027,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder mergeUserList(qaul.rpc.users.UsersOuterClass.UserList value) {
@@ -1506,6 +2056,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public Builder clearUserList() {
@@ -1525,12 +2081,24 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserList.Builder getUserListBuilder() {
         return getUserListFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       @java.lang.Override
@@ -1545,6 +2113,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User List
+       * Libqaul's return message for  'UserRequest' and
+       * 'UserOnlineRequest', containing a list of UserEntry's
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserList user_list = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1569,6 +2143,13 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserEntry, qaul.rpc.users.UsersOuterClass.UserEntry.Builder, qaul.rpc.users.UsersOuterClass.UserEntryOrBuilder> userUpdateBuilder_;
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        * @return Whether the userUpdate field is set.
        */
@@ -1577,6 +2158,13 @@ public final class UsersOuterClass {
         return messageCase_ == 4;
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        * @return The userUpdate.
        */
@@ -1595,6 +2183,13 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder setUserUpdate(qaul.rpc.users.UsersOuterClass.UserEntry value) {
@@ -1611,6 +2206,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder setUserUpdate(
@@ -1625,6 +2227,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder mergeUserUpdate(qaul.rpc.users.UsersOuterClass.UserEntry value) {
@@ -1648,6 +2257,13 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public Builder clearUserUpdate() {
@@ -1667,12 +2283,26 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       public qaul.rpc.users.UsersOuterClass.UserEntry.Builder getUserUpdateBuilder() {
         return getUserUpdateFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       @java.lang.Override
@@ -1687,6 +2317,13 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * User Update
+       * Sent to libqaul to update the verification &amp; blocked fields
+       * of a user.
+       * All other fields will be ignored.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.UserEntry user_update = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1711,6 +2348,12 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.SecurityNumberRequest, qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberRequestOrBuilder> securityNumberRequestBuilder_;
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        * @return Whether the securityNumberRequest field is set.
        */
@@ -1719,6 +2362,12 @@ public final class UsersOuterClass {
         return messageCase_ == 5;
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        * @return The securityNumberRequest.
        */
@@ -1737,6 +2386,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       public Builder setSecurityNumberRequest(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest value) {
@@ -1753,6 +2408,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       public Builder setSecurityNumberRequest(
@@ -1767,6 +2428,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       public Builder mergeSecurityNumberRequest(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest value) {
@@ -1790,6 +2457,12 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       public Builder clearSecurityNumberRequest() {
@@ -1809,12 +2482,24 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest.Builder getSecurityNumberRequestBuilder() {
         return getSecurityNumberRequestFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       @java.lang.Override
@@ -1829,6 +2514,12 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * Security Number Request
+       * Requests the specific security number for
+       * for the connection with this user.
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberRequest security_number_request = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -1853,6 +2544,18 @@ public final class UsersOuterClass {
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.SecurityNumberResponse, qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder, qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder> securityNumberResponseBuilder_;
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        * @return Whether the securityNumberResponse field is set.
        */
@@ -1861,6 +2564,18 @@ public final class UsersOuterClass {
         return messageCase_ == 6;
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        * @return The securityNumberResponse.
        */
@@ -1879,6 +2594,18 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       public Builder setSecurityNumberResponse(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse value) {
@@ -1895,6 +2622,18 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       public Builder setSecurityNumberResponse(
@@ -1909,6 +2648,18 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       public Builder mergeSecurityNumberResponse(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse value) {
@@ -1932,6 +2683,18 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       public Builder clearSecurityNumberResponse() {
@@ -1951,12 +2714,36 @@ public final class UsersOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse.Builder getSecurityNumberResponseBuilder() {
         return getSecurityNumberResponseFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       @java.lang.Override
@@ -1971,6 +2758,18 @@ public final class UsersOuterClass {
         }
       }
       /**
+       * <pre>
+       * Security Number Response
+       * Libqaul's response containing the security number.
+       * The security number contains 8 blocks of 5 digit numbers.
+       * They shall be rendered in two rows. If a number is
+       * smaller then five-digits, the missing digits shall be filled
+       * with leading zeros.
+       * example rendering of security number:
+       * 13246 42369 46193 12484
+       * 12142 31101 09874 34545
+       * </pre>
+       *
        * <code>.qaul.rpc.users.SecurityNumberResponse security_number_response = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -3806,6 +4605,55 @@ public final class UsersOuterClass {
      * @return The blocked.
      */
     boolean getBlocked();
+
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> 
+        getConnectionsList();
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    qaul.rpc.users.UsersOuterClass.RoutingTableConnection getConnections(int index);
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    int getConnectionsCount();
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    java.util.List<? extends qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder> 
+        getConnectionsOrBuilderList();
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+        int index);
   }
   /**
    * <pre>
@@ -3829,6 +4677,7 @@ public final class UsersOuterClass {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
       keyBase58_ = "";
       connectivity_ = 0;
+      connections_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -3851,6 +4700,7 @@ public final class UsersOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3899,6 +4749,15 @@ public final class UsersOuterClass {
               blocked_ = input.readBool();
               break;
             }
+            case 90: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                connections_ = new java.util.ArrayList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              connections_.add(
+                  input.readMessage(qaul.rpc.users.UsersOuterClass.RoutingTableConnection.parser(), extensionRegistry));
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -3916,6 +4775,9 @@ public final class UsersOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          connections_ = java.util.Collections.unmodifiableList(connections_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -4113,6 +4975,71 @@ public final class UsersOuterClass {
       return blocked_;
     }
 
+    public static final int CONNECTIONS_FIELD_NUMBER = 11;
+    private java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> connections_;
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> getConnectionsList() {
+      return connections_;
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder> 
+        getConnectionsOrBuilderList() {
+      return connections_;
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @java.lang.Override
+    public int getConnectionsCount() {
+      return connections_.size();
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.RoutingTableConnection getConnections(int index) {
+      return connections_.get(index);
+    }
+    /**
+     * <pre>
+     * routing connection entries
+     * RoutingTableConnection connections = 11;
+     * </pre>
+     *
+     * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+        int index) {
+      return connections_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4147,6 +5074,9 @@ public final class UsersOuterClass {
       }
       if (blocked_ != false) {
         output.writeBool(10, blocked_);
+      }
+      for (int i = 0; i < connections_.size(); i++) {
+        output.writeMessage(11, connections_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -4183,6 +5113,10 @@ public final class UsersOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(10, blocked_);
       }
+      for (int i = 0; i < connections_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, connections_.get(i));
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4211,6 +5145,8 @@ public final class UsersOuterClass {
           != other.getVerified()) return false;
       if (getBlocked()
           != other.getBlocked()) return false;
+      if (!getConnectionsList()
+          .equals(other.getConnectionsList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4238,6 +5174,10 @@ public final class UsersOuterClass {
       hash = (37 * hash) + BLOCKED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getBlocked());
+      if (getConnectionsCount() > 0) {
+        hash = (37 * hash) + CONNECTIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getConnectionsList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4370,6 +5310,7 @@ public final class UsersOuterClass {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getConnectionsFieldBuilder();
         }
       }
       @java.lang.Override
@@ -4389,6 +5330,12 @@ public final class UsersOuterClass {
 
         blocked_ = false;
 
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          connectionsBuilder_.clear();
+        }
         return this;
       }
 
@@ -4415,6 +5362,7 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserEntry buildPartial() {
         qaul.rpc.users.UsersOuterClass.UserEntry result = new qaul.rpc.users.UsersOuterClass.UserEntry(this);
+        int from_bitField0_ = bitField0_;
         result.name_ = name_;
         result.id_ = id_;
         result.groupId_ = groupId_;
@@ -4422,6 +5370,15 @@ public final class UsersOuterClass {
         result.connectivity_ = connectivity_;
         result.verified_ = verified_;
         result.blocked_ = blocked_;
+        if (connectionsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            connections_ = java.util.Collections.unmodifiableList(connections_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.connections_ = connections_;
+        } else {
+          result.connections_ = connectionsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -4493,6 +5450,32 @@ public final class UsersOuterClass {
         if (other.getBlocked() != false) {
           setBlocked(other.getBlocked());
         }
+        if (connectionsBuilder_ == null) {
+          if (!other.connections_.isEmpty()) {
+            if (connections_.isEmpty()) {
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureConnectionsIsMutable();
+              connections_.addAll(other.connections_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.connections_.isEmpty()) {
+            if (connectionsBuilder_.isEmpty()) {
+              connectionsBuilder_.dispose();
+              connectionsBuilder_ = null;
+              connections_ = other.connections_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              connectionsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getConnectionsFieldBuilder() : null;
+            } else {
+              connectionsBuilder_.addAllMessages(other.connections_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -4521,6 +5504,7 @@ public final class UsersOuterClass {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object name_ = "";
       /**
@@ -4968,6 +5952,336 @@ public final class UsersOuterClass {
         onChanged();
         return this;
       }
+
+      private java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> connections_ =
+        java.util.Collections.emptyList();
+      private void ensureConnectionsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          connections_ = new java.util.ArrayList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection>(connections_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.RoutingTableConnection, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder, qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder> connectionsBuilder_;
+
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> getConnectionsList() {
+        if (connectionsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(connections_);
+        } else {
+          return connectionsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public int getConnectionsCount() {
+        if (connectionsBuilder_ == null) {
+          return connections_.size();
+        } else {
+          return connectionsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection getConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);
+        } else {
+          return connectionsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.users.UsersOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.set(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder setConnections(
+          int index, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder addConnections(qaul.rpc.users.UsersOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.users.UsersOuterClass.RoutingTableConnection value) {
+        if (connectionsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureConnectionsIsMutable();
+          connections_.add(index, value);
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder addConnections(
+          qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder addConnections(
+          int index, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder builderForValue) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          connectionsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder addAllConnections(
+          java.lang.Iterable<? extends qaul.rpc.users.UsersOuterClass.RoutingTableConnection> values) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, connections_);
+          onChanged();
+        } else {
+          connectionsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder clearConnections() {
+        if (connectionsBuilder_ == null) {
+          connections_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          connectionsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public Builder removeConnections(int index) {
+        if (connectionsBuilder_ == null) {
+          ensureConnectionsIsMutable();
+          connections_.remove(index);
+          onChanged();
+        } else {
+          connectionsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder getConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder getConnectionsOrBuilder(
+          int index) {
+        if (connectionsBuilder_ == null) {
+          return connections_.get(index);  } else {
+          return connectionsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public java.util.List<? extends qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder> 
+           getConnectionsOrBuilderList() {
+        if (connectionsBuilder_ != null) {
+          return connectionsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(connections_);
+        }
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder addConnectionsBuilder() {
+        return getConnectionsFieldBuilder().addBuilder(
+            qaul.rpc.users.UsersOuterClass.RoutingTableConnection.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder addConnectionsBuilder(
+          int index) {
+        return getConnectionsFieldBuilder().addBuilder(
+            index, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * routing connection entries
+       * RoutingTableConnection connections = 11;
+       * </pre>
+       *
+       * <code>repeated .qaul.rpc.users.RoutingTableConnection connections = 11;</code>
+       */
+      public java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder> 
+           getConnectionsBuilderList() {
+        return getConnectionsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          qaul.rpc.users.UsersOuterClass.RoutingTableConnection, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder, qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder> 
+          getConnectionsFieldBuilder() {
+        if (connectionsBuilder_ == null) {
+          connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              qaul.rpc.users.UsersOuterClass.RoutingTableConnection, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder, qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder>(
+                  connections_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          connections_ = null;
+        }
+        return connectionsBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5016,6 +6330,853 @@ public final class UsersOuterClass {
 
     @java.lang.Override
     public qaul.rpc.users.UsersOuterClass.UserEntry getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RoutingTableConnectionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:qaul.rpc.users.RoutingTableConnection)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+     * @return The enum numeric value on the wire for module.
+     */
+    int getModuleValue();
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+     * @return The module.
+     */
+    qaul.rpc.users.UsersOuterClass.ConnectionModule getModule();
+
+    /**
+     * <pre>
+     * the round trip time for this connection
+     * </pre>
+     *
+     * <code>uint32 rtt = 3;</code>
+     * @return The rtt.
+     */
+    int getRtt();
+
+    /**
+     * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     * @return The hopCount.
+     */
+    int getHopCount();
+
+    /**
+     * <pre>
+     * node id via which this connection is routed
+     * </pre>
+     *
+     * <code>bytes via = 4;</code>
+     * @return The via.
+     */
+    com.google.protobuf.ByteString getVia();
+  }
+  /**
+   * <pre>
+   * Routing table connection entry.
+   * This message contains a connection to a specific user.
+   * </pre>
+   *
+   * Protobuf type {@code qaul.rpc.users.RoutingTableConnection}
+   */
+  public static final class RoutingTableConnection extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:qaul.rpc.users.RoutingTableConnection)
+      RoutingTableConnectionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RoutingTableConnection.newBuilder() to construct.
+    private RoutingTableConnection(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RoutingTableConnection() {
+      module_ = 0;
+      via_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RoutingTableConnection();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RoutingTableConnection(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 16: {
+              int rawValue = input.readEnum();
+
+              module_ = rawValue;
+              break;
+            }
+            case 24: {
+
+              rtt_ = input.readUInt32();
+              break;
+            }
+            case 34: {
+
+              via_ = input.readBytes();
+              break;
+            }
+            case 40: {
+
+              hopCount_ = input.readUInt32();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              qaul.rpc.users.UsersOuterClass.RoutingTableConnection.class, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder.class);
+    }
+
+    public static final int MODULE_FIELD_NUMBER = 2;
+    private int module_;
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+     * @return The enum numeric value on the wire for module.
+     */
+    @java.lang.Override public int getModuleValue() {
+      return module_;
+    }
+    /**
+     * <pre>
+     * the connection module (LAN, Internet, BLE, etc.)
+     * </pre>
+     *
+     * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+     * @return The module.
+     */
+    @java.lang.Override public qaul.rpc.users.UsersOuterClass.ConnectionModule getModule() {
+      @SuppressWarnings("deprecation")
+      qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.valueOf(module_);
+      return result == null ? qaul.rpc.users.UsersOuterClass.ConnectionModule.UNRECOGNIZED : result;
+    }
+
+    public static final int RTT_FIELD_NUMBER = 3;
+    private int rtt_;
+    /**
+     * <pre>
+     * the round trip time for this connection
+     * </pre>
+     *
+     * <code>uint32 rtt = 3;</code>
+     * @return The rtt.
+     */
+    @java.lang.Override
+    public int getRtt() {
+      return rtt_;
+    }
+
+    public static final int HOP_COUNT_FIELD_NUMBER = 5;
+    private int hopCount_;
+    /**
+     * <pre>
+     * hop count
+     * </pre>
+     *
+     * <code>uint32 hop_count = 5;</code>
+     * @return The hopCount.
+     */
+    @java.lang.Override
+    public int getHopCount() {
+      return hopCount_;
+    }
+
+    public static final int VIA_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString via_;
+    /**
+     * <pre>
+     * node id via which this connection is routed
+     * </pre>
+     *
+     * <code>bytes via = 4;</code>
+     * @return The via.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getVia() {
+      return via_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (module_ != qaul.rpc.users.UsersOuterClass.ConnectionModule.NONE.getNumber()) {
+        output.writeEnum(2, module_);
+      }
+      if (rtt_ != 0) {
+        output.writeUInt32(3, rtt_);
+      }
+      if (!via_.isEmpty()) {
+        output.writeBytes(4, via_);
+      }
+      if (hopCount_ != 0) {
+        output.writeUInt32(5, hopCount_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (module_ != qaul.rpc.users.UsersOuterClass.ConnectionModule.NONE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, module_);
+      }
+      if (rtt_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(3, rtt_);
+      }
+      if (!via_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, via_);
+      }
+      if (hopCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(5, hopCount_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof qaul.rpc.users.UsersOuterClass.RoutingTableConnection)) {
+        return super.equals(obj);
+      }
+      qaul.rpc.users.UsersOuterClass.RoutingTableConnection other = (qaul.rpc.users.UsersOuterClass.RoutingTableConnection) obj;
+
+      if (module_ != other.module_) return false;
+      if (getRtt()
+          != other.getRtt()) return false;
+      if (getHopCount()
+          != other.getHopCount()) return false;
+      if (!getVia()
+          .equals(other.getVia())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + MODULE_FIELD_NUMBER;
+      hash = (53 * hash) + module_;
+      hash = (37 * hash) + RTT_FIELD_NUMBER;
+      hash = (53 * hash) + getRtt();
+      hash = (37 * hash) + HOP_COUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getHopCount();
+      hash = (37 * hash) + VIA_FIELD_NUMBER;
+      hash = (53 * hash) + getVia().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(qaul.rpc.users.UsersOuterClass.RoutingTableConnection prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Routing table connection entry.
+     * This message contains a connection to a specific user.
+     * </pre>
+     *
+     * Protobuf type {@code qaul.rpc.users.RoutingTableConnection}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:qaul.rpc.users.RoutingTableConnection)
+        qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                qaul.rpc.users.UsersOuterClass.RoutingTableConnection.class, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder.class);
+      }
+
+      // Construct using qaul.rpc.users.UsersOuterClass.RoutingTableConnection.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        module_ = 0;
+
+        rtt_ = 0;
+
+        hopCount_ = 0;
+
+        via_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_descriptor;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection getDefaultInstanceForType() {
+        return qaul.rpc.users.UsersOuterClass.RoutingTableConnection.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection build() {
+        qaul.rpc.users.UsersOuterClass.RoutingTableConnection result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.RoutingTableConnection buildPartial() {
+        qaul.rpc.users.UsersOuterClass.RoutingTableConnection result = new qaul.rpc.users.UsersOuterClass.RoutingTableConnection(this);
+        result.module_ = module_;
+        result.rtt_ = rtt_;
+        result.hopCount_ = hopCount_;
+        result.via_ = via_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof qaul.rpc.users.UsersOuterClass.RoutingTableConnection) {
+          return mergeFrom((qaul.rpc.users.UsersOuterClass.RoutingTableConnection)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(qaul.rpc.users.UsersOuterClass.RoutingTableConnection other) {
+        if (other == qaul.rpc.users.UsersOuterClass.RoutingTableConnection.getDefaultInstance()) return this;
+        if (other.module_ != 0) {
+          setModuleValue(other.getModuleValue());
+        }
+        if (other.getRtt() != 0) {
+          setRtt(other.getRtt());
+        }
+        if (other.getHopCount() != 0) {
+          setHopCount(other.getHopCount());
+        }
+        if (other.getVia() != com.google.protobuf.ByteString.EMPTY) {
+          setVia(other.getVia());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        qaul.rpc.users.UsersOuterClass.RoutingTableConnection parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (qaul.rpc.users.UsersOuterClass.RoutingTableConnection) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int module_ = 0;
+      /**
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+       * @return The enum numeric value on the wire for module.
+       */
+      @java.lang.Override public int getModuleValue() {
+        return module_;
+      }
+      /**
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+       * @param value The enum numeric value on the wire for module to set.
+       * @return This builder for chaining.
+       */
+      public Builder setModuleValue(int value) {
+        
+        module_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+       * @return The module.
+       */
+      @java.lang.Override
+      public qaul.rpc.users.UsersOuterClass.ConnectionModule getModule() {
+        @SuppressWarnings("deprecation")
+        qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.valueOf(module_);
+        return result == null ? qaul.rpc.users.UsersOuterClass.ConnectionModule.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+       * @param value The module to set.
+       * @return This builder for chaining.
+       */
+      public Builder setModule(qaul.rpc.users.UsersOuterClass.ConnectionModule value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        module_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the connection module (LAN, Internet, BLE, etc.)
+       * </pre>
+       *
+       * <code>.qaul.rpc.users.ConnectionModule module = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearModule() {
+        
+        module_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int rtt_ ;
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @return The rtt.
+       */
+      @java.lang.Override
+      public int getRtt() {
+        return rtt_;
+      }
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @param value The rtt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRtt(int value) {
+        
+        rtt_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the round trip time for this connection
+       * </pre>
+       *
+       * <code>uint32 rtt = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRtt() {
+        
+        rtt_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int hopCount_ ;
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @return The hopCount.
+       */
+      @java.lang.Override
+      public int getHopCount() {
+        return hopCount_;
+      }
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @param value The hopCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHopCount(int value) {
+        
+        hopCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * hop count
+       * </pre>
+       *
+       * <code>uint32 hop_count = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHopCount() {
+        
+        hopCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @return The via.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getVia() {
+        return via_;
+      }
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @param value The via to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVia(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        via_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * node id via which this connection is routed
+       * </pre>
+       *
+       * <code>bytes via = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVia() {
+        
+        via_ = getDefaultInstance().getVia();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:qaul.rpc.users.RoutingTableConnection)
+    }
+
+    // @@protoc_insertion_point(class_scope:qaul.rpc.users.RoutingTableConnection)
+    private static final qaul.rpc.users.UsersOuterClass.RoutingTableConnection DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new qaul.rpc.users.UsersOuterClass.RoutingTableConnection();
+    }
+
+    public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RoutingTableConnection>
+        PARSER = new com.google.protobuf.AbstractParser<RoutingTableConnection>() {
+      @java.lang.Override
+      public RoutingTableConnection parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RoutingTableConnection(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RoutingTableConnection> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RoutingTableConnection> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public qaul.rpc.users.UsersOuterClass.RoutingTableConnection getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -5570,7 +7731,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -5580,7 +7742,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -5590,7 +7753,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -5755,7 +7919,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -5769,7 +7934,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -5781,7 +7947,8 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * fill in 8 numbers of 16bits
-     * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+     * uint16 data type does not exist in protobuf, just fill them in the u16 as
+     * u32.
      * </pre>
      *
      * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6265,7 +8432,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6279,7 +8447,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6291,7 +8460,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6304,7 +8474,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6322,7 +8493,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6338,7 +8510,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6356,7 +8529,8 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * fill in 8 numbers of 16bits
-       * uint16 data type does not exist in protobuf, just fill them in the u16 as u32.
+       * uint16 data type does not exist in protobuf, just fill them in the u16 as
+       * u32.
        * </pre>
        *
        * <code>repeated uint32 security_number_blocks = 3;</code>
@@ -6447,6 +8621,11 @@ public final class UsersOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_qaul_rpc_users_RoutingTableConnection_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_qaul_rpc_users_RoutingTableConnection_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -6477,17 +8656,23 @@ public final class UsersOuterClass {
       "onse\030\006 \001(\0132&.qaul.rpc.users.SecurityNumb" +
       "erResponseH\000B\t\n\007message\"\r\n\013UserRequest\"\023" +
       "\n\021UserOnlineRequest\"3\n\010UserList\022\'\n\004user\030" +
-      "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\242\001\n\tUse" +
+      "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\337\001\n\tUse" +
       "rEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\020\n\010grou" +
       "p_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connec" +
       "tivity\030\010 \001(\0162\034.qaul.rpc.users.Connectivi" +
-      "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\"(\n" +
-      "\025SecurityNumberRequest\022\017\n\007user_id\030\001 \001(\014\"" +
-      "`\n\026SecurityNumberResponse\022\017\n\007user_id\030\001 \001" +
-      "(\014\022\025\n\rsecurity_hash\030\002 \001(\014\022\036\n\026security_nu" +
-      "mber_blocks\030\003 \003(\r*6\n\014Connectivity\022\n\n\006Onl" +
-      "ine\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto" +
-      "3"
+      "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\022;\n" +
+      "\013connections\030\013 \003(\0132&.qaul.rpc.users.Rout" +
+      "ingTableConnection\"w\n\026RoutingTableConnec" +
+      "tion\0220\n\006module\030\002 \001(\0162 .qaul.rpc.users.Co" +
+      "nnectionModule\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count" +
+      "\030\005 \001(\r\022\013\n\003via\030\004 \001(\014\"(\n\025SecurityNumberReq" +
+      "uest\022\017\n\007user_id\030\001 \001(\014\"`\n\026SecurityNumberR" +
+      "esponse\022\017\n\007user_id\030\001 \001(\014\022\025\n\rsecurity_has" +
+      "h\030\002 \001(\014\022\036\n\026security_number_blocks\030\003 \003(\r*" +
+      "G\n\020ConnectionModule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014" +
+      "\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n\005LOCAL\020\004*6\n\014Conn" +
+      "ectivity\022\n\n\006Online\020\000\022\r\n\tReachable\020\001\022\013\n\007O" +
+      "ffline\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -6522,15 +8707,21 @@ public final class UsersOuterClass {
     internal_static_qaul_rpc_users_UserEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_UserEntry_descriptor,
-        new java.lang.String[] { "Name", "Id", "GroupId", "KeyBase58", "Connectivity", "Verified", "Blocked", });
-    internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor =
+        new java.lang.String[] { "Name", "Id", "GroupId", "KeyBase58", "Connectivity", "Verified", "Blocked", "Connections", });
+    internal_static_qaul_rpc_users_RoutingTableConnection_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_qaul_rpc_users_RoutingTableConnection_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_qaul_rpc_users_RoutingTableConnection_descriptor,
+        new java.lang.String[] { "Module", "Rtt", "HopCount", "Via", });
+    internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_qaul_rpc_users_SecurityNumberRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor,
         new java.lang.String[] { "UserId", });
     internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_qaul_rpc_users_SecurityNumberResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor,

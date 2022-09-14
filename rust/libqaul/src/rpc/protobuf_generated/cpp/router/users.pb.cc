@@ -74,7 +74,8 @@ struct UserListDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserListDefaultTypeInternal _UserList_default_instance_;
 PROTOBUF_CONSTEXPR UserEntry::UserEntry(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.connections_)*/{}
+  , /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.group_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.key_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
@@ -91,6 +92,22 @@ struct UserEntryDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserEntryDefaultTypeInternal _UserEntry_default_instance_;
+PROTOBUF_CONSTEXPR RoutingTableConnection::RoutingTableConnection(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.via_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.module_)*/0
+  , /*decltype(_impl_.rtt_)*/0u
+  , /*decltype(_impl_.hop_count_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct RoutingTableConnectionDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RoutingTableConnectionDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RoutingTableConnectionDefaultTypeInternal() {}
+  union {
+    RoutingTableConnection _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableConnectionDefaultTypeInternal _RoutingTableConnection_default_instance_;
 PROTOBUF_CONSTEXPR SecurityNumberRequest::SecurityNumberRequest(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
@@ -123,8 +140,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace users
 }  // namespace rpc
 }  // namespace qaul
-static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[7];
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2fusers_2eproto[1];
+static ::_pb::Metadata file_level_metadata_router_2fusers_2eproto[8];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2fusers_2eproto[2];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_router_2fusers_2eproto = nullptr;
 
 const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -173,6 +190,17 @@ const uint32_t TableStruct_router_2fusers_2eproto::offsets[] PROTOBUF_SECTION_VA
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.connectivity_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.verified_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.blocked_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::UserEntry, _impl_.connections_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::RoutingTableConnection, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::RoutingTableConnection, _impl_.module_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::RoutingTableConnection, _impl_.rtt_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::RoutingTableConnection, _impl_.hop_count_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::RoutingTableConnection, _impl_.via_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::users::SecurityNumberRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -196,8 +224,9 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 19, -1, -1, sizeof(::qaul::rpc::users::UserOnlineRequest)},
   { 25, -1, -1, sizeof(::qaul::rpc::users::UserList)},
   { 32, -1, -1, sizeof(::qaul::rpc::users::UserEntry)},
-  { 45, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberRequest)},
-  { 52, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberResponse)},
+  { 46, -1, -1, sizeof(::qaul::rpc::users::RoutingTableConnection)},
+  { 56, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberRequest)},
+  { 63, -1, -1, sizeof(::qaul::rpc::users::SecurityNumberResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -206,6 +235,7 @@ static const ::_pb::Message* const file_default_instances[] = {
   &::qaul::rpc::users::_UserOnlineRequest_default_instance_._instance,
   &::qaul::rpc::users::_UserList_default_instance_._instance,
   &::qaul::rpc::users::_UserEntry_default_instance_._instance,
+  &::qaul::rpc::users::_RoutingTableConnection_default_instance_._instance,
   &::qaul::rpc::users::_SecurityNumberRequest_default_instance_._instance,
   &::qaul::rpc::users::_SecurityNumberResponse_default_instance_._instance,
 };
@@ -223,23 +253,29 @@ const char descriptor_table_protodef_router_2fusers_2eproto[] PROTOBUF_SECTION_V
   "onse\030\006 \001(\0132&.qaul.rpc.users.SecurityNumb"
   "erResponseH\000B\t\n\007message\"\r\n\013UserRequest\"\023"
   "\n\021UserOnlineRequest\"3\n\010UserList\022\'\n\004user\030"
-  "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\242\001\n\tUse"
+  "\001 \003(\0132\031.qaul.rpc.users.UserEntry\"\337\001\n\tUse"
   "rEntry\022\014\n\004name\030\001 \001(\t\022\n\n\002id\030\002 \001(\014\022\020\n\010grou"
   "p_id\030\003 \001(\014\022\022\n\nkey_base58\030\007 \001(\t\0222\n\014connec"
   "tivity\030\010 \001(\0162\034.qaul.rpc.users.Connectivi"
-  "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\"(\n"
-  "\025SecurityNumberRequest\022\017\n\007user_id\030\001 \001(\014\""
-  "`\n\026SecurityNumberResponse\022\017\n\007user_id\030\001 \001"
-  "(\014\022\025\n\rsecurity_hash\030\002 \001(\014\022\036\n\026security_nu"
-  "mber_blocks\030\003 \003(\r*6\n\014Connectivity\022\n\n\006Onl"
-  "ine\020\000\022\r\n\tReachable\020\001\022\013\n\007Offline\020\002b\006proto"
-  "3"
+  "ty\022\020\n\010verified\030\t \001(\010\022\017\n\007blocked\030\n \001(\010\022;\n"
+  "\013connections\030\013 \003(\0132&.qaul.rpc.users.Rout"
+  "ingTableConnection\"w\n\026RoutingTableConnec"
+  "tion\0220\n\006module\030\002 \001(\0162 .qaul.rpc.users.Co"
+  "nnectionModule\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count"
+  "\030\005 \001(\r\022\013\n\003via\030\004 \001(\014\"(\n\025SecurityNumberReq"
+  "uest\022\017\n\007user_id\030\001 \001(\014\"`\n\026SecurityNumberR"
+  "esponse\022\017\n\007user_id\030\001 \001(\014\022\025\n\rsecurity_has"
+  "h\030\002 \001(\014\022\036\n\026security_number_blocks\030\003 \003(\r*"
+  "G\n\020ConnectionModule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014"
+  "\n\010INTERNET\020\002\022\007\n\003BLE\020\003\022\t\n\005LOCAL\020\004*6\n\014Conn"
+  "ectivity\022\n\n\006Online\020\000\022\r\n\tReachable\020\001\022\013\n\007O"
+  "ffline\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_router_2fusers_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2fusers_2eproto = {
-    false, false, 881, descriptor_table_protodef_router_2fusers_2eproto,
+    false, false, 1136, descriptor_table_protodef_router_2fusers_2eproto,
     "router/users.proto",
-    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 7,
+    &descriptor_table_router_2fusers_2eproto_once, nullptr, 0, 8,
     schemas, file_default_instances, TableStruct_router_2fusers_2eproto::offsets,
     file_level_metadata_router_2fusers_2eproto, file_level_enum_descriptors_router_2fusers_2eproto,
     file_level_service_descriptors_router_2fusers_2eproto,
@@ -253,9 +289,26 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_in
 namespace qaul {
 namespace rpc {
 namespace users {
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Connectivity_descriptor() {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ConnectionModule_descriptor() {
   ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_router_2fusers_2eproto);
   return file_level_enum_descriptors_router_2fusers_2eproto[0];
+}
+bool ConnectionModule_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Connectivity_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_router_2fusers_2eproto);
+  return file_level_enum_descriptors_router_2fusers_2eproto[1];
 }
 bool Connectivity_IsValid(int value) {
   switch (value) {
@@ -1087,7 +1140,8 @@ UserEntry::UserEntry(const UserEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   UserEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.name_){}
+      decltype(_impl_.connections_){from._impl_.connections_}
+    , decltype(_impl_.name_){}
     , decltype(_impl_.id_){}
     , decltype(_impl_.group_id_){}
     , decltype(_impl_.key_base58_){}
@@ -1140,7 +1194,8 @@ inline void UserEntry::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.name_){}
+      decltype(_impl_.connections_){arena}
+    , decltype(_impl_.name_){}
     , decltype(_impl_.id_){}
     , decltype(_impl_.group_id_){}
     , decltype(_impl_.key_base58_){}
@@ -1178,6 +1233,7 @@ UserEntry::~UserEntry() {
 
 inline void UserEntry::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.connections_.~RepeatedPtrField();
   _impl_.name_.Destroy();
   _impl_.id_.Destroy();
   _impl_.group_id_.Destroy();
@@ -1194,6 +1250,7 @@ void UserEntry::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.connections_.Clear();
   _impl_.name_.ClearToEmpty();
   _impl_.id_.ClearToEmpty();
   _impl_.group_id_.ClearToEmpty();
@@ -1270,6 +1327,19 @@ const char* UserEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 80)) {
           _impl_.blocked_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated .qaul.rpc.users.RoutingTableConnection connections = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_connections(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<90>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -1353,6 +1423,14 @@ uint8_t* UserEntry::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(10, this->_internal_blocked(), target);
   }
 
+  // repeated .qaul.rpc.users.RoutingTableConnection connections = 11;
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_connections_size()); i < n; i++) {
+    const auto& repfield = this->_internal_connections(i);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(11, repfield, repfield.GetCachedSize(), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1368,6 +1446,13 @@ size_t UserEntry::ByteSizeLong() const {
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // repeated .qaul.rpc.users.RoutingTableConnection connections = 11;
+  total_size += 1UL * this->_internal_connections_size();
+  for (const auto& msg : this->_impl_.connections_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
 
   // string name = 1;
   if (!this->_internal_name().empty()) {
@@ -1431,6 +1516,7 @@ void UserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROT
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  _this->_impl_.connections_.MergeFrom(from._impl_.connections_);
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
@@ -1471,6 +1557,7 @@ void UserEntry::InternalSwap(UserEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.connections_.InternalSwap(&other->_impl_.connections_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.name_, lhs_arena,
       &other->_impl_.name_, rhs_arena
@@ -1499,6 +1586,291 @@ void UserEntry::InternalSwap(UserEntry* other) {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
       file_level_metadata_router_2fusers_2eproto[4]);
+}
+
+// ===================================================================
+
+class RoutingTableConnection::_Internal {
+ public:
+};
+
+RoutingTableConnection::RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:qaul.rpc.users.RoutingTableConnection)
+}
+RoutingTableConnection::RoutingTableConnection(const RoutingTableConnection& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RoutingTableConnection* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.module_){}
+    , decltype(_impl_.rtt_){}
+    , decltype(_impl_.hop_count_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.via_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.via_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_via().empty()) {
+    _this->_impl_.via_.Set(from._internal_via(), 
+      _this->GetArenaForAllocation());
+  }
+  ::memcpy(&_impl_.module_, &from._impl_.module_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
+    reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
+  // @@protoc_insertion_point(copy_constructor:qaul.rpc.users.RoutingTableConnection)
+}
+
+inline void RoutingTableConnection::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.via_){}
+    , decltype(_impl_.module_){0}
+    , decltype(_impl_.rtt_){0u}
+    , decltype(_impl_.hop_count_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.via_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.via_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+RoutingTableConnection::~RoutingTableConnection() {
+  // @@protoc_insertion_point(destructor:qaul.rpc.users.RoutingTableConnection)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void RoutingTableConnection::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.via_.Destroy();
+}
+
+void RoutingTableConnection::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void RoutingTableConnection::Clear() {
+// @@protoc_insertion_point(message_clear_start:qaul.rpc.users.RoutingTableConnection)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.via_.ClearToEmpty();
+  ::memset(&_impl_.module_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.hop_count_) -
+      reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* RoutingTableConnection::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .qaul.rpc.users.ConnectionModule module = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_module(static_cast<::qaul::rpc::users::ConnectionModule>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 rtt = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bytes via = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          auto str = _internal_mutable_via();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 hop_count = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _impl_.hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* RoutingTableConnection::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.users.RoutingTableConnection)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .qaul.rpc.users.ConnectionModule module = 2;
+  if (this->_internal_module() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      2, this->_internal_module(), target);
+  }
+
+  // uint32 rtt = 3;
+  if (this->_internal_rtt() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_rtt(), target);
+  }
+
+  // bytes via = 4;
+  if (!this->_internal_via().empty()) {
+    target = stream->WriteBytesMaybeAliased(
+        4, this->_internal_via(), target);
+  }
+
+  // uint32 hop_count = 5;
+  if (this->_internal_hop_count() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_hop_count(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:qaul.rpc.users.RoutingTableConnection)
+  return target;
+}
+
+size_t RoutingTableConnection::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:qaul.rpc.users.RoutingTableConnection)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bytes via = 4;
+  if (!this->_internal_via().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+        this->_internal_via());
+  }
+
+  // .qaul.rpc.users.ConnectionModule module = 2;
+  if (this->_internal_module() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_module());
+  }
+
+  // uint32 rtt = 3;
+  if (this->_internal_rtt() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
+  }
+
+  // uint32 hop_count = 5;
+  if (this->_internal_hop_count() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RoutingTableConnection::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    RoutingTableConnection::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RoutingTableConnection::GetClassData() const { return &_class_data_; }
+
+
+void RoutingTableConnection::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RoutingTableConnection*>(&to_msg);
+  auto& from = static_cast<const RoutingTableConnection&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.users.RoutingTableConnection)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_via().empty()) {
+    _this->_internal_set_via(from._internal_via());
+  }
+  if (from._internal_module() != 0) {
+    _this->_internal_set_module(from._internal_module());
+  }
+  if (from._internal_rtt() != 0) {
+    _this->_internal_set_rtt(from._internal_rtt());
+  }
+  if (from._internal_hop_count() != 0) {
+    _this->_internal_set_hop_count(from._internal_hop_count());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RoutingTableConnection::CopyFrom(const RoutingTableConnection& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:qaul.rpc.users.RoutingTableConnection)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RoutingTableConnection::IsInitialized() const {
+  return true;
+}
+
+void RoutingTableConnection::InternalSwap(RoutingTableConnection* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.via_, lhs_arena,
+      &other->_impl_.via_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RoutingTableConnection, _impl_.hop_count_)
+      + sizeof(RoutingTableConnection::_impl_.hop_count_)
+      - PROTOBUF_FIELD_OFFSET(RoutingTableConnection, _impl_.module_)>(
+          reinterpret_cast<char*>(&_impl_.module_),
+          reinterpret_cast<char*>(&other->_impl_.module_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata RoutingTableConnection::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
+      file_level_metadata_router_2fusers_2eproto[5]);
 }
 
 // ===================================================================
@@ -1696,7 +2068,7 @@ void SecurityNumberRequest::InternalSwap(SecurityNumberRequest* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SecurityNumberRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
-      file_level_metadata_router_2fusers_2eproto[5]);
+      file_level_metadata_router_2fusers_2eproto[6]);
 }
 
 // ===================================================================
@@ -1981,7 +2353,7 @@ void SecurityNumberResponse::InternalSwap(SecurityNumberResponse* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SecurityNumberResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_router_2fusers_2eproto_getter, &descriptor_table_router_2fusers_2eproto_once,
-      file_level_metadata_router_2fusers_2eproto[6]);
+      file_level_metadata_router_2fusers_2eproto[7]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -2008,6 +2380,10 @@ Arena::CreateMaybeMessage< ::qaul::rpc::users::UserList >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::qaul::rpc::users::UserEntry*
 Arena::CreateMaybeMessage< ::qaul::rpc::users::UserEntry >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::users::UserEntry >(arena);
+}
+template<> PROTOBUF_NOINLINE ::qaul::rpc::users::RoutingTableConnection*
+Arena::CreateMaybeMessage< ::qaul::rpc::users::RoutingTableConnection >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::qaul::rpc::users::RoutingTableConnection >(arena);
 }
 template<> PROTOBUF_NOINLINE ::qaul::rpc::users::SecurityNumberRequest*
 Arena::CreateMaybeMessage< ::qaul::rpc::users::SecurityNumberRequest >(Arena* arena) {
