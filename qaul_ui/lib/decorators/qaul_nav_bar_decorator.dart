@@ -206,6 +206,7 @@ class QaulNavBarItem extends HookConsumerWidget {
 
     String svgPath;
     String tooltip;
+    double sizeFactor = 1.0;
     switch (tab) {
       case TabType.account:
         return Padding(
@@ -227,35 +228,37 @@ class QaulNavBarItem extends HookConsumerWidget {
         tooltip = l18ns!.usersNavButtonTooltip;
         break;
       case TabType.feed:
-        svgPath = 'assets/icons/hashtag.svg';
+        svgPath = 'assets/icons/public.svg';
         tooltip = l18ns!.feedNavButtonTooltip;
+        sizeFactor = 1.2;
         break;
       case TabType.chat:
-        svgPath = 'assets/icons/comments.svg';
+        svgPath = 'assets/icons/chat.svg';
         tooltip = l18ns!.chatNavButtonTooltip;
         break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
         tooltip = l18ns!.netNavButtonTooltip;
+        sizeFactor = 1.2;
         break;
     }
 
     final button = _SelectedIndicatorDecorator(
       selected: selected,
       selectedColor: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        width: _iconSize * sizeFactor,
+        height: _iconSize * sizeFactor,
         child: IconButton(
           tooltip: tooltip,
           splashRadius: 0.01,
-          padding: const EdgeInsets.all(8.0),
           icon: SvgPicture.asset(
             svgPath,
-            width: _iconSize,
-            height: _iconSize,
             color: selected.value
                 ? theme.colorScheme.primary
                 : theme.iconTheme.color,
+            fit: BoxFit.cover,
+            clipBehavior: Clip.none,
           ),
           onPressed: () => controller.goToTab(tab),
         ),
