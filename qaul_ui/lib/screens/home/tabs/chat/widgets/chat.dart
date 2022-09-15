@@ -153,18 +153,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         room.conversationId,
         lastIndex: room.lastMessageIndex ?? 1,
       );
-    }, []);
+    }, [room]);
 
     final closeChat = useCallback(() {
       ref.read(currentOpenChatRoom.notifier).state = null;
       ref.read(uiOpenChatProvider.notifier).close();
       if (Responsiveness.isMobile(context)) Navigator.pop(context);
-    }, []);
+    }, [room]);
 
     final sendMessage = useCallback((types.PartialText msg) {
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
-    }, []);
+    }, [room]);
 
     return Scaffold(
       appBar: AppBar(
