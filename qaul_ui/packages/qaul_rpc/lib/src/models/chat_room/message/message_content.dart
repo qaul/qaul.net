@@ -8,21 +8,23 @@ abstract class MessageContent extends Equatable {
     final content = ChatContentMessage.fromBuffer(buffer);
     switch (content.whichMessage()) {
       case ChatContentMessage_Message.chatContent:
-        return TextMessageContent(String.fromCharCodes(buffer));
+        final message = content.ensureChatContent();
+        return TextMessageContent(message.text);
       case ChatContentMessage_Message.fileContent:
-        final file = FileSharingContainer.fromBuffer(buffer).fileInfo;
+        final message = content.ensureFileContent();
+        // TODO: historyIndex is not provided
         return FileShareContent(
-          historyIndex: file.startIndex,
-          fileId: file.fileId.toStringUnsigned(),
-          fileName: file.fileName,
-          size: file.fileSize,
-          description: file.fileDescr,
+          historyIndex: 0,
+          fileId: message.fileId.toStringUnsigned(),
+          fileName: '${message.fileName}.${message.fileExtension}',
+          size: message.fileSize,
+          description: message.fileDescription,
         );
       case ChatContentMessage_Message.groupEvent:
-        final event = GroupEvent.fromBuffer(buffer);
+        final message = content.ensureGroupEvent();
         return GroupEventContent(
-          userId: Uint8List.fromList(event.userId),
-          type: _groupEventContentTypeFactory(t: event.eventType),
+          userId: Uint8List.fromList(message.userId),
+          type: _groupEventContentTypeFactory(t: message.eventType),
         );
       case ChatContentMessage_Message.notSet:
         // TODO: log warning
