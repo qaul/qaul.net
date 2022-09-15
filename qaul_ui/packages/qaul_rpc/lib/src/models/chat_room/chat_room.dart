@@ -8,7 +8,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../qaul_rpc.dart';
 import '../../generated/services/chat/chat.pb.dart';
-import '../../generated/services/filesharing/filesharing_net.pb.dart';
 import '../../generated/services/group/group_rpc.pb.dart';
 
 part 'chat_room_list_notifier.dart';
