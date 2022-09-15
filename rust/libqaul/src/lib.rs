@@ -32,12 +32,10 @@ mod types;
 pub mod utilities;
 
 use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections};
-
-use node::Node;
+use node::{user_accounts::UserAccounts, Node};
 use router::{
     feed_requester, flooder, info::RouterInfo, neighbours::Neighbours, user_requester, Router,
 };
-
 use rpc::sys::Sys;
 use rpc::Rpc;
 use services::messaging::Messaging;
@@ -206,8 +204,9 @@ pub async fn start(storage_path: String) -> () {
     // initialize router
     Router::init();
 
-    // initialize1 node & user accounts
-    Node::init1();
+    // create a user default user account if requested
+    #[cfg(feature = "defaultaccount")]
+    UserAccounts::create_default_named();
 
     // initialize Connection Modules
     let conn = Connections::init().await;

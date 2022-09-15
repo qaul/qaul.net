@@ -63,23 +63,6 @@ impl Node {
         }
     }
 
-    pub fn init1() {
-        // check users , if there is no user, we create default user
-        if UserAccounts::len() == 0 {
-            #[cfg(feature = "defaultaccount")]
-            {
-                let mut user_name: String;
-                user_name = "Community Server ".to_string();
-                user_name.push_str(Timestamp::get_timestamp().to_string().as_str());
-                log::error!("new user: {}", user_name);
-                UserAccounts::create(user_name.clone());
-                log::error!("new user created");
-            }
-            #[cfg(not(feature = "defaultaccount"))]
-            log::info!("feature defaultaccount is off");
-        }
-    }
-
     /// create a new node and save the parameters into config
     fn new() {
         // create node
