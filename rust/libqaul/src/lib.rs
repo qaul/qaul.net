@@ -206,6 +206,9 @@ pub async fn start(storage_path: String) -> () {
     // initialize router
     Router::init();
 
+    // initialize1 node & user accounts
+    Node::init1();
+
     // initialize Connection Modules
     let conn = Connections::init().await;
     let mut internet = conn.internet.unwrap();

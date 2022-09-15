@@ -24,6 +24,7 @@ use crate::connections::{internet::Internet, lan::Lan};
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::utilities::qaul_id::QaulId;
+use crate::utilities::timestamp::Timestamp;
 use user_accounts::UserAccounts;
 
 /// central state of this instances Node struct
@@ -54,17 +55,28 @@ impl Node {
                 // create a new node and save it to configuration
                 info!("Create a new node.");
                 Self::new();
-
-                // check if qauld is running
-                #[cfg(feature = "defaultaccount")]
-                log::info!("feature defaultaccount is on: qauld is running, create user account");
-                #[cfg(not(feature = "defaultaccount"))]
-                log::info!("feature defaultaccount is off");
             } else {
                 // instantiate node from configuration
                 info!("Setup node from configuration.");
                 Self::from_config();
             }
+        }
+    }
+
+    pub fn init1() {
+        // check users , if there is no user, we create default user
+        if UserAccounts::len() == 0 {
+            #[cfg(feature = "defaultaccount")]
+            {
+                let mut user_name: String;
+                user_name = "Community Server ".to_string();
+                user_name.push_str(Timestamp::get_timestamp().to_string().as_str());
+                log::error!("new user: {}", user_name);
+                UserAccounts::create(user_name.clone());
+                log::error!("new user created");
+            }
+            #[cfg(not(feature = "defaultaccount"))]
+            log::info!("feature defaultaccount is off");
         }
     }
 
