@@ -205,8 +205,8 @@ pub async fn start(storage_path: String) -> () {
     Router::init();
 
     // create a user default user account if requested
-    #[cfg(feature = "defaultaccount")]
-    UserAccounts::create_default_named();
+    // #[cfg(feature = "defaultaccount")]
+    // UserAccounts::create_default_named();
 
     // initialize Connection Modules
     let conn = Connections::init().await;
