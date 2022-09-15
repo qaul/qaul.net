@@ -378,7 +378,8 @@ extension _MessageExtension on Message {
   types.Message toInternalMessage(User author, Reader read) {
     var mappedState = status == MessageState.sent
         ? types.Status.sent
-        : status == MessageState.received
+        : status == MessageState.confirmedByAll ||
+                status == MessageState.confirmed
             ? types.Status.seen
             : null;
 
