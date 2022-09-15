@@ -186,6 +186,7 @@ impl UserAccounts {
     /// checks if user account exists
     ///
     /// returns true if a user account with the given ID exists
+    #[allow(dead_code)]
     pub fn is_account(user_id: PeerId) -> bool {
         // get user accounts state
         let users = USERACCOUNTS.get().read().unwrap();

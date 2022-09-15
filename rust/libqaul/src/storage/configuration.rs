@@ -71,15 +71,14 @@ impl Default for Internet {
     fn default() -> Self {
         Internet {
             active: true,
-            #[cfg(any(target_os = "android", target_os = "ios"))]
+            #[cfg(feature = "nopeers")]
+            peers: Vec::new(),
+            #[cfg(not(feature = "nopeers"))]
             peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
-            #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
-            //peers: Vec::new(),
             do_listen: false,
-            #[cfg(any(target_os = "android", target_os = "ios"))]
+            #[cfg(any(target_os = "android", target_os = "ios", feature = "fixedport"))]
             listen: String::from("/ip4/0.0.0.0/tcp/9229"),
-            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            #[cfg(not(any(target_os = "android", target_os = "ios", feature = "fixedport")))]
             listen: String::from("/ip4/0.0.0.0/tcp/0"),
         }
     }

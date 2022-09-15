@@ -9,6 +9,12 @@ license = "AGPL"
 name = "libqaul"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
+[features]
+default = []
+defaultaccount = []
+fixedport = []
+nopeers = []
+
 [dependencies]
 libp2p = { version = "0.47.0" }
 async-std = { version = "1.9", features = ["attributes"] }
