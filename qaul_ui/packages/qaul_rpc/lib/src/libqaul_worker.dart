@@ -19,9 +19,9 @@ import 'generated/router/users.pb.dart';
 import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
+import 'generated/services/chat/chatfile_rpc.pb.dart';
 import 'generated/services/dtn/dtn_rpc.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
-import 'generated/services/filesharing/filesharing_rpc.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
@@ -240,17 +240,17 @@ class LibqaulWorker {
       final compressed = await processImage(file);
       if (compressed != null) file = compressed;
     }
-    final msg = FileSharing(
+    final msg = ChatFile(
         sendFileRequest: SendFileRequest(
       pathName: file.path,
-      conversationId: conversationId.toList(),
+      groupId: conversationId.toList(),
       description: description,
     ));
     await _sendMessage(Modules.CHATFILE, msg);
   }
 
   void getFileHistory({int? offset, int? limit}) async {
-    final msg = FileSharing(
+    final msg = ChatFile(
       fileHistory: FileHistoryRequest(offset: offset, limit: limit),
     );
     await _sendMessage(Modules.CHATFILE, msg);
@@ -265,7 +265,8 @@ class LibqaulWorker {
   }
 
   void addDTNUser(Uint8List userId) async {
-    final msg = DTN(dtnAddUserRequest: DtnAddUserRequest(userId: userId.toList()));
+    final msg =
+        DTN(dtnAddUserRequest: DtnAddUserRequest(userId: userId.toList()));
     await _sendMessage(Modules.DTN, msg);
   }
 

@@ -1,6 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../generated/services/filesharing/filesharing_rpc.pb.dart';
+import '../generated/services/chat/chatfile_rpc.pb.dart';
 
 class FileHistoryEntity {
   FileHistoryEntity({
@@ -27,9 +27,9 @@ class FileHistoryEntity {
     return FileHistoryEntity(
       id: file.fileId.toInt(),
       name: file.fileName,
-      extension: file.fileExt,
+      extension: file.fileExtension,
       size: file.fileSize,
-      description: file.fileDescr,
+      description: file.fileDescription,
       time: DateTime.fromMillisecondsSinceEpoch(file.time.toInt()),
       senderId: file.senderId,
       groupId: file.groupId,
