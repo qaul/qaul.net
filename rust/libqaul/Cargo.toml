@@ -11,9 +11,6 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 
 [features]
 default = []
-defaultaccount = []
-fixedport = []
-nopeers = []
 
 [dependencies]
 libp2p = { version = "0.47.0" }
