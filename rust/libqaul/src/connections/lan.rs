@@ -32,7 +32,6 @@ use async_std::task;
 use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
-use log::info;
 use mpsc::UnboundedReceiver;
 use prost::Message;
 
@@ -97,14 +96,14 @@ impl QaulLanBehaviour {
         match event {
             MdnsEvent::Discovered(discovered_list) => {
                 for (peer, _addr) in discovered_list {
-                    info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
+                    log::trace!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
                     self.floodsub.add_node_to_partial_view(peer);
                 }
             }
             MdnsEvent::Expired(expired_list) => {
                 for (peer, _addr) in expired_list {
                     if !self.mdns.has_node(&peer) {
-                        info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
+                        log::trace!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
                         self.floodsub.remove_node_from_partial_view(&peer);
                     }
                 }
@@ -121,14 +120,12 @@ impl QaulLanBehaviour {
                 }
                 // Pages Messages
                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    //if resp.receiver == node::get_id_string() {
-                    info!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| info!("{:?}", r));
-                    //}
+                    log::trace!("Response from {}", msg.source);
+                    resp.data.iter().for_each(|r| log::trace!("{:?}", r));
                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
                     match req.mode {
                         PageMode::ALL => {
-                            info!("Received All req: {:?} from {:?}", req, msg.source);
+                            log::trace!("Received All req: {:?} from {:?}", req, msg.source);
                             page::respond_with_public_pages(
                                 self.response_sender.clone(),
                                 msg.source.to_string(),
@@ -136,7 +133,7 @@ impl QaulLanBehaviour {
                         }
                         PageMode::One(ref peer_id) => {
                             if peer_id.to_string() == Node::get_id_string() {
-                                info!("Received req: {:?} from {:?}", req, msg.source);
+                                log::trace!("Received req: {:?} from {:?}", req, msg.source);
                                 page::respond_with_public_pages(
                                     self.response_sender.clone(),
                                     msg.source.to_string(),
@@ -198,12 +195,12 @@ pub struct Lan {
 impl Lan {
     /// Initialize swarm for LAN connection module
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Lan {
-        log::info!("Lan::init() start");
+        log::trace!("Lan::init() start");
 
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
 
-        log::info!("Lan::init() mpsc channels created");
+        log::trace!("Lan::init() mpsc channels created");
 
         // TCP transport without DNS resolution on android
         // as the DNS module crashes on android due to a file system access
@@ -225,7 +222,7 @@ impl Lan {
             dns_tcp.or_transport(ws_dns_tcp)
         };
 
-        log::info!("Lan::init() transport created");
+        log::trace!("Lan::init() transport created");
 
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
@@ -237,7 +234,7 @@ impl Lan {
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
 
-        log::info!("Lan::init() transport_upgraded");
+        log::trace!("Lan::init() transport_upgraded");
 
         // create ping configuration
         // with customized parameters
@@ -249,16 +246,16 @@ impl Lan {
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
 
-        log::info!("Lan::init() ping_config");
+        log::trace!("Lan::init() ping_config");
 
         let mut swarm = {
-            log::info!("Lan::init() swarm creation started");
+            log::trace!("Lan::init() swarm creation started");
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
             let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
 
-            log::info!("Lan::init() swarm mdns module created");
+            log::trace!("Lan::init() swarm mdns module created");
 
             // TODO: set shorter re-advertisement time
             //       see here: libp2p-mdns/src/behaviour.rs
@@ -271,17 +268,17 @@ impl Lan {
                 response_sender,
             };
 
-            log::info!("Lan::init() swarm behaviour defined");
+            log::trace!("Lan::init() swarm behaviour defined");
 
             behaviour.floodsub.subscribe(Node::get_topic());
 
-            log::info!("Lan::init() swarm behaviour floodsub subscribed");
+            log::trace!("Lan::init() swarm behaviour floodsub subscribed");
 
             //Swarm::new(transport_upgraded, behaviour, Node::get_id())
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
 
-        log::info!("Lan::init() swarm created");
+        log::trace!("Lan::init() swarm created");
 
         // connect swarm to the listening interface in
         // the configuration config.lan.listen
@@ -292,7 +289,7 @@ impl Lan {
         )
         .expect("swarm can be started");
 
-        log::info!("Lan::init() swarm connected");
+        log::trace!("Lan::init() swarm connected");
 
         let lan = Lan {
             swarm: swarm,
@@ -302,88 +299,3 @@ impl Lan {
         lan
     }
 }
-
-// impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulLanBehaviour {
-//     fn inject_event(&mut self, event: QaulInfoEvent) {
-//         events::qaul_info_event(event, ConnectionModule::Lan);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulLanBehaviour {
-//     fn inject_event(&mut self, event: QaulMessagingEvent) {
-//         events::qaul_messaging_event(event, ConnectionModule::Lan);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<PingEvent> for QaulLanBehaviour {
-//     fn inject_event(&mut self, event: PingEvent) {
-//         events::ping_event(event, ConnectionModule::Lan);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<MdnsEvent> for QaulLanBehaviour {
-//     fn inject_event(&mut self, event: MdnsEvent) {
-//         log::error!("lan MdnsEvent");
-
-//         match event {
-//             MdnsEvent::Discovered(discovered_list) => {
-//                 log::error!("discover event {}", discovered_list.len());
-
-//                 for (peer, _addr) in discovered_list {
-//                     info!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
-//                     self.floodsub.add_node_to_partial_view(peer);
-//                 }
-//             }
-//             MdnsEvent::Expired(expired_list) => {
-//                 log::error!("discover expired event {}", expired_list.len());
-
-//                 for (peer, _addr) in expired_list {
-//                     if !self.mdns.has_node(&peer) {
-//                         info!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
-//                         self.floodsub.remove_node_from_partial_view(&peer);
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulLanBehaviour {
-//     fn inject_event(&mut self, event: FloodsubEvent) {
-//         match event {
-//             FloodsubEvent::Message(msg) => {
-//                 // feed Message
-//                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-//                     Feed::received(ConnectionModule::Lan, msg.source, resp);
-//                 }
-//                 // Pages Messages
-//                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-//                     //if resp.receiver == node::get_id_string() {
-//                     info!("Response from {}", msg.source);
-//                     resp.data.iter().for_each(|r| info!("{:?}", r));
-//                     //}
-//                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-//                     match req.mode {
-//                         PageMode::ALL => {
-//                             info!("Received All req: {:?} from {:?}", req, msg.source);
-//                             page::respond_with_public_pages(
-//                                 self.response_sender.clone(),
-//                                 msg.source.to_string(),
-//                             );
-//                         }
-//                         PageMode::One(ref peer_id) => {
-//                             if peer_id.to_string() == Node::get_id_string() {
-//                                 info!("Received req: {:?} from {:?}", req, msg.source);
-//                                 page::respond_with_public_pages(
-//                                     self.response_sender.clone(),
-//                                     msg.source.to_string(),
-//                                 );
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//             _ => (),
-//         }
-//     }
-// }

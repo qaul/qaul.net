@@ -180,7 +180,7 @@ impl RouterInfo {
     /// add new neighbour entry
     pub fn add_neighbour(node_id: PeerId) {
         let exists;
-        log::info!("add new neighbour {:?} to RouterInfo scheduler", node_id);
+        log::trace!("add new neighbour {:?} to RouterInfo scheduler", node_id);
         // check if a neighbour entry exists
         {
             let scheduler = SCHEDULER.get().read().unwrap();

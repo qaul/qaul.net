@@ -16,7 +16,6 @@ use libp2p::{
     identity::{ed25519, Keypair},
     PeerId,
 };
-use log::{error, info};
 use prost::Message;
 use state;
 
@@ -52,11 +51,11 @@ impl Node {
         {
             if !Configuration::is_node_initialized() {
                 // create a new node and save it to configuration
-                info!("Create a new node.");
+                log::trace!("Create a new node.");
                 Self::new();
             } else {
                 // instantiate node from configuration
-                info!("Setup node from configuration.");
+                log::trace!("Setup node from configuration.");
                 Self::from_config();
             }
         }
@@ -81,7 +80,7 @@ impl Node {
         Configuration::save();
 
         // display id
-        info!("Peer Id: {}", node.id.clone());
+        log::trace!("Peer Id: {}", node.id.clone());
 
         // save node to state
         NODE.set(node);
@@ -97,12 +96,12 @@ impl Node {
 
         // check if saved ID and the id from the keypair are equal
         if id.to_string() == config.node.id {
-            info!("id's match {}", config.node.id);
+            log::trace!("id's match {}", config.node.id);
         } else {
-            error!("------------------------------------");
-            error!("ERROR: id's are not equal");
-            error!("{}  {}", id.to_string(), config.node.id);
-            error!("------------------------------------");
+            log::error!("------------------------------------");
+            log::error!("ERROR: id's are not equal");
+            log::error!("{}  {}", id.to_string(), config.node.id);
+            log::error!("------------------------------------");
         }
 
         let node = Node { id, keys, topic };

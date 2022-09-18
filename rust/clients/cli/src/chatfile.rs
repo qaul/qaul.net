@@ -50,7 +50,7 @@ impl ChatFile {
                             _ => "".to_string(),
                         };
 
-                        log::info!(
+                        log::trace!(
                             "send file to group={}, file path={}, description={}",
                             group_id_str,
                             file_path_name,

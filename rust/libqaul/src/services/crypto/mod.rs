@@ -122,7 +122,7 @@ impl Crypto {
         // check if there is a handshake state?
         match crypto_account.get_state(remote_id) {
             Some(session) => {
-                log::info!("encrypt with existing session_id {}", session.session_id);
+                log::trace!("encrypt with existing session_id {}", session.session_id);
 
                 // get session id
                 session_id = session.session_id;
@@ -130,7 +130,7 @@ impl Crypto {
                 // encrypt in accordance to session state
                 match session.state {
                     CryptoProcessState::HalfOutgoing => {
-                        log::info!("session state HalfOutgoing");
+                        log::trace!("session state HalfOutgoing");
                         // we cannot send more messages at the moment, before we haven't
                         // received the handshake confirmation.
                         // TODO: build functionality to send further asymmetrically encrypted messages
@@ -138,7 +138,7 @@ impl Crypto {
                         return None;
                     }
                     CryptoProcessState::HalfIncoming => {
-                        log::info!("session state HalfIncoming");
+                        log::trace!("session state HalfIncoming");
                         // encrypt handshake 2 message
                         (encrypted_option, nonce) =
                             CryptoNoise::encrypt_noise_kk_handshake_2::<
@@ -151,7 +151,7 @@ impl Crypto {
                         process_state = proto::CryptoState::Handshake;
                     }
                     CryptoProcessState::Transport => {
-                        log::info!("session state Transport");
+                        log::trace!("session state Transport");
 
                         // encrypt transport message
                         (encrypted_option, nonce) =
@@ -167,7 +167,7 @@ impl Crypto {
                 }
             }
             None => {
-                log::info!("encrypt with new session");
+                log::trace!("encrypt with new session");
 
                 // create new session and start handshake
                 (encrypted_option, nonce, session_id) =
@@ -220,12 +220,12 @@ impl Crypto {
         // get data base object
         let crypto_account = CryptoStorage::get_db_ref(user_account.id.clone());
 
-        log::info!("decrypt session_id: {}", message.session_id);
+        log::trace!("decrypt session_id: {}", message.session_id);
 
         // check if there is a handshake state?
         match crypto_account.get_state_by_id(remote_id, message.session_id) {
             Some(session) => {
-                log::info!("decrypt session id found: {}", session.session_id);
+                log::trace!("decrypt session id found: {}", session.session_id);
 
                 // decide how to go further
                 match (
@@ -300,7 +300,7 @@ impl Crypto {
                 }
             }
             None => {
-                log::info!("decrypt no session found");
+                log::trace!("decrypt no session found");
 
                 // check what kind of message we are getting
                 match proto::CryptoState::from_i32(message.state) {

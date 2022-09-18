@@ -89,7 +89,7 @@ impl Neighbours {
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
     pub fn update_node(module: ConnectionModule, node_id: PeerId, rtt: u32) {
-        log::info!("update_node node {:?}", node_id);
+        log::trace!("update_node node {:?}", node_id);
         // get table
         let mut neighbours;
         match module {
@@ -106,7 +106,7 @@ impl Neighbours {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = Timestamp::get_timestamp();
         } else {
-            log::info!("add node {:?} to neighbours table", node_id);
+            log::trace!("add node {:?} to neighbours table", node_id);
             neighbours.nodes.insert(
                 node_id,
                 Neighbour {

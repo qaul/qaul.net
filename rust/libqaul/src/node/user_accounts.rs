@@ -13,7 +13,6 @@ use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
     PeerId,
 };
-use log::{error, info};
 use prost::Message;
 use state::Storage;
 use std::sync::RwLock;
@@ -59,12 +58,12 @@ impl UserAccounts {
 
             // check if saved ID and the id from the keypair are equal
             if id.to_string() == user.id {
-                info!("user id's of '{}' match {}", user.name, user.id);
+                log::trace!("user id's of '{}' match {}", user.name, user.id);
             } else {
-                error!("------------------------------------");
-                error!("ERROR: user id's of '{}' are not equal", user.name);
-                error!("{}  {}", id.to_string(), user.id);
-                error!("------------------------------------");
+                log::error!("------------------------------------");
+                log::error!("ERROR: user id's of '{}' are not equal", user.name);
+                log::error!("{}  {}", id.to_string(), user.id);
+                log::error!("------------------------------------");
             }
 
             // push to user accounts table
@@ -115,7 +114,7 @@ impl UserAccounts {
         crate::router::connections::ConnectionTable::add_local_user(id);
 
         // display id
-        info!("created user account '{}' {:?}", name, id);
+        log::trace!("created user account '{}' {:?}", name, id);
 
         user
     }

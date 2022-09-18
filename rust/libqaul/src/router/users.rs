@@ -275,7 +275,6 @@ impl Users {
         for _ in 0..5200 {
             data.append(&mut key_data);
             let hash = Sha512::digest(&data);
-            //log::error!("len: {}", hash.len());
             let mut hash_vec = hash[..64].to_vec();
             data.clear();
             data.append(&mut hash_vec);
@@ -443,7 +442,7 @@ impl Users {
                         );
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
-                        log::info!("UserUpdate protobuf RPC message");
+                        log::trace!("UserUpdate protobuf RPC message");
 
                         // create user id from bytes
                         if let Ok(user_id) = PeerId::from_bytes(&updated_user.id) {
@@ -518,7 +517,7 @@ impl Users {
                                 );
                             }
                             Err(error) => {
-                                log::error!("get secure unmber error {}", error);
+                                log::error!("security number error: {}", error);
                             }
                         }
                     }

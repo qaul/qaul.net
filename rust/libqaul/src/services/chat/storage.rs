@@ -131,7 +131,7 @@ impl ChatStorage {
         content: super::rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
     ) {
-        log::info!("chat save_message");
+        log::trace!("chat save_message");
 
         // get data base of user account
         let db_ref = Self::get_db_ref(account_id.clone());

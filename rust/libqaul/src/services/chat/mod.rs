@@ -98,7 +98,7 @@ impl Chat {
                     }
                     Some(rpc_proto::chat::Message::Send(message)) => {
                         // print message
-                        log::info!("sending chat message: {}", message.content.clone());
+                        log::trace!("sending chat message: {}", message.content.clone());
 
                         // get user account from user_id
                         let user_account;

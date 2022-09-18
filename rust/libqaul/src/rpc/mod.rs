@@ -142,7 +142,7 @@ impl Rpc {
                         Node::rpc(message.data, lan, internet);
                     }
                     Some(Modules::Rpc) => {
-                        log::info!("Message Modules::Rpc received");
+                        log::trace!("Message Modules::Rpc received");
                         // TODO: authorisation
                     }
                     Some(Modules::Useraccounts) => {
@@ -182,7 +182,7 @@ impl Rpc {
                         Rtc::rpc(message.data, message.user_id);
                     }
                     Some(Modules::Dtn) => {
-                        log::info!("Message Modules::Group received");
+                        log::trace!("Message Modules::Group received");
                         Dtn::rpc(message.data, message.user_id);
                     }
                     Some(Modules::None) => {

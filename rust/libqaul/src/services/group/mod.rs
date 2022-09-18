@@ -340,18 +340,18 @@ impl Group {
         match proto_net::GroupContainer::decode(&data[..]) {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::group_container::Message::InviteMember(invite_member)) => {
-                    log::info!("group::on_receive_invite");
+                    log::trace!("group::on_receive_invite");
                     Member::on_be_invited(&sender_id, &receiver_id, &invite_member);
                 }
                 Some(proto_net::group_container::Message::Removed(removed)) => {
-                    log::info!("group::on_removed");
+                    log::trace!("group::on_removed");
                     // remove user from group and deactivate group
                     if let Err(error) = Member::on_removed(&sender_id, &receiver_id, &removed) {
                         log::error!("group on_removed error {}", error);
                     }
                 }
                 Some(proto_net::group_container::Message::ReplyInvite(reply_invite)) => {
-                    log::info!("group::on_answered for invite");
+                    log::trace!("group::on_answered for invite");
                     if let Err(error) =
                         Member::on_reply_invite(sender_id, receiver_id, &reply_invite)
                     {
@@ -363,7 +363,7 @@ impl Group {
                     }
                 }
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
-                    log::info!("group info arrived");
+                    log::trace!("group info arrived");
                     manage::GroupManage::on_group_notify(
                         sender_id.to_owned(),
                         receiver_id.to_owned(),

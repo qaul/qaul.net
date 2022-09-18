@@ -76,7 +76,7 @@ enum EventType {
 ///
 /// Provide a path where libqaul can save all data.
 pub async fn start(storage_path: String) -> () {
-    log::info!("start initializing libqaul");
+    log::trace!("start initializing libqaul");
 
     // initialize rpc system
     let libqaul_rpc_receive = Rpc::init();
@@ -196,7 +196,7 @@ pub async fn start(storage_path: String) -> () {
             .unwrap();
     }
 
-    log::error!("test log to ensure that logging is working");
+    log::trace!("test log to ensure that logging is working");
 
     // initialize node & user accounts
     Node::init();
@@ -257,7 +257,7 @@ pub async fn start(storage_path: String) -> () {
     // set initialized flag
     INITIALIZED.set(true);
 
-    log::info!("initializing finished, start event loop");
+    log::trace!("initializing finished, start event loop");
 
     loop {
         let evt = {
@@ -297,16 +297,16 @@ pub async fn start(storage_path: String) -> () {
 
             select! {
                 lan_event = lan_fut => {
-                    //log::info!("Unhandled lan connection module event: {:?}", lan_event);
+                    //log::trace!("Unhandled lan connection module event: {:?}", lan_event);
                     match lan_event.unwrap() {
                         libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::info!("lan connection closed: {:?}", peer_id);
+                            log::trace!("lan connection closed: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
                         },
                         libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::info!("lan connection banned: {:?}", peer_id);
+                            log::trace!("lan connection banned: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
                         },
                         libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
@@ -317,7 +317,7 @@ pub async fn start(storage_path: String) -> () {
                     None
                 },
                 internet_event = internet_fut => {
-                    //log::info!("Unhandled internet connection module event: {:?}", internet_event);
+                    //log::trace!("Unhandled internet connection module event: {:?}", internet_event);
                     match internet_event.unwrap() {
                         libp2p::swarm::SwarmEvent::OutgoingConnectionError{error, ..} => {
                             // Get list of addresses which we failed to connect to
@@ -343,7 +343,7 @@ pub async fn start(storage_path: String) -> () {
                         }
                         libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
                             // remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::info!("internet connection closed: {:?}", peer_id);
+                            log::trace!("internet connection closed: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Internet, peer_id);
 
                             // add new reconnection
@@ -356,7 +356,7 @@ pub async fn start(storage_path: String) -> () {
                         }
                         libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::info!("internet connection banned: {:?}", peer_id);
+                            log::trace!("internet connection banned: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Internet, peer_id);
                         },
                         libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
@@ -583,7 +583,7 @@ pub async fn start(storage_path: String) -> () {
                     if let Some((neighbour_id, connection_module, data)) =
                         RouterInfo::check_scheduler()
                     {
-                        log::info!(
+                        log::trace!(
                             "sending routing information via {:?} to {:?}, {:?}",
                             connection_module,
                             neighbour_id,
@@ -611,7 +611,7 @@ pub async fn start(storage_path: String) -> () {
                 }
                 EventType::ReConnecting(_) => {
                     if let Some(addr) = Internet::check_reconnection() {
-                        log::info!("redial....: {:?}", addr);
+                        log::trace!("redial....: {:?}", addr);
                         Internet::peer_redial(&addr, &mut internet.swarm).await;
                         Internet::set_redialed(&addr);
                     }
@@ -625,7 +625,7 @@ pub async fn start(storage_path: String) -> () {
                     if let Some((neighbour_id, connection_module, data)) =
                         Messaging::check_scheduler()
                     {
-                        log::info!(
+                        log::trace!(
                             "sending messaging message via {:?} to {}",
                             connection_module,
                             neighbour_id.to_base58()

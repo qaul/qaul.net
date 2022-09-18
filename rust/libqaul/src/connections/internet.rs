@@ -25,15 +25,14 @@ use libp2p::{
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping::{Ping, PingConfig, PingEvent},
-    swarm::{Swarm},
-    tcp::{TcpTransport, GenTcpConfig},
+    swarm::Swarm,
+    tcp::{GenTcpConfig, TcpTransport},
     yamux, Multiaddr, NetworkBehaviour, Transport,
 };
 // DNS is excluded on mobile, as it is not working there
 use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
-use log::info;
 use mpsc::{UnboundedReceiver, UnboundedSender};
 use prost::Message;
 
@@ -68,24 +67,24 @@ pub struct QaulInternetBehaviour {
     pub response_sender: UnboundedSender<QaulMessage>,
 }
 
-impl QaulInternetBehaviour{
-    pub fn process_events(&mut self, event: QaulInternetEvent){
+impl QaulInternetBehaviour {
+    pub fn process_events(&mut self, event: QaulInternetEvent) {
         match event {
-            QaulInternetEvent::QaulInfo(ev)=>{
+            QaulInternetEvent::QaulInfo(ev) => {
                 self.qaul_info_event(ev);
-            },
-            QaulInternetEvent::QaulMessaging(ev)=>{
+            }
+            QaulInternetEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
-            },
-            QaulInternetEvent::Ping(ev)=>{
+            }
+            QaulInternetEvent::Ping(ev) => {
                 self.ping_event(ev);
-            },
-            QaulInternetEvent::Identify(ev)=>{
+            }
+            QaulInternetEvent::Identify(ev) => {
                 self.identify_event(ev);
-            },
-            QaulInternetEvent::Floodsub(ev)=>{
+            }
+            QaulInternetEvent::Floodsub(ev) => {
                 self.floodsub_event(ev);
-            },
+            }
         }
     }
 
@@ -106,27 +105,26 @@ impl QaulInternetBehaviour{
                 self.floodsub.add_node_to_partial_view(peer_id);
 
                 // print received information
-                info!("IdentifyEvent::Received from {:?}", peer_id);
-                info!("  added peer_id {:?} to floodsub", peer_id);
-                info!("  public key: {:?}", info.public_key);
-                info!("  protocol version: {:?}", info.protocol_version);
-                info!("  agent version: {:?}", info.agent_version);
-                info!("  listen addresses: {:?}", info.listen_addrs);
-                info!("  protocols: {:?}", info.protocols);
-                info!("  observed address: {:?}", info.observed_addr);
+                log::trace!("IdentifyEvent::Received from {:?}", peer_id);
+                log::trace!("  added peer_id {:?} to floodsub", peer_id);
+                log::trace!("  public key: {:?}", info.public_key);
+                log::trace!("  protocol version: {:?}", info.protocol_version);
+                log::trace!("  agent version: {:?}", info.agent_version);
+                log::trace!("  listen addresses: {:?}", info.listen_addrs);
+                log::trace!("  protocols: {:?}", info.protocols);
+                log::trace!("  observed address: {:?}", info.observed_addr);
             }
             IdentifyEvent::Sent { peer_id } => {
-                info!("IdentifyEvent::Sent to {:?}", peer_id);
+                log::trace!("IdentifyEvent::Sent to {:?}", peer_id);
             }
             IdentifyEvent::Pushed { peer_id } => {
-                info!("IdentifyEvent::Pushed {:?}", peer_id);
+                log::trace!("IdentifyEvent::Pushed {:?}", peer_id);
             }
             IdentifyEvent::Error { peer_id, error } => {
-                info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
+                log::trace!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
             }
         }
-    }    
-
+    }
 
     fn floodsub_event(&mut self, event: FloodsubEvent) {
         match event {
@@ -137,14 +135,12 @@ impl QaulInternetBehaviour{
                 }
                 // Pages Messages
                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    //if resp.receiver == node::get_id_string() {
-                    info!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| info!("{:?}", r));
-                    //}
+                    log::trace!("Response from {}", msg.source);
+                    resp.data.iter().for_each(|r| log::trace!("{:?}", r));
                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
                     match req.mode {
                         PageMode::ALL => {
-                            info!("Received All req: {:?} from {:?}", req, msg.source);
+                            log::trace!("Received All req: {:?} from {:?}", req, msg.source);
                             page::respond_with_public_pages(
                                 self.response_sender.clone(),
                                 msg.source.to_string(),
@@ -152,7 +148,7 @@ impl QaulInternetBehaviour{
                         }
                         PageMode::One(ref peer_id) => {
                             if peer_id.to_string() == Node::get_id_string() {
-                                info!("Received req: {:?} from {:?}", req, msg.source);
+                                log::trace!("Received req: {:?} from {:?}", req, msg.source);
                                 page::respond_with_public_pages(
                                     self.response_sender.clone(),
                                     msg.source.to_string(),
@@ -164,8 +160,7 @@ impl QaulInternetBehaviour{
             }
             _ => (),
         }
-    }    
-
+    }
 }
 
 pub struct InternetReConnection {
@@ -228,7 +223,7 @@ pub struct Internet {
 impl Internet {
     /// Initialize swarm for Internet overlay connection module
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Self {
-        log::info!("Internet.init() start");
+        log::trace!("Internet.init() start");
 
         INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
             peers: HashMap::new(),
@@ -237,7 +232,7 @@ impl Internet {
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
 
-        log::info!("Internet.init() mpsc channels created");
+        log::trace!("Internet.init() mpsc channels created");
 
         // TCP transport for android without DNS resolution
         // as the DNS module crashes on android due to a file system access
@@ -252,14 +247,14 @@ impl Internet {
             let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
             let ws_dns_tcp = WsConfig::new(
-                DnsConfig::system(TcpTransport::new(GenTcpConfig::new().nodelay(true),))
+                DnsConfig::system(TcpTransport::new(GenTcpConfig::new().nodelay(true)))
                     .await
                     .unwrap(),
             );
             dns_tcp.or_transport(ws_dns_tcp)
         };
 
-        log::info!("Internet.init() transport created");
+        log::trace!("Internet.init() transport created");
 
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
@@ -271,7 +266,7 @@ impl Internet {
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
 
-        log::info!("Internet.init() transport_upgraded");
+        log::trace!("Internet.init() transport_upgraded");
 
         // create ping configuration
         // with customized parameters
@@ -289,7 +284,7 @@ impl Internet {
         //ping_config.with_timeout(d: Duration);
         //ping_config.with_max_failures(n);
 
-        log::info!("Internet.init() ping_config");
+        log::trace!("Internet.init() ping_config");
 
         // create behaviour
         let mut swarm = {
@@ -308,7 +303,7 @@ impl Internet {
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
 
-        log::info!("Internet.init() swarm created");
+        log::trace!("Internet.init() swarm created");
 
         // connect swarm to the listening interface in
         // the configuration config.internet.listen
@@ -323,13 +318,13 @@ impl Internet {
         )
         .expect("swarm can be started");
 
-        log::info!("Internet.init() Swarm::listen_on");
+        log::trace!("Internet.init() Swarm::listen_on");
 
         // connect to remote peers that are specified in
         // the configuration config.internet.peers
         Self::peer_connect(&config, &mut swarm);
 
-        log::info!("Internet.init() peer_connect");
+        log::trace!("Internet.init() peer_connect");
 
         // construct internet object
         let internet = Internet {
@@ -346,7 +341,7 @@ impl Internet {
         for addr_str in &config.internet.peers {
             match addr_str.clone().parse() {
                 Ok(addresse) => Self::peer_dial(addresse, swarm),
-                Err(error) => info!("peer address {} parse error: {:?}", addr_str, error),
+                Err(error) => log::trace!("peer address {} parse error: {:?}", addr_str, error),
             }
         }
     }
@@ -354,8 +349,8 @@ impl Internet {
     /// dial a remote peer
     pub fn peer_dial(addresse: Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour>) {
         match swarm.dial(addresse.clone()) {
-            Ok(_) => info!("peer {:?} dialed", addresse),
-            Err(error) => info!("peer {} swarm dial error: {:?}", addresse, error),
+            Ok(_) => log::trace!("peer {:?} dialed", addresse),
+            Err(error) => log::trace!("peer {} swarm dial error: {:?}", addresse, error),
         }
     }
 
@@ -406,93 +401,3 @@ impl Internet {
         None
     }
 }
-
-
-
-// impl NetworkBehaviourEventProcess<IdentifyEvent> for QaulInternetBehaviour {
-//     fn inject_event(&mut self, event: IdentifyEvent) {
-//         match event {
-//             IdentifyEvent::Received { peer_id, info } => {
-//                 // add node to floodsub
-//                 self.floodsub.add_node_to_partial_view(peer_id);
-
-//                 // print received information
-//                 info!("IdentifyEvent::Received from {:?}", peer_id);
-//                 info!("  added peer_id {:?} to floodsub", peer_id);
-//                 info!("  public key: {:?}", info.public_key);
-//                 info!("  protocol version: {:?}", info.protocol_version);
-//                 info!("  agent version: {:?}", info.agent_version);
-//                 info!("  listen addresses: {:?}", info.listen_addrs);
-//                 info!("  protocols: {:?}", info.protocols);
-//                 info!("  observed address: {:?}", info.observed_addr);
-//             }
-//             IdentifyEvent::Sent { peer_id } => {
-//                 info!("IdentifyEvent::Sent to {:?}", peer_id);
-//             }
-//             IdentifyEvent::Pushed { peer_id } => {
-//                 info!("IdentifyEvent::Pushed {:?}", peer_id);
-//             }
-//             IdentifyEvent::Error { peer_id, error } => {
-//                 info!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
-//             }
-//         }
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<QaulInfoEvent> for QaulInternetBehaviour {
-//     fn inject_event(&mut self, event: QaulInfoEvent) {
-//         events::qaul_info_event(event, ConnectionModule::Internet);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<QaulMessagingEvent> for QaulInternetBehaviour {
-//     fn inject_event(&mut self, event: QaulMessagingEvent) {
-//         events::qaul_messaging_event(event, ConnectionModule::Internet);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<PingEvent> for QaulInternetBehaviour {
-//     fn inject_event(&mut self, event: PingEvent) {
-//         events::ping_event(event, ConnectionModule::Internet);
-//     }
-// }
-
-// impl NetworkBehaviourEventProcess<FloodsubEvent> for QaulInternetBehaviour {
-//     fn inject_event(&mut self, event: FloodsubEvent) {
-//         match event {
-//             FloodsubEvent::Message(msg) => {
-//                 // feed Message
-//                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-//                     Feed::received(ConnectionModule::Internet, msg.source, resp);
-//                 }
-//                 // Pages Messages
-//                 else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-//                     //if resp.receiver == node::get_id_string() {
-//                     info!("Response from {}", msg.source);
-//                     resp.data.iter().for_each(|r| info!("{:?}", r));
-//                     //}
-//                 } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-//                     match req.mode {
-//                         PageMode::ALL => {
-//                             info!("Received All req: {:?} from {:?}", req, msg.source);
-//                             page::respond_with_public_pages(
-//                                 self.response_sender.clone(),
-//                                 msg.source.to_string(),
-//                             );
-//                         }
-//                         PageMode::One(ref peer_id) => {
-//                             if peer_id.to_string() == Node::get_id_string() {
-//                                 info!("Received req: {:?} from {:?}", req, msg.source);
-//                                 page::respond_with_public_pages(
-//                                     self.response_sender.clone(),
-//                                     msg.source.to_string(),
-//                                 );
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//             _ => (),
-//         }
-//     }
-// }

@@ -145,11 +145,11 @@ impl ConnectionTable {
         neighbour_id: PeerId,
         info: &Vec<router_net_proto::RoutingInfoEntry>,
     ) {
-        // log::info!("process_received_routing_info count={}", info.len());
+        // log::trace!("process_received_routing_info count={}", info.len());
         // for inf in &info{
         //     let c: &[u8] = &inf.user;
         //     let userid = PeerId::from_bytes(c).unwrap();
-        //     log::info!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
+        //     log::trace!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
         // }
 
         // try Lan module
@@ -170,7 +170,7 @@ impl ConnectionTable {
         rtt: u32,
         info: &Vec<router_net_proto::RoutingInfoEntry>,
     ) {
-        log::info!("fill_received_routing_info {}", info.len());
+        log::trace!("fill_received_routing_info {}", info.len());
         // loop through results and enter them to the table
         for entry in info {
             // calculate hop count
@@ -241,7 +241,7 @@ impl ConnectionTable {
                 user.pgid = pgid;
                 user.pgid_update = now_ts;
                 user.pgid_update_hc = connection.hc;
-                log::info!("add_connection={}", connection.last_update);
+                log::trace!("add_connection={}", connection.last_update);
                 user.connections.remove(&connection.id);
                 user.connections.insert(connection.id, connection);
             } else if pgid == user.pgid {
@@ -458,7 +458,7 @@ impl ConnectionTable {
 
                 // put connection for removal if expired
                 if expired {
-                    log::error!(
+                    log::warn!(
                         "expired entry={},  hc={}",
                         (now - value.last_update),
                         value.hc

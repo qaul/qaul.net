@@ -163,7 +163,7 @@ impl Messaging {
         };
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
-        //
+        // insert message to data base
         if let Err(e) = unconfirmed
             .unconfirmed
             .insert(container.signature.clone(), new_entry)
@@ -183,7 +183,7 @@ impl Messaging {
         user_account: UserAccount,
         confirmation: proto::Confirmation,
     ) {
-        log::info!("messgae confirmed");
+        log::trace!("messgae confirmed");
 
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -227,7 +227,7 @@ impl Messaging {
                                 );
                             }
                             MessagingServiceType::ChatFile => {
-                                log::info!("Confirmation: ChatFile");
+                                log::trace!("Confirmation: ChatFile");
                                 match unconfirmed.message_id.try_into() {
                                     Ok(arr) => {
                                         let file_id = u64::from_be_bytes(arr);
@@ -330,7 +330,7 @@ impl Messaging {
             None => return Err("Encryption error occurred".to_string()),
         }
 
-        log::info!(
+        log::trace!(
             "sender_id: {}, receiver_id: {}",
             user_account.id.to_base58(),
             receiver.to_base58()
@@ -350,7 +350,7 @@ impl Messaging {
         };
 
         // debug
-        log::info!("envelope len: {}", envelope.encoded_len());
+        log::trace!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());

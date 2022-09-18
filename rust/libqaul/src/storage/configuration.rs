@@ -10,7 +10,6 @@
 //! All options are configurable from the commandline too.
 
 use config::{Config, File};
-use log::info;
 use serde::{Deserialize, Serialize};
 use state::Storage;
 use std::{
@@ -315,7 +314,7 @@ impl Configuration {
         let path = Path::new(path_string.as_str());
         let config_path = path.join("config.yaml");
 
-        info!("Writing to Path {:?}, {:?}", path, config_path);
+        log::trace!("Writing to Path {:?}, {:?}", path, config_path);
 
         fs::write(config_path.clone(), yaml)
             .expect(&format!("Could not write config to {:?}.", config_path));

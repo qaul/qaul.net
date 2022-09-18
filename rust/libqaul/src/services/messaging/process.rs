@@ -212,16 +212,14 @@ impl MessagingProcess {
     /// process received message
     pub fn process_received_message(user_account: UserAccount, container: super::proto::Container) {
         // check envelop
-        let envelope = container.envelope.as_ref().unwrap();
-        // match container.envelope {
-        //     Some(v) => {
-        //         envelope = v;
-        //     }
-        //     _ => {
-        //         log::error!("No Envelope in Message Container");
-        //         return;
-        //     }
-        // }
+        let envelope;
+        match container.envelope {
+            Some(v) => envelope = v,
+            _ => {
+                log::error!("No Envelope in Message Container");
+                return;
+            }
+        }
 
         // check sender_id
         let sender_id;

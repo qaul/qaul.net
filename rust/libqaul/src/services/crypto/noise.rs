@@ -35,7 +35,7 @@ impl CryptoNoise {
         let nonce: u64 = 0;
 
         // no saved state available: generate crypto state
-        log::info!("Initiate Crypto Handshake");
+        log::trace!("Initiate Crypto Handshake");
 
         // get receivers public key
         let remote_key: PublicKey;
@@ -51,7 +51,7 @@ impl CryptoNoise {
         state = Self::create_crypto_state::<D>(true, user_account.clone(), remote_key);
         let session_id = state.session_id;
 
-        log::info!("new session generated with session_id: {}", session_id);
+        log::trace!("new session generated with session_id: {}", session_id);
 
         // create handshake pattern
         let pattern = noise_protocol::patterns::noise_kk();
@@ -337,7 +337,7 @@ impl CryptoNoise {
         let (key_out, nonce_out) = cipher_key_out.extract();
         let (key_in, nonce_in) = cipher_key_in.extract();
 
-        log::info!(
+        log::trace!(
             "handshake initiation finished: noce out: {}, in: {}",
             nonce_out,
             nonce_in

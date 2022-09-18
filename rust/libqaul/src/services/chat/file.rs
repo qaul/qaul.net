@@ -346,7 +346,7 @@ impl ChatFile {
         file_id: u64,
         received_at: u64,
     ) {
-        log::info!("update confirmation");
+        log::trace!("update confirmation");
 
         // get db reference
         let user_files = ChatFile::get_db_ref(&account_id);
@@ -660,7 +660,7 @@ impl ChatFile {
         file_history: &FileHistory,
         status: super::rpc_proto::MessageStatus,
     ) {
-        log::info!("save_filemsg_in_chat");
+        log::trace!("save_filemsg_in_chat");
 
         // create chat file message content
         let chat_filecontent = super::rpc_proto::FileContent {
