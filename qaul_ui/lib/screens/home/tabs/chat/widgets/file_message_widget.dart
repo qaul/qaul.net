@@ -12,8 +12,9 @@ class FileMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var style = TextStyle(
+    var style = Theme.of(context).textTheme.bodyText1!.copyWith(
       color: isDefaultUser ? Colors.white : Colors.black,
+      fontSize: 16,
     );
 
     String? description = message.metadata?['description'];
