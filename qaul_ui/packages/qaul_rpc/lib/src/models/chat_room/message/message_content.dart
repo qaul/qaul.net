@@ -16,7 +16,7 @@ abstract class MessageContent extends Equatable {
         return FileShareContent(
           historyIndex: 0,
           fileId: message.fileId.toStringUnsigned(),
-          fileName: '${message.fileName}.${message.fileExtension}',
+          fileName: message.fileName,
           size: message.fileSize,
           description: message.fileDescription,
         );

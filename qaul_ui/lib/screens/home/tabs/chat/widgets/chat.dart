@@ -403,7 +403,7 @@ extension _MessageExtension on Message {
       var filePath = (content as FileShareContent).filePath(read);
 
       String? mimeStr = lookupMimeType(filePath);
-      if (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr)) {
+      if (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr) && !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
           author: author.toInternalUser(),
