@@ -13,6 +13,7 @@
 use crossbeam_channel::TryRecvError;
 use directories::ProjectDirs;
 use futures::executor::block_on;
+use std::collections::BTreeMap;
 use std::thread;
 
 use crate::rpc::sys::Sys;
@@ -29,12 +30,12 @@ mod android;
 /// start libqaul in an own thread
 ///
 /// Provide the location for storage, all data of qaul will be saved there.
-pub fn start(storage_path: String) {
+pub fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) {
     // Spawn new thread
     thread::spawn(move || {
         block_on(async move {
             // start libqaul
-            crate::start(storage_path).await;
+            crate::start(storage_path, def_config).await;
         })
     });
 }
@@ -70,7 +71,7 @@ pub fn start_desktop() {
         log::trace!("start libqaul");
 
         // start the library with the path
-        start(path.to_str().unwrap().to_string());
+        start(path.to_str().unwrap().to_string(), None);
     } else {
         log::error!("Configuration path couldn't be created.");
     }

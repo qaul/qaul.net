@@ -68,6 +68,18 @@ pub struct Internet {
 
 impl Default for Internet {
     fn default() -> Self {
+        let mut listen_str: String = "/ip4/0.0.0.0/tcp/".to_string();
+        let mut port: u16 = 0;
+        if let Some(port_str) = super::super::get_default_config("port") {
+            match port_str.parse::<u16>() {
+                Ok(p) => {
+                    port = p;
+                }
+                _ => {}
+            }
+        }
+        listen_str.push_str(port.to_string().as_str());
+
         Internet {
             active: true,
             peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
@@ -75,7 +87,7 @@ impl Default for Internet {
             #[cfg(any(target_os = "android", target_os = "ios"))]
             listen: String::from("/ip4/0.0.0.0/tcp/9229"),
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+            listen: listen_str.clone(),
         }
     }
 }

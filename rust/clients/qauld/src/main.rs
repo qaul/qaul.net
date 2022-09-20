@@ -6,6 +6,7 @@
 //! qaul Daemon is running headless on servers in the background
 
 use clap::{App, Arg};
+use std::collections::BTreeMap;
 use std::{thread, time::Duration};
 
 use libqaul;
@@ -55,8 +56,17 @@ async fn main() {
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
+    // parse parameters and create default config
+    let mut def_config: BTreeMap<String, String> = BTreeMap::new();
+    let possible_arguments = vec!["name", "port"];
+    for s in possible_arguments {
+        if let Some(v) = get_argument(&s) {
+            def_config.insert(s.to_string(), v.clone());
+        }
+    }
+
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start(storage_path);
+    libqaul::api::start(storage_path, Some(def_config.clone()));
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {

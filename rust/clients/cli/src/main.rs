@@ -48,7 +48,7 @@ async fn main() {
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start(storage_path);
+    libqaul::api::start(storage_path, None);
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {

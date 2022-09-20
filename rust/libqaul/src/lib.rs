@@ -44,6 +44,9 @@ use services::Services;
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();
 
+/// default configs
+static DEFCONFIGS: Storage<BTreeMap<String, String>> = Storage::new();
+
 /// To see logs on android we need the android logger
 #[cfg(target_os = "android")]
 extern crate log;
@@ -54,6 +57,15 @@ use log::Level;
 extern crate android_logger;
 #[cfg(target_os = "android")]
 use android_logger::Config;
+
+/// Get default config values
+pub fn get_default_config(pattern: &str) -> Option<String> {
+    let def_config = DEFCONFIGS.get();
+    if let Some(v) = def_config.get(&pattern.to_string()) {
+        return Some(v.clone());
+    }
+    None
+}
 
 /// Events of the async loop
 enum EventType {
@@ -75,8 +87,14 @@ enum EventType {
 /// and poll all the necessary modules
 ///
 /// Provide a path where libqaul can save all data.
-pub async fn start(storage_path: String) -> () {
+pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
     log::trace!("start initializing libqaul");
+
+    if let Some(def_cfg) = def_config {
+        DEFCONFIGS.set(def_cfg.clone());
+    } else {
+        DEFCONFIGS.set(BTreeMap::new());
+    }
 
     // initialize rpc system
     let libqaul_rpc_receive = Rpc::init();
@@ -678,5 +696,5 @@ pub async fn start(storage_path: String) -> () {
 /// This function is here to test the initialization of libqaul
 /// on android.
 pub async fn start_android(storage_path: String) -> () {
-    start(storage_path).await
+    start(storage_path, None).await
 }

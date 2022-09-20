@@ -2,26 +2,24 @@
 // This software is published under the AGPLv3 license.
 
 //! # C-API for the threaded libqaul
-//! 
+//!
 //! This is the C compatible FFI of libqaul.
 //! It can be used to start libqaul in an own
 //! thread and communicate thread safe with it.
 //! All functions are thread safe and can be
 //! called from any external thread.
 
-use std::ffi::{CString, CStr};
+use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
 /// test function
 #[no_mangle]
 pub extern "C" fn hello() -> *mut c_char {
-    CString::new("Hello qaul!")
-        .unwrap()
-        .into_raw()
+    CString::new("Hello qaul!").unwrap().into_raw()
 }
 
 /// start libqaul in an own thread
-/// 
+///
 /// This function initializes and starts libqaul.
 /// It needs to be called before any other function
 /// of this API.
@@ -35,16 +33,16 @@ pub extern "C" fn start(s: *const c_char) {
 
     let r_str = c_str.to_str().unwrap();
     println!("{}", r_str.to_string());
-    super::start(r_str.to_string());
+    super::start(r_str.to_string(), None);
 }
 
-/// start libqaul on desktop operating systems 
-/// 
-/// This function supports the following systems: 
+/// start libqaul on desktop operating systems
+///
+/// This function supports the following systems:
 /// linux, macOS, windows
-/// 
-/// libqaul will create and find the common paths 
-/// to the data storage location. Therefore no path has 
+///
+/// libqaul will create and find the common paths
+/// to the data storage location. Therefore no path has
 /// to be provided.
 #[no_mangle]
 pub extern "C" fn start_desktop() {
@@ -52,17 +50,17 @@ pub extern "C" fn start_desktop() {
 }
 
 /// check if libqaul finished initializing
-/// 
+///
 /// Returns 1 when it finished, otherwise 0.
-/// 
+///
 /// 1: initialization finished
 /// 0: libqaul not initialized
-/// 
+///
 /// Don't send any messages to libqaul before it finished initializing.
 #[no_mangle]
 pub extern "C" fn initialized() -> i32 {
     if super::initialization_finished() {
-        return 1
+        return 1;
     }
 
     0
@@ -75,9 +73,9 @@ pub extern "C" fn receivequeue() -> i32 {
 }
 
 /// send RPC messages to libqaul
-/// 
+///
 /// returns 0 on success and negative numbers on failure
-/// 
+///
 /// 0  : success
 /// -1 : pointer is null
 /// -2 : message is too big
@@ -86,14 +84,14 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
     // message-pointer sanity check
     if message.is_null() {
         log::error!("message pointer is null");
-        return -1
+        return -1;
     }
 
     // check for message length
     // set a maximum message size to 500'000 bytes
     if message_length > 500000 {
         log::error!("message size to big! size is {} bytes", message_length);
-        return -2
+        return -2;
     }
 
     // copy input buffer to libqaul
@@ -112,17 +110,16 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
     0
 }
 
-
 /// receive RPC messages from libqaul
-/// 
+///
 /// You need to provide the pointer to a buffer and declare
 /// the length of a buffer.
 /// If a message was received, this function copies the message
 /// into the buffer.
-/// 
+///
 /// The function returns the length of the message.
-/// The return value '0' means no message was received. 
-/// 
+/// The return value '0' means no message was received.
+///
 /// A negative value is an error.
 /// -1 : an error occurred
 /// -2 : buffer to small
@@ -136,28 +133,32 @@ pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
         Ok(message) => {
             // check if no message
             if message.len() == 0 {
-                return 0
+                return 0;
             }
 
             // buffer-pointer sanity check
             if buffer.is_null() {
                 log::error!("provided buffer pointer is null");
-                return -3
+                return -3;
             }
 
             // check buffer len
             let buffer_length_usize: usize = buffer_length as usize;
             if message.len() >= buffer_length_usize {
-                log::error!("Buffer size to small! message size: {} < buffer size {}", message.len(), buffer_length);
+                log::error!(
+                    "Buffer size to small! message size: {} < buffer size {}",
+                    message.len(),
+                    buffer_length
+                );
                 // return -2: buffer size to small
-                return -2            
+                return -2;
             }
 
             // copy message into provided buffer
             unsafe {
                 std::ptr::copy_nonoverlapping(message.as_ptr(), buffer, message.len());
             }
-                
+
             // // https://doc.rust-lang.org/std/mem/fn.transmute.html
             // let u8_slice = unsafe {
             // &*( &slice as *const [c_char] as *const [u8])
@@ -171,14 +172,14 @@ pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
 
             // return message length
             let len: i32 = message.len() as i32;
-            return len
-        },
+            return len;
+        }
         Err(err) => {
             // log error message
             log::error!("{:?}", err);
             // return -1: an error occurred
-            return -1
-        },
+            return -1;
+        }
     }
 }
 
@@ -198,11 +199,10 @@ pub extern "C" fn send_rpc_to_libqaul_count() -> i32 {
     crate::rpc::Rpc::send_rpc_count()
 }
 
-
 /// send SYS messages to libqaul
-/// 
+///
 /// returns 0 on success and negative numbers on failure
-/// 
+///
 /// 0  : success
 /// -1 : pointer is null
 /// -2 : message is too big
@@ -211,14 +211,14 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
     // message-pointer sanity check
     if message.is_null() {
         log::error!("message pointer is null");
-        return -1
+        return -1;
     }
 
     // check for message length
     // set a maximum message size to 500'000 bytes
     if message_length > 500000 {
         log::error!("message size to big! size is {} bytes", message_length);
-        return -2
+        return -2;
     }
 
     // copy input buffer to libqaul
@@ -237,17 +237,16 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
     0
 }
 
-
 /// receive SYS messages from libqaul
-/// 
+///
 /// You need to provide the pointer to a buffer and declare
 /// the length of a buffer.
 /// If a message was received, this function copies the message
 /// into the buffer.
-/// 
+///
 /// The function returns the length of the message.
-/// The return value '0' means no message was received. 
-/// 
+/// The return value '0' means no message was received.
+///
 /// A negative value is an error.
 /// -1 : an error occurred
 /// -2 : buffer to small
@@ -261,21 +260,25 @@ pub extern "C" fn receive_sys_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
         Ok(message) => {
             // check if no message
             if message.len() == 0 {
-                return 0
+                return 0;
             }
 
             // buffer-pointer sanity check
             if buffer.is_null() {
                 log::error!("provided buffer pointer is null");
-                return -3
+                return -3;
             }
 
             // check buffer len
             let buffer_length_usize: usize = buffer_length as usize;
             if message.len() >= buffer_length_usize {
-                log::error!("Buffer size to small! message size: {} < buffer size {}", message.len(), buffer_length);
+                log::error!(
+                    "Buffer size to small! message size: {} < buffer size {}",
+                    message.len(),
+                    buffer_length
+                );
                 // return -2: buffer size to small
-                return -2            
+                return -2;
             }
 
             // copy message into provided buffer
@@ -285,13 +288,13 @@ pub extern "C" fn receive_sys_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
 
             // return message length
             let len: i32 = message.len() as i32;
-            return len
-        },
+            return len;
+        }
         Err(err) => {
             // log error message
             log::error!("{:?}", err);
             // return -1: an error occurred
-            return -1
-        },
+            return -1;
+        }
     }
 }
