@@ -36,6 +36,19 @@ pub fn get_argument(pattern: &str) -> Option<String> {
     }
 }
 
+/// create a default user account for zero configuration Community Server startups
+/// without providing a user name
+pub fn create_default_named() -> String {
+    let mut user_name: String;
+    user_name = "Community Server ".to_string();
+    user_name.push_str(
+        libqaul::utilities::timestamp::Timestamp::get_timestamp()
+            .to_string()
+            .as_str(),
+    );
+    user_name
+}
+
 #[async_std::main]
 async fn main() {
     // get current working directory
@@ -53,11 +66,13 @@ async fn main() {
 
     // if no account, creating new accounts
     if libqaul::node::user_accounts::UserAccounts::len() == 0 {
-        if let Some(user_name) = get_argument("name") {
-            libqaul::node::user_accounts::UserAccounts::create(user_name.clone());
+        let user_name: String;
+        if let Some(usr_name) = get_argument("name") {
+            user_name = usr_name.clone();
         } else {
-            libqaul::node::user_accounts::UserAccounts::create_default_named();
+            user_name = create_default_named();
         }
+        libqaul::node::user_accounts::UserAccounts::create(user_name.clone());
     }
 
     // loop
