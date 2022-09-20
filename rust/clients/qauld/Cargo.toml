@@ -21,6 +21,7 @@ prost = "0.11.0"
 futures-ticker = "0.0.2"
 state = "0.5"
 bs58 = "0.4"
+clap = "3.2.21" 
 
 
 [package.metadata.deb]

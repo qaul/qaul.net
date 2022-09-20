@@ -23,7 +23,7 @@ use std::time::Duration;
 // crate modules
 pub mod api;
 mod connections;
-mod node;
+pub mod node;
 mod router;
 mod rpc;
 mod services;
