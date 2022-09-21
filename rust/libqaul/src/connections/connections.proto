@@ -17,6 +17,9 @@ message Connections {
         // Remove an internet node address.
         // libqaul returns an internet_nodes_list message.
         InternetNodesEntry internet_nodes_remove = 4;
+        // Update an internet node state.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesEntry internet_nodes_state = 5;
     }
 }
 
@@ -53,12 +56,14 @@ enum Info {
     // Successfully added an address
     ADD_SUCCESS = 1;
     // Error: not a valid multiaddress
-    ADD_ERROR_INVALID = 2;
+    ADD_ERROR_INVALID = 2;    
     // Remove Internet Node
     // Successfully removed the address
     REMOVE_SUCCESS = 5;
+    // Successfully changed state of the address
+    STATE_SUCCESS = 6;
     // Error: Address not found
-    REMOVE_ERROR_NOT_FOUND = 6;
+    REMOVE_ERROR_NOT_FOUND = 7;
 }
 
 // Internet Nodes Entry

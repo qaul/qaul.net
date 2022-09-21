@@ -40,8 +40,20 @@ impl Connections {
 
                 Self::internet_node_remove(String::from(address));
             }
+            // active an internet peer node
+            cmd if cmd.starts_with("nodes active ") => {
+                let address = cmd.strip_prefix("nodes active ").unwrap();
+
+                Self::internet_node_active(String::from(address));
+            }
+            // active an internet peer node
+            cmd if cmd.starts_with("nodes deactive ") => {
+                let address = cmd.strip_prefix("nodes deactive ").unwrap();
+
+                Self::internet_node_deactive(String::from(address));
+            }
             // unknown command
-            _ => log::error!("unknown users command"),
+            _ => log::error!("unknown connections command"),
         }
     }
 
@@ -92,6 +104,40 @@ impl Connections {
         Self::send_message(proto_message);
     }
 
+    /// Send an rpc message to active a specific internet peer node connection
+    ///
+    /// The nodes are specified by their libp2p multiaddress
+    fn internet_node_active(address: String) {
+        // create message
+        let proto_message = proto::Connections {
+            message: Some(proto::connections::Message::InternetNodesState(
+                proto::InternetNodesEntry {
+                    address,
+                    enabled: true,
+                },
+            )),
+        };
+        // send message
+        Self::send_message(proto_message);
+    }
+
+    /// Send an rpc message to deactive a specific internet peer node connection
+    ///
+    /// The nodes are specified by their libp2p multiaddress
+    fn internet_node_deactive(address: String) {
+        // create message
+        let proto_message = proto::Connections {
+            message: Some(proto::connections::Message::InternetNodesState(
+                proto::InternetNodesEntry {
+                    address,
+                    enabled: false,
+                },
+            )),
+        };
+        // send message
+        Self::send_message(proto_message);
+    }
+
     /// Encode and send a protobuf connections message to RPC
     fn send_message(message: proto::Connections) {
         // encode message
@@ -137,6 +183,12 @@ impl Connections {
                             Some(proto::Info::RemoveSuccess) => {
                                 println!(
                                     "Address successfully removed from 'Internet Peer Nodes List'"
+                                );
+                                println!("");
+                            }
+                            Some(proto::Info::StateSuccess) => {
+                                println!(
+                                    "Address successfully state changed in 'Internet Peer Nodes List'"
                                 );
                                 println!("");
                             }

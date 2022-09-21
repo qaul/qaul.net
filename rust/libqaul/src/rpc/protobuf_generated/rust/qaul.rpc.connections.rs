@@ -1,7 +1,7 @@
 /// Connections rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Connections {
-    #[prost(oneof="connections::Message", tags="1, 2, 3, 4")]
+    #[prost(oneof="connections::Message", tags="1, 2, 3, 4, 5")]
     pub message: ::core::option::Option<connections::Message>,
 }
 /// Nested message and enum types in `Connections`.
@@ -24,6 +24,10 @@ pub mod connections {
         /// libqaul returns an internet_nodes_list message.
         #[prost(message, tag="4")]
         InternetNodesRemove(super::InternetNodesEntry),
+        /// Update an internet node state.
+        /// libqaul returns an internet_nodes_list message.
+        #[prost(message, tag="5")]
+        InternetNodesState(super::InternetNodesEntry),
     }
 }
 /// UI request for Internet nodes list
@@ -79,8 +83,10 @@ pub enum Info {
     /// Remove Internet Node
     /// Successfully removed the address
     RemoveSuccess = 5,
+    /// Successfully changed state of the address
+    StateSuccess = 6,
     /// Error: Address not found
-    RemoveErrorNotFound = 6,
+    RemoveErrorNotFound = 7,
 }
 impl Info {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -93,6 +99,7 @@ impl Info {
             Info::AddSuccess => "ADD_SUCCESS",
             Info::AddErrorInvalid => "ADD_ERROR_INVALID",
             Info::RemoveSuccess => "REMOVE_SUCCESS",
+            Info::StateSuccess => "STATE_SUCCESS",
             Info::RemoveErrorNotFound => "REMOVE_ERROR_NOT_FOUND",
         }
     }
