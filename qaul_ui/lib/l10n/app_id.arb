@@ -15,15 +15,15 @@
   "learnMore": "Pelajari tentang qaul.net",
 
   "userAccountNavButtonTooltip": "Akun Anda",
-  "feedNavButtonTooltip": "Umpan",
+  "publicNavButtonTooltip": "Umpan",
   "usersNavButtonTooltip": "Pengguna",
   "chatNavButtonTooltip": "Mengobrol",
   "netNavButtonTooltip": "Jaringan",
-  "createFeedPostTooltip": "Buat unggahan",
+  "createPublicPostTooltip": "Buat unggahan",
   "submitPostTooltip": "Kirim",
   "newChatTooltip": "Obrolan Baru",
 
-  "feedNotificationsEnabled": "Aktifkan/Nonaktifkan Pemberitahuan Umpan:",
+  "publicNotificationsEnabled": "Aktifkan/Nonaktifkan Pemberitahuan Umpan:",
   "chatNotificationsEnabled": "Aktifkan/Nonaktifkan Notifikasi Obrolan:",
   "notifyOnlyForVerifiedUsers": "Hanya Tampilkan Notifikasi Terverifikasi:",
 
@@ -51,7 +51,7 @@
   "unblockUser": "Buka blokir Pengguna",
   "addNodeCTA": "Tambahkan simpul Internet",
   "chatEmptyMessageHint": "Pesan Anda...",
-  "emptyFeedList": "Belum ada umpan pesan",
+  "emptyPublicList": "Belum ada umpan pesan",
   "emptyUsersList": "Belum ada pengguna ditambahkan",
   "emptyChatsList": "Belum ada ruang ngobrol",
   "verifyUserConfirmationMessage": "Apakah Anda ingin memverifikasi pengguna ini?",

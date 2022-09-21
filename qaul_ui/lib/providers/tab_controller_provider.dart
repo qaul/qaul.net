@@ -3,7 +3,7 @@ part of 'providers.dart';
 final homeScreenControllerProvider = StateNotifierProvider<HomeScreenTabController, int>(
     (ref) => HomeScreenTabController(initialTab: 1));
 
-enum TabType { account, feed, users, chat, network }
+enum TabType { account, public, users, chat, network }
 
 class HomeScreenTabController extends StateNotifier<int> {
   HomeScreenTabController({int? initialTab})

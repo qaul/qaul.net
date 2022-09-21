@@ -70,7 +70,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- Accepts URIs that begin with "qaul://<HOST>” -->
-                <data android:scheme="qaul" android:host="feed"/>
+                <data android:scheme="qaul" android:host="public"/>
                 <data android:scheme="qaul" android:host="chat"/>
             </intent-filter>
         </activity>

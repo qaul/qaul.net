@@ -10,9 +10,9 @@ final nodeInfoProvider = StateProvider<NodeInfo?>((_) => null);
 
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
-final feedMessagesProvider =
-    StateNotifierProvider<FeedPostListNotifier, List<FeedPost>>(
-  (ref) => FeedPostListNotifier(messages: []),
+final publicMessagesProvider =
+    StateNotifierProvider<PublicPostListNotifier, List<PublicPost>>(
+  (ref) => PublicPostListNotifier(messages: []),
 );
 
 final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(

@@ -15,15 +15,15 @@
   "learnMore": "Learn about qaul.net",
 
   "userAccountNavButtonTooltip": "Your account",
-  "feedNavButtonTooltip": "Feed",
+  "publicNavButtonTooltip": "Public",
   "usersNavButtonTooltip": "Users",
   "chatNavButtonTooltip": "Chat",
   "netNavButtonTooltip": "Network",
-  "createFeedPostTooltip": "Create post",
+  "createPublicPostTooltip": "Create post",
   "submitPostTooltip": "Submit",
   "newChatTooltip": "New chat",
 
-  "feedNotificationsEnabled": "Enable/Disable Feed Notifications:",
+  "publicNotificationsEnabled": "Enable/Disable Public posts Notifications:",
   "chatNotificationsEnabled": "Enable/Disable Chat Notifications:",
   "notifyOnlyForVerifiedUsers": "Only Show Verified Notifications:",
 
@@ -51,7 +51,7 @@
   "unblockUser": "Unblock User",
   "addNodeCTA": "Add internet node",
   "chatEmptyMessageHint": "Your message...",
-  "emptyFeedList": "No feed messages yet",
+  "emptyPublicList": "No public messages yet",
   "emptyUsersList": "No users added yet",
   "emptyChatsList": "No chat rooms yet",
   "verifyUserConfirmationMessage": "Do you want to verify this user?",

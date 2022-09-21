@@ -32,7 +32,7 @@ part 'chat/chat_tab.dart';
 
 part 'chat/dialogs/dialogs.dart';
 
-part 'feed_tab.dart';
+part 'public_tab.dart';
 
 part 'network_tab.dart';
 
@@ -43,7 +43,7 @@ abstract class BaseTab extends StatefulHookConsumerWidget {
 
   factory BaseTab.chat({Key? key}) => _Chat(key: key);
 
-  factory BaseTab.feed({Key? key}) => _Feed(key: key);
+  factory BaseTab.public({Key? key}) => _Public(key: key);
 
   factory BaseTab.network({Key? key}) => _Network(key: key);
 

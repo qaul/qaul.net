@@ -5,8 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
 
-class FeedPost extends Equatable {
-  const FeedPost({
+class PublicPost extends Equatable {
+  const PublicPost({
     this.senderId,
     this.index,
     this.senderIdBase58,
@@ -31,7 +31,7 @@ class FeedPost extends Equatable {
 }
 
 extension FMExtension on FeedMessage {
-  FeedPost get toModelMessage => FeedPost(
+  PublicPost get toModelMessage => PublicPost(
         senderId: Uint8List.fromList(senderId),
         index: index.toInt(),
         senderIdBase58: senderIdBase58,
@@ -44,14 +44,14 @@ extension FMExtension on FeedMessage {
 }
 
 // Maybe using a Stream would be simpler. Just creating this class to facilitate manipulating StateNotifierProvider
-class FeedPostListNotifier extends StateNotifier<List<FeedPost>> {
-  FeedPostListNotifier({List<FeedPost>? messages}) : super(messages ?? []);
+class PublicPostListNotifier extends StateNotifier<List<PublicPost>> {
+  PublicPostListNotifier({List<PublicPost>? messages}) : super(messages ?? []);
 
-  void add(FeedPost message) {
+  void add(PublicPost message) {
     state = [message, ...state];
   }
 
-  bool contains(FeedPost message) {
+  bool contains(PublicPost message) {
     return !state
         .indexWhere(
           (m) =>

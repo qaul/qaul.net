@@ -77,12 +77,12 @@ class LibqaulWorker {
   // *******************************
   // Public rpc requests
   // *******************************
-  Future<void> sendFeedMessage(String content) async {
+  Future<void> sendPublicMessage(String content) async {
     final msg = Feed(send: SendMessage(content: content));
     await _sendMessage(Modules.FEED, msg);
   }
 
-  Future<void> requestFeedMessages({int? lastIndex}) async {
+  Future<void> requestPublicMessages({int? lastIndex}) async {
     final msg = Feed(
       request: FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0)),
     );

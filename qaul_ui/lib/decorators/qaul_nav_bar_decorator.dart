@@ -82,7 +82,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: const [
-                  QaulNavBarItem(TabType.feed),
+                  QaulNavBarItem(TabType.public),
                   QaulNavBarItem(TabType.users),
                   QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
@@ -91,7 +91,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: const [
-                  QaulNavBarItem(TabType.feed),
+                  QaulNavBarItem(TabType.public),
                   QaulNavBarItem(TabType.users),
                   QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
@@ -227,9 +227,9 @@ class QaulNavBarItem extends HookConsumerWidget {
         svgPath = 'assets/icons/people.svg';
         tooltip = l18ns!.usersNavButtonTooltip;
         break;
-      case TabType.feed:
+      case TabType.public:
         svgPath = 'assets/icons/public.svg';
-        tooltip = l18ns!.feedNavButtonTooltip;
+        tooltip = l18ns!.publicNavButtonTooltip;
         sizeFactor = 1.2;
         break;
       case TabType.chat:
@@ -265,13 +265,13 @@ class QaulNavBarItem extends HookConsumerWidget {
       ),
     );
 
-    if (tab == TabType.feed) {
+    if (tab == TabType.public) {
       return _TabNotificationBadge(
         notificationCount:
-            ref.read(feedNotificationControllerProvider).newNotificationCount,
+            ref.read(publicNotificationControllerProvider).newNotificationCount,
         onPressed: () {
           controller.goToTab(tab);
-          ref.read(feedNotificationControllerProvider).removeNotifications();
+          ref.read(publicNotificationControllerProvider).removeNotifications();
         },
         child: button,
       );
@@ -281,7 +281,7 @@ class QaulNavBarItem extends HookConsumerWidget {
             ref.read(chatNotificationControllerProvider).newNotificationCount,
         onPressed: () {
           controller.goToTab(tab);
-          ref.read(feedNotificationControllerProvider).removeNotifications();
+          ref.read(publicNotificationControllerProvider).removeNotifications();
         },
         child: button,
       );

@@ -12,7 +12,7 @@ class UserPrefsHelper {
 
   String get _defaultThemeKey => 'cached_default_theme';
 
-  String get _feedNTFYKey => 'cached_feed_notification_enabled';
+  String get _publicNTFYKey => 'cached_public_notification_enabled';
 
   String get _chatNTFYKey => 'cached_chat_notification_enabled';
 
@@ -44,9 +44,9 @@ class UserPrefsHelper {
     _prefsBox?.put(_defaultThemeKey, ThemeMode.values.indexOf(theme));
   }
 
-  bool get feedNotificationsEnabled => _prefsBox?.get(_feedNTFYKey) ?? true;
+  bool get publicTabNotificationsEnabled => _prefsBox?.get(_publicNTFYKey) ?? true;
 
-  set feedNotificationsEnabled(bool val) => _prefsBox?.put(_feedNTFYKey, val);
+  set publicTabNotificationsEnabled(bool val) => _prefsBox?.put(_publicNTFYKey, val);
 
   bool get chatNotificationsEnabled => _prefsBox?.get(_chatNTFYKey) ?? true;
 

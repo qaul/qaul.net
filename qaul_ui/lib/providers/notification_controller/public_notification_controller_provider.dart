@@ -1,22 +1,22 @@
 part of '../providers.dart';
 
-final feedNotificationControllerProvider = Provider((ref) => FeedNotificationController(ref));
+final publicNotificationControllerProvider = Provider((ref) => PublicNotificationController(ref));
 
-class FeedNotificationController extends NotificationController<List<FeedPost>>
-    with DataProcessingStrategy<FeedPost> {
-  FeedNotificationController(Ref ref) : super(ref);
+class PublicNotificationController extends NotificationController<List<PublicPost>>
+    with DataProcessingStrategy<PublicPost> {
+  PublicNotificationController(Ref ref) : super(ref);
 
   int _lastIndex = -1;
 
-  final _log = Logger('FeedNotificationController');
+  final _log = Logger('PublicNotificationController');
 
   @override
-  String get cacheKey => 'feedNotificationControllerLastPostIndexDataKey';
+  String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
 
   @override
-  MapEntry<AlwaysAliveProviderListenable<List<FeedPost>>,
-          void Function(List<FeedPost>?, List<FeedPost>)>
-      get strategy => MapEntry(feedMessagesProvider, execute);
+  MapEntry<AlwaysAliveProviderListenable<List<PublicPost>>,
+          void Function(List<PublicPost>?, List<PublicPost>)>
+      get strategy => MapEntry(publicMessagesProvider, execute);
 
   @override
   Future<void> initialize() async {
@@ -24,7 +24,7 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
     if (preferences.containsKey(cacheKey)) {
       _lastIndex = preferences.getInt(cacheKey)!;
     }
-    ref.read(qaulWorkerProvider).requestFeedMessages();
+    ref.read(qaulWorkerProvider).requestPublicMessages();
     _log.config('Initialized:\n\t· Last Post Index: $_lastIndex');
   }
 
@@ -32,10 +32,10 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
   void updatePersistentCachedData() => preferences.setInt(cacheKey, _lastIndex);
 
   // ***************************************************************************
-  // DataProcessingStrategy<FeedPost> Mixin
+  // DataProcessingStrategy<PublicPost> Mixin
   // ***************************************************************************
   @override
-  Iterable<FeedPost> entriesToBeProcessed(List<FeedPost> values) {
+  Iterable<PublicPost> entriesToBeProcessed(List<PublicPost> values) {
     var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex).toList();
     if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
       final verifiedIds =
@@ -44,28 +44,28 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
           post.senderId != null && verifiedIds.where((id) => id.equals(post.senderId!)).isNotEmpty).toList();
     }
     if (newPosts.isEmpty) return [];
-    _log.fine('Feed posts updated. New ones are: $newPosts');
+    _log.fine('Public posts updated. New ones are: $newPosts');
     _updateCachedIndex([...newPosts]);
     return newPosts;
   }
 
-  void _updateCachedIndex(List<FeedPost> newPosts) {
+  void _updateCachedIndex(List<PublicPost> newPosts) {
     var maxIndex = newPosts.map((e) => e.index ?? 0).reduce(max);
     if (maxIndex > _lastIndex) {
-      _log.finer('updating last feed post index to $maxIndex');
+      _log.finer('updating last public post index to $maxIndex');
       _lastIndex = maxIndex;
       updatePersistentCachedData();
     }
   }
 
   @override
-  LocalNotification? process(FeedPost value) {
-    if (currentVisibleHomeTab == TabType.feed) {
-      _log.finer('currently in Feed tab, filtering notifications');
+  LocalNotification? process(PublicPost value) {
+    if (currentVisibleHomeTab == TabType.public) {
+      _log.finer('currently in Public tab, filtering notifications');
       return null;
     }
-    if (!UserPrefsHelper().feedNotificationsEnabled) {
-      _log.finer('feed notifications disabled, filtering notifications');
+    if (!UserPrefsHelper().publicTabNotificationsEnabled) {
+      _log.finer('public notifications disabled, filtering notifications');
       return null;
     }
     if (_lastMessageIsFromLocalUser(value)) {
@@ -74,13 +74,13 @@ class FeedNotificationController extends NotificationController<List<FeedPost>>
     }
     return LocalNotification(
       id: value.hashCode,
-      title: 'New Feed Post:',
+      title: 'New Public Post:',
       body: value.content!,
-      payload: 'qaul://feed',
+      payload: 'qaul://public',
     );
   }
 
-  bool _lastMessageIsFromLocalUser(FeedPost post) =>
+  bool _lastMessageIsFromLocalUser(PublicPost post) =>
       post.senderId != null && post.senderId!.equals(localUser.id);
 
   @override
