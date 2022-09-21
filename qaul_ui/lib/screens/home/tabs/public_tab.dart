@@ -34,19 +34,30 @@ class _PublicState extends _BaseTabState<_Public> {
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context);
+    const bullhorn = 'assets/icons/public.svg';
+
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.large(
+        elevation: 0,
         heroTag: 'publicTabFAB',
+        backgroundColor: Colors.white,
         tooltip: l18ns!.createPublicPostTooltip,
+        shape: const CircleBorder(side: BorderSide(color: Colors.black)),
         onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => _CreatePublicMessage()),
+          showModalBottomSheet(
+            context: context,
+            barrierColor: Colors.transparent,
+            builder: (context) {
+              return _CreatePublicMessage();
+            },
           );
-          await Future.delayed(const Duration(milliseconds: 2000));
-          await refreshPublic();
         },
-        child: const Icon(Icons.add, size: 32),
+        child: SvgPicture.asset(
+          bullhorn,
+          width: 52,
+          height: 52,
+          color: Theme.of(context).iconTheme.color,
+        ),
       ),
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 2500),
@@ -123,60 +134,40 @@ class _CreatePublicMessage extends HookConsumerWidget {
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context)!;
-    return LoadingDecorator(
-      isLoading: loading.value,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            splashRadius: 24,
-            icon: const Icon(Icons.close),
-            tooltip: l18ns.backButtonTooltip,
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'createpublicMessageSubscreenFAB',
-          tooltip: l18ns.submitPostTooltip,
-          onPressed: sendMessage,
-          child: const Icon(Icons.check, size: 32.0),
-        ),
-        body: Shortcuts(
-          shortcuts: {
-            LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.control):
-                const SendMessageIntent(),
-            LogicalKeySet(LogicalKeyboardKey.escape): const ExitScreenIntent(),
-          },
-          child: Actions(
-            actions: {
-              SendMessageIntent: CallbackAction<SendMessageIntent>(
-                onInvoke: (SendMessageIntent intent) => sendMessage(),
-              ),
-              ExitScreenIntent: CallbackAction<ExitScreenIntent>(
-                onInvoke: (ExitScreenIntent intent) => Navigator.pop(context),
-              ),
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: TextFormField(
-                key: _formKey,
-                maxLines: 15,
-                autofocus: true,
-                controller: controller,
-                keyboardType: TextInputType.multiline,
-                style: Theme.of(context).textTheme.subtitle1,
-                decoration: const InputDecoration(border: InputBorder.none),
-                validator: (s) {
-                  if (s == null || s.isEmpty) {
-                    return l18ns.fieldRequiredErrorMessage;
-                  }
-                  return null;
-                },
-              ),
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.grey)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: TextFormField(
+              key: _formKey,
+              maxLines: 15,
+              autofocus: true,
+              controller: controller,
+              keyboardType: TextInputType.multiline,
+              style: Theme.of(context).textTheme.subtitle1,
+              decoration: const InputDecoration(hintText: 'Public note'),
+              validator: (s) {
+                if (s == null || s.isEmpty) {
+                  return l18ns.fieldRequiredErrorMessage;
+                }
+                return null;
+              },
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.only(left: 12, bottom: 12),
+            child: GestureDetector(
+              onTap: sendMessage,
+              child: const Icon(Icons.send),
+            ),
+          ),
+        ],
       ),
     );
   }
