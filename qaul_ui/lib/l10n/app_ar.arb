@@ -64,5 +64,6 @@
 
   "publicNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
   "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:",
-  "notifyOnlyForVerifiedUsers": "إظهار الإخطارات التي تم التحقق منها فقط:"
+  "notifyOnlyForVerifiedUsers": "إظهار الإخطارات التي تم التحقق منها فقط:",
+  "createGroupHint": "أسم المجموعة"
 }

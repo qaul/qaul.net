@@ -60,6 +60,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
     final isMounted = useIsMounted();
 
+    const groupIcon = 'assets/icons/group.svg';
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -72,29 +73,30 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
         children: [
           Column(
             children: [
-              const SizedBox(height: 40),
-              const CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.lightBlue,
-                child: Icon(Icons.people, color: Colors.white, size: 40),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 70),
-                child: TextFormField(
-                  key: _nameKey,
-                  controller: nameCtrl,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return l10n.fieldRequiredErrorMessage;
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(hintText: 'Group Name'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
+              const SizedBox(height: 140, width: double.maxFinite),
+              SvgPicture.asset(groupIcon),
+              const SizedBox(height: 20),
+              LayoutBuilder(builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.constrainWidth(400),
+                  child: TextFormField(
+                    key: _nameKey,
+                    controller: nameCtrl,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return l10n.fieldRequiredErrorMessage;
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.createGroupHint,
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 20),
+              QaulButton(
+                label: 'Create',
                 onPressed: () async {
                   if (!_nameKey.currentState!.validate()) return;
                   loading.value = true;
@@ -137,7 +139,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                         .firstWhereOrNull((g) => g.name == name),
                   );
                 },
-                child: const Text('Create'),
               ),
             ],
           ),

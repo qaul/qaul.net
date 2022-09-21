@@ -66,5 +66,6 @@
   "noneAvailableMessage": "Доступних нема",
   "invalidIPMessage": "Хибна IP-адреса",
   "invalidPortMessage": "Хибний порт",
-  "usernameLengthMessage": "Ім'я користувача повинно містити принаймні 2 символи."
+  "usernameLengthMessage": "Ім'я користувача повинно містити принаймні 2 символи.",
+  "createGroupHint": "Назва групи"
 }
