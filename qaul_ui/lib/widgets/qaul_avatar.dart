@@ -103,15 +103,8 @@ class _SmallQaulAvatar extends QaulAvatar {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (isGroup) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.lightBlue,
-        child: const FaIcon(
-          FontAwesomeIcons.users,
-          size: 16,
-          color: Colors.white,
-        ),
-      );
+      const groupIcon = 'assets/icons/group.svg';
+      return SvgPicture.asset(groupIcon, width: radius * 2, height: radius * 2);
     }
 
     if (!badgeEnabled || userIsOffline(user)) {
@@ -153,14 +146,7 @@ class _LargeQaulAvatar extends QaulAvatar {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isGroup) return super.build(context, ref);
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: Colors.lightBlue,
-      child: const FaIcon(
-        FontAwesomeIcons.users,
-        size: 48,
-        color: Colors.white,
-      ),
-    );
+    const groupIcon = 'assets/icons/group.svg';
+    return SvgPicture.asset(groupIcon, width: radius * 2, height: radius * 2);
   }
 }

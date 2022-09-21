@@ -22,6 +22,7 @@
   "createPublicPostTooltip": "Create post",
   "submitPostTooltip": "Submit",
   "newChatTooltip": "New chat",
+  "createGroupHint": "Group name",
 
   "publicNotificationsEnabled": "Enable/Disable Public posts Notifications:",
   "chatNotificationsEnabled": "Enable/Disable Chat Notifications:",

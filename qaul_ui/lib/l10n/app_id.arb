@@ -66,5 +66,6 @@
   "noneAvailableMessage": "Tidak Ada yang Tersedia",
   "invalidIPMessage": "IP Salah",
   "invalidPortMessage": "Portal Salah",
-  "usernameLengthMessage": "Nama pengguna harus memiliki minimal 2 karakter."
+  "usernameLengthMessage": "Nama pengguna harus memiliki minimal 2 karakter.",
+  "createGroupHint": "Nama grup"
 }

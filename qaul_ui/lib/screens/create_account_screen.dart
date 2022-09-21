@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -83,7 +82,6 @@ class CreateAccountScreen extends HookConsumerWidget {
       },
     );
 
-    const userIcon = 'assets/icons/user.svg';
     final i10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -96,7 +94,7 @@ class CreateAccountScreen extends HookConsumerWidget {
               child: Column(
                 children: [
                   const SizedBox(width: double.maxFinite),
-                  SvgPicture.asset(userIcon),
+                  QaulAvatar.groupLarge(),
                   const SizedBox(height: 28),
                   LayoutBuilder(builder: (context, constraints) {
                     return SizedBox(
