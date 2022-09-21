@@ -55,8 +55,12 @@ pub struct InternetNodesList {
 /// e.g. "/ip4/144.91.74.192/tcp/9229"
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InternetNodesEntry {
+    /// address
     #[prost(string, tag="1")]
     pub address: ::prost::alloc::string::String,
+    /// enabled
+    #[prost(bool, tag="2")]
+    pub enabled: bool,
 }
 /// Information about the system actions that led to 
 /// the creation of this message.

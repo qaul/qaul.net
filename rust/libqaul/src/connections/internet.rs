@@ -338,10 +338,16 @@ impl Internet {
     /// connect to remote peers that are specified in
     /// the configuration config.internet.peers
     pub fn peer_connect(config: &Configuration, swarm: &mut Swarm<QaulInternetBehaviour>) {
-        for addr_str in &config.internet.peers {
-            match addr_str.clone().parse() {
-                Ok(addresse) => Self::peer_dial(addresse, swarm),
-                Err(error) => log::trace!("peer address {} parse error: {:?}", addr_str, error),
+        for peer in &config.internet.peers {
+            if peer.enabled {
+                match peer.address.clone().parse() {
+                    Ok(addresse) => Self::peer_dial(addresse, swarm),
+                    Err(error) => log::trace!(
+                        "peer address {} parse error: {:?}",
+                        peer.address.clone(),
+                        error
+                    ),
+                }
             }
         }
     }

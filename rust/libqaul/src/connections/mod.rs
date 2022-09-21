@@ -20,6 +20,7 @@ use serde::{Deserialize, Serialize};
 use crate::node::Node;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
+use crate::storage::configuration::InternetPeer;
 use ble::Ble;
 use internet::Internet;
 use lan::Lan;
@@ -134,7 +135,10 @@ impl Connections {
                                     valid = true;
 
                                     // add to config
-                                    config.internet.peers.push(nodes_entry.address);
+                                    config.internet.peers.push(InternetPeer {
+                                        address: nodes_entry.address.clone(),
+                                        enabled: true,
+                                    });
 
                                     // connect to node
                                     if let Some(internet) = internet_opt {
@@ -160,25 +164,23 @@ impl Connections {
                         let mut info = proto::Info::RemoveErrorNotFound;
 
                         {
-                            let mut nodes: Vec<String> = Vec::new();
+                            let mut nodes: Vec<InternetPeer> = Vec::new();
 
                             // get config
                             let mut config = Configuration::get_mut();
 
                             // loop through addresses and remove the equal
-                            for addr_string in &config.internet.peers {
-                                let string = String::from(addr_string);
-                                if string == nodes_entry.address {
+                            for peer in &config.internet.peers {
+                                if peer.address == nodes_entry.address {
                                     // address has been found and is
                                     // therefore removed.
                                     info = proto::Info::RemoveSuccess;
                                 } else {
                                     // addresses do not match.
                                     // add this address to the new vector.
-                                    nodes.push(string);
+                                    nodes.push(peer.clone());
                                 }
                             }
-
                             // add new nodes list to configuration
                             config.internet.peers = nodes;
                         }
@@ -208,9 +210,10 @@ impl Connections {
         let config = Configuration::get();
 
         // fill all the nodes
-        for addr_str in &config.internet.peers {
+        for peer in &config.internet.peers {
             nodes.push(proto::InternetNodesEntry {
-                address: String::from(addr_str),
+                address: peer.address.clone(),
+                enabled: peer.enabled,
             });
         }
 

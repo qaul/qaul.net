@@ -66,5 +66,8 @@ enum Info {
 // Contains a node address as a libp2p multiaddress.
 // e.g. "/ip4/144.91.74.192/tcp/9229"
 message InternetNodesEntry {
+    // address
     string address = 1;
+    // enabled
+    bool enabled = 2;
 }

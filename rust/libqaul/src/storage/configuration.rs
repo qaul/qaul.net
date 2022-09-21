@@ -57,11 +57,17 @@ impl Default for Lan {
     }
 }
 
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct InternetPeer {
+    pub address: String,
+    pub enabled: bool,
+}
+
 /// Internet Overlay Connection Module
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Internet {
     pub active: bool,
-    pub peers: Vec<String>,
+    pub peers: Vec<InternetPeer>,
     pub do_listen: bool,
     pub listen: String,
 }
@@ -82,7 +88,10 @@ impl Default for Internet {
 
         Internet {
             active: true,
-            peers: vec![String::from("/ip4/144.91.74.192/tcp/9229"); 1],
+            peers: vec![InternetPeer {
+                address: String::from("/ip4/144.91.74.192/tcp/9229"),
+                enabled: true,
+            }],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
             listen: String::from("/ip4/0.0.0.0/tcp/9229"),
