@@ -1,23 +1,23 @@
 part of 'tab.dart';
 
-class _Feed extends BaseTab {
-  const _Feed({Key? key}) : super(key: key);
+class _Public extends BaseTab {
+  const _Public({Key? key}) : super(key: key);
 
   @override
-  _FeedState createState() => _FeedState();
+  _PublicState createState() => _PublicState();
 }
 
-class _FeedState extends _BaseTabState<_Feed> {
+class _PublicState extends _BaseTabState<_Public> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
     useEffect(() {
-      ref.read(feedNotificationControllerProvider).initialize();
+      ref.read(publicNotificationControllerProvider).initialize();
       return () {};
     }, []);
 
     final users = ref.watch(usersProvider);
-    final messages = ref.watch(feedMessagesProvider);
+    final messages = ref.watch(publicMessagesProvider);
     final defaultUser = ref.watch(defaultUserProvider);
 
     final blockedIds =
@@ -26,33 +26,35 @@ class _FeedState extends _BaseTabState<_Feed> {
         .where((m) => !blockedIds.contains(m.senderIdBase58 ?? ''))
         .toList();
 
-    final refreshFeed = useCallback(() async {
+    final refreshPublic = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
       final indexes = messages.map((e) => e.index ?? 1);
-      await worker.requestFeedMessages(
+      await worker.requestPublicMessages(
           lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max));
     }, [UniqueKey()]);
 
     final l18ns = AppLocalizations.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        heroTag: 'feedTabFAB',
-        tooltip: l18ns!.createFeedPostTooltip,
+        heroTag: 'publicTabFAB',
+        tooltip: l18ns!.createPublicPostTooltip,
         onPressed: () async {
           await Navigator.push(
-              context, MaterialPageRoute(builder: (_) => _CreateFeedMessage()));
+            context,
+            MaterialPageRoute(builder: (_) => _CreatePublicMessage()),
+          );
           await Future.delayed(const Duration(milliseconds: 2000));
-          await refreshFeed();
+          await refreshPublic();
         },
         child: const Icon(Icons.add, size: 32),
       ),
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 2500),
-        callback: () async => await refreshFeed(),
+        callback: () async => await refreshPublic(),
         child: RefreshIndicator(
-          onRefresh: () async => await refreshFeed(),
+          onRefresh: () async => await refreshPublic(),
           child: EmptyStateTextDecorator(
-            l18ns.emptyFeedList,
+            l18ns.emptyPublicList,
             isEmpty: filteredMessages.isEmpty,
             child: ListView.separated(
               controller: ScrollController(),
@@ -99,8 +101,8 @@ class ExitScreenIntent extends Intent {
   const ExitScreenIntent();
 }
 
-class _CreateFeedMessage extends HookConsumerWidget {
-  _CreateFeedMessage({Key? key}) : super(key: key);
+class _CreatePublicMessage extends HookConsumerWidget {
+  _CreatePublicMessage({Key? key}) : super(key: key);
 
   final _formKey = GlobalKey<FormFieldState>();
 
@@ -114,7 +116,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
       if (!(_formKey.currentState?.validate() ?? false)) return;
       loading.value = true;
       final worker = ref.read(qaulWorkerProvider);
-      await worker.sendFeedMessage(controller.text.trim());
+      await worker.sendPublicMessage(controller.text.trim());
       loading.value = false;
       if (!isMounted()) return;
       Navigator.pop(context); // ignore: use_build_context_synchronously
@@ -135,7 +137,7 @@ class _CreateFeedMessage extends HookConsumerWidget {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          heroTag: 'createFeedMessageSubscreenFAB',
+          heroTag: 'createpublicMessageSubscreenFAB',
           tooltip: l18ns.submitPostTooltip,
           onPressed: sendMessage,
           child: const Icon(Icons.check, size: 32.0),

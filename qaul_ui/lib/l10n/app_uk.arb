@@ -15,15 +15,15 @@
   "learnMore": "Дізнайтеся про qaul.net",
 
   "userAccountNavButtonTooltip": "Ваш обліковий запис",
-  "feedNavButtonTooltip": "Стрічка",
+  "publicNavButtonTooltip": "Стрічка",
   "usersNavButtonTooltip": "Люди",
   "chatNavButtonTooltip": "Розмови",
   "netNavButtonTooltip": "Мережа",
-  "createFeedPostTooltip": "Створити допис",
+  "createPublicPostTooltip": "Створити допис",
   "submitPostTooltip": "Надіслати",
   "newChatTooltip": "Нова розмова",
 
-  "feedNotificationsEnabled": "Увімкнути сповіщення стрічки:",
+  "publicNotificationsEnabled": "Увімкнути сповіщення стрічки:",
   "chatNotificationsEnabled": "Увімкнути сповіщення чату:",
   "notifyOnlyForVerifiedUsers": "Показувати лише підтверджені сповіщення:",
 
@@ -51,7 +51,7 @@
   "unblockUser": "Розблокувати",
   "addNodeCTA": "Додати інтернет-вузол",
   "chatEmptyMessageHint": "Ваше повідомлення…",
-  "emptyFeedList": "Повідомлень ще не отримано",
+  "emptyPublicList": "Повідомлень ще не отримано",
   "emptyUsersList": "Нікого ще не додано",
   "emptyChatsList": "Розмов ще не почато",
   "verifyUserConfirmationMessage": "Точно підтвердити цю людину?",

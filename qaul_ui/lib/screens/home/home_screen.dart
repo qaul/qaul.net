@@ -21,11 +21,11 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabCtrl = ref.read(homeScreenControllerProvider.notifier);
 
-    final switchToFeed = useCallback(() => tabCtrl.goToTab(TabType.feed), []);
+    final gotoToPubTab = useCallback(() => tabCtrl.goToTab(TabType.public), []);
 
     return WillPopScope(
       onWillPop: () async {
-        if (Platform.isAndroid) switchToFeed();
+        if (Platform.isAndroid) gotoToPubTab();
         return false;
       },
       child: Scaffold(
@@ -37,7 +37,7 @@ class HomeScreen extends HookConsumerWidget {
             physics: _isMobile ? const PageScrollPhysics() : const NeverScrollableScrollPhysics(),
             children: [
               const UserAccountScreen(),
-              BaseTab.feed(),
+              BaseTab.public(),
               BaseTab.users(),
               BaseTab.chat(),
               const DynamicNetworkScreen(),

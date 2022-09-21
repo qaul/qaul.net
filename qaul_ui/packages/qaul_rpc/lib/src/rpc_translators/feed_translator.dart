@@ -22,8 +22,8 @@ class FeedTranslator extends RpcModuleTranslator {
 
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
-    if (res.module != type || res.data is! List<FeedPost>) return;
-    final provider = reader(feedMessagesProvider.notifier);
+    if (res.module != type || res.data is! List<PublicPost>) return;
+    final provider = reader(publicMessagesProvider.notifier);
     for (final msg in res.data) {
       if (!provider.contains(msg)) provider.add(msg);
     }

@@ -14,11 +14,11 @@
   "sendTooltip": "نص بسيط",
   "sendFileTooltip": "إرسال ملف",
   "userAccountNavButtonTooltip": "نص بسيط",
-  "feedNavButtonTooltip": "نص بسيط",
+  "publicNavButtonTooltip": "نص بسيط",
   "usersNavButtonTooltip": "نص بسيط",
   "chatNavButtonTooltip": "نص بسيط",
   "netNavButtonTooltip": "نص بسيط",
-  "createFeedPostTooltip": "نص بسيط",
+  "createPublicPostTooltip": "نص بسيط",
   "submitPostTooltip": "نص بسيط",
   "newChatTooltip": "نص بسيط",
   "settings": "نص بسيط",
@@ -45,7 +45,7 @@
   "unblockUser": "نص بسيط",
   "addNodeCTA": "نص بسيط",
   "chatEmptyMessageHint": "نص بسيط",
-  "emptyFeedList": "نص بسيط",
+  "emptyPublicList": "نص بسيط",
   "emptyUsersList": "نص بسيط",
   "emptyChatsList": "نص بسيط",
   "verifyUserConfirmationMessage": "نص بسيط",
@@ -62,7 +62,7 @@
   "invalidPortMessage": "نص بسيط",
   "usernameLengthMessage": "يجب أن يتكون اسم المستخدم من حرفين على الأقل.",
 
-  "feedNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
+  "publicNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
   "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:",
   "notifyOnlyForVerifiedUsers": "إظهار الإخطارات التي تم التحقق منها فقط:"
 }

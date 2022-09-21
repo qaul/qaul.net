@@ -45,11 +45,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l18ns.feedNotificationsEnabled),
+                  Text(l18ns.publicNotificationsEnabled),
                   PlatformAwareSwitch(
-                    value: UserPrefsHelper().feedNotificationsEnabled,
+                    value: UserPrefsHelper().publicTabNotificationsEnabled,
                     onChanged: (val) {
-                      UserPrefsHelper().feedNotificationsEnabled = val;
+                      UserPrefsHelper().publicTabNotificationsEnabled = val;
                       setState(() {});
                     },
                   ),
@@ -98,7 +98,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   bool get _notificationsAreEnabled =>
-      UserPrefsHelper().chatNotificationsEnabled || UserPrefsHelper().feedNotificationsEnabled;
+      UserPrefsHelper().chatNotificationsEnabled || UserPrefsHelper().publicTabNotificationsEnabled;
 }
 
 class _InternetNodesList extends HookConsumerWidget {
