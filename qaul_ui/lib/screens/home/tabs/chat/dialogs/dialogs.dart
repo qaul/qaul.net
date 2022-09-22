@@ -221,3 +221,60 @@ class _InviteUsersToGroupDialogState
     );
   }
 }
+
+class _InviteDetailsDialog extends HookConsumerWidget {
+  const _InviteDetailsDialog(this.invite, {Key? key}) : super(key: key);
+
+  final GroupInvite invite;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final users = ref.watch(usersProvider);
+
+    final replyInvite = useCallback(({required bool accepted}) {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.replyToGroupInvite(
+        invite.groupDetails.conversationId,
+        accepted: accepted,
+      );
+
+      Navigator.pop(context);
+    }, []);
+
+    final sender = users.firstWhereOrNull((s) => s.id.equals(invite.senderId));
+
+    return AlertDialog(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Group Invite'),
+          IconButtonFactory.close(),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Group name: ${invite.groupDetails.name}'),
+              Text('Created at: ${invite.groupDetails.createdAt}'),
+              Text('Number of members: ${invite.groupDetails.members.length}'),
+              if (sender != null) ...[Text('Invited by: ${sender.name}')],
+            ],
+          ),
+          const SizedBox(height: 20),
+          QaulButton(
+            label: 'Accept',
+            onPressed: () => replyInvite(accepted: true),
+          ),
+          const SizedBox(height: 12),
+          QaulButton(
+            label: 'Decline',
+            onPressed: () => replyInvite(accepted: false),
+          ),
+        ],
+      ),
+    );
+  }
+}

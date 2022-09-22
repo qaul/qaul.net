@@ -44,4 +44,8 @@ class GroupInviteListNotifier extends StateNotifier<List<GroupInvite>> {
   }
 
   bool contains(GroupInvite invite) => state.contains(invite);
+
+  void filterInvitesNotIn(List<GroupInvite> list) {
+    state = [...state.where((invite) => list.contains(invite))];
+  }
 }
