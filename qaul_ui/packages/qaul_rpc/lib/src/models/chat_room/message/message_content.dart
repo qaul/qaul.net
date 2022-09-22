@@ -1,6 +1,5 @@
 part of '../chat_room.dart';
 
-
 abstract class MessageContent extends Equatable {
   const MessageContent();
 
@@ -55,6 +54,25 @@ class GroupEventContent extends MessageContent {
 
   final Uint8List userId;
   final GroupEventContentType type;
+
+  String toEventMessage(User user) {
+    String msgBase(String event) => '"${user.name}" has $event the group';
+
+    switch (type) {
+      case GroupEventContentType.none:
+        return '';
+      case GroupEventContentType.invited:
+        return msgBase('been invited to');
+      case GroupEventContentType.joined:
+        return msgBase('joined');
+      case GroupEventContentType.left:
+        return msgBase('left');
+      case GroupEventContentType.closed:
+        return 'The group has been closed';
+      case GroupEventContentType.removed:
+        return msgBase('been removed from');
+    }
+  }
 
   String get userIdBase58 => Base58Encode(userId);
 
