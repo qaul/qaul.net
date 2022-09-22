@@ -38,7 +38,8 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final l18ns = AppLocalizations.of(context);
 
-    final mobile = Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
+    final mobile =
+        Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
     final chatWidget = useState<Widget?>(null);
     final currentOpenChat = ref.watch(uiOpenChatProvider);
     useEffect(() {
@@ -48,8 +49,8 @@ class _ChatState extends _BaseTabState<_Chat> {
         return () {};
       }
 
-      final otherUser = users
-          .firstWhereOrNull((u) => u.conversationId?.equals(currentOpenChat.conversationId) ?? false);
+      final otherUser = users.firstWhereOrNull((u) =>
+          u.conversationId?.equals(currentOpenChat.conversationId) ?? false);
 
       if (otherUser == null && !currentOpenChat.isGroupChatRoom) {
         _log.warning('single-person room with unknown otherUser');
@@ -95,7 +96,7 @@ class _ChatState extends _BaseTabState<_Chat> {
               var theme = Theme.of(context).textTheme;
 
               if (i < groupInvites.length) {
-                return const Text('group invite');
+                return _GroupInviteTile(invite: groupInvites[i]);
               }
 
               final room = filteredRooms[i - groupInvites.length];
@@ -263,5 +264,69 @@ class _ChatState extends _BaseTabState<_Chat> {
       _log.fine('overview type ${message.runtimeType} has not been rendered');
       return const SizedBox.shrink();
     }
+  }
+}
+
+class _GroupInviteTile extends HookConsumerWidget {
+  const _GroupInviteTile({
+    Key? key,
+    required this.invite,
+  }) : super(key: key);
+
+  final GroupInvite invite;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      leading: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          QaulAvatar.groupSmall(),
+          const Icon(Icons.add, size: 12, color: Colors.black),
+        ],
+      ),
+      title: const Text('Group Invite'),
+      subtitle: Text(
+        invite.groupDetails.name ?? '',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.small(
+            elevation: 0,
+            focusElevation: 0,
+            hoverElevation: 0,
+            highlightElevation: 0,
+            backgroundColor: Colors.green.shade300,
+            foregroundColor: Colors.white,
+            onPressed: () {
+              final worker = ref.read(qaulWorkerProvider);
+              worker.replyToGroupInvite(
+                invite.groupDetails.conversationId,
+                accepted: true,
+              );
+            },
+            child: const Icon(Icons.check),
+          ),
+          const SizedBox(width: 4),
+          FloatingActionButton.small(
+            elevation: 0,
+            focusElevation: 0,
+            hoverElevation: 0,
+            highlightElevation: 0,
+            backgroundColor: Colors.lightBlue,
+            foregroundColor: Colors.white,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => _InviteDetailsDialog(invite),
+            ),
+            child: const Icon(Icons.more_vert),
+          ),
+        ],
+      ),
+    );
   }
 }

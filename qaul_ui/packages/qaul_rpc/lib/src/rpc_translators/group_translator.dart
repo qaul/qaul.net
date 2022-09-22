@@ -86,6 +86,7 @@ class GroupTranslator extends RpcModuleTranslator {
           invites.update(invite);
         }
       }
+      invites.filterInvitesNotIn(res.data);
     }
   }
 }
