@@ -310,15 +310,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             customMessageBuilder: (message, {required int messageWidth}) {
               final event = GroupEventContent.fromJson(message.metadata!);
-              final u = ref
+              final usr = ref
                   .read(usersProvider)
-                  .firstWhereOrNull((e) => e.idBase58 == event.userIdBase58);
-              if (u == null || event.type == GroupEventContentType.none) {
+                  .firstWhereOrNull((u) => u.idBase58 == event.userIdBase58);
+              if (usr == null || event.type == GroupEventContentType.none) {
                 return const SizedBox.shrink();
               }
 
               return Text(
-                '"${u.name}" has ${message.type == GroupEventContentType.joined ? 'joined' : 'left'} the group',
+                event.toEventMessage(usr),
                 style: Theme.of(context)
                     .textTheme
                     .bodyText1!
@@ -355,6 +355,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     required types.Message message,
     required bool nextMessageInGroup,
   }) {
+    if (message.type == types.MessageType.custom) {
+      return Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
+        margin: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey, width: 0.5),
+            borderRadius: const BorderRadius.all(Radius.circular(20))),
+        child: child,
+      );
+    }
+
     return Builder(builder: (context) {
       return Bubble(
         color: user.toInternalUser().id != message.author.id
@@ -403,7 +415,9 @@ extension _MessageExtension on Message {
       var filePath = (content as FileShareContent).filePath(read);
 
       String? mimeStr = lookupMimeType(filePath);
-      if (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr) && !filePath.endsWith('svg')) {
+      if (mimeStr != null &&
+          RegExp('image/.*').hasMatch(mimeStr) &&
+          !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
           author: author.toInternalUser(),
