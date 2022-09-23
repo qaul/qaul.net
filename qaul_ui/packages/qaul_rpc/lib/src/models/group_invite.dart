@@ -7,6 +7,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../qaul_rpc.dart';
 import '../generated/services/group/group_rpc.pb.dart';
 
+final groupInvitesProvider =
+    StateNotifierProvider<GroupInviteListNotifier, List<GroupInvite>>(
+        (_) => GroupInviteListNotifier());
+
 class GroupInvite extends Equatable {
   const GroupInvite({
     required this.senderId,

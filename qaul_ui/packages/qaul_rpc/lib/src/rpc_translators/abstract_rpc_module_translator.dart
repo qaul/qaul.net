@@ -19,9 +19,7 @@ import '../generated/services/chat/chatfile_rpc.pb.dart';
 import '../generated/services/dtn/dtn_rpc.pb.dart';
 import '../generated/services/feed/feed.pb.dart';
 import '../generated/services/group/group_rpc.pb.dart';
-import '../models/dtn_configuration.dart';
 import '../models/models.dart';
-import '../providers.dart';
 
 part 'ble_translator.dart';
 

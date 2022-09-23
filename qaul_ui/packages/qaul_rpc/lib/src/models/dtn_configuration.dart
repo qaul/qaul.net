@@ -1,7 +1,10 @@
 import 'package:collection/collection.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/dtn/dtn_rpc.pb.dart';
 import 'models.dart';
+
+final dtnConfigurationProvider = StateProvider<DTNConfiguration?>((_) => null);
 
 class DTNConfiguration {
   DTNConfiguration._(this.totalSize, this.users);
