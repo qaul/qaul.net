@@ -218,40 +218,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             customBottomWidget: _CustomInput(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
-              onAttachmentPressed: ({types.PartialText? text}) async {
-                final result = await FilePicker.platform.pickFiles();
-
-                if (result != null && result.files.single.path != null) {
-                  File file = File(result.files.single.path!);
-
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (_) {
-                      return _SendFileDialog(
-                        file,
-                        room: room,
-                        partialMessage: text?.text,
-                        onSendPressed: (description) {
-                          final worker = ref.read(qaulWorkerProvider);
-                          worker.sendFile(
-                            pathName: file.path,
-                            conversationId: room.conversationId,
-                            description: description.text,
-                          );
-                        },
-                      );
-                    },
-                  );
-                }
-              },
-              onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
+              onAttachmentPressed: (room.messages?.isEmpty ?? true)
                   ? null
                   : ({types.PartialText? text}) async {
-                      final result = await ImagePicker()
-                          .pickImage(source: ImageSource.camera);
+                      final result = await FilePicker.platform.pickFiles();
 
-                      if (result != null) {
-                        File file = File(result.path);
+                      if (result != null && result.files.single.path != null) {
+                        File file = File(result.files.single.path!);
 
                         showModalBottomSheet(
                           context: context,
@@ -273,6 +246,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         );
                       }
                     },
+              onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                      ? null
+                      : ({types.PartialText? text}) async {
+                          final result = await ImagePicker()
+                              .pickImage(source: ImageSource.camera);
+
+                          if (result != null) {
+                            File file = File(result.path);
+
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) {
+                                return _SendFileDialog(
+                                  file,
+                                  room: room,
+                                  partialMessage: text?.text,
+                                  onSendPressed: (description) {
+                                    final worker = ref.read(qaulWorkerProvider);
+                                    worker.sendFile(
+                                      pathName: file.path,
+                                      conversationId: room.conversationId,
+                                      description: description.text,
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          }
+                        },
             ),
             onMessageTap: (context, message) async {
               if (message is! types.FileMessage) return;
@@ -403,7 +407,9 @@ extension _MessageExtension on Message {
       var filePath = (content as FileShareContent).filePath(read);
 
       String? mimeStr = lookupMimeType(filePath);
-      if (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr) && !filePath.endsWith('svg')) {
+      if (mimeStr != null &&
+          RegExp('image/.*').hasMatch(mimeStr) &&
+          !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
           author: author.toInternalUser(),
