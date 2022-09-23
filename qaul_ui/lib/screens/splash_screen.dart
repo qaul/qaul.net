@@ -40,7 +40,8 @@ class SplashScreen extends HookConsumerWidget {
     final startAnimationPlayed = useState(false);
 
     useEffect(() {
-      Future.delayed(_animationDuration + const Duration(milliseconds: 500)).then(
+      const gapBetweenFetchAndRouting = Duration(milliseconds: 500);
+      Future.delayed(_animationDuration + gapBetweenFetchAndRouting).then(
         (_) => startAnimationPlayed.value = true,
       );
       return () {};
@@ -49,38 +50,35 @@ class SplashScreen extends HookConsumerWidget {
     final i10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(width: double.maxFinite),
-            SvgPicture.asset('assets/logo/logo.svg', width: 320, height: 320),
-            AnimatedOpacity(
-              opacity: startAnimationPlayed.value == false ? 0 : 1,
-              duration: const Duration(milliseconds: 200),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const LanguageSelectDropDown(),
-                  const SizedBox(height: 20),
-                  QaulButton(
-                    label: i10n.createUserAccount,
-                    onPressed: () => Navigator.pushReplacementNamed(
-                        context, NavigationHelper.createAccount),
+        children: [
+          const SizedBox(width: double.maxFinite),
+          SvgPicture.asset('assets/logo/logo.svg', width: 320, height: 320),
+          AnimatedOpacity(
+            opacity: startAnimationPlayed.value == false ? 0 : 1,
+            duration: const Duration(milliseconds: 200),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const LanguageSelectDropDown(),
+                const SizedBox(height: 20),
+                QaulButton(
+                  label: i10n.createUserAccount,
+                  onPressed: () => Navigator.pushReplacementNamed(
+                      context, NavigationHelper.createAccount),
+                ),
+                const SizedBox(height: 20),
+                QaulButton(
+                  label: i10n.learnMore,
+                  onPressed: () => launchUrl(
+                    Uri.parse('https://qaul.net'),
                   ),
-                  const SizedBox(height: 20),
-                  QaulButton(
-                    label: i10n.learnMore,
-                    onPressed: () => launchUrl(
-                      Uri.parse('https://qaul.net'),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
