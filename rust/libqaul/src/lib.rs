@@ -83,10 +83,14 @@ enum EventType {
     Retransmit(bool),
 }
 
-/// initialize and start libqaul
+/// initialize and start libqaul with a optional custom configuration options
 /// and poll all the necessary modules
 ///
-/// Provide a path where libqaul can save all data.
+/// Input Values:
+///
+/// * Provide a path where libqaul can save all data.
+/// * Optionally you can provide the following configuration values:
+///   * listening port of the Internet connection module (default = randomly assigned)
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
     log::trace!("start initializing libqaul");
 
@@ -687,14 +691,4 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
             }
         }
     }
-}
-
-/// ANDROID TESTING
-/// initialize libqaul for android
-/// and poll all the necessary modules
-///
-/// This function is here to test the initialization of libqaul
-/// on android.
-pub async fn start_android(storage_path: String) -> () {
-    start(storage_path, None).await
 }

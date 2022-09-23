@@ -30,12 +30,22 @@ mod android;
 /// start libqaul in an own thread
 ///
 /// Provide the location for storage, all data of qaul will be saved there.
-pub fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) {
+pub fn start(storage_path: String) {
+    self::start_with_config(storage_path, None);
+}
+
+/// start libqaul in an own thread
+///
+/// * Provide the location for storage, all data of qaul will be saved there.
+/// * Optionally provide some configuration options, to initially configure libqaul to your needs.
+///   the following options can be provided:
+///   * Internet module listening port. By default this port is randomly assigned.
+pub fn start_with_config(storage_path: String, config: Option<BTreeMap<String, String>>) {
     // Spawn new thread
     thread::spawn(move || {
         block_on(async move {
             // start libqaul
-            crate::start(storage_path, def_config).await;
+            crate::start(storage_path, config).await;
         })
     });
 }
@@ -71,7 +81,7 @@ pub fn start_desktop() {
         log::trace!("start libqaul");
 
         // start the library with the path
-        start(path.to_str().unwrap().to_string(), None);
+        self::start_with_config(path.to_str().unwrap().to_string(), None);
     } else {
         log::error!("Configuration path couldn't be created.");
     }
@@ -83,13 +93,8 @@ pub fn start_desktop() {
 /// Hand over the path on the file system
 /// where the app is allowed to store data.
 pub fn start_android(storage_path: String) {
-    // Spawn new thread
-    thread::spawn(move || {
-        block_on(async move {
-            // start libqaul
-            crate::start_android(storage_path).await;
-        })
-    });
+    // start libqaul in an own thread
+    self::start_with_config(storage_path, None);
 }
 
 /// Check if libqaul finished initializing

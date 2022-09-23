@@ -33,7 +33,7 @@ pub extern "C" fn start(s: *const c_char) {
 
     let r_str = c_str.to_str().unwrap();
     println!("{}", r_str.to_string());
-    super::start(r_str.to_string(), None);
+    super::start(r_str.to_string());
 }
 
 /// start libqaul on desktop operating systems

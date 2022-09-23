@@ -66,7 +66,7 @@ async fn main() {
     }
 
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start(storage_path, Some(def_config.clone()));
+    libqaul::api::start_with_config(storage_path, Some(def_config.clone()));
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {
