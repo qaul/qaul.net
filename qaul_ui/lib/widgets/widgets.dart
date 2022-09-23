@@ -36,3 +36,5 @@ part 'theme_select_dropdown.dart';
 part 'qaul_avatar.dart';
 
 part 'qaul_list_tile.dart';
+
+part 'qaul_table.dart';
