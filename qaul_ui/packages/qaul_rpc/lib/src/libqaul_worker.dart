@@ -27,6 +27,11 @@ import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
+final qaulWorkerProvider =
+    Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
+
+final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);
+
 class LibqaulWorker {
   LibqaulWorker(Reader reader) : _reader = reader {
     _init();

@@ -20,6 +20,8 @@ part 'message/message.dart';
 
 part 'message/message_content.dart';
 
+part 'providers.dart';
+
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
   const ChatRoom._({

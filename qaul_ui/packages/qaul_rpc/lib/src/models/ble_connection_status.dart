@@ -2,6 +2,9 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+final bleStatusProvider = StateProvider<BleConnectionStatus?>((_) => null);
 
 class BleConnectionStatus {
   final Uint8List bleId;

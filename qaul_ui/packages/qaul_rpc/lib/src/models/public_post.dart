@@ -5,6 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
 
+final publicMessagesProvider =
+    StateNotifierProvider<PublicPostListNotifier, List<PublicPost>>(
+  (_) => PublicPostListNotifier(messages: []),
+);
+
 class PublicPost extends Equatable {
   const PublicPost({
     this.senderId,
@@ -39,11 +44,11 @@ extension FMExtension on FeedMessage {
         messageIdBase58: messageIdBase58,
         content: content,
         sendTime: DateTime.fromMillisecondsSinceEpoch(timestampSent.toInt()),
-        receiveTime: DateTime.fromMillisecondsSinceEpoch(timestampReceived.toInt()),
+        receiveTime:
+            DateTime.fromMillisecondsSinceEpoch(timestampReceived.toInt()),
       );
 }
 
-// Maybe using a Stream would be simpler. Just creating this class to facilitate manipulating StateNotifierProvider
 class PublicPostListNotifier extends StateNotifier<List<PublicPost>> {
   PublicPostListNotifier({List<PublicPost>? messages}) : super(messages ?? []);
 
@@ -55,9 +60,9 @@ class PublicPostListNotifier extends StateNotifier<List<PublicPost>> {
     return !state
         .indexWhere(
           (m) =>
-      m.senderIdBase58 == message.senderIdBase58 &&
-          m.messageIdBase58 == message.messageIdBase58,
-    )
+              m.senderIdBase58 == message.senderIdBase58 &&
+              m.messageIdBase58 == message.messageIdBase58,
+        )
         .isNegative;
   }
 }

@@ -4,6 +4,12 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+final defaultUserProvider = StateProvider<User?>((ref) => null);
+
+final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(
+      (ref) => UserListNotifier(users: const []),
+);
+
 enum ConnectionStatus { online, reachable, offline }
 
 enum ConnectionType { lan, internet, ble, local }

@@ -2,6 +2,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/chat/chatfile_rpc.pb.dart';
 
+final fileHistoryEntitiesProvider =
+    StateNotifierProvider<FileHistoryEntityNotifier, List<FileHistoryEntity>>(
+  (ref) => FileHistoryEntityNotifier(files: const []),
+);
+
 class FileHistoryEntity {
   FileHistoryEntity({
     required this.id,
