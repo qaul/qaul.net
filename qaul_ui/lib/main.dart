@@ -53,7 +53,8 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
               content: const Text('Please restart the application.'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, NavigationHelper.support),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, NavigationHelper.support),
                   child: const Text('Go to support'),
                 ),
               ],

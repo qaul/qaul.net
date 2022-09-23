@@ -12,7 +12,7 @@ class GroupTranslator extends RpcModuleTranslator {
     switch (message.whichMessage()) {
       case Group_Message.groupInfoResponse:
         return RpcTranslatorResponse(
-          Modules.GROUP,
+          type,
           ChatRoom.fromRpcGroupInfo(message.ensureGroupInfoResponse(), users),
         );
       case Group_Message.groupCreateResponse:
@@ -36,21 +36,21 @@ class GroupTranslator extends RpcModuleTranslator {
             .groups
             .map((g) => ChatRoom.fromRpcGroupInfo(g, users))
             .toList();
-        return RpcTranslatorResponse(Modules.GROUP, groups);
+        return RpcTranslatorResponse(type, groups);
       case Group_Message.groupInvitedResponse:
         final invites = message
             .ensureGroupInvitedResponse()
             .invited
             .map((e) => GroupInvite.fromRpcGroupInvited(e, users))
             .toList();
-        return RpcTranslatorResponse(Modules.GROUP, invites);
+        return RpcTranslatorResponse(type, invites);
       default:
         return super.decodeMessageBytes(data, reader);
     }
   }
 
   RpcTranslatorResponse _receiveGroupResultResponse(GroupResult res) {
-    if (res.status == true) return RpcTranslatorResponse(Modules.GROUP, true);
+    if (res.status == true) return RpcTranslatorResponse(type, true);
     throw ArgumentError.value(res.message, 'GroupTranslator');
   }
 
