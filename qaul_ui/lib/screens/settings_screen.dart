@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
-import '../decorators/loading_decorator.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
@@ -34,7 +33,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
+          padding:
+              MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
           child: Column(
             children: [
               const LanguageSelectDropDown(),
@@ -98,7 +98,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   bool get _notificationsAreEnabled =>
-      UserPrefsHelper().chatNotificationsEnabled || UserPrefsHelper().publicTabNotificationsEnabled;
+      UserPrefsHelper().chatNotificationsEnabled ||
+      UserPrefsHelper().publicTabNotificationsEnabled;
 }
 
 class _InternetNodesList extends HookConsumerWidget {
@@ -133,84 +134,47 @@ class _InternetNodesList extends HookConsumerWidget {
     });
 
     final l18ns = AppLocalizations.of(context);
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Icon(CupertinoIcons.globe),
-            const SizedBox(width: 8.0),
-            Text(l18ns!.internetNodes),
-          ],
-        ),
-        const SizedBox(height: 8.0),
-        LoadingDecorator(
-          isLoading: loading.value,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.symmetric(
-                  horizontal: loading.value || nodes.isEmpty
-                      ? BorderSide.none
-                      : BorderSide(color: Theme.of(context).dividerColor)),
-            ),
-            child: nodes.isEmpty
-                ? const SizedBox(width: 28, height: 20)
-                : ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: nodes.length,
-                    separatorBuilder: (_, __) => const Divider(height: 12.0),
-                    itemBuilder: (context, i) {
-                      var nodeAddr = nodes[i].address;
-                      return ListTile(
-                        contentPadding: const EdgeInsets.all(4.0),
-                        title: Text(
-                          nodeAddr,
-                          style: Theme.of(context).textTheme.subtitle2,
-                        ),
-                        trailing: IconButton(
-                          splashRadius: 24,
-                          iconSize: 20,
-                          icon: const Icon(CupertinoIcons.delete),
-                          onPressed: () async => removeNode(nodeAddr),
-                        ),
-                        onTap: () async {
-                          final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
-                          final port = nodeAddr.split('/').last;
-                          final res = await showDialog(
-                            context: context,
-                            builder: (_) => _AddNodeDialog(ip: ip, port: port),
-                          );
+    return QaulTable(
+      titleIcon: CupertinoIcons.globe,
+      title: l18ns!.internetNodes,
+      addRowLabel: l18ns.addNodeCTA,
+      rowCount: nodes.length,
+      onAddRowPressed: () async {
+        final res = await showDialog(
+            context: context, builder: (_) => _AddNodeDialog());
 
-                          if (res is! String) return;
-                          removeNode(nodeAddr);
-                          addNode(res);
-                        },
-                      );
-                    },
-                  ),
+        if (res is! String) return;
+
+        addNode(res);
+      },
+      rowBuilder: (context, i) {
+        var nodeAddr = nodes[i].address;
+        return ListTile(
+          contentPadding: const EdgeInsets.all(4.0),
+          title: Text(
+            nodeAddr,
+            style: Theme.of(context).textTheme.subtitle2,
           ),
-        ),
-        const SizedBox(height: 12.0),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              splashRadius: 24,
-              onPressed: () async {
-                final res = await showDialog(context: context, builder: (_) => _AddNodeDialog());
+          trailing: IconButton(
+            splashRadius: 24,
+            iconSize: 20,
+            icon: const Icon(CupertinoIcons.delete),
+            onPressed: () async => removeNode(nodeAddr),
+          ),
+          onTap: () async {
+            final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
+            final port = nodeAddr.split('/').last;
+            final res = await showDialog(
+              context: context,
+              builder: (_) => _AddNodeDialog(ip: ip, port: port),
+            );
 
-                if (res is! String) return;
-
-                addNode(res);
-              },
-            ),
-            const SizedBox(width: 12.0),
-            Text(l18ns.addNodeCTA),
-          ],
-        ),
-      ],
+            if (res is! String) return;
+            removeNode(nodeAddr);
+            addNode(res);
+          },
+        );
+      },
     );
   }
 }
@@ -252,7 +216,8 @@ class _AddNodeDialog extends HookWidget {
     ];
 
     return AlertDialog(
-      title: orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
+      title:
+          orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
       content: Form(
         key: _formKey,
         child: Column(
@@ -307,8 +272,8 @@ class _AddNodeDialog extends HookWidget {
 
   SizedBox get _spacer => const SizedBox(width: 4, height: 4);
 
-  TextStyle get _fixedTextStyle =>
-      TextStyle(fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
+  TextStyle get _fixedTextStyle => TextStyle(
+      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
 
   InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
         isDense: true,
