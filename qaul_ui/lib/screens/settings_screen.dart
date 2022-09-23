@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
+import '../decorators/cron_task_decorator.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
@@ -108,73 +109,83 @@ class _InternetNodesList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nodes = ref.watch(connectedNodesProvider);
-    final loading = useState(true);
-    final isMounted = useIsMounted();
 
-    final removeNode = useCallback((String nodeAddress) async {
-      loading.value = true;
+    final removeNode = useCallback((String nodeAddress) {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.removeNode(nodeAddress);
-      if (!isMounted()) return;
-      loading.value = false;
-    }, [UniqueKey()]);
+      worker.removeNode(nodeAddress);
+    }, []);
 
-    final addNode = useCallback((String nodeAddress) async {
-      loading.value = true;
+    final addNode = useCallback((String nodeAddress) {
       final worker = ref.read(qaulWorkerProvider);
-      await worker.addNode(nodeAddress);
-      if (!isMounted()) return;
-      loading.value = false;
-    }, [UniqueKey()]);
+      worker.addNode(nodeAddress);
+    }, []);
 
-    useMemoized(() async {
+    final setNodeState = useCallback((String address, bool value) {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.setNodeState(address, active: value);
+    }, []);
+
+    final refreshNodes = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
       await worker.requestNodes();
-      loading.value = false;
-    });
+    }, []);
 
     final l18ns = AppLocalizations.of(context);
-    return QaulTable(
-      titleIcon: CupertinoIcons.globe,
-      title: l18ns!.internetNodes,
-      addRowLabel: l18ns.addNodeCTA,
-      rowCount: nodes.length,
-      onAddRowPressed: () async {
-        final res = await showDialog(
-            context: context, builder: (_) => _AddNodeDialog());
+    return CronTaskDecorator(
+      callback: refreshNodes,
+      schedule: const Duration(milliseconds: 1000),
+      child: QaulTable(
+        titleIcon: CupertinoIcons.globe,
+        title: l18ns!.internetNodes,
+        addRowLabel: l18ns.addNodeCTA,
+        rowCount: nodes.length,
+        onAddRowPressed: () async {
+          final res = await showDialog(
+              context: context, builder: (_) => _AddNodeDialog());
 
-        if (res is! String) return;
+          if (res is! String) return;
 
-        addNode(res);
-      },
-      rowBuilder: (context, i) {
-        var nodeAddr = nodes[i].address;
-        return ListTile(
-          contentPadding: const EdgeInsets.all(4.0),
-          title: Text(
-            nodeAddr,
-            style: Theme.of(context).textTheme.subtitle2,
-          ),
-          trailing: IconButton(
-            splashRadius: 24,
-            iconSize: 20,
-            icon: const Icon(CupertinoIcons.delete),
-            onPressed: () async => removeNode(nodeAddr),
-          ),
-          onTap: () async {
-            final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
-            final port = nodeAddr.split('/').last;
-            final res = await showDialog(
-              context: context,
-              builder: (_) => _AddNodeDialog(ip: ip, port: port),
-            );
+          addNode(res);
+        },
+        rowBuilder: (context, i) {
+          var node = nodes[i];
+          var nodeAddr = node.address;
+          return ListTile(
+            contentPadding: const EdgeInsets.all(4.0),
+            title: Text(
+              nodeAddr,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PlatformAwareSwitch(
+                  value: node.isActive,
+                  onChanged: (val) => setNodeState(nodeAddr, val),
+                ),
+                IconButton(
+                  splashRadius: 24,
+                  iconSize: 20,
+                  icon: const Icon(CupertinoIcons.delete),
+                  onPressed: () async => removeNode(nodeAddr),
+                ),
+              ],
+            ),
+            onTap: () async {
+              final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
+              final port = nodeAddr.split('/').last;
+              final res = await showDialog(
+                context: context,
+                builder: (_) => _AddNodeDialog(ip: ip, port: port),
+              );
 
-            if (res is! String) return;
-            removeNode(nodeAddr);
-            addNode(res);
-          },
-        );
-      },
+              if (res is! String) return;
+              removeNode(nodeAddr);
+              addNode(res);
+            },
+          );
+        },
+      ),
     );
   }
 }
