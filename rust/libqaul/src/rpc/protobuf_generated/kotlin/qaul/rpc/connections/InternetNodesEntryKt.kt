@@ -23,6 +23,10 @@ object InternetNodesEntryKt {
     internal fun _build(): qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry = _builder.build()
 
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      */
     var address: kotlin.String
@@ -33,10 +37,39 @@ object InternetNodesEntryKt {
         _builder.setAddress(value)
       }
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      */
     fun clearAddress() {
       _builder.clearAddress()
+    }
+
+    /**
+     * <pre>
+     * enabled
+     * </pre>
+     *
+     * <code>bool enabled = 2;</code>
+     */
+    var enabled: kotlin.Boolean
+      @JvmName("getEnabled")
+      get() = _builder.getEnabled()
+      @JvmName("setEnabled")
+      set(value) {
+        _builder.setEnabled(value)
+      }
+    /**
+     * <pre>
+     * enabled
+     * </pre>
+     *
+     * <code>bool enabled = 2;</code>
+     */
+    fun clearEnabled() {
+      _builder.clearEnabled()
     }
   }
 }

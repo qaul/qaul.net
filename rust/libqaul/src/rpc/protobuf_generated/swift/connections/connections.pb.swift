@@ -41,8 +41,11 @@ enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
   /// Successfully removed the address
   case removeSuccess // = 5
 
+  /// Successfully changed state of the address
+  case stateSuccess // = 6
+
   /// Error: Address not found
-  case removeErrorNotFound // = 6
+  case removeErrorNotFound // = 7
   case UNRECOGNIZED(Int)
 
   init() {
@@ -55,7 +58,8 @@ enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
     case 1: self = .addSuccess
     case 2: self = .addErrorInvalid
     case 5: self = .removeSuccess
-    case 6: self = .removeErrorNotFound
+    case 6: self = .stateSuccess
+    case 7: self = .removeErrorNotFound
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -66,7 +70,8 @@ enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
     case .addSuccess: return 1
     case .addErrorInvalid: return 2
     case .removeSuccess: return 5
-    case .removeErrorNotFound: return 6
+    case .stateSuccess: return 6
+    case .removeErrorNotFound: return 7
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -82,6 +87,7 @@ extension Qaul_Rpc_Connections_Info: CaseIterable {
     .addSuccess,
     .addErrorInvalid,
     .removeSuccess,
+    .stateSuccess,
     .removeErrorNotFound,
   ]
 }
@@ -136,6 +142,16 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesRemove(newValue)}
   }
 
+  /// Update an internet node state.
+  /// libqaul returns an internet_nodes_list message.
+  var internetNodesState: Qaul_Rpc_Connections_InternetNodesEntry {
+    get {
+      if case .internetNodesState(let v)? = message {return v}
+      return Qaul_Rpc_Connections_InternetNodesEntry()
+    }
+    set {message = .internetNodesState(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
@@ -151,6 +167,9 @@ struct Qaul_Rpc_Connections_Connections {
     /// Remove an internet node address.
     /// libqaul returns an internet_nodes_list message.
     case internetNodesRemove(Qaul_Rpc_Connections_InternetNodesEntry)
+    /// Update an internet node state.
+    /// libqaul returns an internet_nodes_list message.
+    case internetNodesState(Qaul_Rpc_Connections_InternetNodesEntry)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Connections_Connections.OneOf_Message, rhs: Qaul_Rpc_Connections_Connections.OneOf_Message) -> Bool {
@@ -172,6 +191,10 @@ struct Qaul_Rpc_Connections_Connections {
       }()
       case (.internetNodesRemove, .internetNodesRemove): return {
         guard case .internetNodesRemove(let l) = lhs, case .internetNodesRemove(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.internetNodesState, .internetNodesState): return {
+        guard case .internetNodesState(let l) = lhs, case .internetNodesState(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -229,7 +252,11 @@ struct Qaul_Rpc_Connections_InternetNodesEntry {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// address
   var address: String = String()
+
+  /// enabled
+  var enabled: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -246,7 +273,8 @@ extension Qaul_Rpc_Connections_Info: SwiftProtobuf._ProtoNameProviding {
     1: .same(proto: "ADD_SUCCESS"),
     2: .same(proto: "ADD_ERROR_INVALID"),
     5: .same(proto: "REMOVE_SUCCESS"),
-    6: .same(proto: "REMOVE_ERROR_NOT_FOUND"),
+    6: .same(proto: "STATE_SUCCESS"),
+    7: .same(proto: "REMOVE_ERROR_NOT_FOUND"),
   ]
 }
 
@@ -257,6 +285,7 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
     2: .standard(proto: "internet_nodes_list"),
     3: .standard(proto: "internet_nodes_add"),
     4: .standard(proto: "internet_nodes_remove"),
+    5: .standard(proto: "internet_nodes_state"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -317,6 +346,19 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
           self.message = .internetNodesRemove(v)
         }
       }()
+      case 5: try {
+        var v: Qaul_Rpc_Connections_InternetNodesEntry?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .internetNodesState(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .internetNodesState(v)
+        }
+      }()
       default: break
       }
     }
@@ -343,6 +385,10 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
     case .internetNodesRemove?: try {
       guard case .internetNodesRemove(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .internetNodesState?: try {
+      guard case .internetNodesState(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case nil: break
     }
@@ -417,6 +463,7 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
   static let protoMessageName: String = _protobuf_package + ".InternetNodesEntry"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "address"),
+    2: .same(proto: "enabled"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -426,6 +473,7 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.address) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.enabled) }()
       default: break
       }
     }
@@ -435,11 +483,15 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
     if !self.address.isEmpty {
       try visitor.visitSingularStringField(value: self.address, fieldNumber: 1)
     }
+    if self.enabled != false {
+      try visitor.visitSingularBoolField(value: self.enabled, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Connections_InternetNodesEntry, rhs: Qaul_Rpc_Connections_InternetNodesEntry) -> Bool {
     if lhs.address != rhs.address {return false}
+    if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

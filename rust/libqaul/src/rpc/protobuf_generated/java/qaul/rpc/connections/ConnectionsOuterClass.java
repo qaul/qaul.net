@@ -62,12 +62,20 @@ public final class ConnectionsOuterClass {
     REMOVE_SUCCESS(5),
     /**
      * <pre>
+     * Successfully changed state of the address
+     * </pre>
+     *
+     * <code>STATE_SUCCESS = 6;</code>
+     */
+    STATE_SUCCESS(6),
+    /**
+     * <pre>
      * Error: Address not found
      * </pre>
      *
-     * <code>REMOVE_ERROR_NOT_FOUND = 6;</code>
+     * <code>REMOVE_ERROR_NOT_FOUND = 7;</code>
      */
-    REMOVE_ERROR_NOT_FOUND(6),
+    REMOVE_ERROR_NOT_FOUND(7),
     UNRECOGNIZED(-1),
     ;
 
@@ -109,12 +117,20 @@ public final class ConnectionsOuterClass {
     public static final int REMOVE_SUCCESS_VALUE = 5;
     /**
      * <pre>
+     * Successfully changed state of the address
+     * </pre>
+     *
+     * <code>STATE_SUCCESS = 6;</code>
+     */
+    public static final int STATE_SUCCESS_VALUE = 6;
+    /**
+     * <pre>
      * Error: Address not found
      * </pre>
      *
-     * <code>REMOVE_ERROR_NOT_FOUND = 6;</code>
+     * <code>REMOVE_ERROR_NOT_FOUND = 7;</code>
      */
-    public static final int REMOVE_ERROR_NOT_FOUND_VALUE = 6;
+    public static final int REMOVE_ERROR_NOT_FOUND_VALUE = 7;
 
 
     public final int getNumber() {
@@ -145,7 +161,8 @@ public final class ConnectionsOuterClass {
         case 1: return ADD_SUCCESS;
         case 2: return ADD_ERROR_INVALID;
         case 5: return REMOVE_SUCCESS;
-        case 6: return REMOVE_ERROR_NOT_FOUND;
+        case 6: return STATE_SUCCESS;
+        case 7: return REMOVE_ERROR_NOT_FOUND;
         default: return null;
       }
     }
@@ -326,6 +343,36 @@ public final class ConnectionsOuterClass {
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesRemoveOrBuilder();
 
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     * @return Whether the internetNodesState field is set.
+     */
+    boolean hasInternetNodesState();
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     * @return The internetNodesState.
+     */
+    qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesState();
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     */
+    qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesStateOrBuilder();
+
     public qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase getMessageCase();
   }
   /**
@@ -433,6 +480,20 @@ public final class ConnectionsOuterClass {
               messageCase_ = 4;
               break;
             }
+            case 42: {
+              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder subBuilder = null;
+              if (messageCase_ == 5) {
+                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_).toBuilder();
+              }
+              message_ =
+                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
+                message_ = subBuilder.buildPartial();
+              }
+              messageCase_ = 5;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -476,6 +537,7 @@ public final class ConnectionsOuterClass {
       INTERNET_NODES_LIST(2),
       INTERNET_NODES_ADD(3),
       INTERNET_NODES_REMOVE(4),
+      INTERNET_NODES_STATE(5),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -497,6 +559,7 @@ public final class ConnectionsOuterClass {
           case 2: return INTERNET_NODES_LIST;
           case 3: return INTERNET_NODES_ADD;
           case 4: return INTERNET_NODES_REMOVE;
+          case 5: return INTERNET_NODES_STATE;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -696,6 +759,52 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
     }
 
+    public static final int INTERNET_NODES_STATE_FIELD_NUMBER = 5;
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     * @return Whether the internetNodesState field is set.
+     */
+    @java.lang.Override
+    public boolean hasInternetNodesState() {
+      return messageCase_ == 5;
+    }
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     * @return The internetNodesState.
+     */
+    @java.lang.Override
+    public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesState() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+      }
+      return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesStateOrBuilder() {
+      if (messageCase_ == 5) {
+         return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+      }
+      return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -722,6 +831,9 @@ public final class ConnectionsOuterClass {
       if (messageCase_ == 4) {
         output.writeMessage(4, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
       }
+      if (messageCase_ == 5) {
+        output.writeMessage(5, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -746,6 +858,10 @@ public final class ConnectionsOuterClass {
       if (messageCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
+      }
+      if (messageCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -780,6 +896,10 @@ public final class ConnectionsOuterClass {
           if (!getInternetNodesRemove()
               .equals(other.getInternetNodesRemove())) return false;
           break;
+        case 5:
+          if (!getInternetNodesState()
+              .equals(other.getInternetNodesState())) return false;
+          break;
         case 0:
         default:
       }
@@ -810,6 +930,10 @@ public final class ConnectionsOuterClass {
         case 4:
           hash = (37 * hash) + INTERNET_NODES_REMOVE_FIELD_NUMBER;
           hash = (53 * hash) + getInternetNodesRemove().hashCode();
+          break;
+        case 5:
+          hash = (37 * hash) + INTERNET_NODES_STATE_FIELD_NUMBER;
+          hash = (53 * hash) + getInternetNodesState().hashCode();
           break;
         case 0:
         default:
@@ -1007,6 +1131,13 @@ public final class ConnectionsOuterClass {
             result.message_ = internetNodesRemoveBuilder_.build();
           }
         }
+        if (messageCase_ == 5) {
+          if (internetNodesStateBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = internetNodesStateBuilder_.build();
+          }
+        }
         result.messageCase_ = messageCase_;
         onBuilt();
         return result;
@@ -1071,6 +1202,10 @@ public final class ConnectionsOuterClass {
           }
           case INTERNET_NODES_REMOVE: {
             mergeInternetNodesRemove(other.getInternetNodesRemove());
+            break;
+          }
+          case INTERNET_NODES_STATE: {
+            mergeInternetNodesState(other.getInternetNodesState());
             break;
           }
           case MESSAGE_NOT_SET: {
@@ -1867,6 +2002,193 @@ public final class ConnectionsOuterClass {
         messageCase_ = 4;
         onChanged();;
         return internetNodesRemoveBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> internetNodesStateBuilder_;
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       * @return Whether the internetNodesState field is set.
+       */
+      @java.lang.Override
+      public boolean hasInternetNodesState() {
+        return messageCase_ == 5;
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       * @return The internetNodesState.
+       */
+      @java.lang.Override
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesState() {
+        if (internetNodesStateBuilder_ == null) {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        } else {
+          if (messageCase_ == 5) {
+            return internetNodesStateBuilder_.getMessage();
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      public Builder setInternetNodesState(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
+        if (internetNodesStateBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          internetNodesStateBuilder_.setMessage(value);
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      public Builder setInternetNodesState(
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder builderForValue) {
+        if (internetNodesStateBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          internetNodesStateBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      public Builder mergeInternetNodesState(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
+        if (internetNodesStateBuilder_ == null) {
+          if (messageCase_ == 5 &&
+              message_ != qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance()) {
+            message_ = qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.newBuilder((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 5) {
+            internetNodesStateBuilder_.mergeFrom(value);
+          } else {
+            internetNodesStateBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 5;
+        return this;
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      public Builder clearInternetNodesState() {
+        if (internetNodesStateBuilder_ == null) {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 5) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          internetNodesStateBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder getInternetNodesStateBuilder() {
+        return getInternetNodesStateFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesStateOrBuilder() {
+        if ((messageCase_ == 5) && (internetNodesStateBuilder_ != null)) {
+          return internetNodesStateBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 5) {
+            return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Update an internet node state.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> 
+          getInternetNodesStateFieldBuilder() {
+        if (internetNodesStateBuilder_ == null) {
+          if (!(messageCase_ == 5)) {
+            message_ = qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+          }
+          internetNodesStateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder>(
+                  (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 5;
+        onChanged();;
+        return internetNodesStateBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -3466,16 +3788,34 @@ public final class ConnectionsOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      * @return The address.
      */
     java.lang.String getAddress();
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      * @return The bytes for address.
      */
     com.google.protobuf.ByteString
         getAddressBytes();
+
+    /**
+     * <pre>
+     * enabled
+     * </pre>
+     *
+     * <code>bool enabled = 2;</code>
+     * @return The enabled.
+     */
+    boolean getEnabled();
   }
   /**
    * <pre>
@@ -3535,6 +3875,11 @@ public final class ConnectionsOuterClass {
               address_ = s;
               break;
             }
+            case 16: {
+
+              enabled_ = input.readBool();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -3572,6 +3917,10 @@ public final class ConnectionsOuterClass {
     public static final int ADDRESS_FIELD_NUMBER = 1;
     private volatile java.lang.Object address_;
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      * @return The address.
      */
@@ -3589,6 +3938,10 @@ public final class ConnectionsOuterClass {
       }
     }
     /**
+     * <pre>
+     * address
+     * </pre>
+     *
      * <code>string address = 1;</code>
      * @return The bytes for address.
      */
@@ -3605,6 +3958,21 @@ public final class ConnectionsOuterClass {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int ENABLED_FIELD_NUMBER = 2;
+    private boolean enabled_;
+    /**
+     * <pre>
+     * enabled
+     * </pre>
+     *
+     * <code>bool enabled = 2;</code>
+     * @return The enabled.
+     */
+    @java.lang.Override
+    public boolean getEnabled() {
+      return enabled_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -3624,6 +3992,9 @@ public final class ConnectionsOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(address_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, address_);
       }
+      if (enabled_ != false) {
+        output.writeBool(2, enabled_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3635,6 +4006,10 @@ public final class ConnectionsOuterClass {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(address_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, address_);
+      }
+      if (enabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, enabled_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3653,6 +4028,8 @@ public final class ConnectionsOuterClass {
 
       if (!getAddress()
           .equals(other.getAddress())) return false;
+      if (getEnabled()
+          != other.getEnabled()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3666,6 +4043,9 @@ public final class ConnectionsOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ADDRESS_FIELD_NUMBER;
       hash = (53 * hash) + getAddress().hashCode();
+      hash = (37 * hash) + ENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getEnabled());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3807,6 +4187,8 @@ public final class ConnectionsOuterClass {
         super.clear();
         address_ = "";
 
+        enabled_ = false;
+
         return this;
       }
 
@@ -3834,6 +4216,7 @@ public final class ConnectionsOuterClass {
       public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry buildPartial() {
         qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry result = new qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry(this);
         result.address_ = address_;
+        result.enabled_ = enabled_;
         onBuilt();
         return result;
       }
@@ -3886,6 +4269,9 @@ public final class ConnectionsOuterClass {
           address_ = other.address_;
           onChanged();
         }
+        if (other.getEnabled() != false) {
+          setEnabled(other.getEnabled());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -3917,6 +4303,10 @@ public final class ConnectionsOuterClass {
 
       private java.lang.Object address_ = "";
       /**
+       * <pre>
+       * address
+       * </pre>
+       *
        * <code>string address = 1;</code>
        * @return The address.
        */
@@ -3933,6 +4323,10 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * address
+       * </pre>
+       *
        * <code>string address = 1;</code>
        * @return The bytes for address.
        */
@@ -3950,6 +4344,10 @@ public final class ConnectionsOuterClass {
         }
       }
       /**
+       * <pre>
+       * address
+       * </pre>
+       *
        * <code>string address = 1;</code>
        * @param value The address to set.
        * @return This builder for chaining.
@@ -3965,6 +4363,10 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * address
+       * </pre>
+       *
        * <code>string address = 1;</code>
        * @return This builder for chaining.
        */
@@ -3975,6 +4377,10 @@ public final class ConnectionsOuterClass {
         return this;
       }
       /**
+       * <pre>
+       * address
+       * </pre>
+       *
        * <code>string address = 1;</code>
        * @param value The bytes for address to set.
        * @return This builder for chaining.
@@ -3987,6 +4393,49 @@ public final class ConnectionsOuterClass {
   checkByteStringIsUtf8(value);
         
         address_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean enabled_ ;
+      /**
+       * <pre>
+       * enabled
+       * </pre>
+       *
+       * <code>bool enabled = 2;</code>
+       * @return The enabled.
+       */
+      @java.lang.Override
+      public boolean getEnabled() {
+        return enabled_;
+      }
+      /**
+       * <pre>
+       * enabled
+       * </pre>
+       *
+       * <code>bool enabled = 2;</code>
+       * @param value The enabled to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnabled(boolean value) {
+        
+        enabled_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * enabled
+       * </pre>
+       *
+       * <code>bool enabled = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnabled() {
+        
+        enabled_ = false;
         onChanged();
         return this;
       }
@@ -4073,7 +4522,7 @@ public final class ConnectionsOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\035connections/connections.proto\022\024qaul.rp" +
-      "c.connections\"\301\002\n\013Connections\022L\n\026interne" +
+      "c.connections\"\213\003\n\013Connections\022L\n\026interne" +
       "t_nodes_request\030\001 \001(\0132*.qaul.rpc.connect" +
       "ions.InternetNodesRequestH\000\022F\n\023internet_" +
       "nodes_list\030\002 \001(\0132\'.qaul.rpc.connections." +
@@ -4081,14 +4530,17 @@ public final class ConnectionsOuterClass {
       "d\030\003 \001(\0132(.qaul.rpc.connections.InternetN" +
       "odesEntryH\000\022I\n\025internet_nodes_remove\030\004 \001" +
       "(\0132(.qaul.rpc.connections.InternetNodesE" +
-      "ntryH\000B\t\n\007message\"\026\n\024InternetNodesReques" +
-      "t\"v\n\021InternetNodesList\022(\n\004info\030\001 \001(\0162\032.q" +
-      "aul.rpc.connections.Info\0227\n\005nodes\030\002 \003(\0132" +
-      "(.qaul.rpc.connections.InternetNodesEntr" +
-      "y\"%\n\022InternetNodesEntry\022\017\n\007address\030\001 \001(\t" +
-      "*k\n\004Info\022\013\n\007REQUEST\020\000\022\017\n\013ADD_SUCCESS\020\001\022\025" +
-      "\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMOVE_SUCCESS\020" +
-      "\005\022\032\n\026REMOVE_ERROR_NOT_FOUND\020\006b\006proto3"
+      "ntryH\000\022H\n\024internet_nodes_state\030\005 \001(\0132(.q" +
+      "aul.rpc.connections.InternetNodesEntryH\000" +
+      "B\t\n\007message\"\026\n\024InternetNodesRequest\"v\n\021I" +
+      "nternetNodesList\022(\n\004info\030\001 \001(\0162\032.qaul.rp" +
+      "c.connections.Info\0227\n\005nodes\030\002 \003(\0132(.qaul" +
+      ".rpc.connections.InternetNodesEntry\"6\n\022I" +
+      "nternetNodesEntry\022\017\n\007address\030\001 \001(\t\022\017\n\007en" +
+      "abled\030\002 \001(\010*~\n\004Info\022\013\n\007REQUEST\020\000\022\017\n\013ADD_" +
+      "SUCCESS\020\001\022\025\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMO" +
+      "VE_SUCCESS\020\005\022\021\n\rSTATE_SUCCESS\020\006\022\032\n\026REMOV" +
+      "E_ERROR_NOT_FOUND\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4099,7 +4551,7 @@ public final class ConnectionsOuterClass {
     internal_static_qaul_rpc_connections_Connections_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_connections_Connections_descriptor,
-        new java.lang.String[] { "InternetNodesRequest", "InternetNodesList", "InternetNodesAdd", "InternetNodesRemove", "Message", });
+        new java.lang.String[] { "InternetNodesRequest", "InternetNodesList", "InternetNodesAdd", "InternetNodesRemove", "InternetNodesState", "Message", });
     internal_static_qaul_rpc_connections_InternetNodesRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_connections_InternetNodesRequest_fieldAccessorTable = new
@@ -4117,7 +4569,7 @@ public final class ConnectionsOuterClass {
     internal_static_qaul_rpc_connections_InternetNodesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_connections_InternetNodesEntry_descriptor,
-        new java.lang.String[] { "Address", });
+        new java.lang.String[] { "Address", "Enabled", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

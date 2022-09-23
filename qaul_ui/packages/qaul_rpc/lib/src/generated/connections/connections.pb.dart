@@ -18,6 +18,7 @@ enum Connections_Message {
   internetNodesList, 
   internetNodesAdd, 
   internetNodesRemove, 
+  internetNodesState, 
   notSet
 }
 
@@ -27,14 +28,16 @@ class Connections extends $pb.GeneratedMessage {
     2 : Connections_Message.internetNodesList,
     3 : Connections_Message.internetNodesAdd,
     4 : Connections_Message.internetNodesRemove,
+    5 : Connections_Message.internetNodesState,
     0 : Connections_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Connections', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4])
+    ..oo(0, [1, 2, 3, 4, 5])
     ..aOM<InternetNodesRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRequest', subBuilder: InternetNodesRequest.create)
     ..aOM<InternetNodesList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesList', subBuilder: InternetNodesList.create)
     ..aOM<InternetNodesEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesAdd', subBuilder: InternetNodesEntry.create)
     ..aOM<InternetNodesEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRemove', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesEntry>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesState', subBuilder: InternetNodesEntry.create)
     ..hasRequiredFields = false
   ;
 
@@ -44,6 +47,7 @@ class Connections extends $pb.GeneratedMessage {
     InternetNodesList? internetNodesList,
     InternetNodesEntry? internetNodesAdd,
     InternetNodesEntry? internetNodesRemove,
+    InternetNodesEntry? internetNodesState,
   }) {
     final _result = create();
     if (internetNodesRequest != null) {
@@ -57,6 +61,9 @@ class Connections extends $pb.GeneratedMessage {
     }
     if (internetNodesRemove != null) {
       _result.internetNodesRemove = internetNodesRemove;
+    }
+    if (internetNodesState != null) {
+      _result.internetNodesState = internetNodesState;
     }
     return _result;
   }
@@ -127,6 +134,17 @@ class Connections extends $pb.GeneratedMessage {
   void clearInternetNodesRemove() => clearField(4);
   @$pb.TagNumber(4)
   InternetNodesEntry ensureInternetNodesRemove() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  InternetNodesEntry get internetNodesState => $_getN(4);
+  @$pb.TagNumber(5)
+  set internetNodesState(InternetNodesEntry v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasInternetNodesState() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearInternetNodesState() => clearField(5);
+  @$pb.TagNumber(5)
+  InternetNodesEntry ensureInternetNodesState() => $_ensure(4);
 }
 
 class InternetNodesRequest extends $pb.GeneratedMessage {
@@ -216,16 +234,21 @@ class InternetNodesList extends $pb.GeneratedMessage {
 class InternetNodesEntry extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enabled')
     ..hasRequiredFields = false
   ;
 
   InternetNodesEntry._() : super();
   factory InternetNodesEntry({
     $core.String? address,
+    $core.bool? enabled,
   }) {
     final _result = create();
     if (address != null) {
       _result.address = address;
+    }
+    if (enabled != null) {
+      _result.enabled = enabled;
     }
     return _result;
   }
@@ -258,5 +281,14 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   $core.bool hasAddress() => $_has(0);
   @$pb.TagNumber(1)
   void clearAddress() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get enabled => $_getBF(1);
+  @$pb.TagNumber(2)
+  set enabled($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasEnabled() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearEnabled() => clearField(2);
 }
 

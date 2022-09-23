@@ -177,6 +177,45 @@ object ConnectionsKt {
     fun hasInternetNodesRemove(): kotlin.Boolean {
       return _builder.hasInternetNodesRemove()
     }
+
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     */
+    var internetNodesState: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
+      @JvmName("getInternetNodesState")
+      get() = _builder.getInternetNodesState()
+      @JvmName("setInternetNodesState")
+      set(value) {
+        _builder.setInternetNodesState(value)
+      }
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     */
+    fun clearInternetNodesState() {
+      _builder.clearInternetNodesState()
+    }
+    /**
+     * <pre>
+     * Update an internet node state.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_state = 5;</code>
+     * @return Whether the internetNodesState field is set.
+     */
+    fun hasInternetNodesState(): kotlin.Boolean {
+      return _builder.hasInternetNodesState()
+    }
     val messageCase: qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -201,4 +240,7 @@ val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNode
 
 val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesRemoveOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
   get() = if (hasInternetNodesRemove()) getInternetNodesRemove() else null
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesStateOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
+  get() = if (hasInternetNodesState()) getInternetNodesState() else null
 

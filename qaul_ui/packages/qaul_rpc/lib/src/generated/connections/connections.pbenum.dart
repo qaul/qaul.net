@@ -14,13 +14,15 @@ class Info extends $pb.ProtobufEnum {
   static const Info ADD_SUCCESS = Info._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADD_SUCCESS');
   static const Info ADD_ERROR_INVALID = Info._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADD_ERROR_INVALID');
   static const Info REMOVE_SUCCESS = Info._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REMOVE_SUCCESS');
-  static const Info REMOVE_ERROR_NOT_FOUND = Info._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REMOVE_ERROR_NOT_FOUND');
+  static const Info STATE_SUCCESS = Info._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'STATE_SUCCESS');
+  static const Info REMOVE_ERROR_NOT_FOUND = Info._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REMOVE_ERROR_NOT_FOUND');
 
   static const $core.List<Info> values = <Info> [
     REQUEST,
     ADD_SUCCESS,
     ADD_ERROR_INVALID,
     REMOVE_SUCCESS,
+    STATE_SUCCESS,
     REMOVE_ERROR_NOT_FOUND,
   ];
 
