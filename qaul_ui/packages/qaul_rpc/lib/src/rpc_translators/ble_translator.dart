@@ -15,7 +15,7 @@ class BleTranslator extends RpcModuleTranslator {
           status: msg.status,
           deviceInfo: Uint8List.fromList(msg.deviceInfo),
         );
-        return RpcTranslatorResponse(Modules.BLE, status);
+        return RpcTranslatorResponse(type, status);
       case Ble_Message.discoveredResponse:
         final msg = message.ensureDiscoveredResponse();
         final status = BleConnectionStatus(
@@ -23,7 +23,7 @@ class BleTranslator extends RpcModuleTranslator {
           discoveredNodes: msg.nodesCount,
           nodesPendingConfirmation: msg.toConfirmCount,
         );
-        return RpcTranslatorResponse(Modules.BLE, status);
+        return RpcTranslatorResponse(type, status);
       default:
         return super.decodeMessageBytes(data, reader);
     }

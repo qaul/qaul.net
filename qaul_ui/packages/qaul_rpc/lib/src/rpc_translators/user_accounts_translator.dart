@@ -29,7 +29,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
       keyBase58: account.keyBase58,
     );
 
-    return RpcTranslatorResponse(Modules.USERACCOUNTS, user);
+    return RpcTranslatorResponse(type, user);
   }
 
   @override

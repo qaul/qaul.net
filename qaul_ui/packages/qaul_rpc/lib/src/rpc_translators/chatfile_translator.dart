@@ -14,7 +14,7 @@ class ChatFileTranslator extends RpcModuleTranslator {
             .histories
             .map((e) => FileHistoryEntity.fromRpcEntry(e))
             .toList();
-        return RpcTranslatorResponse(Modules.CHATFILE, entities);
+        return RpcTranslatorResponse(type, entities);
       default:
         return super.decodeMessageBytes(data, reader);
     }

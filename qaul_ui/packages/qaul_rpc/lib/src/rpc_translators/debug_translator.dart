@@ -10,10 +10,10 @@ class DebugTranslator extends RpcModuleTranslator {
     switch (message.whichMessage()) {
       case Debug_Message.heartbeatResponse:
         message.ensureHeartbeatResponse();
-        return RpcTranslatorResponse(Modules.DEBUG, true);
+        return RpcTranslatorResponse(type, true);
       case Debug_Message.storagePathResponse:
         final response = message.ensureStoragePathResponse();
-        return RpcTranslatorResponse(Modules.DEBUG, response.storagePath);
+        return RpcTranslatorResponse(type, response.storagePath);
       default:
         return super.decodeMessageBytes(data, reader);
     }

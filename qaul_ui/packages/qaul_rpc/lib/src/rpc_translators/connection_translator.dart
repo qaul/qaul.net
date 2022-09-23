@@ -9,13 +9,12 @@ class ConnectionTranslator extends RpcModuleTranslator {
     final message = Connections.fromBuffer(data);
     switch (message.whichMessage()) {
       case Connections_Message.internetNodesList:
-        // TODO: evaluate message info field, show message if error?
         final nodes = message
             .ensureInternetNodesList()
             .nodes
             .map((e) => InternetNode(e.address))
             .toList();
-        return RpcTranslatorResponse(Modules.CONNECTIONS, nodes);
+        return RpcTranslatorResponse(type, nodes);
       default:
         return super.decodeMessageBytes(data, reader);
     }

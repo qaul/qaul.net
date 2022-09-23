@@ -14,7 +14,7 @@ class FeedTranslator extends RpcModuleTranslator {
             .feedMessage
             .map((msg) => msg.toModelMessage)
             .toList();
-        return RpcTranslatorResponse(Modules.FEED, newMessages);
+        return RpcTranslatorResponse(type, newMessages);
       default:
         return super.decodeMessageBytes(data, reader);
     }

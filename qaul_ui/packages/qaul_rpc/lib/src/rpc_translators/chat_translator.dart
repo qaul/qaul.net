@@ -10,10 +10,7 @@ class ChatTranslator extends RpcModuleTranslator {
     final message = Chat.fromBuffer(data);
     switch (message.whichMessage()) {
       case Chat_Message.conversationList:
-        return RpcTranslatorResponse(
-          Modules.CHAT,
-          message.ensureConversationList(),
-        );
+        return RpcTranslatorResponse(type, message.ensureConversationList());
       default:
         return super.decodeMessageBytes(data, reader);
     }
