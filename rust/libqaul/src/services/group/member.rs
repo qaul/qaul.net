@@ -143,8 +143,10 @@ impl Member {
             return Err("user account problem".to_string());
         }
 
-        // save group into data base
-        GroupStorage::save_group(account_id.to_owned(), invite.group);
+        // save group into data base if invite was accepted
+        if accept {
+            GroupStorage::save_group(account_id.to_owned(), invite.group);
+        }
 
         Ok(true)
     }
