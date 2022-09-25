@@ -102,9 +102,7 @@ impl GroupManage {
                 user_id: account_id.to_bytes(),
                 role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -113,6 +111,26 @@ impl GroupManage {
 
         // save group
         GroupStorage::save_group(account_id.to_owned(), group.clone());
+
+        // save group created event
+        let event = chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: chat::rpc_proto::GroupEventType::Created as i32,
+                    user_id: account_id.to_bytes(),
+                },
+            )),
+        };
+
+        ChatStorage::save_message(
+            account_id,
+            &GroupId::from_bytes(&group.id).unwrap(),
+            account_id,
+            &Vec::new(),
+            Timestamp::get_timestamp(),
+            event,
+            chat::rpc_proto::MessageStatus::Received,
+        );
 
         return group.id;
     }

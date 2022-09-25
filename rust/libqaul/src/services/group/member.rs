@@ -145,7 +145,28 @@ impl Member {
 
         // save group into data base if invite was accepted
         if accept {
+            // save group to data base
             GroupStorage::save_group(account_id.to_owned(), invite.group);
+
+            // save group event: invite accepted message into chat
+            let event = chat::rpc_proto::ChatContentMessage {
+                message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                    chat::rpc_proto::GroupEvent {
+                        event_type: chat::rpc_proto::GroupEventType::InviteAccepted as i32,
+                        user_id: account_id.to_bytes(),
+                    },
+                )),
+            };
+
+            ChatStorage::save_message(
+                account_id,
+                &GroupId::from_bytes(&group_id).unwrap(),
+                account_id,
+                &Vec::new(),
+                Timestamp::get_timestamp(),
+                event,
+                chat::rpc_proto::MessageStatus::Received,
+            );
         }
 
         Ok(true)

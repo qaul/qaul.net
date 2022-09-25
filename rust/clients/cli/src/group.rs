@@ -449,6 +449,15 @@ impl Group {
                                 bs58::encode(group_event.user_id).into_string()
                             );
                         }
+                        proto_chat::GroupEventType::Removed => {
+                            println!("\t\tYou have been removed from this group.");
+                        }
+                        proto_chat::GroupEventType::Created => {
+                            println!("\t\tYou created this group");
+                        }
+                        proto_chat::GroupEventType::InviteAccepted => {
+                            println!("\t\tYou accepted the invitation");
+                        }
                         _ => {}
                     }
                 }

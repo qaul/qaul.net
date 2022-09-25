@@ -231,7 +231,15 @@ impl Chat {
                             return Ok(res);
                         }
                         proto::GroupEventType::Removed => {
-                            res.push("You were removed from the group".to_string());
+                            res.push("You have been removed from the group".to_string());
+                            return Ok(res);
+                        }
+                        proto::GroupEventType::Created => {
+                            res.push("You created this group".to_string());
+                            return Ok(res);
+                        }
+                        proto::GroupEventType::InviteAccepted => {
+                            res.push("You accepted the invitation".to_string());
                             return Ok(res);
                         }
                         _ => {}

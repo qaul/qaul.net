@@ -210,6 +210,15 @@ pub enum GroupEventType {
     Removed = 4,
     /// group was closed
     Closed = 5,
+    /// group was created
+    Created = 6,
+    /// group invite was accepted
+    ///
+    /// this state indicates, that we accepted
+    /// an invite, but that we haven't received
+    /// the group update from the administrator yet,
+    /// and are therefore not yet an official member of the group.
+    InviteAccepted = 7,
 }
 impl GroupEventType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -224,6 +233,8 @@ impl GroupEventType {
             GroupEventType::Left => "LEFT",
             GroupEventType::Removed => "REMOVED",
             GroupEventType::Closed => "CLOSED",
+            GroupEventType::Created => "CREATED",
+            GroupEventType::InviteAccepted => "INVITE_ACCEPTED",
         }
     }
 }
