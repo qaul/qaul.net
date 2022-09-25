@@ -287,6 +287,7 @@ impl Member {
         group.id = group_info.group_id.clone();
         group.name = group_info.group_name.clone();
         group.created_at = group_info.created_at;
+        group.status = super::proto_rpc::GroupStatus::InviteAccepted as i32;
         group.revision = group_info.revision;
 
         let invited = super::GroupInvited {
@@ -440,7 +441,8 @@ impl Member {
         // remove self from group
         group.members.remove(&account_id.to_bytes());
 
-        // TODO: create a group deactivation state
+        // set group deactivation status
+        group.status = super::proto_rpc::GroupStatus::Deactivated as i32;
 
         // save group
         GroupStorage::save_group(account_id.to_owned(), group.clone());

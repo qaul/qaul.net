@@ -78,6 +78,9 @@ pub struct Group {
     pub is_direct_chat: bool,
     /// created at
     pub created_at: u64,
+    /// group status
+    ///
+    pub status: i32,
     /// group revision number
     ///
     /// this number increases with every revision
@@ -114,6 +117,7 @@ impl Group {
             name: "".to_string(),
             is_direct_chat: false,
             created_at: Timestamp::get_timestamp(),
+            status: 0,
             revision: 0,
             members: BTreeMap::new(),
             unread_messages: 0,
