@@ -334,13 +334,14 @@ const char descriptor_table_protodef_services_2fchat_2fchat_2eproto[] PROTOBUF_S
   "content\030\002 \001(\t*h\n\rMessageStatus\022\013\n\007SENDIN"
   "G\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020CONFIRME"
   "D_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010RECEIVED\020\005*"
-  "Y\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE"
+  "{\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE"
   "D\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\013\n\007REMOVED\020\004\022\n"
-  "\n\006CLOSED\020\005b\006proto3"
+  "\n\006CLOSED\020\005\022\013\n\007CREATED\020\006\022\023\n\017INVITE_ACCEPT"
+  "ED\020\007b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fchat_2fchat_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fchat_2fchat_2eproto = {
-    false, false, 1418, descriptor_table_protodef_services_2fchat_2fchat_2eproto,
+    false, false, 1452, descriptor_table_protodef_services_2fchat_2fchat_2eproto,
     "services/chat/chat.proto",
     &descriptor_table_services_2fchat_2fchat_2eproto_once, nullptr, 0, 10,
     schemas, file_default_instances, TableStruct_services_2fchat_2fchat_2eproto::offsets,
@@ -386,6 +387,8 @@ bool GroupEventType_IsValid(int value) {
     case 3:
     case 4:
     case 5:
+    case 6:
+    case 7:
       return true;
     default:
       return false;

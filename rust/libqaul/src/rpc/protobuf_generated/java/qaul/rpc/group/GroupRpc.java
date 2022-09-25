@@ -270,6 +270,172 @@ public final class GroupRpc {
     // @@protoc_insertion_point(enum_scope:qaul.rpc.group.GroupMemberRole)
   }
 
+  /**
+   * <pre>
+   * Group Status
+   * Indicates the working status of a group.
+   * </pre>
+   *
+   * Protobuf enum {@code qaul.rpc.group.GroupStatus}
+   */
+  public enum GroupStatus
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Group is Active
+     * The group is in active state and we can post
+     * messages to this group.
+     * </pre>
+     *
+     * <code>ACTIVE = 0;</code>
+     */
+    ACTIVE(0),
+    /**
+     * <pre>
+     * Invite Accepted
+     * We accepted the invitation to this group
+     * but we haven't received the updated group
+     * info from the group administrator yet.
+     * We therefore can't yet post messages into
+     * the group.
+     * </pre>
+     *
+     * <code>INVITE_ACCEPTED = 1;</code>
+     */
+    INVITE_ACCEPTED(1),
+    /**
+     * <pre>
+     * The group was deactivated
+     * We either left the group or have been removed from the group
+     * by the group administrator.
+     * We therefore can't post messages into this group anymore.
+     * </pre>
+     *
+     * <code>DEACTIVATED = 2;</code>
+     */
+    DEACTIVATED(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Group is Active
+     * The group is in active state and we can post
+     * messages to this group.
+     * </pre>
+     *
+     * <code>ACTIVE = 0;</code>
+     */
+    public static final int ACTIVE_VALUE = 0;
+    /**
+     * <pre>
+     * Invite Accepted
+     * We accepted the invitation to this group
+     * but we haven't received the updated group
+     * info from the group administrator yet.
+     * We therefore can't yet post messages into
+     * the group.
+     * </pre>
+     *
+     * <code>INVITE_ACCEPTED = 1;</code>
+     */
+    public static final int INVITE_ACCEPTED_VALUE = 1;
+    /**
+     * <pre>
+     * The group was deactivated
+     * We either left the group or have been removed from the group
+     * by the group administrator.
+     * We therefore can't post messages into this group anymore.
+     * </pre>
+     *
+     * <code>DEACTIVATED = 2;</code>
+     */
+    public static final int DEACTIVATED_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static GroupStatus valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static GroupStatus forNumber(int value) {
+      switch (value) {
+        case 0: return ACTIVE;
+        case 1: return INVITE_ACCEPTED;
+        case 2: return DEACTIVATED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<GroupStatus>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        GroupStatus> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<GroupStatus>() {
+            public GroupStatus findValueByNumber(int number) {
+              return GroupStatus.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return qaul.rpc.group.GroupRpc.getDescriptor().getEnumTypes().get(2);
+    }
+
+    private static final GroupStatus[] VALUES = values();
+
+    public static GroupStatus valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private GroupStatus(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:qaul.rpc.group.GroupStatus)
+  }
+
   public interface GroupOrBuilder extends
       // @@protoc_insertion_point(interface_extends:qaul.rpc.group.Group)
       com.google.protobuf.MessageOrBuilder {
@@ -15157,10 +15323,29 @@ public final class GroupRpc {
 
     /**
      * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     * @return The status.
+     */
+    qaul.rpc.group.GroupRpc.GroupStatus getStatus();
+
+    /**
+     * <pre>
      * group revision number
      * </pre>
      *
-     * <code>uint32 revision = 4;</code>
+     * <code>uint32 revision = 5;</code>
      * @return The revision.
      */
     int getRevision();
@@ -15170,7 +15355,7 @@ public final class GroupRpc {
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 5;</code>
+     * <code>bool is_direct_chat = 6;</code>
      * @return The isDirectChat.
      */
     boolean getIsDirectChat();
@@ -15180,7 +15365,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     java.util.List<qaul.rpc.group.GroupRpc.GroupMember> 
         getMembersList();
@@ -15189,7 +15374,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     qaul.rpc.group.GroupRpc.GroupMember getMembers(int index);
     /**
@@ -15197,7 +15382,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     int getMembersCount();
     /**
@@ -15205,7 +15390,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
         getMembersOrBuilderList();
@@ -15214,7 +15399,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
         int index);
@@ -15224,7 +15409,7 @@ public final class GroupRpc {
      * unread messages
      * </pre>
      *
-     * <code>uint32 unread_messages = 7;</code>
+     * <code>uint32 unread_messages = 8;</code>
      * @return The unreadMessages.
      */
     int getUnreadMessages();
@@ -15234,7 +15419,7 @@ public final class GroupRpc {
      * time when last message was sent
      * </pre>
      *
-     * <code>uint64 last_message_at = 8;</code>
+     * <code>uint64 last_message_at = 9;</code>
      * @return The lastMessageAt.
      */
     long getLastMessageAt();
@@ -15244,7 +15429,7 @@ public final class GroupRpc {
      * content type
      * </pre>
      *
-     * <code>bytes last_message = 9;</code>
+     * <code>bytes last_message = 10;</code>
      * @return The lastMessage.
      */
     com.google.protobuf.ByteString getLastMessage();
@@ -15254,7 +15439,7 @@ public final class GroupRpc {
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 10;</code>
+     * <code>bytes last_message_sender_id = 11;</code>
      * @return The lastMessageSenderId.
      */
     com.google.protobuf.ByteString getLastMessageSenderId();
@@ -15278,6 +15463,7 @@ public final class GroupRpc {
     private GroupInfo() {
       groupId_ = com.google.protobuf.ByteString.EMPTY;
       groupName_ = "";
+      status_ = 0;
       members_ = java.util.Collections.emptyList();
       lastMessage_ = com.google.protobuf.ByteString.EMPTY;
       lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
@@ -15331,16 +15517,22 @@ public final class GroupRpc {
               break;
             }
             case 32: {
+              int rawValue = input.readEnum();
 
-              revision_ = input.readUInt32();
+              status_ = rawValue;
               break;
             }
             case 40: {
 
+              revision_ = input.readUInt32();
+              break;
+            }
+            case 48: {
+
               isDirectChat_ = input.readBool();
               break;
             }
-            case 50: {
+            case 58: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 members_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupMember>();
                 mutable_bitField0_ |= 0x00000001;
@@ -15349,22 +15541,22 @@ public final class GroupRpc {
                   input.readMessage(qaul.rpc.group.GroupRpc.GroupMember.parser(), extensionRegistry));
               break;
             }
-            case 56: {
+            case 64: {
 
               unreadMessages_ = input.readUInt32();
               break;
             }
-            case 64: {
+            case 72: {
 
               lastMessageAt_ = input.readUInt64();
               break;
             }
-            case 74: {
+            case 82: {
 
               lastMessage_ = input.readBytes();
               break;
             }
-            case 82: {
+            case 90: {
 
               lastMessageSenderId_ = input.readBytes();
               break;
@@ -15482,14 +15674,41 @@ public final class GroupRpc {
       return createdAt_;
     }
 
-    public static final int REVISION_FIELD_NUMBER = 4;
+    public static final int STATUS_FIELD_NUMBER = 4;
+    private int status_;
+    /**
+     * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    @java.lang.Override public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     * @return The status.
+     */
+    @java.lang.Override public qaul.rpc.group.GroupRpc.GroupStatus getStatus() {
+      @SuppressWarnings("deprecation")
+      qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.valueOf(status_);
+      return result == null ? qaul.rpc.group.GroupRpc.GroupStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int REVISION_FIELD_NUMBER = 5;
     private int revision_;
     /**
      * <pre>
      * group revision number
      * </pre>
      *
-     * <code>uint32 revision = 4;</code>
+     * <code>uint32 revision = 5;</code>
      * @return The revision.
      */
     @java.lang.Override
@@ -15497,14 +15716,14 @@ public final class GroupRpc {
       return revision_;
     }
 
-    public static final int IS_DIRECT_CHAT_FIELD_NUMBER = 5;
+    public static final int IS_DIRECT_CHAT_FIELD_NUMBER = 6;
     private boolean isDirectChat_;
     /**
      * <pre>
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 5;</code>
+     * <code>bool is_direct_chat = 6;</code>
      * @return The isDirectChat.
      */
     @java.lang.Override
@@ -15512,14 +15731,14 @@ public final class GroupRpc {
       return isDirectChat_;
     }
 
-    public static final int MEMBERS_FIELD_NUMBER = 6;
+    public static final int MEMBERS_FIELD_NUMBER = 7;
     private java.util.List<qaul.rpc.group.GroupRpc.GroupMember> members_;
     /**
      * <pre>
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @java.lang.Override
     public java.util.List<qaul.rpc.group.GroupRpc.GroupMember> getMembersList() {
@@ -15530,7 +15749,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @java.lang.Override
     public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
@@ -15542,7 +15761,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @java.lang.Override
     public int getMembersCount() {
@@ -15553,7 +15772,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupMember getMembers(int index) {
@@ -15564,7 +15783,7 @@ public final class GroupRpc {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
@@ -15572,14 +15791,14 @@ public final class GroupRpc {
       return members_.get(index);
     }
 
-    public static final int UNREAD_MESSAGES_FIELD_NUMBER = 7;
+    public static final int UNREAD_MESSAGES_FIELD_NUMBER = 8;
     private int unreadMessages_;
     /**
      * <pre>
      * unread messages
      * </pre>
      *
-     * <code>uint32 unread_messages = 7;</code>
+     * <code>uint32 unread_messages = 8;</code>
      * @return The unreadMessages.
      */
     @java.lang.Override
@@ -15587,14 +15806,14 @@ public final class GroupRpc {
       return unreadMessages_;
     }
 
-    public static final int LAST_MESSAGE_AT_FIELD_NUMBER = 8;
+    public static final int LAST_MESSAGE_AT_FIELD_NUMBER = 9;
     private long lastMessageAt_;
     /**
      * <pre>
      * time when last message was sent
      * </pre>
      *
-     * <code>uint64 last_message_at = 8;</code>
+     * <code>uint64 last_message_at = 9;</code>
      * @return The lastMessageAt.
      */
     @java.lang.Override
@@ -15602,14 +15821,14 @@ public final class GroupRpc {
       return lastMessageAt_;
     }
 
-    public static final int LAST_MESSAGE_FIELD_NUMBER = 9;
+    public static final int LAST_MESSAGE_FIELD_NUMBER = 10;
     private com.google.protobuf.ByteString lastMessage_;
     /**
      * <pre>
      * content type
      * </pre>
      *
-     * <code>bytes last_message = 9;</code>
+     * <code>bytes last_message = 10;</code>
      * @return The lastMessage.
      */
     @java.lang.Override
@@ -15617,14 +15836,14 @@ public final class GroupRpc {
       return lastMessage_;
     }
 
-    public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 10;
+    public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 11;
     private com.google.protobuf.ByteString lastMessageSenderId_;
     /**
      * <pre>
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 10;</code>
+     * <code>bytes last_message_sender_id = 11;</code>
      * @return The lastMessageSenderId.
      */
     @java.lang.Override
@@ -15655,26 +15874,29 @@ public final class GroupRpc {
       if (createdAt_ != 0L) {
         output.writeUInt64(3, createdAt_);
       }
+      if (status_ != qaul.rpc.group.GroupRpc.GroupStatus.ACTIVE.getNumber()) {
+        output.writeEnum(4, status_);
+      }
       if (revision_ != 0) {
-        output.writeUInt32(4, revision_);
+        output.writeUInt32(5, revision_);
       }
       if (isDirectChat_ != false) {
-        output.writeBool(5, isDirectChat_);
+        output.writeBool(6, isDirectChat_);
       }
       for (int i = 0; i < members_.size(); i++) {
-        output.writeMessage(6, members_.get(i));
+        output.writeMessage(7, members_.get(i));
       }
       if (unreadMessages_ != 0) {
-        output.writeUInt32(7, unreadMessages_);
+        output.writeUInt32(8, unreadMessages_);
       }
       if (lastMessageAt_ != 0L) {
-        output.writeUInt64(8, lastMessageAt_);
+        output.writeUInt64(9, lastMessageAt_);
       }
       if (!lastMessage_.isEmpty()) {
-        output.writeBytes(9, lastMessage_);
+        output.writeBytes(10, lastMessage_);
       }
       if (!lastMessageSenderId_.isEmpty()) {
-        output.writeBytes(10, lastMessageSenderId_);
+        output.writeBytes(11, lastMessageSenderId_);
       }
       unknownFields.writeTo(output);
     }
@@ -15696,33 +15918,37 @@ public final class GroupRpc {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(3, createdAt_);
       }
+      if (status_ != qaul.rpc.group.GroupRpc.GroupStatus.ACTIVE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, status_);
+      }
       if (revision_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(4, revision_);
+          .computeUInt32Size(5, revision_);
       }
       if (isDirectChat_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, isDirectChat_);
+          .computeBoolSize(6, isDirectChat_);
       }
       for (int i = 0; i < members_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, members_.get(i));
+          .computeMessageSize(7, members_.get(i));
       }
       if (unreadMessages_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(7, unreadMessages_);
+          .computeUInt32Size(8, unreadMessages_);
       }
       if (lastMessageAt_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(8, lastMessageAt_);
+          .computeUInt64Size(9, lastMessageAt_);
       }
       if (!lastMessage_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(9, lastMessage_);
+          .computeBytesSize(10, lastMessage_);
       }
       if (!lastMessageSenderId_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(10, lastMessageSenderId_);
+          .computeBytesSize(11, lastMessageSenderId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -15745,6 +15971,7 @@ public final class GroupRpc {
           .equals(other.getGroupName())) return false;
       if (getCreatedAt()
           != other.getCreatedAt()) return false;
+      if (status_ != other.status_) return false;
       if (getRevision()
           != other.getRevision()) return false;
       if (getIsDirectChat()
@@ -15777,6 +16004,8 @@ public final class GroupRpc {
       hash = (37 * hash) + CREATED_AT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCreatedAt());
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
       hash = (37 * hash) + REVISION_FIELD_NUMBER;
       hash = (53 * hash) + getRevision();
       hash = (37 * hash) + IS_DIRECT_CHAT_FIELD_NUMBER;
@@ -15939,6 +16168,8 @@ public final class GroupRpc {
 
         createdAt_ = 0L;
 
+        status_ = 0;
+
         revision_ = 0;
 
         isDirectChat_ = false;
@@ -15987,6 +16218,7 @@ public final class GroupRpc {
         result.groupId_ = groupId_;
         result.groupName_ = groupName_;
         result.createdAt_ = createdAt_;
+        result.status_ = status_;
         result.revision_ = revision_;
         result.isDirectChat_ = isDirectChat_;
         if (membersBuilder_ == null) {
@@ -16059,6 +16291,9 @@ public final class GroupRpc {
         }
         if (other.getCreatedAt() != 0L) {
           setCreatedAt(other.getCreatedAt());
+        }
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
         }
         if (other.getRevision() != 0) {
           setRevision(other.getRevision());
@@ -16319,13 +16554,87 @@ public final class GroupRpc {
         return this;
       }
 
+      private int status_ = 0;
+      /**
+       * <pre>
+       * group status
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+       * @return The enum numeric value on the wire for status.
+       */
+      @java.lang.Override public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * group status
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusValue(int value) {
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group status
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+       * @return The status.
+       */
+      @java.lang.Override
+      public qaul.rpc.group.GroupRpc.GroupStatus getStatus() {
+        @SuppressWarnings("deprecation")
+        qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.valueOf(status_);
+        return result == null ? qaul.rpc.group.GroupRpc.GroupStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * group status
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(qaul.rpc.group.GroupRpc.GroupStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * group status
+       * </pre>
+       *
+       * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+
       private int revision_ ;
       /**
        * <pre>
        * group revision number
        * </pre>
        *
-       * <code>uint32 revision = 4;</code>
+       * <code>uint32 revision = 5;</code>
        * @return The revision.
        */
       @java.lang.Override
@@ -16337,7 +16646,7 @@ public final class GroupRpc {
        * group revision number
        * </pre>
        *
-       * <code>uint32 revision = 4;</code>
+       * <code>uint32 revision = 5;</code>
        * @param value The revision to set.
        * @return This builder for chaining.
        */
@@ -16352,7 +16661,7 @@ public final class GroupRpc {
        * group revision number
        * </pre>
        *
-       * <code>uint32 revision = 4;</code>
+       * <code>uint32 revision = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearRevision() {
@@ -16368,7 +16677,7 @@ public final class GroupRpc {
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 5;</code>
+       * <code>bool is_direct_chat = 6;</code>
        * @return The isDirectChat.
        */
       @java.lang.Override
@@ -16380,7 +16689,7 @@ public final class GroupRpc {
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 5;</code>
+       * <code>bool is_direct_chat = 6;</code>
        * @param value The isDirectChat to set.
        * @return This builder for chaining.
        */
@@ -16395,7 +16704,7 @@ public final class GroupRpc {
        * is direct chat
        * </pre>
        *
-       * <code>bool is_direct_chat = 5;</code>
+       * <code>bool is_direct_chat = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearIsDirectChat() {
@@ -16422,7 +16731,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public java.util.List<qaul.rpc.group.GroupRpc.GroupMember> getMembersList() {
         if (membersBuilder_ == null) {
@@ -16436,7 +16745,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public int getMembersCount() {
         if (membersBuilder_ == null) {
@@ -16450,7 +16759,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember getMembers(int index) {
         if (membersBuilder_ == null) {
@@ -16464,7 +16773,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder setMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember value) {
@@ -16485,7 +16794,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder setMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16503,7 +16812,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder addMembers(qaul.rpc.group.GroupRpc.GroupMember value) {
         if (membersBuilder_ == null) {
@@ -16523,7 +16832,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder addMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember value) {
@@ -16544,7 +16853,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder addMembers(
           qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16562,7 +16871,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder addMembers(
           int index, qaul.rpc.group.GroupRpc.GroupMember.Builder builderForValue) {
@@ -16580,7 +16889,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder addAllMembers(
           java.lang.Iterable<? extends qaul.rpc.group.GroupRpc.GroupMember> values) {
@@ -16599,7 +16908,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder clearMembers() {
         if (membersBuilder_ == null) {
@@ -16616,7 +16925,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public Builder removeMembers(int index) {
         if (membersBuilder_ == null) {
@@ -16633,7 +16942,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder getMembersBuilder(
           int index) {
@@ -16644,7 +16953,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMemberOrBuilder getMembersOrBuilder(
           int index) {
@@ -16658,7 +16967,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public java.util.List<? extends qaul.rpc.group.GroupRpc.GroupMemberOrBuilder> 
            getMembersOrBuilderList() {
@@ -16673,7 +16982,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder addMembersBuilder() {
         return getMembersFieldBuilder().addBuilder(
@@ -16684,7 +16993,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupMember.Builder addMembersBuilder(
           int index) {
@@ -16696,7 +17005,7 @@ public final class GroupRpc {
        * members
        * </pre>
        *
-       * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+       * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
        */
       public java.util.List<qaul.rpc.group.GroupRpc.GroupMember.Builder> 
            getMembersBuilderList() {
@@ -16723,7 +17032,7 @@ public final class GroupRpc {
        * unread messages
        * </pre>
        *
-       * <code>uint32 unread_messages = 7;</code>
+       * <code>uint32 unread_messages = 8;</code>
        * @return The unreadMessages.
        */
       @java.lang.Override
@@ -16735,7 +17044,7 @@ public final class GroupRpc {
        * unread messages
        * </pre>
        *
-       * <code>uint32 unread_messages = 7;</code>
+       * <code>uint32 unread_messages = 8;</code>
        * @param value The unreadMessages to set.
        * @return This builder for chaining.
        */
@@ -16750,7 +17059,7 @@ public final class GroupRpc {
        * unread messages
        * </pre>
        *
-       * <code>uint32 unread_messages = 7;</code>
+       * <code>uint32 unread_messages = 8;</code>
        * @return This builder for chaining.
        */
       public Builder clearUnreadMessages() {
@@ -16766,7 +17075,7 @@ public final class GroupRpc {
        * time when last message was sent
        * </pre>
        *
-       * <code>uint64 last_message_at = 8;</code>
+       * <code>uint64 last_message_at = 9;</code>
        * @return The lastMessageAt.
        */
       @java.lang.Override
@@ -16778,7 +17087,7 @@ public final class GroupRpc {
        * time when last message was sent
        * </pre>
        *
-       * <code>uint64 last_message_at = 8;</code>
+       * <code>uint64 last_message_at = 9;</code>
        * @param value The lastMessageAt to set.
        * @return This builder for chaining.
        */
@@ -16793,7 +17102,7 @@ public final class GroupRpc {
        * time when last message was sent
        * </pre>
        *
-       * <code>uint64 last_message_at = 8;</code>
+       * <code>uint64 last_message_at = 9;</code>
        * @return This builder for chaining.
        */
       public Builder clearLastMessageAt() {
@@ -16809,7 +17118,7 @@ public final class GroupRpc {
        * content type
        * </pre>
        *
-       * <code>bytes last_message = 9;</code>
+       * <code>bytes last_message = 10;</code>
        * @return The lastMessage.
        */
       @java.lang.Override
@@ -16821,7 +17130,7 @@ public final class GroupRpc {
        * content type
        * </pre>
        *
-       * <code>bytes last_message = 9;</code>
+       * <code>bytes last_message = 10;</code>
        * @param value The lastMessage to set.
        * @return This builder for chaining.
        */
@@ -16839,7 +17148,7 @@ public final class GroupRpc {
        * content type
        * </pre>
        *
-       * <code>bytes last_message = 9;</code>
+       * <code>bytes last_message = 10;</code>
        * @return This builder for chaining.
        */
       public Builder clearLastMessage() {
@@ -16855,7 +17164,7 @@ public final class GroupRpc {
        * sender of the last message
        * </pre>
        *
-       * <code>bytes last_message_sender_id = 10;</code>
+       * <code>bytes last_message_sender_id = 11;</code>
        * @return The lastMessageSenderId.
        */
       @java.lang.Override
@@ -16867,7 +17176,7 @@ public final class GroupRpc {
        * sender of the last message
        * </pre>
        *
-       * <code>bytes last_message_sender_id = 10;</code>
+       * <code>bytes last_message_sender_id = 11;</code>
        * @param value The lastMessageSenderId to set.
        * @return This builder for chaining.
        */
@@ -16885,7 +17194,7 @@ public final class GroupRpc {
        * sender of the last message
        * </pre>
        *
-       * <code>bytes last_message_sender_id = 10;</code>
+       * <code>bytes last_message_sender_id = 11;</code>
        * @return This builder for chaining.
        */
       public Builder clearLastMessageSenderId() {
@@ -20667,22 +20976,25 @@ public final class GroupRpc {
       "c.group.GroupMemberRole\022\021\n\tjoined_at\030\003 \001" +
       "(\004\022/\n\005state\030\004 \001(\0162 .qaul.rpc.group.Group" +
       "MemberState\022\032\n\022last_message_index\030\005 \001(\r\"" +
-      "\205\002\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup" +
-      "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022\020\n\010revis" +
-      "ion\030\004 \001(\r\022\026\n\016is_direct_chat\030\005 \001(\010\022,\n\007mem" +
-      "bers\030\006 \003(\0132\033.qaul.rpc.group.GroupMember\022" +
-      "\027\n\017unread_messages\030\007 \001(\r\022\027\n\017last_message" +
-      "_at\030\010 \001(\004\022\024\n\014last_message\030\t \001(\014\022\036\n\026last_" +
-      "message_sender_id\030\n \001(\014\"\022\n\020GroupListRequ" +
-      "est\">\n\021GroupListResponse\022)\n\006groups\030\001 \003(\013" +
-      "2\031.qaul.rpc.group.GroupInfo\"`\n\014GroupInvi" +
-      "ted\022\021\n\tsender_id\030\001 \001(\014\022\023\n\013received_at\030\002 " +
-      "\001(\004\022(\n\005group\030\003 \001(\0132\031.qaul.rpc.group.Grou" +
-      "pInfo\"\025\n\023GroupInvitedRequest\"E\n\024GroupInv" +
-      "itedResponse\022-\n\007invited\030\001 \003(\0132\034.qaul.rpc" +
-      ".group.GroupInvited*.\n\020GroupMemberState\022" +
-      "\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017GroupMemb" +
-      "erRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001b\006proto3"
+      "\262\002\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup" +
+      "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022+\n\006statu" +
+      "s\030\004 \001(\0162\033.qaul.rpc.group.GroupStatus\022\020\n\010" +
+      "revision\030\005 \001(\r\022\026\n\016is_direct_chat\030\006 \001(\010\022," +
+      "\n\007members\030\007 \003(\0132\033.qaul.rpc.group.GroupMe" +
+      "mber\022\027\n\017unread_messages\030\010 \001(\r\022\027\n\017last_me" +
+      "ssage_at\030\t \001(\004\022\024\n\014last_message\030\n \001(\014\022\036\n\026" +
+      "last_message_sender_id\030\013 \001(\014\"\022\n\020GroupLis" +
+      "tRequest\">\n\021GroupListResponse\022)\n\006groups\030" +
+      "\001 \003(\0132\031.qaul.rpc.group.GroupInfo\"`\n\014Grou" +
+      "pInvited\022\021\n\tsender_id\030\001 \001(\014\022\023\n\013received_" +
+      "at\030\002 \001(\004\022(\n\005group\030\003 \001(\0132\031.qaul.rpc.group" +
+      ".GroupInfo\"\025\n\023GroupInvitedRequest\"E\n\024Gro" +
+      "upInvitedResponse\022-\n\007invited\030\001 \003(\0132\034.qau" +
+      "l.rpc.group.GroupInvited*.\n\020GroupMemberS" +
+      "tate\022\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017Grou" +
+      "pMemberRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001*?\n\013Gro" +
+      "upStatus\022\n\n\006ACTIVE\020\000\022\023\n\017INVITE_ACCEPTED\020" +
+      "\001\022\017\n\013DEACTIVATED\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -20777,7 +21089,7 @@ public final class GroupRpc {
     internal_static_qaul_rpc_group_GroupInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_group_GroupInfo_descriptor,
-        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "Revision", "IsDirectChat", "Members", "UnreadMessages", "LastMessageAt", "LastMessage", "LastMessageSenderId", });
+        new java.lang.String[] { "GroupId", "GroupName", "CreatedAt", "Status", "Revision", "IsDirectChat", "Members", "UnreadMessages", "LastMessageAt", "LastMessage", "LastMessageSenderId", });
     internal_static_qaul_rpc_group_GroupListRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_qaul_rpc_group_GroupListRequest_fieldAccessorTable = new

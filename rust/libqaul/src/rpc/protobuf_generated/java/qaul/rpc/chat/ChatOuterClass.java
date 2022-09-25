@@ -272,6 +272,26 @@ public final class ChatOuterClass {
      * <code>CLOSED = 5;</code>
      */
     CLOSED(5),
+    /**
+     * <pre>
+     * group was created
+     * </pre>
+     *
+     * <code>CREATED = 6;</code>
+     */
+    CREATED(6),
+    /**
+     * <pre>
+     * group invite was accepted
+     * this state indicates, that we accepted
+     * an invite, but that we haven't received
+     * the group update from the administrator yet,
+     * and are therefore not yet an official member of the group.
+     * </pre>
+     *
+     * <code>INVITE_ACCEPTED = 7;</code>
+     */
+    INVITE_ACCEPTED(7),
     UNRECOGNIZED(-1),
     ;
 
@@ -324,6 +344,26 @@ public final class ChatOuterClass {
      * <code>CLOSED = 5;</code>
      */
     public static final int CLOSED_VALUE = 5;
+    /**
+     * <pre>
+     * group was created
+     * </pre>
+     *
+     * <code>CREATED = 6;</code>
+     */
+    public static final int CREATED_VALUE = 6;
+    /**
+     * <pre>
+     * group invite was accepted
+     * this state indicates, that we accepted
+     * an invite, but that we haven't received
+     * the group update from the administrator yet,
+     * and are therefore not yet an official member of the group.
+     * </pre>
+     *
+     * <code>INVITE_ACCEPTED = 7;</code>
+     */
+    public static final int INVITE_ACCEPTED_VALUE = 7;
 
 
     public final int getNumber() {
@@ -356,6 +396,8 @@ public final class ChatOuterClass {
         case 3: return LEFT;
         case 4: return REMOVED;
         case 5: return CLOSED;
+        case 6: return CREATED;
+        case 7: return INVITE_ACCEPTED;
         default: return null;
       }
     }
@@ -10452,9 +10494,10 @@ public final class ChatOuterClass {
       "content\030\002 \001(\t*h\n\rMessageStatus\022\013\n\007SENDIN" +
       "G\020\000\022\010\n\004SENT\020\001\022\r\n\tCONFIRMED\020\002\022\024\n\020CONFIRME" +
       "D_BY_ALL\020\003\022\r\n\tRECEIVING\020\004\022\014\n\010RECEIVED\020\005*" +
-      "Y\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE" +
+      "{\n\016GroupEventType\022\013\n\007DEFAULT\020\000\022\013\n\007INVITE" +
       "D\020\001\022\n\n\006JOINED\020\002\022\010\n\004LEFT\020\003\022\013\n\007REMOVED\020\004\022\n" +
-      "\n\006CLOSED\020\005b\006proto3"
+      "\n\006CLOSED\020\005\022\013\n\007CREATED\020\006\022\023\n\017INVITE_ACCEPT" +
+      "ED\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

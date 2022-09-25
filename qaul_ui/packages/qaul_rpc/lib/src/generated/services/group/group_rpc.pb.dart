@@ -1210,13 +1210,14 @@ class GroupInfo extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupName')
     ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'revision', $pb.PbFieldType.OU3)
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDirectChat')
-    ..pc<GroupMember>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', $pb.PbFieldType.PM, subBuilder: GroupMember.create)
-    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unreadMessages', $pb.PbFieldType.OU3)
-    ..a<$fixnum.Int64>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.List<$core.int>>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessage', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageSenderId', $pb.PbFieldType.OY)
+    ..e<GroupStatus>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: GroupStatus.ACTIVE, valueOf: GroupStatus.valueOf, enumValues: GroupStatus.values)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'revision', $pb.PbFieldType.OU3)
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDirectChat')
+    ..pc<GroupMember>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', $pb.PbFieldType.PM, subBuilder: GroupMember.create)
+    ..a<$core.int>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unreadMessages', $pb.PbFieldType.OU3)
+    ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.List<$core.int>>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessage', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageSenderId', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
@@ -1225,6 +1226,7 @@ class GroupInfo extends $pb.GeneratedMessage {
     $core.List<$core.int>? groupId,
     $core.String? groupName,
     $fixnum.Int64? createdAt,
+    GroupStatus? status,
     $core.int? revision,
     $core.bool? isDirectChat,
     $core.Iterable<GroupMember>? members,
@@ -1242,6 +1244,9 @@ class GroupInfo extends $pb.GeneratedMessage {
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
+    }
+    if (status != null) {
+      _result.status = status;
     }
     if (revision != null) {
       _result.revision = revision;
@@ -1315,61 +1320,70 @@ class GroupInfo extends $pb.GeneratedMessage {
   void clearCreatedAt() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.int get revision => $_getIZ(3);
+  GroupStatus get status => $_getN(3);
   @$pb.TagNumber(4)
-  set revision($core.int v) { $_setUnsignedInt32(3, v); }
+  set status(GroupStatus v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasRevision() => $_has(3);
+  $core.bool hasStatus() => $_has(3);
   @$pb.TagNumber(4)
-  void clearRevision() => clearField(4);
+  void clearStatus() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.bool get isDirectChat => $_getBF(4);
+  $core.int get revision => $_getIZ(4);
   @$pb.TagNumber(5)
-  set isDirectChat($core.bool v) { $_setBool(4, v); }
+  set revision($core.int v) { $_setUnsignedInt32(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasIsDirectChat() => $_has(4);
+  $core.bool hasRevision() => $_has(4);
   @$pb.TagNumber(5)
-  void clearIsDirectChat() => clearField(5);
+  void clearRevision() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.List<GroupMember> get members => $_getList(5);
+  $core.bool get isDirectChat => $_getBF(5);
+  @$pb.TagNumber(6)
+  set isDirectChat($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasIsDirectChat() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearIsDirectChat() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.int get unreadMessages => $_getIZ(6);
-  @$pb.TagNumber(7)
-  set unreadMessages($core.int v) { $_setUnsignedInt32(6, v); }
-  @$pb.TagNumber(7)
-  $core.bool hasUnreadMessages() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearUnreadMessages() => clearField(7);
+  $core.List<GroupMember> get members => $_getList(6);
 
   @$pb.TagNumber(8)
-  $fixnum.Int64 get lastMessageAt => $_getI64(7);
+  $core.int get unreadMessages => $_getIZ(7);
   @$pb.TagNumber(8)
-  set lastMessageAt($fixnum.Int64 v) { $_setInt64(7, v); }
+  set unreadMessages($core.int v) { $_setUnsignedInt32(7, v); }
   @$pb.TagNumber(8)
-  $core.bool hasLastMessageAt() => $_has(7);
+  $core.bool hasUnreadMessages() => $_has(7);
   @$pb.TagNumber(8)
-  void clearLastMessageAt() => clearField(8);
+  void clearUnreadMessages() => clearField(8);
 
   @$pb.TagNumber(9)
-  $core.List<$core.int> get lastMessage => $_getN(8);
+  $fixnum.Int64 get lastMessageAt => $_getI64(8);
   @$pb.TagNumber(9)
-  set lastMessage($core.List<$core.int> v) { $_setBytes(8, v); }
+  set lastMessageAt($fixnum.Int64 v) { $_setInt64(8, v); }
   @$pb.TagNumber(9)
-  $core.bool hasLastMessage() => $_has(8);
+  $core.bool hasLastMessageAt() => $_has(8);
   @$pb.TagNumber(9)
-  void clearLastMessage() => clearField(9);
+  void clearLastMessageAt() => clearField(9);
 
   @$pb.TagNumber(10)
-  $core.List<$core.int> get lastMessageSenderId => $_getN(9);
+  $core.List<$core.int> get lastMessage => $_getN(9);
   @$pb.TagNumber(10)
-  set lastMessageSenderId($core.List<$core.int> v) { $_setBytes(9, v); }
+  set lastMessage($core.List<$core.int> v) { $_setBytes(9, v); }
   @$pb.TagNumber(10)
-  $core.bool hasLastMessageSenderId() => $_has(9);
+  $core.bool hasLastMessage() => $_has(9);
   @$pb.TagNumber(10)
-  void clearLastMessageSenderId() => clearField(10);
+  void clearLastMessage() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.List<$core.int> get lastMessageSenderId => $_getN(10);
+  @$pb.TagNumber(11)
+  set lastMessageSenderId($core.List<$core.int> v) { $_setBytes(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasLastMessageSenderId() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearLastMessageSenderId() => clearField(11);
 }
 
 class GroupListRequest extends $pb.GeneratedMessage {

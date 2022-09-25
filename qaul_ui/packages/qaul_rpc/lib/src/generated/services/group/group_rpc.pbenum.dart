@@ -39,3 +39,20 @@ class GroupMemberRole extends $pb.ProtobufEnum {
   const GroupMemberRole._($core.int v, $core.String n) : super(v, n);
 }
 
+class GroupStatus extends $pb.ProtobufEnum {
+  static const GroupStatus ACTIVE = GroupStatus._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ACTIVE');
+  static const GroupStatus INVITE_ACCEPTED = GroupStatus._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INVITE_ACCEPTED');
+  static const GroupStatus DEACTIVATED = GroupStatus._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DEACTIVATED');
+
+  static const $core.List<GroupStatus> values = <GroupStatus> [
+    ACTIVE,
+    INVITE_ACCEPTED,
+    DEACTIVATED,
+  ];
+
+  static final $core.Map<$core.int, GroupStatus> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static GroupStatus? valueOf($core.int value) => _byValue[value];
+
+  const GroupStatus._($core.int v, $core.String n) : super(v, n);
+}
+

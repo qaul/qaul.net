@@ -39,6 +39,8 @@ class GroupEventType extends $pb.ProtobufEnum {
   static const GroupEventType LEFT = GroupEventType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LEFT');
   static const GroupEventType REMOVED = GroupEventType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REMOVED');
   static const GroupEventType CLOSED = GroupEventType._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSED');
+  static const GroupEventType CREATED = GroupEventType._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CREATED');
+  static const GroupEventType INVITE_ACCEPTED = GroupEventType._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INVITE_ACCEPTED');
 
   static const $core.List<GroupEventType> values = <GroupEventType> [
     DEFAULT,
@@ -47,6 +49,8 @@ class GroupEventType extends $pb.ProtobufEnum {
     LEFT,
     REMOVED,
     CLOSED,
+    CREATED,
+    INVITE_ACCEPTED,
   ];
 
   static final $core.Map<$core.int, GroupEventType> _byValue = $pb.ProtobufEnum.initByValue(values);

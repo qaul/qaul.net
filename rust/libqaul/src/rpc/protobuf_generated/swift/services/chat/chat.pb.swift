@@ -114,6 +114,17 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
 
   /// group was closed
   case closed // = 5
+
+  /// group was created
+  case created // = 6
+
+  /// group invite was accepted
+  ///
+  /// this state indicates, that we accepted
+  /// an invite, but that we haven't received
+  /// the group update from the administrator yet,
+  /// and are therefore not yet an official member of the group.
+  case inviteAccepted // = 7
   case UNRECOGNIZED(Int)
 
   init() {
@@ -128,6 +139,8 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
     case 3: self = .left
     case 4: self = .removed
     case 5: self = .closed
+    case 6: self = .created
+    case 7: self = .inviteAccepted
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -140,6 +153,8 @@ enum Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf.Enum {
     case .left: return 3
     case .removed: return 4
     case .closed: return 5
+    case .created: return 6
+    case .inviteAccepted: return 7
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -157,6 +172,8 @@ extension Qaul_Rpc_Chat_GroupEventType: CaseIterable {
     .left,
     .removed,
     .closed,
+    .created,
+    .inviteAccepted,
   ]
 }
 
@@ -500,6 +517,8 @@ extension Qaul_Rpc_Chat_GroupEventType: SwiftProtobuf._ProtoNameProviding {
     3: .same(proto: "LEFT"),
     4: .same(proto: "REMOVED"),
     5: .same(proto: "CLOSED"),
+    6: .same(proto: "CREATED"),
+    7: .same(proto: "INVITE_ACCEPTED"),
   ]
 }
 

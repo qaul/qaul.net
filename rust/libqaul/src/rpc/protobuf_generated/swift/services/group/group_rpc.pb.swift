@@ -110,6 +110,72 @@ extension Qaul_Rpc_Group_GroupMemberRole: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// Group Status
+///
+/// Indicates the working status of a group.
+enum Qaul_Rpc_Group_GroupStatus: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// Group is Active
+  ///
+  /// The group is in active state and we can post
+  /// messages to this group.
+  case active // = 0
+
+  /// Invite Accepted
+  ///
+  /// We accepted the invitation to this group
+  /// but we haven't received the updated group
+  /// info from the group administrator yet.
+  /// We therefore can't yet post messages into
+  /// the group.
+  case inviteAccepted // = 1
+
+  /// The group was deactivated
+  ///
+  /// We either left the group or have been removed from the group
+  /// by the group administrator.
+  /// We therefore can't post messages into this group anymore.
+  case deactivated // = 2
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .active
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .active
+    case 1: self = .inviteAccepted
+    case 2: self = .deactivated
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .active: return 0
+    case .inviteAccepted: return 1
+    case .deactivated: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Qaul_Rpc_Group_GroupStatus: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Qaul_Rpc_Group_GroupStatus] = [
+    .active,
+    .inviteAccepted,
+    .deactivated,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// Group service RPC message container
 struct Qaul_Rpc_Group_Group {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -678,6 +744,9 @@ struct Qaul_Rpc_Group_GroupInfo {
   /// created at
   var createdAt: UInt64 = 0
 
+  /// group status
+  var status: Qaul_Rpc_Group_GroupStatus = .active
+
   /// group revision number
   var revision: UInt32 = 0
 
@@ -797,6 +866,14 @@ extension Qaul_Rpc_Group_GroupMemberRole: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "User"),
     255: .same(proto: "Admin"),
+  ]
+}
+
+extension Qaul_Rpc_Group_GroupStatus: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "ACTIVE"),
+    1: .same(proto: "INVITE_ACCEPTED"),
+    2: .same(proto: "DEACTIVATED"),
   ]
 }
 
@@ -1666,13 +1743,14 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     1: .standard(proto: "group_id"),
     2: .standard(proto: "group_name"),
     3: .standard(proto: "created_at"),
-    4: .same(proto: "revision"),
-    5: .standard(proto: "is_direct_chat"),
-    6: .same(proto: "members"),
-    7: .standard(proto: "unread_messages"),
-    8: .standard(proto: "last_message_at"),
-    9: .standard(proto: "last_message"),
-    10: .standard(proto: "last_message_sender_id"),
+    4: .same(proto: "status"),
+    5: .same(proto: "revision"),
+    6: .standard(proto: "is_direct_chat"),
+    7: .same(proto: "members"),
+    8: .standard(proto: "unread_messages"),
+    9: .standard(proto: "last_message_at"),
+    10: .standard(proto: "last_message"),
+    11: .standard(proto: "last_message_sender_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1684,13 +1762,14 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 1: try { try decoder.decodeSingularBytesField(value: &self.groupID) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.groupName) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.createdAt) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
-      case 5: try { try decoder.decodeSingularBoolField(value: &self.isDirectChat) }()
-      case 6: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
-      case 7: try { try decoder.decodeSingularUInt32Field(value: &self.unreadMessages) }()
-      case 8: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageAt) }()
-      case 9: try { try decoder.decodeSingularBytesField(value: &self.lastMessage) }()
-      case 10: try { try decoder.decodeSingularBytesField(value: &self.lastMessageSenderID) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.status) }()
+      case 5: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
+      case 6: try { try decoder.decodeSingularBoolField(value: &self.isDirectChat) }()
+      case 7: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
+      case 8: try { try decoder.decodeSingularUInt32Field(value: &self.unreadMessages) }()
+      case 9: try { try decoder.decodeSingularUInt64Field(value: &self.lastMessageAt) }()
+      case 10: try { try decoder.decodeSingularBytesField(value: &self.lastMessage) }()
+      case 11: try { try decoder.decodeSingularBytesField(value: &self.lastMessageSenderID) }()
       default: break
       }
     }
@@ -1706,26 +1785,29 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if self.createdAt != 0 {
       try visitor.visitSingularUInt64Field(value: self.createdAt, fieldNumber: 3)
     }
+    if self.status != .active {
+      try visitor.visitSingularEnumField(value: self.status, fieldNumber: 4)
+    }
     if self.revision != 0 {
-      try visitor.visitSingularUInt32Field(value: self.revision, fieldNumber: 4)
+      try visitor.visitSingularUInt32Field(value: self.revision, fieldNumber: 5)
     }
     if self.isDirectChat != false {
-      try visitor.visitSingularBoolField(value: self.isDirectChat, fieldNumber: 5)
+      try visitor.visitSingularBoolField(value: self.isDirectChat, fieldNumber: 6)
     }
     if !self.members.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.members, fieldNumber: 6)
+      try visitor.visitRepeatedMessageField(value: self.members, fieldNumber: 7)
     }
     if self.unreadMessages != 0 {
-      try visitor.visitSingularUInt32Field(value: self.unreadMessages, fieldNumber: 7)
+      try visitor.visitSingularUInt32Field(value: self.unreadMessages, fieldNumber: 8)
     }
     if self.lastMessageAt != 0 {
-      try visitor.visitSingularUInt64Field(value: self.lastMessageAt, fieldNumber: 8)
+      try visitor.visitSingularUInt64Field(value: self.lastMessageAt, fieldNumber: 9)
     }
     if !self.lastMessage.isEmpty {
-      try visitor.visitSingularBytesField(value: self.lastMessage, fieldNumber: 9)
+      try visitor.visitSingularBytesField(value: self.lastMessage, fieldNumber: 10)
     }
     if !self.lastMessageSenderID.isEmpty {
-      try visitor.visitSingularBytesField(value: self.lastMessageSenderID, fieldNumber: 10)
+      try visitor.visitSingularBytesField(value: self.lastMessageSenderID, fieldNumber: 11)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1734,6 +1816,7 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.groupID != rhs.groupID {return false}
     if lhs.groupName != rhs.groupName {return false}
     if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.status != rhs.status {return false}
     if lhs.revision != rhs.revision {return false}
     if lhs.isDirectChat != rhs.isDirectChat {return false}
     if lhs.members != rhs.members {return false}
