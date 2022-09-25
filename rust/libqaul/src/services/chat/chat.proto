@@ -144,6 +144,15 @@ enum GroupEventType {
     REMOVED = 4;
     // group was closed
     CLOSED = 5;
+    // group was created
+    CREATED = 6;
+    // group invite was accepted
+    //
+    // this state indicates, that we accepted
+    // an invite, but that we haven't received
+    // the group update from the administrator yet,
+    // and are therefore not yet an official member of the group.
+    INVITE_ACCEPTED = 7;
 }
 
 // send chat message

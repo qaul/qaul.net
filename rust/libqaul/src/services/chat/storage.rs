@@ -138,9 +138,11 @@ impl ChatStorage {
 
         // check if message_id already exists
         // this protects the double saving of incoming messages
-        if db_ref.message_ids.contains_key(message_id).unwrap() {
-            log::warn!("chat message already exists");
-            return;
+        if message_id.len() > 0 {
+            if db_ref.message_ids.contains_key(message_id).unwrap() {
+                log::warn!("chat message already exists");
+                return;
+            }
         }
 
         // create received at timestamp
@@ -184,15 +186,17 @@ impl ChatStorage {
         }
 
         // save message id in data base
-        if let Err(e) = db_ref
-            .message_ids
-            .insert(message_id.clone(), db_key.clone())
-        {
-            log::error!("Error saving chat messageid to data base: {}", e);
-        }
-        // flush trees to disk
-        if let Err(e) = db_ref.message_ids.flush() {
-            log::error!("Error chat message_ids flush: {}", e);
+        if message_id.len() > 0 {
+            if let Err(e) = db_ref
+                .message_ids
+                .insert(message_id.clone(), db_key.clone())
+            {
+                log::error!("Error saving chat messageid to data base: {}", e);
+            }
+            // flush trees to disk
+            if let Err(e) = db_ref.message_ids.flush() {
+                log::error!("Error chat message_ids flush: {}", e);
+            }
         }
     }
 
