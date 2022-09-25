@@ -221,6 +221,7 @@ impl GroupManage {
             group_id: group.id,
             group_name: group.name,
             created_at: group.created_at,
+            status: group.status,
             revision: group.revision,
             is_direct_chat: group.is_direct_chat,
             members,
@@ -259,6 +260,7 @@ impl GroupManage {
                         group_id: group.id,
                         group_name: group.name,
                         created_at: group.created_at,
+                        status: group.status,
                         revision: group.revision,
                         is_direct_chat: group.is_direct_chat,
                         members,
@@ -302,6 +304,7 @@ impl GroupManage {
                             group_id: invite.group.id,
                             group_name: invite.group.name,
                             created_at: invite.group.created_at,
+                            status: invite.group.status,
                             revision: invite.group.revision,
                             is_direct_chat: invite.group.is_direct_chat,
                             members,
@@ -406,6 +409,11 @@ impl GroupManage {
         group.created_at = notify.created_at;
         group.revision = notify.revision;
         group.members = members;
+
+        // activate group after invite accept
+        if group.status == super::proto_rpc::GroupStatus::InviteAccepted as i32 {
+            group.status = super::proto_rpc::GroupStatus::Active as i32;
+        }
 
         // save group
         GroupStorage::save_group(account_id, group);

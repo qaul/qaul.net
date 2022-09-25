@@ -222,26 +222,29 @@ pub struct GroupInfo {
     /// created at
     #[prost(uint64, tag="3")]
     pub created_at: u64,
+    /// group status
+    #[prost(enumeration="GroupStatus", tag="4")]
+    pub status: i32,
     /// group revision number
-    #[prost(uint32, tag="4")]
+    #[prost(uint32, tag="5")]
     pub revision: u32,
     /// is direct chat
-    #[prost(bool, tag="5")]
+    #[prost(bool, tag="6")]
     pub is_direct_chat: bool,
     /// members
-    #[prost(message, repeated, tag="6")]
+    #[prost(message, repeated, tag="7")]
     pub members: ::prost::alloc::vec::Vec<GroupMember>,
     /// unread messages
-    #[prost(uint32, tag="7")]
+    #[prost(uint32, tag="8")]
     pub unread_messages: u32,
     /// time when last message was sent
-    #[prost(uint64, tag="8")]
+    #[prost(uint64, tag="9")]
     pub last_message_at: u64,
     /// content type
-    #[prost(bytes="vec", tag="9")]
+    #[prost(bytes="vec", tag="10")]
     pub last_message: ::prost::alloc::vec::Vec<u8>,
     /// sender of the last message
-    #[prost(bytes="vec", tag="10")]
+    #[prost(bytes="vec", tag="11")]
     pub last_message_sender_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// Group list request
@@ -317,6 +320,45 @@ impl GroupMemberRole {
         match self {
             GroupMemberRole::User => "User",
             GroupMemberRole::Admin => "Admin",
+        }
+    }
+}
+/// Group Status
+///
+/// Indicates the working status of a group.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum GroupStatus {
+    /// Group is Active
+    ///
+    /// The group is in active state and we can post
+    /// messages to this group.
+    Active = 0,
+    /// Invite Accepted
+    ///
+    /// We accepted the invitation to this group
+    /// but we haven't received the updated group
+    /// info from the group administrator yet.
+    /// We therefore can't yet post messages into
+    /// the group.
+    InviteAccepted = 1,
+    /// The group was deactivated
+    ///
+    /// We either left the group or have been removed from the group
+    /// by the group administrator.
+    /// We therefore can't post messages into this group anymore.
+    Deactivated = 2,
+}
+impl GroupStatus {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            GroupStatus::Active => "ACTIVE",
+            GroupStatus::InviteAccepted => "INVITE_ACCEPTED",
+            GroupStatus::Deactivated => "DEACTIVATED",
         }
     }
 }

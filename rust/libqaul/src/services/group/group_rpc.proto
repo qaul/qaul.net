@@ -179,6 +179,31 @@ message GroupMember {
     uint32 last_message_index = 5;
 }
 
+// Group Status
+//
+// Indicates the working status of a group.
+enum GroupStatus {
+    // Group is Active
+    //
+    // The group is in active state and we can post
+    // messages to this group.
+    ACTIVE = 0;
+    // Invite Accepted
+    //
+    // We accepted the invitation to this group
+    // but we haven't received the updated group
+    // info from the group administrator yet.
+    // We therefore can't yet post messages into
+    // the group.
+    INVITE_ACCEPTED = 1;
+    // The group was deactivated
+    //
+    // We either left the group or have been removed from the group
+    // by the group administrator.
+    // We therefore can't post messages into this group anymore.
+    DEACTIVATED = 2;
+}
+
 // Group info response
 message GroupInfo {
     // group id
@@ -187,20 +212,22 @@ message GroupInfo {
     string group_name = 2;
     // created at
     uint64 created_at = 3;
+    // group status
+    GroupStatus status = 4;
     // group revision number
-    uint32 revision = 4;
+    uint32 revision = 5;
     // is direct chat
-    bool is_direct_chat = 5;
+    bool is_direct_chat = 6;
     // members
-    repeated GroupMember members = 6;
+    repeated GroupMember members = 7;
     // unread messages
-    uint32 unread_messages = 7;
+    uint32 unread_messages = 8;
     // time when last message was sent
-    uint64 last_message_at = 8;
+    uint64 last_message_at = 9;
     // content type
-    bytes last_message = 9;
+    bytes last_message = 10;
     // sender of the last message
-    bytes last_message_sender_id = 10;
+    bytes last_message_sender_id = 11;
 }
 
 // Group list request

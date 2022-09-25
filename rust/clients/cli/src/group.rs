@@ -552,9 +552,27 @@ impl Group {
                         for group in group_list_response.groups {
                             let group_id =
                                 uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
-                            println!("id: {}", group_id.to_string());
-                            println!("\tname: {}", group.group_name.clone());
-                            println!("\tis_direct_chat: {}", group.is_direct_chat);
+                            let group_type: String;
+                            match group.is_direct_chat {
+                                true => group_type = "Direct".to_string(),
+                                false => group_type = "Group".to_string(),
+                            }
+                            println!(
+                                "{} {} {}",
+                                group_type,
+                                group_id.to_string(),
+                                group.group_name.clone()
+                            );
+                            print!("\tstatus: ");
+                            match proto::GroupStatus::from_i32(group.status) {
+                                Some(proto::GroupStatus::Active) => println!("Active"),
+                                Some(proto::GroupStatus::InviteAccepted) => {
+                                    println!("Invite Accepted")
+                                }
+                                Some(proto::GroupStatus::Deactivated) => println!("Deactivated"),
+                                None => println!("NOT SET"),
+                            }
+
                             println!(
                                 "\tcreated_at: {}, members: {}",
                                 group.created_at,
