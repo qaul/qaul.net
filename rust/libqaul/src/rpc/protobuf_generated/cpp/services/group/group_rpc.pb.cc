@@ -231,10 +231,11 @@ PROTOBUF_CONSTEXPR GroupInfo::GroupInfo(
   , /*decltype(_impl_.last_message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.last_message_sender_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.created_at_)*/uint64_t{0u}
+  , /*decltype(_impl_.status_)*/0
   , /*decltype(_impl_.revision_)*/0u
   , /*decltype(_impl_.is_direct_chat_)*/false
-  , /*decltype(_impl_.last_message_at_)*/uint64_t{0u}
   , /*decltype(_impl_.unread_messages_)*/0u
+  , /*decltype(_impl_.last_message_at_)*/uint64_t{0u}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct GroupInfoDefaultTypeInternal {
   PROTOBUF_CONSTEXPR GroupInfoDefaultTypeInternal()
@@ -312,7 +313,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace rpc
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_services_2fgroup_2fgroup_5frpc_2eproto[20];
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_services_2fgroup_2fgroup_5frpc_2eproto[2];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_services_2fgroup_2fgroup_5frpc_2eproto[3];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fgroup_2fgroup_5frpc_2eproto = nullptr;
 
 const uint32_t TableStruct_services_2fgroup_2fgroup_5frpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -456,6 +457,7 @@ const uint32_t TableStruct_services_2fgroup_2fgroup_5frpc_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.group_id_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.group_name_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.created_at_),
+  PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.status_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.revision_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.is_direct_chat_),
   PROTOBUF_FIELD_OFFSET(::qaul::rpc::group::GroupInfo, _impl_.members_),
@@ -515,11 +517,11 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 113, -1, -1, sizeof(::qaul::rpc::group::GroupInfoRequest)},
   { 120, -1, -1, sizeof(::qaul::rpc::group::GroupMember)},
   { 131, -1, -1, sizeof(::qaul::rpc::group::GroupInfo)},
-  { 147, -1, -1, sizeof(::qaul::rpc::group::GroupListRequest)},
-  { 153, -1, -1, sizeof(::qaul::rpc::group::GroupListResponse)},
-  { 160, -1, -1, sizeof(::qaul::rpc::group::GroupInvited)},
-  { 169, -1, -1, sizeof(::qaul::rpc::group::GroupInvitedRequest)},
-  { 175, -1, -1, sizeof(::qaul::rpc::group::GroupInvitedResponse)},
+  { 148, -1, -1, sizeof(::qaul::rpc::group::GroupListRequest)},
+  { 154, -1, -1, sizeof(::qaul::rpc::group::GroupListResponse)},
+  { 161, -1, -1, sizeof(::qaul::rpc::group::GroupInvited)},
+  { 170, -1, -1, sizeof(::qaul::rpc::group::GroupInvitedRequest)},
+  { 176, -1, -1, sizeof(::qaul::rpc::group::GroupInvitedResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -603,26 +605,29 @@ const char descriptor_table_protodef_services_2fgroup_2fgroup_5frpc_2eproto[] PR
   "c.group.GroupMemberRole\022\021\n\tjoined_at\030\003 \001"
   "(\004\022/\n\005state\030\004 \001(\0162 .qaul.rpc.group.Group"
   "MemberState\022\032\n\022last_message_index\030\005 \001(\r\""
-  "\205\002\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup"
-  "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022\020\n\010revis"
-  "ion\030\004 \001(\r\022\026\n\016is_direct_chat\030\005 \001(\010\022,\n\007mem"
-  "bers\030\006 \003(\0132\033.qaul.rpc.group.GroupMember\022"
-  "\027\n\017unread_messages\030\007 \001(\r\022\027\n\017last_message"
-  "_at\030\010 \001(\004\022\024\n\014last_message\030\t \001(\014\022\036\n\026last_"
-  "message_sender_id\030\n \001(\014\"\022\n\020GroupListRequ"
-  "est\">\n\021GroupListResponse\022)\n\006groups\030\001 \003(\013"
-  "2\031.qaul.rpc.group.GroupInfo\"`\n\014GroupInvi"
-  "ted\022\021\n\tsender_id\030\001 \001(\014\022\023\n\013received_at\030\002 "
-  "\001(\004\022(\n\005group\030\003 \001(\0132\031.qaul.rpc.group.Grou"
-  "pInfo\"\025\n\023GroupInvitedRequest\"E\n\024GroupInv"
-  "itedResponse\022-\n\007invited\030\001 \003(\0132\034.qaul.rpc"
-  ".group.GroupInvited*.\n\020GroupMemberState\022"
-  "\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017GroupMemb"
-  "erRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001b\006proto3"
+  "\262\002\n\tGroupInfo\022\020\n\010group_id\030\001 \001(\014\022\022\n\ngroup"
+  "_name\030\002 \001(\t\022\022\n\ncreated_at\030\003 \001(\004\022+\n\006statu"
+  "s\030\004 \001(\0162\033.qaul.rpc.group.GroupStatus\022\020\n\010"
+  "revision\030\005 \001(\r\022\026\n\016is_direct_chat\030\006 \001(\010\022,"
+  "\n\007members\030\007 \003(\0132\033.qaul.rpc.group.GroupMe"
+  "mber\022\027\n\017unread_messages\030\010 \001(\r\022\027\n\017last_me"
+  "ssage_at\030\t \001(\004\022\024\n\014last_message\030\n \001(\014\022\036\n\026"
+  "last_message_sender_id\030\013 \001(\014\"\022\n\020GroupLis"
+  "tRequest\">\n\021GroupListResponse\022)\n\006groups\030"
+  "\001 \003(\0132\031.qaul.rpc.group.GroupInfo\"`\n\014Grou"
+  "pInvited\022\021\n\tsender_id\030\001 \001(\014\022\023\n\013received_"
+  "at\030\002 \001(\004\022(\n\005group\030\003 \001(\0132\031.qaul.rpc.group"
+  ".GroupInfo\"\025\n\023GroupInvitedRequest\"E\n\024Gro"
+  "upInvitedResponse\022-\n\007invited\030\001 \003(\0132\034.qau"
+  "l.rpc.group.GroupInvited*.\n\020GroupMemberS"
+  "tate\022\013\n\007Invited\020\000\022\r\n\tActivated\020\001*\'\n\017Grou"
+  "pMemberRole\022\010\n\004User\020\000\022\n\n\005Admin\020\377\001*\?\n\013Gro"
+  "upStatus\022\n\n\006ACTIVE\020\000\022\023\n\017INVITE_ACCEPTED\020"
+  "\001\022\017\n\013DEACTIVATED\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_services_2fgroup_2fgroup_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fgroup_2fgroup_5frpc_2eproto = {
-    false, false, 2916, descriptor_table_protodef_services_2fgroup_2fgroup_5frpc_2eproto,
+    false, false, 3026, descriptor_table_protodef_services_2fgroup_2fgroup_5frpc_2eproto,
     "services/group/group_rpc.proto",
     &descriptor_table_services_2fgroup_2fgroup_5frpc_2eproto_once, nullptr, 0, 20,
     schemas, file_default_instances, TableStruct_services_2fgroup_2fgroup_5frpc_2eproto::offsets,
@@ -660,6 +665,21 @@ bool GroupMemberRole_IsValid(int value) {
   switch (value) {
     case 0:
     case 255:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GroupStatus_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_services_2fgroup_2fgroup_5frpc_2eproto);
+  return file_level_enum_descriptors_services_2fgroup_2fgroup_5frpc_2eproto[2];
+}
+bool GroupStatus_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
       return true;
     default:
       return false;
@@ -5048,10 +5068,11 @@ GroupInfo::GroupInfo(const GroupInfo& from)
     , decltype(_impl_.last_message_){}
     , decltype(_impl_.last_message_sender_id_){}
     , decltype(_impl_.created_at_){}
+    , decltype(_impl_.status_){}
     , decltype(_impl_.revision_){}
     , decltype(_impl_.is_direct_chat_){}
-    , decltype(_impl_.last_message_at_){}
     , decltype(_impl_.unread_messages_){}
+    , decltype(_impl_.last_message_at_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -5088,8 +5109,8 @@ GroupInfo::GroupInfo(const GroupInfo& from)
       _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.created_at_, &from._impl_.created_at_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.unread_messages_) -
-    reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.unread_messages_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.last_message_at_) -
+    reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.last_message_at_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.group.GroupInfo)
 }
 
@@ -5104,10 +5125,11 @@ inline void GroupInfo::SharedCtor(
     , decltype(_impl_.last_message_){}
     , decltype(_impl_.last_message_sender_id_){}
     , decltype(_impl_.created_at_){uint64_t{0u}}
+    , decltype(_impl_.status_){0}
     , decltype(_impl_.revision_){0u}
     , decltype(_impl_.is_direct_chat_){false}
-    , decltype(_impl_.last_message_at_){uint64_t{0u}}
     , decltype(_impl_.unread_messages_){0u}
+    , decltype(_impl_.last_message_at_){uint64_t{0u}}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.group_id_.InitDefault();
@@ -5162,8 +5184,8 @@ void GroupInfo::Clear() {
   _impl_.last_message_.ClearToEmpty();
   _impl_.last_message_sender_id_.ClearToEmpty();
   ::memset(&_impl_.created_at_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.unread_messages_) -
-      reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.unread_messages_));
+      reinterpret_cast<char*>(&_impl_.last_message_at_) -
+      reinterpret_cast<char*>(&_impl_.created_at_)) + sizeof(_impl_.last_message_at_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5200,63 +5222,72 @@ const char* GroupInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx
         } else
           goto handle_unusual;
         continue;
-      // uint32 revision = 4;
+      // .qaul.rpc.group.GroupStatus status = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_status(static_cast<::qaul::rpc::group::GroupStatus>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 revision = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
           _impl_.revision_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // bool is_direct_chat = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+      // bool is_direct_chat = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
           _impl_.is_direct_chat_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .qaul.rpc.group.GroupMember members = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+      // repeated .qaul.rpc.group.GroupMember members = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_members(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else
           goto handle_unusual;
         continue;
-      // uint32 unread_messages = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+      // uint32 unread_messages = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
           _impl_.unread_messages_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // uint64 last_message_at = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
+      // uint64 last_message_at = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           _impl_.last_message_at_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // bytes last_message = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
+      // bytes last_message = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           auto str = _internal_mutable_last_message();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // bytes last_message_sender_id = 10;
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
+      // bytes last_message_sender_id = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
           auto str = _internal_mutable_last_message_sender_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -5314,48 +5345,55 @@ uint8_t* GroupInfo::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteUInt64ToArray(3, this->_internal_created_at(), target);
   }
 
-  // uint32 revision = 4;
+  // .qaul.rpc.group.GroupStatus status = 4;
+  if (this->_internal_status() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      4, this->_internal_status(), target);
+  }
+
+  // uint32 revision = 5;
   if (this->_internal_revision() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_revision(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_revision(), target);
   }
 
-  // bool is_direct_chat = 5;
+  // bool is_direct_chat = 6;
   if (this->_internal_is_direct_chat() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(5, this->_internal_is_direct_chat(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_is_direct_chat(), target);
   }
 
-  // repeated .qaul.rpc.group.GroupMember members = 6;
+  // repeated .qaul.rpc.group.GroupMember members = 7;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_members_size()); i < n; i++) {
     const auto& repfield = this->_internal_members(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-        InternalWriteMessage(6, repfield, repfield.GetCachedSize(), target, stream);
+        InternalWriteMessage(7, repfield, repfield.GetCachedSize(), target, stream);
   }
 
-  // uint32 unread_messages = 7;
+  // uint32 unread_messages = 8;
   if (this->_internal_unread_messages() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(7, this->_internal_unread_messages(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(8, this->_internal_unread_messages(), target);
   }
 
-  // uint64 last_message_at = 8;
+  // uint64 last_message_at = 9;
   if (this->_internal_last_message_at() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(8, this->_internal_last_message_at(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(9, this->_internal_last_message_at(), target);
   }
 
-  // bytes last_message = 9;
+  // bytes last_message = 10;
   if (!this->_internal_last_message().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        9, this->_internal_last_message(), target);
+        10, this->_internal_last_message(), target);
   }
 
-  // bytes last_message_sender_id = 10;
+  // bytes last_message_sender_id = 11;
   if (!this->_internal_last_message_sender_id().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        10, this->_internal_last_message_sender_id(), target);
+        11, this->_internal_last_message_sender_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5374,7 +5412,7 @@ size_t GroupInfo::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .qaul.rpc.group.GroupMember members = 6;
+  // repeated .qaul.rpc.group.GroupMember members = 7;
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->_impl_.members_) {
     total_size +=
@@ -5395,14 +5433,14 @@ size_t GroupInfo::ByteSizeLong() const {
         this->_internal_group_name());
   }
 
-  // bytes last_message = 9;
+  // bytes last_message = 10;
   if (!this->_internal_last_message().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_last_message());
   }
 
-  // bytes last_message_sender_id = 10;
+  // bytes last_message_sender_id = 11;
   if (!this->_internal_last_message_sender_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
@@ -5414,24 +5452,30 @@ size_t GroupInfo::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_created_at());
   }
 
-  // uint32 revision = 4;
+  // .qaul.rpc.group.GroupStatus status = 4;
+  if (this->_internal_status() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_status());
+  }
+
+  // uint32 revision = 5;
   if (this->_internal_revision() != 0) {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_revision());
   }
 
-  // bool is_direct_chat = 5;
+  // bool is_direct_chat = 6;
   if (this->_internal_is_direct_chat() != 0) {
     total_size += 1 + 1;
   }
 
-  // uint64 last_message_at = 8;
-  if (this->_internal_last_message_at() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_last_message_at());
-  }
-
-  // uint32 unread_messages = 7;
+  // uint32 unread_messages = 8;
   if (this->_internal_unread_messages() != 0) {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_unread_messages());
+  }
+
+  // uint64 last_message_at = 9;
+  if (this->_internal_last_message_at() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_last_message_at());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -5468,17 +5512,20 @@ void GroupInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROT
   if (from._internal_created_at() != 0) {
     _this->_internal_set_created_at(from._internal_created_at());
   }
+  if (from._internal_status() != 0) {
+    _this->_internal_set_status(from._internal_status());
+  }
   if (from._internal_revision() != 0) {
     _this->_internal_set_revision(from._internal_revision());
   }
   if (from._internal_is_direct_chat() != 0) {
     _this->_internal_set_is_direct_chat(from._internal_is_direct_chat());
   }
-  if (from._internal_last_message_at() != 0) {
-    _this->_internal_set_last_message_at(from._internal_last_message_at());
-  }
   if (from._internal_unread_messages() != 0) {
     _this->_internal_set_unread_messages(from._internal_unread_messages());
+  }
+  if (from._internal_last_message_at() != 0) {
+    _this->_internal_set_last_message_at(from._internal_last_message_at());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -5517,8 +5564,8 @@ void GroupInfo::InternalSwap(GroupInfo* other) {
       &other->_impl_.last_message_sender_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GroupInfo, _impl_.unread_messages_)
-      + sizeof(GroupInfo::_impl_.unread_messages_)
+      PROTOBUF_FIELD_OFFSET(GroupInfo, _impl_.last_message_at_)
+      + sizeof(GroupInfo::_impl_.last_message_at_)
       - PROTOBUF_FIELD_OFFSET(GroupInfo, _impl_.created_at_)>(
           reinterpret_cast<char*>(&_impl_.created_at_),
           reinterpret_cast<char*>(&other->_impl_.created_at_));

@@ -99,10 +99,35 @@ object GroupInfoKt {
 
     /**
      * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     */
+     var status: qaul.rpc.group.GroupRpc.GroupStatus
+      @JvmName("getStatus")
+      get() = _builder.getStatus()
+      @JvmName("setStatus")
+      set(value) {
+        _builder.setStatus(value)
+      }
+    /**
+     * <pre>
+     * group status
+     * </pre>
+     *
+     * <code>.qaul.rpc.group.GroupStatus status = 4;</code>
+     */
+    fun clearStatus() {
+      _builder.clearStatus()
+    }
+
+    /**
+     * <pre>
      * group revision number
      * </pre>
      *
-     * <code>uint32 revision = 4;</code>
+     * <code>uint32 revision = 5;</code>
      */
     var revision: kotlin.Int
       @JvmName("getRevision")
@@ -116,7 +141,7 @@ object GroupInfoKt {
      * group revision number
      * </pre>
      *
-     * <code>uint32 revision = 4;</code>
+     * <code>uint32 revision = 5;</code>
      */
     fun clearRevision() {
       _builder.clearRevision()
@@ -127,7 +152,7 @@ object GroupInfoKt {
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 5;</code>
+     * <code>bool is_direct_chat = 6;</code>
      */
     var isDirectChat: kotlin.Boolean
       @JvmName("getIsDirectChat")
@@ -141,7 +166,7 @@ object GroupInfoKt {
      * is direct chat
      * </pre>
      *
-     * <code>bool is_direct_chat = 5;</code>
+     * <code>bool is_direct_chat = 6;</code>
      */
     fun clearIsDirectChat() {
       _builder.clearIsDirectChat()
@@ -158,7 +183,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
      val members: com.google.protobuf.kotlin.DslList<qaul.rpc.group.GroupRpc.GroupMember, MembersProxy>
       @kotlin.jvm.JvmSynthetic
@@ -170,7 +195,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      * @param value The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -183,7 +208,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      * @param value The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -197,7 +222,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      * @param values The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -210,7 +235,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      * @param values The members to add.
      */
     @kotlin.jvm.JvmSynthetic
@@ -224,7 +249,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      * @param index The index to set the value at.
      * @param value The members to set.
      */
@@ -238,7 +263,7 @@ object GroupInfoKt {
      * members
      * </pre>
      *
-     * <code>repeated .qaul.rpc.group.GroupMember members = 6;</code>
+     * <code>repeated .qaul.rpc.group.GroupMember members = 7;</code>
      */
     @kotlin.jvm.JvmSynthetic
     @kotlin.jvm.JvmName("clearMembers")
@@ -252,7 +277,7 @@ object GroupInfoKt {
      * unread messages
      * </pre>
      *
-     * <code>uint32 unread_messages = 7;</code>
+     * <code>uint32 unread_messages = 8;</code>
      */
     var unreadMessages: kotlin.Int
       @JvmName("getUnreadMessages")
@@ -266,7 +291,7 @@ object GroupInfoKt {
      * unread messages
      * </pre>
      *
-     * <code>uint32 unread_messages = 7;</code>
+     * <code>uint32 unread_messages = 8;</code>
      */
     fun clearUnreadMessages() {
       _builder.clearUnreadMessages()
@@ -277,7 +302,7 @@ object GroupInfoKt {
      * time when last message was sent
      * </pre>
      *
-     * <code>uint64 last_message_at = 8;</code>
+     * <code>uint64 last_message_at = 9;</code>
      */
     var lastMessageAt: kotlin.Long
       @JvmName("getLastMessageAt")
@@ -291,7 +316,7 @@ object GroupInfoKt {
      * time when last message was sent
      * </pre>
      *
-     * <code>uint64 last_message_at = 8;</code>
+     * <code>uint64 last_message_at = 9;</code>
      */
     fun clearLastMessageAt() {
       _builder.clearLastMessageAt()
@@ -302,7 +327,7 @@ object GroupInfoKt {
      * content type
      * </pre>
      *
-     * <code>bytes last_message = 9;</code>
+     * <code>bytes last_message = 10;</code>
      */
     var lastMessage: com.google.protobuf.ByteString
       @JvmName("getLastMessage")
@@ -316,7 +341,7 @@ object GroupInfoKt {
      * content type
      * </pre>
      *
-     * <code>bytes last_message = 9;</code>
+     * <code>bytes last_message = 10;</code>
      */
     fun clearLastMessage() {
       _builder.clearLastMessage()
@@ -327,7 +352,7 @@ object GroupInfoKt {
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 10;</code>
+     * <code>bytes last_message_sender_id = 11;</code>
      */
     var lastMessageSenderId: com.google.protobuf.ByteString
       @JvmName("getLastMessageSenderId")
@@ -341,7 +366,7 @@ object GroupInfoKt {
      * sender of the last message
      * </pre>
      *
-     * <code>bytes last_message_sender_id = 10;</code>
+     * <code>bytes last_message_sender_id = 11;</code>
      */
     fun clearLastMessageSenderId() {
       _builder.clearLastMessageSenderId()

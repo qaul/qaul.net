@@ -33,11 +33,13 @@ const GroupEventType$json = const {
     const {'1': 'LEFT', '2': 3},
     const {'1': 'REMOVED', '2': 4},
     const {'1': 'CLOSED', '2': 5},
+    const {'1': 'CREATED', '2': 6},
+    const {'1': 'INVITE_ACCEPTED', '2': 7},
   ],
 };
 
 /// Descriptor for `GroupEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List groupEventTypeDescriptor = $convert.base64Decode('Cg5Hcm91cEV2ZW50VHlwZRILCgdERUZBVUxUEAASCwoHSU5WSVRFRBABEgoKBkpPSU5FRBACEggKBExFRlQQAxILCgdSRU1PVkVEEAQSCgoGQ0xPU0VEEAU=');
+final $typed_data.Uint8List groupEventTypeDescriptor = $convert.base64Decode('Cg5Hcm91cEV2ZW50VHlwZRILCgdERUZBVUxUEAASCwoHSU5WSVRFRBABEgoKBkpPSU5FRBACEggKBExFRlQQAxILCgdSRU1PVkVEEAQSCgoGQ0xPU0VEEAUSCwoHQ1JFQVRFRBAGEhMKD0lOVklURV9BQ0NFUFRFRBAH');
 @$core.Deprecated('Use chatDescriptor instead')
 const Chat$json = const {
   '1': 'Chat',

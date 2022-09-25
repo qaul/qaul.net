@@ -30,6 +30,18 @@ const GroupMemberRole$json = const {
 
 /// Descriptor for `GroupMemberRole`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List groupMemberRoleDescriptor = $convert.base64Decode('Cg9Hcm91cE1lbWJlclJvbGUSCAoEVXNlchAAEgoKBUFkbWluEP8B');
+@$core.Deprecated('Use groupStatusDescriptor instead')
+const GroupStatus$json = const {
+  '1': 'GroupStatus',
+  '2': const [
+    const {'1': 'ACTIVE', '2': 0},
+    const {'1': 'INVITE_ACCEPTED', '2': 1},
+    const {'1': 'DEACTIVATED', '2': 2},
+  ],
+};
+
+/// Descriptor for `GroupStatus`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List groupStatusDescriptor = $convert.base64Decode('CgtHcm91cFN0YXR1cxIKCgZBQ1RJVkUQABITCg9JTlZJVEVfQUNDRVBURUQQARIPCgtERUFDVElWQVRFRBAC');
 @$core.Deprecated('Use groupDescriptor instead')
 const Group$json = const {
   '1': 'Group',
@@ -212,18 +224,19 @@ const GroupInfo$json = const {
     const {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     const {'1': 'group_name', '3': 2, '4': 1, '5': 9, '10': 'groupName'},
     const {'1': 'created_at', '3': 3, '4': 1, '5': 4, '10': 'createdAt'},
-    const {'1': 'revision', '3': 4, '4': 1, '5': 13, '10': 'revision'},
-    const {'1': 'is_direct_chat', '3': 5, '4': 1, '5': 8, '10': 'isDirectChat'},
-    const {'1': 'members', '3': 6, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
-    const {'1': 'unread_messages', '3': 7, '4': 1, '5': 13, '10': 'unreadMessages'},
-    const {'1': 'last_message_at', '3': 8, '4': 1, '5': 4, '10': 'lastMessageAt'},
-    const {'1': 'last_message', '3': 9, '4': 1, '5': 12, '10': 'lastMessage'},
-    const {'1': 'last_message_sender_id', '3': 10, '4': 1, '5': 12, '10': 'lastMessageSenderId'},
+    const {'1': 'status', '3': 4, '4': 1, '5': 14, '6': '.qaul.rpc.group.GroupStatus', '10': 'status'},
+    const {'1': 'revision', '3': 5, '4': 1, '5': 13, '10': 'revision'},
+    const {'1': 'is_direct_chat', '3': 6, '4': 1, '5': 8, '10': 'isDirectChat'},
+    const {'1': 'members', '3': 7, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
+    const {'1': 'unread_messages', '3': 8, '4': 1, '5': 13, '10': 'unreadMessages'},
+    const {'1': 'last_message_at', '3': 9, '4': 1, '5': 4, '10': 'lastMessageAt'},
+    const {'1': 'last_message', '3': 10, '4': 1, '5': 12, '10': 'lastMessage'},
+    const {'1': 'last_message_sender_id', '3': 11, '4': 1, '5': 12, '10': 'lastMessageSenderId'},
   ],
 };
 
 /// Descriptor for `GroupInfo`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode('CglHcm91cEluZm8SGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSHQoKZ3JvdXBfbmFtZRgCIAEoCVIJZ3JvdXBOYW1lEh0KCmNyZWF0ZWRfYXQYAyABKARSCWNyZWF0ZWRBdBIaCghyZXZpc2lvbhgEIAEoDVIIcmV2aXNpb24SJAoOaXNfZGlyZWN0X2NoYXQYBSABKAhSDGlzRGlyZWN0Q2hhdBI1CgdtZW1iZXJzGAYgAygLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBNZW1iZXJSB21lbWJlcnMSJwoPdW5yZWFkX21lc3NhZ2VzGAcgASgNUg51bnJlYWRNZXNzYWdlcxImCg9sYXN0X21lc3NhZ2VfYXQYCCABKARSDWxhc3RNZXNzYWdlQXQSIQoMbGFzdF9tZXNzYWdlGAkgASgMUgtsYXN0TWVzc2FnZRIzChZsYXN0X21lc3NhZ2Vfc2VuZGVyX2lkGAogASgMUhNsYXN0TWVzc2FnZVNlbmRlcklk');
+final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode('CglHcm91cEluZm8SGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSHQoKZ3JvdXBfbmFtZRgCIAEoCVIJZ3JvdXBOYW1lEh0KCmNyZWF0ZWRfYXQYAyABKARSCWNyZWF0ZWRBdBIzCgZzdGF0dXMYBCABKA4yGy5xYXVsLnJwYy5ncm91cC5Hcm91cFN0YXR1c1IGc3RhdHVzEhoKCHJldmlzaW9uGAUgASgNUghyZXZpc2lvbhIkCg5pc19kaXJlY3RfY2hhdBgGIAEoCFIMaXNEaXJlY3RDaGF0EjUKB21lbWJlcnMYByADKAsyGy5xYXVsLnJwYy5ncm91cC5Hcm91cE1lbWJlclIHbWVtYmVycxInCg91bnJlYWRfbWVzc2FnZXMYCCABKA1SDnVucmVhZE1lc3NhZ2VzEiYKD2xhc3RfbWVzc2FnZV9hdBgJIAEoBFINbGFzdE1lc3NhZ2VBdBIhCgxsYXN0X21lc3NhZ2UYCiABKAxSC2xhc3RNZXNzYWdlEjMKFmxhc3RfbWVzc2FnZV9zZW5kZXJfaWQYCyABKAxSE2xhc3RNZXNzYWdlU2VuZGVySWQ=');
 @$core.Deprecated('Use groupListRequestDescriptor instead')
 const GroupListRequest$json = const {
   '1': 'GroupListRequest',
