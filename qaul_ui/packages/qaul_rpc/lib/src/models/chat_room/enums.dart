@@ -31,7 +31,16 @@ MessageState _messageStateFactory({required MessageStatus status}) {
   throw UnimplementedError('(_messageStatusFactory) Unmapped status: $status');
 }
 
-enum GroupEventContentType { none, invited, joined, left, closed, removed }
+enum GroupEventContentType {
+  none,
+  created,
+  invited,
+  inviteAccepted,
+  joined,
+  left,
+  closed,
+  removed
+}
 
 GroupEventContentType _groupEventContentTypeFactory({
   required GroupEventType t,
@@ -49,6 +58,10 @@ GroupEventContentType _groupEventContentTypeFactory({
       return GroupEventContentType.left;
     case GroupEventType.REMOVED:
       return GroupEventContentType.removed;
+    case GroupEventType.CREATED:
+      return GroupEventContentType.created;
+    case GroupEventType.INVITE_ACCEPTED:
+      return GroupEventContentType.inviteAccepted;
   }
   throw UnimplementedError(
       '(_groupEventContentTypeFactory) unmpaped event type: $t');
