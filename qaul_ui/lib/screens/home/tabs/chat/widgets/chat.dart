@@ -223,6 +223,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
+              isDisabled: room.status != ChatRoomStatus.active,
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
               onAttachmentPressed: (room.messages?.isEmpty ?? true)
