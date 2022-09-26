@@ -37,6 +37,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     this.isDirectChat = true,
     this.members = const [],
     this.revisionNumber = 0,
+    this.status = ChatRoomStatus.active,
   });
 
   final Uint8List conversationId;
@@ -51,6 +52,7 @@ class ChatRoom with EquatableMixin implements Comparable {
   final bool isDirectChat;
   final List<ChatRoomUser> members;
   final int revisionNumber;
+  final ChatRoomStatus status;
 
   factory ChatRoom.blank({required User otherUser}) {
     assert(otherUser.conversationId != null);
@@ -79,6 +81,7 @@ class ChatRoom with EquatableMixin implements Comparable {
           DateTime.fromMillisecondsSinceEpoch(g.lastMessageAt.toInt()),
       lastMessagePreview: MessageContent.fromBuffer(g.lastMessage),
       lastMessageSenderId: Uint8List.fromList(g.lastMessageSenderId),
+      status: _chatRoomStatusFactory(s: g.status),
     );
   }
 

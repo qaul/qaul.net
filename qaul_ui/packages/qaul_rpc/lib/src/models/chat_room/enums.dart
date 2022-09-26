@@ -66,3 +66,17 @@ GroupEventContentType _groupEventContentTypeFactory({
   throw UnimplementedError(
       '(_groupEventContentTypeFactory) unmpaped event type: $t');
 }
+
+enum ChatRoomStatus { active, inviteAccepted, deactivated }
+
+ChatRoomStatus _chatRoomStatusFactory({required GroupStatus s}) {
+  switch (s) {
+    case GroupStatus.ACTIVE:
+      return ChatRoomStatus.active;
+    case GroupStatus.DEACTIVATED:
+      return ChatRoomStatus.deactivated;
+    case GroupStatus.INVITE_ACCEPTED:
+      return ChatRoomStatus.inviteAccepted;
+  }
+  throw UnimplementedError('(_chatRoomStatusFactory) type: $s');
+}
