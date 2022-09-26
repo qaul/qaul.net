@@ -120,25 +120,6 @@ class ChatRoom with EquatableMixin implements Comparable {
     return '$room)';
   }
 
-  ChatRoom copyWith({
-    int? lastMessageIndex,
-    String? name,
-    DateTime? lastMessageTime,
-    int? unreadCount,
-    MessageContent? lastMessagePreview,
-    List<Message>? messages,
-  }) {
-    return ChatRoom._(
-      conversationId: conversationId,
-      lastMessageIndex: lastMessageIndex ?? this.lastMessageIndex,
-      name: name ?? this.name,
-      lastMessageTime: lastMessageTime ?? this.lastMessageTime,
-      unreadCount: unreadCount ?? this.unreadCount,
-      lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
-      messages: messages ?? this.messages,
-    );
-  }
-
   ChatRoom mergeWithConversationList(ChatConversationList c) {
     assert(conversationId.equals(Uint8List.fromList(c.groupId)));
     return ChatRoom._(
@@ -153,6 +134,7 @@ class ChatRoom with EquatableMixin implements Comparable {
       createdAt: createdAt,
       isDirectChat: isDirectChat,
       members: members,
+      status: status,
     );
   }
 }

@@ -224,6 +224,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               isDisabled: room.status != ChatRoomStatus.active,
+              disabledMessage: room.status != ChatRoomStatus.inviteAccepted
+                  ? null
+                  : 'Please wait for the admin to confirm your acceptance to send messages',
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               onSendPressed: sendMessage,
               onAttachmentPressed: (room.messages?.isEmpty ?? true)

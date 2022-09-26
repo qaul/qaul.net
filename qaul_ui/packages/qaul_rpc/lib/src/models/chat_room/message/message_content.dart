@@ -74,7 +74,7 @@ class GroupEventContent extends MessageContent {
       case GroupEventContentType.created:
         return 'The group has been created';
       case GroupEventContentType.inviteAccepted:
-        return "${msgBase('accepted the invite')}. They'll be able to send messages once the group admin confirms the invite acceptance.";
+        return '"${user.name}" has accepted the invite.';
     }
   }
 

@@ -21,6 +21,7 @@ class _CustomInput extends StatefulWidget {
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.initialText,
+    this.disabledMessage,
     this.isDisabled = false,
   }) : super(key: key);
 
@@ -35,6 +36,8 @@ class _CustomInput extends StatefulWidget {
   final String? initialText;
 
   final bool isDisabled;
+
+  final String? disabledMessage;
 
   @override
   _CustomInputState createState() => _CustomInputState();
@@ -100,84 +103,93 @@ class _CustomInputState extends State<_CustomInput> {
   Widget build(BuildContext context) {
     final query = MediaQuery.of(context);
 
-    return Opacity(
-      opacity: widget.isDisabled ? 0.3 : 1,
-      child: IgnorePointer(
-        ignoring: widget.isDisabled,
-        child: GestureDetector(
-          onTap: () => _inputFocusNode.requestFocus(),
-          child: Shortcuts(
-            shortcuts: {
-              LogicalKeySet(LogicalKeyboardKey.enter):
-                  const SendMessageIntent(),
-              LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
-                  const NewLineIntent(),
-              LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
-                  const NewLineIntent(),
-            },
-            child: Actions(
-              actions: {
-                SendMessageIntent: CallbackAction<SendMessageIntent>(
-                  onInvoke: (SendMessageIntent intent) => _handleSendPressed(),
-                ),
-                NewLineIntent: CallbackAction<NewLineIntent>(
-                  onInvoke: (NewLineIntent intent) {
-                    final newValue = '${_textController.text}\r\n';
-                    _textController.value = TextEditingValue(
-                      text: newValue,
-                      selection: TextSelection.fromPosition(
-                        TextPosition(offset: newValue.length),
-                      ),
-                    );
-                    return null;
-                  },
-                ),
-              },
-              child: Focus(
-                autofocus: true,
-                child: Material(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.transparent,
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(
-                      24 + query.padding.left,
-                      20,
-                      24 + query.padding.right,
-                      20 + query.viewInsets.bottom + query.padding.bottom,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Opacity(
+          opacity: widget.isDisabled ? 0.3 : 1,
+          child: IgnorePointer(
+            ignoring: widget.isDisabled,
+            child: GestureDetector(
+              onTap: () => _inputFocusNode.requestFocus(),
+              child: Shortcuts(
+                shortcuts: {
+                  LogicalKeySet(LogicalKeyboardKey.enter):
+                      const SendMessageIntent(),
+                  LogicalKeySet(
+                          LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
+                      const NewLineIntent(),
+                  LogicalKeySet(
+                          LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
+                      const NewLineIntent(),
+                },
+                child: Actions(
+                  actions: {
+                    SendMessageIntent: CallbackAction<SendMessageIntent>(
+                      onInvoke: (SendMessageIntent intent) =>
+                          _handleSendPressed(),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _textController,
-                            decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!
-                                    .chatEmptyMessageHint),
-                            focusNode: _inputFocusNode,
-                            keyboardType: TextInputType.multiline,
-                            maxLines: 5,
-                            minLines: 1,
-                            textCapitalization: TextCapitalization.sentences,
+                    NewLineIntent: CallbackAction<NewLineIntent>(
+                      onInvoke: (NewLineIntent intent) {
+                        final newValue = '${_textController.text}\r\n';
+                        _textController.value = TextEditingValue(
+                          text: newValue,
+                          selection: TextSelection.fromPosition(
+                            TextPosition(offset: newValue.length),
                           ),
+                        );
+                        return null;
+                      },
+                    ),
+                  },
+                  child: Focus(
+                    autofocus: true,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.transparent,
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          24 + query.padding.left,
+                          20,
+                          24 + query.padding.right,
+                          20 + query.viewInsets.bottom + query.padding.bottom,
                         ),
-                        const SizedBox(width: 16.0),
-                        if (widget.onAttachmentPressed != null)
-                          _AttachmentButton(
-                            onPressed: () =>
-                                _sendFilePressed(widget.onAttachmentPressed),
-                          ),
-                        if (widget.onPickImagePressed != null)
-                          _AttachmentButton(
-                            icon: Icons.add_photo_alternate,
-                            onPressed: () =>
-                                _sendFilePressed(widget.onPickImagePressed),
-                          ),
-                        Visibility(
-                          visible: _sendButtonVisible,
-                          child:
-                              _CustomSendButton(onPressed: _handleSendPressed),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _textController,
+                                decoration: InputDecoration(
+                                    labelText: AppLocalizations.of(context)!
+                                        .chatEmptyMessageHint),
+                                focusNode: _inputFocusNode,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: 5,
+                                minLines: 1,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                              ),
+                            ),
+                            const SizedBox(width: 16.0),
+                            if (widget.onAttachmentPressed != null)
+                              _AttachmentButton(
+                                onPressed: () => _sendFilePressed(
+                                    widget.onAttachmentPressed),
+                              ),
+                            if (widget.onPickImagePressed != null)
+                              _AttachmentButton(
+                                icon: Icons.add_photo_alternate,
+                                onPressed: () =>
+                                    _sendFilePressed(widget.onPickImagePressed),
+                              ),
+                            Visibility(
+                              visible: _sendButtonVisible,
+                              child: _CustomSendButton(
+                                  onPressed: _handleSendPressed),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -185,7 +197,20 @@ class _CustomInputState extends State<_CustomInput> {
             ),
           ),
         ),
-      ),
+        if (widget.isDisabled && widget.disabledMessage != null)
+          Container(
+            color: Colors.black54,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            child: Text(
+              widget.disabledMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          )
+      ],
     );
   }
 }
