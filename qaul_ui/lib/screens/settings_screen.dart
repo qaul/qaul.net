@@ -174,12 +174,25 @@ class _InternetNodesList extends HookConsumerWidget {
                   ],
                 ),
                 onTap: () async {
-                  final ip = nodeAddr.replaceAll('/ip4/', '').split('/').first;
-                  final port = nodeAddr.split('/').last;
-                  final res = await showDialog(
-                    context: context,
-                    builder: (_) => _AddNodeDialog(ip: ip, port: port),
-                  );
+                  String? res;
+                  if (nodeAddr.contains('/ip4/')) {
+                    final ip =
+                        nodeAddr.replaceAll('/ip4/', '').split('/').first;
+                    final port = nodeAddr.split('/').last;
+                    res = await showDialog(
+                      context: context,
+                      builder: (_) => _AddNodeDialog(ip: ip, port: port),
+                    );
+                  }
+                  if (nodeAddr.contains('/ip6/')) {
+                    final ip =
+                        nodeAddr.replaceAll('/ip6/', '').split('/').first;
+                    final port = nodeAddr.split('/').last;
+                    res = await showDialog(
+                      context: context,
+                      builder: (_) => _AddIPv6NodeDialog(ip: ip, port: port),
+                    );
+                  }
 
                   if (res is! String) return;
                   removeNode(nodeAddr);
@@ -319,33 +332,77 @@ class _AddNodeDialog extends HookWidget {
 }
 
 class _AddIPv6NodeDialog extends HookWidget {
+  _AddIPv6NodeDialog({this.ip, this.port});
+
+  final String? ip;
+  final String? port;
+
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final ipCtrl = useTextEditingController();
+    final ipCtrl = useTextEditingController(text: ip);
+    final portCtrl = useTextEditingController(text: port);
 
     final l18ns = AppLocalizations.of(context)!;
     var orientation = MediaQuery.of(context).orientation;
+    final tcpField = [
+      _spacer,
+      Text('/tcp/', style: _fixedTextStyle),
+      _spacer,
+      Expanded(
+        child: TextFormField(
+          controller: portCtrl,
+          decoration: _decoration('port', hint: '9229'),
+          keyboardType: TextInputType.number,
+          validator: (val) {
+            if (isValidPort(val)) return null;
+            return l18ns.invalidPortMessage;
+          },
+        ),
+      ),
+    ];
 
     return AlertDialog(
       title:
           orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
       content: Form(
         key: _formKey,
-        child: TextFormField(
-          autofocus: true,
-          controller: ipCtrl,
-          inputFormatters: [IPv6TextInputFormatter()],
-          decoration: _decoration(
-            'ip',
-            hint: '0000:0000:0000:0000:0000:0000:0000:0000',
-          ),
-          validator: (val) {
-            if (isValidIPv6(val)) return null;
-            return l18ns.invalidIPMessage;
-          },
-          enableInteractiveSelection: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('/ip6/', style: _fixedTextStyle),
+                _spacer,
+                Expanded(
+                  child: TextFormField(
+                    autofocus: true,
+                    controller: ipCtrl,
+                    inputFormatters: [IPv6TextInputFormatter()],
+                    decoration: _decoration(
+                      'ip',
+                      hint: '0000:0000:0000:0000:0000:0000:0000:0000',
+                    ),
+                    validator: (val) {
+                      if (isValidIPv6(val)) return null;
+                      return l18ns.invalidIPMessage;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    enableInteractiveSelection: false,
+                  ),
+                ),
+                if (orientation == Orientation.landscape) ...tcpField,
+              ],
+            ),
+            if (orientation == Orientation.portrait) ...[
+              const SizedBox(height: 20),
+              Row(children: tcpField),
+            ],
+          ],
         ),
       ),
       actions: [
@@ -353,7 +410,7 @@ class _AddIPv6NodeDialog extends HookWidget {
           child: Text(l18ns.okDialogButton),
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
-            Navigator.pop(context, ipCtrl.text);
+            Navigator.pop(context, '/ip6/${ipCtrl.text}/tcp/${portCtrl.text}');
           },
         ),
         TextButton(
@@ -363,6 +420,11 @@ class _AddIPv6NodeDialog extends HookWidget {
       ],
     );
   }
+
+  SizedBox get _spacer => const SizedBox(width: 4, height: 4);
+
+  TextStyle get _fixedTextStyle => TextStyle(
+      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
 
   InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
         isDense: true,
