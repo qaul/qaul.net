@@ -248,7 +248,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       }
 
       return Text(
-        '"${u.name}" has ${message.type == GroupEventContentType.joined ? 'joined' : 'left'} the group',
+        message.toEventMessage(u),
         style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

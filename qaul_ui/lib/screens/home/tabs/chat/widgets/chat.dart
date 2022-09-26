@@ -170,12 +170,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         leading: IconButtonFactory(onPressed: closeChat),
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             (room.isGroupChatRoom)
                 ? QaulAvatar.groupSmall()
                 : QaulAvatar.small(badgeEnabled: false, user: otherUser),
             const SizedBox(width: 12),
-            Text(otherUser?.name ?? room.name ?? 'Group'),
+            Expanded(
+              child: Text(
+                otherUser?.name ?? room.name ?? 'Group',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         titleSpacing: 0,

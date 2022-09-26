@@ -71,6 +71,10 @@ class GroupEventContent extends MessageContent {
         return 'The group has been closed';
       case GroupEventContentType.removed:
         return msgBase('been removed from');
+      case GroupEventContentType.created:
+        return 'The group has been created';
+      case GroupEventContentType.inviteAccepted:
+        return msgBase('accepted the invite');
     }
   }
 
