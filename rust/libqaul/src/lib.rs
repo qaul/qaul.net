@@ -354,11 +354,13 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                                 _ => {}
                             }
                         }
-                        libp2p::swarm::SwarmEvent::ConnectionEstablished{endpoint, ..} =>{
+                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id, endpoint, ..} =>{
                             //remove from attempting connections
                             match endpoint{
                                 libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                    Internet::remove_reconnection(address);
+                                    log::error!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
+                                    Internet::remove_reconnection(address.clone());
+                                    Internet::add_connection(address.to_string(), &peer_id);
                                 }
                                 _ => {}
                             }
@@ -636,6 +638,16 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         log::trace!("redial....: {:?}", addr);
                         Internet::peer_redial(&addr, &mut internet.swarm).await;
                         Internet::set_redialed(&addr);
+                    }
+
+                    if let Some((addr, enabled)) = Internet::check_change_connection() {
+                        if let Some(peer_id) = Internet::peerid_from_address(addr.to_string()) {
+                            if !enabled {
+                                internet.swarm.ban_peer_id(peer_id.clone());
+                            } else {
+                                internet.swarm.unban_peer_id(peer_id.clone());
+                            }
+                        }
                     }
                 }
                 EventType::RoutingTable(_) => {

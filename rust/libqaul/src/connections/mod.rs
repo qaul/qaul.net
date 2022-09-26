@@ -212,6 +212,13 @@ impl Connections {
                                         enabled: nodes_entry.enabled,
                                     });
                                     info = proto::Info::StateSuccess;
+
+                                    if peer.enabled != nodes_entry.enabled {
+                                        Internet::change_connection(
+                                            peer.address.clone(),
+                                            nodes_entry.enabled,
+                                        );
+                                    }
                                 } else {
                                     // addresses do not match.
                                     // add this address to the new vector.

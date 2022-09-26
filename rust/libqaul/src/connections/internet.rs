@@ -27,7 +27,7 @@ use libp2p::{
     ping::{Ping, PingConfig, PingEvent},
     swarm::Swarm,
     tcp::{GenTcpConfig, TcpTransport},
-    yamux, Multiaddr, NetworkBehaviour, Transport,
+    yamux, Multiaddr, NetworkBehaviour, PeerId, Transport,
 };
 // DNS is excluded on mobile, as it is not working there
 use futures::channel::mpsc;
@@ -49,7 +49,10 @@ use crate::utilities::timestamp::Timestamp;
 use qaul_info::{QaulInfo, QaulInfoEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 use state::Storage;
-use std::{collections::HashMap, sync::RwLock};
+use std::{
+    collections::{BTreeMap, HashMap, VecDeque},
+    sync::RwLock,
+};
 
 use crate::services::feed::proto_net;
 use crate::storage::configuration::Configuration;
@@ -173,6 +176,15 @@ pub struct InternetReConnections {
 }
 static INTERNETRECONNECTIONS: Storage<RwLock<InternetReConnections>> = Storage::new();
 
+pub struct InternetChangeConnection {
+    pub address: Multiaddr,
+    pub enabled: bool,
+}
+static INTERNETCHANGECONNECTIONS: Storage<RwLock<VecDeque<InternetChangeConnection>>> =
+    Storage::new();
+
+static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage::new();
+
 #[derive(Debug)]
 pub enum QaulInternetEvent {
     Floodsub(FloodsubEvent),
@@ -228,6 +240,9 @@ impl Internet {
         INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
             peers: HashMap::new(),
         }));
+
+        INTERNETCHANGECONNECTIONS.set(RwLock::new(VecDeque::<InternetChangeConnection>::new()));
+        INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
 
         // create a multi producer, single consumer queue
         let (response_sender, response_rcv) = mpsc::unbounded();
@@ -335,6 +350,29 @@ impl Internet {
         internet
     }
 
+    pub fn change_connection(address_str: String, enabled: bool) {
+        match address_str.parse::<Multiaddr>() {
+            Ok(address) => {
+                let mut change_connections = INTERNETCHANGECONNECTIONS.get().write().unwrap();
+                change_connections.push_back(InternetChangeConnection {
+                    address: address.clone(),
+                    enabled,
+                });
+            }
+            Err(_) => {}
+        }
+    }
+
+    /// check change connection
+    pub fn check_change_connection() -> Option<(Multiaddr, bool)> {
+        let mut change_connections = INTERNETCHANGECONNECTIONS.get().write().unwrap();
+        if change_connections.len() > 0 {
+            let cnn = change_connections.pop_front().unwrap();
+            return Some((cnn.address.clone(), cnn.enabled));
+        }
+        None
+    }
+
     /// connect to remote peers that are specified in
     /// the configuration config.internet.peers
     pub fn peer_connect(config: &Configuration, swarm: &mut Swarm<QaulInternetBehaviour>) {
@@ -371,6 +409,21 @@ impl Internet {
     /// redial a remote peer
     pub async fn peer_redial(addresse: &Multiaddr, swarm: &mut Swarm<QaulInternetBehaviour>) {
         Self::peer_dial(addresse.clone(), swarm);
+    }
+
+    /// add connection entry
+    pub fn add_connection(address: String, peer_id: &PeerId) {
+        let mut connections = INTERNETCONNECTIONS.get().write().unwrap();
+        connections.insert(address.clone(), peer_id.clone());
+    }
+
+    /// peerid from mutiaddr uri
+    pub fn peerid_from_address(address: String) -> Option<PeerId> {
+        let connections = INTERNETCONNECTIONS.get().read().unwrap();
+        if let Some(v) = connections.get(&address) {
+            return Some(v.clone());
+        }
+        return None;
     }
 
     ///add reconnection
