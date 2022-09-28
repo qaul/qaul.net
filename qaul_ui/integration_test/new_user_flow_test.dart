@@ -39,12 +39,27 @@ void main() {
 
     expect(find.byKey(SplashScreen.widgetKey), findsOneWidget);
 
+    final createUserButtonFinder = find.byKey(SplashScreen.createUserButtonKey);
+    while (!isPresent(createUserButtonFinder, tester)) {
+      await tester.pump();
+      await delay(10);
+    }
+
+    expect(createUserButtonFinder, findsOneWidget);
+
     FlutterError.onError = (FlutterErrorDetails details) {
       originalOnError(details); // reinstating est framework's error handler
     };
 
     // This is required prior to taking the screenshot (Android only).
     await binding.convertFlutterSurfaceToImage();
+
+    if (goldenSuffix != null) {
+      var bytes = await binding.takeScreenshot('screenshot');
+      await expectGoldenMatches(bytes, 'splashScreenGolden$goldenSuffix.png');
+    }
+
+    await tester.tap(createUserButtonFinder);
 
     await tester.pump();
     await tester.pumpAndSettle();
