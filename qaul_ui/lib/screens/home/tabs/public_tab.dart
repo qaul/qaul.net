@@ -56,7 +56,7 @@ class _PublicState extends _BaseTabState<_Public> {
           bullhorn,
           width: 52,
           height: 52,
-          color: Theme.of(context).iconTheme.color,
+          color: Colors.grey.shade600,
         ),
       ),
       body: CronTaskDecorator(
