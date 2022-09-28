@@ -875,11 +875,6 @@ workflows:
         jobs:
             - test-flutter
             - analyze-flutter
-            - integration-test-flutter-ios:
-                filters:
-                    branches:
-                        only:
-                            - main
             - integration-test-flutter-macos:
                 filters:
                     branches:
