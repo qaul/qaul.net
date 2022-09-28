@@ -1,6 +1,5 @@
 {
   "languageName": "English",
-
   "createAccountHeading": "Choose a user name",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"
@@ -13,7 +12,6 @@
   "start": "Start",
   "createUserAccount": "Create user profile",
   "learnMore": "Learn about qaul.net",
-
   "userAccountNavButtonTooltip": "Your account",
   "publicNavButtonTooltip": "Public",
   "usersNavButtonTooltip": "Users",
@@ -23,11 +21,9 @@
   "submitPostTooltip": "Submit",
   "newChatTooltip": "New chat",
   "createGroupHint": "Group name",
-
   "publicNotificationsEnabled": "Enable/Disable Public posts Notifications:",
   "chatNotificationsEnabled": "Enable/Disable Chat Notifications:",
   "notifyOnlyForVerifiedUsers": "Only Show Verified Notifications:",
-
   "settings": "Settings",
   "about": "About",
   "theme": "Theme",
@@ -55,6 +51,7 @@
   "emptyPublicList": "No public messages yet",
   "emptyUsersList": "No users added yet",
   "emptyChatsList": "No chat rooms yet",
+  "genericEmptyState": "Nothing here yet",
   "verifyUserConfirmationMessage": "Do you want to verify this user?",
   "unverifyUserConfirmationMessage": "Do you want to remove the verified status from this user?",
   "blockUserConfirmationMessage": "Do you want to block this user?",
@@ -67,5 +64,33 @@
   "noneAvailableMessage": "None available",
   "invalidIPMessage": "Invalid IP",
   "invalidPortMessage": "Invalid Port",
-  "usernameLengthMessage": "Username must have at least 2 characters."
+  "usernameLengthMessage": "Username must have at least 2 characters.",
+  "pleaseRestartApp": "Please restart the application",
+  "gotoSupport": "Go to support",
+  "continueDialogButton": "Continue",
+  "removeUser": "Remove user",
+  "removeUserDialogContent": "Are you sure you'd like to remove this user from the group?",
+  "support": "Support",
+  "enableLogging": "Enable Logging:",
+  "totalLogsSize": "Total logs size:",
+  "deleteLogs": "Delete logs",
+  "logsDescription1": "Whenever an error occurs, a log is created.",
+  "logsDescription2": "You can choose to report them or delete them.",
+  "sendLogs": "Send Logs",
+  "noLogsAvailable": "No Logs Available",
+  "routingDataTable": "Routing Data Table",
+  "addIPv6NodeCTA": "Add IPv6 Node",
+  "knownAddresses": "Known Addresses",
+  "noOpenChats": "No open chats",
+  "groupInvite": "Group Invite",
+  "createNewGroup": "Create new group",
+  "invite": "Invite",
+  "groupName": "Group Name",
+  "createdAt": "Created at",
+  "noOfMembers": "Number of members",
+  "invitedBy": "Invited by",
+  "accept": "Accept",
+  "decline": "Decline",
+  "groupSettings": "Group Settings",
+  "members": "Members"
 }

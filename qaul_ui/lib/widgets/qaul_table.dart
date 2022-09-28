@@ -21,6 +21,7 @@ class QaulTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Row(
@@ -32,7 +33,7 @@ class QaulTable extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         if (rowCount == 0)
-          emptyStateWidget ?? const Text('Nothing here yet')
+          emptyStateWidget ?? Text(l10n.genericEmptyState)
         else
           Container(
             padding: const EdgeInsets.symmetric(vertical: 4),

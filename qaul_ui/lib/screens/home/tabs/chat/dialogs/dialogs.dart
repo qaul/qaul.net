@@ -6,6 +6,7 @@ class _CreateNewRoomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SearchUserDecorator(
       title: AppLocalizations.of(context)!.newChatTooltip,
       builder: (_, users) {
@@ -23,7 +24,7 @@ class _CreateNewRoomDialog extends StatelessWidget {
                     const Icon(Icons.add, size: 12),
                   ],
                 ),
-                title: const Text('Create new group'),
+                title: Text(l10n.createNewGroup),
                 onTap: () => Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -62,7 +63,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create new group'),
+        title: Text(l10n.groupInvite),
         centerTitle: false,
         leading: IconButtonFactory.close(),
       ),
@@ -113,8 +114,8 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                       .firstWhereOrNull((g) => g.name == name);
                   if (group == null) {
                     if (!isMounted()) return;
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('An error occurred. Please try again.'),
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(l10n.genericErrorMessage),
                     ));
                     Navigator.pop(context);
                     return;
@@ -171,6 +172,7 @@ class _InviteUsersToGroupDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SearchUserDecorator(
       title: AppLocalizations.of(context)!.newChatTooltip,
       builder: (_, users) {
@@ -209,7 +211,7 @@ class _InviteUsersToGroupDialogState
                   }
                   Navigator.pop(context);
                 },
-                child: const Text('Invite', style: TextStyle(fontSize: 20)),
+                child: Text(l10n.invite, style: const TextStyle(fontSize: 20)),
               ),
             ),
           ],
@@ -240,11 +242,12 @@ class _InviteDetailsDialog extends HookConsumerWidget {
 
     final sender = users.firstWhereOrNull((s) => s.id.equals(invite.senderId));
 
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Group Invite'),
+          Text(l10n.groupInvite),
           IconButtonFactory.close(),
         ],
       ),
@@ -254,20 +257,24 @@ class _InviteDetailsDialog extends HookConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Group name: ${invite.groupDetails.name}'),
-              Text('Created at: ${invite.groupDetails.createdAt}'),
-              Text('Number of members: ${invite.groupDetails.members.length}'),
-              if (sender != null) ...[Text('Invited by: ${sender.name}')],
+              Text('${l10n.groupName}: ${invite.groupDetails.name}'),
+              Text('${l10n.createdAt}: ${invite.groupDetails.createdAt}'),
+              Text(
+                '${l10n.noOfMembers}: ${invite.groupDetails.members.length}',
+              ),
+              if (sender != null) ...[
+                Text('${l10n.invitedBy}: ${sender.name}'),
+              ],
             ],
           ),
           const SizedBox(height: 20),
           QaulButton(
-            label: 'Accept',
+            label: l10n.accept,
             onPressed: () => replyInvite(accepted: true),
           ),
           const SizedBox(height: 12),
           QaulButton(
-            label: 'Decline',
+            label: l10n.decline,
             onPressed: () => replyInvite(accepted: false),
           ),
         ],

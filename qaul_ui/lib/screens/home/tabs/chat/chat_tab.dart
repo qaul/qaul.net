@@ -36,7 +36,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       worker.getGroupInvitesReceived();
     }, []);
 
-    final l18ns = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final mobile =
         Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
@@ -85,7 +85,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       child: RefreshIndicator(
         onRefresh: () => refreshChatsAndInvites(),
         child: EmptyStateTextDecorator(
-          l18ns!.emptyChatsList,
+          l10n!.emptyChatsList,
           isEmpty: groupInvites.isEmpty && filteredRooms.isEmpty,
           child: ListView.separated(
             controller: ScrollController(),
@@ -169,7 +169,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final createChatButton = FloatingActionButton(
       heroTag: 'chatTabFAB',
-      tooltip: l18ns.newChatTooltip,
+      tooltip: l10n.newChatTooltip,
       onPressed: () async {
         final newChat = await Navigator.push(
           context,
@@ -216,7 +216,7 @@ class _ChatState extends _BaseTabState<_Chat> {
           Expanded(
             child: Scaffold(
               body: chatWidget.value ??
-                  const Center(child: Text('No open chats')),
+                  Center(child: Text(l10n.noOpenChats)),
             ),
           ),
         ],
@@ -277,6 +277,7 @@ class _GroupInviteTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       leading: Stack(
         alignment: Alignment.topRight,
@@ -285,7 +286,7 @@ class _GroupInviteTile extends HookConsumerWidget {
           const Icon(Icons.add, size: 12, color: Colors.black),
         ],
       ),
-      title: const Text('Group Invite'),
+      title: Text(l10n.groupInvite),
       subtitle: Text(
         invite.groupDetails.name ?? '',
         maxLines: 1,

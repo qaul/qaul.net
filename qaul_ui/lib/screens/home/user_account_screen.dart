@@ -24,7 +24,7 @@ class UserAccountScreen extends HookConsumerWidget {
     }, []);
 
     final theme = Theme.of(context).textTheme;
-    final l18ns = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     return CronTaskDecorator(
       schedule: const Duration(milliseconds: 1500),
       callback: refreshConnectionData,
@@ -45,14 +45,14 @@ class UserAccountScreen extends HookConsumerWidget {
                       Text(
                         user != null
                             ? user.name
-                            : _notFound(l18ns!, l18ns.username),
+                            : _notFound(l10n!, l10n.username),
                         style: theme.headline6,
                       ),
                       const SizedBox(height: 24),
                       Text(
                         user != null
                             ? user.idBase58
-                            : _notFound(l18ns!, l18ns.userID),
+                            : _notFound(l10n!, l10n.userID),
                         style: theme.subtitle2,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
@@ -64,12 +64,12 @@ class UserAccountScreen extends HookConsumerWidget {
             ],
           ),
           const SizedBox(height: 60),
-          Text('Qaul ${l18ns!.publicKey}', style: theme.headline5),
+          Text('Qaul ${l10n!.publicKey}', style: theme.headline5),
           const SizedBox(height: 20),
           Text(
             user != null && user.keyBase58 != null
                 ? user.keyBase58!
-                : _notFound(l18ns, l18ns.publicKey),
+                : _notFound(l10n, l10n.publicKey),
           ),
           const SizedBox(height: 60),
           const _DTNNodesList(),
@@ -81,7 +81,7 @@ class UserAccountScreen extends HookConsumerWidget {
           Text(nodeInfo?.idBase58 ?? 'Unknown',
               style: theme.bodyText2!.copyWith(fontSize: 12)),
           const SizedBox(height: 20),
-          Text('Known Addresses', style: theme.headline6),
+          Text(l10n.knownAddresses, style: theme.headline6),
           const SizedBox(height: 8),
           Table(
             border: TableBorder.all(),
@@ -135,6 +135,7 @@ class _DTNNodesList extends HookConsumerWidget {
       worker.getDTNConfiguration();
     });
 
+    final l10n = AppLocalizations.of(context)!;
     return CronTaskDecorator(
       callback: refreshDTN,
       schedule: const Duration(milliseconds: 200),
@@ -142,7 +143,7 @@ class _DTNNodesList extends HookConsumerWidget {
         titleIcon: Icons.storage,
         title: 'DTN Nodes',
         addRowLabel: 'Add user node',
-        emptyStateWidget: const Text('No user nodes yet'),
+        emptyStateWidget: Text(l10n.emptyUsersList),
         rowCount: config == null ? 0 : config.users.length,
         onAddRowPressed: () async {
           final res = await Navigator.push(context,

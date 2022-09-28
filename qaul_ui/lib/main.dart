@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
@@ -47,15 +48,16 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
       showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (_) {
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
             return AlertDialog(
-              title: const Text('An Error occurred'),
-              content: const Text('Please restart the application.'),
+              title: Text(l10n.genericErrorMessage),
+              content: Text(l10n.pleaseRestartApp),
               actions: [
                 TextButton(
                   onPressed: () =>
                       Navigator.pushNamed(context, NavigationHelper.support),
-                  child: const Text('Go to support'),
+                  child: Text(l10n.gotoSupport),
                 ),
               ],
             );

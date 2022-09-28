@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -18,14 +19,15 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: const IconButtonFactory(),
         title: Row(
-          children: const [
-            FaIcon(FontAwesomeIcons.headset),
-            SizedBox(width: 8),
-            Text('Support'),
+          children: [
+            const FaIcon(FontAwesomeIcons.headset),
+            const SizedBox(width: 8),
+            Text(l10n.support),
           ],
         ),
       ),
@@ -45,11 +47,12 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Enable Logging:'),
+                            Text(l10n.enableLogging),
                             PlatformAwareSwitch(
                               value: emailLogger.loggingEnabled,
                               onChanged: (val) {
-                                emailLogger.setLoggingEnabled(val, reader: ref.read);
+                                emailLogger.setLoggingEnabled(val,
+                                    reader: ref.read);
                                 setState(() {});
                               },
                             ),
@@ -64,11 +67,11 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                                 future: emailLogger.logStorageSize,
                                 builder: (context, snapshot) {
                                   final size = snapshot.data ?? '0.0 KB';
-                                  return Text('Total logs size: $size');
+                                  return Text('${l10n.totalLogsSize} $size');
                                 },
                               ),
                               TextButton(
-                                child: const Text('Delete Logs'),
+                                child: Text(l10n.deleteLogs),
                                 onPressed: () async {
                                   await emailLogger.deleteLogs();
                                   if (!mounted) return;
@@ -89,9 +92,9 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text('Whenever an error occurs, a log is created.'),
+                        Text(l10n.logsDescription1),
                         const SizedBox(height: 8, width: double.maxFinite),
-                        const Text('You can choose to report them or delete them.'),
+                        Text(l10n.logsDescription2),
                         const SizedBox(height: 20, width: double.maxFinite),
                         TextButton(
                           onPressed: hasLogs
@@ -102,14 +105,15 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                                   Navigator.pop(context);
                                 }
                               : null,
-                          child: Text(hasLogs ? 'Send Logs' : 'No Logs Available'),
+                          child: Text(
+                            hasLogs ? l10n.sendLogs : l10n.noLogsAvailable,
+                          ),
                         ),
                         const SizedBox(height: 20, width: double.maxFinite),
                       ],
                     ),
                   ),
                 ),
-                TextButton(onPressed: () => throw FlutterError('test'), child: const Text('Throw')),
                 const Expanded(child: SizedBox()),
               ],
             );
