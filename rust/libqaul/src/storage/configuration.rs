@@ -90,7 +90,7 @@ impl Default for Internet {
             active: true,
             peers: vec![InternetPeer {
                 address: String::from("/ip4/144.91.74.192/tcp/9229"),
-                enabled: true,
+                enabled: false,
             }],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
