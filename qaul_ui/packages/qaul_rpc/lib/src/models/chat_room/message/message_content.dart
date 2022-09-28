@@ -82,21 +82,6 @@ class GroupEventContent extends MessageContent {
 
   @override
   List<Object?> get props => [userIdBase58, type];
-
-  GroupEventContent.fromJson(Map<String, dynamic> json)
-      : userId = Uint8List.fromList(json['userId']),
-        type = _typeFromString(json['type']);
-
-  Map<String, dynamic> toJson() {
-    return {'userId': userId.toList(), 'type': type.toString()};
-  }
-
-  static GroupEventContentType _typeFromString(String s) {
-    for (var element in GroupEventContentType.values) {
-      if (element.toString() == s) return element;
-    }
-    throw ArgumentError.value(s, 'GroupEventType', 'unable to deserialize');
-  }
 }
 
 class FileShareContent extends MessageContent {

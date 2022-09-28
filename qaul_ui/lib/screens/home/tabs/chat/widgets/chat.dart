@@ -323,25 +323,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 isDefaultUser: message.author.id == user.idBase58,
               );
             },
-            customMessageBuilder: (message, {required int messageWidth}) {
-              final event = GroupEventContent.fromJson(message.metadata!);
-              final usr = ref
-                  .read(usersProvider)
-                  .firstWhereOrNull((u) => u.idBase58 == event.userIdBase58);
-              if (usr == null || event.type == GroupEventContentType.none) {
-                return const SizedBox.shrink();
-              }
-
-              return Text(
-                event.toEventMessage(usr),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(fontStyle: FontStyle.italic),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              );
-            },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
                 colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
@@ -419,12 +400,11 @@ extension _MessageExtension on Message {
         status: mappedState,
       );
     } else if (content is GroupEventContent) {
-      return types.CustomMessage(
+      return types.SystemMessage(
         id: messageIdBase58,
-        author: author.toInternalUser(),
+        text: (content as GroupEventContent).toEventMessage(author),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedState,
-        metadata: (content as GroupEventContent).toJson(),
       );
     } else if (content is FileShareContent) {
       var filePath = (content as FileShareContent).filePath(read);
