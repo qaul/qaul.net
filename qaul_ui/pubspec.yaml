@@ -31,7 +31,11 @@ dependencies:
   flame_forge2d: ^0.12.2
   fluent_ui: ^3.12.0
   flutter_chat_types: ^3.4.5
-  flutter_chat_ui: ^1.5.1
+  # TODO(brenodt): reinstate direct dependency once PR is merged (https://github.com/flyerhq/flutter_chat_ui/pull/305)
+  flutter_chat_ui:
+    git:
+      url: https://github.com/felixgabler/flutter_chat_ui.git
+      ref: fg/system_messages
   flutter_email_sender: ^5.0.2
   flutter_hooks: ^0.18.4
   flutter_markdown: ^0.6.8

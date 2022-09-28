@@ -373,9 +373,11 @@ packages:
   flutter_chat_ui:
     dependency: "direct main"
     description:
-      name: flutter_chat_ui
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "fg/system_messages"
+      resolved-ref: fcc22fffff9072ad91d2e3c35b49b91c13001a52
+      url: "https://github.com/felixgabler/flutter_chat_ui.git"
+    source: git
     version: "1.6.4"
   flutter_driver:
     dependency: transitive
@@ -995,6 +997,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  scroll_to_index:
+    dependency: transitive
+    description:
+      name: scroll_to_index
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   shared_preferences:
     dependency: "direct main"
     description:
