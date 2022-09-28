@@ -18,11 +18,9 @@ class _CreateNewRoomDialog extends StatelessWidget {
               return ListTile(
                 leading: Stack(
                   alignment: AlignmentDirectional.topStart,
-                  children: const [
-                    CircleAvatar(
-                        backgroundColor: Colors.lightBlue,
-                        child: Icon(Icons.people, color: Colors.white)),
-                    Icon(Icons.add, size: 12),
+                  children: [
+                    QaulAvatar.groupSmall(),
+                    const Icon(Icons.add, size: 12),
                   ],
                 ),
                 title: const Text('Create new group'),
@@ -60,7 +58,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
     final isMounted = useIsMounted();
 
-    const groupIcon = 'assets/icons/group.svg';
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -74,7 +71,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
           Column(
             children: [
               const SizedBox(height: 140, width: double.maxFinite),
-              SvgPicture.asset(groupIcon),
+              QaulAvatar.groupLarge(),
               const SizedBox(height: 20),
               LayoutBuilder(builder: (context, constraints) {
                 return SizedBox(
