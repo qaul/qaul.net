@@ -13,6 +13,7 @@ class SplashScreen extends HookConsumerWidget {
   SplashScreen() : super(key: widgetKey);
 
   static const widgetKey = ValueKey('SplashScreen');
+  static const createUserButtonKey = ValueKey('createUserAccountButton');
   static const _animationDuration = Duration(milliseconds: 1500);
 
   final _sendRequestProvider = FutureProvider<String?>((ref) async {
@@ -64,6 +65,7 @@ class SplashScreen extends HookConsumerWidget {
                 const LanguageSelectDropDown(),
                 const SizedBox(height: 20),
                 QaulButton(
+                  key: createUserButtonKey,
                   label: i10n.createUserAccount,
                   onPressed: () => Navigator.pushReplacementNamed(
                       context, NavigationHelper.createAccount),
