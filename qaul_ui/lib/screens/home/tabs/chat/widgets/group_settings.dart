@@ -27,7 +27,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: const IconButtonFactory(),
-          title: const Text('Group Settings'),
+          title: Text(l10n.groupSettings),
         ),
         floatingActionButton: !isAdmin
             ? const SizedBox()
@@ -73,7 +73,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
                     ),
                   ),
             const SizedBox(height: 20),
-            const Text('Members'),
+            Text(l10n.members),
             const SizedBox(height: 4),
             ListView.separated(
               shrinkWrap: true,
@@ -96,7 +96,8 @@ class _GroupSettingsPage extends HookConsumerWidget {
                             if (isAdmin)
                               IconButton(
                                 onPressed: () async {
-                                  var ok = await showConfirmDialog(context);
+                                  var ok =
+                                      await showConfirmDialog(context, l10n);
                                   if (!(ok ?? false)) return;
                                   var worker = ref.read(qaulWorkerProvider);
                                   worker.removeUserFromGroup(user, room);
@@ -130,22 +131,22 @@ class _GroupSettingsPage extends HookConsumerWidget {
     }
   }
 
-  Future<bool?> showConfirmDialog(BuildContext context) async {
+  Future<bool?> showConfirmDialog(
+      BuildContext context, AppLocalizations l10n) async {
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: const Text('Cancel'),
+      child: Text(l10n.cancelDialogButton),
       onPressed: () => Navigator.pop(context, false),
     );
     Widget continueButton = TextButton(
-      child: const Text('Continue'),
+      child: Text(l10n.continueDialogButton),
       onPressed: () => Navigator.pop(context, true),
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: const Text('Remove User'),
-      content: const Text(
-          "Are you sure you'd like to remove this user from the group?"),
+      title: Text(l10n.removeUser),
+      content: Text(l10n.removeUserDialogContent),
       actions: [
         cancelButton,
         continueButton,

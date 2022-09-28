@@ -130,7 +130,7 @@ class _InternetNodesList extends HookConsumerWidget {
       await worker.requestNodes();
     }, []);
 
-    final l18ns = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     return CronTaskDecorator(
       callback: refreshNodes,
       schedule: const Duration(milliseconds: 1000),
@@ -138,8 +138,8 @@ class _InternetNodesList extends HookConsumerWidget {
         children: [
           QaulTable(
             titleIcon: CupertinoIcons.globe,
-            title: l18ns!.internetNodes,
-            addRowLabel: l18ns.addNodeCTA,
+            title: l10n!.internetNodes,
+            addRowLabel: l10n.addNodeCTA,
             rowCount: nodes.length,
             onAddRowPressed: () async {
               final res = await showDialog(
@@ -216,7 +216,7 @@ class _InternetNodesList extends HookConsumerWidget {
                 },
               ),
               const SizedBox(width: 12.0),
-              const Text('Add IPv6 Node'),
+              Text(l10n.addIPv6NodeCTA),
             ],
           ),
         ],

@@ -26,9 +26,8 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   Map<String, String> get _overflowMenuOptions => {
         'settings': AppLocalizations.of(context)!.settings,
         'about': AppLocalizations.of(context)!.about,
-        // 'support': AppLocalizations.of(context)!.support,
-        'support': 'Support',
-        'old-network': 'Routing Data Table',
+        'support': AppLocalizations.of(context)!.support,
+        'old-network': AppLocalizations.of(context)!.routingDataTable,
       };
 
   void _handleClick(String value) {
@@ -48,10 +47,10 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
             appBar: AppBar(
               leading: const IconButtonFactory(),
               title: Row(
-                children: const [
-                  Icon(Icons.language),
-                  SizedBox(width: 8),
-                  Text('Classic Network View'),
+                children: [
+                  const Icon(Icons.language),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(context)!.routingDataTable),
                 ],
               ),
             ),
