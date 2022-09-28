@@ -37,6 +37,7 @@ class _PublicState extends _BaseTabState<_Public> {
     const bullhorn = 'assets/icons/public.svg';
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       floatingActionButton: FloatingActionButton.large(
         elevation: 0,
         heroTag: 'publicTabFAB',
@@ -46,9 +47,13 @@ class _PublicState extends _BaseTabState<_Public> {
         onPressed: () async {
           showModalBottomSheet(
             context: context,
+            isScrollControlled: true,
             barrierColor: Colors.transparent,
             builder: (context) {
-              return _CreatePublicMessage();
+              return Padding(
+                padding: MediaQuery.of(context).viewInsets,
+                child: _CreatePublicMessage(),
+              );
             },
           );
         },
