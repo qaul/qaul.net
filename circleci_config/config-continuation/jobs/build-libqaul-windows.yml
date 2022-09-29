@@ -12,6 +12,12 @@ steps:
       shell: powershell.exe
       command: choco install cmake -y
   - run:
+      name: Install protoc
+      shell: powershell.exe
+      command: |
+        choco install protoc -y
+        protoc --version
+  - run:
       name: Install Rust
       command: |
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

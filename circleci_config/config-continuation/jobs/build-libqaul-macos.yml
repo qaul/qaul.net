@@ -5,6 +5,11 @@ steps:
       name: Install CMake
       command: brew install cmake
   - run:
+      name: Install protoc
+      command: |
+        brew install protobuf
+        protoc --version
+  - run:
       name: Install Rust
       command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   - setup-sccache

@@ -371,6 +371,12 @@ jobs:
         steps:
             - checkout-project
             - run:
+                command: |
+                    sudo apt update
+                    sudo apt install -y protobuf-compiler
+                    protoc --version
+                name: Install protoc
+            - run:
                 command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
                 name: Install Rust
             - setup-sccache
@@ -409,6 +415,11 @@ jobs:
                 command: brew install cmake
                 name: Install CMake
             - run:
+                command: |
+                    brew install protobuf
+                    protoc --version
+                name: Install protoc
+            - run:
                 command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
                 name: Install Rust
             - setup-sccache
@@ -431,6 +442,12 @@ jobs:
         executor: rust-linux
         steps:
             - checkout-project
+            - run:
+                command: |
+                    sudo apt update
+                    sudo apt install -y protobuf-compiler
+                    protoc --version
+                name: Install protoc
             - setup-sccache
             - restore-sccache-cache
             - run:
@@ -450,6 +467,11 @@ jobs:
             - run:
                 command: brew install cmake
                 name: Install CMake
+            - run:
+                command: |
+                    brew install protobuf
+                    protoc --version
+                name: Install protoc
             - run:
                 command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
                 name: Install Rust
@@ -477,6 +499,12 @@ jobs:
             - run:
                 command: choco install cmake -y
                 name: Install CMake
+                shell: powershell.exe
+            - run:
+                command: |
+                    choco install protoc -y
+                    protoc --version
+                name: Install protoc
                 shell: powershell.exe
             - run:
                 command: |
