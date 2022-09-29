@@ -1,6 +1,5 @@
 {
   "languageName": "اللغة العربية",
-
   "createAccountHeading": "نص بسيط",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"
@@ -61,9 +60,41 @@
   "invalidIPMessage": "نص بسيط",
   "invalidPortMessage": "نص بسيط",
   "usernameLengthMessage": "يجب أن يتكون اسم المستخدم من حرفين على الأقل.",
-
   "publicNotificationsEnabled": "تمكين / تعطيل إشعارات الخلاصة:",
   "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:",
   "notifyOnlyForVerifiedUsers": "إظهار الإخطارات التي تم التحقق منها فقط:",
-  "createGroupHint": "أسم المجموعة"
+  "createGroupHint": "أسم المجموعة",
+  "genericEmptyState": "لا شيء هنا حتى الآن",
+  "pleaseRestartApp": "الرجاء إعادة تشغيل التطبيق",
+  "gotoSupport": "اذهب إلى الدعم",
+  "continueDialogButton": "يكمل",
+  "removeUser": "إزالة المستخدم",
+  "removeUserDialogContent": "هل أنت متأكد أنك تريد إزالة هذا المستخدم من المجموعة؟",
+  "support": "الدعم",
+  "enableLogging": "تمكين التسجيل:",
+  "totalLogsSize": "الحجم الإجمالي للسجلات:",
+  "deleteLogs": "حذف السجلات",
+  "logsDescription1": "عند حدوث خطأ ، يتم إنشاء سجل.",
+  "logsDescription2": "يمكنك اختيار الإبلاغ عنها أو حذفها.",
+  "sendLogs": "إرسال سجلات",
+  "noLogsAvailable": "لا توجد سجلات متاحة",
+  "routingDataTable": "جدول بيانات التوجيه",
+  "addIPv6NodeCTA": "أضف عقدة IPv6",
+  "knownAddresses": "العناوين المعروفة",
+  "noOpenChats": "لا توجد محادثات مفتوحة",
+  "groupInvite": "دعوة المجموعة",
+  "createNewGroup": "إنشاء مجموعة جديدة",
+  "invite": "يدعو",
+  "groupName": "أسم المجموعة",
+  "createdAt": "أنشئت في",
+  "noOfMembers": "عدد من أعضاء",
+  "invitedBy": "بدعوة من",
+  "accept": "قبول",
+  "decline": "انخفاض",
+  "groupSettings": "إعدادات المجموعة",
+  "members": "أعضاء",
+  "showAllFiles": "إظهار كافة الملفات",
+  "searchUser": "بحث عن مستخدم ...",
+  "dtnNodes": "عقد DTN",
+  "addUserNode": "أضف عقدة المستخدم"
 }

@@ -141,8 +141,8 @@ class _DTNNodesList extends HookConsumerWidget {
       schedule: const Duration(milliseconds: 200),
       child: QaulTable(
         titleIcon: Icons.storage,
-        title: 'DTN Nodes',
-        addRowLabel: 'Add user node',
+        title: l10n.dtnNodes,
+        addRowLabel: l10n.addUserNode,
         emptyStateWidget: Text(l10n.emptyUsersList),
         rowCount: config == null ? 0 : config.users.length,
         onAddRowPressed: () async {

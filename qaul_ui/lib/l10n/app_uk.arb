@@ -1,6 +1,5 @@
 {
   "languageName": "Українська",
-
   "createAccountHeading": "Оберіть псевдонім",
   "@createAccountHeading": {
     "description": "Вузол показано над текстовим полем"
@@ -13,7 +12,6 @@
   "start": "почати",
   "createUserAccount": "Створити профіль користувача",
   "learnMore": "Дізнайтеся про qaul.net",
-
   "userAccountNavButtonTooltip": "Ваш обліковий запис",
   "publicNavButtonTooltip": "Стрічка",
   "usersNavButtonTooltip": "Люди",
@@ -22,11 +20,9 @@
   "createPublicPostTooltip": "Створити допис",
   "submitPostTooltip": "Надіслати",
   "newChatTooltip": "Нова розмова",
-
   "publicNotificationsEnabled": "Увімкнути сповіщення стрічки:",
   "chatNotificationsEnabled": "Увімкнути сповіщення чату:",
   "notifyOnlyForVerifiedUsers": "Показувати лише підтверджені сповіщення:",
-
   "settings": "Параметри",
   "about": "Про застосунок",
   "theme": "Тема",
@@ -67,5 +63,38 @@
   "invalidIPMessage": "Хибна IP-адреса",
   "invalidPortMessage": "Хибний порт",
   "usernameLengthMessage": "Ім'я користувача повинно містити принаймні 2 символи.",
-  "createGroupHint": "Назва групи"
+  "createGroupHint": "Назва групи",
+  "genericEmptyState": "Тут ще нічого немає",
+  "pleaseRestartApp": "Перезапустіть програму",
+  "gotoSupport": "Перейдіть до служби підтримки",
+  "continueDialogButton": "Продовжити",
+  "removeUser": "Видалити користувача",
+  "removeUserDialogContent": "Ви впевнені, що хочете видалити цього користувача з групи?",
+  "support": "Підтримка",
+  "enableLogging": "Увімкнути журналювання:",
+  "totalLogsSize": "Загальний розмір журналів:",
+  "deleteLogs": "Видалити журнали",
+  "logsDescription1": "Щоразу, коли виникає помилка, створюється журнал.",
+  "logsDescription2": "Ви можете повідомити про них або видалити їх.",
+  "sendLogs": "Надіслати журнали",
+  "noLogsAvailable": "Немає журналів",
+  "routingDataTable": "Таблиця даних маршрутизації",
+  "addIPv6NodeCTA": "Додайте вузол IPv6",
+  "knownAddresses": "Відомі адреси",
+  "noOpenChats": "Немає відкритих чатів",
+  "groupInvite": "Групове запрошення",
+  "createNewGroup": "Створити нову групу",
+  "invite": "Запросити",
+  "groupName": "Назва групи",
+  "createdAt": "Створено в",
+  "noOfMembers": "Кількість учасників",
+  "invitedBy": "Запрошено",
+  "accept": "прийняти",
+  "decline": "відхилити",
+  "groupSettings": "Налаштування групи",
+  "members": "Члени",
+  "showAllFiles": "Показати всі файли",
+  "searchUser": "Пошук користувача...",
+  "dtnNodes": "Вузли DTN",
+  "addUserNode": "Додати вузол користувача"
 }
