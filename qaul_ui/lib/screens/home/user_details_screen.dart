@@ -14,8 +14,13 @@ import '../../widgets/widgets.dart';
 import 'tabs/chat/widgets/chat.dart';
 
 class UserDetailsScreen extends HookConsumerWidget {
-  const UserDetailsScreen({Key? key, required this.user}) : super(key: key);
+  const UserDetailsScreen({
+    Key? key,
+    required this.user,
+    this.showChatButton = true,
+  }) : super(key: key);
   final User user;
+  final bool showChatButton;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +34,7 @@ class UserDetailsScreen extends HookConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: const IconButtonFactory(),
-          title: Row(
+          title: !showChatButton ? null : Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Tooltip(
@@ -80,7 +85,8 @@ class UserDetailsScreen extends HookConsumerWidget {
             child: Builder(builder: (context) {
               return SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 32.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -91,19 +97,21 @@ class UserDetailsScreen extends HookConsumerWidget {
                       const SizedBox(height: 8.0),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text('${l18ns.userID}: ${user.idBase58}', style: theme.headline5),
+                        child: Text('${l18ns.userID}: ${user.idBase58}',
+                            style: theme.headline5),
                       ),
                       const SizedBox(height: 40.0),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child:
-                            Text('${l18ns.publicKey}:\n${user.keyBase58}', style: theme.headline5),
+                        child: Text('${l18ns.publicKey}:\n${user.keyBase58}',
+                            style: theme.headline5),
                       ),
                       const SizedBox(height: 40.0),
                       DisabledStateDecorator(
                         isDisabled: blocked,
                         child: _RoundedRectButton(
-                          color: verified ? Colors.green.shade300 : Colors.green,
+                          color:
+                              verified ? Colors.green.shade300 : Colors.green,
                           onPressed: blocked
                               ? null
                               : () async {
@@ -132,7 +140,8 @@ class UserDetailsScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 28.0),
                       _RoundedRectButton(
-                        color: blocked ? Colors.red.shade300 : Colors.red.shade400,
+                        color:
+                            blocked ? Colors.red.shade300 : Colors.red.shade400,
                         onPressed: () async {
                           final res = await _confirmAction(
                             context,
@@ -145,13 +154,16 @@ class UserDetailsScreen extends HookConsumerWidget {
                           loading.value = true;
 
                           final worker = ref.read(qaulWorkerProvider);
-                          blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
+                          blocked
+                              ? await worker.unblockUser(user)
+                              : await worker.blockUser(user);
 
                           loading.value = false;
                           if (!isMounted()) return;
                           Navigator.pop(context);
                         },
-                        child: Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
+                        child:
+                            Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
                       ),
                     ],
                   ),

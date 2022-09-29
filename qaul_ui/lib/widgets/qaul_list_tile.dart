@@ -9,6 +9,7 @@ class QaulListTile extends StatelessWidget {
     this.trailingIcon,
     this.trailingMetadata,
     this.onTap,
+    this.onAvatarTap,
     this.isThreeLine = false,
     this.allowTapRouteToUserDetailsScreen = true,
   })  : assert(trailingIcon == null || trailingMetadata == null),
@@ -22,6 +23,7 @@ class QaulListTile extends StatelessWidget {
     Widget? trailingIcon,
     Widget? trailingMetadata,
     VoidCallback? onTap,
+    VoidCallback? onAvatarTap,
     bool isThreeLine = false,
     bool allowTapRouteToUserDetailsScreen = true,
   }) {
@@ -34,6 +36,7 @@ class QaulListTile extends StatelessWidget {
       onTap: onTap,
       isThreeLine: isThreeLine,
       allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
+      onAvatarTap: onAvatarTap,
     );
   }
 
@@ -44,6 +47,7 @@ class QaulListTile extends StatelessWidget {
     Widget? trailingIcon,
     Widget? trailingMetadata,
     VoidCallback? onTap,
+    VoidCallback? onAvatarTap,
     bool isThreeLine = false,
     bool allowTapRouteToUserDetailsScreen = true,
   }) {
@@ -56,6 +60,7 @@ class QaulListTile extends StatelessWidget {
       onTap: onTap,
       isThreeLine: isThreeLine,
       allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
+      onAvatarTap: onAvatarTap,
     );
   }
 
@@ -82,6 +87,8 @@ class QaulListTile extends StatelessWidget {
   ///
   /// Set to [false] to disable this behavior.
   final bool allowTapRouteToUserDetailsScreen;
+
+  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +122,12 @@ class QaulListTile extends StatelessWidget {
                       builder: (_) => UserDetailsScreen(user: user!)),
                 ));
 
-    var leading =
+    Widget leading =
         user != null ? QaulAvatar.small(user: user) : QaulAvatar.groupSmall();
+
+    if (onAvatarTap != null) {
+      leading = GestureDetector(onTap: onAvatarTap, child: leading);
+    }
 
     return ListTile(
       onTap: onTap ?? fallback,
