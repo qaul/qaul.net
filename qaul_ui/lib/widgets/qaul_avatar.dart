@@ -14,7 +14,7 @@ abstract class QaulAvatar extends ConsumerWidget {
       _SmallQaulAvatar(key: key, user: user, badgeEnabled: badgeEnabled);
 
   factory QaulAvatar.large({Key? key, User? user}) =>
-      _LargeQaulAvatar(key: key, user: user);
+      _LargeQaulAvatar(key: key, user: user, isBlankUser: user == null);
 
   factory QaulAvatar.groupSmall({Key? key}) => const _SmallQaulAvatar(
         badgeEnabled: false,
@@ -130,8 +130,10 @@ class _LargeQaulAvatar extends QaulAvatar {
     Key? key,
     User? user,
     this.isGroup = false,
+    this.isBlankUser = false,
   }) : super(key: key, user: user);
   final bool isGroup;
+  final bool isBlankUser;
 
   @override
   double get radius => 80.0;
@@ -145,8 +147,8 @@ class _LargeQaulAvatar extends QaulAvatar {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!isGroup) return super.build(context, ref);
-    const groupIcon = 'assets/icons/group.svg';
-    return SvgPicture.asset(groupIcon, width: radius * 2, height: radius * 2);
+    if (!isGroup && !isBlankUser) return super.build(context, ref);
+    final icon = 'assets/icons/${isGroup ? 'group' : 'user'}.svg';
+    return SvgPicture.asset(icon, width: radius * 2, height: radius * 2);
   }
 }

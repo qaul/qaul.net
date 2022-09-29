@@ -2,11 +2,12 @@ when: << pipeline.parameters.run-flutter-workflow >>
 jobs:
   - test-flutter
   - analyze-flutter
-  - integration-test-flutter-ios:
-      filters:
-        branches:
-          only:
-            - main
+# TODO(brenodt): iOS is not compiling due to a Rust package we depend on; reinstate once fixed
+#  - integration-test-flutter-ios:
+#      filters:
+#        branches:
+#          only:
+#            - main
   - integration-test-flutter-macos:
       filters:
         branches:

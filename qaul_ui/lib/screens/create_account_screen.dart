@@ -94,7 +94,7 @@ class CreateAccountScreen extends HookConsumerWidget {
               child: Column(
                 children: [
                   const SizedBox(width: double.maxFinite),
-                  QaulAvatar.groupLarge(),
+                  QaulAvatar.large(),
                   const SizedBox(height: 28),
                   LayoutBuilder(builder: (context, constraints) {
                     return SizedBox(
