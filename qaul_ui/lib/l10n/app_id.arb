@@ -1,6 +1,5 @@
 {
   "languageName": "Bahasa Indonesia",
-
   "createAccountHeading": "Pilih nama pengguna",
   "@createAccountHeading": {
     "description": "CTA dirender di atas bidang teks"
@@ -13,7 +12,6 @@
   "start": "Mulailah",
   "createUserAccount": "Buat profil pengguna",
   "learnMore": "Pelajari tentang qaul.net",
-
   "userAccountNavButtonTooltip": "Akun Anda",
   "publicNavButtonTooltip": "Umpan",
   "usersNavButtonTooltip": "Pengguna",
@@ -22,11 +20,9 @@
   "createPublicPostTooltip": "Buat unggahan",
   "submitPostTooltip": "Kirim",
   "newChatTooltip": "Obrolan Baru",
-
   "publicNotificationsEnabled": "Aktifkan/Nonaktifkan Pemberitahuan Umpan:",
   "chatNotificationsEnabled": "Aktifkan/Nonaktifkan Notifikasi Obrolan:",
   "notifyOnlyForVerifiedUsers": "Hanya Tampilkan Notifikasi Terverifikasi:",
-
   "settings": "Pengaturan",
   "about": "Tentang",
   "theme": "Tema",
@@ -67,5 +63,38 @@
   "invalidIPMessage": "IP Salah",
   "invalidPortMessage": "Portal Salah",
   "usernameLengthMessage": "Nama pengguna harus memiliki minimal 2 karakter.",
-  "createGroupHint": "Nama grup"
+  "createGroupHint": "Nama grup",
+  "genericEmptyState": "Belum ada apa-apa di sini",
+  "pleaseRestartApp": "Silakan mulai ulang aplikasi",
+  "gotoSupport": "Pergi untuk mendukung",
+  "continueDialogButton": "Melanjutkan",
+  "removeUser": "Hapus pengguna",
+  "removeUserDialogContent": "Apakah Anda yakin ingin menghapus pengguna ini dari grup?",
+  "support": "Mendukung",
+  "enableLogging": "Aktifkan Pencatatan:",
+  "totalLogsSize": "Ukuran total log:",
+  "deleteLogs": "Hapus log",
+  "logsDescription1": "Setiap kali terjadi kesalahan, log dibuat.",
+  "logsDescription2": "Anda dapat memilih untuk melaporkannya atau menghapusnya.",
+  "sendLogs": "Kirim Log",
+  "noLogsAvailable": "Tidak Ada Log yang Tersedia",
+  "routingDataTable": "Tabel Data Perutean",
+  "addIPv6NodeCTA": "Tambahkan Node IPv6",
+  "knownAddresses": "Alamat yang Diketahui",
+  "noOpenChats": "Tidak ada obrolan terbuka",
+  "groupInvite": "Undangan Grup",
+  "createNewGroup": "Buat grup baru",
+  "invite": "Mengundang",
+  "groupName": "Nama grup",
+  "createdAt": "Dibuat di",
+  "noOfMembers": "Jumlah anggota",
+  "invitedBy": "Diundang oleh",
+  "accept": "Menerima",
+  "decline": "Menolak",
+  "groupSettings": "Pengaturan Grup",
+  "members": "Anggota",
+  "showAllFiles": "Tampilkan semua file",
+  "searchUser": "Cari pengguna...",
+  "dtnNodes": "Node DTN",
+  "addUserNode": "Tambahkan simpul pengguna"
 }

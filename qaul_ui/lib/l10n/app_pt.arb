@@ -1,6 +1,5 @@
 {
   "languageName": "Português",
-
   "createAccountHeading": "Escolha um nome de usuário",
   "@createAccountHeading": {
     "description": "CTA rendered on top of text field"
@@ -13,7 +12,6 @@
   "start": "Começar",
   "createUserAccount": "Criar perfil de usuário",
   "learnMore": "Aprenda mais sobre qaul.net",
-
   "userAccountNavButtonTooltip": "Sua conta",
   "publicNavButtonTooltip": "Público",
   "usersNavButtonTooltip": "Usuários",
@@ -22,11 +20,9 @@
   "createPublicPostTooltip": "Criar postagem",
   "submitPostTooltip": "Submeter",
   "newChatTooltip": "Nova conversa",
-
   "publicNotificationsEnabled": "Ativar/Desativar notificações de postagens públicas:",
   "chatNotificationsEnabled": "Ativar/Desativar notificações do chat:",
   "notifyOnlyForVerifiedUsers": "Mostrar apenas notificações verificadas:",
-
   "settings": "Configurações",
   "about": "Sobre",
   "theme": "Tema",
@@ -40,7 +36,7 @@
   "ping": "Ping",
   "hopCount": "Número de Saltos",
   "via": "Via",
-  "language": "Linguagem",
+  "language": "Idioma",
   "username": "Nome de Usuário",
   "userID": "ID de Usuário",
   "publicKey": "Chave Pública",
@@ -67,5 +63,38 @@
   "invalidIPMessage": "IP Inválido",
   "invalidPortMessage": "Porta Inválida",
   "usernameLengthMessage": "Seu nome deve conter no mínimo 2 caracteres.",
-  "createGroupHint": "Nome do grupo"
+  "createGroupHint": "Nome do grupo",
+  "genericEmptyState": "Nada aqui ainda",
+  "pleaseRestartApp": "Por favor, reinicie o aplicativo",
+  "gotoSupport": "Ir para o suporte",
+  "continueDialogButton": "Continuar",
+  "removeUser": "Remover usuário",
+  "removeUserDialogContent": "Você quer mesmo remover esse usuário do grupo?",
+  "support": "Suporte",
+  "enableLogging": "Ativar Registros técnicos:",
+  "totalLogsSize": "Tamanho total de registros:",
+  "deleteLogs": "Remover registros",
+  "logsDescription1": "Sempre que um erro occorre, um registro técnico é criado.",
+  "logsDescription2": "Você tem a opção de reportar esses registros aos desenvolvedores ou removê-los.",
+  "sendLogs": "Enviar Registros",
+  "noLogsAvailable": "Nenhum registro disponível",
+  "routingDataTable": "Tabela de Dados de Roteamento",
+  "addIPv6NodeCTA": "Adicionar Ponto de Conexão IPv6",
+  "knownAddresses": "Endereços reconhecidos",
+  "noOpenChats": "Nenhum chat aberto",
+  "groupInvite": "Convite de grupo",
+  "createNewGroup": "Criar novo grupo",
+  "invite": "Convidar",
+  "groupName": "Nome do grupo",
+  "createdAt": "Criado em",
+  "noOfMembers": "Número de membros",
+  "invitedBy": "Convidado por",
+  "accept": "Aceitar",
+  "decline": "Negar",
+  "groupSettings": "Configurações de grupo",
+  "members": "Membros",
+  "showAllFiles": "Arquivos Compartilhados",
+  "searchUser": "Procurar usuário...",
+  "dtnNodes": "Pontos de DTN (Delayed-tolerant network)",
+  "addUserNode": "Adicionar nó de usuário"
 }

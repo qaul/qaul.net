@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -38,6 +39,7 @@ class SearchUserDecorator extends HookConsumerWidget {
     final controller = useTextEditingController();
     final searchKeyNotifier = _searchKeyProvider.notifier;
 
+    final l10n = AppLocalizations.of(context)!;
     final searchBar = PreferredSize(
       preferredSize: const Size(double.maxFinite, 40),
       child: Padding(
@@ -46,7 +48,7 @@ class SearchUserDecorator extends HookConsumerWidget {
           controller: controller,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
-            hintText: 'Search user...',
+            hintText: l10n.searchUser,
             border: const UnderlineInputBorder(),
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.white),

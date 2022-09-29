@@ -96,9 +96,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User? get otherUser => widget.otherUser;
 
-  final Map<String, String> _overflowMenuOptions = {
-    'showFiles': 'Show All Files',
-  };
+  final Map<String, String> _overflowMenuOptions = {};
 
   void _handleClick(String value) {
     switch (value) {
@@ -125,11 +123,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     assert(otherUser != null || room.isGroupChatRoom);
-    if (room.isGroupChatRoom) {
-      _overflowMenuOptions.addAll({'groupSettings': 'Group Settings'});
-    }
-
     _scheduleUpdateCurrentOpenChat();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    var l10n = AppLocalizations.of(context)!;
+    _overflowMenuOptions.addAll({'showFiles': l10n.showAllFiles});
+    if (room.isGroupChatRoom) {
+      _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
+    }
   }
 
   @override

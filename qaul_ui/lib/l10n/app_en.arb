@@ -92,5 +92,10 @@
   "accept": "Accept",
   "decline": "Decline",
   "groupSettings": "Group Settings",
-  "members": "Members"
+  "members": "Members",
+  "showAllFiles": "Show All Files",
+  "searchUser": "Search user...",
+  "dtnNodes": "DTN Nodes",
+  "addUserNode": "Add user node"
 }
+
