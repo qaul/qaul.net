@@ -739,7 +739,11 @@ jobs:
                     cp ../utilities/installers/windows/qaul.exe ./artifacts/
                     # Linux
                     cp *.snap ./artifacts/
+
+                    # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
+                    exit 0
                 name: Copy executables to ./artifacts
+                shell: /bin/bash --login +eo pipefail
             - run:
                 command: |
                     GHR_VERSION=0.14.0
@@ -750,7 +754,7 @@ jobs:
                     echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
                 name: Install ghr
             - run:
-                command: |-
+                command: |
                     VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
                     TAG="v${VERSION}-flutter"
 
@@ -813,7 +817,7 @@ jobs:
                     echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
                 name: Install ghr
             - run:
-                command: |-
+                command: |
                     VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
                     TAG="v${VERSION}-rust"
                     DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
@@ -901,13 +905,10 @@ version: 2.1
 workflows:
     analyze-and-test-flutter:
         jobs:
-            - test-flutter
-            - analyze-flutter
-            - integration-test-flutter-macos:
-                filters:
-                    branches:
-                        only:
-                            - main
+            - publish-flutter-github-release:
+                requires:
+                    - build-flutter-windows
+            - build-flutter-windows
         when: << pipeline.parameters.run-flutter-workflow >>
     build-and-deploy-flutter:
         jobs:
