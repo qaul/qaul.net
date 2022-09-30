@@ -29,7 +29,7 @@ cp "$LIBQAUL_DLL" "$DEPS_PATH"
 # copy all *.dll files that flutter bundled with executable
 # TODO: Use find instead of hard-coded values
 cp "${BUILD_PATH}/flutter_windows.dll" "$DEPS_PATH"
-cp "${BUILD_PATH}/native_context_menu_plugin.dll" "$DEPS_PATH"
+#cp "${BUILD_PATH}/native_context_menu_plugin.dll" "$DEPS_PATH"
 cp "${BUILD_PATH}/url_launcher_windows_plugin.dll" "$DEPS_PATH"
 # copy entire data folder
 cp -R "${BUILD_PATH}/data" "$DEPS_PATH"

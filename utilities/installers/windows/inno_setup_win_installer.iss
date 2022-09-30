@@ -5,7 +5,7 @@
 #define MyAppVersion "APPVERSIONHERE"
 #define MyAppPublisher "qaul"
 #define MyAppURL "https://qaul.net"
-#define MyAppExeName "qaul.exe"      
+#define MyAppExeName "qaul.exe"
 #define MyAppAssetsFolder "assets"
 #define MyAppDependenciesFolder "dependencies"
 
@@ -41,7 +41,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+; Source: "{#SourcePath}{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\libqaul.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
