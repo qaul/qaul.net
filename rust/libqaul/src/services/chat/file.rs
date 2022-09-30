@@ -1,11 +1,10 @@
 // Copyright (c) 2022 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Qaul File Sharing Service
+//! # Chat File Transfer
 //!
-//! The File sharing service sends and receives file messages into the network.
-//! The File messages carry on the Messaging service
-//! Messaging(FileMessage(ChatFileContainer(FileInfo, FileData, Confirmation)))
+//! Sending files via the chat messenger to other users and groups.
+//! The chat file messages use the messaging service.
 
 use libp2p::PeerId;
 use prost::Message;
@@ -133,7 +132,7 @@ impl UserFiles {
     /// (first_key, last_key)
     fn get_chunk_key_range(file_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
         let first_key = Self::get_chunk_key(file_id, 0);
-        let last_key = Self::get_chunk_key(file_id, 0xFFFFFFFF);
+        let last_key = Self::get_chunk_key(file_id, u32::MAX);
         (first_key, last_key)
     }
 
@@ -141,6 +140,8 @@ impl UserFiles {
     pub fn save_file_chunk(&self, file_id: u64, index: u32, data: Vec<u8>) {
         // get chunk key
         let key = Self::get_chunk_key(&file_id.to_be_bytes().to_vec(), index);
+
+        log::trace!("save file chunk {} with key: {:?}", index, key);
 
         // save file chunk into data base
         if let Err(e) = self.file_chunks.insert(key, data) {
@@ -155,6 +156,8 @@ impl UserFiles {
     }
 
     /// count file chunks
+    ///
+    /// Count how many chunks of a file we already have in the data base
     pub fn count_file_chunks(&self, file_id: &Vec<u8>) -> usize {
         // get key range
         let (first_key, last_key) = Self::get_chunk_key_range(file_id);
@@ -180,8 +183,9 @@ impl UserFiles {
 /// File State
 #[derive(Serialize, Deserialize, Clone)]
 pub enum FileState {
+    /// We are in the process of sending this file
     Sending,
-    /// File has been sent to another
+    /// File has been sent to another user
     Sent,
     /// File reception has been confirmed
     Confirmed,
@@ -189,7 +193,7 @@ pub enum FileState {
     ConfirmedByAll,
     /// Receiving
     Receiving,
-    /// File successfully
+    /// File successfully received
     Received,
 }
 
@@ -241,11 +245,10 @@ impl FileHistory {
     /// the function returns a boolean that indicates, whether the user finished receiving
     /// {user completed}
     pub fn reception_confirmed(&mut self, receiver_id: PeerId) -> bool {
-        // set received state
         let key = receiver_id.to_bytes();
         if let Some(tracking) = self.reception_tracking.get_mut(&key) {
             tracking.package_count = tracking.package_count + 1;
-            log::debug!("package_count {}", tracking.package_count);
+            log::trace!("package_count {}", tracking.package_count);
 
             // check if user has received all messages
             if tracking.package_count >= self.message_count {
@@ -606,6 +609,7 @@ impl ChatFile {
         // read file contents and create and send FileData messages
         let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
+        let mut chunk_index: u32 = 0;
 
         while left_size > 0 {
             let mut read_size = left_size;
@@ -623,7 +627,7 @@ impl ChatFile {
                 message: Some(proto_net::chat_file_container::Message::FileData(
                     proto_net::ChatFileData {
                         file_id,
-                        start_index: 0,
+                        start_index: chunk_index,
                         message_count: mesage_count,
                         data: buffer[0..(read_size as usize)].iter().cloned().collect(),
                     },
@@ -638,6 +642,8 @@ impl ChatFile {
                 timestamp,
                 data.encode_to_vec(),
             );
+
+            chunk_index = chunk_index + 1;
         }
 
         // set file status to sent
@@ -759,13 +765,18 @@ impl ChatFile {
         // check how many chunks have been downloaded
         let count = user_files.count_file_chunks(&file_history.file_id.to_be_bytes().to_vec());
 
+        log::trace!(
+            "received {} chunks of {}",
+            count + 1,
+            file_history.message_count
+        );
+
         // if we downloaded all chunks, save it to file if we received the file info
         if (count + 1) as u32 == file_history.message_count {
+            log::trace!("store_file");
+
             Self::store_file(user_account, user_files, file_history);
         }
-
-        // TODO
-        // reference it in chat
     }
 
     /// Store a completely downloaded file
@@ -831,6 +842,7 @@ impl ChatFile {
                 Self::try_store_file(user_account, user_files, file_history);
             }
             None => {
+                log::warn!("haven't received file info message yet");
                 // TODO: create stub file history file
                 /*
                 // create a file history stub if nothing was found

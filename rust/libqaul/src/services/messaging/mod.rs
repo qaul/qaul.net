@@ -183,7 +183,7 @@ impl Messaging {
         user_account: UserAccount,
         confirmation: proto::Confirmation,
     ) {
-        log::trace!("messgae confirmed");
+        log::trace!("message confirmed");
 
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -199,25 +199,25 @@ impl Messaging {
                         // check message and decide what to do
                         match unconfirmed.message_type {
                             MessagingServiceType::Unconfirmed => {
-                                log::debug!("Confirmation: Unconfirmed");
+                                log::trace!("Confirmation: Unconfirmed");
                             }
                             MessagingServiceType::DtnOrigin => {
-                                log::debug!("Confirmation: DtnOrigin");
+                                log::trace!("Confirmation: DtnOrigin");
                                 // what kind of message do we have here?
                                 // TODO: check chat storage as sent ...
                             }
                             MessagingServiceType::DtnStored => {
-                                log::debug!("Confirmation: DtnStored");
+                                log::trace!("Confirmation: DtnStored");
                             }
                             MessagingServiceType::Crypto => {
-                                log::debug!("Confirmation: Crypto");
+                                log::trace!("Confirmation: Crypto");
                             }
                             MessagingServiceType::Group => {
-                                log::debug!("Confirmation: Group");
+                                log::trace!("Confirmation: Group");
                                 // don't do anything for group messages
                             }
                             MessagingServiceType::Chat => {
-                                log::debug!("Confirmation: Chat");
+                                log::trace!("Confirmation: Chat");
                                 // set received info in chat data base
                                 ChatStorage::update_confirmation(
                                     user_account.id,
@@ -246,7 +246,7 @@ impl Messaging {
                                 }
                             }
                             MessagingServiceType::Rtc => {
-                                log::debug!("Confirmation: Rtc");
+                                log::trace!("Confirmation: Rtc");
                                 // TODO CONFIRM RTC MESSAGE
                             }
                         }
@@ -317,7 +317,7 @@ impl Messaging {
         message_id: &Vec<u8>,
         is_common_message: bool,
     ) -> Result<Vec<u8>, String> {
-        log::debug!("pack_and_send_message to {}", receiver.to_base58());
+        log::trace!("pack_and_send_message to {}", receiver.to_base58());
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
@@ -348,9 +348,6 @@ impl Messaging {
             receiver_id: receiver.to_bytes(),
             payload: envelop_payload.encode_to_vec(),
         };
-
-        // debug
-        log::trace!("envelope len: {}", envelope.encoded_len());
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());

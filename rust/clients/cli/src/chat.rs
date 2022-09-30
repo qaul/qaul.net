@@ -282,7 +282,7 @@ impl Chat {
                                     proto::MessageStatus::Sent => print!("✓. | "),
                                     proto::MessageStatus::Confirmed => print!("✓✓ | "),
                                     proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
-                                    proto::MessageStatus::Receiving => print!("📨 | "),
+                                    proto::MessageStatus::Receiving => print!("🚚 | "),
                                     proto::MessageStatus::Received => print!("📨 | "),
                                 }
 

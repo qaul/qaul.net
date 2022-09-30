@@ -29,7 +29,7 @@ impl MessagingProcess {
         data: &Vec<u8>,
         signature: &Vec<u8>,
     ) {
-        log::debug!("on_decrypted_message arrived");
+        log::trace!("on_decrypted_message arrived");
 
         // decode messaging
         let messaging;
