@@ -2,16 +2,11 @@
 
 # build android release version
 
-# delete old libqaul libraries
-#rm ../../android/libqaul/src/main/jniLibs/arm64-v8a/liblibqaul.so
-#rm ../../android/libqaul/src/main/jniLibs/armeabi-v7a/liblibqaul.so
-#rm ../../android/libqaul/src/main/jniLibs/x86/liblibqaul.so
-#rm ../../android/libqaul/src/main/jniLibs/x86_64/liblibqaul.so
-
 # build libqaul
 cd ../../rust/libqaul
+
 #cargo clean
-./build_android_release.sh
+./build_libqaul_android.sh release
 
 # android aar
 cd ../../android
