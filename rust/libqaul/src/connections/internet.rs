@@ -33,16 +33,10 @@ use libp2p::{
 use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
-use mpsc::{UnboundedReceiver, UnboundedSender};
 use prost::Message;
 
 use crate::node::Node;
-use crate::services::{
-    feed::Feed,
-    page,
-    page::{PageMode, PageRequest, PageResponse},
-};
-use crate::types::QaulMessage;
+use crate::services::feed::Feed;
 
 use crate::connections::{events, ConnectionModule};
 use crate::utilities::timestamp::Timestamp;
@@ -64,10 +58,8 @@ pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
     pub ping: Ping,
-    pub qaul_info: QaulInfo,
-    pub qaul_messaging: QaulMessaging,
-    #[behaviour(ignore)]
-    pub response_sender: UnboundedSender<QaulMessage>,
+    //pub qaul_info: QaulInfo,
+    //pub qaul_messaging: QaulMessaging,
 }
 
 impl QaulInternetBehaviour {
@@ -136,30 +128,6 @@ impl QaulInternetBehaviour {
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received(ConnectionModule::Internet, msg.source, resp);
                 }
-                // Pages Messages
-                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    log::trace!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| log::trace!("{:?}", r));
-                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-                    match req.mode {
-                        PageMode::ALL => {
-                            log::trace!("Received All req: {:?} from {:?}", req, msg.source);
-                            page::respond_with_public_pages(
-                                self.response_sender.clone(),
-                                msg.source.to_string(),
-                            );
-                        }
-                        PageMode::One(ref peer_id) => {
-                            if peer_id.to_string() == Node::get_id_string() {
-                                log::trace!("Received req: {:?} from {:?}", req, msg.source);
-                                page::respond_with_public_pages(
-                                    self.response_sender.clone(),
-                                    msg.source.to_string(),
-                                );
-                            }
-                        }
-                    }
-                }
             }
             _ => (),
         }
@@ -211,25 +179,25 @@ impl From<PingEvent> for QaulInternetEvent {
         Self::Ping(event)
     }
 }
-
+/*
 impl From<QaulInfoEvent> for QaulInternetEvent {
     fn from(event: QaulInfoEvent) -> Self {
         Self::QaulInfo(event)
     }
 }
 
+//impl From<<QaulMessaging as NetworkBehaviour>::OutEvent> for QaulInternetEvent {
 impl From<QaulMessagingEvent> for QaulInternetEvent {
     fn from(event: QaulMessagingEvent) -> Self {
         Self::QaulMessaging(event)
     }
 }
-
+ */
 /// Internet Connection Module of libqaul
 ///
 /// it creates a libp2p swarm
 pub struct Internet {
     pub swarm: Swarm<QaulInternetBehaviour>,
-    pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
 impl Internet {
@@ -310,9 +278,8 @@ impl Internet {
                     Node::get_keys().public(),
                 )),
                 ping: Ping::new(ping_config),
-                qaul_info: QaulInfo::new(Node::get_id()),
-                qaul_messaging: QaulMessaging::new(Node::get_id()),
-                response_sender,
+                //qaul_info: QaulInfo::new(Node::get_id()),
+                //qaul_messaging: QaulMessaging::new(Node::get_id()),
             };
             behaviour.floodsub.subscribe(Node::get_topic());
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
@@ -342,10 +309,7 @@ impl Internet {
         log::trace!("Internet.init() peer_connect");
 
         // construct internet object
-        let internet = Internet {
-            swarm: swarm,
-            receiver: response_rcv,
-        };
+        let internet = Internet { swarm };
 
         internet
     }
