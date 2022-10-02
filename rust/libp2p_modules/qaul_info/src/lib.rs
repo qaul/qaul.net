@@ -65,7 +65,6 @@ impl QaulInfo {
 }
 
 impl NetworkBehaviour for QaulInfo {
-    //type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoRpc, InnerMessage>;
     type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>;
     type OutEvent = QaulInfoEvent;
 

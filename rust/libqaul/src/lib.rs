@@ -5,11 +5,6 @@
 //!
 //! Library for qaul.net
 
-// Async comparison
-// https://runrust.miraheze.org/wiki/Async_crate_comparison
-// MPSC = Multi-Producer, Single-Consumer FiFo
-use crate::utilities::filelogger::FileLogger;
-use crate::utilities::timestamp::Timestamp;
 use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
@@ -28,7 +23,6 @@ mod router;
 mod rpc;
 mod services;
 pub mod storage;
-mod types;
 pub mod utilities;
 
 use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections};
@@ -40,6 +34,8 @@ use rpc::sys::Sys;
 use rpc::Rpc;
 use services::messaging::Messaging;
 use services::Services;
+use utilities::filelogger::FileLogger;
+use utilities::timestamp::Timestamp;
 
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();

@@ -32,17 +32,11 @@ use async_std::task;
 use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
-use mpsc::UnboundedReceiver;
 use prost::Message;
 
 use crate::node::Node;
-use crate::services::{
-    feed::Feed,
-    page,
-    page::{PageMode, PageRequest, PageResponse},
-};
+use crate::services::feed::Feed;
 use crate::storage::configuration::Configuration;
-use crate::types::QaulMessage;
 use std::time::Duration;
 
 use crate::connections::{events, ConnectionModule};
@@ -59,8 +53,6 @@ pub struct QaulLanBehaviour {
     pub ping: Ping,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
-    #[behaviour(ignore)]
-    pub response_sender: mpsc::UnboundedSender<QaulMessage>,
 }
 
 impl QaulLanBehaviour {
@@ -118,30 +110,6 @@ impl QaulLanBehaviour {
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received(ConnectionModule::Lan, msg.source, resp);
                 }
-                // Pages Messages
-                else if let Ok(resp) = serde_json::from_slice::<PageResponse>(&msg.data) {
-                    log::trace!("Response from {}", msg.source);
-                    resp.data.iter().for_each(|r| log::trace!("{:?}", r));
-                } else if let Ok(req) = serde_json::from_slice::<PageRequest>(&msg.data) {
-                    match req.mode {
-                        PageMode::ALL => {
-                            log::trace!("Received All req: {:?} from {:?}", req, msg.source);
-                            page::respond_with_public_pages(
-                                self.response_sender.clone(),
-                                msg.source.to_string(),
-                            );
-                        }
-                        PageMode::One(ref peer_id) => {
-                            if peer_id.to_string() == Node::get_id_string() {
-                                log::trace!("Received req: {:?} from {:?}", req, msg.source);
-                                page::respond_with_public_pages(
-                                    self.response_sender.clone(),
-                                    msg.source.to_string(),
-                                );
-                            }
-                        }
-                    }
-                }
             }
             _ => (),
         }
@@ -189,7 +157,6 @@ impl From<QaulMessagingEvent> for QaulLanEvent {
 
 pub struct Lan {
     pub swarm: Swarm<QaulLanBehaviour>,
-    pub receiver: UnboundedReceiver<QaulMessage>,
 }
 
 impl Lan {
@@ -265,7 +232,6 @@ impl Lan {
                 ping: Ping::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
-                response_sender,
             };
 
             log::trace!("Lan::init() swarm behaviour defined");
@@ -274,7 +240,6 @@ impl Lan {
 
             log::trace!("Lan::init() swarm behaviour floodsub subscribed");
 
-            //Swarm::new(transport_upgraded, behaviour, Node::get_id())
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
         };
 
@@ -291,10 +256,7 @@ impl Lan {
 
         log::trace!("Lan::init() swarm connected");
 
-        let lan = Lan {
-            swarm: swarm,
-            receiver: response_rcv,
-        };
+        let lan = Lan { swarm };
 
         lan
     }

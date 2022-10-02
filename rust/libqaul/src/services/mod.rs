@@ -18,7 +18,6 @@ pub mod dtn;
 pub mod feed;
 pub mod group;
 pub mod messaging;
-pub mod page;
 pub mod rtc;
 
 /// qaul Services
