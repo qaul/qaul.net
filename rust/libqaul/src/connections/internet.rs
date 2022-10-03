@@ -213,7 +213,7 @@ impl Internet {
         INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
 
         // create a multi producer, single consumer queue
-        let (response_sender, response_rcv) = mpsc::unbounded();
+        let (response_sender, response_rcv) = mpsc::unbounded::<Vec<u8>>();
 
         log::trace!("Internet.init() mpsc channels created");
 
@@ -226,7 +226,7 @@ impl Internet {
         };
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
-        let transport = {
+        let transport = async {
             let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
             let ws_dns_tcp = WsConfig::new(
