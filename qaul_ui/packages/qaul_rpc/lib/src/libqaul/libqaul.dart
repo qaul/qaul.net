@@ -24,6 +24,8 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 
+import 'libqaul_interface.dart';
+
 part 'channel.dart';
 
 part 'ffi.dart';
@@ -31,118 +33,54 @@ part 'ffi.dart';
 part 'fii_function_types.dart';
 
 /// Libqaul facade provider state.
-final libqaulProvider = Provider<Libqaul>((ref) => Libqaul(ref.read));
+final libqaulProvider = Provider<Libqaul>((ref) => Libqaul());
 
 /// libqaul dart class,
 /// loading dynamic libqaul library
 /// and accessing libqaul's C API ffi through dart
 class Libqaul {
-  final Reader read;
   static bool? _initialized;
-  static LibqaulChannel? _libqaulChannel;
-  static LibqaulFfi? _libqaulFfi;
+  static late LibqaulInterface _libqaul;
 
   /// instantiate libqaul
   /// load dynamic library and initialize it
-  Libqaul(this.read) {
+  Libqaul() {
     // check if library has already been loaded
     if (_initialized != null) return;
-
-    // initialize Library
-    if (Platform.isAndroid || Platform.isIOS) {
-      // load platform plugin
-      _libqaulChannel = LibqaulChannel(read);
-    } else {
-      // load shared library
-      _libqaulFfi = LibqaulFfi(read);
-    }
-
+    _libqaul = LibqaulInterface.platform();
     _initialized = true;
   }
 
   /// load libqaul
   Future load() async {
-    if (Platform.isAndroid) {
-      await _libqaulChannel!.load();
-    } else {
-      // no loading needed, as this is done
-      // in the initialization
-    }
+    if (Platform.isAndroid) await _libqaul.load();
   }
 
   /// start and initialize libqaul
-  Future start() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await _libqaulChannel!.start();
-    } else {
-      _libqaulFfi!.start();
-    }
-  }
+  Future start() async => await _libqaul.start();
 
   /// check if libqaul finished initializing
   ///
   /// returns 1, when qaul finished initializing
   /// otherwise it returns 0
-  Future<int> initialized() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return await _libqaulChannel!.initialized();
-    } else {
-      return _libqaulFfi!.initialized();
-    }
-  }
+  Future<int> initialized() async => _libqaul.initialized();
 
   /// Debug function: get Android Version
   /// returns a string of the android version from AAR library
-  Future<String> getPlatformVersion() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return await _libqaulChannel!.platformVersion();
-    } else {
-      return "getPlatformVersion() NOT IMPLEMENTED FOR THIS PLATFORM";
-    }
-  }
+  Future<String> getPlatformVersion() async => _libqaul.getPlatformVersion();
 
   /// Debug function: hello function
-  Future<String> hello() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return await _libqaulChannel!.hello();
-    } else {
-      return _libqaulFfi!.hello();
-    }
-  }
+  Future<String> hello() async => _libqaul.hello();
 
   /// Debug function: how many rpc messages have been sent to libqaul
-  Future<int> checkSendCounter() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return await _libqaulChannel!.checkSendCounter();
-    } else {
-      return _libqaulFfi!.checkSendCounter();
-    }
-  }
+  Future<int> checkSendCounter() async => _libqaul.checkSendCounter();
 
   /// Debug function: How many rpc messages are queued by libqaul
-  Future<int> checkReceiveQueue() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return await _libqaulChannel!.checkReceiveQueue();
-    } else {
-      return _libqaulFfi!.checkReceiveQueue();
-    }
-  }
+  Future<int> checkReceiveQueue() async => _libqaul.checkReceiveQueue();
 
   /// send binary protobuf RPC message to libqaul
-  Future<void> sendRpc(Uint8List message) async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await _libqaulChannel!.sendRpc(message);
-    } else {
-      _libqaulFfi!.sendRpc(message);
-    }
-  }
+  Future<void> sendRpc(Uint8List message) async => _libqaul.sendRpc(message);
 
   /// receive binary protobuf RPC message from libqaul
-  Future<Uint8List?> receiveRpc() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      return _libqaulChannel!.receiveRpc();
-    } else {
-      return _libqaulFfi!.receiveRpc();
-    }
-  }
+  Future<Uint8List?> receiveRpc() async => _libqaul.receiveRpc();
 }

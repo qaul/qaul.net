@@ -47,8 +47,8 @@ class LibqaulWorker {
 
   final _heartbeats = Queue<bool>();
 
-  Stream<bool> get onLibraryCrash => _streamController.stream;
-  final _streamController = StreamController<bool>.broadcast();
+  Stream<bool> get onLibraryCrash => _crashStreamController.stream;
+  final _crashStreamController = StreamController<bool>.broadcast();
 
   void _init() async {
     if (_initialized.isCompleted) return;
@@ -68,9 +68,9 @@ class LibqaulWorker {
     Timer.periodic(const Duration(seconds: 2), (_) async {
       if (_heartbeats.length > 5) {
         _log.warning('${_heartbeats.length} heartbeats unanswered by Libqaul');
-        _streamController.add(true);
+        _crashStreamController.add(true);
       }
-      _heartbeats.addLast(true);
+      if (_heartbeats.length < 5) _heartbeats.addLast(true);
       _log.finest('requesting heartbeat to libqaul');
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _sendMessage(Modules.DEBUG, msg);
