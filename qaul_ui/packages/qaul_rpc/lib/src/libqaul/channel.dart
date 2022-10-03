@@ -10,22 +10,20 @@ part of 'libqaul.dart';
 /// plugin that invokes libqaul.
 ///
 /// This procedure is used on Android.
-class LibqaulChannel {
-  final Reader read;
-  static const MethodChannel libqaulChannel = MethodChannel('libqaul');
-
-  final _log = Logger('LibqaulChannel');
-
-  /// instantiate libqaul
-  LibqaulChannel(this.read) {
+class LibqaulChannel extends LibqaulInterface {
+  LibqaulChannel() {
     _log.finest("LibqaulChannel(this.read)");
   }
 
-  /// load libqaul
+  static const MethodChannel _channel = MethodChannel('libqaul');
+
+  final _log = Logger('LibqaulChannel');
+
+  @override
   Future<void> load() async {
     _log.finest("load()");
     try {
-      await libqaulChannel.invokeMethod('libqaulload');
+      await _channel.invokeMethod('libqaulload');
       _log.finest("libqaulload called");
     } on PlatformException catch (e) {
       _log.warning("ERROR: Failed to load libqaul: '${e.message}'");
@@ -33,18 +31,14 @@ class LibqaulChannel {
     }
   }
 
-  /// Test Platform Version dummy method
-  Future<String> platformVersion() async {
+  @override
+  Future<String> getPlatformVersion() async {
     _log.finest("platformVersion()");
-
-    //const MethodChannel local_channel = MethodChannel('libqaul');
-
-    _log.finest("platformVersion() channel instantiated");
 
     String version;
     try {
       _log.finest("platformVersion() try");
-      final result = await libqaulChannel.invokeMethod('getPlatformVersion');
+      final result = await _channel.invokeMethod('getPlatformVersion');
       _log.finest("platformVersion() result: $result");
       version = 'Android platform version: $result';
     } on PlatformException catch (e) {
@@ -55,23 +49,20 @@ class LibqaulChannel {
     return version;
   }
 
-  /// start and initiate libqaul
+  @override
   Future<void> start() async {
     try {
-      await libqaulChannel.invokeMethod('start');
+      await _channel.invokeMethod('start');
     } on PlatformException catch (e) {
       _log.warning("ERROR: Failed to start libqaul: '${e.message}'");
       rethrow;
     }
   }
 
-  /// check if libqaul finished initializing
-  ///
-  /// returns 1, when qaul finished initializing
-  /// otherwise it returns 0
+  @override
   Future<int> initialized() async {
     try {
-      var init = await libqaulChannel.invokeMethod('initialized');
+      var init = await _channel.invokeMethod('initialized');
       if ((init is int && init == 1) || (init is bool && init)) {
         return 1;
       } else {
@@ -83,11 +74,11 @@ class LibqaulChannel {
     }
   }
 
-  /// hello function
+  @override
   Future<String> hello() async {
     String result;
     try {
-      result = await libqaulChannel.invokeMethod('hello');
+      result = await _channel.invokeMethod('hello');
     } on PlatformException catch (e) {
       _log.warning("ERROR: libqaul hello: '${e.message}'");
       rethrow;
@@ -95,11 +86,11 @@ class LibqaulChannel {
     return result;
   }
 
-  /// Debug function: how many rpc messages have been sent to libqaul
+  @override
   Future<int> checkSendCounter() async {
     int result;
     try {
-      result = await libqaulChannel.invokeMethod('sendcounter');
+      result = await _channel.invokeMethod('sendcounter');
     } on PlatformException catch (e) {
       _log.warning("ERROR: libqaul sendcounter: '${e.message}'");
       rethrow;
@@ -107,11 +98,11 @@ class LibqaulChannel {
     return result;
   }
 
-  /// Debug function: How many rpc messages are queued by libqaul
+  @override
   Future<int> checkReceiveQueue() async {
     int result;
     try {
-      result = await libqaulChannel.invokeMethod('receivequeue');
+      result = await _channel.invokeMethod('receivequeue');
     } on PlatformException catch (e) {
       _log.warning("ERROR: libqaul channel receivequeue: '${e.message}'");
       rethrow;
@@ -119,21 +110,20 @@ class LibqaulChannel {
     return result;
   }
 
-  /// send binary protobuf RPC message to libqaul
+  @override
   Future<void> sendRpc(Uint8List message) async {
     try {
-      await libqaulChannel.invokeMethod('sendRpcMessage', {'message': message});
+      await _channel.invokeMethod('sendRpcMessage', {'message': message});
     } on PlatformException catch (e) {
       _log.warning("ERROR: libqaul channel sendRpcMessage: '${e.message}'");
       rethrow;
     }
   }
 
-  /// receive binary protobuf RPC message from libqaul
-  /// and pass it to RPC module
+  @override
   Future<Uint8List?> receiveRpc() async {
     try {
-      final Uint8List? result = await libqaulChannel.invokeMethod('receiveRpcMessage');
+      final Uint8List? result = await _channel.invokeMethod('receiveRpcMessage');
 
       if (result == null) {
         _log.finest("channel receiveRpcMessage: null received");
