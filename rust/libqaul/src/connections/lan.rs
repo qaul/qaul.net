@@ -165,7 +165,7 @@ impl Lan {
         log::trace!("Lan::init() start");
 
         // create a multi producer, single consumer queue
-        let (response_sender, response_rcv) = mpsc::unbounded();
+        let (response_sender, response_rcv) = mpsc::unbounded::<Vec<u8>>();
 
         log::trace!("Lan::init() mpsc channels created");
 
@@ -178,7 +178,7 @@ impl Lan {
         };
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
-        let transport = {
+        let transport = async {
             let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
             let ws_dns_tcp = WsConfig::new(
