@@ -8,14 +8,7 @@ part of 'libqaul.dart';
 ///
 /// load dynamic libqaul library and accessing libqaul's C API ffi through dart
 class LibqaulFFI extends LibqaulInterface {
-  static DynamicLibrary? _lib;
-
-  final _log = Logger('LibqaulFfi');
-
   LibqaulFFI() {
-    // check if library has already been loaded
-    if (_lib != null) return;
-
     // check build mode (release or debug target)
     String mode;
     if (kReleaseMode) {
@@ -41,11 +34,15 @@ class LibqaulFFI extends LibqaulInterface {
     }
   }
 
-  @override
-  Future<String> getPlatformVersion() async => '';
+  static late DynamicLibrary _lib;
+
+  final _log = Logger('LibqaulFfi');
 
   @override
   Future load() async => {};
+
+  @override
+  Future<String> getPlatformVersion() async => '';
 
   @override
   Future<void> start() async {
@@ -54,41 +51,40 @@ class LibqaulFFI extends LibqaulInterface {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       _log.finer("flutter start_desktop libqaul");
       // start libqaul with finding paths to save the configuration files
-      start = _lib!
-          .lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>(
-              'start_desktop');
+      start = _lib.lookupFunction<StartDesktopFunctionRust,
+          StartDesktopFunctionDart>('start_desktop');
     } else {
       _log.finer("flutter start libqaul");
       // start libqaul without path to storage location
       start =
-          _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+          _lib.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
     }
     start();
   }
 
   @override
   Future<int> initialized() async {
-    final initialized = _lib!
-        .lookupFunction<InitializationFinishedRust, InitializationFinishedDart>(
-            'initialized');
+    final initialized = _lib.lookupFunction<InitializationFinishedRust,
+        InitializationFinishedDart>('initialized');
     final result = initialized();
     return result;
   }
 
   @override
-  Future<String> hello() async {
+  Future<String> hello() async => using(_hello);
+
+  String _hello(Arena arena) {
     final hello =
-        _lib!.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
+        _lib.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
     final ptr = hello();
     final helloMessage = ptr.toDartString();
-    calloc.free(ptr);
     return helloMessage;
   }
 
   @override
   Future<int> checkSendCounter() async {
-    final checkCounter = _lib!
-        .lookupFunction<SendRpcCounterRust, SendRpcCounterDart>(
+    final checkCounter =
+        _lib.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>(
             'send_rpc_to_libqaul_count');
     final result = checkCounter();
     _log.finer("$result RPC messages sent to libqaul");
@@ -97,8 +93,8 @@ class LibqaulFFI extends LibqaulInterface {
 
   @override
   Future<int> checkReceiveQueue() async {
-    final checkQueue = _lib!
-        .lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
+    final checkQueue =
+        _lib.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
             'receive_rpc_from_libqaul_queued_length');
     final result = checkQueue();
     if (result > 0) _log.finer("$result messages queued by libqaul RPC");
@@ -106,26 +102,25 @@ class LibqaulFFI extends LibqaulInterface {
   }
 
   @override
-  Future<void> sendRpc(Uint8List message) async {
-    final sendRpcToLibqaul = _lib!.lookupFunction<SendRpcToLibqaulFunctionRust,
+  Future<void> sendRpc(Uint8List message) async =>
+      using((a) => _sendRpc(a, message), malloc);
+
+  void _sendRpc(Arena arena, Uint8List message) {
+    final sendRpcToLibqaul = _lib.lookupFunction<SendRpcToLibqaulFunctionRust,
         SendRpcToLibqaulFunctionDart>('send_rpc_to_libqaul');
 
     // create message buffer
-    final buffer = malloc<Uint8>(message.length);
+    final buffer = arena.allocate<Uint8>(message.length);
 
     // fill message into buffer
     for (var i = 0; i < message.length; i++) {
       buffer[i] = message[i];
     }
-    final bufferPointer = buffer.cast<Uint8>();
 
     // send message
     final messageSize = message.length;
     _log.finer("sendRpc send $messageSize bytes");
-    final result = sendRpcToLibqaul(bufferPointer, message.length);
-
-    // free buffer
-    malloc.free(bufferPointer);
+    final result = sendRpcToLibqaul(buffer, message.length);
 
     // analyze result
     switch (result) {
@@ -144,22 +139,19 @@ class LibqaulFFI extends LibqaulInterface {
     }
   }
 
-  /// receive binary protobuf RPC message from libqaul
   @override
-  Future<Uint8List?> receiveRpc() async {
-    final receiveRpcFromLibqaul = _lib!.lookupFunction<
+  Future<Uint8List?> receiveRpc() async => using(_receiveRpc, malloc);
+
+  Uint8List? _receiveRpc(Arena arena) {
+    final receiveRpcFromLibqaul = _lib.lookupFunction<
         ReceiveRpcFromLibqaulFunctionRust,
         ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
 
-    // create a buffer
-    const bufferSize = 259072;
-    final buffer = malloc<Uint8>(bufferSize);
-    final bufferPointer = buffer.cast<Uint8>();
+    const size = 259072;
+    final buffer = arena.allocate<Uint8>(size);
+    final result = receiveRpcFromLibqaul(buffer, size);
 
-    // request a new message
-    final result = receiveRpcFromLibqaul(bufferPointer, bufferSize);
-
-    // check if a message was received
+    // check if a message was receivedRpc
     if (result == 0) {
       _log.finer("receiveRpc: nothing received");
     } else if (result > 0) {
@@ -186,9 +178,6 @@ class LibqaulFFI extends LibqaulInterface {
           break;
       }
     }
-
-    // free buffer
-    malloc.free(bufferPointer);
     return null;
   }
 }
