@@ -235,7 +235,8 @@ impl Internet {
                     .unwrap(),
             );
             dns_tcp.or_transport(ws_dns_tcp)
-        };
+        }
+        .await;
 
         log::trace!("Internet.init() transport created");
 

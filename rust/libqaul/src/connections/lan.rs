@@ -186,8 +186,9 @@ impl Lan {
                     .await
                     .unwrap(),
             );
+
             dns_tcp.or_transport(ws_dns_tcp)
-        };
+        }.await;
 
         log::trace!("Lan::init() transport created");
 
