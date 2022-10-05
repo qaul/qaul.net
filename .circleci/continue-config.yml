@@ -905,10 +905,13 @@ version: 2.1
 workflows:
     analyze-and-test-flutter:
         jobs:
-            - publish-flutter-github-release:
-                requires:
-                    - build-flutter-windows
-            - build-flutter-windows
+            - test-flutter
+            - analyze-flutter
+            - integration-test-flutter-macos:
+                filters:
+                    branches:
+                        only:
+                            - main
         when: << pipeline.parameters.run-flutter-workflow >>
     build-and-deploy-flutter:
         jobs:
