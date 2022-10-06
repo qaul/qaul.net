@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
 final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(
-      (ref) => UserListNotifier(users: const []),
+  (ref) => UserListNotifier(users: const []),
 );
 
 enum ConnectionStatus { online, reachable, offline }
@@ -15,7 +15,7 @@ enum ConnectionStatus { online, reachable, offline }
 enum ConnectionType { lan, internet, ble, local }
 
 class User with EquatableMixin implements Comparable<User> {
-  const User({
+  User({
     required this.name,
     required this.id,
     this.conversationId,
@@ -24,7 +24,7 @@ class User with EquatableMixin implements Comparable<User> {
     this.isBlocked,
     this.isVerified,
     this.status = ConnectionStatus.offline,
-  });
+  }) : idBase58 = Base58Encode(id);
 
   final String name;
   final Uint8List id;
@@ -34,6 +34,8 @@ class User with EquatableMixin implements Comparable<User> {
   final bool? isBlocked;
   final bool? isVerified;
   final ConnectionStatus status;
+
+  final String idBase58;
 
   @override
   int compareTo(dynamic other) {
@@ -52,8 +54,6 @@ class User with EquatableMixin implements Comparable<User> {
 
   @override
   List<Object?> get props => [name, idBase58];
-
-  String get idBase58 => Base58Encode(id);
 
   bool get isConnected =>
       availableTypes?.isNotEmpty ?? status == ConnectionStatus.online;

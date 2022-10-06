@@ -2,7 +2,7 @@ part of '../chat_room.dart';
 
 @immutable
 class Message with EquatableMixin implements Comparable<Message> {
-  const Message({
+  Message({
     required this.senderId,
     required this.messageId,
     required this.content,
@@ -10,7 +10,7 @@ class Message with EquatableMixin implements Comparable<Message> {
     required this.sentAt,
     required this.receivedAt,
     this.status = MessageState.sending,
-  });
+  }) : messageIdBase58 = Base58Encode(messageId);
 
   final Uint8List senderId;
   final Uint8List messageId;
@@ -20,7 +20,7 @@ class Message with EquatableMixin implements Comparable<Message> {
   final DateTime receivedAt;
   final MessageContent content;
 
-  String get messageIdBase58 => Base58Encode(messageId);
+  final String messageIdBase58;
 
   factory Message.fromChatMessage(ChatMessage m) {
     return Message(
