@@ -30,7 +30,6 @@ use libp2p::{
     yamux, Multiaddr, NetworkBehaviour, PeerId, Transport,
 };
 // DNS is excluded on mobile, as it is not working there
-use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
 use prost::Message;
@@ -58,8 +57,8 @@ pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: Identify,
     pub ping: Ping,
-    //pub qaul_info: QaulInfo,
-    //pub qaul_messaging: QaulMessaging,
+    pub qaul_info: QaulInfo,
+    pub qaul_messaging: QaulMessaging,
 }
 
 impl QaulInternetBehaviour {
@@ -179,20 +178,19 @@ impl From<PingEvent> for QaulInternetEvent {
         Self::Ping(event)
     }
 }
-/*
+
 impl From<QaulInfoEvent> for QaulInternetEvent {
     fn from(event: QaulInfoEvent) -> Self {
         Self::QaulInfo(event)
     }
 }
 
-//impl From<<QaulMessaging as NetworkBehaviour>::OutEvent> for QaulInternetEvent {
 impl From<QaulMessagingEvent> for QaulInternetEvent {
     fn from(event: QaulMessagingEvent) -> Self {
         Self::QaulMessaging(event)
     }
 }
- */
+
 /// Internet Connection Module of libqaul
 ///
 /// it creates a libp2p swarm
@@ -211,11 +209,6 @@ impl Internet {
 
         INTERNETCHANGECONNECTIONS.set(RwLock::new(VecDeque::<InternetChangeConnection>::new()));
         INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
-
-        // create a multi producer, single consumer queue
-        let (response_sender, response_rcv) = mpsc::unbounded::<Vec<u8>>();
-
-        log::trace!("Internet.init() mpsc channels created");
 
         // TCP transport for android without DNS resolution
         // as the DNS module crashes on android due to a file system access
@@ -279,8 +272,8 @@ impl Internet {
                     Node::get_keys().public(),
                 )),
                 ping: Ping::new(ping_config),
-                //qaul_info: QaulInfo::new(Node::get_id()),
-                //qaul_messaging: QaulMessaging::new(Node::get_id()),
+                qaul_info: QaulInfo::new(Node::get_id()),
+                qaul_messaging: QaulMessaging::new(Node::get_id()),
             };
             behaviour.floodsub.subscribe(Node::get_topic());
             Swarm::new(transport_upgraded, behaviour, Node::get_id())
