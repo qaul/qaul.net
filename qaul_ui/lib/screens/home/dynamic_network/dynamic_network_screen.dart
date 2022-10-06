@@ -139,7 +139,7 @@ class _NetworkNodeComponent extends BodyComponent
 
   final _NetworkNodeComponent? ballParent;
 
-  final _noise = OpenSimplex2S(math.Random().nextInt(255));
+  final _noise = OpenSimplex2F(math.Random().nextInt(255));
 
   async.Timer? _timer;
 
