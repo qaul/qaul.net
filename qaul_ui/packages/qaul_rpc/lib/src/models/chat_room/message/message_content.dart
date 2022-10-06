@@ -47,13 +47,15 @@ class TextMessageContent extends MessageContent {
 }
 
 class GroupEventContent extends MessageContent {
-  const GroupEventContent({
+  GroupEventContent({
     required this.userId,
     required this.type,
-  });
+  }) : userIdBase58 = Base58Encode(userId);
 
   final Uint8List userId;
   final GroupEventContentType type;
+
+  final String userIdBase58;
 
   String toEventMessage(User user) {
     String msgBase(String event) => '"${user.name}" has $event the group';
@@ -77,8 +79,6 @@ class GroupEventContent extends MessageContent {
         return '"${user.name}" has accepted the invite.';
     }
   }
-
-  String get userIdBase58 => Base58Encode(userId);
 
   @override
   List<Object?> get props => [userIdBase58, type];

@@ -12,15 +12,17 @@ final groupInvitesProvider =
         (_) => GroupInviteListNotifier());
 
 class GroupInvite extends Equatable {
-  const GroupInvite({
+  GroupInvite({
     required this.senderId,
     required this.receivedAt,
     required this.groupDetails,
-  });
+  }) : senderIdBase58 = Base58Encode(senderId);
 
   final Uint8List senderId;
   final DateTime receivedAt;
   final ChatRoom groupDetails;
+
+  final String senderIdBase58;
 
   factory GroupInvite.fromRpcGroupInvited(GroupInvited i, List<User> users) {
     return GroupInvite(
@@ -29,8 +31,6 @@ class GroupInvite extends Equatable {
       groupDetails: ChatRoom.fromRpcGroupInfo(i.group, users),
     );
   }
-
-  String get senderIdBase58 => Base58Encode(senderId);
 
   @override
   List<Object?> get props => [senderIdBase58, groupDetails.idBase58];

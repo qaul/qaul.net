@@ -19,12 +19,11 @@ class BleConnectionStatus {
     this.deviceInfo,
     this.discoveredNodes = 0,
     this.nodesPendingConfirmation = 0,
-  });
+  })  : idBase58 = Base58Encode(bleId),
+        deviceInfoBase58 = deviceInfo == null ? null : Base58Encode(deviceInfo);
 
-  String get idBase58 => Base58Encode(bleId);
-
-  String? get deviceInfoBase58 =>
-      deviceInfo == null ? null : Base58Encode(deviceInfo!);
+  final String idBase58;
+  final String? deviceInfoBase58;
 
   BleConnectionStatus copyWith({
     String? status,
