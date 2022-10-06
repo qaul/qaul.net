@@ -29,7 +29,6 @@ use libp2p::{
 };
 // DNS is excluded on mobile, as it is not working there
 use async_std::task;
-use futures::channel::mpsc;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use libp2p::{dns::DnsConfig, websocket::WsConfig};
 use prost::Message;
@@ -164,11 +163,6 @@ impl Lan {
     pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Lan {
         log::trace!("Lan::init() start");
 
-        // create a multi producer, single consumer queue
-        let (response_sender, response_rcv) = mpsc::unbounded::<Vec<u8>>();
-
-        log::trace!("Lan::init() mpsc channels created");
-
         // TCP transport without DNS resolution on android
         // as the DNS module crashes on android due to a file system access
         #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -188,7 +182,8 @@ impl Lan {
             );
 
             dns_tcp.or_transport(ws_dns_tcp)
-        }.await;
+        }
+        .await;
 
         log::trace!("Lan::init() transport created");
 
