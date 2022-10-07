@@ -777,7 +777,6 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "Flutter - v${VERSION}" \
                       -b "${DESCRIPTION}" \
-                      -delete \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
     publish-rust-github-release:
@@ -874,7 +873,22 @@ orbs:
     flutter: circleci/flutter@1.1.0
     win: circleci/windows@4.1
 parameters:
+    run-flutter-android-tagged-workflow:
+        default: false
+        type: boolean
+    run-flutter-ios-tagged-workflow:
+        default: false
+        type: boolean
+    run-flutter-linux-tagged-workflow:
+        default: false
+        type: boolean
+    run-flutter-macos-tagged-workflow:
+        default: false
+        type: boolean
     run-flutter-tagged-workflow:
+        default: false
+        type: boolean
+    run-flutter-windows-tagged-workflow:
         default: false
         type: boolean
     run-flutter-workflow:
@@ -913,70 +927,120 @@ workflows:
                         only:
                             - main
         when: << pipeline.parameters.run-flutter-workflow >>
-    build-and-deploy-flutter:
+    build-and-deploy-flutter-android:
         jobs:
             - verify-version-flutter:
                 filters:
                     tags:
                         only: /.*/
-            - test-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - analyze-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
             - build-and-deploy-flutter-android:
                 filters:
                     tags:
                         only: /.*/
                 requires:
-                    - test-flutter
-                    - analyze-flutter
-            - build-and-deploy-flutter-ios:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - test-flutter
-                    - analyze-flutter
-            - build-flutter-macos:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - test-flutter
-                    - analyze-flutter
-            - build-flutter-windows:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - test-flutter
-                    - analyze-flutter
-            - build-flutter-linux:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - test-flutter
-                    - analyze-flutter
+                    - verify-version-flutter
             - publish-flutter-github-release:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-and-deploy-flutter-android
+        when:
+            or:
+                - << pipeline.parameters.run-flutter-tagged-workflow >>
+                - << pipeline.parameters.run-flutter-android-tagged-workflow >>
+    build-and-deploy-flutter-ios:
+        jobs:
+            - verify-version-flutter:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-and-deploy-flutter-ios:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-flutter
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
                     - build-and-deploy-flutter-ios
-                    - build-flutter-macos
-                    - build-flutter-windows
+        when:
+            and:
+                - false
+                - or:
+                    - << pipeline.parameters.run-flutter-tagged-workflow >>
+                    - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+    build-and-deploy-flutter-linux:
+        jobs:
+            - verify-version-flutter:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-flutter-linux:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-flutter
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
                     - build-flutter-linux
-        when: << pipeline.parameters.run-flutter-tagged-workflow >>
+        when:
+            or:
+                - << pipeline.parameters.run-flutter-tagged-workflow >>
+                - << pipeline.parameters.run-flutter-linux-tagged-workflow >>
+    build-and-deploy-flutter-macos:
+        jobs:
+            - verify-version-flutter:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-flutter-macos:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-flutter
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - build-flutter-macos
+        when:
+            and:
+                - false
+                - or:
+                    - << pipeline.parameters.run-flutter-tagged-workflow >>
+                    - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+    build-and-deploy-flutter-windows:
+        jobs:
+            - verify-version-flutter:
+                filters:
+                    tags:
+                        only: /.*/
+            - build-flutter-windows:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-flutter
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - build-flutter-windows
+        when:
+            or:
+                - << pipeline.parameters.run-flutter-tagged-workflow >>
+                - << pipeline.parameters.run-flutter-windows-tagged-workflow >>
     build-and-deploy-rust-android:
         jobs:
             - verify-version-rust:

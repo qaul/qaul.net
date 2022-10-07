@@ -55,5 +55,4 @@ steps:
           -c "${CIRCLE_SHA1}" \
           -n "Flutter - v${VERSION}" \
           -b "${DESCRIPTION}" \
-          -delete \
           "${TAG}" artifacts/

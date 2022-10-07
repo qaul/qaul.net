@@ -1,0 +1,21 @@
+when:
+  and:
+    # TODO: Reinstate once MacOS app signing on pipeline is fixed
+    - false
+    - or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+jobs:
+  - verify-version-flutter: { 'filters': { 'tags': { 'only': '/.*/' } } }
+  - build-flutter-macos:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - build-flutter-macos
+      filters:
+        tags:
+          only: /.*/
