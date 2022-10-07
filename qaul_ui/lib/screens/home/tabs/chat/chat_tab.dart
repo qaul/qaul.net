@@ -81,7 +81,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final chatRoomsListView = CronTaskDecorator(
       callback: () => refreshChatsAndInvites(),
-      schedule: const Duration(milliseconds: 500),
+      schedule: const Duration(milliseconds: 1000),
       child: RefreshIndicator(
         onRefresh: () => refreshChatsAndInvites(),
         child: EmptyStateTextDecorator(

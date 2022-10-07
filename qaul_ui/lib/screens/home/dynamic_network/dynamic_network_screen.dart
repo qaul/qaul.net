@@ -17,6 +17,7 @@ import 'package:open_simplex_2/open_simplex_2.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
+import '../../../providers/providers.dart';
 import '../../../widgets/widgets.dart';
 
 part 'models/network_node.dart';
@@ -32,15 +33,20 @@ class DynamicNetworkScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final nodes = ref.watch(_filteredNodes);
 
+    var gameEngine = _DynamicNetworkGameEngine(root: nodes);
+
+    final currentTab = ref.watch(homeScreenControllerProvider);
+    if (TabType.values[currentTab] == TabType.network) {
+      gameEngine.resumeEngine();
+    } else {
+      gameEngine.pauseEngine();
+    }
+
     return Scaffold(
       body: Stack(
         alignment: AlignmentDirectional.topEnd,
         children: [
-          InteractiveViewer(
-            child: GameWidget(
-              game: _DynamicNetworkGameEngine(root: nodes),
-            ),
-          ),
+          InteractiveViewer(child: GameWidget(game: gameEngine)),
           const _NetworkTypeFilterToolbar(),
         ],
       ),
