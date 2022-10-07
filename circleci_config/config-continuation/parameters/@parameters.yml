@@ -7,6 +7,21 @@ run-rust-workflow:
 run-flutter-tagged-workflow:
   type: boolean
   default: false
+run-flutter-android-tagged-workflow:
+  type: boolean
+  default: false
+run-flutter-ios-tagged-workflow:
+  type: boolean
+  default: false
+run-flutter-linux-tagged-workflow:
+  type: boolean
+  default: false
+run-flutter-macos-tagged-workflow:
+  type: boolean
+  default: false
+run-flutter-windows-tagged-workflow:
+  type: boolean
+  default: false
 run-rust-tagged-workflow:
   type: boolean
   default: false

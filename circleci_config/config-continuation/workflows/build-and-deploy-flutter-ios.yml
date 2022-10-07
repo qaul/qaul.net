@@ -1,0 +1,21 @@
+when:
+  and:
+    # TODO: Reinstate once iOS compilation is fixed
+    - false
+    - or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+jobs:
+  - verify-version-flutter: { 'filters': { 'tags': { 'only': '/.*/' } } }
+  - build-and-deploy-flutter-ios:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - build-and-deploy-flutter-ios
+      filters:
+        tags:
+          only: /.*/

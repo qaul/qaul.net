@@ -1,0 +1,18 @@
+when:
+  or:
+    - << pipeline.parameters.run-flutter-tagged-workflow >>
+    - << pipeline.parameters.run-flutter-windows-tagged-workflow >>
+jobs:
+  - verify-version-flutter: { 'filters': { 'tags': { 'only': '/.*/' } } }
+  - build-flutter-windows:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - build-flutter-windows
+      filters:
+        tags:
+          only: /.*/

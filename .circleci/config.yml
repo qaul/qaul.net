@@ -33,7 +33,19 @@ workflows:
                             {
                               echo '{'
                               if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-flutter$ ]]; then
-                                echo '  "run-flutter-tagged-workflow": true'
+                                if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
+                                  echo '  "run-flutter-android-tagged-workflow": true'
+                                elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
+                                  echo '  "run-flutter-ios-tagged-workflow": true'
+                                elif [[ "$CIRCLE_TAG" =~ ^.*-linux$ ]]; then
+                                  echo '  "run-flutter-linux-tagged-workflow": true'
+                                elif [[ "$CIRCLE_TAG" =~ ^.*-macos$ ]]; then
+                                  echo '  "run-flutter-macos-tagged-workflow": true'
+                                elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
+                                  echo '  "run-flutter-windows-tagged-workflow": true'
+                                else
+                                  echo '  "run-flutter-tagged-workflow": true'
+                                fi
                               fi
                               if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust.*$ ]]; then
                                 if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
