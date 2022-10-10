@@ -138,7 +138,7 @@ class _CreatePublicMessage extends HookConsumerWidget {
       Navigator.pop(context); // ignore: use_build_context_synchronously
     }, [UniqueKey()]);
 
-    final l18ns = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       height: 200,
       padding: const EdgeInsets.all(20),
@@ -156,10 +156,12 @@ class _CreatePublicMessage extends HookConsumerWidget {
               controller: controller,
               keyboardType: TextInputType.multiline,
               style: Theme.of(context).textTheme.subtitle1,
-              decoration: const InputDecoration(hintText: 'Public note'),
+              decoration: InputDecoration(
+                hintText: l10n.publicNoteHintText,
+              ),
               validator: (s) {
                 if (s == null || s.isEmpty) {
-                  return l18ns.fieldRequiredErrorMessage;
+                  return l10n.fieldRequiredErrorMessage;
                 }
                 return null;
               },

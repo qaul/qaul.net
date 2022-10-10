@@ -269,7 +269,7 @@ class _VerifyUserDialog extends HookConsumerWidget {
       return () {};
     }, []);
 
-    final l18ns = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return LoadingDecorator(
       isLoading: isLoading.value,
@@ -292,7 +292,7 @@ class _VerifyUserDialog extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Please ensure that the person you're trying to verify sees the same security number on their screen when attempting to verify you.",
+                l10n.securityNumberDialogDesc,
                 style: Theme.of(context).textTheme.subtitle1,
                 textAlign: TextAlign.center,
               ),
@@ -309,14 +309,14 @@ class _VerifyUserDialog extends HookConsumerWidget {
                   worker.verifyUser(user);
                   Navigator.pop(context);
                 },
-                child: Text(l18ns.okDialogButton),
+                child: Text(l10n.okDialogButton),
               ),
               const SizedBox(height: 12),
               _RoundedRectButton(
                 color: Colors.red.shade400,
                 size: const Size(280, 80),
                 onPressed: () => Navigator.pop(context),
-                child: Text(l18ns.cancelDialogButton),
+                child: Text(l10n.cancelDialogButton),
               ),
             ],
           ),
@@ -336,10 +336,11 @@ class _SecurityNumberDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Text(
-          'Security Number:',
+          l10n.securityNumber,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
