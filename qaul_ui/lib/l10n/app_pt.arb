@@ -1,9 +1,6 @@
 {
   "languageName": "Português",
   "createAccountHeading": "Escolha um nome de usuário",
-  "@createAccountHeading": {
-    "description": "CTA rendered on top of text field"
-  },
   "okDialogButton": "OK",
   "cancelDialogButton": "CANCELAR",
   "backButtonTooltip": "Voltar",
@@ -96,5 +93,18 @@
   "showAllFiles": "Arquivos Compartilhados",
   "searchUser": "Procurar usuário...",
   "dtnNodes": "Pontos de DTN (Delayed-tolerant network)",
-  "addUserNode": "Adicionar nó de usuário"
+  "addUserNode": "Adicionar nó de usuário",
+  "publicNoteHintText": "Mensagem pública",
+  "createButtonHint": "Criar",
+  "chatEmptyState": "Nenhuma mensagem disponível",
+  "securityNumber": "Número de Segurança",
+  "securityNumberDialogDesc": "Se certifique que essa pessoa vê o número de segurança abaixo quando tenta verificar você.",
+  "groupStateEventCreated": "O grupo foi criado",
+  "groupStateEventClosed": "O grupo foi fechado",
+  "groupMemberEvent": "\"{username}\" {event} grupo",
+  "groupEventInvited": "foi convidado para o",
+  "groupEventJoined": "entrou no",
+  "groupEventLeft": "deixou o",
+  "groupEventRemoved": "foi removido do",
+  "groupEventInviteAccepted": "aceitou o convite do"
 }
