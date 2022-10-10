@@ -1,9 +1,6 @@
 {
   "languageName": "فارسی",
   "createAccountHeading": "یک نام کاربری انتخاب کنید",
-  "@createAccountHeading": {
-    "description": "CTA در بالای فیلد متن نمایش داده شده است"
-  },
   "okDialogButton": "تایید",
   "cancelDialogButton": "انصراف",
   "backButtonTooltip": "بازگشت",
@@ -96,5 +93,12 @@
   "showAllFiles": "نمایش همه فایل ها",
   "searchUser": "جستجوی کاربر ...",
   "dtnNodes": "گره های DTN",
-  "addUserNode": "اضافه کردن گره کاربر"
+  "addUserNode": "اضافه کردن گره کاربر",
+  "publicNoteHintText": "یادداشت عمومی",
+  "createButtonHint": "ایجاد کردن",
+  "chatEmptyState": "هنوز هیچ پیامی در اینجا وجود ندارد",
+  "securityNumber": "شماره امنیتی",
+  "securityNumberDialogDesc": "لطفاً مطمئن شوید که شخصی که می\u200Cخواهید تأیید کنید، هنگام تلاش برای تأیید شما، همان شماره امنیتی را روی صفحه خود ببیند.",
+  "groupStateEventCreated": "گروه ایجاد شده است",
+  "groupStateEventClosed": "گروه بسته شده است"
 }
