@@ -217,7 +217,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           child: Chat(
             showUserAvatars: true,
             user: user.toInternalUser(),
-            messages: messages(room) ?? [],
+            messages: messages(room, l10n: l10n) ?? [],
             onSendPressed: sendMessage,
             inputOptions: const InputOptions(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -346,10 +346,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ? user
       : ref.read(usersProvider).firstWhere((usr) => usr.id.equals(e.senderId));
 
-  List<types.Message>? messages(ChatRoom room) {
+  List<types.Message>? messages(ChatRoom room,
+      {required AppLocalizations l10n}) {
     return room.messages
         ?.sorted()
-        .map((e) => e.toInternalMessage(_author(e), ref.read))
+        .map((e) => e.toInternalMessage(_author(e), ref.read, l10n: l10n))
         .toList();
   }
 
@@ -390,7 +391,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 extension _MessageExtension on Message {
-  types.Message toInternalMessage(User author, Reader read) {
+  types.Message toInternalMessage(User author, Reader read,
+      {required AppLocalizations l10n}) {
     var mappedState = status == MessageState.sent
         ? types.Status.sent
         : status == MessageState.confirmedByAll ||
@@ -409,7 +411,11 @@ extension _MessageExtension on Message {
     } else if (content is GroupEventContent) {
       return types.SystemMessage(
         id: messageIdBase58,
-        text: (content as GroupEventContent).toEventMessage(author),
+        text: _translateGroupEventMessage(
+          content as GroupEventContent,
+          author,
+          l10n: l10n,
+        ),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedState,
       );
@@ -456,6 +462,43 @@ extension _MessageExtension on Message {
       status: mappedState,
     );
   }
+
+  String _translateGroupEventMessage(GroupEventContent message, User author,
+      {required AppLocalizations l10n}) {
+    if (message.type == GroupEventContentType.none) {
+    return '';
+  }
+
+  if (message.type == GroupEventContentType.created) {
+      return l10n.groupStateEventCreated;
+  } else if (message.type == GroupEventContentType.closed) {
+      return l10n.groupStateEventClosed;
+  } else {
+    String event = '';
+    switch (message.type) {
+      case GroupEventContentType.invited:
+        event = l10n.groupEventInvited;
+        break;
+      case GroupEventContentType.inviteAccepted:
+        event = l10n.groupEventInviteAccepted;
+        break;
+      case GroupEventContentType.joined:
+        event = l10n.groupEventJoined;
+        break;
+      case GroupEventContentType.left:
+        event = l10n.groupEventLeft;
+        break;
+      case GroupEventContentType.removed:
+        event = l10n.groupEventRemoved;
+        break;
+      case GroupEventContentType.none:
+      case GroupEventContentType.created:
+      case GroupEventContentType.closed:
+        break;
+    }
+
+    return l10n.groupMemberEvent(author.name, event);
+  }}
 }
 
 extension _UserExtension on User {
