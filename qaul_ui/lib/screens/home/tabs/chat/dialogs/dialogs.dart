@@ -94,7 +94,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
               }),
               const SizedBox(height: 20),
               QaulButton(
-                label: 'Create',
+                label: l10n.createButtonHint,
                 onPressed: () async {
                   if (!_nameKey.currentState!.validate()) return;
                   loading.value = true;

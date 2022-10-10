@@ -171,6 +171,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       worker.sendMessage(room.conversationId, msg.text);
     }, [room]);
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButtonFactory(onPressed: closeChat),
@@ -226,6 +227,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               if (user == null) return const SizedBox();
               return QaulAvatar.small(user: user, badgeEnabled: false);
             },
+            emptyState: Center(child: Text(l10n.chatEmptyState)),
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               isDisabled: room.status != ChatRoomStatus.active,

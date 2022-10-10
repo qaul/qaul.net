@@ -96,6 +96,11 @@
   "showAllFiles": "Show All Files",
   "searchUser": "Search user...",
   "dtnNodes": "DTN Nodes",
-  "addUserNode": "Add user node"
+  "addUserNode": "Add user node",
+  "publicNoteHintText": "Public note",
+  "createButtonHint": "Create",
+  "chatEmptyState": "No messages here yet",
+  "securityNumber": "Security Number",
+  "securityNumberDialogDesc": "Please ensure that the person you're trying to verify sees the same security number on their screen when attempting to verify you."
 }
 
