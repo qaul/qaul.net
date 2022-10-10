@@ -1,9 +1,6 @@
 {
   "languageName": "Українська",
   "createAccountHeading": "Оберіть псевдонім",
-  "@createAccountHeading": {
-    "description": "Вузол показано над текстовим полем"
-  },
   "okDialogButton": "ГАРАЗД",
   "cancelDialogButton": "СКАСУВАТИ",
   "backButtonTooltip": "Назад",
@@ -96,5 +93,12 @@
   "showAllFiles": "Показати всі файли",
   "searchUser": "Пошук користувача...",
   "dtnNodes": "Вузли DTN",
-  "addUserNode": "Додати вузол користувача"
+  "addUserNode": "Додати вузол користувача",
+  "publicNoteHintText": "Публічна записка",
+  "createButtonHint": "Створити",
+  "chatEmptyState": "Тут ще немає повідомлень",
+  "securityNumber": "Номер безпеки",
+  "securityNumberDialogDesc": "Будь ласка, переконайтеся, що особа, яку ви намагаєтеся перевірити, бачить той самий номер безпеки на своєму екрані, коли намагається підтвердити вас.",
+  "groupStateEventCreated": "Групу створено",
+  "groupStateEventClosed": "Групу закрито"
 }
