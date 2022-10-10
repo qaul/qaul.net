@@ -96,5 +96,12 @@
   "showAllFiles": "Tampilkan semua file",
   "searchUser": "Cari pengguna...",
   "dtnNodes": "Node DTN",
-  "addUserNode": "Tambahkan simpul pengguna"
+  "addUserNode": "Tambahkan simpul pengguna",
+  "publicNoteHintText": "Catatan publik",
+  "createButtonHint": "Membuat",
+  "chatEmptyState": "Belum ada pesan di sini",
+  "securityNumber": "Nomor keamanan",
+  "securityNumberDialogDesc": "Harap pastikan bahwa orang yang Anda coba verifikasi melihat nomor keamanan yang sama di layar mereka saat mencoba memverifikasi Anda.",
+  "groupStateEventCreated": "Grup telah dibuat",
+  "groupStateEventClosed": "Grup telah ditutup"
 }
