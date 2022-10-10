@@ -1,9 +1,6 @@
 {
   "languageName": "اللغة العربية",
   "createAccountHeading": "نص بسيط",
-  "@createAccountHeading": {
-    "description": "CTA rendered on top of text field"
-  },
   "start": "بداية",
   "createUserAccount": "إنشاء ملف تعريف المستخدم",
   "learnMore": "تعرف على موقع qaul.net",
@@ -96,5 +93,12 @@
   "showAllFiles": "إظهار كافة الملفات",
   "searchUser": "بحث عن مستخدم ...",
   "dtnNodes": "عقد DTN",
-  "addUserNode": "أضف عقدة المستخدم"
+  "addUserNode": "أضف عقدة المستخدم",
+  "publicNoteHintText": "ملاحظة عامة",
+  "createButtonHint": "خلق",
+  "chatEmptyState": "لا توجد رسائل هنا حتى الآن",
+  "securityNumber": "رقم سرى",
+  "securityNumberDialogDesc": "يرجى التأكد من أن الشخص الذي تحاول التحقق منه يرى نفس رقم الأمان على شاشته عند محاولة التحقق منك.",
+  "groupStateEventCreated": "تم إنشاء المجموعة",
+  "groupStateEventClosed": "تم إغلاق المجموعة"
 }
