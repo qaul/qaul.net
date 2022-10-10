@@ -107,6 +107,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                     room.lastMessagePreview,
                     theme,
                     users: users,
+                    l10n: l10n,
                   ),
                   trailingMetadata: Row(
                     children: [
@@ -143,6 +144,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                   room.lastMessagePreview,
                   theme,
                   users: users,
+                  l10n: l10n,
                 ),
                 trailingMetadata: Row(
                   children: [
@@ -215,8 +217,7 @@ class _ChatState extends _BaseTabState<_Chat> {
           const VerticalDivider(width: 1),
           Expanded(
             child: Scaffold(
-              body: chatWidget.value ??
-                  Center(child: Text(l10n.noOpenChats)),
+              body: chatWidget.value ?? Center(child: Text(l10n.noOpenChats)),
             ),
           ),
         ],
@@ -228,6 +229,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     MessageContent? message,
     TextTheme theme, {
     required List<User> users,
+    required AppLocalizations l10n,
   }) {
     if (message is TextMessageContent) {
       return Text(
@@ -237,22 +239,7 @@ class _ChatState extends _BaseTabState<_Chat> {
         overflow: TextOverflow.ellipsis,
       );
     } else if (message is GroupEventContent) {
-      final u =
-          users.firstWhereOrNull((e) => e.idBase58 == message.userIdBase58);
-      if (u == null) {
-        _log.warning('group event message from unknown user');
-        return const SizedBox.shrink();
-      }
-      if (message.type == GroupEventContentType.none) {
-        return const SizedBox.shrink();
-      }
-
-      return Text(
-        message.toEventMessage(u),
-        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      );
+      return _contentFromGroupEvent(message, theme, users: users, l10n: l10n);
     } else if (message is FileShareContent) {
       return Text(
         '${message.fileName} · ${filesize(message.size)}',
@@ -263,6 +250,70 @@ class _ChatState extends _BaseTabState<_Chat> {
     } else {
       _log.fine('overview type ${message.runtimeType} has not been rendered');
       return const SizedBox.shrink();
+    }
+  }
+
+  Widget _contentFromGroupEvent(
+    GroupEventContent message,
+    TextTheme theme, {
+    required List<User> users,
+    required AppLocalizations l10n,
+  }) {
+    if (message.type == GroupEventContentType.none) {
+      return const SizedBox.shrink();
+    }
+
+    if (message.type == GroupEventContentType.created) {
+      return Text(
+        l10n.groupStateEventCreated,
+        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else if (message.type == GroupEventContentType.closed) {
+      return Text(
+        l10n.groupStateEventClosed,
+        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else {
+      final u =
+          users.firstWhereOrNull((e) => e.idBase58 == message.userIdBase58);
+      if (u == null) {
+        _log.warning('group event message from unknown user');
+        return const SizedBox.shrink();
+      }
+
+      String event = '';
+      switch (message.type) {
+        case GroupEventContentType.invited:
+          event = l10n.groupEventInvited;
+          break;
+        case GroupEventContentType.inviteAccepted:
+          event = l10n.groupEventInviteAccepted;
+          break;
+        case GroupEventContentType.joined:
+          event = l10n.groupEventJoined;
+          break;
+        case GroupEventContentType.left:
+          event = l10n.groupEventLeft;
+          break;
+        case GroupEventContentType.removed:
+          event = l10n.groupEventRemoved;
+          break;
+        case GroupEventContentType.none:
+        case GroupEventContentType.created:
+        case GroupEventContentType.closed:
+          break;
+      }
+
+      return Text(
+        l10n.groupMemberEvent(u.name, event),
+        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
     }
   }
 }
