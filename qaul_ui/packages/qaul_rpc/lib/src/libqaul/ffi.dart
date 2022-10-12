@@ -8,7 +8,14 @@ part of 'libqaul.dart';
 ///
 /// load dynamic libqaul library and accessing libqaul's C API ffi through dart
 class LibqaulFFI extends LibqaulInterface {
+  static DynamicLibrary? _lib;
+
+  final _log = Logger('LibqaulFfi');
+
   LibqaulFFI() {
+    // check if library has already been loaded
+    if (_lib != null) return;
+
     // check build mode (release or debug target)
     String mode;
     if (kReleaseMode) {
@@ -32,109 +39,151 @@ class LibqaulFFI extends LibqaulInterface {
     } else {
       throw ('Platform ${Platform.operatingSystem} not implemented yet OR is not supported by FFI.');
     }
-
-    _lookupFunctions();
   }
-
-  static late DynamicLibrary _lib;
-
-  final _log = Logger('LibqaulFFI');
-
-  static late final StartDesktopFunctionDart _startFn;
-  static late final InitializationFinishedDart _initializeFn;
-  static late final HelloFunctionDart _helloFn;
-  static late final SendRpcCounterDart _sendRpcCounterFn;
-  static late final ReceiveRpcQueuedDart _receiveRpcCounterFn;
-  static late final SendRpcToLibqaulFunctionDart _sendRpcFn;
-  static late final ReceiveRpcFromLibqaulFunctionDart _receiveRpcFn;
-
-  static void _lookupFunctions() {
-    _startFn =
-        _lib.lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>(
-            'start_desktop');
-    _initializeFn = _lib.lookupFunction<InitializationFinishedRust,
-        InitializationFinishedDart>('initialized');
-    _helloFn =
-        _lib.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
-    _sendRpcCounterFn =
-        _lib.lookupFunction<SendRpcCounterRust, SendRpcCounterDart>(
-            'send_rpc_to_libqaul_count');
-    _receiveRpcCounterFn =
-        _lib.lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
-            'receive_rpc_from_libqaul_queued_length');
-    _sendRpcFn = _lib.lookupFunction<SendRpcToLibqaulFunctionRust,
-        SendRpcToLibqaulFunctionDart>('send_rpc_to_libqaul');
-    _receiveRpcFn = _lib.lookupFunction<ReceiveRpcFromLibqaulFunctionRust,
-        ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
-  }
-
-  @override
-  Future load() async => {};
 
   @override
   Future<String> getPlatformVersion() async => '';
 
   @override
-  Future<void> start() async => _startFn();
+  Future load() async => {};
 
   @override
-  Future<int> initialized() async => _initializeFn();
+  Future<void> start() async {
+    StartDesktopFunctionDart start;
+    // check what system we are initializing
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+      _log.finer("flutter start_desktop libqaul");
+      // start libqaul with finding paths to save the configuration files
+      start = _lib!
+          .lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>(
+              'start_desktop');
+    } else {
+      _log.finer("flutter start libqaul");
+      // start libqaul without path to storage location
+      start =
+          _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+    }
+    start();
+  }
 
   @override
-  Future<String> hello() async => using(_hello);
+  Future<int> initialized() async {
+    final initialized = _lib!
+        .lookupFunction<InitializationFinishedRust, InitializationFinishedDart>(
+            'initialized');
+    final result = initialized();
+    return result;
+  }
 
-  String _hello(Arena arena) {
-    final ptr = _helloFn();
+  @override
+  Future<String> hello() async {
+    final hello =
+        _lib!.lookupFunction<HelloFunctionRust, HelloFunctionDart>('hello');
+    final ptr = hello();
     final helloMessage = ptr.toDartString();
+    calloc.free(ptr);
     return helloMessage;
   }
 
   @override
   Future<int> checkSendCounter() async {
-    final result = _sendRpcCounterFn();
+    final checkCounter = _lib!
+        .lookupFunction<SendRpcCounterRust, SendRpcCounterDart>(
+            'send_rpc_to_libqaul_count');
+    final result = checkCounter();
     _log.finer("$result RPC messages sent to libqaul");
     return result;
   }
 
   @override
   Future<int> checkReceiveQueue() async {
-    final result = _receiveRpcCounterFn();
+    final checkQueue = _lib!
+        .lookupFunction<ReceiveRpcQueuedRust, ReceiveRpcQueuedDart>(
+            'receive_rpc_from_libqaul_queued_length');
+    final result = checkQueue();
     if (result > 0) _log.finer("$result messages queued by libqaul RPC");
     return result;
   }
 
   @override
-  Future<void> sendRpc(Uint8List message) async =>
-      using((a) => _sendRpc(a, message), malloc);
+  Future<void> sendRpc(Uint8List message) async {
+    final sendRpcToLibqaul = _lib!.lookupFunction<SendRpcToLibqaulFunctionRust,
+        SendRpcToLibqaulFunctionDart>('send_rpc_to_libqaul');
 
-  void _sendRpc(Arena arena, Uint8List message) {
-    final buffer = arena.allocate<Uint8>(message.length);
-    for (var i = 0; i < message.length; i++) {
-      buffer[i] = message[i];
+    final buffer = malloc<Uint8>(message.length);
+
+    try {
+      for (var i = 0; i < message.length; i++) {
+        buffer[i] = message[i];
+      }
+
+      final messageSize = message.length;
+      _log.finer("sendRpc send $messageSize bytes");
+      final result = sendRpcToLibqaul(buffer, message.length);
+      _logSendRpcResult(result);
+    } finally {
+      malloc.free(buffer);
     }
+  }
 
-    final messageSize = message.length;
-    _log.finer("sendRpc send $messageSize bytes");
-    final result = _sendRpcFn(buffer, message.length);
-    if (result != 0) _log.warning('sendRpc Error; received result: $result');
+  void _logSendRpcResult(int result) {
+    switch (result) {
+      case 0:
+        _log.finer("sendRpc success");
+        break;
+      case -1:
+        _log.finer("sendRpc Error: pointer is null");
+        break;
+      case -2:
+        _log.finer("sendRpc Error: message is too big");
+        break;
+      default:
+        _log.finer("sendRpc invalid result");
+        break;
+    }
   }
 
   @override
-  Future<Uint8List?> receiveRpc() async => using(_receiveRpc, malloc);
+  Future<Uint8List?> receiveRpc() async {
+    final receiveRpcFromLibqaul = _lib!.lookupFunction<
+        ReceiveRpcFromLibqaulFunctionRust,
+        ReceiveRpcFromLibqaulFunctionDart>('receive_rpc_from_libqaul');
 
-  Uint8List? _receiveRpc(Arena arena) {
-    const size = 259072;
-    final buffer = arena.allocate<Uint8>(size);
-    final result = _receiveRpcFn(buffer, size);
+    const bufferSize = 259072;
+    final buffer = malloc<Uint8>(bufferSize);
 
-    if (result == 0) {
-      _log.finer("receiveRpc: nothing received");
-    } else if (result > 0) {
-      _log.finer("receiveRpc: $result bytes received");
-      return buffer.asTypedList(result);
-    } else {
-      _log.warning('receiveRpc Error; received result: $result');
+    Uint8List? rpcMessage;
+    try {
+      final result = receiveRpcFromLibqaul(buffer, bufferSize);
+
+      if (result == 0) {
+        _log.finer("receiveRpc: nothing received");
+      } else if (result > 0) {
+        _log.finer("receiveRpc: $result bytes received");
+        rpcMessage = buffer.asTypedList(result);
+      } else {
+        _logReceiveRpcError(result);
+      }
+    } finally {
+      malloc.free(buffer);
     }
-    return null;
+    return rpcMessage;
+  }
+
+  void _logReceiveRpcError(int result) {
+    switch (result) {
+      case -1:
+        _log.finer("receiveRpc ERROR -1: an error occurred");
+        break;
+      case -2:
+        _log.finer("receiveRpc ERROR -2: buffer to small");
+        break;
+      case -3:
+        _log.finer("receiveRpc ERROR -3: buffer pointer is null");
+        break;
+      default:
+        _log.finer("receivedRpc unknown ERROR $result");
+        break;
+    }
   }
 }
