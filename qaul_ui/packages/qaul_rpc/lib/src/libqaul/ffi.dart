@@ -160,7 +160,7 @@ class LibqaulFFI extends LibqaulInterface {
         _log.finer("receiveRpc: nothing received");
       } else if (result > 0) {
         _log.finer("receiveRpc: $result bytes received");
-        rpcMessage = buffer.asTypedList(result);
+        rpcMessage = Uint8List.fromList(buffer.asTypedList(result));
       } else {
         _logReceiveRpcError(result);
       }
