@@ -5,10 +5,11 @@ import 'dart:io' show Platform;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:logging/logging.dart';
 
 abstract class LocalNotifications {
   static LocalNotifications instance =
-      const bool.fromEnvironment('testing_mode', defaultValue: false)
+      Platform.isWindows || const bool.fromEnvironment('testing_mode', defaultValue: false)
           ? _NullLocalNotifications()
           : _LocalNotifications();
 
@@ -52,10 +53,10 @@ class _LocalNotifications implements LocalNotifications {
   Future<bool> initialize() async {
     final initializationSettings = InitializationSettings(
       android: const AndroidInitializationSettings('@drawable/ic_notification'),
-      iOS: IOSInitializationSettings(
+      iOS: DarwinInitializationSettings(
         onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
       ),
-      macOS: const MacOSInitializationSettings(),
+      macOS: const DarwinInitializationSettings(),
       linux: LinuxInitializationSettings(
         defaultActionName: 'qaul-app',
         defaultIcon: AssetsLinuxIcon('assets/logo/icon_android.png'),
@@ -64,8 +65,7 @@ class _LocalNotifications implements LocalNotifications {
 
     final r = await _localNotificationsPlugin.initialize(
       initializationSettings,
-      onSelectNotification: (payload) async {
-        if (payload == null) return;
+      onDidReceiveNotificationResponse: (payload) async {
         await _handleNewLocalNotificationOpened(payload);
       },
     );
@@ -121,7 +121,7 @@ class _LocalNotifications implements LocalNotifications {
     }
   }
 
-  Future<void> _handleNewLocalNotificationOpened(String payload) async {
+  Future<void> _handleNewLocalNotificationOpened(NotificationResponse payload) async {
     if (await FlutterAppBadger.isAppBadgeSupported()) {
       FlutterAppBadger.removeBadge();
     }
@@ -131,8 +131,8 @@ class _LocalNotifications implements LocalNotifications {
     if (!Platform.isWindows) {
       return NotificationDetails(
         android: _androidDetails,
-        iOS: _iosDetails,
-        macOS: _macosDetails,
+        iOS: _darwinDetails,
+        macOS: _darwinDetails,
         linux: _linuxDetails,
       );
     }
@@ -150,11 +150,8 @@ class _LocalNotifications implements LocalNotifications {
           priority: Priority.high,
         );
 
-  IOSNotificationDetails? get _iosDetails =>
-      !Platform.isIOS ? null : const IOSNotificationDetails();
-
-  MacOSNotificationDetails? get _macosDetails =>
-      !Platform.isIOS ? null : const MacOSNotificationDetails();
+  DarwinNotificationDetails? get _darwinDetails =>
+      !(Platform.isIOS || Platform.isMacOS) ? null : const DarwinNotificationDetails();
 
   LinuxNotificationDetails? get _linuxDetails =>
       !Platform.isLinux ? null : const LinuxNotificationDetails();
@@ -165,7 +162,10 @@ class _NullLocalNotifications implements LocalNotifications {
   Future<void> displayNotification(LocalNotification message) async {}
 
   @override
-  Future<bool> initialize() => Future.value(false);
+  Future<bool> initialize() {
+    Logger('LocalNotifications').config('(NullLocalNotifications): The package is initializing a Null implementation, either because it has been told to (with --dart-define=testing_mode=true), or because the host platform is not supported.');
+    return Future.value(false);
+  }
 
   @override
   Stream<LocalNotification> get onNotificationOpened => throw UnimplementedError();
