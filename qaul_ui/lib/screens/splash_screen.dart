@@ -38,12 +38,16 @@ class SplashScreen extends HookConsumerWidget {
       if (value != null) Navigator.pushReplacementNamed(context, value);
     });
 
+    final isMounted = useIsMounted();
     final startAnimationPlayed = useState(false);
 
     useEffect(() {
       const gapBetweenFetchAndRouting = Duration(milliseconds: 500);
       Future.delayed(_animationDuration + gapBetweenFetchAndRouting).then(
-        (_) => startAnimationPlayed.value = true,
+        (_) {
+          if (!isMounted()) return;
+          startAnimationPlayed.value = true;
+        },
       );
       return () {};
     }, []);
