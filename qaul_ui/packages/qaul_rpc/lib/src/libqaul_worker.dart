@@ -358,7 +358,7 @@ class LibqaulWorker {
 
     if (res.data is bool) {
       _log.finest('libqaul answered a heartbeat request');
-      _heartbeats.removeFirst();
+      if (_heartbeats.isNotEmpty) _heartbeats.removeFirst();
     }
     if (res.data is String) {
       final path =
