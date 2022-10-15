@@ -205,7 +205,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
                     gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
                 name: Download Libqaul AAR Files from latest Github Release
@@ -235,7 +235,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
@@ -272,7 +272,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.so File from latest Github Release
             - install-flutter:
@@ -296,7 +296,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
                 name: Download Libqaul *.dylib File from latest Github Release
             - run:
@@ -345,7 +345,7 @@ jobs:
 
                     export PATH="/c/Program Files/Github CLI:${PATH}"
 
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
                     echo "Found latest tag: $LATEST_TAG"
 
                     gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
@@ -549,7 +549,7 @@ jobs:
                     gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
                     gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
 
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
                     gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
                 name: Download Libqaul AAR Files from latest Github Release
@@ -588,7 +588,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
@@ -641,7 +641,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.so File from latest Github Release
             - flutter/install_sdk_and_pub:
@@ -666,7 +666,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
                     gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
                 name: Download Libqaul *.dylib File from latest Github Release
             - install-flutter:
@@ -702,7 +702,7 @@ jobs:
 
                     export PATH="/c/Program Files/Github CLI:${PATH}"
 
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
+                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
                     echo "Found latest tag: $LATEST_TAG"
 
                     gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release

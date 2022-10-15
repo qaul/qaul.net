@@ -14,7 +14,7 @@ steps:
   - run:
       name: Download Libqaul *.so File from latest Github Release
       command: |
-        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+        LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
         gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
