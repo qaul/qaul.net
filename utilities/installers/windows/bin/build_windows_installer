@@ -35,3 +35,5 @@ cp "${BUILD_PATH}/url_launcher_windows_plugin.dll" "$DEPS_PATH"
 cp -R "${BUILD_PATH}/data" "$DEPS_PATH"
 
 iscc "${INSTALLER_PATH}/inno_setup_win_installer.iss"
+
+mv "./qaul.exe" "./qaul_installer_$VERSION.exe"

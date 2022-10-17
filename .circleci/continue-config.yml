@@ -363,7 +363,7 @@ jobs:
                 name: Run iscc
             - persist_to_workspace:
                 paths:
-                    - utilities\installers\windows\qaul.exe
+                    - utilities\installers\windows\*.exe
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p/qaul_ui
     build-libqaul-android:
@@ -736,7 +736,7 @@ jobs:
                     # MacOS
                     cp ../utilities/installers/macos/*.dmg ./artifacts/
                     # Windows
-                    cp ../utilities/installers/windows/qaul.exe ./artifacts/
+                    cp ../utilities/installers/windows/*.exe ./artifacts/
                     # Linux
                     cp *.snap ./artifacts/
 
@@ -763,6 +763,7 @@ jobs:
                     IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
                     XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
                     DMG_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
+                    EXE_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
 
                     DESCRIPTION=$(cat ../docs/flutter-release-template.md \
                       | sed "s/TAGNAME/${TAG}/g" \
@@ -771,6 +772,7 @@ jobs:
                       | sed "s/IPAVERSION/${IPA_FILE}/g" \
                       | sed "s/XCAVERSION/${XCA_FILE}/g" \
                       | sed "s/MACOSVERSION/${DMG_FILE}/g" \
+                      | sed "s/WINDOWSVERSION/${EXE_FILE}/g" \
                     )
 
                     echo "Version Found: $VERSION"
