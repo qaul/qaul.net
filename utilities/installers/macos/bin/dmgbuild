@@ -1,0 +1,29 @@
+#! /bin/bash
+
+PATTERN="^dmgbuild\$"
+if [[ ! $0 =~ $PATTERN ]]; then
+  echo "This script uses relative paths to find some of it's dependencies. Please run directly from it's directory."
+  exit 1
+fi
+
+echo ""
+echo "Retrieving application version..."
+
+cd ../../../../qaul_ui || exit 1
+
+if [ ! -f pubspec.yaml ]; then
+    echo "pubspec.yaml not found!"
+    exit 1
+fi
+
+VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+echo "Using App Version: $VERSION"
+
+cd ../utilities/installers/macos || exit 1
+
+echo ""
+echo "Updating app version on config.json..."
+
+sed -i sed "s/\"title\": \".*\"/\"title\": \"qaul-$VERSION\"/g" config.json
+
+appdmg ./config.json "qaul-$VERSION.dmg"

@@ -1,6 +1,6 @@
 ## Desktop Installers :desktop_computer:
 * **Linux**:   [*\*.snap*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/SNAPVERSION.snap)
-* **MacOS**:   [*\*.dmg*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qaul.dmg)
+* **MacOS**:   [*\*.dmg*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/MACOSVERSION.dmg)
 * **Windows**: [*\*.exe*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qaul.exe)
 
 ## Mobile Applications :iphone:
