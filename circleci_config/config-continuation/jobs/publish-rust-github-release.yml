@@ -49,6 +49,6 @@ steps:
           -u "${CIRCLE_PROJECT_USERNAME}" \
           -r "${CIRCLE_PROJECT_REPONAME}" \
           -c "${CIRCLE_SHA1}" \
-          -n "Rust - v${VERSION}" \
+          -n "Libqaul and CLI - v${VERSION}" \
           -b "${DESCRIPTION}" \
           "${TAG}" artifacts/
