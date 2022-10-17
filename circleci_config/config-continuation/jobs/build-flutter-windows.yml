@@ -39,4 +39,4 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - utilities\installers\windows\qaul.exe
+        - utilities\installers\windows\*.exe
