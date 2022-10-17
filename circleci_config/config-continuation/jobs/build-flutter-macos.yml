@@ -27,9 +27,9 @@ steps:
   - run:
       name: Build *.dmg File
       command: |
-        cd ../utilities/installers/macos
-        appdmg ./config.json ./qaul.dmg
+        cd ../utilities/installers/macos/bin
+        sh dmgbuild
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - utilities/installers/macos/qaul.dmg
+        - utilities/installers/macos/*.dmg

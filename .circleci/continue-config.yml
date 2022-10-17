@@ -316,12 +316,12 @@ jobs:
                 name: Build MacOS Application
             - run:
                 command: |
-                    cd ../utilities/installers/macos
-                    appdmg ./config.json ./qaul.dmg
+                    cd ../utilities/installers/macos/bin
+                    sh dmgbuild
                 name: Build *.dmg File
             - persist_to_workspace:
                 paths:
-                    - utilities/installers/macos/qaul.dmg
+                    - utilities/installers/macos/*.dmg
                 root: ~/qaul-libp2p
     build-flutter-windows:
         environment:
@@ -734,7 +734,7 @@ jobs:
                     # iOS
                     cp ios/output/gym/Runner.ipa ./artifacts/
                     # MacOS
-                    cp ../utilities/installers/macos/qaul.dmg ./artifacts/
+                    cp ../utilities/installers/macos/*.dmg ./artifacts/
                     # Windows
                     cp ../utilities/installers/windows/qaul.exe ./artifacts/
                     # Linux
@@ -762,8 +762,16 @@ jobs:
                     AAB_FILE=$(find artifacts -maxdepth 1 -name '*.aab' -type f -exec basename {} \; | cut -f 1 -d '.')
                     IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
                     XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
+                    DMG_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
 
-                    DESCRIPTION=$(cat ../docs/flutter-release-template.md | sed "s/TAGNAME/${TAG}/g" | sed "s/SNAPVERSION/${SNAP_FILE}/g" | sed "s/ANDROIDVERSION/${AAB_FILE}/g" | sed "s/IPAVERSION/${IPA_FILE}/g" | sed "s/XCAVERSION/${XCA_FILE}/g")
+                    DESCRIPTION=$(cat ../docs/flutter-release-template.md \
+                      | sed "s/TAGNAME/${TAG}/g" \
+                      | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
+                      | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \
+                      | sed "s/IPAVERSION/${IPA_FILE}/g" \
+                      | sed "s/XCAVERSION/${XCA_FILE}/g" \
+                      | sed "s/MACOSVERSION/${DMG_FILE}/g" \
+                    )
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
