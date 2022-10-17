@@ -785,7 +785,7 @@ jobs:
                       -u "${CIRCLE_PROJECT_USERNAME}" \
                       -r "${CIRCLE_PROJECT_REPONAME}" \
                       -c "${CIRCLE_SHA1}" \
-                      -n "Flutter - v${VERSION}" \
+                      -n "qaul.net App - v${VERSION}" \
                       -b "${DESCRIPTION}" \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
@@ -840,7 +840,7 @@ jobs:
                       -u "${CIRCLE_PROJECT_USERNAME}" \
                       -r "${CIRCLE_PROJECT_REPONAME}" \
                       -c "${CIRCLE_SHA1}" \
-                      -n "Rust - v${VERSION}" \
+                      -n "Libqaul and CLI - v${VERSION}" \
                       -b "${DESCRIPTION}" \
                       "${TAG}" artifacts/
                 name: Publish Release on GitHub
