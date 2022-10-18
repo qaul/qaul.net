@@ -3,17 +3,13 @@ import 'dart:async';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
-// import 'package:bitsdojo_window/bitsdojo_window.dart';
-
 import 'coordinators/email_logging_coordinator/email_logging_coordinator.dart';
-import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'qaul_app.dart';
 
@@ -41,30 +37,6 @@ class _CustomProviderScope extends StatefulWidget {
 }
 
 class _CustomProviderScopeState extends State<_CustomProviderScope> {
-  @override
-  void initState() {
-    super.initState();
-    _container.read(qaulWorkerProvider).onLibraryCrash.listen((_) {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            return AlertDialog(
-              title: Text(l10n.genericErrorMessage),
-              content: Text(l10n.pleaseRestartApp),
-              actions: [
-                TextButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, NavigationHelper.support),
-                  child: Text(l10n.gotoSupport),
-                ),
-              ],
-            );
-          });
-    });
-  }
-
   @override
   void dispose() {
     super.dispose();
