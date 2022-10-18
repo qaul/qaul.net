@@ -401,10 +401,12 @@ packages:
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
-      name: flutter_launcher_icons
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.10.0"
+      path: "."
+      ref: "v0.11.0"
+      resolved-ref: "5d45f1fa6fcb28608ba77eb53937ac2cc077f2e3"
+      url: "https://github.com/fluttercommunity/flutter_launcher_icons.git"
+    source: git
+    version: "0.11.0"
   flutter_link_previewer:
     dependency: transitive
     description:
