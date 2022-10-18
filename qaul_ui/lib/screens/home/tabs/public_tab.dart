@@ -18,7 +18,6 @@ class _PublicState extends _BaseTabState<_Public> {
 
     final users = ref.watch(usersProvider);
     final messages = ref.watch(publicMessagesProvider);
-    final defaultUser = ref.watch(defaultUserProvider);
 
     final blockedIds =
         users.where((u) => u.isBlocked ?? false).map((u) => u.idBase58);
@@ -97,8 +96,6 @@ class _PublicState extends _BaseTabState<_Public> {
                     sentAt,
                     style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                   ),
-                  allowTapRouteToUserDetailsScreen:
-                      (author.idBase58 != (defaultUser?.idBase58 ?? '')),
                 );
               },
             ),
