@@ -129,6 +129,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                     ],
                   ),
                   onTap: () => setOpenChat(room),
+                  allowAvatarTapRouteToUserDetailsScreen: false,
                 );
               }
 
@@ -165,6 +166,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                   ],
                 ),
                 onTap: () => setOpenChat(room, otherUser),
+                allowAvatarTapRouteToUserDetailsScreen: false,
               );
             },
           ),

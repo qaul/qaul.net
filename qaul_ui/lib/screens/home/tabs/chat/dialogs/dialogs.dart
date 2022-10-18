@@ -172,15 +172,6 @@ class _InviteUsersToGroupDialogState
 
   @override
   Widget build(BuildContext context) {
-    final openUserDetailsScreen = useCallback((BuildContext c, User u) async {
-      return await Navigator.push(
-        c,
-        MaterialPageRoute(
-          builder: (_) => UserDetailsScreen(user: u, showChatButton: false),
-        ),
-      );
-    }, []);
-
     final l10n = AppLocalizations.of(context)!;
     return SearchUserDecorator(
       title: AppLocalizations.of(context)!.newChatTooltip,
@@ -195,7 +186,6 @@ class _InviteUsersToGroupDialogState
                 final usr = users[i];
                 return QaulListTile.user(
                   usr,
-                  onAvatarTap: () => openUserDetailsScreen(context, usr),
                   onTap: () {
                     if (selected.contains(usr)) {
                       setState(() => selected.remove(usr));
