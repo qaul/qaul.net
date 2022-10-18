@@ -65,6 +65,7 @@ class _UsersState extends _BaseTabState<_Users> {
                       trailingIcon: (user.isVerified ?? false)
                           ? const Icon(Icons.verified_user)
                           : const SizedBox(),
+                      allowTapRouteToUserDetailsScreen: true,
                     ),
                   );
                 },

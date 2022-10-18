@@ -11,7 +11,7 @@ class QaulListTile extends StatelessWidget {
     this.onTap,
     this.onAvatarTap,
     this.isThreeLine = false,
-    this.allowTapRouteToUserDetailsScreen = true,
+    this.allowTapRouteToUserDetailsScreen = false,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         assert(user != null || room != null),
         super(key: key);
@@ -25,7 +25,7 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
-    bool allowTapRouteToUserDetailsScreen = true,
+    bool allowTapRouteToUserDetailsScreen = false,
   }) {
     return QaulListTile._(
       user: user,
@@ -49,7 +49,7 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
-    bool allowTapRouteToUserDetailsScreen = true,
+    bool allowTapRouteToUserDetailsScreen = false,
   }) {
     return QaulListTile._(
       room: room,
