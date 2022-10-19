@@ -137,9 +137,17 @@ class QaulListTile extends StatelessWidget {
           onTap: onAvatarTap ?? onAvatarTapFallback, child: leading);
     }
 
+    Widget tileTitle = title;
+    if (onAvatarTapFallback != null) {
+      tileTitle = GestureDetector(
+        onTap: onAvatarTapFallback,
+        child: title,
+      );
+    }
+
     return ListTile(
       onTap: onTap ?? onTapFallback,
-      title: title,
+      title: tileTitle,
       subtitle: content,
       trailing: trailingIcon,
       isThreeLine: isThreeLine,
