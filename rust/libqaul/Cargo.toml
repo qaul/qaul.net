@@ -67,15 +67,3 @@ prost-build = "0.11.1"
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.11"
-
-[target.aarch64-linux-android.dependencies]
-openssl = { version = "*", features = ["vendored"] }
-
-[target.armv7-linux-androideabi.dependencies]
-openssl = { version = "*", features = ["vendored"] }
-
-[target.i686-linux-android.dependencies]
-openssl = { version = "*", features = ["vendored"] }
-
-[target.x86_64-linux-android.dependencies]
-openssl = { version = "*", features = ["vendored"] }

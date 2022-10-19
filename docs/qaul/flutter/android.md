@@ -23,7 +23,6 @@ This is a small guide how to do this:
 2) In the settings window, select the tag 'SDK Tools'
 3) Check the following check boxes
   * 'NDK (Side by side)'
-    * Install NDK `22.1.7171670` (NDK `23.0.7599858` IS NOT WORKING)
   * 'Android SDK Command-line Tools (latest)'
   * 'CMake'
 4) Apply the changes.
@@ -34,15 +33,8 @@ Set it to the correct locations on your machine. e.g.:
 
 ```sh
 export ANDROID_SDK_ROOT=$HOME/Android/Sdk
-export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/22.1.7171670
+export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/23.1.7779620
 ```
-
-TROUBLESHOOTING:
-
-Don't use the latest NDK `23.0.7599858` as there are some platform linking tools missing
-needed to compile libqaul's dependencies.
-Install NDK `22.1.7171670`, it is working.
-
 
 #### Android Studio Gradle Tasks
 
