@@ -36,4 +36,4 @@ cp -R "${BUILD_PATH}/data" "$DEPS_PATH"
 
 iscc "${INSTALLER_PATH}/inno_setup_win_installer.iss"
 
-mv "./qaul.exe" "./qaul_installer_$VERSION.exe"
+mv -v "../qaul.exe" "../qaul_installer_$VERSION.exe"
