@@ -7,9 +7,9 @@
     * `icon_android.png` - It's advised for the source icon to have padding around it to avoid having the resulting 
       image too big or too small. 
       See [this issue](https://github.com/fluttercommunity/flutter_launcher_icons/issues/96) for more information.
-    * `icon_darwin.png` - iOS/MacOS icons should [fill the entire image](https://stackoverflow.com/questions/26014461/black-border-on-my-ios-icon) 
+    * `icon_ios.png` - iOS icons should [fill the entire image](https://stackoverflow.com/questions/26014461/black-border-on-my-ios-icon) 
       and not contain transparent borders.
-    * `icon_windows.png` - The icon will, effectively, be a resized copy of the source. If you want it to be rounded, 
+    * `icon_desktop.png` - The icon will, effectively, be a resized copy of the source. If you want it to be rounded, 
       circular or something of the sort, edit the image accordingly.
 
 2. Run the following command:
