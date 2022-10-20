@@ -7,6 +7,7 @@
         * [CircleCI Configuration](qaul/tooling/circleci-configuration.md)
     * **Flutter**
         * [Installation](qaul/flutter/flutter-install.md)
+        * [Updating Icons](qaul/flutter/updating-icons.md)
         * **Platform Configuration**
             * [Android](qaul/flutter/android.md)
             * [iOS](qaul/flutter/ios.md)
