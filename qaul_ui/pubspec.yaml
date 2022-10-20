@@ -85,7 +85,7 @@ dev_dependencies:
 flutter_icons:
   ios: true
   remove_alpha_ios: true
-  image_path_ios: "assets/logo/icon_darwin.png"
+  image_path_ios: "assets/logo/icon_ios.png"
 
   android: true
   image_path_android: "assets/logo/icon_android.png"
@@ -94,12 +94,12 @@ flutter_icons:
 
   windows:
     generate: true
-    image_path: "assets/logo/icon_windows.png"
+    image_path: "assets/logo/icon_desktop.png"
     icon_size: 256
 
   macos:
     generate: true
-    image_path: "assets/logo/icon_darwin.png"
+    image_path: "assets/logo/icon_desktop.png"
 
 flutter:
   uses-material-design: true
