@@ -41,7 +41,7 @@ steps:
         IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
         XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
         DMG_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
-        EXE_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
+        EXE_FILE=$(find artifacts -maxdepth 1 -name '*.exe' -type f -exec basename {} \; | cut -f 1 -d '.')
 
         DESCRIPTION=$(cat ../docs/flutter-release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
