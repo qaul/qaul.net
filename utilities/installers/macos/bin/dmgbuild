@@ -30,13 +30,13 @@ echo ""
 echo "Updating the signing identity on config.json..."
 
 # Get list of certificates available locally, filtering out revoked ones.
-SIGNING_IDENTITY=$(
-  security find-identity -v -p codesigning |
-    grep --invert-match "(CSSMERR_TP_CERT_REVOKED)" |
-    grep "Apple Distribution: Verein zur Forderung von offenen Community-Projekten" |
-    awk '{ print $2 }' |
-    head -n1 \
-)
-sed -i sed "s/\"signing-identity\": \".*\"/\"signing-identity\": \"$SIGNING_IDENTITY\"/g" config.json
+#SIGNING_IDENTITY=$(
+#  security find-identity -v -p codesigning |
+#    grep --invert-match "(CSSMERR_TP_CERT_REVOKED)" |
+#    grep "Apple Distribution: Verein zur Forderung von offenen Community-Projekten" |
+#    awk '{ print $2 }' |
+#    head -n1 \
+#)
+#sed -i sed "s/\"signing-identity\": \".*\"/\"signing-identity\": \"$SIGNING_IDENTITY\"/g" config.json
 
 npx appdmg ./config.json "qaul-$VERSION.dmg"
