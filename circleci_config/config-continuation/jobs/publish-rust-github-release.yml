@@ -8,10 +8,11 @@ steps:
       shell: /bin/bash --login +eo pipefail
       command: |
         mkdir artifacts
-        # Linux
+        # Linux - libqaul
         cp rust/target/release/liblibqaul.so ./artifacts/
         cp rust/target/release/qaul-cli ./artifacts/
-        cp rust/target/release/qauld ./artifacts/
+        # Linux - qauld
+        cp rust/target/debian/*.deb ./artifacts/
         # Android
         cp -a android/blemodule/build/outputs/aar/. ./artifacts/
         cp -a android/libqaul/build/outputs/aar/. ./artifacts/
@@ -38,7 +39,10 @@ steps:
       command: |
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
         TAG="v${VERSION}-rust"
-        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+
+        DEB_FILE=$(find artifacts -maxdepth 1 -name '*.deb' -type f -exec basename {} \; | cut -f 1 -d '.')
+
+        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g"| sed "s/QAULDVERSION/${DEB_FILE}/g")
 
         echo "Version Found: $VERSION"
         echo "Tag built:     $TAG"

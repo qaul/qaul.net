@@ -10,11 +10,13 @@ steps:
   - setup-sccache
   - restore-sccache-cache
   - run:
-      name: Build Libqaul for Linux
-      command: cd rust && cargo build --release
+      name: Install cargo-deb package
+      command: cd rust && cargo install cargo-deb
+  - run:
+      name: Build qauld for Linux
+      command: cd rust/clients/qauld && cargo deb
   - save-sccache-cache
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/release/liblibqaul.so
-        - rust/target/release/qaul-cli
+        - rust/target/debian/*.deb
