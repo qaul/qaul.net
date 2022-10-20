@@ -73,7 +73,11 @@ dev_dependencies:
 
   build_runner: ^2.1.4
   fast_base58: ^0.2.1
-  flutter_launcher_icons: ^0.10.0
+#  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons:
+    git:
+      ref: v0.11.0
+      url: https://github.com/fluttercommunity/flutter_launcher_icons.git
   flutter_lints: ^2.0.1
   hive_generator: ^1.1.1
   uuid: ^3.0.6
@@ -81,10 +85,21 @@ dev_dependencies:
 flutter_icons:
   ios: true
   remove_alpha_ios: true
-  image_path_ios: "assets/logo/icon_ios.png"
+  image_path_ios: "assets/logo/icon_darwin.png"
 
   android: true
   image_path_android: "assets/logo/icon_android.png"
+  adaptive_icon_foreground: "assets/logo/icon_android.png"
+  adaptive_icon_background: "#5EAED4"
+
+  windows:
+    generate: true
+    image_path: "assets/logo/icon_windows.png"
+    icon_size: 256
+
+  macos:
+    generate: true
+    image_path: "assets/logo/icon_darwin.png"
 
 flutter:
   uses-material-design: true

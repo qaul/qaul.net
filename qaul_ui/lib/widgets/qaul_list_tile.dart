@@ -11,7 +11,8 @@ class QaulListTile extends StatelessWidget {
     this.onTap,
     this.onAvatarTap,
     this.isThreeLine = false,
-    this.allowTapRouteToUserDetailsScreen = true,
+    this.allowTapRouteToUserDetailsScreen = false,
+    this.allowAvatarTapRouteToUserDetailsScreen = true,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         assert(user != null || room != null),
         super(key: key);
@@ -25,7 +26,8 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
-    bool allowTapRouteToUserDetailsScreen = true,
+    bool allowTapRouteToUserDetailsScreen = false,
+    bool allowAvatarTapRouteToUserDetailsScreen = true,
   }) {
     return QaulListTile._(
       user: user,
@@ -37,6 +39,8 @@ class QaulListTile extends StatelessWidget {
       isThreeLine: isThreeLine,
       allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
       onAvatarTap: onAvatarTap,
+      allowAvatarTapRouteToUserDetailsScreen:
+          allowAvatarTapRouteToUserDetailsScreen,
     );
   }
 
@@ -49,7 +53,8 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
-    bool allowTapRouteToUserDetailsScreen = true,
+    bool allowTapRouteToUserDetailsScreen = false,
+    bool allowAvatarTapRouteToUserDetailsScreen = true,
   }) {
     return QaulListTile._(
       room: room,
@@ -61,6 +66,8 @@ class QaulListTile extends StatelessWidget {
       isThreeLine: isThreeLine,
       allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
       onAvatarTap: onAvatarTap,
+      allowAvatarTapRouteToUserDetailsScreen:
+          allowAvatarTapRouteToUserDetailsScreen,
     );
   }
 
@@ -90,6 +97,8 @@ class QaulListTile extends StatelessWidget {
 
   final VoidCallback? onAvatarTap;
 
+  final bool allowAvatarTapRouteToUserDetailsScreen;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -112,31 +121,44 @@ class QaulListTile extends StatelessWidget {
             ],
           );
 
-    final fallback = user == null
-        ? () {}
-        : (!allowTapRouteToUserDetailsScreen
-            ? null
-            : () async => await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => UserDetailsScreen(user: user!)),
-                ));
+    final onTapFallback = !allowTapRouteToUserDetailsScreen
+        ? null
+        : () => _navigateToUserDetailsScreen(context, user!);
+
+    final onAvatarTapFallback = !allowAvatarTapRouteToUserDetailsScreen
+        ? null
+        : () => _navigateToUserDetailsScreen(context, user!);
 
     Widget leading =
         user != null ? QaulAvatar.small(user: user) : QaulAvatar.groupSmall();
 
-    if (onAvatarTap != null) {
-      leading = GestureDetector(onTap: onAvatarTap, child: leading);
+    if (onAvatarTap != null || onAvatarTapFallback != null) {
+      leading = GestureDetector(
+          onTap: onAvatarTap ?? onAvatarTapFallback, child: leading);
+    }
+
+    Widget tileTitle = title;
+    if (onAvatarTapFallback != null) {
+      tileTitle = GestureDetector(
+        onTap: onAvatarTapFallback,
+        child: title,
+      );
     }
 
     return ListTile(
-      onTap: onTap ?? fallback,
-      title: title,
+      onTap: onTap ?? onTapFallback,
+      title: tileTitle,
       subtitle: content,
       trailing: trailingIcon,
       isThreeLine: isThreeLine,
       leading: leading,
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
+  }
+
+  void _navigateToUserDetailsScreen(BuildContext c, User? u) {
+    if (u == null) return;
+    Navigator.push(
+        c, MaterialPageRoute(builder: (_) => UserDetailsScreen(user: u)));
   }
 }

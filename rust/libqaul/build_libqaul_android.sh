@@ -10,7 +10,7 @@
 # build_libqaul_android
 #
 # Compiles the rust jniLibs in either 'release' or 'debug' mode.
-# WARNING: you heed to have the ANDROID_NDK_HOME environment variable set.
+# WARNING: you need to have the ANDROID_NDK_HOME environment variable set.
 # Note: please run this script from the rust/libqaul path
 #
 # == Usage ==
@@ -20,18 +20,21 @@
 # 2. To compile in release mode:
 #   sh build_libqaul_android.sh release
 
+# Pre-step: assert that the script is being run from rust/libqaul
+PATTERN="^.*/rust/libqaul$"
+if [[ ! $(pwd) =~ $PATTERN ]]; then
+  echo "This script uses relative paths. Please run directly from it's directory."
+  exit 1
+fi
+
 # Initialize variables
 mode=${1:-debug}
 release="false"
-buildType="debug"
 buildTypeCargo=
 if [ "$mode" == "release" ]; then
   release="true"
-  buildType="release"
   buildTypeCargo=--release
 fi
-
-libName=liblibqaul.so
 
 echo "Compiling libqaul in release mode: $release"
 echo ""

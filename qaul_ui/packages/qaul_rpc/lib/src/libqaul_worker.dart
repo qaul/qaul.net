@@ -48,9 +48,6 @@ class LibqaulWorker {
 
   final _heartbeats = Queue<bool>();
 
-  Stream<bool> get onLibraryCrash => _crashStreamController.stream;
-  final _crashStreamController = StreamController<bool>.broadcast();
-
   void _init() async {
     if (_initialized.isCompleted) return;
     // Throws when called for some reason
@@ -67,12 +64,11 @@ class LibqaulWorker {
       if (n > 0) _receiveResponse();
     });
     Timer.periodic(const Duration(seconds: 2), (_) async {
-      if (_heartbeats.length > 5) {
-        _log.warning('${_heartbeats.length} heartbeats unanswered by Libqaul');
-        _crashStreamController.add(true);
+      if (_heartbeats.length == 5) {
+        _log.warning('libqaul stopped responding to heartbeats.');
       }
       if (_heartbeats.length < 5) _heartbeats.addLast(true);
-      _log.finest('requesting heartbeat to libqaul');
+      _log.finer('requesting heartbeat to libqaul');
       final msg = Debug(heartbeatRequest: HeartbeatRequest());
       _sendMessage(Modules.DEBUG, msg);
     });
@@ -385,8 +381,8 @@ class LibqaulWorker {
     }
 
     if (res.data is bool) {
-      _log.finest('libqaul answered a heartbeat request');
-      if (_heartbeats.isNotEmpty) _heartbeats.removeFirst();
+      _log.finer('libqaul answered a heartbeat request');
+      if (_heartbeats.isNotEmpty) _heartbeats.clear();
     }
     if (res.data is String) {
       final path =
