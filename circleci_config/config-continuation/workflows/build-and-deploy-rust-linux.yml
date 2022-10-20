@@ -5,4 +5,5 @@ when:
 jobs:
   - verify-version-rust: { 'filters': { 'tags': { 'only': '/.*/' } } }
   - build-libqaul-linux: { 'requires': [ 'verify-version-rust' ], 'filters': { 'tags': { 'only': '/.*/' } } }
-  - publish-rust-github-release: { 'requires': [ 'build-libqaul-linux' ], 'filters': { 'tags': { 'only': '/.*/' } } }
+  - build-qauld-linux: { 'requires': [ 'verify-version-rust' ], 'filters': { 'tags': { 'only': '/.*/' } } }
+  - publish-rust-github-release: { 'requires': [ 'build-libqaul-linux', 'build-qauld-linux' ], 'filters': { 'tags': { 'only': '/.*/' } } }

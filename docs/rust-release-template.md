@@ -1,7 +1,9 @@
 ## Desktop Assets :desktop_computer:
 ### CLI:
 * [qaul-cli](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qaul-cli)
-* [qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qauld)
+
+### qauld (qaul server daemon)
+* [qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/QAULDVERSION)
 
 ### Linux:
 *\*.so* library - [liblibqaul.so](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.so)

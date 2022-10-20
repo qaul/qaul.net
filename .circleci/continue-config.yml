@@ -458,7 +458,6 @@ jobs:
                 paths:
                     - rust/target/release/liblibqaul.so
                     - rust/target/release/qaul-cli
-                    - rust/target/release/qauld
                 root: ~/qaul-libp2p
     build-libqaul-macos:
         executor: rust-macos
@@ -525,6 +524,29 @@ jobs:
                     - rust/target/release/libqaul.dll
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
+    build-qauld-linux:
+        executor: rust-linux
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    sudo apt update
+                    sudo apt install -y protobuf-compiler
+                    protoc --version
+                name: Install protoc
+            - setup-sccache
+            - restore-sccache-cache
+            - run:
+                command: cd rust && cargo install cargo-deb
+                name: Install cargo-deb package
+            - run:
+                command: cd rust/clients/qauld && cargo deb
+                name: Build qauld for Linux
+            - save-sccache-cache
+            - persist_to_workspace:
+                paths:
+                    - rust/target/debian/*.deb
+                root: ~/qaul-libp2p
     integration-test-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx3g
@@ -798,10 +820,11 @@ jobs:
             - run:
                 command: |
                     mkdir artifacts
-                    # Linux
+                    # Linux - libqaul
                     cp rust/target/release/liblibqaul.so ./artifacts/
                     cp rust/target/release/qaul-cli ./artifacts/
-                    cp rust/target/release/qauld ./artifacts/
+                    # Linux - qauld
+                    cp rust/target/debian/*.deb ./artifacts/
                     # Android
                     cp -a android/blemodule/build/outputs/aar/. ./artifacts/
                     cp -a android/libqaul/build/outputs/aar/. ./artifacts/
@@ -829,7 +852,10 @@ jobs:
                 command: |
                     VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
                     TAG="v${VERSION}-rust"
-                    DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+
+                    DEB_FILE=$(find artifacts -maxdepth 1 -name '*.deb' -type f -exec basename {} \; | cut -f 1 -d '.')
+
+                    DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g"| sed "s/QAULDVERSION/${DEB_FILE}/g")
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
@@ -1107,12 +1133,19 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
+            - build-qauld-linux:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-rust
             - publish-rust-github-release:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-libqaul-linux
+                    - build-qauld-linux
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
