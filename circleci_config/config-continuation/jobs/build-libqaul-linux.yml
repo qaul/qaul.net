@@ -18,3 +18,4 @@ steps:
       paths:
         - rust/target/release/liblibqaul.so
         - rust/target/release/qaul-cli
+        - rust/target/release/qauld

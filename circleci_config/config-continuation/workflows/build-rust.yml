@@ -1,3 +1,6 @@
 when: << pipeline.parameters.run-rust-workflow >>
 jobs:
   - build-libqaul-linux
+  # TODO: remove
+  - build-qauld-linux
+  - publish-rust-github-release: { 'requires': [ 'build-libqaul-linux', 'build-qauld-linux' ] }

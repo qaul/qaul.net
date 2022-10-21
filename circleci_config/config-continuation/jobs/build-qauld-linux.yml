@@ -6,6 +6,7 @@ steps:
       command: |
         sudo apt update
         sudo apt install -y protobuf-compiler
+        sudo apt install -y gcc-arm-linux-gnueabihf
         protoc --version
   - setup-sccache
   - restore-sccache-cache
@@ -15,6 +16,12 @@ steps:
   - run:
       name: Build qauld for Linux
       command: cd rust/clients/qauld && cargo deb
+  - run:
+      name: Add ARM Target for Raspberry pi
+      command: cd rust && rustup target add armv7-unknown-linux-gnueabihf
+  - run:
+      name: Build qauld for Raspberry pi
+      command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
   - save-sccache-cache
   - persist_to_workspace:
       root: ~/qaul-libp2p
