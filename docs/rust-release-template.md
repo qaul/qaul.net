@@ -1,9 +1,11 @@
 ## Desktop Assets :desktop_computer:
-### CLI:
-* [qaul-cli](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qaul-cli)
+### CLI Binaries:
+* **Linux**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries.zip)
+* **MacOS**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/macos-cli-binaries.zip)
+* **Windows**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/windows-cli-binaries.zip)
 
-### qauld (qaul server daemon)
-* [qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/QAULDVERSION)
+### qauld (qaul server daemon) debian installer
+* [qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qauld-debian-packages.zip)
 
 ### Linux:
 *\*.so* library - [liblibqaul.so](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.so)
