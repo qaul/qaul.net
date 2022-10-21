@@ -20,7 +20,24 @@ steps:
         cd rust/libqaul
         sh build_libqaul_macos.sh release
   - save-sccache-cache
+  - run:
+      name: zip command-line binaries
+      command: |
+        cd rust/target/release
+
+        # Storing pre-compiled dylib
+        mv liblibqaul.dylib liblibqaul.dylib.old
+        # compiling CLI tools (qaul-cli, qauld)
+        cargo build --release
+        # Replacing newly compiled dylib with correct one
+        mv -f liblibqaul.dylib.old liblibqaul.dylib
+
+        mkdir cli-binaries
+        mv qauld qaul-cli cli-binaries
+        cd cli-binaries
+        zip macos-cli-binaries *
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
         - rust/target/release/liblibqaul.dylib
+        - rust/target/release/cli-binaries/macos-cli-binaries.zip

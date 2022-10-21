@@ -454,11 +454,18 @@ jobs:
                 command: cd rust && cargo build --release
                 name: Build Libqaul for Linux
             - save-sccache-cache
+            - run:
+                command: |
+                    cd rust/target/release
+                    mkdir cli-binaries
+                    mv qauld qaul-cli cli-binaries
+                    cd cli-binaries
+                    zip linux-cli-binaries *
+                name: zip command-line binaries
             - persist_to_workspace:
                 paths:
                     - rust/target/release/liblibqaul.so
-                    - rust/target/release/qaul-cli
-                    - rust/target/release/qauld
+                    - rust/target/release/cli-binaries/linux-cli-binaries.zip
                 root: ~/qaul-libp2p
     build-libqaul-macos:
         executor: rust-macos
@@ -483,9 +490,26 @@ jobs:
                     sh build_libqaul_macos.sh release
                 name: Build Libqaul *.dylib Library for MacOS
             - save-sccache-cache
+            - run:
+                command: |
+                    cd rust/target/release
+
+                    # Storing pre-compiled dylib
+                    mv liblibqaul.dylib liblibqaul.dylib.old
+                    # compiling CLI tools (qaul-cli, qauld)
+                    cargo build --release
+                    # Replacing newly compiled dylib with correct one
+                    mv -f liblibqaul.dylib.old liblibqaul.dylib
+
+                    mkdir cli-binaries
+                    mv qauld qaul-cli cli-binaries
+                    cd cli-binaries
+                    zip macos-cli-binaries *
+                name: zip command-line binaries
             - persist_to_workspace:
                 paths:
                     - rust/target/release/liblibqaul.dylib
+                    - rust/target/release/cli-binaries/macos-cli-binaries.zip
                 root: ~/qaul-libp2p
     build-libqaul-windows:
         environment:
@@ -520,9 +544,18 @@ jobs:
                     cd rust && cargo build --release
                 name: Build dll Libqaul
                 no_output_timeout: 30m
+            - run:
+                command: |
+                    cd rust/target/release
+                    mkdir cli-binaries
+                    mv qauld qaul-cli cli-binaries
+                    cd cli-binaries
+                    tar -a -c -f windows-cli-binaries.zip *
+                name: zip command-line binaries
             - persist_to_workspace:
                 paths:
                     - rust/target/release/libqaul.dll
+                    - rust/target/release/cli-binaries/windows-cli-binaries.zip
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
     build-qauld-linux:
@@ -551,9 +584,17 @@ jobs:
                 command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
                 name: Build qauld for Raspberry pi
             - save-sccache-cache
+            - run:
+                command: |
+                    cd rust/target/
+                    mkdir qauld-debian-packages
+                    mv debian/*.deb armv7-unknown-linux-gnueabihf/debian/*.deb qauld-debian-packages
+                    cd qauld-debian-packages
+                    zip qauld-debian-packages *
+                name: zip debian files
             - persist_to_workspace:
                 paths:
-                    - rust/target/debian/*.deb
+                    - rust/target/qauld-debian-packages/qauld-debian-packages.zip
                 root: ~/qaul-libp2p
     integration-test-flutter-android:
         environment:
@@ -830,10 +871,9 @@ jobs:
                     mkdir artifacts
                     # Linux - libqaul
                     cp rust/target/release/liblibqaul.so ./artifacts/
-                    cp rust/target/release/qaul-cli ./artifacts/
-                    cp rust/target/release/qauld ./artifacts/
-                    # Linux - qauld
-                    cp rust/target/debian/*.deb ./artifacts/
+                    cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+                    # Linux - qauld debian installers
+                    cp rust/target/qauld-debian-packages/qauld-debian-packages.zip ./artifacts/
                     # Android
                     cp -a android/blemodule/build/outputs/aar/. ./artifacts/
                     cp -a android/libqaul/build/outputs/aar/. ./artifacts/
@@ -841,8 +881,10 @@ jobs:
                     cp rust/target/release/liblibqaul.dylib ./artifacts/
                     # MacOS
                     cp rust/target/universal/release/liblibqaul.a ./artifacts/
+                    cp rust/target/release/cli-binaries/macos-cli-binaries.zip ./artifacts/
                     # Windows
                     cp rust/target/release/libqaul.dll ./artifacts/
+                    cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
 
                     # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
                     exit 0
@@ -862,9 +904,7 @@ jobs:
                     VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
                     TAG="v${VERSION}-rust"
 
-                    DEB_FILE=$(find artifacts -maxdepth 1 -name '*.deb' -type f -exec basename {} \; | cut -f 1 -d '.')
-
-                    DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g"| sed "s/QAULDVERSION/${DEB_FILE}/g")
+                    DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
@@ -1207,9 +1247,13 @@ workflows:
         jobs:
             - build-libqaul-linux
             - build-qauld-linux
+            - build-libqaul-macos
+            - build-libqaul-windows
             - publish-rust-github-release:
                 requires:
                     - build-libqaul-linux
                     - build-qauld-linux
+                    - build-libqaul-macos
+                    - build-libqaul-windows
         when: << pipeline.parameters.run-rust-workflow >>
 

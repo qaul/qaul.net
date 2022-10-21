@@ -10,10 +10,9 @@ steps:
         mkdir artifacts
         # Linux - libqaul
         cp rust/target/release/liblibqaul.so ./artifacts/
-        cp rust/target/release/qaul-cli ./artifacts/
-        cp rust/target/release/qauld ./artifacts/
-        # Linux - qauld
-        cp rust/target/debian/*.deb ./artifacts/
+        cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+        # Linux - qauld debian installers
+        cp rust/target/qauld-debian-packages/qauld-debian-packages.zip ./artifacts/
         # Android
         cp -a android/blemodule/build/outputs/aar/. ./artifacts/
         cp -a android/libqaul/build/outputs/aar/. ./artifacts/
@@ -21,8 +20,10 @@ steps:
         cp rust/target/release/liblibqaul.dylib ./artifacts/
         # MacOS
         cp rust/target/universal/release/liblibqaul.a ./artifacts/
+        cp rust/target/release/cli-binaries/macos-cli-binaries.zip ./artifacts/
         # Windows
         cp rust/target/release/libqaul.dll ./artifacts/
+        cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
 
         # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
         exit 0
@@ -41,9 +42,7 @@ steps:
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
         TAG="v${VERSION}-rust"
 
-        DEB_FILE=$(find artifacts -maxdepth 1 -name '*.deb' -type f -exec basename {} \; | cut -f 1 -d '.')
-
-        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g"| sed "s/QAULDVERSION/${DEB_FILE}/g")
+        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
 
         echo "Version Found: $VERSION"
         echo "Tag built:     $TAG"

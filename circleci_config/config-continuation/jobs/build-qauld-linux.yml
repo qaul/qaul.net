@@ -23,7 +23,15 @@ steps:
       name: Build qauld for Raspberry pi
       command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
   - save-sccache-cache
+  - run:
+      name: zip debian files
+      command: |
+        cd rust/target/
+        mkdir qauld-debian-packages
+        mv debian/*.deb armv7-unknown-linux-gnueabihf/debian/*.deb qauld-debian-packages
+        cd qauld-debian-packages
+        zip qauld-debian-packages *
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/debian/*.deb
+        - rust/target/qauld-debian-packages/qauld-debian-packages.zip

@@ -31,7 +31,16 @@ steps:
       command: |
         export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
         cd rust && cargo build --release
+  - run:
+      name: zip command-line binaries
+      command: |
+        cd rust/target/release
+        mkdir cli-binaries
+        mv qauld qaul-cli cli-binaries
+        cd cli-binaries
+        tar -a -c -f windows-cli-binaries.zip *
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
         - rust/target/release/libqaul.dll
+        - rust/target/release/cli-binaries/windows-cli-binaries.zip
