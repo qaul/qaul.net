@@ -11,6 +11,7 @@ steps:
         # Linux - libqaul
         cp rust/target/release/liblibqaul.so ./artifacts/
         cp rust/target/release/qaul-cli ./artifacts/
+        cp rust/target/release/qauld ./artifacts/
         # Linux - qauld
         cp rust/target/debian/*.deb ./artifacts/
         # Android
