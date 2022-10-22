@@ -1,6 +1,6 @@
 [package]
 name = "qauld"
-version = "2.0.0-beta.3"
+version = "2.0.0-beta.5"
 authors = ["qaul.net community <contact@qaul.net>"]
 edition = "2021"
 description = "qaul.net community server daemon"
@@ -21,7 +21,7 @@ prost = "0.11.0"
 futures-ticker = "0.0.2"
 state = "0.5"
 bs58 = "0.4"
-clap = "3.2.21" 
+clap = "4.0.18" 
 
 
 [package.metadata.deb]
@@ -29,7 +29,7 @@ maintainer = "Open Community Projects Association <develop@ocpa.ch>"
 copyright = "2021 Open Community Projects Association <contact@ocpa.ch>, Christoph Wachter & Mathias Jud <contact@wachter-jud.net>"
 license-file = ["../../../LICENSE", "0"]
 extended-description = """\
-qaul.net – قول project https://qaul.net \
+qaul – قول project https://qaul.net \
 Internet Independent Wireless Mesh Communication \
 \
 Contains the qauld server daemon & qaul-cli binaries \
