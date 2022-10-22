@@ -40,7 +40,7 @@ libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.4"
 futures-ticker = "0.0.2"
-jni = "0.20.0"
+jni = "0.19"
 serde_yaml = "0.9.9"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
