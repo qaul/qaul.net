@@ -1246,14 +1246,5 @@ workflows:
     build-rust:
         jobs:
             - build-libqaul-linux
-            - build-qauld-linux
-            - build-libqaul-macos
-            - build-libqaul-windows
-            - publish-rust-github-release:
-                requires:
-                    - build-libqaul-linux
-                    - build-qauld-linux
-                    - build-libqaul-macos
-                    - build-libqaul-windows
         when: << pipeline.parameters.run-rust-workflow >>
 
