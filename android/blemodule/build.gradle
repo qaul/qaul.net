@@ -7,11 +7,21 @@ plugins {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.6.1'
+        // for apple m1, add protoc_platform=osx-x86_64 in $HOME/.gradle/gradle.properties
+        if (project.hasProperty('protoc_platform')) {
+            artifact = "com.google.protobuf:protoc:3.6.1:${protoc_platform}"
+        } else {
+            artifact = "com.google.protobuf:protoc:3.6.1"
+        }
     }
     plugins {
         javalite {
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+            // The codegen for lite comes as a separate artifact
+            if (project.hasProperty('protoc_platform')) {
+                artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0:${protoc_platform}"
+            } else {
+                artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
+            }
         }
     }
     generateProtoTasks {
@@ -68,6 +78,13 @@ processResources {
     exclude('**/*.proto')
 }
 
+
+task wrapper(type: Wrapper){
+    gradleVersion = '7.5.1'
+}
+task prepareKotlinBuildScriptModel {
+
+}
 
 dependencies {
 
