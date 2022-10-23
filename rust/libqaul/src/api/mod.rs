@@ -139,3 +139,83 @@ pub fn send_sys(binary_message: Vec<u8>) {
 pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
     Sys::receive_from_libqaul()
 }
+
+#[cfg(target_os = "android")]
+use android_logger::Config;
+use log::Level;
+use rifgen::rifgen_attr::*;
+use rifgen::rifgen_attr::*;
+
+struct AndroidBindings;
+
+impl AndroidBindings {
+    /// Set up loggingg
+    #[generate_interface]
+    pub fn initialise_logging() {
+        #[cfg(target_os = "android")]
+        android_logger::init_once(
+            Config::default()
+                .with_min_level(Level::Trace)
+                .with_tag("rust"),
+        );
+        log_panics::init();
+        log::error!("initialised");
+    }
+
+    /// start libqaul for android
+    /// here for debugging and testing
+    ///
+    /// Hand over the path on the file system
+    /// where the app is allowed to store data.
+    #[generate_interface]
+    pub fn initialise_libqual(storage_path: String) {
+        start_android(storage_path)
+    }
+
+    /// send a SYS message to libqaul
+    #[generate_interface]
+    pub fn send_sys(binary_message: &[i8]) {
+        send_sys(AndroidBindings::vec_i8_into_u8(binary_message.to_vec()))
+    }
+
+    /// receive a SYS message from libqaul
+    #[generate_interface]
+    pub fn receive_sys() -> Vec<i8> {
+        Sys::receive_from_libqaul()
+            .map(AndroidBindings::vec_u8_into_i8)
+            .unwrap_or_default()
+    }
+
+    fn vec_i8_into_u8(v: Vec<i8>) -> Vec<u8> {
+        // ideally we'd use Vec::into_raw_parts, but it's unstable,
+        // so we have to do it manually:
+
+        // first, make sure v's destructor doesn't free the data
+        // it thinks it owns when it goes out of scope
+        let mut v = std::mem::ManuallyDrop::new(v);
+
+        // then, pick apart the existing Vec
+        let p = v.as_mut_ptr();
+        let len = v.len();
+        let cap = v.capacity();
+
+        // finally, adopt the data into a new Vec
+        unsafe { Vec::from_raw_parts(p as *mut u8, len, cap) }
+    }
+    fn vec_u8_into_i8(v: Vec<u8>) -> Vec<i8> {
+        // ideally we'd use Vec::into_raw_parts, but it's unstable,
+        // so we have to do it manually:
+
+        // first, make sure v's destructor doesn't free the data
+        // it thinks it owns when it goes out of scope
+        let mut v = std::mem::ManuallyDrop::new(v);
+
+        // then, pick apart the existing Vec
+        let p = v.as_mut_ptr();
+        let len = v.len();
+        let cap = v.capacity();
+
+        // finally, adopt the data into a new Vec
+        unsafe { Vec::from_raw_parts(p as *mut i8, len, cap) }
+    }
+}

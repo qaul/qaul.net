@@ -59,10 +59,17 @@ directories = "4.0"
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
+##
+rifgen = "*"
+log-panics="*"
+##
 
 [build-dependencies]
 prost-build = "0.11.1"
-
+#java file gen
+rifgen = "*"
+flapigen = { git = "https://github.com/Dushistov/flapigen-rs", rev = "d8167dbd6896b96bf1ae8c0db339d2f0adcfb1c4" }
+##
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]

@@ -33,4 +33,4 @@ cd ../qaul_ui/android || exit 1
 #flutter clean
 
 ## build android AAB release file
-bundle exec fastlane upload_beta_playstore
+#bundle exec fastlane upload_beta_playstore

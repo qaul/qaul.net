@@ -87,7 +87,7 @@ enum EventType {
 /// * Provide a path where libqaul can save all data.
 /// * Optionally you can provide the following configuration values:
 ///   * listening port of the Internet connection module (default = randomly assigned)
-pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
+pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) {
     log::trace!("start initializing libqaul");
 
     if let Some(def_cfg) = def_config {

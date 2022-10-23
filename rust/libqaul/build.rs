@@ -9,11 +9,34 @@
 //! * Create rust code files from protobuf files
 //! * Copy the generated files to the right locations
 
-use std::env;
-use std::fs;
-use std::path::Path;
+use flapigen::LanguageConfig::JavaConfig;
+use rifgen::{Generator, Language, TypeCases};
+use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 fn main() {
+    // generate java files for android
+    {
+        let out_dir = env::var("OUT_DIR").unwrap();
+        let in_src = path_buf!("src/api", "java_glue.rs.in");
+        Generator::new(TypeCases::CamelCase, Language::Java, path_buf!("src/api"))
+            .generate_interface(&in_src);
+        let out_src = Path::new(&out_dir).join("java_glue.rs");
+
+        let out_dir = path_buf!("../../android/libqaul/src/main/java/net/qaul/libqaul/lib");
+        if out_dir.exists() {
+            fs::remove_dir_all(&out_dir).unwrap();
+        }
+        fs::create_dir(&out_dir).unwrap();
+        let swig_gen = flapigen::Generator::new(JavaConfig(
+            flapigen::JavaConfig::new(out_dir, "net.qaul.libqaul.lib".into())
+                .use_null_annotation_from_package("androidx.annotation".into()),
+        ))
+        .rustfmt_bindings(true);
+        swig_gen.expand("android bindings", &in_src, &out_src);
+        println!("cargo:rerun-if-changed=src");
+    }
+
     let mut prost_build = prost_build::Config::new();
 
     // make chat messages serializable
@@ -325,4 +348,19 @@ fn main() {
         Path::new("src/connections/ble/qaul.net.ble.rs"),
     )
     .unwrap();
+}
+
+// Creates a new [`PathBuf`] from the arguments
+#[macro_export]
+macro_rules! path_buf {
+    ($($others:expr),+) => {{
+        collect!(PathBuf,<[_]>::iter(&[$($others),+]))
+    }};
+}
+
+#[macro_export]
+macro_rules! collect {
+    ($type:ty,$value:expr) => {
+        $value.collect::<$type>()
+    };
 }

@@ -236,6 +236,6 @@ impl Rpc {
     /// Please don't use it for anything serious.
     pub fn increase_message_counter() {
         let mut counter = EXTERN_SEND_COUNT.get().write().unwrap();
-        counter.count = counter.count + 1;
+        counter.count += 1;
     }
 }

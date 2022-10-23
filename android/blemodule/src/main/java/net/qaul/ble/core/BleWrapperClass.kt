@@ -59,7 +59,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
     }
 
     /**
-     * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
+     * This Method gets BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
     open fun receiveRequest(data: ByteString, callback: BleRequestCallback) {
         val bleReq: BleOuterClass.Ble = BleOuterClass.Ble.parseFrom(data)

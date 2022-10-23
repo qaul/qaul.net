@@ -94,6 +94,7 @@ class MainActivity: FlutterActivity() {
 
     /// start libqaul
     private fun startLibqaul() {
+        libqaulLoad()
         // get path to storage directory
         val storagePath = context.filesDir.absolutePath
 
