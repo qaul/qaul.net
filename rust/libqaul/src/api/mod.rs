@@ -144,12 +144,11 @@ pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
 use android_logger::Config;
 use log::Level;
 use rifgen::rifgen_attr::*;
-use rifgen::rifgen_attr::*;
 
 struct AndroidBindings;
 
 impl AndroidBindings {
-    /// Set up loggingg
+    /// Set up logging
     #[generate_interface]
     pub fn initialise_logging() {
         #[cfg(target_os = "android")]
