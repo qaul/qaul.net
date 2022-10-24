@@ -3,9 +3,9 @@ version: 2.0.0-beta.5
 summary: qaul - Internet Independent Wireless Mesh Communication App
 description: Communicate directly from device to device via your local wifi network, or via the shared wifi network of your phone. Mesh local clouds together via manually added static nodes. Use this peer to peer communication method to communicate internet independently and completely off-the-grid.
 
-confinement: classic
+confinement: strict
 base: core18
-grade: beta
+grade: devel
 
 slots:
   dbus-qaul:

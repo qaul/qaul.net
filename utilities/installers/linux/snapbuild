@@ -4,12 +4,13 @@
 echo "Updating dependencies..."
 
 sed -i "s/xenial/focal/g" /etc/apt/sources.list
-apt update -qq
-apt install -y -qq wget tar unzip zip lib32stdc++6 lib32z1 git clang cmake ninja-build pkg-config libgtk-3-dev curl
+apt-get -qq update
+apt-get -qq install -y wget tar unzip zip lib32stdc++6 lib32z1 git clang cmake ninja-build pkg-config libgtk-3-dev curl apt-utils
 
 echo ""
 
 flutter config --enable-linux-desktop
+flutter doctor --verbose
 
 echo ""
 echo "Retrieving application version..."
@@ -36,7 +37,7 @@ sed -i "s/version\:\W\+[0-9]\+\.[0-9]\+\.[0-9]\+/version: $VERSION/g" snapcraft.
 mkdir local
 echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > local/snapcraft.login
 snapcraft login --with local/snapcraft.login
-set +o pipefail
+#set +o pipefail
 
 # shellcheck disable=SC2103
 cd ..
@@ -47,6 +48,7 @@ echo "Building Flutter application..."
 git config --global --add safe.directory /root/development/flutter
 
 snapcraft
+
 mv ./*.snap "qaul-app-$VERSION.snap"
 # TODO cannot upload via CircleCI due to the directive:
 #     - human review required due to 'deny-connection' constraint (interface attributes)
