@@ -280,8 +280,7 @@ jobs:
             - install-flutter-deps
             - run:
                 command: |
-                    SNAP_PATH=$(cd ../utilities/installers/linux && bash snapbuild | tail -n1 )
-                    echo "Resulting snap file can be found at: $SNAP_PATH"
+                    cd ../utilities/installers/linux && bash snapbuild
                 name: Build Flutter Application for Linux
             - persist_to_workspace:
                 paths:
@@ -1006,6 +1005,7 @@ workflows:
         jobs:
             - test-flutter
             - analyze-flutter
+            - build-flutter-linux
             - integration-test-flutter-macos:
                 filters:
                     branches:
