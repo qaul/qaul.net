@@ -1,0 +1,40 @@
+#! /bin/bash
+set -eo pipefail
+
+#-----------------------------------------------------------------NoticeStart-
+# Utilities
+#
+# Copyright (c) 2022 Open Community Project Association https://ocpa.ch
+# This software is published under the AGPLv3 license.
+#-----------------------------------------------------------------NoticeEnd---
+#
+# filename
+#
+# DESCRIPTION
+#   Find the first file of a given extension present in the current folder and
+#   print the file, extension and full name - separated by tabs.
+#
+# EXAMPLE
+#   filename exe
+#
+#   -- On a folder with a file "ab.c.exe" the output will be --
+#   ab.c  exe  ab.c.exe
+#
+
+function printHelp() {
+  echo 'usage: filename "extension"'
+}
+
+EXTENSION="$1"
+
+if [[ $EXTENSION == "" ]]; then
+  echo "Missing extension"
+  printHelp
+  exit 1
+fi
+
+file=$(find . -maxdepth 1 -name "*.$EXTENSION" -type f -exec basename {} \;)
+extension="${file##*.}"
+filename="${file%.*}"
+
+printf "%s\t%s\t%s" "$filename" "$extension" "$file"

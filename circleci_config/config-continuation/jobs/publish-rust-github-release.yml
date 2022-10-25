@@ -35,18 +35,27 @@ steps:
         wget "$GHR_URL"
         tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
         rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-        echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+        echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+  - run:
+      name: Add utilities/bin to PATH
+      command: |
+        cd utilities/bin
+        chmod +x filename
+        echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
   - run:
       name: Publish Release on GitHub
       command: |
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
         TAG="v${VERSION}-rust"
 
+        cd artifacts
+
         DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
 
         echo "Version Found: $VERSION"
         echo "Tag built:     $TAG"
-        echo "Description:\n$DESCRIPTION"
+        echo "Description:
+        echo "$DESCRIPTION"
         echo ""
 
         ghr -t "${GITHUB_TOKEN}" \
@@ -55,4 +64,4 @@ steps:
           -c "${CIRCLE_SHA1}" \
           -n "Libqaul and CLI - v${VERSION}" \
           -b "${DESCRIPTION}" \
-          "${TAG}" artifacts/
+          "${TAG}" .

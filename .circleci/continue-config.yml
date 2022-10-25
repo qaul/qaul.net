@@ -279,8 +279,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
             - run:
-                command: |
-                    cd ../utilities/installers/linux && bash snapbuild
+                command: cd ../utilities/installers/linux && bash snapbuild
                 name: Build Flutter Application for Linux
             - persist_to_workspace:
                 paths:
@@ -821,26 +820,34 @@ jobs:
                     wget "$GHR_URL"
                     tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
                     rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+                    echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
                 name: Install ghr
+            - run:
+                command: |
+                    cd ../utilities/bin
+                    chmod +x filename
+                    echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
+                name: Add utilities/bin to PATH
             - run:
                 command: |
                     VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
                     TAG="v${VERSION}-flutter"
 
-                    SNAP_FILE=$(find artifacts -maxdepth 1 -name '*.snap' -type f -exec basename {} \; | sed 's/\.snap//')
-                    AAB_FILE=$(find artifacts -maxdepth 1 -name '*.aab' -type f -exec basename {} \; | cut -f 1 -d '.')
-                    IPA_FILE=$(find artifacts -maxdepth 1 -name '*.ipa' -type f -exec basename {} \; | cut -f 1 -d '.')
-                    XCA_FILE=$(find artifacts -maxdepth 1 -name '*.xcarchive' -type f -exec basename {} \; | cut -f 1 -d '.')
-                    DMG_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
-                    EXE_FILE=$(find artifacts -maxdepth 1 -name '*.exe' -type f -exec basename {} \; | cut -f 1 -d '.')
+                    cd artifacts
 
-                    DESCRIPTION=$(cat ../docs/flutter-release-template.md \
+                    AAB_FILE=$(filename aab | cut -f1)
+                    DMG_FILE=$(filename dmg | cut -f1)
+                    EXE_FILE=$(filename exe | cut -f1)
+                    IPA_FILE=$(filename ipa | cut -f1)
+                    SNAP_FILE=$(filename snap | cut -f1)
+                    ARCH_FILE=$(filename xcarchive | cut -f1)
+
+                    DESCRIPTION=$(cat ../../utilities/release-templates/flutter-release-template.md \
                       | sed "s/TAGNAME/${TAG}/g" \
                       | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
                       | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \
                       | sed "s/IPAVERSION/${IPA_FILE}/g" \
-                      | sed "s/XCAVERSION/${XCA_FILE}/g" \
+                      | sed "s/XCAVERSION/${ARCH_FILE}/g" \
                       | sed "s/MACOSVERSION/${DMG_FILE}/g" \
                       | sed "s/WINDOWSVERSION/${EXE_FILE}/g" \
                     )
@@ -857,7 +864,7 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "qaul.net App - v${VERSION}" \
                       -b "${DESCRIPTION}" \
-                      "${TAG}" artifacts/
+                      "${TAG}" .
                 name: Publish Release on GitHub
     publish-rust-github-release:
         executor: rust-linux
@@ -896,18 +903,27 @@ jobs:
                     wget "$GHR_URL"
                     tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
                     rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    echo "export PATH=ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+                    echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
                 name: Install ghr
+            - run:
+                command: |
+                    cd utilities/bin
+                    chmod +x filename
+                    echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
+                name: Add utilities/bin to PATH
             - run:
                 command: |
                     VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
                     TAG="v${VERSION}-rust"
 
-                    DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+                    cd artifacts
+
+                    DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
-                    echo "Description:\n$DESCRIPTION"
+                    echo "Description:
+                    echo "$DESCRIPTION"
                     echo ""
 
                     ghr -t "${GITHUB_TOKEN}" \
@@ -916,7 +932,7 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "Libqaul and CLI - v${VERSION}" \
                       -b "${DESCRIPTION}" \
-                      "${TAG}" artifacts/
+                      "${TAG}" .
                 name: Publish Release on GitHub
     test-flutter:
         executor: flutter
@@ -1005,7 +1021,6 @@ workflows:
         jobs:
             - test-flutter
             - analyze-flutter
-            - build-flutter-linux
             - integration-test-flutter-macos:
                 filters:
                     branches:
