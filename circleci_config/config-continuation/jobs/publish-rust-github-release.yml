@@ -42,7 +42,7 @@ steps:
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
         TAG="v${VERSION}-rust"
 
-        DESCRIPTION=$(cat docs/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+        DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
 
         echo "Version Found: $VERSION"
         echo "Tag built:     $TAG"
