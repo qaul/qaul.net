@@ -142,6 +142,12 @@ impl Connections {
 
                                     // connect to node
                                     if let Some(internet) = internet_opt {
+                                        // if we already have connection history, we need to remove from banned list.
+                                        if let Some(peer_id) = Internet::peerid_from_address(
+                                            nodes_entry.address.clone(),
+                                        ) {
+                                            internet.swarm.unban_peer_id(peer_id);
+                                        }
                                         Internet::peer_dial(address, &mut internet.swarm);
                                     }
                                 }
@@ -188,13 +194,19 @@ impl Connections {
                         // save configuration
                         Configuration::save();
 
-                        // TODO: stop connection to removed host
+                        // check connection and deactive node
+                        if let Some(_id) =
+                            Internet::peerid_from_address(nodes_entry.address.clone())
+                        {
+                            Internet::change_connection(nodes_entry.address.clone(), false);
+                        }
 
                         // send response
                         Self::rpc_send_node_list(info);
                     }
                     Some(proto::connections::Message::InternetNodesState(nodes_entry)) => {
                         let mut info = proto::Info::RemoveErrorNotFound;
+                        let mut changed_state = false;
 
                         {
                             let mut nodes: Vec<InternetPeer> = Vec::new();
@@ -214,10 +226,7 @@ impl Connections {
                                     info = proto::Info::StateSuccess;
 
                                     if peer.enabled != nodes_entry.enabled {
-                                        Internet::change_connection(
-                                            peer.address.clone(),
-                                            nodes_entry.enabled,
-                                        );
+                                        changed_state = true;
                                     }
                                 } else {
                                     // addresses do not match.
@@ -233,6 +242,29 @@ impl Connections {
                         Configuration::save();
 
                         // TODO: stop connection to removed host
+
+                        if info == proto::Info::StateSuccess && changed_state == true {
+                            // already has connection history, we simply handle banned peer list
+                            if let Some(_) =
+                                Internet::peerid_from_address(nodes_entry.address.clone())
+                            {
+                                Internet::change_connection(
+                                    nodes_entry.address.clone(),
+                                    nodes_entry.enabled,
+                                );
+                            } else if nodes_entry.enabled == true {
+                                // already we don't have connection history and it's activate request.
+                                // we redial connection
+                                if let Some(internet) = internet_opt {
+                                    let address_result: Result<
+                                        Multiaddr,
+                                        libp2p::multiaddr::Error,
+                                    > = nodes_entry.address.clone().parse();
+                                    let address = address_result.unwrap();
+                                    Internet::peer_dial(address, &mut internet.swarm);
+                                }
+                            }
+                        }
 
                         // send response
                         Self::rpc_send_node_list(info);
