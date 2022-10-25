@@ -43,7 +43,7 @@ steps:
         DMG_FILE=$(find artifacts -maxdepth 1 -name '*.dmg' -type f -exec basename {} \; | cut -f 1 -d '.')
         EXE_FILE=$(find artifacts -maxdepth 1 -name '*.exe' -type f -exec basename {} \; | cut -f 1 -d '.')
 
-        DESCRIPTION=$(cat ../docs/flutter-release-template.md \
+        DESCRIPTION=$(cat ../utilities/release-templates/flutter-release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
           | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \
