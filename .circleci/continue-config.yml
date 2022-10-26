@@ -592,7 +592,8 @@ jobs:
                 name: zip debian files
             - persist_to_workspace:
                 paths:
-                    - rust/target/qauld-debian-packages/qauld-debian-packages.zip
+                    - rust/target/debian/*.deb
+                    - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb
                 root: ~/qaul-libp2p
     integration-test-flutter-android:
         environment:
@@ -875,19 +876,26 @@ jobs:
             - run:
                 command: |
                     mkdir artifacts
-                    # Linux - libqaul
-                    cp rust/target/release/liblibqaul.so ./artifacts/
-                    cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
-                    # Linux - qauld debian installers
-                    cp rust/target/qauld-debian-packages/qauld-debian-packages.zip ./artifacts/
+
                     # Android
                     cp -a android/blemodule/build/outputs/aar/. ./artifacts/
                     cp -a android/libqaul/build/outputs/aar/. ./artifacts/
+
                     # iOS
                     cp rust/target/release/liblibqaul.dylib ./artifacts/
+
+                    # Linux - libqaul
+                    cp rust/target/release/liblibqaul.so ./artifacts/
+                    cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+
+                    # Linux - qauld debian installers
+                    cp rust/target/debian/*.deb ./artifacts/
+                    cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
+
                     # MacOS
                     cp rust/target/universal/release/liblibqaul.a ./artifacts/
                     cp rust/target/release/cli-binaries/macos-cli-binaries.zip ./artifacts/
+
                     # Windows
                     cp rust/target/release/libqaul.dll ./artifacts/
                     cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
@@ -918,7 +926,14 @@ jobs:
 
                     cd artifacts
 
-                    DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md | sed "s/TAGNAME/${TAG}/g")
+                    AMD64_FILE=$(filename deb | grep "amd64" cut -f1)
+                    ARMHF_FILE=$(filename deb | grep "armhf" cut -f1)
+
+                    DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md \
+                      | sed "s/TAGNAME/${TAG}/g" \
+                      | set "s/DEB_AMD/${AMD64_FILE}/g" \
+                      | set "s/DEB_ARM/${ARMHF_FILE}/g" \
+                    )
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"

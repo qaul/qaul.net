@@ -34,4 +34,5 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/qauld-debian-packages/qauld-debian-packages.zip
+        - rust/target/debian/*.deb
+        - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb

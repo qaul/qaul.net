@@ -5,7 +5,8 @@
 * **Windows**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/windows-cli-binaries.zip)
 
 ### qauld (qaul server daemon) debian installer
-* [qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/qauld-debian-packages.zip)
+* [qauld - amd](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_AMD.deb)
+* [qauld - arm (Raspberry pi)](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM.deb)
 
 ### Linux:
 *\*.so* library - [liblibqaul.so](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.so)
