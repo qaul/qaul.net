@@ -11,7 +11,7 @@ set -eo pipefail
 # filename
 #
 # DESCRIPTION
-#   Find the first file of a given extension present in the current folder and
+#   Find the files of a given extension present in the current folder and
 #   print the file, extension and full name - separated by tabs.
 #
 # EXAMPLE
@@ -33,8 +33,11 @@ if [[ $EXTENSION == "" ]]; then
   exit 1
 fi
 
-file=$(find . -maxdepth 1 -name "*.$EXTENSION" -type f -exec basename {} \;)
-extension="${file##*.}"
-filename="${file%.*}"
+find . -name "*.$EXTENSION" -type f  -print0 | while read -r -d $'\0' file
+do
+  file=$(basename "$file")
+  extension="${file##*.}"
+  filename="${file%.*}"
 
-printf "%s\t%s\t%s" "$filename" "$extension" "$file"
+  printf "%s\t%s\t%s\n" "$filename" "$extension" "$file"
+done
