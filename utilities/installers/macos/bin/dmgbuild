@@ -1,20 +1,26 @@
 #! /bin/bash
 
-PATTERN="^dmgbuild\$"
-if [[ ! $0 =~ $PATTERN ]]; then
-  echo "This script uses relative paths to find some of it's dependencies. Please run directly from it's directory."
+# Pre-step: assert that the script is being run from rust/libqaul
+PATTERN="^.*/installers/macos/bin\$"
+if [[ ! $(pwd) =~ $PATTERN ]]; then
+  echo "This script uses relative paths. Please run directly from it's directory."
   exit 1
 fi
 
 echo ""
-echo "Retrieving application version..."
+echo "Building MacOS Flutter App..."
 
 cd ../../../../qaul_ui || exit 1
+flutter build macos --release
 
-if [ ! -f pubspec.yaml ]; then
-  echo "pubspec.yaml not found!"
-  exit 1
-fi
+echo ""
+echo "Signing *.App file with 'Developer ID Application' certificate..."
+codesign --force --deep \
+  -s "Developer ID Application: Verein zur Forderung von offenen Community-Projekten (VVYZ2Q8TUK)" \
+  "build/macos/Build/Products/Release/qaul.net – قول.app"
+
+echo ""
+echo "Retrieving application version..."
 
 VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
 echo "Using App Version: $VERSION"
@@ -28,15 +34,5 @@ sed -i sed "s/\"title\": \".*\"/\"title\": \"qaul-$VERSION\"/g" config.json
 
 echo ""
 echo "Updating the signing identity on config.json..."
-
-# Get list of certificates available locally, filtering out revoked ones.
-#SIGNING_IDENTITY=$(
-#  security find-identity -v -p codesigning |
-#    grep --invert-match "(CSSMERR_TP_CERT_REVOKED)" |
-#    grep "Apple Distribution: Verein zur Forderung von offenen Community-Projekten" |
-#    awk '{ print $2 }' |
-#    head -n1 \
-#)
-#sed -i sed "s/\"signing-identity\": \".*\"/\"signing-identity\": \"$SIGNING_IDENTITY\"/g" config.json
 
 npx appdmg ./config.json "qaul-$VERSION.dmg"
