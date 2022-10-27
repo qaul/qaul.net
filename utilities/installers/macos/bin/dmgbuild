@@ -1,4 +1,5 @@
 #! /bin/bash
+set -eo pipefail
 
 # Pre-step: assert that the script is being run from rust/libqaul
 PATTERN="^.*/installers/macos/bin\$"
@@ -7,18 +8,53 @@ if [[ ! $(pwd) =~ $PATTERN ]]; then
   exit 1
 fi
 
+PRODUCT_NAME="qaul.net – قول.app"
+EXPORT_PATH="build/macos/Build/Products/Release"
+APP_PATH="$EXPORT_PATH/$PRODUCT_NAME"
+
+# -------------------------------------------------------------------------------
+# STEP 1 - Compile Signed MacOS App
 echo ""
 echo "Building MacOS Flutter App..."
 
 cd ../../../../qaul_ui || exit 1
 flutter build macos --release
 
+# -------------------------------------------------------------------------------
+# STEP 2 - Validate and Notarize App
+# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
 echo ""
-echo "Signing *.App file with 'Developer ID Application' certificate..."
-codesign --force --deep \
-  -s "Developer ID Application: Verein zur Forderung von offenen Community-Projekten (VVYZ2Q8TUK)" \
-  "build/macos/Build/Products/Release/qaul.net – قول.app"
+echo "Validating App signature..."
+# use codesign -vvv for extra verbosity
+# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735
+codesign -vv --deep --strict "$APP_PATH"
 
+echo ""
+echo "Validating the Developer ID Certificate..."
+# add the --raw option to generate a more detailed output
+# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087721
+spctl -vvv --assess --type exec "$APP_PATH"
+
+echo ""
+echo "Submitting the application for notarization..."
+
+ZIP_PATH="$EXPORT_PATH/$PRODUCT_NAME.zip"
+ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+
+# This assumes that a valid profile named "NOTARY_PASSWORD" is available in the Keychain.
+# The following command creates such profile:
+# xcrun notarytool store-credentials "NOTARY_PASSWORD" \
+#               --apple-id "AC_USERNAME" \
+#               --team-id <WWDRTeamID> \
+#               --password <secret_2FA_password>
+# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow
+# See: https://support.apple.com/en-us/HT204397
+xcrun notarytool submit "$ZIP_PATH" --keychain-profile "NOTARY_PASSWORD" --wait
+
+xcrun stapler staple "$APP_PATH"
+
+# -------------------------------------------------------------------------------
+# STEP 3 - Build and sign *.dmg
 echo ""
 echo "Retrieving application version..."
 
