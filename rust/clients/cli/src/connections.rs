@@ -30,9 +30,37 @@ impl Connections {
             }
             // add an internet node
             cmd if cmd.starts_with("nodes add ") => {
-                let address = cmd.strip_prefix("nodes add ").unwrap();
+                let args_str = cmd.strip_prefix("nodes add ").unwrap();
+                let mut iter = args_str.split_whitespace();
 
-                Self::internet_node_add(String::from(address));
+                if let Some(address) = iter.next() {
+                    let mut address_str = address.to_string();
+                    address_str.push(' ');
+                    if let Some(name) = args_str.strip_prefix(address_str.as_str()) {
+                        Self::internet_node_add(String::from(address), String::from(name));
+                    } else {
+                        log::error!("usage: connections nodes add address name");
+                    }
+                } else {
+                    log::error!("usage: connections nodes add address name");
+                }
+            }
+            // rename internet peer node
+            cmd if cmd.starts_with("nodes rename ") => {
+                let args_str = cmd.strip_prefix("nodes rename ").unwrap();
+                let mut iter = args_str.split_whitespace();
+
+                if let Some(address) = iter.next() {
+                    let mut address_str = address.to_string();
+                    address_str.push(' ');
+                    if let Some(name) = args_str.strip_prefix(address_str.as_str()) {
+                        Self::internet_node_rename(String::from(address), String::from(name));
+                    } else {
+                        log::error!("usage: connections nodes rename address name");
+                    }
+                } else {
+                    log::error!("usage: connections nodes rename address name");
+                }
             }
             // remove an internet node
             cmd if cmd.starts_with("nodes remove ") => {
@@ -71,12 +99,30 @@ impl Connections {
     }
 
     /// send an RPC message to add a new internet peer node connection
-    fn internet_node_add(address: String) {
+    fn internet_node_add(address: String, name: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesAdd(
                 proto::InternetNodesEntry {
                     address,
+                    name,
+                    enabled: true,
+                },
+            )),
+        };
+
+        // send message
+        Self::send_message(proto_message);
+    }
+
+    /// send an RPC message to add a new internet peer node connection
+    fn internet_node_rename(address: String, name: String) {
+        // create message
+        let proto_message = proto::Connections {
+            message: Some(proto::connections::Message::InternetNodesRename(
+                proto::InternetNodesEntry {
+                    address,
+                    name,
                     enabled: true,
                 },
             )),
@@ -95,6 +141,7 @@ impl Connections {
             message: Some(proto::connections::Message::InternetNodesRemove(
                 proto::InternetNodesEntry {
                     address,
+                    name: String::from(""),
                     enabled: false,
                 },
             )),
@@ -113,6 +160,7 @@ impl Connections {
             message: Some(proto::connections::Message::InternetNodesState(
                 proto::InternetNodesEntry {
                     address,
+                    name: String::from(""),
                     enabled: true,
                 },
             )),
@@ -130,6 +178,7 @@ impl Connections {
             message: Some(proto::connections::Message::InternetNodesState(
                 proto::InternetNodesEntry {
                     address,
+                    name: String::from(""),
                     enabled: false,
                 },
             )),
@@ -203,10 +252,13 @@ impl Connections {
                         };
 
                         println!("Internet Peer Nodes List");
-                        println!("No. | Address | Enabled");
+                        println!("No. | Address | Name | Enabled");
 
                         for node in proto_list.nodes {
-                            println!("{} | {} | {}", line, node.address, node.enabled);
+                            println!(
+                                "{} | {} | {} | {}",
+                                line, node.address, node.name, node.enabled
+                            );
                             line += 1;
                         }
 

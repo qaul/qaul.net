@@ -14,12 +14,15 @@ message Connections {
         // Add a new internet node address.
         // libqaul returns an internet_nodes_list message.
         InternetNodesEntry internet_nodes_add = 3;
+        // Rename internet node.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesEntry internet_nodes_rename = 4;
         // Remove an internet node address.
         // libqaul returns an internet_nodes_list message.
-        InternetNodesEntry internet_nodes_remove = 4;
+        InternetNodesEntry internet_nodes_remove = 5;
         // Update an internet node state.
         // libqaul returns an internet_nodes_list message.
-        InternetNodesEntry internet_nodes_state = 5;
+        InternetNodesEntry internet_nodes_state = 6;
     }
 }
 
@@ -73,6 +76,8 @@ enum Info {
 message InternetNodesEntry {
     // address
     string address = 1;
+   // name
+    string name = 2;
     // enabled
-    bool enabled = 2;
+    bool enabled = 3;
 }

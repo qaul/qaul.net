@@ -1,7 +1,7 @@
 /// Connections rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Connections {
-    #[prost(oneof="connections::Message", tags="1, 2, 3, 4, 5")]
+    #[prost(oneof="connections::Message", tags="1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<connections::Message>,
 }
 /// Nested message and enum types in `Connections`.
@@ -20,13 +20,17 @@ pub mod connections {
         /// libqaul returns an internet_nodes_list message.
         #[prost(message, tag="3")]
         InternetNodesAdd(super::InternetNodesEntry),
-        /// Remove an internet node address.
+        /// Rename internet node.
         /// libqaul returns an internet_nodes_list message.
         #[prost(message, tag="4")]
+        InternetNodesRename(super::InternetNodesEntry),
+        /// Remove an internet node address.
+        /// libqaul returns an internet_nodes_list message.
+        #[prost(message, tag="5")]
         InternetNodesRemove(super::InternetNodesEntry),
         /// Update an internet node state.
         /// libqaul returns an internet_nodes_list message.
-        #[prost(message, tag="5")]
+        #[prost(message, tag="6")]
         InternetNodesState(super::InternetNodesEntry),
     }
 }
@@ -62,8 +66,11 @@ pub struct InternetNodesEntry {
     /// address
     #[prost(string, tag="1")]
     pub address: ::prost::alloc::string::String,
+    /// name
+    #[prost(string, tag="2")]
+    pub name: ::prost::alloc::string::String,
     /// enabled
-    #[prost(bool, tag="2")]
+    #[prost(bool, tag="3")]
     pub enabled: bool,
 }
 /// Information about the system actions that led to 
