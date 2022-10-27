@@ -60,6 +60,7 @@ impl Default for Lan {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct InternetPeer {
     pub address: String,
+    pub name: String,
     pub enabled: bool,
 }
 
@@ -90,6 +91,7 @@ impl Default for Internet {
             active: true,
             peers: vec![InternetPeer {
                 address: String::from("/ip4/144.91.74.192/tcp/9229"),
+                name: String::from("default server"),
                 enabled: false,
             }],
             do_listen: false,

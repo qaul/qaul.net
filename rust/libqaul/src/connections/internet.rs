@@ -42,7 +42,7 @@ use qaul_info::{QaulInfo, QaulInfoEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 use state::Storage;
 use std::{
-    collections::{BTreeMap, HashMap, VecDeque},
+    collections::{BTreeMap, HashMap},
     sync::RwLock,
 };
 
@@ -141,14 +141,6 @@ pub struct InternetReConnections {
     peers: HashMap<Multiaddr, InternetReConnection>,
 }
 static INTERNETRECONNECTIONS: Storage<RwLock<InternetReConnections>> = Storage::new();
-
-pub struct InternetChangeConnection {
-    pub address: Multiaddr,
-    pub enabled: bool,
-}
-static INTERNETCHANGECONNECTIONS: Storage<RwLock<VecDeque<InternetChangeConnection>>> =
-    Storage::new();
-
 static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage::new();
 
 #[derive(Debug)]
@@ -205,8 +197,6 @@ impl Internet {
         INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
             peers: HashMap::new(),
         }));
-
-        INTERNETCHANGECONNECTIONS.set(RwLock::new(VecDeque::<InternetChangeConnection>::new()));
         INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
 
         // TCP transport for android without DNS resolution
@@ -304,27 +294,16 @@ impl Internet {
         internet
     }
 
-    pub fn change_connection(address_str: String, enabled: bool) {
-        match address_str.parse::<Multiaddr>() {
-            Ok(address) => {
-                let mut change_connections = INTERNETCHANGECONNECTIONS.get().write().unwrap();
-                change_connections.push_back(InternetChangeConnection {
-                    address: address.clone(),
-                    enabled,
-                });
+    // check if conneciton is active
+    pub fn is_active_connection(address: &Multiaddr) -> bool {
+        let config = Configuration::get();
+        let address_str = address.to_string();
+        for peer in &config.internet.peers {
+            if address_str == peer.address {
+                return peer.enabled;
             }
-            Err(_) => {}
         }
-    }
-
-    /// check change connection
-    pub fn check_change_connection() -> Option<(Multiaddr, bool)> {
-        let mut change_connections = INTERNETCHANGECONNECTIONS.get().write().unwrap();
-        if change_connections.len() > 0 {
-            let cnn = change_connections.pop_front().unwrap();
-            return Some((cnn.address.clone(), cnn.enabled));
-        }
-        None
+        return false;
     }
 
     /// connect to remote peers that are specified in

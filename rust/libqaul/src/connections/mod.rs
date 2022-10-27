@@ -137,18 +137,22 @@ impl Connections {
                                     // add to config
                                     config.internet.peers.push(InternetPeer {
                                         address: nodes_entry.address.clone(),
+                                        name: nodes_entry.name.clone(),
                                         enabled: true,
                                     });
 
                                     // connect to node
                                     if let Some(internet) = internet_opt {
-                                        // if we already have connection history, we need to remove from banned list.
+                                        let mut connected = false;
+                                        // if we already have connection history, check if there is connected
                                         if let Some(peer_id) = Internet::peerid_from_address(
                                             nodes_entry.address.clone(),
                                         ) {
-                                            internet.swarm.unban_peer_id(peer_id);
+                                            connected = internet.swarm.is_connected(&peer_id);
                                         }
-                                        Internet::peer_dial(address, &mut internet.swarm);
+                                        if connected == false {
+                                            Internet::peer_dial(address, &mut internet.swarm);
+                                        }
                                     }
                                 }
                                 Err(e) => {
@@ -166,6 +170,44 @@ impl Connections {
                         // send response message
                         Self::rpc_send_node_list(info);
                     }
+
+                    Some(proto::connections::Message::InternetNodesRename(nodes_entry)) => {
+                        let mut info = proto::Info::RemoveErrorNotFound;
+                        {
+                            let mut nodes: Vec<InternetPeer> = Vec::new();
+
+                            // get config
+                            let mut config = Configuration::get_mut();
+
+                            // loop through addresses and remove the equal
+                            for peer in &config.internet.peers {
+                                if peer.address == nodes_entry.address {
+                                    // address has been found and is
+                                    // therefore removed.
+                                    nodes.push(InternetPeer {
+                                        address: peer.address.clone(),
+                                        name: nodes_entry.name.clone(),
+                                        enabled: peer.enabled,
+                                    });
+                                    info = proto::Info::StateSuccess;
+                                } else {
+                                    // addresses do not match.
+                                    // add this address to the new vector.
+                                    nodes.push(peer.clone());
+                                }
+                            }
+                            // add new nodes list to configuration
+                            config.internet.peers = nodes;
+                        }
+
+                        // save configuration
+                        if info == proto::Info::StateSuccess {
+                            Configuration::save();
+                        }
+                        // send response
+                        Self::rpc_send_node_list(info);
+                    }
+
                     Some(proto::connections::Message::InternetNodesRemove(nodes_entry)) => {
                         let mut info = proto::Info::RemoveErrorNotFound;
 
@@ -194,11 +236,14 @@ impl Connections {
                         // save configuration
                         Configuration::save();
 
-                        // check connection and deactivate node
-                        if let Some(_id) =
+                        // check connection and disconnect node
+                        if let Some(peer_id) =
                             Internet::peerid_from_address(nodes_entry.address.clone())
                         {
-                            Internet::change_connection(nodes_entry.address.clone(), false);
+                            let internet = internet_opt.unwrap();
+                            if internet.swarm.is_connected(&peer_id) {
+                                if let Err(_) = internet.swarm.disconnect_peer_id(peer_id) {}
+                            }
                         }
 
                         // send response
@@ -221,6 +266,7 @@ impl Connections {
                                     // therefore removed.
                                     nodes.push(InternetPeer {
                                         address: peer.address.clone(),
+                                        name: peer.name.clone(),
                                         enabled: nodes_entry.enabled,
                                     });
                                     info = proto::Info::StateSuccess;
@@ -242,18 +288,25 @@ impl Connections {
                         Configuration::save();
 
                         if info == proto::Info::StateSuccess && changed_state == true {
+                            let internet = internet_opt.unwrap();
                             // already has connection history, we simply handle banned peer list
-                            if let Some(_) =
-                                Internet::peerid_from_address(nodes_entry.address.clone())
-                            {
-                                Internet::change_connection(
-                                    nodes_entry.address.clone(),
-                                    nodes_entry.enabled,
-                                );
-                            } else if nodes_entry.enabled == true {
-                                // already we don't have connection history and it's activate request.
-                                // we redial connection
-                                if let Some(internet) = internet_opt {
+                            if nodes_entry.enabled == false {
+                                if let Some(peer_id) =
+                                    Internet::peerid_from_address(nodes_entry.address.clone())
+                                {
+                                    if internet.swarm.is_connected(&peer_id) {
+                                        if let Err(_) = internet.swarm.disconnect_peer_id(peer_id) {
+                                        }
+                                    }
+                                }
+                            } else {
+                                let mut connected = false;
+                                if let Some(peer_id) =
+                                    Internet::peerid_from_address(nodes_entry.address.clone())
+                                {
+                                    connected = internet.swarm.is_connected(&peer_id);
+                                }
+                                if connected == false {
                                     let address_result: Result<
                                         Multiaddr,
                                         libp2p::multiaddr::Error,
@@ -287,6 +340,7 @@ impl Connections {
         for peer in &config.internet.peers {
             nodes.push(proto::InternetNodesEntry {
                 address: peer.address.clone(),
+                name: peer.name.clone(),
                 enabled: peer.enabled,
             });
         }

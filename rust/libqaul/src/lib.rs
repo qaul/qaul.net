@@ -344,7 +344,12 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             match error {
                                 libp2p::swarm::DialError::Transport(unreachable_addrs) => {
                                     for (addr, _) in unreachable_addrs {
-                                        Internet::add_reconnection(addr);
+
+                                        //check if address is active
+                                        if Internet::is_active_connection(&addr){
+                                            Internet::add_reconnection(addr);
+                                        }
+
                                     }
                                 },
                                 _ => {}
@@ -369,7 +374,10 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             // add new reconnection
                             match endpoint {
                                 libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                    Internet::add_reconnection(address);
+                                    //check if address is active
+                                    if Internet::is_active_connection(&address){
+                                        Internet::add_reconnection(address);
+                                    }
                                 }
                                 _ => {}
                             }
@@ -634,16 +642,6 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         log::trace!("redial....: {:?}", addr);
                         Internet::peer_redial(&addr, &mut internet.swarm).await;
                         Internet::set_redialed(&addr);
-                    }
-
-                    if let Some((addr, enabled)) = Internet::check_change_connection() {
-                        if let Some(peer_id) = Internet::peerid_from_address(addr.to_string()) {
-                            if !enabled {
-                                internet.swarm.ban_peer_id(peer_id.clone());
-                            } else {
-                                internet.swarm.unban_peer_id(peer_id.clone());
-                            }
-                        }
                     }
                 }
                 EventType::RoutingTable(_) => {
