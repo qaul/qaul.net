@@ -458,7 +458,7 @@ impl ConnectionTable {
 
                 // put connection for removal if expired
                 if expired {
-                    log::warn!(
+                    log::info!(
                         "expired entry={},  hc={}",
                         (now - value.last_update),
                         value.hc

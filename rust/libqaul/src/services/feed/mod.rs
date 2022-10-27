@@ -473,9 +473,9 @@ impl Feed {
                 match res {
                     Ok((_id, message)) => {
                         if feed.messages.contains_key(&message.message_id) {
-                            log::error!("key exist");
+                            log::info!("key exist");
                         } else {
-                            log::error!("key find error");
+                            log::info!("key find error");
                         }
 
                         let sender_id_base58 =

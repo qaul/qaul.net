@@ -30,9 +30,9 @@ The zeroed values mean, the node listens on every address and it chooses
 a random free port where it starts to listen on.
 
 
-## Configuring the Server
+## Configuring a Static Node
 
-In order for the server to be approachable by others you need to fix the network port to a specific number.
+In order for the a node to be approachable by others you need to fix the network port to a specific number.
 By default qaul.net nodes shall listen on port `9229`.
 
 Your new internet configuration looks like this: `/ip4/0.0.0.0/tcp/9229`

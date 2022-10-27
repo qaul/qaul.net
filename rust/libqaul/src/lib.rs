@@ -354,7 +354,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             //remove from attempting connections
                             match endpoint{
                                 libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                    log::error!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
+                                    log::info!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
                                     Internet::remove_reconnection(address.clone());
                                     Internet::add_connection(address.to_string(), &peer_id);
                                 }

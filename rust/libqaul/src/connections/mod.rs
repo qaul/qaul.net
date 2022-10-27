@@ -194,7 +194,7 @@ impl Connections {
                         // save configuration
                         Configuration::save();
 
-                        // check connection and deactive node
+                        // check connection and deactivate node
                         if let Some(_id) =
                             Internet::peerid_from_address(nodes_entry.address.clone())
                         {
@@ -240,8 +240,6 @@ impl Connections {
 
                         // save configuration
                         Configuration::save();
-
-                        // TODO: stop connection to removed host
 
                         if info == proto::Info::StateSuccess && changed_state == true {
                             // already has connection history, we simply handle banned peer list

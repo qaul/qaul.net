@@ -3,7 +3,9 @@
 
 //! # qauld - qaul Daemon
 //!
-//! qaul Daemon is running headless on servers in the background
+//! qaul daemon is running headless in the background.
+//! It can be used to run on an embedded device, such as a raspberry Pi,
+//! or as a static node on a server in the Internet.
 
 use clap::{App, Arg};
 use std::collections::BTreeMap;
@@ -37,11 +39,11 @@ pub fn get_argument(pattern: &str) -> Option<String> {
     }
 }
 
-/// create a default user account for zero configuration Community Server startups
+/// create a default user account for zero configuration Community Node startups
 /// without providing a user name
 pub fn create_default_named() -> String {
     let mut user_name: String;
-    user_name = "Community Server ".to_string();
+    user_name = "Community Node ".to_string();
     user_name.push_str(
         libqaul::utilities::timestamp::Timestamp::get_timestamp()
             .to_string()

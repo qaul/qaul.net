@@ -1,6 +1,6 @@
 # Build a Debian Installer of the qauld Deamon
 
-Build a Debian installer on Linux of `qauld`, the qaul server daemon
+Build a Debian installer on Linux of `qauld`, the qaul daemon
 
 ## Install Requirements
 

@@ -3,7 +3,7 @@ name = "qauld"
 version = "2.0.0-beta.5"
 authors = ["qaul.net community <contact@qaul.net>"]
 edition = "2021"
-description = "qaul.net community server daemon"
+description = "qaul daemon"
 license = "AGPL-3.0"
 readme = "README.md"
 homepage = "https://qaul.net"
@@ -32,7 +32,7 @@ extended-description = """\
 qaul – قول project https://qaul.net \
 Internet Independent Wireless Mesh Communication \
 \
-Contains the qauld server daemon & qaul-cli binaries \
+Contains the qauld daemon \
 """
 depends = "$auto"
 section = "network"

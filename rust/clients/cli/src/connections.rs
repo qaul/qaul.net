@@ -24,33 +24,33 @@ impl Connections {
     /// The CLI commands of users are processed here
     pub fn cli(command: &str) {
         match command {
-            // request list of all internet peer nodes
+            // request list of all internet nodes
             cmd if cmd.starts_with("nodes list") => {
                 Self::internet_nodes_list();
             }
-            // add internet peer node
+            // add an internet node
             cmd if cmd.starts_with("nodes add ") => {
                 let address = cmd.strip_prefix("nodes add ").unwrap();
 
                 Self::internet_node_add(String::from(address));
             }
-            // remove an internet peer node
+            // remove an internet node
             cmd if cmd.starts_with("nodes remove ") => {
                 let address = cmd.strip_prefix("nodes remove ").unwrap();
 
                 Self::internet_node_remove(String::from(address));
             }
-            // active an internet peer node
-            cmd if cmd.starts_with("nodes active ") => {
-                let address = cmd.strip_prefix("nodes active ").unwrap();
+            // activate an internet node
+            cmd if cmd.starts_with("nodes activate ") => {
+                let address = cmd.strip_prefix("nodes activate ").unwrap();
 
-                Self::internet_node_active(String::from(address));
+                Self::internet_node_activate(String::from(address));
             }
-            // active an internet peer node
-            cmd if cmd.starts_with("nodes deactive ") => {
-                let address = cmd.strip_prefix("nodes deactive ").unwrap();
+            // deactivate an internet node
+            cmd if cmd.starts_with("nodes deactivate ") => {
+                let address = cmd.strip_prefix("nodes deactivate ").unwrap();
 
-                Self::internet_node_deactive(String::from(address));
+                Self::internet_node_deactivate(String::from(address));
             }
             // unknown command
             _ => log::error!("unknown connections command"),
@@ -104,10 +104,10 @@ impl Connections {
         Self::send_message(proto_message);
     }
 
-    /// Send an rpc message to active a specific internet peer node connection
+    /// Send an rpc message to activate a specific internet peer node connection
     ///
     /// The nodes are specified by their libp2p multiaddress
-    fn internet_node_active(address: String) {
+    fn internet_node_activate(address: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesState(
@@ -121,10 +121,10 @@ impl Connections {
         Self::send_message(proto_message);
     }
 
-    /// Send an rpc message to deactive a specific internet peer node connection
+    /// Send an rpc message to deactivate a specific internet peer node connection
     ///
     /// The nodes are specified by their libp2p multiaddress
-    fn internet_node_deactive(address: String) {
+    fn internet_node_deactivate(address: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesState(
