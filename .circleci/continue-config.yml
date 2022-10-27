@@ -582,14 +582,6 @@ jobs:
                 command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
                 name: Build qauld for Raspberry pi
             - save-sccache-cache
-            - run:
-                command: |
-                    cd rust/target/
-                    mkdir qauld-debian-packages
-                    mv debian/*.deb armv7-unknown-linux-gnueabihf/debian/*.deb qauld-debian-packages
-                    cd qauld-debian-packages
-                    zip qauld-debian-packages *
-                name: zip debian files
             - persist_to_workspace:
                 paths:
                     - rust/target/debian/*.deb
@@ -926,18 +918,18 @@ jobs:
 
                     cd artifacts
 
-                    AMD64_FILE=$(filename deb | grep "amd64" cut -f1)
-                    ARMHF_FILE=$(filename deb | grep "armhf" cut -f1)
+                    AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+                    ARMHF_FILE=$(filename deb | grep "armhf" |cut -f1)
 
-                    DESCRIPTION=$(cat utilities/release-templates/rust-release-template.md \
+                    DESCRIPTION=$(cat ../utilities/release-templates/rust-release-template.md \
                       | sed "s/TAGNAME/${TAG}/g" \
-                      | set "s/DEB_AMD/${AMD64_FILE}/g" \
-                      | set "s/DEB_ARM/${ARMHF_FILE}/g" \
+                      | sed "s/DEB_AMD/${AMD64_FILE}/g" \
+                      | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
                     )
 
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
-                    echo "Description:
+                    echo "Description:"
                     echo "$DESCRIPTION"
                     echo ""
 
@@ -947,6 +939,7 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "Libqaul and CLI - v${VERSION}" \
                       -b "${DESCRIPTION}" \
+                      -replace \
                       "${TAG}" .
                 name: Publish Release on GitHub
     test-flutter:
