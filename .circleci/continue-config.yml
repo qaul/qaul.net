@@ -857,6 +857,7 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "qaul.net App - v${VERSION}" \
                       -b "${DESCRIPTION}" \
+                      -replace \
                       "${TAG}" .
                 name: Publish Release on GitHub
     publish-rust-github-release:
