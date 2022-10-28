@@ -20,6 +20,10 @@ echo "Building MacOS Flutter App..."
 cd ../../../../qaul_ui || exit 1
 flutter build macos --release
 
+#codesign --force --verbose --timestamp --options=runtime \
+#  --sign "Developer ID Application: Verein zur Forderung von offenen Community-Projekten" \
+#  "$APP_PATH"
+
 # -------------------------------------------------------------------------------
 # STEP 2 - Validate and Notarize App
 # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
@@ -28,12 +32,7 @@ echo "Validating App signature..."
 # use codesign -vvv for extra verbosity
 # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735
 codesign -vv --deep --strict "$APP_PATH"
-
-echo ""
-echo "Validating the Developer ID Certificate..."
-# add the --raw option to generate a more detailed output
-# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087721
-spctl -vvv --assess --type exec "$APP_PATH"
+codesign -dvv "$APP_PATH"
 
 echo ""
 echo "Submitting the application for notarization..."
@@ -52,6 +51,13 @@ ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
 xcrun notarytool submit "$ZIP_PATH" --keychain-profile "NOTARY_PASSWORD" --wait
 
 xcrun stapler staple "$APP_PATH"
+
+#echo ""
+#echo "Validating the Notarized App..."
+# add the --raw option to generate a more detailed output
+# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087721
+#spctl -vvv --assess --type exec <NOTARIZED APP PATH>
+#xcrun stapler validate <NOTARIZED APP PATH>
 
 # -------------------------------------------------------------------------------
 # STEP 3 - Build and sign *.dmg
