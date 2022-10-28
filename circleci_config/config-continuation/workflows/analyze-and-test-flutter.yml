@@ -8,12 +8,11 @@ jobs:
 #        branches:
 #          only:
 #            - main
-  - integration-test-flutter-macos
-#  - integration-test-flutter-macos:
-#      filters:
-#        branches:
-#          only:
-#            - main
+  - integration-test-flutter-macos:
+      filters:
+        branches:
+          only:
+            - main
 #  - integration-test-flutter-linux # TODO: Fix, failing
 #  - integration-test-flutter-windows # TODO: Fix, failing
 #  - integration-test-flutter-android # TODO: Fix, failing

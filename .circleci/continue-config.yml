@@ -1030,7 +1030,11 @@ workflows:
         jobs:
             - test-flutter
             - analyze-flutter
-            - integration-test-flutter-macos
+            - integration-test-flutter-macos:
+                filters:
+                    branches:
+                        only:
+                            - main
         when: << pipeline.parameters.run-flutter-workflow >>
     build-and-deploy-flutter-android:
         jobs:
