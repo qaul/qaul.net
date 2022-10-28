@@ -66,11 +66,11 @@ flutter-linux:
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
-    xcode: 13.0.0
+    xcode: 14.0.1
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.3.1"
+    FLUTTER_VERSION: "3.3.6"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ubuntu-lean:
   working_directory: ~/qaul-libp2p/qaul_ui
