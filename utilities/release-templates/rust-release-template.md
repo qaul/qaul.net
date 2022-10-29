@@ -1,33 +1,14 @@
-## Desktop Assets :desktop_computer:
-### CLI Binaries:
-* **Linux**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries.zip)
-* **MacOS**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/macos-cli-binaries.zip)
-* **Windows**: [qaul-cli/qauld](https://github.com/qaul/qaul.net/releases/download/TAGNAME/windows-cli-binaries.zip)
+## qaul CLI Tools (qaul-cli & qauld)
 
-### qauld (qaul server daemon) debian installer
-* [qauld - amd](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_AMD.deb)
-* [qauld - arm (Raspberry pi)](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM.deb)
+The CLI tools can be used to run qaul from the terminal. For example on an embedded computer without a screen such as a Raspberry Pi or on a Server in the Internet.
 
-### Linux:
-*\*.so* library - [liblibqaul.so](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.so)
+**qaul-cli** is the interactive qaul CLI client for communicating over the qaul net via the terminal.
 
-### MacOS:
-*\*.dylib* library - [liblibqaul.dylib](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.dylib)
+**qauld** is the qaul daemon to be run in the background and work as a _Community Node_ in the network.
 
-### Windows:
-*\*.dll* library - [libqaul.dll](https://github.com/qaul/qaul.net/releases/download/TAGNAME/libqaul.dll)
-
-## Mobile Assets :iphone:
-### Android
-Any *\*.aar* files, namely:
-* `blemodule-<BUILD_TYPE>.aar`
-    * [blemodule-release.aar](https://github.com/qaul/qaul.net/releases/download/TAGNAME/blemodule-release.aar)
-    * [blemodule-debug.aar](https://github.com/qaul/qaul.net/releases/download/TAGNAME/blemodule-debug.aar)
-* `libqaul-<BUILD_TYPE>.aar`
-    * [libqaul-release.aar](https://github.com/qaul/qaul.net/releases/download/TAGNAME/libqaul-release.aar)
-    * [libqaul-debug.aar](https://github.com/qaul/qaul.net/releases/download/TAGNAME/libqaul-debug.aar)
-
-### iOS
-*\*.a* and *\*.h* files, namely:
-* [liblibqaul.a](https://github.com/qaul/qaul.net/releases/download/TAGNAME/liblibqaul.a)
-* [libqaul.h](https://github.com/qaul/qaul.net/blob/main/rust/include/libqaul.h)
+* [Windows CLI Tools](https://github.com/qaul/qaul.net/releases/download/TAGNAME/windows-cli-binaries.zip)
+* [MacOS CLI Tools](https://github.com/qaul/qaul.net/releases/download/TAGNAME/macos-cli-binaries.zip)
+* Linux
+  * [Linux CLI Tools](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries.zip)
+  * [qauld Debian Installer - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_AMD.deb)
+  * [qauld Debian Installer - armhf (for Raspberry Pi)](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM.deb)

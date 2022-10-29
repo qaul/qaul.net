@@ -5,7 +5,7 @@ description: Communicate directly from device to device via your local wifi netw
 
 confinement: strict
 base: core18
-grade: devel
+grade: stable
 
 slots:
   dbus-qaul:

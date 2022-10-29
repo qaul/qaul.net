@@ -1,9 +1,8 @@
-## Desktop Installers :desktop_computer:
-* **Linux**:   [*\*.snap*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/SNAPVERSION.snap)
-* **MacOS**:   [*\*.dmg*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/MACOSVERSION.dmg)
-* **Windows**: [*\*.exe*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/WINDOWSVERSION.exe)
+## qaul App Installers
 
-## Mobile Applications :iphone:
-* **Android**:         [*\*.aab*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/ANDROIDVERSION.aab)
-* **iOS (ipa)**:       [*\*.ipa*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/IPAVERSION.ipa)
-* **iOS (xcarchive)**: [*\*.xcarchive*](https://github.com/qaul/qaul.net/releases/download/TAGNAME/XCAVERSION.xcarchive)
+Download and install qaul on your device and share the app with others.
+
+* [Windows Installer](https://github.com/qaul/qaul.net/releases/download/TAGNAME/WINDOWSVERSION.exe)
+* [MacOS Installer](https://github.com/qaul/qaul.net/releases/download/TAGNAME/MACOSVERSION.dmg)
+* [Linux Snap Package](https://github.com/qaul/qaul.net/releases/download/TAGNAME/SNAPVERSION.snap)
+* [Android Universal APK](https://github.com/qaul/qaul.net/releases/download/TAGNAME/MACOSVERSION.apk)
