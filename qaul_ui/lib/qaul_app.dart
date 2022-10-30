@@ -136,7 +136,6 @@ class QaulApp extends PlatformAwareBuilder {
 
                 return ResponsiveWrapper.builder(
                   child,
-                  maxWidth: 828,
                   minWidth: 370,
                   breakpoints: const [
                     ResponsiveBreakpoint.resize(350.0,
