@@ -33,6 +33,7 @@ class QaulApp extends PlatformAwareBuilder {
             const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         iconTheme: IconThemeData(color: Colors.grey.shade600),
         appBarTheme: AppBarTheme(
+          toolbarHeight: 72,
           color: Colors.transparent,
           elevation: 0.0,
           // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
@@ -83,6 +84,7 @@ class QaulApp extends PlatformAwareBuilder {
         tooltipTheme:
             const TooltipThemeData(waitDuration: Duration(seconds: 1)),
         appBarTheme: const AppBarTheme(
+          toolbarHeight: 72,
           elevation: 0.0,
           color: Color(0xff212121),
           shadowColor: Color(0xff212121),
