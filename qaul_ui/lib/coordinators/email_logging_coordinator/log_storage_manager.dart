@@ -107,6 +107,7 @@ class _LogStorageManager {
       await oldest.delete();
     }
     while ((await logFolderSize) > _maxSizeInBytes) {
+      if (sortedLogs.isEmpty) break;
       final oldest = sortedLogs.removeAt(0);
       await oldest.delete();
     }
