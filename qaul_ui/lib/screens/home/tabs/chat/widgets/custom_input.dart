@@ -159,9 +159,11 @@ class _CustomInputState extends State<_CustomInput> {
                             Expanded(
                               child: TextField(
                                 controller: _textController,
+                                style: const TextStyle(fontSize: 19),
                                 decoration: InputDecoration(
-                                    labelText: AppLocalizations.of(context)!
-                                        .chatEmptyMessageHint),
+                                  labelText: AppLocalizations.of(context)!
+                                      .chatEmptyMessageHint,
+                                ),
                                 focusNode: _inputFocusNode,
                                 keyboardType: TextInputType.multiline,
                                 maxLines: 5,

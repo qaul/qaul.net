@@ -335,6 +335,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
               ],
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              sentMessageBodyTextStyle: const TextStyle(
+                fontSize: 17,
+                color: Colors.white,
+              ),
+              receivedMessageBodyTextStyle: const TextStyle(fontSize: 17),
             ),
           ),
         ),
@@ -466,39 +471,40 @@ extension _MessageExtension on Message {
   String _translateGroupEventMessage(GroupEventContent message, User author,
       {required AppLocalizations l10n}) {
     if (message.type == GroupEventContentType.none) {
-    return '';
-  }
-
-  if (message.type == GroupEventContentType.created) {
-      return l10n.groupStateEventCreated;
-  } else if (message.type == GroupEventContentType.closed) {
-      return l10n.groupStateEventClosed;
-  } else {
-    String event = '';
-    switch (message.type) {
-      case GroupEventContentType.invited:
-        event = l10n.groupEventInvited;
-        break;
-      case GroupEventContentType.inviteAccepted:
-        event = l10n.groupEventInviteAccepted;
-        break;
-      case GroupEventContentType.joined:
-        event = l10n.groupEventJoined;
-        break;
-      case GroupEventContentType.left:
-        event = l10n.groupEventLeft;
-        break;
-      case GroupEventContentType.removed:
-        event = l10n.groupEventRemoved;
-        break;
-      case GroupEventContentType.none:
-      case GroupEventContentType.created:
-      case GroupEventContentType.closed:
-        break;
+      return '';
     }
 
-    return l10n.groupMemberEvent(author.name, event);
-  }}
+    if (message.type == GroupEventContentType.created) {
+      return l10n.groupStateEventCreated;
+    } else if (message.type == GroupEventContentType.closed) {
+      return l10n.groupStateEventClosed;
+    } else {
+      String event = '';
+      switch (message.type) {
+        case GroupEventContentType.invited:
+          event = l10n.groupEventInvited;
+          break;
+        case GroupEventContentType.inviteAccepted:
+          event = l10n.groupEventInviteAccepted;
+          break;
+        case GroupEventContentType.joined:
+          event = l10n.groupEventJoined;
+          break;
+        case GroupEventContentType.left:
+          event = l10n.groupEventLeft;
+          break;
+        case GroupEventContentType.removed:
+          event = l10n.groupEventRemoved;
+          break;
+        case GroupEventContentType.none:
+        case GroupEventContentType.created:
+        case GroupEventContentType.closed:
+          break;
+      }
+
+      return l10n.groupMemberEvent(author.name, event);
+    }
+  }
 }
 
 extension _UserExtension on User {
