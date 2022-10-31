@@ -376,14 +376,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
+    const radius = 20.0;
+
     return Builder(builder: (context) {
       return Bubble(
+        nipRadius: 0,
+        nipWidth: 0.1,
+        nipHeight: radius,
+        radius: const Radius.circular(radius),
+        padding: const BubbleEdges.all(0),
         color: user.toInternalUser().id != message.author.id
             ? const Color(0xfff5f5f7)
             : Colors.lightBlue.shade700,
-        margin: nextMessageInGroup
-            ? const BubbleEdges.symmetric(horizontal: 6)
-            : null,
         nip: nextMessageInGroup
             ? BubbleNip.no
             : user.toInternalUser().id != message.author.id
