@@ -91,6 +91,7 @@ class _PublicState extends _BaseTabState<_Public> {
 
                 return QaulListTile.user(
                   author,
+                  useUserColorOnName: true,
                   content: Text(msg.content ?? '', style: theme.bodyText1),
                   trailingMetadata: Text(
                     sentAt,

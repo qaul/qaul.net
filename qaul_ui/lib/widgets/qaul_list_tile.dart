@@ -11,6 +11,7 @@ class QaulListTile extends StatelessWidget {
     this.onTap,
     this.onAvatarTap,
     this.isThreeLine = false,
+    this.useUserColorOnName = false,
     this.allowTapRouteToUserDetailsScreen = false,
     this.allowAvatarTapRouteToUserDetailsScreen = true,
   })  : assert(trailingIcon == null || trailingMetadata == null),
@@ -26,6 +27,7 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
+    bool useUserColorOnName = false,
     bool allowTapRouteToUserDetailsScreen = false,
     bool allowAvatarTapRouteToUserDetailsScreen = true,
   }) {
@@ -41,6 +43,7 @@ class QaulListTile extends StatelessWidget {
       onAvatarTap: onAvatarTap,
       allowAvatarTapRouteToUserDetailsScreen:
           allowAvatarTapRouteToUserDetailsScreen,
+      useUserColorOnName: useUserColorOnName,
     );
   }
 
@@ -53,6 +56,7 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onAvatarTap,
     bool isThreeLine = false,
+    bool useUserColorOnName = false,
     bool allowTapRouteToUserDetailsScreen = false,
     bool allowAvatarTapRouteToUserDetailsScreen = true,
   }) {
@@ -68,6 +72,7 @@ class QaulListTile extends StatelessWidget {
       onAvatarTap: onAvatarTap,
       allowAvatarTapRouteToUserDetailsScreen:
           allowAvatarTapRouteToUserDetailsScreen,
+      useUserColorOnName: useUserColorOnName,
     );
   }
 
@@ -99,6 +104,10 @@ class QaulListTile extends StatelessWidget {
 
   final bool allowAvatarTapRouteToUserDetailsScreen;
 
+  final bool useUserColorOnName;
+
+  Color get _userColor => colorGenerationStrategy(user!.idBase58);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -107,7 +116,10 @@ class QaulListTile extends StatelessWidget {
       user?.name ?? room?.name ?? 'Undefined Name',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: theme.bodyText1!.copyWith(fontWeight: FontWeight.bold),
+      style: theme.bodyText1!.copyWith(
+        fontWeight: FontWeight.bold,
+        color: useUserColorOnName ? _userColor : theme.bodyText1!.color,
+      ),
     );
 
     Widget title = trailingIcon != null
