@@ -100,5 +100,7 @@
   "securityNumber": "Номер безпеки",
   "securityNumberDialogDesc": "Будь ласка, переконайтеся, що особа, яку ви намагаєтеся перевірити, бачить той самий номер безпеки на своєму екрані, коли намагається підтвердити вас.",
   "groupStateEventCreated": "Групу створено",
-  "groupStateEventClosed": "Групу закрито"
+  "groupStateEventClosed": "Групу закрито",
+  "securePrivateMessageHint": "Безпечне приватне повідомлення",
+  "groupChatMessageHint": "Повідомлення групового чату"
 }

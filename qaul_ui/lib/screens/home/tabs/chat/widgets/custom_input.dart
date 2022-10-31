@@ -18,6 +18,7 @@ class _CustomInput extends StatefulWidget {
     Key? key,
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
+    required this.hintText,
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.initialText,
@@ -38,6 +39,8 @@ class _CustomInput extends StatefulWidget {
   final bool isDisabled;
 
   final String? disabledMessage;
+
+  final String hintText;
 
   @override
   _CustomInputState createState() => _CustomInputState();
@@ -161,8 +164,7 @@ class _CustomInputState extends State<_CustomInput> {
                                 controller: _textController,
                                 style: const TextStyle(fontSize: 19),
                                 decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context)!
-                                      .chatEmptyMessageHint,
+                                  labelText: widget.hintText,
                                 ),
                                 focusNode: _inputFocusNode,
                                 keyboardType: TextInputType.multiline,
