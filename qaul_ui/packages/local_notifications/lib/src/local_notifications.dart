@@ -103,7 +103,7 @@ class _LocalNotifications implements LocalNotifications {
 
   @override
   Future<void> displayNotification(LocalNotification message) async {
-    if (await FlutterAppBadger.isAppBadgeSupported()) {
+    if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported())) {
       FlutterAppBadger.updateBadgeCount(1);
     }
     await _localNotificationsPlugin.show(
@@ -116,13 +116,13 @@ class _LocalNotifications implements LocalNotifications {
 
   // ***************************************************************************
   void _onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
-    if (await FlutterAppBadger.isAppBadgeSupported()) {
+    if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported()) ){
       FlutterAppBadger.removeBadge();
     }
   }
 
   Future<void> _handleNewLocalNotificationOpened(NotificationResponse payload) async {
-    if (await FlutterAppBadger.isAppBadgeSupported()) {
+      if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported()) ){
       FlutterAppBadger.removeBadge();
     }
   }
