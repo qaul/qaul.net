@@ -22,6 +22,9 @@ class QaulApp extends PlatformAwareBuilder {
       light: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.lightBlue,
+        navigationBarTheme: const NavigationBarThemeData(
+          surfaceTintColor: Colors.black,
+        ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
@@ -70,6 +73,9 @@ class QaulApp extends PlatformAwareBuilder {
         primarySwatch: Colors.lightBlue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         iconTheme: const IconThemeData(color: Colors.white),
+        navigationBarTheme: const NavigationBarThemeData(
+          surfaceTintColor: Colors.white,
+        ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Colors.lightBlue,
           foregroundColor: Colors.black,

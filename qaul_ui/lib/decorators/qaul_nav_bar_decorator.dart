@@ -12,6 +12,7 @@ import '../widgets/widgets.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
+
   /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
   /// lost when the window is resized.
   final Widget Function(GlobalKey pageViewKey) child;
@@ -65,10 +66,16 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       mobileBody: Column(
-        children: [_buildHorizontalBar(context), Expanded(child: widget.child(_pageViewKey)),],
+        children: [
+          _buildHorizontalBar(context),
+          Expanded(child: widget.child(_pageViewKey)),
+        ],
       ),
       tabletBody: Row(
-        children: [_buildVerticalBar(context), Expanded(child: widget.child(_pageViewKey)),],
+        children: [
+          _buildVerticalBar(context),
+          Expanded(child: widget.child(_pageViewKey)),
+        ],
       ),
     );
   }
@@ -242,9 +249,11 @@ class QaulNavBarItem extends HookConsumerWidget {
         break;
     }
 
+    final activeColor = Theme.of(context).navigationBarTheme.surfaceTintColor!;
     final button = _SelectedIndicatorDecorator(
-      selected: selected,
-      selectedColor: theme.colorScheme.primary,
+      isSelected: selected,
+      label: tooltip,
+        selectedColor: activeColor,
       child: SizedBox(
         width: _iconSize * sizeFactor,
         height: _iconSize * sizeFactor,
@@ -254,7 +263,7 @@ class QaulNavBarItem extends HookConsumerWidget {
           icon: SvgPicture.asset(
             svgPath,
             color: selected.value
-                ? theme.colorScheme.primary
+                ? activeColor
                 : theme.iconTheme.color,
             fit: BoxFit.cover,
             clipBehavior: Clip.none,
@@ -292,14 +301,16 @@ class QaulNavBarItem extends HookConsumerWidget {
 class _SelectedIndicatorDecorator extends StatelessWidget {
   const _SelectedIndicatorDecorator({
     Key? key,
-    required this.selected,
+    required this.isSelected,
+    required this.label,
     required this.selectedColor,
     required this.child,
   }) : super(key: key);
 
-  final ValueNotifier<bool> selected;
-  final Color selectedColor;
+  final ValueNotifier<bool> isSelected;
   final Widget child;
+  final String label;
+  final Color selectedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -307,22 +318,23 @@ class _SelectedIndicatorDecorator extends StatelessWidget {
       if (orientation != Orientation.landscape) return child;
 
       var indicatorLength = (24.0 + 8.0 + 8.0) * 1.5;
-      var side = BorderSide(
-        width: 2.0,
-        color: selected.value ? selectedColor : Colors.transparent,
-      );
-      return Stack(
-        alignment: AlignmentDirectional.bottomCenter,
+
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           child,
           Container(
-            height: 2.0,
-            width: indicatorLength,
-            alignment: Alignment.bottomCenter,
-            decoration: BoxDecoration(
-              border: Border(bottom: side),
-            ),
-          ),
+              width: indicatorLength,
+              margin: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                label.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 8,
+                  color: isSelected.value ? selectedColor : Colors.transparent,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
         ],
       );
     });
