@@ -78,7 +78,7 @@ class SplashScreen extends HookConsumerWidget {
                 QaulButton(
                   label: i10n.learnMore,
                   onPressed: () => launchUrl(
-                    Uri.parse('https://qaul.net'),
+                    Uri.parse('https://qaul.net/tutorials/onboarding/'),
                   ),
                 ),
               ],
