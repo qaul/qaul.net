@@ -103,5 +103,7 @@
   "securityNumber": "Nomor keamanan",
   "securityNumberDialogDesc": "Harap pastikan bahwa orang yang Anda coba verifikasi melihat nomor keamanan yang sama di layar mereka saat mencoba memverifikasi Anda.",
   "groupStateEventCreated": "Grup telah dibuat",
-  "groupStateEventClosed": "Grup telah ditutup"
+  "groupStateEventClosed": "Grup telah ditutup",
+  "securePrivateMessageHint": "Pesan pribadi yang aman",
+  "groupChatMessageHint": "Pesan obrolan grup"
 }

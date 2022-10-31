@@ -106,5 +106,7 @@
   "groupEventJoined": "entrou no",
   "groupEventLeft": "deixou o",
   "groupEventRemoved": "foi removido do",
-  "groupEventInviteAccepted": "aceitou o convite do"
+  "groupEventInviteAccepted": "aceitou o convite do",
+  "securePrivateMessageHint": "Mensagem privada segura",
+  "groupChatMessageHint": "Mensagem de grupo"
 }

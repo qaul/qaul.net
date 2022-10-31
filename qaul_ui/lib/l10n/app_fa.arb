@@ -100,5 +100,7 @@
   "securityNumber": "شماره امنیتی",
   "securityNumberDialogDesc": "لطفاً مطمئن شوید که شخصی که می\u200Cخواهید تأیید کنید، هنگام تلاش برای تأیید شما، همان شماره امنیتی را روی صفحه خود ببیند.",
   "groupStateEventCreated": "گروه ایجاد شده است",
-  "groupStateEventClosed": "گروه بسته شده است"
+  "groupStateEventClosed": "گروه بسته شده است",
+  "securePrivateMessageHint": "پیام خصوصی امن",
+  "groupChatMessageHint": "پیام چت گروهی"
 }

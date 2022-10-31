@@ -235,6 +235,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ? null
                   : 'Please wait for the admin to confirm your acceptance to send messages',
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+              hintText: room.isGroupChatRoom
+                  ? l10n.groupChatMessageHint
+                  : l10n.securePrivateMessageHint,
               onSendPressed: sendMessage,
               onAttachmentPressed: (room.messages?.isEmpty ?? true)
                   ? null
