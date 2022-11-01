@@ -82,6 +82,17 @@ class _ChatState extends _BaseTabState<_Chat> {
       }
     }, [mobile]);
 
+    final onNewChatFABPressed = useCallback(() async {
+      final newChat = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
+      );
+      if (newChat is User) {
+        final newRoom = ChatRoom.blank(otherUser: newChat);
+        setOpenChat(newRoom, newChat);
+      }
+    }, [setOpenChat]);
+
     final chatRoomsListView = CronTaskDecorator(
       callback: () => refreshChatsAndInvites(),
       schedule: const Duration(milliseconds: 1000),
@@ -174,25 +185,12 @@ class _ChatState extends _BaseTabState<_Chat> {
       ),
     );
 
-    final createChatButton = FloatingActionButton(
+    final createChatButton = QaulFAB(
+      size: 48,
       heroTag: 'chatTabFAB',
       tooltip: l10n.newChatTooltip,
-      onPressed: () async {
-        final newChat = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
-        );
-        if (newChat is User) {
-          final newRoom = ChatRoom.blank(otherUser: newChat);
-          setOpenChat(newRoom, newChat);
-        }
-      },
-      child: SvgPicture.asset(
-        'assets/icons/comment.svg',
-        width: 24,
-        height: 24,
-        color: Theme.of(context).floatingActionButtonTheme.foregroundColor,
-      ),
+      onPressed: onNewChatFABPressed,
+      svgAsset: 'assets/icons/comment.svg',
     );
 
     return ResponsiveLayout(

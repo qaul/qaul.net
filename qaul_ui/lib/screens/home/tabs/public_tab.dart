@@ -32,36 +32,33 @@ class _PublicState extends _BaseTabState<_Public> {
           lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max));
     }, [UniqueKey()]);
 
-    final l18ns = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     const bullhorn = 'assets/icons/public.svg';
+
+    final onCreatePublicMessagePressed = useCallback(
+      () async {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          barrierColor: Colors.transparent,
+          builder: (context) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: _CreatePublicMessage(),
+            );
+          },
+        );
+      },
+      [],
+    );
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      floatingActionButton: FloatingActionButton.large(
-        elevation: 0,
+      floatingActionButton: QaulFAB(
+        onPressed: onCreatePublicMessagePressed,
+        svgAsset: bullhorn,
         heroTag: 'publicTabFAB',
-        backgroundColor: Colors.white,
-        tooltip: l18ns!.createPublicPostTooltip,
-        shape: const CircleBorder(side: BorderSide(color: Colors.black)),
-        onPressed: () async {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            barrierColor: Colors.transparent,
-            builder: (context) {
-              return Padding(
-                padding: MediaQuery.of(context).viewInsets,
-                child: _CreatePublicMessage(),
-              );
-            },
-          );
-        },
-        child: SvgPicture.asset(
-          bullhorn,
-          width: 52,
-          height: 52,
-          color: Colors.grey.shade600,
-        ),
+        tooltip: l10n.createPublicPostTooltip,
       ),
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 2500),
@@ -69,7 +66,7 @@ class _PublicState extends _BaseTabState<_Public> {
         child: RefreshIndicator(
           onRefresh: () async => await refreshPublic(),
           child: EmptyStateTextDecorator(
-            l18ns.emptyPublicList,
+            l10n.emptyPublicList,
             isEmpty: filteredMessages.isEmpty,
             child: ListView.separated(
               controller: ScrollController(),
