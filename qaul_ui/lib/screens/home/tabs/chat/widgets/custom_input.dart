@@ -165,6 +165,22 @@ class _CustomInputState extends State<_CustomInput> {
                                 style: const TextStyle(fontSize: 19),
                                 decoration: InputDecoration(
                                   labelText: widget.hintText,
+                                  suffixIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (widget.onAttachmentPressed != null)
+                                        _AttachmentButton(
+                                          onPressed: () => _sendFilePressed(
+                                              widget.onAttachmentPressed),
+                                        ),
+                                      if (widget.onPickImagePressed != null)
+                                        _AttachmentButton(
+                                          icon: Icons.add_photo_alternate,
+                                          onPressed: () => _sendFilePressed(
+                                              widget.onPickImagePressed),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                                 focusNode: _inputFocusNode,
                                 keyboardType: TextInputType.multiline,
@@ -175,17 +191,6 @@ class _CustomInputState extends State<_CustomInput> {
                               ),
                             ),
                             const SizedBox(width: 16.0),
-                            if (widget.onAttachmentPressed != null)
-                              _AttachmentButton(
-                                onPressed: () => _sendFilePressed(
-                                    widget.onAttachmentPressed),
-                              ),
-                            if (widget.onPickImagePressed != null)
-                              _AttachmentButton(
-                                icon: Icons.add_photo_alternate,
-                                onPressed: () =>
-                                    _sendFilePressed(widget.onPickImagePressed),
-                              ),
                             Visibility(
                               visible: _sendButtonVisible,
                               child: _CustomSendButton(
@@ -259,6 +264,7 @@ class _AttachmentButton extends StatelessWidget {
       height: 24,
       margin: const EdgeInsets.only(right: 16),
       child: IconButton(
+        color: Theme.of(context).iconTheme.color,
         icon: Icon(icon),
         splashRadius: 24,
         onPressed: onPressed,
