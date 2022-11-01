@@ -35,7 +35,7 @@ class UserAccountScreen extends HookConsumerWidget {
         children: [
           Row(
             children: [
-              QaulAvatar.large(),
+              QaulAvatar.large(user: user),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
