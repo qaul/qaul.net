@@ -98,25 +98,49 @@ class UserDetailsScreen extends HookConsumerWidget {
               .add(const EdgeInsets.fromLTRB(16, 32, 16, 8)),
           children: [
             UserDetailsHeading(user),
-            Row(
-              children: [
-                Expanded(
-                  child: DisabledStateDecorator(
-                    isDisabled: blocked,
-                    child: QaulButton(
-                      onPressed: blocked ? null : onVerifyUserPressed,
-                      label: verified ? l10n.unverify : l10n.verify,
+            ResponsiveLayout(
+              mobileBody: Column(
+                children: [
+                  SizedBox(
+                    width: 280,
+                    child: DisabledStateDecorator(
+                      isDisabled: blocked,
+                      child: QaulButton(
+                        onPressed: blocked ? null : onVerifyUserPressed,
+                        label: verified ? l10n.unverify : l10n.verify,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: QaulButton(
-                    onPressed: onBlockUserPressed,
-                    label: blocked ? l10n.unblockUser : l10n.blockUser,
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 280,
+                    child: QaulButton(
+                      onPressed: onBlockUserPressed,
+                      label: blocked ? l10n.unblockUser : l10n.blockUser,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              tabletBody: Row(
+                children: [
+                  Expanded(
+                    child: DisabledStateDecorator(
+                      isDisabled: blocked,
+                      child: QaulButton(
+                        onPressed: blocked ? null : onVerifyUserPressed,
+                        label: verified ? l10n.unverify : l10n.verify,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: QaulButton(
+                      onPressed: onBlockUserPressed,
+                      label: blocked ? l10n.unblockUser : l10n.blockUser,
+                    ),
+                  ),
+                ],
+              ),
             )
           ],
         ));
