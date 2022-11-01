@@ -10,6 +10,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/disabled_state_decorator.dart';
 import '../../decorators/loading_decorator.dart';
+import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
 import 'tabs/chat/widgets/chat.dart';
 
@@ -24,156 +25,101 @@ class UserDetailsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loading = useState(false);
     final isMounted = useIsMounted();
 
-    var theme = Theme.of(context).textTheme;
-    final l18ns = AppLocalizations.of(context)!;
-    return LoadingDecorator(
-      isLoading: loading.value,
-      child: Scaffold(
+    final l10n = AppLocalizations.of(context)!;
+
+    final onVerifyUserPressed = useCallback(() async {
+      final worker = ref.read(qaulWorkerProvider);
+      verified
+          ? await worker.unverifyUser(user)
+          : await _verifyUser(context, user: user);
+
+      if (!isMounted()) return;
+      Navigator.pop(context);
+    }, [ref, isMounted]);
+
+    final onBlockUserPressed = useCallback(() async {
+      final res = await _confirmAction(
+        context,
+        description: blocked
+            ? l10n.unblockUserConfirmationMessage
+            : l10n.blockUserConfirmationMessage,
+      );
+
+      if (res is! bool || !res) return;
+
+      final worker = ref.read(qaulWorkerProvider);
+      blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
+      if (!isMounted()) return;
+      Navigator.pop(context);
+    }, [l10n, ref, isMounted]);
+
+    return Scaffold(
         appBar: AppBar(
           leading: const IconButtonFactory(),
-          title: !showChatButton ? null : Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Tooltip(
-                message: l18ns.newChatTooltip,
-                child: IconButton(
-                  splashRadius: 26,
-                  onPressed: () {
-                    final defaultUser = ref.watch(defaultUserProvider)!;
-                    final newRoom = ChatRoom.blank(otherUser: user);
-                    Navigator.pop(context);
-                    openChat(
-                      newRoom,
-                      ref: ref,
-                      context: context,
-                      user: defaultUser,
-                      otherUser: user,
-                    );
-                  },
-                  icon: SvgPicture.asset(
-                    'assets/icons/comment.svg',
-                    width: 24,
-                    height: 24,
-                    color: Theme.of(context).appBarTheme.iconTheme?.color ??
-                        Theme.of(context).iconTheme.color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: SizedBox.expand(
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * .8, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  // disabledForegroundColor: Colors.white.withOpacity(0.38),
-                  // disabledBackgroundColor: Colors.white.withOpacity(0.12),
-                  surfaceTintColor: Colors.white.withOpacity(0.38),
-                  shadowColor: Colors.white.withOpacity(0.12),
-                  textStyle: theme.headline6,
-                ),
-              ),
-            ),
-            child: Builder(builder: (context) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 32.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      QaulAvatar.large(user: user),
-                      const SizedBox(height: 28.0),
-                      Text(user.name, style: theme.headline3),
-                      const SizedBox(height: 8.0),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text('${l18ns.userID}: ${user.idBase58}',
-                            style: theme.headline5),
-                      ),
-                      const SizedBox(height: 40.0),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Text('${l18ns.publicKey}:\n${user.keyBase58}',
-                            style: theme.headline5),
-                      ),
-                      const SizedBox(height: 40.0),
-                      DisabledStateDecorator(
-                        isDisabled: blocked,
-                        child: _RoundedRectButton(
+          title: !showChatButton
+              ? null
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Tooltip(
+                      message: l10n.newChatTooltip,
+                      child: IconButton(
+                        splashRadius: 26,
+                        onPressed: () {
+                          final defaultUser = ref.watch(defaultUserProvider)!;
+                          final newRoom = ChatRoom.blank(otherUser: user);
+                          Navigator.pop(context);
+                          openChat(
+                            newRoom,
+                            ref: ref,
+                            context: context,
+                            user: defaultUser,
+                            otherUser: user,
+                          );
+                        },
+                        icon: SvgPicture.asset(
+                          'assets/icons/comment.svg',
+                          width: 24,
+                          height: 24,
                           color:
-                              verified ? Colors.green.shade300 : Colors.green,
-                          onPressed: blocked
-                              ? null
-                              : () async {
-                                  loading.value = true;
-
-                                  final worker = ref.read(qaulWorkerProvider);
-                                  verified
-                                      ? await worker.unverifyUser(user)
-                                      : await _verifyUser(context, user: user);
-
-                                  loading.value = false;
-                                  if (!isMounted()) return;
-                                  Navigator.pop(context);
-                                },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (!verified) ...[
-                                const Icon(Icons.check, size: 32),
-                                const SizedBox(width: 4),
-                              ],
-                              Text(verified ? l18ns.unverify : l18ns.verify),
-                            ],
-                          ),
+                              Theme.of(context).appBarTheme.iconTheme?.color ??
+                                  Theme.of(context).iconTheme.color,
                         ),
                       ),
-                      const SizedBox(height: 28.0),
-                      _RoundedRectButton(
-                        color:
-                            blocked ? Colors.red.shade300 : Colors.red.shade400,
-                        onPressed: () async {
-                          final res = await _confirmAction(
-                            context,
-                            description: blocked
-                                ? l18ns.unblockUserConfirmationMessage
-                                : l18ns.blockUserConfirmationMessage,
-                          );
-
-                          if (res is! bool || !res) return;
-                          loading.value = true;
-
-                          final worker = ref.read(qaulWorkerProvider);
-                          blocked
-                              ? await worker.unblockUser(user)
-                              : await worker.blockUser(user);
-
-                          loading.value = false;
-                          if (!isMounted()) return;
-                          Navigator.pop(context);
-                        },
-                        child:
-                            Text(blocked ? l18ns.unblockUser : l18ns.blockUser),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+        ),
+        body: ListView(
+          padding: MediaQuery.of(context)
+              .viewPadding
+              .add(const EdgeInsets.fromLTRB(16, 32, 16, 8)),
+          children: [
+            UserDetailsHeading(user),
+            Row(
+              children: [
+                Expanded(
+                  child: DisabledStateDecorator(
+                    isDisabled: blocked,
+                    child: QaulButton(
+                      onPressed: blocked ? null : onVerifyUserPressed,
+                      label: verified ? l10n.unverify : l10n.verify,
+                    ),
                   ),
                 ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
+                const SizedBox(width: 20),
+                Expanded(
+                  child: QaulButton(
+                    onPressed: onBlockUserPressed,
+                    label: blocked ? l10n.unblockUser : l10n.blockUser,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ));
   }
 
   bool get verified => (user.isVerified ?? false);
@@ -209,18 +155,14 @@ class UserDetailsScreen extends HookConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              _RoundedRectButton(
-                color: Colors.lightBlue,
-                size: const Size(280, 80),
+              QaulButton(
                 onPressed: () => pop(res: true),
-                child: Text(l18ns!.okDialogButton),
+                label: l18ns!.okDialogButton,
               ),
               const SizedBox(height: 12),
-              _RoundedRectButton(
-                color: Colors.lightBlue,
-                size: const Size(280, 80),
+              QaulButton(
                 onPressed: pop,
-                child: Text(l18ns.cancelDialogButton),
+                label: l18ns.cancelDialogButton,
               ),
             ],
           ),
@@ -301,22 +243,18 @@ class _VerifyUserDialog extends HookConsumerWidget {
                 _SecurityNumberDisplay(securityNo: securityNo),
               ],
               const SizedBox(height: 24),
-              _RoundedRectButton(
-                color: Colors.lightBlue,
-                size: const Size(280, 80),
+              QaulButton(
                 onPressed: () {
                   final worker = ref.read(qaulWorkerProvider);
                   worker.verifyUser(user);
                   Navigator.pop(context);
                 },
-                child: Text(l10n.okDialogButton),
+                label: l10n.okDialogButton,
               ),
               const SizedBox(height: 12),
-              _RoundedRectButton(
-                color: Colors.red.shade400,
-                size: const Size(280, 80),
+              QaulButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancelDialogButton),
+                label: l10n.cancelDialogButton,
               ),
             ],
           ),
@@ -370,36 +308,6 @@ class _SecurityNumberDisplay extends StatelessWidget {
           border: Border.all(color: Colors.grey.withOpacity(.5)),
         ),
         child: Text(securityNo.securityCode[(row * 4) + index]),
-      ),
-    );
-  }
-}
-
-class _RoundedRectButton extends StatelessWidget {
-  const _RoundedRectButton({
-    Key? key,
-    required this.color,
-    required this.onPressed,
-    required this.child,
-    this.size,
-  }) : super(key: key);
-  final Color color;
-  final VoidCallback? onPressed;
-  final Widget child;
-  final Size? size;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 500),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              backgroundColor: MaterialStateProperty.all(color),
-              maximumSize: MaterialStateProperty.all(size),
-            ),
-        child: child,
       ),
     );
   }
