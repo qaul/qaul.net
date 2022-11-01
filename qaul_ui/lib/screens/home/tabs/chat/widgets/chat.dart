@@ -234,7 +234,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               disabledMessage: room.status != ChatRoomStatus.inviteAccepted
                   ? null
                   : 'Please wait for the admin to confirm your acceptance to send messages',
-              sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+              sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
               hintText: room.isGroupChatRoom
                   ? l10n.groupChatMessageHint
                   : l10n.securePrivateMessageHint,
