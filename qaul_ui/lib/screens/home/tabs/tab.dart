@@ -22,6 +22,7 @@ import '../../../decorators/empty_state_text_decorator.dart';
 import '../../../decorators/search_user_decorator.dart';
 import '../../../providers/providers.dart';
 import '../../../utils.dart';
+import '../../../widgets/qaul_dialog.dart';
 import '../../../widgets/qaul_fab.dart';
 import '../../../widgets/widgets.dart';
 import 'chat/current_open_chat_notifier.dart';
