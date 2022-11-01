@@ -69,7 +69,8 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
       ),
       body: Stack(
         children: [
-          Column(
+          ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
             children: [
               const SizedBox(height: 140, width: double.maxFinite),
               QaulAvatar.groupLarge(),
@@ -210,7 +211,7 @@ class _InviteUsersToGroupDialogState
               textDirection: Directionality.of(context),
               end: 80,
               bottom: 20,
-              child: ElevatedButton(
+              child: QaulButton(
                 onPressed: () async {
                   final worker = ref.read(qaulWorkerProvider);
                   for (final user in selected) {
@@ -218,7 +219,7 @@ class _InviteUsersToGroupDialogState
                   }
                   Navigator.pop(context);
                 },
-                child: Text(l10n.invite, style: const TextStyle(fontSize: 20)),
+                label: l10n.invite,
               ),
             ),
           ],
@@ -250,42 +251,25 @@ class _InviteDetailsDialog extends HookConsumerWidget {
     final sender = users.firstWhereOrNull((s) => s.id.equals(invite.senderId));
 
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(l10n.groupInvite),
-          IconButtonFactory.close(),
-        ],
-      ),
+    return QaulDialog(
+      title: l10n.groupInvite,
       content: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${l10n.groupName}: ${invite.groupDetails.name}'),
-              Text('${l10n.createdAt}: ${invite.groupDetails.createdAt}'),
-              Text(
-                '${l10n.noOfMembers}: ${invite.groupDetails.members.length}',
-              ),
-              if (sender != null) ...[
-                Text('${l10n.invitedBy}: ${sender.name}'),
-              ],
-            ],
+          Text('${l10n.groupName}: ${invite.groupDetails.name}'),
+          Text('${l10n.createdAt}: ${invite.groupDetails.createdAt}'),
+          Text(
+            '${l10n.noOfMembers}: ${invite.groupDetails.members.length}',
           ),
-          const SizedBox(height: 20),
-          QaulButton(
-            label: l10n.accept,
-            onPressed: () => replyInvite(accepted: true),
-          ),
-          const SizedBox(height: 12),
-          QaulButton(
-            label: l10n.decline,
-            onPressed: () => replyInvite(accepted: false),
-          ),
+          if (sender != null) ...[
+            Text('${l10n.invitedBy}: ${sender.name}'),
+          ],
         ],
       ),
+      button1Label: l10n.accept,
+      onButton1Pressed: () => replyInvite(accepted: true),
+      button2Label: l10n.decline,
+      onButton2Pressed: () => replyInvite(accepted: false),
     );
   }
 }

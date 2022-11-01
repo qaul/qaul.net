@@ -10,6 +10,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/disabled_state_decorator.dart';
 import '../../decorators/loading_decorator.dart';
+import '../../widgets/qaul_dialog.dart';
 import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
 import 'tabs/chat/widgets/chat.dart';
@@ -159,17 +160,9 @@ class UserDetailsScreen extends HookConsumerWidget {
     return await showDialog(
       context: context,
       builder: (c) {
-        final l18ns = AppLocalizations.of(context);
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(icon: const Icon(Icons.close), onPressed: pop),
-            ],
-          ),
+        final l10n = AppLocalizations.of(context)!;
+
+        return QaulDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -178,18 +171,12 @@ class UserDetailsScreen extends HookConsumerWidget {
                 style: Theme.of(context).textTheme.subtitle1,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-              QaulButton(
-                onPressed: () => pop(res: true),
-                label: l18ns!.okDialogButton,
-              ),
-              const SizedBox(height: 12),
-              QaulButton(
-                onPressed: pop,
-                label: l18ns.cancelDialogButton,
-              ),
             ],
           ),
+          button1Label: l10n.okDialogButton,
+          onButton1Pressed: () => pop(res: true),
+          button2Label: l10n.cancelDialogButton,
+          onButton2Pressed: pop,
         );
       },
     );
@@ -239,50 +226,29 @@ class _VerifyUserDialog extends HookConsumerWidget {
 
     return LoadingDecorator(
       isLoading: isLoading.value,
-      child: AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+      child: QaulDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.pop(context),
+            if (securityNo != null && securityNo.userId.equals(user.id)) ...[
+              _SecurityNumberDisplay(securityNo: securityNo),
+            ],
+            const SizedBox(height: 24),
+            Text(
+              l10n.securityNumberDialogDesc,
+              style: Theme.of(context).textTheme.subtitle1,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 60.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.securityNumberDialogDesc,
-                style: Theme.of(context).textTheme.subtitle1,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              if (securityNo != null && securityNo.userId.equals(user.id)) ...[
-                _SecurityNumberDisplay(securityNo: securityNo),
-              ],
-              const SizedBox(height: 24),
-              QaulButton(
-                onPressed: () {
-                  final worker = ref.read(qaulWorkerProvider);
-                  worker.verifyUser(user);
-                  Navigator.pop(context);
-                },
-                label: l10n.okDialogButton,
-              ),
-              const SizedBox(height: 12),
-              QaulButton(
-                onPressed: () => Navigator.pop(context),
-                label: l10n.cancelDialogButton,
-              ),
-            ],
-          ),
-        ),
+        button1Label: l10n.okDialogButton,
+        onButton1Pressed: () {
+          final worker = ref.read(qaulWorkerProvider);
+          worker.verifyUser(user);
+          Navigator.pop(context);
+        },
+        button2Label: l10n.cancelDialogButton,
+        onButton2Pressed: () => Navigator.pop(context),
       ),
     );
   }
@@ -306,18 +272,32 @@ class _SecurityNumberDisplay extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _buildSecurityCodeRow(0)
-              .intersperse(const SizedBox(width: 16))
-              .toList(),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _buildSecurityCodeRow(1)
-              .intersperse(const SizedBox(width: 16))
-              .toList(),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.withOpacity(.5)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _buildSecurityCodeRow(0)
+                      .intersperse(const SizedBox(width: 16))
+                      .toList(),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _buildSecurityCodeRow(1)
+                      .intersperse(const SizedBox(width: 16))
+                      .toList(),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -328,9 +308,6 @@ class _SecurityNumberDisplay extends StatelessWidget {
       4,
       (index) => Container(
         padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.withOpacity(.5)),
-        ),
         child: Text(securityNo.securityCode[(row * 4) + index]),
       ),
     );
