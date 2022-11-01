@@ -8,6 +8,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/cron_task_decorator.dart';
 import '../../decorators/search_user_decorator.dart';
+import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
 
 class UserAccountScreen extends HookConsumerWidget {
@@ -15,7 +16,7 @@ class UserAccountScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(defaultUserProvider);
+    final user = ref.watch(defaultUserProvider)!;
     final nodeInfo = ref.watch(nodeInfoProvider);
 
     final refreshConnectionData = useCallback(() {
@@ -24,7 +25,7 @@ class UserAccountScreen extends HookConsumerWidget {
     }, []);
 
     final theme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return CronTaskDecorator(
       schedule: const Duration(milliseconds: 1500),
       callback: refreshConnectionData,
@@ -33,45 +34,7 @@ class UserAccountScreen extends HookConsumerWidget {
             .viewPadding
             .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
         children: [
-          Row(
-            children: [
-              QaulAvatar.large(user: user),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user != null
-                            ? user.name
-                            : _notFound(l10n!, l10n.username),
-                        style: theme.headline6,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        user != null
-                            ? user.idBase58
-                            : _notFound(l10n!, l10n.userID),
-                        style: theme.subtitle2,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 60),
-          Text('Qaul ${l10n!.publicKey}', style: theme.headline5),
-          const SizedBox(height: 20),
-          Text(
-            user != null && user.keyBase58 != null
-                ? user.keyBase58!
-                : _notFound(l10n, l10n.publicKey),
-          ),
-          const SizedBox(height: 60),
+          UserDetailsHeading(user),
           const _DTNNodesList(),
           const SizedBox(height: 60),
           Text('Node Info', style: theme.headline4),
