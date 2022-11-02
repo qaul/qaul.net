@@ -70,7 +70,8 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
 
     var style = Theme.of(context).textTheme.bodyText1!.copyWith(
           color: widget.isDefaultUser ? Colors.white : Colors.black,
-          fontSize: 16,
+          fontSize: 17,
+          fontWeight: FontWeight.w400,
         );
 
     Widget image;
@@ -144,7 +145,10 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
         image,
         if (description != null) ...[
           const SizedBox(height: 12),
-          Text(description, style: style),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            child: Text(description, style: style),
+          ),
           const SizedBox(height: 8),
         ],
       ],
