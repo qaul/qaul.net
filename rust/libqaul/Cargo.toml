@@ -13,7 +13,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 default = []
 
 [dependencies]
-libp2p = { version = "0.48.0" }
+libp2p = { version = "0.49.0", features = ["full"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 futures = "0.3.15"
 serde = {version = "=1.0", features = ["derive"] }
@@ -46,11 +46,11 @@ sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 ed25519-dalek = "1.0.1"
-x25519-dalek = "1.2.0"
+x25519-dalek = "1.1.0"
 curve25519-dalek = "3.2.0"
 sha2 = "0.10.2"
-noise-protocol = { git = "https://github.com/MathJud/noise-rust.git", branch = "libp2p-45" }
-noise-rust-crypto = { git = "https://github.com/MathJud/noise-rust.git", branch = "libp2p-45", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
+noise-protocol = { git = "https://github.com/qaul/noise-rust.git" }
+noise-rust-crypto = { git = "https://github.com/qaul/noise-rust.git", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
 crc = "^1.0.0"
 
 # only for desktop platforms: Linux, Mac, Windows
@@ -62,7 +62,6 @@ qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
 prost-build = "0.11.1"
-
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]
