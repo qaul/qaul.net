@@ -16,7 +16,6 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
 import '../helpers/user_prefs_helper.dart';
-import '../screens/home/user_account_screen.dart';
 import '../screens/home/user_details_screen.dart';
 import '../utils.dart';
 

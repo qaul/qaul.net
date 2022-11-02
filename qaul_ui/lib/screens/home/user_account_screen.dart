@@ -66,9 +66,6 @@ class UserAccountScreen extends HookConsumerWidget {
       ),
     );
   }
-
-  String _notFound(AppLocalizations localizations, String field) =>
-      '$field ${localizations.notFoundErrorMessage}';
 }
 
 class _DTNNodesList extends HookConsumerWidget {
