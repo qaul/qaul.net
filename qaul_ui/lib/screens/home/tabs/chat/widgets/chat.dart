@@ -342,7 +342,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 fontSize: 17,
                 color: Colors.white,
               ),
-              receivedMessageBodyTextStyle: const TextStyle(fontSize: 17),
+              receivedMessageBodyTextStyle: const TextStyle(
+                fontSize: 17,
+                color: Colors.black,
+              ),
             ),
           ),
         ),
@@ -383,20 +386,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Builder(builder: (context) {
       return Bubble(
+        elevation: 0,
         nipRadius: 0,
         nipWidth: 0.1,
         nipHeight: radius,
         radius: const Radius.circular(radius),
         padding: const BubbleEdges.all(0),
+        margin: const BubbleEdges.symmetric(horizontal: 4),
         color: user.toInternalUser().id != message.author.id
-            ? const Color(0xfff5f5f7)
+            ? Colors.grey.shade200
             : Colors.lightBlue.shade700,
         nip: nextMessageInGroup
             ? BubbleNip.no
             : user.toInternalUser().id != message.author.id
                 ? BubbleNip.leftBottom
                 : BubbleNip.rightBottom,
-        child: child,
+        child: ClipRRect(borderRadius: BorderRadius.circular(20), child: child),
       );
     });
   }
