@@ -156,6 +156,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     final refreshCurrentRoom = useCallback(() async {
+      if (!mounted) return;
       final worker = ref.read(qaulWorkerProvider);
       worker.getChatRoomMessages(
         room.conversationId,
@@ -164,6 +165,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }, [room]);
 
     final closeChat = useCallback(() {
+      if (!mounted) return;
       ref.read(currentOpenChatRoom.notifier).state = null;
       ref.read(uiOpenChatProvider.notifier).close();
       if (_kChatRouteName == ModalRoute.of(context)?.settings.name) {
@@ -172,6 +174,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }, [room]);
 
     final sendMessage = useCallback((types.PartialText msg) {
+      if (!mounted) return;
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
     }, [room]);
