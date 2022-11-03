@@ -49,8 +49,8 @@ impl GroupMessage {
         if message_id.len() != 20 {
             return Err("invalid group message id".to_string());
         }
-        let group_crc = crc::crc64::checksum_iso(&group_id.clone());
-        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
+        let group_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&group_id.clone());
+        let sender_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&sender_id.to_bytes());
         let group_crc1 = u64::from_be_bytes(message_id[0..8].try_into().unwrap());
         let sender_crc1 = u64::from_be_bytes(message_id[8..16].try_into().unwrap());
         if group_crc != group_crc1 || sender_crc != sender_crc1 {
