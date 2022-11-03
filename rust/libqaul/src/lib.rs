@@ -18,6 +18,7 @@ use std::time::Duration;
 // crate modules
 pub mod api;
 mod connections;
+pub mod migrate;
 pub mod node;
 mod router;
 mod rpc;
@@ -89,6 +90,14 @@ enum EventType {
 ///   * listening port of the Internet connection module (default = randomly assigned)
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
     log::trace!("start initializing libqaul");
+
+    if migrate::Migrate::init(storage_path.clone()) == false {
+        println!("failed to process migrating");
+        //restrat node
+        std::process::exit(0);
+    }
+
+    // check if need to migrate datas
 
     if let Some(def_cfg) = def_config {
         DEFCONFIGS.set(def_cfg.clone());
