@@ -97,6 +97,7 @@ class _PublicState extends _BaseTabState<_Public> {
                     sentAt,
                     style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
                   ),
+                  nameTapRoutesToDetailsScreen: true,
                 );
               },
             ),

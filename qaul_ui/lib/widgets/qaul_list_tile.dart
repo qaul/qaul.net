@@ -9,11 +9,11 @@ class QaulListTile extends StatelessWidget {
     this.trailingIcon,
     this.trailingMetadata,
     this.onTap,
-    this.onAvatarTap,
     this.isThreeLine = false,
     this.useUserColorOnName = false,
-    this.allowTapRouteToUserDetailsScreen = false,
-    this.allowAvatarTapRouteToUserDetailsScreen = true,
+    this.tapRoutesToDetailsScreen = false,
+    this.nameTapRoutesToDetailsScreen = false,
+    this.avatarTapRoutesToDetailsScreen = true,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         assert(user != null || room != null),
         super(key: key);
@@ -25,11 +25,11 @@ class QaulListTile extends StatelessWidget {
     Widget? trailingIcon,
     Widget? trailingMetadata,
     VoidCallback? onTap,
-    VoidCallback? onAvatarTap,
     bool isThreeLine = false,
     bool useUserColorOnName = false,
-    bool allowTapRouteToUserDetailsScreen = false,
-    bool allowAvatarTapRouteToUserDetailsScreen = true,
+    bool tapRoutesToDetailsScreen = false,
+    bool nameTapRoutesToDetailsScreen = false,
+    bool avatarTapRoutesToDetailsScreen = true,
   }) {
     return QaulListTile._(
       user: user,
@@ -39,10 +39,9 @@ class QaulListTile extends StatelessWidget {
       trailingMetadata: trailingMetadata,
       onTap: onTap,
       isThreeLine: isThreeLine,
-      allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
-      onAvatarTap: onAvatarTap,
-      allowAvatarTapRouteToUserDetailsScreen:
-          allowAvatarTapRouteToUserDetailsScreen,
+      tapRoutesToDetailsScreen: tapRoutesToDetailsScreen,
+      nameTapRoutesToDetailsScreen: nameTapRoutesToDetailsScreen,
+      avatarTapRoutesToDetailsScreen: avatarTapRoutesToDetailsScreen,
       useUserColorOnName: useUserColorOnName,
     );
   }
@@ -54,11 +53,8 @@ class QaulListTile extends StatelessWidget {
     Widget? trailingIcon,
     Widget? trailingMetadata,
     VoidCallback? onTap,
-    VoidCallback? onAvatarTap,
     bool isThreeLine = false,
     bool useUserColorOnName = false,
-    bool allowTapRouteToUserDetailsScreen = false,
-    bool allowAvatarTapRouteToUserDetailsScreen = true,
   }) {
     return QaulListTile._(
       room: room,
@@ -68,11 +64,9 @@ class QaulListTile extends StatelessWidget {
       trailingMetadata: trailingMetadata,
       onTap: onTap,
       isThreeLine: isThreeLine,
-      allowTapRouteToUserDetailsScreen: allowTapRouteToUserDetailsScreen,
-      onAvatarTap: onAvatarTap,
-      allowAvatarTapRouteToUserDetailsScreen:
-          allowAvatarTapRouteToUserDetailsScreen,
       useUserColorOnName: useUserColorOnName,
+      tapRoutesToDetailsScreen: false,
+      avatarTapRoutesToDetailsScreen: false,
     );
   }
 
@@ -82,27 +76,24 @@ class QaulListTile extends StatelessWidget {
 
   final bool isThreeLine;
 
-  /// Content displayed under the username
   final Widget? content;
 
-  /// Center-aligned widget, displayed at the end of tile.
   final Widget? trailingIcon;
 
-  /// Right, Baseline-aligned with username (usually a Text).
   final Widget? trailingMetadata;
 
-  /// Override the behavior of tapping this tile, regardless of the value of [allowTapRouteToUserDetailsScreen]
+  /// Override the behavior of tapping this tile, regardless of the value of [tapRoutesToDetailsScreen]
   final VoidCallback? onTap;
 
   /// If set to [true], when [onTap] is [null], tapping on the [QaulListTile]
   /// will open the [UserDetailsScreen] for this [user].
   ///
   /// Set to [false] to disable this behavior.
-  final bool allowTapRouteToUserDetailsScreen;
+  final bool tapRoutesToDetailsScreen;
 
-  final VoidCallback? onAvatarTap;
+  final bool nameTapRoutesToDetailsScreen;
 
-  final bool allowAvatarTapRouteToUserDetailsScreen;
+  final bool avatarTapRoutesToDetailsScreen;
 
   final bool useUserColorOnName;
 
@@ -133,26 +124,29 @@ class QaulListTile extends StatelessWidget {
             ],
           );
 
-    final onTapFallback = !allowTapRouteToUserDetailsScreen
+    final onTapFallback = !tapRoutesToDetailsScreen
         ? null
         : () => _navigateToUserDetailsScreen(context, user!);
 
-    final onAvatarTapFallback = !allowAvatarTapRouteToUserDetailsScreen
+    final onNameTapFallback = !nameTapRoutesToDetailsScreen
+        ? null
+        : () => _navigateToUserDetailsScreen(context, user!);
+
+    final onAvatarTapFallback = !avatarTapRoutesToDetailsScreen
         ? null
         : () => _navigateToUserDetailsScreen(context, user!);
 
     Widget leading =
         user != null ? QaulAvatar.small(user: user) : QaulAvatar.groupSmall();
 
-    if (onAvatarTap != null || onAvatarTapFallback != null) {
-      leading = GestureDetector(
-          onTap: onAvatarTap ?? onAvatarTapFallback, child: leading);
+    if (onAvatarTapFallback != null) {
+      leading = GestureDetector(onTap: onAvatarTapFallback, child: leading);
     }
 
     Widget tileTitle = title;
-    if (onAvatarTapFallback != null) {
+    if (onNameTapFallback != null) {
       tileTitle = GestureDetector(
-        onTap: onAvatarTapFallback,
+        onTap: onNameTapFallback,
         child: title,
       );
     }
