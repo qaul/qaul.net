@@ -25,7 +25,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     final users = ref.watch(usersProvider);
     final chatRooms = ref.watch(chatRoomsProvider);
     final groupInvites = ref.watch(groupInvitesProvider);
-
+    final currentOpenChat = ref.watch(uiOpenChatProvider);
     final blockedIds =
         users.where((u) => u.isBlocked ?? false).map((u) => u.conversationId);
     final filteredRooms = chatRooms
@@ -39,37 +39,8 @@ class _ChatState extends _BaseTabState<_Chat> {
       worker.getGroupInvitesReceived();
     }, []);
 
-    final l10n = AppLocalizations.of(context);
-
     final mobile =
         Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
-    final chatWidget = useState<Widget?>(null);
-    final currentOpenChat = ref.watch(uiOpenChatProvider);
-    useEffect(() {
-      if (mobile) return () {}; // should never require this function
-      if (currentOpenChat == null) {
-        chatWidget.value = null;
-        return () {};
-      }
-
-      final otherUser = users.firstWhereOrNull((u) =>
-          u.conversationId?.equals(currentOpenChat.conversationId) ?? false);
-
-      if (otherUser == null && !currentOpenChat.isGroupChatRoom) {
-        _log.warning('single-person room with unknown otherUser');
-        chatWidget.value = null;
-        return () {};
-      }
-
-      chatWidget.value = ChatScreen(
-        currentOpenChat,
-        defaultUser,
-        otherUser: otherUser,
-      );
-
-      return () {};
-    }, [currentOpenChat, mobile]);
-
     final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
       if (mobile) {
         openChat(room,
@@ -92,6 +63,8 @@ class _ChatState extends _BaseTabState<_Chat> {
         setOpenChat(newRoom, newChat);
       }
     }, [setOpenChat]);
+
+    final l10n = AppLocalizations.of(context);
 
     final chatRoomsListView = CronTaskDecorator(
       callback: () => refreshChatsAndInvites(),
@@ -219,12 +192,28 @@ class _ChatState extends _BaseTabState<_Chat> {
           const VerticalDivider(width: 1),
           Expanded(
             child: Scaffold(
-              body: chatWidget.value ?? Center(child: Text(l10n.noOpenChats)),
+              body: currentOpenChat == null
+                  ? Center(child: Text(l10n.noOpenChats))
+                  : ChatScreen(
+                      currentOpenChat,
+                      defaultUser,
+                      otherUser: getOtherUser(currentOpenChat, users),
+                    ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  User? getOtherUser(ChatRoom chat, List<User> users) {
+    final otherUser = users.firstWhereOrNull(
+        (u) => u.conversationId?.equals(chat.conversationId) ?? false);
+
+    if (otherUser == null && !chat.isGroupChatRoom) {
+      _log.warning('single-person room with unknown otherUser');
+    }
+    return otherUser;
   }
 
   Widget _contentFromOverview(
