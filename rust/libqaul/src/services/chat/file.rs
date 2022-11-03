@@ -750,7 +750,7 @@ impl ChatFile {
         key_bytes.append(&mut name_bytes);
         key_bytes.append(&mut size_bytes);
         key_bytes.append(&mut time_bytes);
-        crc::crc64::checksum_iso(&key_bytes)
+        crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&key_bytes)
     }
 
     /// Try to store the file

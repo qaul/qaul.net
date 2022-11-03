@@ -48,8 +48,8 @@ impl Chat {
     /// * the sender id
     /// * the message index of the sender
     pub fn generate_message_id(group_id: &Vec<u8>, sender_id: &PeerId, index: u32) -> Vec<u8> {
-        let group_crc = crc::crc64::checksum_iso(group_id);
-        let sender_crc = crc::crc64::checksum_iso(&sender_id.to_bytes());
+        let group_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(group_id);
+        let sender_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&sender_id.to_bytes());
         let mut buff0 = group_crc.to_be_bytes().to_vec();
         let mut buff = sender_crc.to_be_bytes().to_vec();
         let mut index_bytes = index.to_be_bytes().to_vec();
