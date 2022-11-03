@@ -41,6 +41,8 @@ part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
+const _kChatRouteName = '/chat';
+
 Future<void> openChat(
   ChatRoom room, {
   required WidgetRef ref,
@@ -60,12 +62,12 @@ Future<void> openChat(
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => ChatScreen(
-        room,
-        user,
-        otherUser: otherUser,
-      ),
-    ),
+        builder: (context) => ChatScreen(
+              room,
+              user,
+              otherUser: otherUser,
+            ),
+        settings: const RouteSettings(name: _kChatRouteName)),
   );
 }
 
@@ -122,7 +124,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    assert(otherUser != null || room.isGroupChatRoom);
+    assert(otherUser != null || room.isGroupChatRoom,
+        'Must either be a group chat or contain another user');
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -163,7 +166,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final closeChat = useCallback(() {
       ref.read(currentOpenChatRoom.notifier).state = null;
       ref.read(uiOpenChatProvider.notifier).close();
-      if (Responsiveness.isMobile(context)) Navigator.pop(context);
+      if (_kChatRouteName == ModalRoute.of(context)?.settings.name) {
+        Navigator.pop(context);
+      }
     }, [room]);
 
     final sendMessage = useCallback((types.PartialText msg) {
