@@ -216,7 +216,7 @@ impl Lan {
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = task::block_on(Mdns::new(MdnsConfig::default())).unwrap();
+            let mdns = Mdns::new(MdnsConfig::default()).unwrap();
 
             log::trace!("Lan::init() swarm mdns module created");
 
