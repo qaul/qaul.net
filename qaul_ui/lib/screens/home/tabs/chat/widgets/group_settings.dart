@@ -108,8 +108,8 @@ class _GroupSettingsPage extends HookConsumerWidget {
                               )
                           ],
                         ),
-                  allowTapRouteToUserDetailsScreen: isNotDefaultUser,
-                  allowAvatarTapRouteToUserDetailsScreen: isNotDefaultUser,
+                  tapRoutesToDetailsScreen: isNotDefaultUser,
+                  avatarTapRoutesToDetailsScreen: isNotDefaultUser,
                 );
               },
             ),

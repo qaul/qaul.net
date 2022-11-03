@@ -120,6 +120,7 @@ class _DTNNodesList extends HookConsumerWidget {
               icon: const Icon(CupertinoIcons.delete),
               onPressed: () => removeUser(user.id),
             ),
+            nameTapRoutesToDetailsScreen: true,
           );
         },
       ),
