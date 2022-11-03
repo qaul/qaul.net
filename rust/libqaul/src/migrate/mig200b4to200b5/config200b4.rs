@@ -116,11 +116,8 @@ impl Configuration {}
 impl Configuration {
     /// Initialize configuration
     pub fn load(path: &str) -> Option<Configuration> {
-        let mut settings = Config::default();
-
-        // Merge config if a Config file exists
-        if let Ok(c) = settings.merge(File::with_name(path)) {
-            return Some(c.clone().try_into().unwrap());
+        if let Ok(c) = Config::builder().add_source(File::with_name(path)).build() {
+            return Some(c.try_deserialize::<Configuration>().unwrap());
         }
         None
     }

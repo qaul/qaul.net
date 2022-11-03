@@ -220,25 +220,21 @@ impl Default for Configuration {
 impl Configuration {
     /// Initialize configuration
     pub fn init() {
-        let mut settings = Config::default();
-
         // create configuration path
         let path_string = super::Storage::get_path();
         let path = Path::new(path_string.as_str());
         let config_path = path.join("config.yaml");
 
-        // Merge config if a Config file exists
-        let config: Configuration =
-            match settings.merge(File::with_name(&config_path.to_str().unwrap())) {
-                Err(_) => {
-                    log::error!("no configuration file found, creating one.");
-                    Configuration::default()
-                }
-                Ok(c) => c
-                    .clone()
-                    .try_into()
-                    .expect("Couldn't Convert to `Configuration`, malformed config file."),
-            };
+        let config: Configuration = match Config::builder()
+            .add_source(File::with_name(&config_path.to_str().unwrap()))
+            .build()
+        {
+            Err(_) => {
+                log::error!("no configuration file found, creating one.");
+                Configuration::default()
+            }
+            Ok(c) => c.try_deserialize::<Configuration>().unwrap(),
+        };
 
         // There is no key for debug in the the configuration hence fails.
 
