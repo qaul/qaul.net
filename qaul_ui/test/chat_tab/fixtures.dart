@@ -1,4 +1,4 @@
-part of 'chat_tab_test.dart';
+part of 'test.dart';
 
 final defaultUser = User(
   name: 'defaultUser',
