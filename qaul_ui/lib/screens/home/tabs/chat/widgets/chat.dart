@@ -26,7 +26,6 @@ import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
-import '../current_open_chat_notifier.dart';
 import 'conditional/conditional.dart';
 
 part 'custom_input.dart';
@@ -50,7 +49,7 @@ Future<void> openChat(
   required User user,
   User? otherUser,
 }) async {
-  ref.read(uiOpenChatProvider.notifier).setCurrent(room);
+  ref.read(currentOpenChatRoom.notifier).state = room;
 
   bool isMobile =
       MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
@@ -167,7 +166,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final closeChat = useCallback(() {
       if (!mounted) return;
       ref.read(currentOpenChatRoom.notifier).state = null;
-      ref.read(uiOpenChatProvider.notifier).close();
       if (_kChatRouteName == ModalRoute.of(context)?.settings.name) {
         Navigator.pop(context);
       }

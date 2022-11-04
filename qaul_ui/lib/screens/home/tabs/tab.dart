@@ -24,7 +24,6 @@ import '../../../utils.dart';
 import '../../../widgets/qaul_dialog.dart';
 import '../../../widgets/qaul_fab.dart';
 import '../../../widgets/widgets.dart';
-import 'chat/current_open_chat_notifier.dart';
 import 'chat/widgets/chat.dart';
 
 part 'chat/chat_tab.dart';

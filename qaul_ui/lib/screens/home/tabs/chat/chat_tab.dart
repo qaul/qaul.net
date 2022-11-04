@@ -25,7 +25,8 @@ class _ChatState extends _BaseTabState<_Chat> {
     final users = ref.watch(usersProvider);
     final chatRooms = ref.watch(chatRoomsProvider);
     final groupInvites = ref.watch(groupInvitesProvider);
-    final currentOpenChat = ref.watch(uiOpenChatProvider);
+    final currentOpenChat = ref.watch(currentOpenChatRoom);
+
     final blockedIds =
         users.where((u) => u.isBlocked ?? false).map((u) => u.conversationId);
     final filteredRooms = chatRooms
@@ -49,7 +50,7 @@ class _ChatState extends _BaseTabState<_Chat> {
             user: defaultUser,
             otherUser: otherUser);
       } else {
-        ref.read(uiOpenChatProvider.notifier).setCurrent(room);
+        ref.read(currentOpenChatRoom.notifier).state = room;
       }
     }, [mobile]);
 
