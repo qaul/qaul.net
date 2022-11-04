@@ -172,4 +172,55 @@ void main() {
       ),
     );
   });
+
+  testResponsiveWidgets('sending multiple messages to an open group chat',
+      (tester) async {
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWithValue(
+          StateController(defaultUser),
+        ),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWithValue(
+          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        ),
+        qaulWorkerProvider.overrideWithProvider(
+          Provider((ref) => StubLibqaulWorker(ref.read)),
+        ),
+      ],
+      child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
+    );
+
+    await tester.pumpWidget(wut);
+
+    var chatRoomTileFinder = find.byType(QaulListTile);
+    expect(
+      chatRoomTileFinder,
+      findsOneWidget,
+      reason: 'one chat room available',
+    );
+
+    expect(find.byType(ChatScreen), findsNothing, reason: 'no open chats');
+    await tester.tap(chatRoomTileFinder);
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatScreen), findsOneWidget, reason: 'one open chat');
+
+    final sendMessageButtonFinder = find.byType(SendMessageButton);
+
+    for (var i = 0; i < 10; i++) {
+      await tester.enterText(find.byType(TextField), 'text$i');
+      await tester.pump();
+      await tester.tap(sendMessageButtonFinder);
+      await tester.pumpAndSettle();
+    }
+  }, goldenCallback: (sizeName, tester) async {
+    await expectLater(
+      find.byType(ChatScreen),
+      matchesGoldenFile(
+        'goldens/chatGolden_withGroupRoom_openChat_messageSent_10messages_$sizeName.png',
+      ),
+    );
+  });
 }

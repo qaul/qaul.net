@@ -31,6 +31,17 @@ class StubLibqaulWorker implements LibqaulWorker {
     Logger.root.info('requested messages fetch; ignoring...');
   }
 
+  @override
+  void getAllChatRooms() {
+    Logger.root.info('requested all Chat rooms fetch; ignoring...');
+  }
+
+  @override
+  void getGroupInvitesReceived(){
+    Logger.root.info('requested group invites fetch; ignoring...');
+  }
+
+
   // -------------------------------------------
   // Unimplemented methods
   // -------------------------------------------
@@ -53,10 +64,6 @@ class StubLibqaulWorker implements LibqaulWorker {
   void deleteLogs() => throw UnimplementedError();
 
   @override
-  void getAllChatRooms() => throw UnimplementedError();
-
-
-  @override
   void getDTNConfiguration() => throw UnimplementedError();
 
   @override
@@ -67,9 +74,6 @@ class StubLibqaulWorker implements LibqaulWorker {
 
   @override
   void getGroupInfo(Uint8List id) => throw UnimplementedError();
-
-  @override
-  void getGroupInvitesReceived() => throw UnimplementedError();
 
   @override
   Future<void> getNodeInfo() => throw UnimplementedError();
