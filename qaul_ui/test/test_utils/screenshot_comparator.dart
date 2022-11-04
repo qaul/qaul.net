@@ -1,9 +1,4 @@
-import 'dart:developer';
-
-import 'package:flutter/foundation.dart';
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as path;
+part of 'test_utils.dart';
 
 const double _kGoldenDiffTolerance = 0.18;
 
