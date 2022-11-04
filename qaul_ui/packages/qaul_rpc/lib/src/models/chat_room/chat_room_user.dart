@@ -2,7 +2,7 @@ part of 'chat_room.dart';
 
 @immutable
 class ChatRoomUser extends User {
-  ChatRoomUser._(
+  ChatRoomUser(
     User u, {
     required this.joinedAt,
     this.roomId,
@@ -25,7 +25,7 @@ class ChatRoomUser extends User {
   final InvitationState invitationState;
 
   factory ChatRoomUser.fromUser(User u, GroupMember m, {Uint8List? roomId}) {
-    return ChatRoomUser._(
+    return ChatRoomUser(
       u,
       roomId: Uint8List.fromList(m.userId),
       joinedAt: DateTime.fromMillisecondsSinceEpoch(m.joinedAt.toInt()),
