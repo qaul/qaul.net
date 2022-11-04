@@ -20,10 +20,11 @@ class StubLibqaulWorker implements LibqaulWorker {
       receivedAt: DateTime(2000),
     );
 
-    reader(currentOpenChatRoom.notifier).state = buildGroupChat(messages: [
-      ...?room?.messages,
-      message,
-    ]);
+    final msgs = List<Message>.from(
+      room == null || room.messages == null ? [] : room.messages!,
+    );
+    msgs.add(message);
+    reader(currentOpenChatRoom.notifier).state = buildGroupChat(messages: msgs);
   }
 
   @override
@@ -37,10 +38,9 @@ class StubLibqaulWorker implements LibqaulWorker {
   }
 
   @override
-  void getGroupInvitesReceived(){
+  void getGroupInvitesReceived() {
     Logger.root.info('requested group invites fetch; ignoring...');
   }
-
 
   // -------------------------------------------
   // Unimplemented methods
