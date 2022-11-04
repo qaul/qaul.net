@@ -5,6 +5,10 @@ class ScreenSize {
 
   final String name;
   final double width, height, pixelDensity;
+
+  @override
+  String toString() =>
+      'ScreenSize(name: "$name", width: $width, height: $height, pixelDensity: $pixelDensity)';
 }
 
 const iPhone8 = ScreenSize('iPhone_8', 414, 736, 3);
