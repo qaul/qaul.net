@@ -8,7 +8,8 @@ import 'package:qaul_ui/screens/create_account_screen.dart';
 import 'package:qaul_ui/screens/home/home_screen.dart';
 import 'package:qaul_ui/screens/splash_screen.dart';
 
-import 'src/screenshot_comparator.dart';
+import '../test/test_utils/test_utils.dart';
+
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
