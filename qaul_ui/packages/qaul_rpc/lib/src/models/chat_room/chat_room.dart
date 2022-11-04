@@ -24,7 +24,7 @@ part 'providers.dart';
 
 @immutable
 class ChatRoom with EquatableMixin implements Comparable {
-  ChatRoom._({
+  ChatRoom({
     required this.conversationId,
     this.lastMessageSenderId,
     this.lastMessageIndex,
@@ -58,7 +58,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   factory ChatRoom.blank({required User otherUser}) {
     assert(otherUser.conversationId != null);
-    return ChatRoom._(
+    return ChatRoom(
         conversationId: otherUser.conversationId!, name: otherUser.name);
   }
 
@@ -71,7 +71,7 @@ class ChatRoom with EquatableMixin implements Comparable {
       members.add(ChatRoomUser.fromUser(user, m));
     }
 
-    return ChatRoom._(
+    return ChatRoom(
       conversationId: Uint8List.fromList(g.groupId),
       name: g.groupName,
       createdAt: DateTime.fromMillisecondsSinceEpoch(g.createdAt.toInt()),
@@ -122,7 +122,7 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   ChatRoom mergeWithConversationList(ChatConversationList c) {
     assert(conversationId.equals(Uint8List.fromList(c.groupId)));
-    return ChatRoom._(
+    return ChatRoom(
       conversationId: conversationId,
       messages: c.messageList.map((e) => Message.fromChatMessage(e)).toList(),
       lastMessageIndex: lastMessageIndex,

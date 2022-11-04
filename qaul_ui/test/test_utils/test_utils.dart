@@ -8,12 +8,13 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 part 'screenshot_comparator.dart';
+
 part 'test_responsive_widgets.dart';
 
 Widget materialAppWithLocalizations(Widget wut) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: wut,
+    home: Material(child: Builder(builder: (context) => wut)),
   );
 }

@@ -1,3 +1,7 @@
+# Custom
+## Test-related
+test/**/failures
+
 # Miscellaneous
 *.class
 *.log
