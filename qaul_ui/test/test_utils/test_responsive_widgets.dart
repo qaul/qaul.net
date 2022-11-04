@@ -17,6 +17,8 @@ final responsiveVariant = ValueVariant<ScreenSize>({
   desktop,
 });
 
+final desktopVariant = ValueVariant<ScreenSize>({desktop});
+
 @isTest
 void testResponsiveWidgets(
   String description,
