@@ -20,8 +20,6 @@ import net.qaul.libqaul.*
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "libqaul"
-    private lateinit var libqualModule: LibqualModule
-
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
         super.configureFlutterEngine(FlutterEngine)
 
@@ -37,7 +35,7 @@ class MainActivity: FlutterActivity() {
                     result.success(res)
                 }
                 call.method == "loadlibrary" -> {
-                    libqualModule = libqaulLoad()
+                    libqaulLoad()
                     result.success(true)
                 }
                 call.method == "hello" -> {
@@ -84,8 +82,8 @@ class MainActivity: FlutterActivity() {
 
     /// Load shared libqaul library
     /// this needs to be invoked before any other function
-    private fun libqaulLoad(): LibqualModule {
-        return loadLibqaul(this)
+    private fun libqaulLoad() {
+        return loadLibqaul()
     }
 
     /// get dummy hello function from libqaul

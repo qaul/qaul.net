@@ -41,6 +41,7 @@ crossbeam-channel = "0.5"
 bs58 = "0.4"
 futures-ticker = "0.0.2"
 jni = "0.19"
+jni-sys = "0.3.0"
 serde_yaml = "0.9.9"
 sled = "0.34.7"
 sled-extensions = { version = "0.2", features = ["bincode"] }
@@ -62,7 +63,7 @@ qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
 prost-build = "0.11.1"
-
+flapigen = { git = "https://github.com/Dushistov/flapigen-rs", rev = "d8167dbd6896b96bf1ae8c0db339d2f0adcfb1c4" }
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]

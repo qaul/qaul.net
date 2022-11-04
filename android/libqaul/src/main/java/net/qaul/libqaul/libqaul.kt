@@ -44,26 +44,8 @@ external fun sysreceivequeue(): Int
 external fun sysreceive(): ByteArray
 
 /// load rust libqaul shared library
-fun loadLibqaul(activity: Activity): LibqualModule {
+fun loadLibqaul(){
     println("load libqaul")
     System.loadLibrary("libqaul")
     println("libqaul loaded")
-    val out = LibqualModule(activity)
-    /*println("BLE test")
-    println("BLE test sent")*/
-    return out
-}
-
-
-class LibqualModule(activity: Activity) : BleRequestCallback {
-    override fun bleResponse(data: ByteString) {
-        println("TODO $data")
-    }
-
-    private val bleWrapperClass = BleWrapperClass(activity)
-
-    fun receiveRequest(data: ByteString) {
-        println("TODO $data")
-        bleWrapperClass.receiveRequest(data, this)
-    }
 }

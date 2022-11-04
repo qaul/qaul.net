@@ -26,6 +26,7 @@ mod c;
 /// The module only compiled, when the compile target is android.
 #[cfg(target_os = "android")]
 mod android;
+mod java_glue;
 
 /// start libqaul in an own thread
 ///
@@ -138,4 +139,8 @@ pub fn send_sys(binary_message: Vec<u8>) {
 /// receive a SYS message from libqaul
 pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
     Sys::receive_from_libqaul()
+}
+
+pub trait BleReceiveResponseCallback {
+    fn ble_receive_response(&self, data: Vec<u8>);
 }
