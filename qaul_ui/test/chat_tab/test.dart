@@ -43,7 +43,7 @@ void main() {
   }, goldenCallback: (sizeName, tester) async {
     await expectLater(
       find.byKey(chatKey),
-      matchesGoldenFile('goldens/chatGolden_emptyState_$sizeName.png'),
+      matchesGoldenFile('goldens/emptyState/$sizeName.png'),
     );
   });
 
@@ -77,7 +77,7 @@ void main() {
   }, goldenCallback: (sizeName, tester) async {
     await expectLater(
       find.byKey(chatKey),
-      matchesGoldenFile('goldens/chatGolden_withGroupRoom_$sizeName.png'),
+      matchesGoldenFile('goldens/tabWithGroupTile/$sizeName.png'),
     );
   });
 
@@ -117,7 +117,7 @@ void main() {
     await expectLater(
       find.byType(ChatScreen),
       matchesGoldenFile(
-        'goldens/chatGolden_withGroupRoom_openChat_$sizeName.png',
+        'goldens/openEmptyChat/$sizeName.png',
       ),
     );
   });
@@ -168,7 +168,7 @@ void main() {
     await expectLater(
       find.byType(ChatScreen),
       matchesGoldenFile(
-        'goldens/chatGolden_withGroupRoom_openChat_messageSent_$sizeName.png',
+        'goldens/singleMessage/$sizeName.png',
       ),
     );
   });
@@ -219,7 +219,7 @@ void main() {
     await expectLater(
       find.byType(ChatScreen),
       matchesGoldenFile(
-        'goldens/chatGolden_withGroupRoom_openChat_messageSent_10messages_$sizeName.png',
+        'goldens/multipleMessages/$sizeName.png',
       ),
     );
   });
