@@ -1,136 +1,144 @@
 part of 'chat_tab_test.dart';
 
 class StubLibqaulWorker implements LibqaulWorker {
-  @override
-  void addDTNUser(Uint8List userId) {}
+  StubLibqaulWorker(this.reader);
+
+  final Reader reader;
 
   @override
-  Future<void> addNode(String address) {
-    throw UnimplementedError();
+  void sendMessage(Uint8List chatId, String content) {
+    Logger.root.info('sending message "$content" to chat id: "$chatId"');
+    final room = reader(currentOpenChatRoom);
+
+    final index = (room?.messages?.length ?? 0) + 1;
+    final message = Message(
+      senderId: defaultUser.id,
+      messageId: Uint8List.fromList(content.codeUnits),
+      content: TextMessageContent(content),
+      index: index,
+      sentAt: DateTime(2000),
+      receivedAt: DateTime(2000),
+    );
+
+    reader(currentOpenChatRoom.notifier).state = buildGroupChat(messages: [
+      ...?room?.messages,
+      message,
+    ]);
   }
 
   @override
-  Future<void> blockUser(User u) {
-    throw UnimplementedError();
+  void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) {
+    Logger.root.info('requested messages fetch; ignoring...');
   }
 
+  // -------------------------------------------
+  // Unimplemented methods
+  // -------------------------------------------
   @override
-  void createGroup(String name) {}
+  void addDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
-  Future<void> createUserAccount(String name) {
-    throw UnimplementedError();
-  }
+  Future<void> addNode(String address) => throw UnimplementedError();
 
   @override
-  void deleteLogs() {}
+  Future<void> blockUser(User u) => throw UnimplementedError();
 
   @override
-  void getAllChatRooms() {}
+  void createGroup(String name) => throw UnimplementedError();
 
   @override
-  void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) {}
+  Future<void> createUserAccount(String name) => throw UnimplementedError();
 
   @override
-  void getDTNConfiguration() {}
+  void deleteLogs() => throw UnimplementedError();
 
   @override
-  Future<void> getDefaultUserAccount() {
-    throw UnimplementedError();
-  }
+  void getAllChatRooms() => throw UnimplementedError();
+
 
   @override
-  void getFileHistory({int? offset, int? limit}) {}
+  void getDTNConfiguration() => throw UnimplementedError();
 
   @override
-  void getGroupInfo(Uint8List id) {}
+  Future<void> getDefaultUserAccount() => throw UnimplementedError();
 
   @override
-  void getGroupInvitesReceived() {}
+  void getFileHistory({int? offset, int? limit}) => throw UnimplementedError();
 
   @override
-  Future<void> getNodeInfo() {
-    throw UnimplementedError();
-  }
+  void getGroupInfo(Uint8List id) => throw UnimplementedError();
 
   @override
-  void getUserSecurityNumber(User u) {}
+  void getGroupInvitesReceived() => throw UnimplementedError();
 
   @override
-  Future<void> getUsers() {
-    throw UnimplementedError();
-  }
+  Future<void> getNodeInfo() => throw UnimplementedError();
+
+  @override
+  void getUserSecurityNumber(User u) => throw UnimplementedError();
+
+  @override
+  Future<void> getUsers() => throw UnimplementedError();
 
   @override
   Future<bool> get initialized => throw UnimplementedError();
 
   @override
-  void inviteUserToGroup(User user, ChatRoom room) {}
+  void inviteUserToGroup(User user, ChatRoom room) =>
+      throw UnimplementedError();
 
   @override
-  void removeDTNUser(Uint8List userId) {}
+  void removeDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
-  Future<void> removeNode(String address) {
-    throw UnimplementedError();
-  }
+  Future<void> removeNode(String address) => throw UnimplementedError();
 
   @override
-  void removeUserFromGroup(User user, ChatRoom room) {}
+  void removeUserFromGroup(User user, ChatRoom room) =>
+      throw UnimplementedError();
 
   @override
-  void renameGroup(ChatRoom room, String name) {}
+  void renameGroup(ChatRoom room, String name) => throw UnimplementedError();
 
   @override
-  void replyToGroupInvite(Uint8List groupId, {required bool accepted}) {}
+  void replyToGroupInvite(Uint8List groupId, {required bool accepted}) =>
+      throw UnimplementedError();
 
   @override
-  Future<void> requestNodes() {
-    throw UnimplementedError();
-  }
+  Future<void> requestNodes() => throw UnimplementedError();
 
   @override
-  Future<void> requestPublicMessages({int? lastIndex}) async {
-    throw UnimplementedError();
-  }
+  Future<void> requestPublicMessages({int? lastIndex}) async =>
+      throw UnimplementedError();
 
   @override
-  void sendBleInfoRequest() {}
+  void sendBleInfoRequest() => throw UnimplementedError();
 
   @override
   void sendFile(
-      {required String pathName,
-      required Uint8List conversationId,
-      required String description}) {}
+          {required String pathName,
+          required Uint8List conversationId,
+          required String description}) =>
+      throw UnimplementedError();
 
   @override
-  void sendMessage(Uint8List chatId, String content) {}
+  Future<void> sendPublicMessage(String content) => throw UnimplementedError();
 
   @override
-  Future<void> sendPublicMessage(String content) {
-    throw UnimplementedError();
-  }
+  void setLibqaulLogging(bool enabled) => throw UnimplementedError();
 
   @override
-  void setLibqaulLogging(bool enabled) {}
+  void setNodeState(String address, {bool active = true}) =>
+      throw UnimplementedError();
 
   @override
-  void setNodeState(String address, {bool active = true}) {}
+  Future<void> unblockUser(User u) => throw UnimplementedError();
 
   @override
-  Future<void> unblockUser(User u) {
-    throw UnimplementedError();
-  }
+  Future<void> unverifyUser(User u) => throw UnimplementedError();
 
   @override
-  Future<void> unverifyUser(User u) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> verifyUser(User u) {
-    throw UnimplementedError();
-  }
+  Future<void> verifyUser(User u) => throw UnimplementedError();
 }
 
 class NullChatNotificationController implements ChatNotificationController {

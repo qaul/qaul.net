@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/widgets/basic.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/src/local_notifications.dart';
+import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/screens/home/tabs/chat/widgets/chat.dart';
@@ -56,10 +57,11 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [groupChat]),
+          ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        currentOpenChatRoom.overrideWithProvider(StateProvider((_) => null)),
-        qaulWorkerProvider.overrideWithValue(StubLibqaulWorker())
+        qaulWorkerProvider.overrideWithProvider(
+          Provider((ref) => StubLibqaulWorker(ref.read)),
+        ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
     );
@@ -89,10 +91,11 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [groupChat]),
+          ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        currentOpenChatRoom.overrideWithProvider(StateProvider((_) => null)),
-        qaulWorkerProvider.overrideWithValue(StubLibqaulWorker())
+        qaulWorkerProvider.overrideWithProvider(
+          Provider((ref) => StubLibqaulWorker(ref.read)),
+        ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
     );
@@ -115,6 +118,57 @@ void main() {
       find.byType(ChatScreen),
       matchesGoldenFile(
         'goldens/chatGolden_withGroupRoom_openChat_$sizeName.png',
+      ),
+    );
+  });
+
+  testResponsiveWidgets('sending a message to an open group chat',
+      (tester) async {
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWithValue(
+          StateController(defaultUser),
+        ),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWithValue(
+          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        ),
+        qaulWorkerProvider.overrideWithProvider(
+          Provider((ref) => StubLibqaulWorker(ref.read)),
+        ),
+      ],
+      child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
+    );
+
+    await tester.pumpWidget(wut);
+
+    var chatRoomTileFinder = find.byType(QaulListTile);
+    expect(
+      chatRoomTileFinder,
+      findsOneWidget,
+      reason: 'one chat room available',
+    );
+
+    expect(find.byType(ChatScreen), findsNothing, reason: 'no open chats');
+    await tester.tap(chatRoomTileFinder);
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatScreen), findsOneWidget, reason: 'one open chat');
+
+    final sendMessageButtonFinder = find.byType(SendMessageButton);
+
+    await tester.enterText(find.byType(TextField), 'text');
+    await tester.pump();
+
+    expect(sendMessageButtonFinder, findsOneWidget);
+    await tester.tap(sendMessageButtonFinder);
+    await tester.pumpAndSettle();
+  }, goldenCallback: (sizeName, tester) async {
+    await expectLater(
+      find.byType(ChatScreen),
+      matchesGoldenFile(
+        'goldens/chatGolden_withGroupRoom_openChat_messageSent_$sizeName.png',
       ),
     );
   });

@@ -193,7 +193,7 @@ class _CustomInputState extends State<_CustomInput> {
                             const SizedBox(width: 16.0),
                             Visibility(
                               visible: _sendButtonVisible,
-                              child: _CustomSendButton(
+                              child: SendMessageButton(
                                   onPressed: _handleSendPressed),
                             ),
                           ],
@@ -224,8 +224,8 @@ class _CustomInputState extends State<_CustomInput> {
   }
 }
 
-class _CustomSendButton extends StatelessWidget {
-  const _CustomSendButton({Key? key, required this.onPressed})
+class SendMessageButton extends StatelessWidget {
+  const SendMessageButton({Key? key, required this.onPressed})
       : super(key: key);
 
   final void Function() onPressed;
