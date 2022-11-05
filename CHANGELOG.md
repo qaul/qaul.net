@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0-beta.7] 2022-11-5
 
-## Changed
+### Changed
 
 - Upgraded rust-libp2p to version 0.49.0
 - Many GUI updates.
