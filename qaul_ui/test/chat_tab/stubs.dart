@@ -4,10 +4,11 @@ class StubLibqaulWorker implements LibqaulWorker {
   StubLibqaulWorker(this.reader);
 
   final Reader reader;
+  final _logger = Logger('StubLibqaulWorker');
 
   @override
   void sendMessage(Uint8List chatId, String content) {
-    Logger.root.info('sending message "$content" to chat id: "$chatId"');
+    _logger.info('sending message "$content" to chat id: "$chatId"');
     final room = reader(currentOpenChatRoom);
 
     final index = (room?.messages?.length ?? 0) + 1;
@@ -29,17 +30,17 @@ class StubLibqaulWorker implements LibqaulWorker {
 
   @override
   void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) {
-    Logger.root.info('requested messages fetch; ignoring...');
+    _logger.info('requested messages fetch; ignoring...');
   }
 
   @override
   void getAllChatRooms() {
-    Logger.root.info('requested all Chat rooms fetch; ignoring...');
+    _logger.info('requested all Chat rooms fetch; ignoring...');
   }
 
   @override
   void getGroupInvitesReceived() {
-    Logger.root.info('requested group invites fetch; ignoring...');
+    _logger.info('requested group invites fetch; ignoring...');
   }
 
   // -------------------------------------------
