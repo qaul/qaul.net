@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../qaul_rpc.dart';
 import '../../generated/services/chat/chat.pb.dart';
