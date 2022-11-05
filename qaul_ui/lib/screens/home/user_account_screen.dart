@@ -35,7 +35,7 @@ class UserAccountScreen extends HookConsumerWidget {
             .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
         children: [
           UserDetailsHeading(user),
-          const _DTNNodesList(),
+          const _StorageUsersList(),
           const SizedBox(height: 60),
           Text('Node Info', style: theme.headline4),
           const SizedBox(height: 20),
@@ -68,8 +68,8 @@ class UserAccountScreen extends HookConsumerWidget {
   }
 }
 
-class _DTNNodesList extends HookConsumerWidget {
-  const _DTNNodesList();
+class _StorageUsersList extends HookConsumerWidget {
+  const _StorageUsersList();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -101,8 +101,8 @@ class _DTNNodesList extends HookConsumerWidget {
       schedule: const Duration(milliseconds: 200),
       child: QaulTable(
         titleIcon: Icons.storage,
-        title: l10n.dtnNodes,
-        addRowLabel: l10n.addUserNode,
+        title: l10n.storageUsers,
+        addRowLabel: l10n.addStorageUser,
         emptyStateWidget: Text(l10n.emptyUsersList),
         rowCount: config == null ? 0 : config.users.length,
         onAddRowPressed: () async {
