@@ -23,9 +23,13 @@ class Message with EquatableMixin implements Comparable<Message> {
   final String messageIdBase58;
 
   factory Message.fromChatMessage(ChatMessage m) {
+    final id = m.messageId.isEmpty
+        ? [m.index.hashCode, m.sentAt.toInt()]
+        : m.messageId;
+
     return Message(
       senderId: Uint8List.fromList(m.senderId),
-      messageId: Uint8List.fromList(m.messageId),
+      messageId: Uint8List.fromList(id),
       content: MessageContent.fromBuffer(m.content),
       index: m.index.toInt(),
       status: _messageStateFactory(status: m.status),
