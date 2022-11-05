@@ -41,9 +41,10 @@ void main() {
     await tester.pumpWidget(wut);
     expect(find.byKey(chatKey), findsOneWidget);
   }, goldenCallback: (sizeName, tester) async {
-    await expectLater(
+    await expectGoldenMatches(
       find.byKey(chatKey),
-      matchesGoldenFile('goldens/emptyState/$sizeName.png'),
+      '$sizeName.png',
+      subPath: 'emptyState',
     );
   });
 
@@ -75,9 +76,10 @@ void main() {
       reason: 'one chat room available',
     );
   }, goldenCallback: (sizeName, tester) async {
-    await expectLater(
+    await expectGoldenMatches(
       find.byKey(chatKey),
-      matchesGoldenFile('goldens/tabWithGroupTile/$sizeName.png'),
+      '$sizeName.png',
+      subPath: 'tabWithGroupTile',
     );
   });
 
@@ -114,11 +116,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ChatScreen), findsOneWidget, reason: 'one open chat');
   }, goldenCallback: (sizeName, tester) async {
-    await expectLater(
+    await expectGoldenMatches(
       find.byType(ChatScreen),
-      matchesGoldenFile(
-        'goldens/openEmptyChat/$sizeName.png',
-      ),
+      '$sizeName.png',
+      subPath: 'openEmptyChat',
     );
   });
 
@@ -165,11 +166,10 @@ void main() {
     await tester.tap(sendMessageButtonFinder);
     await tester.pumpAndSettle();
   }, goldenCallback: (sizeName, tester) async {
-    await expectLater(
+    await expectGoldenMatches(
       find.byType(ChatScreen),
-      matchesGoldenFile(
-        'goldens/singleMessage/$sizeName.png',
-      ),
+      '$sizeName.png',
+      subPath: 'singleMessage',
     );
   });
 
@@ -216,11 +216,10 @@ void main() {
       await tester.pumpAndSettle();
     }
   }, goldenCallback: (sizeName, tester) async {
-    await expectLater(
+    await expectGoldenMatches(
       find.byType(ChatScreen),
-      matchesGoldenFile(
-        'goldens/multipleMessages/$sizeName.png',
-      ),
+      '$sizeName.png',
+      subPath: 'multipleMessages',
     );
   });
 
