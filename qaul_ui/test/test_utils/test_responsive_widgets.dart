@@ -36,7 +36,7 @@ void testResponsiveWidgets(
 }) {
   final variant = breakpoints ?? responsiveVariant;
   testWidgets(
-    description,
+    '$description\n',
     (tester) async {
       await tester.setScreenSize(variant.currentValue!);
       await callback(tester);

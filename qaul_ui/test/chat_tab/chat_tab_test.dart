@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +21,13 @@ part 'stubs.dart';
 
 void main() {
   late Key chatKey;
+
+  Logger.root.onRecord.listen((LogRecord r) {
+    final msg = '${r.level.name}: [${r.loggerName}]@${r.time}: ${r.message}';
+    r.level >= Level.SEVERE
+        ? stderr.writeln('$msg\n${r.error}\n${r.stackTrace}')
+        : stdout.writeln(msg);
+  });
 
   setUp(() {
     chatKey = UniqueKey();
