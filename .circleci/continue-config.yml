@@ -570,7 +570,7 @@ jobs:
             - setup-sccache
             - restore-sccache-cache
             - run:
-                command: cd rust && cargo install cargo-deb --vers 1.40.5
+                command: cd rust && cargo install cargo-deb
                 name: Install cargo-deb package
             - run:
                 command: cd rust/clients/qauld && cargo deb

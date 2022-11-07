@@ -12,7 +12,7 @@ steps:
   - restore-sccache-cache
   - run:
       name: Install cargo-deb package
-      command: cd rust && cargo install cargo-deb --vers 1.40.5
+      command: cd rust && cargo install cargo-deb
   - run:
       name: Build qauld for Linux
       command: cd rust/clients/qauld && cargo deb
