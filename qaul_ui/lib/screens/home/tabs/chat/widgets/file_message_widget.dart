@@ -10,13 +10,22 @@ class FileMessageWidget extends StatelessWidget {
   final types.FileMessage message;
   final bool isDefaultUser;
 
+  bool _isReceivingFile() {
+    var isReceiving = false;
+    if (message.metadata?.containsKey('messageState') ?? false) {
+      final s = MessageState.fromJson(message.metadata!['messageState']);
+      isReceiving = s == MessageState.receiving;
+    }
+    return isReceiving;
+  }
+
   @override
   Widget build(BuildContext context) {
     var style = Theme.of(context).textTheme.bodyText1!.copyWith(
-      color: isDefaultUser ? Colors.white : Colors.black,
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-    );
+          color: isDefaultUser ? Colors.white : Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        );
 
     String? description = message.metadata?['description'];
     return Column(
@@ -39,7 +48,12 @@ class FileMessageWidget extends StatelessWidget {
                 height: 42,
                 decoration: const BoxDecoration(
                     color: Colors.black12, shape: BoxShape.circle),
-                child: const Icon(Icons.description),
+                child: _isReceivingFile()
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      )
+                    : const Icon(Icons.description),
               ),
               const SizedBox(width: 16),
               Expanded(

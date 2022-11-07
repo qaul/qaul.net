@@ -306,7 +306,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         },
             ),
             onMessageTap: (context, message) async {
-              if (message is! types.FileMessage) return;
+              if (message is! types.FileMessage || _isReceivingFile(message)) {
+                return;
+              }
               if (Platform.isIOS || Platform.isAndroid) {
                 OpenFile.open(message.uri);
                 return;
@@ -411,6 +413,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     });
   }
+
+  bool _isReceivingFile(types.FileMessage message) {
+    var isReceiving = false;
+    if (message.metadata?.containsKey('messageState') ?? false) {
+      final s = MessageState.fromJson(message.metadata!['messageState']);
+      isReceiving = s == MessageState.receiving;
+    }
+    return isReceiving;
+  }
 }
 
 extension _MessageExtension on Message {
@@ -474,6 +485,7 @@ extension _MessageExtension on Message {
         status: mappedState,
         metadata: {
           'description': (content as FileShareContent).description,
+          'messageState': status.toJson(),
         },
       );
     }
