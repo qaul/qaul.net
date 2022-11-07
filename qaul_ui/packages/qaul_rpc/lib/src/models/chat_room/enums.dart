@@ -10,7 +10,10 @@ enum MessageState {
   confirmed,
   confirmedByAll,
   receiving,
-  received
+  received;
+
+  String toJson() => name;
+  static MessageState fromJson(String json) => values.byName(json);
 }
 
 MessageState _messageStateFactory({required MessageStatus status}) {

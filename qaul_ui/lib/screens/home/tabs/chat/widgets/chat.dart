@@ -459,6 +459,7 @@ extension _MessageExtension on Message {
           name: (content as FileShareContent).fileName,
           metadata: {
             'description': (content as FileShareContent).description,
+            'messageState': status.toJson(),
           },
         );
       }

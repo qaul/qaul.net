@@ -23,17 +23,39 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
   ImageStream? _stream;
   Size _size = const Size(0, 0);
 
+  bool _isReceivingImage({Map<String, dynamic>? metadata}) {
+    var isReceiving = false;
+    var src = metadata ?? widget.message.metadata;
+    if (src?.containsKey('messageState') ?? false) {
+      final s = MessageState.fromJson(widget.message.metadata!['messageState']);
+      isReceiving = s == MessageState.receiving;
+    }
+    return isReceiving;
+  }
+
   @override
   void initState() {
     super.initState();
+
+    if (_isReceivingImage()) return;
     _image = Conditional().getProvider(widget.message.uri);
     _size = Size(widget.message.width ?? 0, widget.message.height ?? 0);
   }
 
   @override
+  void didUpdateWidget(old) {
+    super.didUpdateWidget(old);
+    if (_image == null && !_isReceivingImage()) {
+      _size = Size(widget.message.width ?? 0, widget.message.height ?? 0);
+      _image = Conditional().getProvider(widget.message.uri);
+      _getImage();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_size.isEmpty) {
+    if (_size.isEmpty && _image != null) {
       _getImage();
     }
   }
@@ -75,7 +97,15 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
         );
 
     Widget image;
-    if (_size.aspectRatio == 0) {
+    if (_isReceivingImage()) {
+      image = Container(
+        color: color,
+        height: 80,
+        width: 80,
+        padding: const EdgeInsets.all(20),
+        child: const CircularProgressIndicator(),
+      );
+    } else if (_size.aspectRatio == 0) {
       image = Container(color: color, height: _size.height, width: _size.width);
     } else if (_size.aspectRatio < 0.1 || _size.aspectRatio > 10) {
       image = Container(
