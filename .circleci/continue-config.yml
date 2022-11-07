@@ -1270,6 +1270,5 @@ workflows:
     build-rust:
         jobs:
             - build-libqaul-linux
-            - build-qauld-linux
         when: << pipeline.parameters.run-rust-workflow >>
 
