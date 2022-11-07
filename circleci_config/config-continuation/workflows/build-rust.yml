@@ -1,3 +1,4 @@
 when: << pipeline.parameters.run-rust-workflow >>
 jobs:
   - build-libqaul-linux
+  - build-qauld-linux

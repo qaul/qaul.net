@@ -173,7 +173,7 @@ executors:
         working_directory: ~/qaul-libp2p
     rust-linux:
         docker:
-            - image: cimg/rust:1.60.0
+            - image: cimg/rust:1.64.0
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         shell: /bin/bash --login -o pipefail
@@ -1270,5 +1270,6 @@ workflows:
     build-rust:
         jobs:
             - build-libqaul-linux
+            - build-qauld-linux
         when: << pipeline.parameters.run-rust-workflow >>
 
