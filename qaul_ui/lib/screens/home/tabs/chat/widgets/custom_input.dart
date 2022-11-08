@@ -162,7 +162,7 @@ class _CustomInputState extends State<_CustomInput> {
                             Expanded(
                               child: TextField(
                                 controller: _textController,
-                                style: const TextStyle(fontSize: 19),
+                                style: const TextStyle(fontSize: 17),
                                 decoration: InputDecoration(
                                   labelText: widget.hintText,
                                   suffixIcon: Row(
