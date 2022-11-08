@@ -9,7 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
-    show Chat, DefaultChatTheme, InputOptions, SendButtonVisibilityMode;
+    show
+        Chat,
+        DefaultChatTheme,
+        EmojiEnlargementBehavior,
+        InputOptions,
+        SendButtonVisibilityMode,
+        TextMessage;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -222,6 +228,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           bottom: false,
           child: Chat(
             showUserAvatars: true,
+            showUserNames: room.isGroupChatRoom,
             user: user.toInternalUser(),
             messages: messages(room, l10n: l10n) ?? [],
             onSendPressed: sendMessage,
@@ -324,6 +331,44 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   return;
                 }
               }
+            },
+            textMessageBuilder: (message,
+                {required int messageWidth, required bool showName}) {
+              final msgIdx = room.messages!.indexWhere(
+                  (element) => element.messageIdBase58 == message.id);
+
+              var prevMsgWasFromSamePerson = false;
+              if (msgIdx > 0) {
+                final prevMsg = room.messages![msgIdx - 1];
+                prevMsgWasFromSamePerson =
+                    prevMsg.content is TextMessageContent &&
+                        prevMsg.senderIdBase58 == message.author.id;
+              }
+
+              return TextMessage(
+                message: message,
+                usePreviewData: true,
+                hideBackgroundOnEmojiMessages: true,
+                showName: showName && !prevMsgWasFromSamePerson,
+                emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
+                nameBuilder: (id) {
+                  var user =
+                      room.members.firstWhereOrNull((u) => id == u.idBase58);
+                  if (user == null) return const SizedBox();
+                  final color = colorGenerationStrategy(user.idBase58);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text(
+                      user.name,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                },
+              );
             },
             fileMessageBuilder: (message, {required int messageWidth}) {
               return SizedBox(
