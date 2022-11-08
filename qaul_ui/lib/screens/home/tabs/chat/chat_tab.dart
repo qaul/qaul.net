@@ -344,6 +344,7 @@ class _GroupInviteTile extends HookConsumerWidget {
             focusElevation: 0,
             hoverElevation: 0,
             highlightElevation: 0,
+            heroTag: 'acceptGroupInviteFAB',
             backgroundColor: Colors.green.shade300,
             foregroundColor: Colors.white,
             onPressed: () {
@@ -361,6 +362,7 @@ class _GroupInviteTile extends HookConsumerWidget {
             focusElevation: 0,
             hoverElevation: 0,
             highlightElevation: 0,
+            heroTag: 'groupInviteDetailsFAB',
             backgroundColor: Colors.lightBlue,
             foregroundColor: Colors.white,
             onPressed: () => showDialog(
