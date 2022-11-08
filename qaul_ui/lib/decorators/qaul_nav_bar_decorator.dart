@@ -241,11 +241,12 @@ class QaulNavBarItem extends HookConsumerWidget {
       case TabType.chat:
         svgPath = 'assets/icons/chat.svg';
         tooltip = l18ns!.chatNavButtonTooltip;
+        sizeFactor = 1.1;
         break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
         tooltip = l18ns!.netNavButtonTooltip;
-        sizeFactor = 1.2;
+        sizeFactor = 1.1;
         break;
     }
 
