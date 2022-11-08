@@ -41,9 +41,9 @@ class QaulApp extends PlatformAwareBuilder {
           titleTextStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.lightBlue),
-          iconTheme: const IconThemeData(color: Colors.lightBlue),
-          actionsIconTheme: const IconThemeData(color: Colors.lightBlue),
+              color: Colors.black),
+          iconTheme: IconThemeData(color: Colors.grey.shade600),
+          actionsIconTheme: IconThemeData(color: Colors.grey.shade600),
           shape: BorderDirectional(
               bottom: BorderSide(color: Colors.grey.shade300)),
         ),
