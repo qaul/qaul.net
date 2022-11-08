@@ -10,7 +10,8 @@ class Message with EquatableMixin implements Comparable<Message> {
     required this.sentAt,
     required this.receivedAt,
     this.status = MessageState.sending,
-  }) : messageIdBase58 = Base58Encode(messageId);
+  })  : messageIdBase58 = Base58Encode(messageId),
+        senderIdBase58 = Base58Encode(senderId);
 
   final Uint8List senderId;
   final Uint8List messageId;
@@ -21,6 +22,7 @@ class Message with EquatableMixin implements Comparable<Message> {
   final MessageContent content;
 
   final String messageIdBase58;
+  final String senderIdBase58;
 
   factory Message.fromChatMessage(ChatMessage m) {
     final id = m.messageId.isEmpty
