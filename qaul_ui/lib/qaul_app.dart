@@ -22,6 +22,7 @@ class QaulApp extends PlatformAwareBuilder {
       light: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.lightBlue,
+        scaffoldBackgroundColor: Colors.white,
         navigationBarTheme: const NavigationBarThemeData(
           surfaceTintColor: Colors.black,
         ),
