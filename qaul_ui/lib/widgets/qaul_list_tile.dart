@@ -9,7 +9,6 @@ class QaulListTile extends StatelessWidget {
     this.trailingIcon,
     this.trailingMetadata,
     this.onTap,
-    this.isThreeLine = false,
     this.useUserColorOnName = false,
     this.tapRoutesToDetailsScreen = false,
     this.nameTapRoutesToDetailsScreen = false,
@@ -38,7 +37,6 @@ class QaulListTile extends StatelessWidget {
       trailingIcon: trailingIcon,
       trailingMetadata: trailingMetadata,
       onTap: onTap,
-      isThreeLine: isThreeLine,
       tapRoutesToDetailsScreen: tapRoutesToDetailsScreen,
       nameTapRoutesToDetailsScreen: nameTapRoutesToDetailsScreen,
       avatarTapRoutesToDetailsScreen: avatarTapRoutesToDetailsScreen,
@@ -63,7 +61,6 @@ class QaulListTile extends StatelessWidget {
       trailingIcon: trailingIcon,
       trailingMetadata: trailingMetadata,
       onTap: onTap,
-      isThreeLine: isThreeLine,
       useUserColorOnName: useUserColorOnName,
       tapRoutesToDetailsScreen: false,
       avatarTapRoutesToDetailsScreen: false,
@@ -73,8 +70,6 @@ class QaulListTile extends StatelessWidget {
   final User? user;
 
   final ChatRoom? room;
-
-  final bool isThreeLine;
 
   final Widget? content;
 
@@ -151,14 +146,29 @@ class QaulListTile extends StatelessWidget {
       );
     }
 
-    return ListTile(
+    return InkWell(
       onTap: onTap ?? onTapFallback,
-      title: tileTitle,
-      subtitle: content,
-      trailing: trailingIcon,
-      isThreeLine: isThreeLine,
-      leading: leading,
-      visualDensity: VisualDensity.adaptivePlatformDensity,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            leading,
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  tileTitle,
+                  const SizedBox(height: 4),
+                  content ?? const SizedBox(),
+                ],
+              ),
+            ),
+            trailingIcon ?? const SizedBox(),
+          ],
+        ),
+      ),
     );
   }
 
