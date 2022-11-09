@@ -125,6 +125,7 @@
   "groupEventInviteAccepted": "accepted the invite to",
   "securePrivateMessageHint": "Secure private message",
   "groupChatMessageHint": "Group chat message",
-  "inviteUser": "Invite user"
+  "inviteUser": "Invite user",
+  "notifications": "Notifications"
 }
 

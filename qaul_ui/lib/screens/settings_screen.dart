@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
@@ -10,17 +11,13 @@ import '../decorators/cron_task_decorator.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
-class SettingsScreen extends StatefulHookConsumerWidget {
+class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: const IconButtonFactory(),
@@ -28,79 +25,113 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             const Icon(Icons.settings),
             const SizedBox(width: 8),
-            Text(l18ns.settings),
+            Text(l10n.settings),
           ],
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding:
-              MediaQuery.of(context).viewPadding.copyWith(left: 20, right: 20),
+          padding: MediaQuery.of(context).viewPadding.copyWith(
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const LanguageSelectDropDown(),
               const SizedBox(height: 20),
               const ThemeSelectDropdown(),
               const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(l18ns.publicNotificationsEnabled),
-                  PlatformAwareSwitch(
-                    value: UserPrefsHelper().publicTabNotificationsEnabled,
-                    onChanged: (val) {
-                      UserPrefsHelper().publicTabNotificationsEnabled = val;
-                      setState(() {});
-                    },
-                  ),
-                ],
+              SettingsSection(
+                name: l10n.notifications,
+                icon: const FaIcon(FontAwesomeIcons.solidBell),
+                content: const _NotificationOptions(),
               ),
               const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(l18ns.chatNotificationsEnabled),
-                  PlatformAwareSwitch(
-                    value: UserPrefsHelper().chatNotificationsEnabled,
-                    onChanged: (val) {
-                      UserPrefsHelper().chatNotificationsEnabled = val;
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-              if (_notificationsAreEnabled) ...[
-                const SizedBox(height: 20),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(l18ns.notifyOnlyForVerifiedUsers),
-                    PlatformAwareSwitch(
-                      value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
-                      onChanged: (val) {
-                        UserPrefsHelper().notifyOnlyForVerifiedUsers = val;
-                        setState(() {});
-                      },
-                    ),
-                  ],
+              const SettingsSection(
+                name: 'Network',
+                icon: FaIcon(FontAwesomeIcons.networkWired),
+                content: Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: _InternetNodesList(),
                 ),
-              ],
-              const Divider(),
-              const SizedBox(height: 80),
-              const _InternetNodesList(),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
+class _NotificationOptions extends StatefulWidget {
+  const _NotificationOptions({Key? key}) : super(key: key);
+
+  @override
+  State<_NotificationOptions> createState() => _NotificationOptionsState();
+}
+
+class _NotificationOptionsState extends State<_NotificationOptions> {
   bool get _notificationsAreEnabled =>
       UserPrefsHelper().chatNotificationsEnabled ||
       UserPrefsHelper().publicTabNotificationsEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.publicNavButtonTooltip),
+            PlatformAwareSwitch(
+              value: UserPrefsHelper().publicTabNotificationsEnabled,
+              onChanged: (val) {
+                UserPrefsHelper().publicTabNotificationsEnabled = val;
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.chatNavButtonTooltip),
+            PlatformAwareSwitch(
+              value: UserPrefsHelper().chatNotificationsEnabled,
+              onChanged: (val) {
+                UserPrefsHelper().chatNotificationsEnabled = val;
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+        if (_notificationsAreEnabled) ...[
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(l10n.notifyOnlyForVerifiedUsers),
+              PlatformAwareSwitch(
+                value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
+                onChanged: (val) {
+                  UserPrefsHelper().notifyOnlyForVerifiedUsers = val;
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 class _InternetNodesList extends HookConsumerWidget {

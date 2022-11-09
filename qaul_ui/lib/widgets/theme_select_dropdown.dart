@@ -5,45 +5,47 @@ class ThemeSelectDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l18ns = AppLocalizations.of(context);
-    return Row(
-      children: [
-        const Icon(Icons.palette_outlined),
-        const SizedBox(width: 8.0),
-        Text(l18ns!.theme),
-        const SizedBox(width: 32.0),
-        const Expanded(child: _PlatformAwareDropdown()),
-      ],
+    return SettingsSection(
+      name: AppLocalizations.of(context)!.theme,
+      icon: const FaIcon(FontAwesomeIcons.palette),
+      content: const _ThemeDropdown(),
     );
   }
 }
 
-class _PlatformAwareDropdown extends PlatformAwareBuilder {
-  const _PlatformAwareDropdown({Key? key}) : super(key: key);
+class _ThemeDropdown extends StatelessWidget {
+  const _ThemeDropdown({Key? key}) : super(key: key);
 
   @override
-  Widget defaultBuilder(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ValueListenableBuilder<AdaptiveThemeMode>(
       valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
       builder: (_, mode, child) {
-        final l18ns = AppLocalizations.of(context)!;
-        return DropdownButton<AdaptiveThemeMode>(
-          isExpanded: true,
+        return DropdownBuilder<AdaptiveThemeMode>(
           value: mode,
-          items: [
-            DropdownMenuItem<AdaptiveThemeMode>(
-              value: AdaptiveThemeMode.system,
-              child: Text(l18ns.useSystemDefaultMessage),
-            ),
-            DropdownMenuItem<AdaptiveThemeMode>(
-              value: AdaptiveThemeMode.light,
-              child: Text(l18ns.lightTheme),
-            ),
-            DropdownMenuItem<AdaptiveThemeMode>(
-              value: AdaptiveThemeMode.dark,
-              child: Text(l18ns.darkTheme),
-            ),
-          ],
+          itemsLength: AdaptiveThemeMode.values.length,
+          itemBuilder: (context, i) {
+            final val = AdaptiveThemeMode.values[i];
+            var label = '';
+            switch (val) {
+              case AdaptiveThemeMode.light:
+                label = l10n.lightTheme;
+                break;
+              case AdaptiveThemeMode.dark:
+                label = l10n.darkTheme;
+                break;
+              case AdaptiveThemeMode.system:
+                label = l10n.useSystemDefaultMessage;
+                break;
+            }
+
+            return DropdownMenuItem<AdaptiveThemeMode>(
+              value: val,
+              child: Text(label),
+            );
+          },
           onChanged: (chosenMode) {
             switch (chosenMode) {
               case AdaptiveThemeMode.light:

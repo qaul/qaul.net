@@ -106,6 +106,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       ),
       PopupMenuButton<String>(
         onSelected: _handleClick,
+        splashRadius: 20,
         iconSize: 36,
         icon: Icon(vertical ? Icons.more_horiz : Icons.more_vert),
         itemBuilder: (BuildContext context) {

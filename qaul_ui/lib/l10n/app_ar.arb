@@ -103,5 +103,6 @@
   "groupStateEventClosed": "تم إغلاق المجموعة",
   "securePrivateMessageHint": "تأمين الرسائل الخاصة",
   "groupChatMessageHint": "رسالة دردشة جماعية",
-  "inviteUser": "قم بدعوة المستخدم"
+  "inviteUser": "قم بدعوة المستخدم",
+  "notifications": "إشعارات"
 }

@@ -103,5 +103,6 @@
   "groupStateEventClosed": "گروه بسته شده است",
   "securePrivateMessageHint": "پیام خصوصی امن",
   "groupChatMessageHint": "پیام چت گروهی",
-  "inviteUser": "دعوت از کاربر"
+  "inviteUser": "دعوت از کاربر",
+  "notifications": "اطلاعیه"
 }

@@ -109,5 +109,6 @@
   "groupEventInviteAccepted": "aceitou o convite do",
   "securePrivateMessageHint": "Mensagem privada segura",
   "groupChatMessageHint": "Mensagem de grupo",
-  "inviteUser": "Convidar usuário"
+  "inviteUser": "Convidar usuário",
+  "notifications": "Notificações"
 }
