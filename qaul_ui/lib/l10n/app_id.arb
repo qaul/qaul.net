@@ -106,5 +106,6 @@
   "groupStateEventClosed": "Grup telah ditutup",
   "securePrivateMessageHint": "Pesan pribadi yang aman",
   "groupChatMessageHint": "Pesan obrolan grup",
-  "inviteUser": "Undang pengguna"
+  "inviteUser": "Undang pengguna",
+  "notifications": "Pemberitahuan"
 }
