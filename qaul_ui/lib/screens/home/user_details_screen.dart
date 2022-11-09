@@ -19,10 +19,8 @@ class UserDetailsScreen extends HookConsumerWidget {
   const UserDetailsScreen({
     Key? key,
     required this.user,
-    this.showChatButton = true,
   }) : super(key: key);
   final User user;
-  final bool showChatButton;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,42 +55,7 @@ class UserDetailsScreen extends HookConsumerWidget {
     }, [l10n, ref, isMounted]);
 
     return Scaffold(
-        appBar: AppBar(
-          leading: const IconButtonFactory(),
-          title: !showChatButton
-              ? null
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Tooltip(
-                      message: l10n.newChatTooltip,
-                      child: IconButton(
-                        splashRadius: 26,
-                        onPressed: () {
-                          final defaultUser = ref.watch(defaultUserProvider)!;
-                          final newRoom = ChatRoom.blank(otherUser: user);
-                          Navigator.pop(context);
-                          openChat(
-                            newRoom,
-                            ref: ref,
-                            context: context,
-                            user: defaultUser,
-                            otherUser: user,
-                          );
-                        },
-                        icon: SvgPicture.asset(
-                          'assets/icons/comment.svg',
-                          width: 24,
-                          height: 24,
-                          color:
-                              Theme.of(context).appBarTheme.iconTheme?.color ??
-                                  Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
+        appBar: AppBar(leading: const IconButtonFactory()),
         body: ListView(
           padding: MediaQuery.of(context)
               .viewPadding
@@ -102,6 +65,25 @@ class UserDetailsScreen extends HookConsumerWidget {
             ResponsiveLayout(
               mobileBody: Column(
                 children: [
+                  SizedBox(
+                    width: 280,
+                    child: QaulButton(
+                      label: l10n.newChatTooltip,
+                      onPressed: () {
+                        final defaultUser = ref.watch(defaultUserProvider)!;
+                        final newRoom = ChatRoom.blank(otherUser: user);
+                        Navigator.pop(context);
+                        openChat(
+                          newRoom,
+                          ref: ref,
+                          context: context,
+                          user: defaultUser,
+                          otherUser: user,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: 280,
                     child: DisabledStateDecorator(
@@ -122,9 +104,30 @@ class UserDetailsScreen extends HookConsumerWidget {
                   ),
                 ],
               ),
-              tabletBody: Row(
+              tabletBody: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 480,
+                    child: QaulButton(
+                      label: l10n.newChatTooltip,
+                      onPressed: () {
+                        final defaultUser = ref.watch(defaultUserProvider)!;
+                        final newRoom = ChatRoom.blank(otherUser: user);
+                        Navigator.pop(context);
+                        openChat(
+                          newRoom,
+                          ref: ref,
+                          context: context,
+                          user: defaultUser,
+                          otherUser: user,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 480,
                     child: DisabledStateDecorator(
                       isDisabled: blocked,
                       child: QaulButton(
@@ -133,8 +136,9 @@ class UserDetailsScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 480,
                     child: QaulButton(
                       onPressed: onBlockUserPressed,
                       label: blocked ? l10n.unblockUser : l10n.blockUser,

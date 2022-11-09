@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import 'widgets.dart';
@@ -17,6 +18,7 @@ class UserDetailsHeading extends StatelessWidget {
       shrinkWrap: true,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             QaulAvatar.large(user: user),
             Expanded(
@@ -28,24 +30,39 @@ class UserDetailsHeading extends StatelessWidget {
                     Text(
                       user.name,
                       style: theme.headline6,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
                     Text(
                       user.idBase58,
                       style: theme.subtitle2,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const FaIcon(FontAwesomeIcons.key, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Qaul ${l10n!.publicKey}',
+                            style: theme.titleMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(user.keyBase58 ?? 'Unknown'),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 60),
-        Text('Qaul ${l10n!.publicKey}', style: theme.headline5),
-        const SizedBox(height: 20),
-        Text(user.keyBase58 ?? 'Unknown'),
         const SizedBox(height: 60),
       ],
     );
