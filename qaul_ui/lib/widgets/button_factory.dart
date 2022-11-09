@@ -27,17 +27,28 @@ class IconButtonFactory extends StatelessWidget {
 }
 
 class QaulButton extends StatelessWidget {
-  const QaulButton({Key? key, required this.label, this.style, this.onPressed})
-      : super(key: key);
+  const QaulButton({
+    Key? key,
+    required this.label,
+    this.style,
+    this.onPressed,
+    this.backgroundColor,
+  }) : super(key: key);
 
   final String label;
   final TextStyle? style;
   final VoidCallback? onPressed;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: onPressed ?? () {},
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(
+          backgroundColor ?? Colors.transparent,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Text(

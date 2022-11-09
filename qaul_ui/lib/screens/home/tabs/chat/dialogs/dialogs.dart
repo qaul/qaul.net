@@ -175,12 +175,12 @@ class _InviteUsersToGroupDialogState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SearchUserDecorator(
-      title: AppLocalizations.of(context)!.newChatTooltip,
+      title: AppLocalizations.of(context)!.inviteUser,
       builder: (_, users) {
         return Stack(
           children: [
             ListView.separated(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 40),
               itemCount: users.length,
               separatorBuilder: (_, __) => const Divider(height: 12.0),
               itemBuilder: (context, i) {
@@ -209,9 +209,10 @@ class _InviteUsersToGroupDialogState
             ),
             Positioned.directional(
               textDirection: Directionality.of(context),
-              end: 80,
-              bottom: 20,
+              end: 12,
+              bottom: 8,
               child: QaulButton(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 onPressed: () async {
                   final worker = ref.read(qaulWorkerProvider);
                   for (final user in selected) {
