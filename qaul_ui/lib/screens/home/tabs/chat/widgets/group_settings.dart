@@ -29,19 +29,6 @@ class _GroupSettingsPage extends HookConsumerWidget {
           leading: const IconButtonFactory(),
           title: Text(l10n.groupSettings),
         ),
-        floatingActionButton: !isAdmin
-            ? const SizedBox()
-            : FloatingActionButton(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => InviteUsersToGroupDialog(room: group),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.person_add, color: Colors.white),
-              ),
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           children: [
@@ -73,13 +60,13 @@ class _GroupSettingsPage extends HookConsumerWidget {
                     ),
                   ),
             const SizedBox(height: 20),
-            Text(l10n.members),
-            const SizedBox(height: 4),
-            ListView.separated(
-              shrinkWrap: true,
-              itemCount: group.members.length,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (c, i) {
+            QaulTable(
+              title: l10n.members,
+              addButtonEnabled: isAdmin,
+              addRowLabel: l10n.inviteUser,
+              rowCount: group.members.length,
+              titleIcon: Icons.people_outlined,
+              rowBuilder: (c, i) {
                 final user = group.members[i];
                 final isNotDefaultUser = user.idBase58 != defaultUser.idBase58;
 
@@ -88,28 +75,36 @@ class _GroupSettingsPage extends HookConsumerWidget {
                   trailingIcon: !isNotDefaultUser
                       ? const SizedBox()
                       : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(_mapInvitationStateToIcon(
-                                user.invitationState)),
-                            const SizedBox(width: 12),
-                            if (isAdmin)
-                              IconButton(
-                                onPressed: () async {
-                                  var ok =
-                                      await showConfirmDialog(context, l10n);
-                                  if (!(ok ?? false)) return;
-                                  var worker = ref.read(qaulWorkerProvider);
-                                  worker.removeUserFromGroup(user, room);
-                                },
-                                splashRadius: 18,
-                                color: Colors.red.shade400,
-                                icon: const Icon(Icons.person_remove_rounded),
-                              )
-                          ],
-                        ),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(_mapInvitationStateToIcon(
+                          user.invitationState)),
+                      const SizedBox(width: 12),
+                      if (isAdmin)
+                        IconButton(
+                          onPressed: () async {
+                            var ok =
+                            await showConfirmDialog(context, l10n);
+                            if (!(ok ?? false)) return;
+                            var worker = ref.read(qaulWorkerProvider);
+                            worker.removeUserFromGroup(user, room);
+                          },
+                          splashRadius: 18,
+                          color: Colors.red.shade400,
+                          icon: const Icon(Icons.person_remove_rounded),
+                        )
+                    ],
+                  ),
                   tapRoutesToDetailsScreen: isNotDefaultUser,
                   avatarTapRoutesToDetailsScreen: isNotDefaultUser,
+                );
+              },
+              onAddRowPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => InviteUsersToGroupDialog(room: group),
+                  ),
                 );
               },
             ),

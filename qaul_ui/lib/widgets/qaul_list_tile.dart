@@ -160,8 +160,10 @@ class QaulListTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   tileTitle,
-                  const SizedBox(height: 4),
-                  content ?? const SizedBox(),
+                  if (content != null) ...[
+                    const SizedBox(height: 4),
+                    content!,
+                  ]
                 ],
               ),
             ),

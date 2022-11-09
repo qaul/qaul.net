@@ -102,5 +102,6 @@
   "groupStateEventCreated": "تم إنشاء المجموعة",
   "groupStateEventClosed": "تم إغلاق المجموعة",
   "securePrivateMessageHint": "تأمين الرسائل الخاصة",
-  "groupChatMessageHint": "رسالة دردشة جماعية"
+  "groupChatMessageHint": "رسالة دردشة جماعية",
+  "inviteUser": "قم بدعوة المستخدم"
 }

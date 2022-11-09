@@ -102,5 +102,6 @@
   "groupStateEventCreated": "گروه ایجاد شده است",
   "groupStateEventClosed": "گروه بسته شده است",
   "securePrivateMessageHint": "پیام خصوصی امن",
-  "groupChatMessageHint": "پیام چت گروهی"
+  "groupChatMessageHint": "پیام چت گروهی",
+  "inviteUser": "دعوت از کاربر"
 }
