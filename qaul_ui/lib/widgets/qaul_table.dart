@@ -10,6 +10,7 @@ class QaulTable extends StatelessWidget {
     required this.addRowLabel,
     required this.onAddRowPressed,
     this.emptyStateWidget,
+    this.addButtonEnabled = true,
   }) : super(key: key);
   final IconData titleIcon;
   final String title;
@@ -18,6 +19,7 @@ class QaulTable extends StatelessWidget {
   final String addRowLabel;
   final VoidCallback onAddRowPressed;
   final Widget? emptyStateWidget;
+  final bool addButtonEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -50,18 +52,20 @@ class QaulTable extends StatelessWidget {
               itemBuilder: rowBuilder,
             ),
           ),
-        const SizedBox(height: 12.0),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              splashRadius: 24,
-              onPressed: onAddRowPressed,
-            ),
-            const SizedBox(width: 12.0),
-            Text(addRowLabel),
-          ],
-        ),
+        if (addButtonEnabled) ...[
+          const SizedBox(height: 12.0),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add),
+                splashRadius: 24,
+                onPressed: onAddRowPressed,
+              ),
+              const SizedBox(width: 12.0),
+              Text(addRowLabel),
+            ],
+          ),
+        ],
       ],
     );
   }

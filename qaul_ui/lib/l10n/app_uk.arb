@@ -102,5 +102,6 @@
   "groupStateEventCreated": "Групу створено",
   "groupStateEventClosed": "Групу закрито",
   "securePrivateMessageHint": "Безпечне приватне повідомлення",
-  "groupChatMessageHint": "Повідомлення групового чату"
+  "groupChatMessageHint": "Повідомлення групового чату",
+  "inviteUser": "Запросити користувача"
 }

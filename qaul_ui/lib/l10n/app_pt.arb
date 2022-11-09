@@ -108,5 +108,6 @@
   "groupEventRemoved": "foi removido do",
   "groupEventInviteAccepted": "aceitou o convite do",
   "securePrivateMessageHint": "Mensagem privada segura",
-  "groupChatMessageHint": "Mensagem de grupo"
+  "groupChatMessageHint": "Mensagem de grupo",
+  "inviteUser": "Convidar usuário"
 }

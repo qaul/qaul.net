@@ -124,6 +124,7 @@
   "groupEventRemoved": "been removed from",
   "groupEventInviteAccepted": "accepted the invite to",
   "securePrivateMessageHint": "Secure private message",
-  "groupChatMessageHint": "Group chat message"
+  "groupChatMessageHint": "Group chat message",
+  "inviteUser": "Invite user"
 }
 
