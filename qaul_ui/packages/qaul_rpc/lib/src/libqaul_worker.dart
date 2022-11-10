@@ -23,6 +23,7 @@ import 'generated/services/chat/chatfile_rpc.pb.dart';
 import 'generated/services/dtn/dtn_rpc.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
+import 'internal/file_history.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
@@ -263,11 +264,28 @@ class LibqaulWorker {
     await _sendMessage(Modules.CHATFILE, msg);
   }
 
-  void getFileHistory({int? page = 0, int? itemsPerPage = 20}) async {
-    final msg = ChatFile(
-      fileHistory: FileHistoryRequest(offset: page, limit: itemsPerPage),
-    );
-    await _sendMessage(Modules.CHATFILE, msg);
+  Future<List<FileHistoryEntity>> getFileHistory({int? page = 0, int? itemsPerPage = 20}) async {
+    Future<void> sendFileHistoryRequest() async {
+      final msg = ChatFile(
+        fileHistory: FileHistoryRequest(offset: page, limit: itemsPerPage),
+      );
+      await _sendMessage(Modules.CHATFILE, msg);
+    }
+
+    List<FileHistoryEntity> newItems = [];
+    try {
+      for (var i = 0; i < 5; i++) {
+        await sendFileHistoryRequest();
+        await Future.delayed(Duration(milliseconds: (i + 1) * 10));
+        newItems = _reader(fileHistoryEntitiesProvider);
+        if (newItems.isNotEmpty) break;
+      }
+    } catch (error) {
+      _log.warning('error fetching file history', error, StackTrace.current);
+    } finally {
+      _reader(fileHistoryEntitiesProvider.notifier).clear();
+    }
+    return newItems;
   }
 
   // -------------------
