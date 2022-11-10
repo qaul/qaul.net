@@ -2,15 +2,17 @@
 
 Between the the signing contributor further called "contributor"
 
-and 
+and
 
+```
 Verein zur Förderung von offenen Community-Projekten
 (Open Community Project Association)
 Bodenackerstr. 2
 8304 Wallisellen
 Switzerland
-<https://ocpa.ch>
-<mailto:contact@ocpa.ch>
+https://ocpa.ch
+contact@ocpa.ch
+```
 
 further called "OCPA".
 
