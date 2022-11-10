@@ -107,5 +107,6 @@
   "securePrivateMessageHint": "Pesan pribadi yang aman",
   "groupChatMessageHint": "Pesan obrolan grup",
   "inviteUser": "Undang pengguna",
-  "notifications": "Pemberitahuan"
+  "notifications": "Pemberitahuan",
+  "fileHistory": "Riwayat berkas"
 }

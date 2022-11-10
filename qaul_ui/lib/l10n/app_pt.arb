@@ -110,5 +110,6 @@
   "securePrivateMessageHint": "Mensagem privada segura",
   "groupChatMessageHint": "Mensagem de grupo",
   "inviteUser": "Convidar usuário",
-  "notifications": "Notificações"
+  "notifications": "Notificações",
+  "fileHistory": "Arquivos recebidos"
 }

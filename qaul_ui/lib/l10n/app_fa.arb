@@ -104,5 +104,6 @@
   "securePrivateMessageHint": "پیام خصوصی امن",
   "groupChatMessageHint": "پیام چت گروهی",
   "inviteUser": "دعوت از کاربر",
-  "notifications": "اطلاعیه"
+  "notifications": "اطلاعیه",
+  "fileHistory": "تاریخچه فایل"
 }

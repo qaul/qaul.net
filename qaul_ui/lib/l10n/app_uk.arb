@@ -104,5 +104,6 @@
   "securePrivateMessageHint": "Безпечне приватне повідомлення",
   "groupChatMessageHint": "Повідомлення групового чату",
   "inviteUser": "Запросити користувача",
-  "notifications": "Сповіщення"
+  "notifications": "Сповіщення",
+  "fileHistory": "Історія файлів"
 }

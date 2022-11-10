@@ -27,7 +27,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
-import '../../../../../decorators/empty_state_text_decorator.dart';
 import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
@@ -107,11 +106,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _handleClick(String value) {
     switch (value) {
-      case 'showFiles':
-        Navigator.push(context, MaterialPageRoute(builder: (_) {
-          return const _FileHistoryPage();
-        }));
-        break;
       case 'groupSettings':
         Navigator.push(context, MaterialPageRoute(builder: (_) {
           return _GroupSettingsPage(room);
@@ -139,7 +133,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.didChangeDependencies();
 
     var l10n = AppLocalizations.of(context)!;
-    _overflowMenuOptions.addAll({'showFiles': l10n.showAllFiles});
     if (room.isGroupChatRoom) {
       _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
     }

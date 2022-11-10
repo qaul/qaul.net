@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../qaul_rpc.dart';
 import '../generated/services/chat/chatfile_rpc.pb.dart';
 
 final fileHistoryEntitiesProvider =
@@ -40,6 +41,13 @@ class FileHistoryEntity {
       groupId: file.groupId,
     );
   }
+
+  String filePath(Reader read) {
+    var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
+    var uuid = read(defaultUserProvider)!.idBase58;
+
+    return '$storagePath/$uuid/files/$id.$extension';
+  }
 }
 
 class FileHistoryEntityNotifier extends StateNotifier<List<FileHistoryEntity>> {
@@ -53,6 +61,8 @@ class FileHistoryEntityNotifier extends StateNotifier<List<FileHistoryEntity>> {
     final filtered = state.where((r) => r != file);
     state = [file, ...filtered];
   }
+
+  void clear() => state = [];
 
   bool contains(FileHistoryEntity file) => state.contains(file);
 }
