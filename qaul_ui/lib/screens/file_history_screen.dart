@@ -23,53 +23,24 @@ class FileHistoryScreen extends StatefulHookConsumerWidget {
 class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
   static const _pageSize = 20;
 
-  final PagingController<int, FileHistoryEntity> _pagingController =
-      PagingController(firstPageKey: 0);
+  final _controller = PagingController<int, FileHistoryEntity>(firstPageKey: 0);
 
   @override
   void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
-    });
     super.initState();
+    _controller.addPageRequestListener((pageKey) => _fetchPage(pageKey));
   }
 
   @override
   void dispose() {
-    _pagingController.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchPage(int pageKey) async {
-    try {
-      final worker = ref.read(qaulWorkerProvider);
-      List<FileHistoryEntity> newItems = [];
-
-      for (var i = 0; i < 5; i++) {
-        worker.getFileHistory(page: pageKey, itemsPerPage: _pageSize);
-        await Future.delayed(Duration(milliseconds: (i + 1) * 100));
-        newItems = ref.read(fileHistoryEntitiesProvider);
-        if (newItems.isNotEmpty) break;
-      }
-
-      final isLastPage = newItems.length < _pageSize;
-
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
-      } else {
-        final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
-      }
-    } catch (error) {
-      _pagingController.error = error;
-    } finally {
-      ref.read(fileHistoryEntitiesProvider.notifier).clear();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         leading: const IconButtonFactory(),
@@ -82,7 +53,7 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
         ),
       ),
       body: PagedListView<int, FileHistoryEntity>(
-        pagingController: _pagingController,
+        pagingController: _controller,
         builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(
           noItemsFoundIndicatorBuilder: (_) => Text(l10n.noneAvailableMessage),
           itemBuilder: (context, file, index) {
@@ -111,6 +82,24 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchPage(int page) async {
+    try {
+      final items = await ref
+          .read(qaulWorkerProvider)
+          .getFileHistory(page: page, itemsPerPage: _pageSize);
+
+      final isLastPage = items.length < _pageSize;
+      if (isLastPage) {
+        _controller.appendLastPage(items);
+      } else {
+        final nextPageKey = page + items.length;
+        _controller.appendPage(items, nextPageKey);
+      }
+    } catch (error) {
+      _controller.error = error;
+    }
   }
 
   void _openFile(FileHistoryEntity file) async {
