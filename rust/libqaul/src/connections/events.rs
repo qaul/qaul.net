@@ -3,7 +3,7 @@
 
 //! Event handling for connection modules
 
-use libp2p::ping::{PingEvent, PingFailure, PingSuccess};
+use libp2p::ping::{Event, Failure, Success};
 use std::convert::TryFrom;
 
 use qaul_info::QaulInfoEvent;
@@ -46,11 +46,11 @@ pub fn qaul_messaging_event(event: QaulMessagingEvent, _module: ConnectionModule
 }
 
 /// Handle incoming ping event
-pub fn ping_event(event: PingEvent, module: ConnectionModule) {
+pub fn ping_event(event: Event, module: ConnectionModule) {
     match event {
-        PingEvent {
+        Event {
             peer,
-            result: Result::Ok(PingSuccess::Ping { rtt }),
+            result: Result::Ok(Success::Ping { rtt }),
         } => {
             log::debug!(
                 "PingSuccess::Ping: rtt to {} is {} ms",
@@ -63,27 +63,27 @@ pub fn ping_event(event: PingEvent, module: ConnectionModule) {
                 Err(_) => Neighbours::update_node(module, peer, 4294967295),
             }
         }
-        PingEvent {
+        Event {
             peer,
-            result: Result::Ok(PingSuccess::Pong),
+            result: Result::Ok(Success::Pong),
         } => {
             log::debug!("PingSuccess::Pong from {}", peer);
         }
-        PingEvent {
+        Event {
             peer,
-            result: Result::Err(PingFailure::Timeout),
+            result: Result::Err(Failure::Timeout),
         } => {
             log::debug!("PingFailure::Timeout to {}", peer);
         }
-        PingEvent {
+        Event {
             peer,
-            result: Result::Err(PingFailure::Other { error }),
+            result: Result::Err(Failure::Other { error }),
         } => {
             log::debug!("PingFailure::Other {} error: {}", peer, error);
         }
-        PingEvent {
+        Event {
             peer,
-            result: Result::Err(PingFailure::Unsupported),
+            result: Result::Err(Failure::Unsupported),
         } => {
             log::debug!("PingFailure::Unsupported by peer {}", peer);
         }

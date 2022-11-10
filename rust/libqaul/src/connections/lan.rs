@@ -22,34 +22,32 @@ use libp2p::{
     mdns::{Mdns, MdnsConfig, MdnsEvent},
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
-    ping::{Ping, PingConfig, PingEvent},
+    ping,
     swarm::Swarm,
     tcp::{GenTcpConfig, TcpTransport},
     yamux, NetworkBehaviour, Transport,
 };
-// DNS is excluded on mobile, as it is not working there
-use async_std::task;
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::{dns::DnsConfig, websocket::WsConfig};
 use prost::Message;
-
-use crate::node::Node;
-use crate::services::feed::Feed;
-use crate::storage::configuration::Configuration;
 use std::time::Duration;
 
+// DNS is excluded on mobile, as it is not working there
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use libp2p::{dns::DnsConfig, websocket::WsConfig};
+
 use crate::connections::{events, ConnectionModule};
+use crate::node::Node;
+use crate::services::feed::proto_net;
+use crate::services::feed::Feed;
+use crate::storage::configuration::Configuration;
 use qaul_info::{QaulInfo, QaulInfoEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
-
-use crate::services::feed::proto_net;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
-    pub ping: Ping,
+    pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
 }
@@ -80,7 +78,7 @@ impl QaulLanBehaviour {
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Lan);
     }
-    fn ping_event(&mut self, event: PingEvent) {
+    fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Lan);
     }
     fn mdsn_event(&mut self, event: MdnsEvent) {
@@ -119,7 +117,7 @@ impl QaulLanBehaviour {
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
     Mdns(MdnsEvent),
-    Ping(PingEvent),
+    Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
 }
@@ -136,8 +134,8 @@ impl From<MdnsEvent> for QaulLanEvent {
     }
 }
 
-impl From<PingEvent> for QaulLanEvent {
-    fn from(event: PingEvent) -> Self {
+impl From<ping::Event> for QaulLanEvent {
+    fn from(event: ping::Event) -> Self {
         Self::Ping(event)
     }
 }
@@ -203,7 +201,7 @@ impl Lan {
         // with customized parameters
         //
         // * keep connection alive
-        let mut ping_config = PingConfig::new();
+        let mut ping_config = ping::Config::new();
         ping_config = ping_config.with_keep_alive(true);
         let config = Configuration::get();
         ping_config =
@@ -225,7 +223,7 @@ impl Lan {
             let mut behaviour = QaulLanBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
                 mdns,
-                ping: Ping::new(ping_config),
+                ping: ping::Behaviour::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
             };

@@ -21,10 +21,9 @@
 use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
-    identify::{Identify, IdentifyConfig, IdentifyEvent},
-    mplex,
+    identify, mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
-    ping::{Ping, PingConfig, PingEvent},
+    ping,
     swarm::Swarm,
     tcp::{GenTcpConfig, TcpTransport},
     yamux, Multiaddr, NetworkBehaviour, PeerId, Transport,
@@ -55,8 +54,8 @@ use std::time::Duration;
 #[behaviour(out_event = "QaulInternetEvent")]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
-    pub identify: Identify,
-    pub ping: Ping,
+    pub identify: identify::Behaviour,
+    pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
 }
@@ -88,13 +87,13 @@ impl QaulInternetBehaviour {
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Internet);
     }
-    fn ping_event(&mut self, event: PingEvent) {
+    fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Internet);
     }
 
-    fn identify_event(&mut self, event: IdentifyEvent) {
+    fn identify_event(&mut self, event: identify::Event) {
         match event {
-            IdentifyEvent::Received { peer_id, info } => {
+            identify::Event::Received { peer_id, info } => {
                 // add node to floodsub
                 self.floodsub.add_node_to_partial_view(peer_id);
 
@@ -108,13 +107,13 @@ impl QaulInternetBehaviour {
                 log::trace!("  protocols: {:?}", info.protocols);
                 log::trace!("  observed address: {:?}", info.observed_addr);
             }
-            IdentifyEvent::Sent { peer_id } => {
+            identify::Event::Sent { peer_id } => {
                 log::trace!("IdentifyEvent::Sent to {:?}", peer_id);
             }
-            IdentifyEvent::Pushed { peer_id } => {
+            identify::Event::Pushed { peer_id } => {
                 log::trace!("IdentifyEvent::Pushed {:?}", peer_id);
             }
-            IdentifyEvent::Error { peer_id, error } => {
+            identify::Event::Error { peer_id, error } => {
                 log::trace!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
             }
         }
@@ -155,8 +154,8 @@ static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage:
 #[derive(Debug)]
 pub enum QaulInternetEvent {
     Floodsub(FloodsubEvent),
-    Identify(IdentifyEvent),
-    Ping(PingEvent),
+    Identify(identify::Event),
+    Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
 }
@@ -167,14 +166,14 @@ impl From<FloodsubEvent> for QaulInternetEvent {
     }
 }
 
-impl From<IdentifyEvent> for QaulInternetEvent {
-    fn from(event: IdentifyEvent) -> Self {
+impl From<identify::Event> for QaulInternetEvent {
+    fn from(event: identify::Event) -> Self {
         Self::Identify(event)
     }
 }
 
-impl From<PingEvent> for QaulInternetEvent {
-    fn from(event: PingEvent) -> Self {
+impl From<ping::Event> for QaulInternetEvent {
+    fn from(event: ping::Event) -> Self {
         Self::Ping(event)
     }
 }
@@ -252,14 +251,11 @@ impl Internet {
         // * set interval
         // * set timeout
         // * set maximal failures
-        let mut ping_config = PingConfig::new();
+        let mut ping_config = ping::Config::new();
         ping_config = ping_config.with_keep_alive(true);
         let config = Configuration::get();
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
-        //ping_config.with_interval(d: Duration);
-        //ping_config.with_timeout(d: Duration);
-        //ping_config.with_max_failures(n);
 
         log::trace!("Internet.init() ping_config");
 
@@ -267,11 +263,11 @@ impl Internet {
         let mut swarm = {
             let mut behaviour = QaulInternetBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
-                identify: Identify::new(IdentifyConfig::new(
+                identify: identify::Behaviour::new(identify::Config::new(
                     "/ipfs/0.1.0".into(),
                     Node::get_keys().public(),
                 )),
-                ping: Ping::new(ping_config),
+                ping: ping::Behaviour::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
             };
