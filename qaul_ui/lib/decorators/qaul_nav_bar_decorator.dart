@@ -29,6 +29,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         'about': AppLocalizations.of(context)!.about,
         'support': AppLocalizations.of(context)!.support,
         'old-network': AppLocalizations.of(context)!.routingDataTable,
+        'files': AppLocalizations.of(context)!.fileHistory,
       };
 
   void _handleClick(String value) {
@@ -58,6 +59,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
             body: BaseTab.network(),
           );
         }));
+        break;
+      case 'files':
+        Navigator.pushNamed(context, NavigationHelper.fileHistory);
         break;
     }
   }
@@ -255,7 +259,7 @@ class QaulNavBarItem extends HookConsumerWidget {
     final button = _SelectedIndicatorDecorator(
       isSelected: selected,
       label: tooltip,
-        selectedColor: activeColor,
+      selectedColor: activeColor,
       child: SizedBox(
         width: _iconSize * sizeFactor,
         height: _iconSize * sizeFactor,
@@ -264,9 +268,7 @@ class QaulNavBarItem extends HookConsumerWidget {
           splashRadius: 0.01,
           icon: SvgPicture.asset(
             svgPath,
-            color: selected.value
-                ? activeColor
-                : theme.iconTheme.color,
+            color: selected.value ? activeColor : theme.iconTheme.color,
             fit: BoxFit.cover,
             clipBehavior: Clip.none,
           ),

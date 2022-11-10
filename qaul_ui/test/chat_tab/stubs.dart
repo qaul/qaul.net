@@ -71,7 +71,8 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> getDefaultUserAccount() => throw UnimplementedError();
 
   @override
-  void getFileHistory({int? offset, int? limit}) => throw UnimplementedError();
+  void getFileHistory({int? page, int? itemsPerPage}) =>
+      throw UnimplementedError();
 
   @override
   void getGroupInfo(Uint8List id) => throw UnimplementedError();

@@ -104,5 +104,6 @@
   "securePrivateMessageHint": "تأمين الرسائل الخاصة",
   "groupChatMessageHint": "رسالة دردشة جماعية",
   "inviteUser": "قم بدعوة المستخدم",
-  "notifications": "إشعارات"
+  "notifications": "إشعارات",
+  "fileHistory": "ملف التاريخ"
 }

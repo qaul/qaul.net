@@ -126,6 +126,7 @@
   "securePrivateMessageHint": "Secure private message",
   "groupChatMessageHint": "Group chat message",
   "inviteUser": "Invite user",
-  "notifications": "Notifications"
+  "notifications": "Notifications",
+  "fileHistory": "File history"
 }
 

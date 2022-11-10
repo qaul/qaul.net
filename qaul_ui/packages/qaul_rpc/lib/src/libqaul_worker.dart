@@ -263,9 +263,9 @@ class LibqaulWorker {
     await _sendMessage(Modules.CHATFILE, msg);
   }
 
-  void getFileHistory({int? offset, int? limit}) async {
+  void getFileHistory({int? page = 0, int? itemsPerPage = 20}) async {
     final msg = ChatFile(
-      fileHistory: FileHistoryRequest(offset: offset, limit: limit),
+      fileHistory: FileHistoryRequest(offset: page, limit: itemsPerPage),
     );
     await _sendMessage(Modules.CHATFILE, msg);
   }
