@@ -87,7 +87,7 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.publicNavButtonTooltip),
+            Text(l10n.publicNotificationsEnabled),
             PlatformAwareSwitch(
               value: UserPrefsHelper().publicTabNotificationsEnabled,
               onChanged: (val) {
@@ -102,7 +102,7 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.chatNavButtonTooltip),
+            Text(l10n.chatNotificationsEnabled),
             PlatformAwareSwitch(
               value: UserPrefsHelper().chatNotificationsEnabled,
               onChanged: (val) {
