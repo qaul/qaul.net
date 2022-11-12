@@ -1,7 +1,14 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Backup Utility Functions
+
 use std::fs;
 use std::path::Path;
 extern crate fs_extra;
 
+/// Backup functions to move stored data
+/// to the backup folder
 pub struct Backup {}
 impl Backup {
     // pub fn copy_file(file: &str, to: &str) -> bool {
@@ -75,7 +82,7 @@ impl Backup {
 
     /// backup storage folder into /backup/{old_version}
     pub fn backup(storage_path: String, old_version: &str) -> bool {
-        //enumerate all files and folders
+        // enumerate all files and folders
         let mut files: Vec<String> = vec![];
         let mut folders: Vec<String> = vec![];
         for entry_res in std::fs::read_dir(storage_path.as_str()).unwrap() {
@@ -94,7 +101,7 @@ impl Backup {
             }
         }
 
-        //destination path
+        // destination path
         let path_dest = Path::new(storage_path.as_str())
             .join("backup")
             .join(old_version);
@@ -108,7 +115,7 @@ impl Backup {
             return false;
         }
 
-        //move files
+        // move files
         if Self::move_files(&files, storage_path.as_str(), path_dest.to_str().unwrap()) == false {
             return false;
         }
@@ -138,7 +145,7 @@ impl Backup {
                 files.push(path);
             }
         }
-        //move files
+        // move files
         if Self::move_files(&files, scr_path.to_str().unwrap(), storage_path.as_str()) == false {
             return false;
         }

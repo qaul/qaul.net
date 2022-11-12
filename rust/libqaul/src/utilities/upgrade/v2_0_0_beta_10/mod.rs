@@ -1,11 +1,18 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Upgrade to new version 2.0.0-beta.10
+//!
+//! Breaking changes that need to be upgraded
+//!
+//! * InternetPeer structure added name field: config.internet.peers<InternetPeer>
+
 use super::backup;
 use std::path::Path;
 
-pub mod config200b4;
+mod old_config;
 
-/// migrate beta.4 into beta.5
-/// todo: migrate config.internet.peers<InternetPeer>
-///       InternetPeer structure added name field
+/// # Upgrade Logic
 pub struct Mig200b4To200b5 {}
 impl Mig200b4To200b5 {
     /// process migrating
@@ -34,64 +41,64 @@ impl Mig200b4To200b5 {
 
         //update config.yaml
         println!("\t\tmigrating config.yaml..");
-        Self::migrate_config(old_path, new_path)
+        Self::upgrade_config(old_path, new_path)
     }
 
-    /// migrate config structure
-    fn migrate_config(old_path: &str, new_path: &str) -> bool {
+    /// upgrade config structure
+    fn upgrade_config(old_path: &str, new_path: &str) -> bool {
         //load old config
-        if let Some(old_cfg) = config200b4::Configuration::load(
+        if let Some(old_cfg) = old_config::Configuration::load(
             Path::new(old_path).join("config.yaml").to_str().unwrap(),
         ) {
-            let node = super::super::storage::configuration::Node {
+            let node = crate::storage::configuration::Node {
                 initialized: old_cfg.node.initialized,
                 id: old_cfg.node.id.clone(),
                 keys: old_cfg.node.keys.clone(),
             };
-            let lan = super::super::storage::configuration::Lan {
+            let lan = crate::storage::configuration::Lan {
                 active: old_cfg.lan.active,
                 listen: old_cfg.lan.listen,
             };
 
-            let mut peers: Vec<super::super::storage::configuration::InternetPeer> = vec![];
+            let mut peers: Vec<crate::storage::configuration::InternetPeer> = vec![];
             for peer in &old_cfg.internet.peers {
-                peers.push(super::super::storage::configuration::InternetPeer {
+                peers.push(crate::storage::configuration::InternetPeer {
                     address: peer.address.clone(),
                     name: String::from("undefined"),
                     enabled: peer.enabled,
                 });
             }
-            let internet = super::super::storage::configuration::Internet {
+            let internet = crate::storage::configuration::Internet {
                 active: old_cfg.internet.active,
                 peers,
                 do_listen: old_cfg.internet.do_listen,
                 listen: old_cfg.internet.listen,
             };
 
-            let mut user_accounts: Vec<super::super::storage::configuration::UserAccount> = vec![];
+            let mut user_accounts: Vec<crate::storage::configuration::UserAccount> = vec![];
             for user in &old_cfg.user_accounts {
-                user_accounts.push(super::super::storage::configuration::UserAccount {
+                user_accounts.push(crate::storage::configuration::UserAccount {
                     name: user.name.clone(),
                     id: user.id.clone(),
                     keys: user.keys.clone(),
-                    storage: super::super::storage::configuration::StorageOptions {
+                    storage: crate::storage::configuration::StorageOptions {
                         users: user.storage.users.clone(),
                         size_total: user.storage.size_total,
                     },
                 });
             }
 
-            let debug = super::super::storage::configuration::DebugOption {
+            let debug = crate::storage::configuration::DebugOption {
                 log: old_cfg.debug.log,
             };
-            let routing = super::super::storage::configuration::RoutingOptions {
+            let routing = crate::storage::configuration::RoutingOptions {
                 sending_table_period: old_cfg.routing.sending_table_period,
                 ping_neighbour_period: old_cfg.routing.ping_neighbour_period,
                 hop_count_penalty: old_cfg.routing.hop_count_penalty,
                 maintain_period_limit: old_cfg.routing.maintain_period_limit,
             };
 
-            let new_config = super::super::storage::configuration::Configuration {
+            let new_config = crate::storage::configuration::Configuration {
                 node,
                 lan,
                 internet,

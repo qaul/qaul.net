@@ -18,7 +18,6 @@ use std::time::Duration;
 // crate modules
 pub mod api;
 mod connections;
-pub mod migrate;
 pub mod node;
 mod router;
 mod rpc;
@@ -37,6 +36,7 @@ use services::messaging::Messaging;
 use services::Services;
 use utilities::filelogger::FileLogger;
 use utilities::timestamp::Timestamp;
+use utilities::upgrade;
 
 /// check this when the library finished initializing
 static INITIALIZED: Storage<bool> = Storage::new();
@@ -91,8 +91,8 @@ enum EventType {
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
     log::trace!("start initializing libqaul");
 
-    // check if we need to migrate our stored data
-    if migrate::Migrate::init(storage_path.clone()) == false {
+    // check if we need to upgrade our stored data
+    if upgrade::Upgrade::init(storage_path.clone()) == false {
         println!("failed to process migrating");
         //restart node
         std::process::exit(0);
