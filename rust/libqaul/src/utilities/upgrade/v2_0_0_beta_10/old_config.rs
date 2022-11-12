@@ -1,3 +1,11 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Configuration File from Version 2.0.0-beta.3
+//!
+//! This configuration file is needed to load the old existing configuration from
+//! the system.
+
 use config::{Config, File};
 use serde::{Deserialize, Serialize};
 

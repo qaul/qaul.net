@@ -1,12 +1,12 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Libqaul Migrating Module
+//! # Libqaul Upgrade Module
 //!
 //! This module is used to automatically upgrade to a new version
 //! with incompatible configuration or data base structure.
 //!
-//! The following migrations to new versions are included:
+//! The following upgrades to new versions are included:
 //!
 //! * 2.0.0-beta.10
 
@@ -14,17 +14,17 @@ use std::fs;
 use std::path::Path;
 
 pub mod backup;
-pub mod mig200b4to200b5;
+pub mod v2_0_0_beta_10;
 
 // whenever update version and structure, we have to track them.
 // (version, structure_updated)
 static G_HISTORIES: &'static [(&str, bool)] = &[("2.0.0-beta.4", true), ("2.0.0-beta.5", true)];
 
-/// check version and determine if we need to migrate.
-struct MigrateStep {}
-impl MigrateStep {
+/// check version and determine if we need to upgrade.
+struct UpgradeStep {}
+impl UpgradeStep {
     /// get migrating steps such as [(beta.4, beta.5), (beta.5, beta.6)]
-    pub fn get_migrate_steps(old_version: &str, cur_version: &str) -> Vec<(usize, usize)> {
+    pub fn get_upgrade_steps(old_version: &str, cur_version: &str) -> Vec<(usize, usize)> {
         if let Some(idx_old) = Self::version_to_index(old_version) {
             if let Some(idx_cur) = Self::version_to_index(cur_version) {
                 return Self::check_tasks(idx_old, idx_cur);
@@ -44,7 +44,7 @@ impl MigrateStep {
     }
 
     /// check migrating
-    fn check_migrate(idx_version: usize) -> (usize, usize) {
+    fn check_upgrade(idx_version: usize) -> (usize, usize) {
         // find left
         let mut idx_left = idx_version;
         let mut idx_right = idx_version + 1;
@@ -71,25 +71,25 @@ impl MigrateStep {
         let mut cur_idx = idx_old;
 
         loop {
-            let migrate = Self::check_migrate(cur_idx);
-            cur_idx = migrate.1;
+            let upgrade = Self::check_upgrade(cur_idx);
+            cur_idx = upgrade.1;
             if cur_idx >= idx_target {
                 if cur_idx == idx_target && G_HISTORIES[idx_target].1 == true {
-                    res.push(migrate);
+                    res.push(upgrade);
                 }
                 break;
             } else {
-                res.push(migrate);
+                res.push(upgrade);
             }
         }
         res
     }
 }
 
-/// migrate module structure
-pub struct Migrate {}
-impl Migrate {
-    /// initialize migrate module
+/// upgrade module structure
+pub struct Upgrade {}
+impl Upgrade {
+    /// initialize upgrade module
     /// requires the path to the data storage folder
     pub fn init(storage_path: String) -> bool {
         let cur_version: &str = env!("CARGO_PKG_VERSION");
@@ -112,8 +112,8 @@ impl Migrate {
         }
         println!("checking version {}", cur_version);
 
-        // check migrate task
-        let tasks = MigrateStep::get_migrate_steps(old_version.as_str(), cur_version.clone());
+        // check upgrade task
+        let tasks = UpgradeStep::get_upgrade_steps(old_version.as_str(), cur_version.clone());
         if tasks.len() == 0 {
             return true;
         }
@@ -126,13 +126,13 @@ impl Migrate {
         );
         backup::Backup::backup(storage_path.clone(), old_version.as_str());
 
-        Self::migrate_all(storage_path.clone(), &tasks)
+        Self::upgrade_all(storage_path.clone(), &tasks)
     }
 
     /// process all migrating steps
-    fn migrate_all(storage_path: String, tasks: &Vec<(usize, usize)>) -> bool {
+    fn upgrade_all(storage_path: String, tasks: &Vec<(usize, usize)>) -> bool {
         for (old_idx, next_idx) in tasks {
-            if Self::migrate_one(
+            if Self::upgrade_one(
                 storage_path.clone(),
                 G_HISTORIES[*old_idx].0,
                 G_HISTORIES[*next_idx].0,
@@ -148,10 +148,10 @@ impl Migrate {
 
         let last_version = G_HISTORIES[tasks[tasks.len() - 1].1].0;
 
-        //restore the migrated last version
-        println!("\n\t#restore latest migrated {}", last_version);
+        //restore the upgraded last version
+        println!("\n\t#restore latest upgraded {}", last_version);
         if backup::Backup::restore(storage_path.clone(), last_version) == true {
-            //remove the latest migrated
+            //remove the latest upgraded
             backup::Backup::remove_folder(
                 Path::new(storage_path.as_str())
                     .join("backup")
@@ -165,8 +165,8 @@ impl Migrate {
     }
 
     /// process one migration step
-    fn migrate_one(storage_path: String, old_version: &str, next_version: &str) -> bool {
-        println!("\n\t##migrate one {} - {}", old_version, next_version);
+    fn upgrade_one(storage_path: String, old_version: &str, next_version: &str) -> bool {
+        println!("\n\t##upgrade one {} - {}", old_version, next_version);
 
         let old_path = Path::new(storage_path.as_str())
             .join("backup")
@@ -178,7 +178,7 @@ impl Migrate {
         let mut result = false;
         match old_version {
             "2.0.0-beta.4" => {
-                result = mig200b4to200b5::Mig200b4To200b5::do_process(
+                result = v2_0_0_beta_10::Mig200b4To200b5::do_process(
                     old_path.to_str().unwrap(),
                     next_path.to_str().unwrap(),
                     next_version,
