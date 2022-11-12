@@ -91,14 +91,14 @@ enum EventType {
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
     log::trace!("start initializing libqaul");
 
+    // check if we need to migrate our stored data
     if migrate::Migrate::init(storage_path.clone()) == false {
         println!("failed to process migrating");
-        //restrat node
+        //restart node
         std::process::exit(0);
     }
 
-    // check if need to migrate datas
-
+    // check configuration options
     if let Some(def_cfg) = def_config {
         DEFCONFIGS.set(def_cfg.clone());
     } else {
