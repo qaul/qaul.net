@@ -5,6 +5,7 @@ config.yaml
 node.db/
 12D3KooW*/
 logs/
+version
 
 # android artifacts
 android/app/debug
