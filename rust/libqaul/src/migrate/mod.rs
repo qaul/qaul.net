@@ -3,6 +3,13 @@
 
 //! # Libqaul Migrating Module
 //!
+//! This module is used to automatically upgrade to a new version
+//! with incompatible configuration or data base structure.
+//!
+//! The following migrations to new versions are included:
+//!
+//! * 2.0.0-beta.10
+
 use std::fs;
 use std::path::Path;
 
@@ -13,7 +20,7 @@ pub mod mig200b4to200b5;
 // (version, structure_updated)
 static G_HISTORIES: &'static [(&str, bool)] = &[("2.0.0-beta.4", true), ("2.0.0-beta.5", true)];
 
-/// check version and determin if we need to migrate.
+/// check version and determine if we need to migrate.
 struct MigrateStep {}
 impl MigrateStep {
     /// get migrating steps such as [(beta.4, beta.5), (beta.5, beta.6)]
@@ -26,7 +33,7 @@ impl MigrateStep {
         vec![]
     }
 
-    /// convert version striong into index
+    /// convert version string into index
     fn version_to_index(version: &str) -> Option<usize> {
         for i in 0..G_HISTORIES.len() {
             if version == G_HISTORIES[i].0 {
@@ -38,7 +45,7 @@ impl MigrateStep {
 
     /// check migrating
     fn check_migrate(idx_version: usize) -> (usize, usize) {
-        //find left
+        // find left
         let mut idx_left = idx_version;
         let mut idx_right = idx_version + 1;
 
@@ -88,7 +95,7 @@ impl Migrate {
         let cur_version: &str = env!("CARGO_PKG_VERSION");
         let mut old_version: String = String::from(cur_version.clone());
 
-        //read old version
+        // read old version
         let path = Path::new(storage_path.as_str()).join("version");
         if path.exists() == false {
             // create new version file
@@ -105,13 +112,13 @@ impl Migrate {
         }
         println!("checking version {}", cur_version);
 
-        //check migrate task
+        // check migrate task
         let tasks = MigrateStep::get_migrate_steps(old_version.as_str(), cur_version.clone());
         if tasks.len() == 0 {
             return true;
         }
 
-        //first backup
+        // first backup
         println!("");
         println!(
             "#Starting migration\n\t##backup old version {}  ...",
@@ -157,7 +164,7 @@ impl Migrate {
         false
     }
 
-    /// process one migrating step
+    /// process one migration step
     fn migrate_one(storage_path: String, old_version: &str, next_version: &str) -> bool {
         println!("\n\t##migrate one {} - {}", old_version, next_version);
 
@@ -183,7 +190,7 @@ impl Migrate {
         }
 
         if result == true {
-            //remove old version
+            // remove old version
             backup::Backup::remove_folder(old_path.to_str().unwrap());
         }
         result
