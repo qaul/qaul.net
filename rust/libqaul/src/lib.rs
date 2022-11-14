@@ -89,12 +89,10 @@ enum EventType {
 /// * Optionally you can provide the following configuration values:
 ///   * listening port of the Internet connection module (default = randomly assigned)
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
-    log::trace!("start initializing libqaul");
-
     // check if we need to upgrade our stored data
     if upgrade::Upgrade::init(storage_path.clone()) == false {
-        println!("failed to process migrating");
-        //restart node
+        println!("upgrade to new version failed");
+        // restart node
         std::process::exit(0);
     }
 

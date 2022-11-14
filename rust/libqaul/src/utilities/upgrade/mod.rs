@@ -8,98 +8,40 @@
 //!
 //! The following upgrades to new versions are included:
 //!
-//! * 2.0.0-beta.10
+//! * 2.0.0-beta.9
 
+use semver::Version;
 use std::fs;
 use std::path::Path;
 
+use crate::utilities::upgrade::backup::Backup;
+
 pub mod backup;
-pub mod v2_0_0_beta_10;
+mod v2_0_0_beta_9;
 
-// whenever update version and structure, we have to track them.
-// (version, structure_updated)
-static G_HISTORIES: &'static [(&str, bool)] = &[("2.0.0-beta.4", true), ("2.0.0-beta.5", true)];
-
-/// check version and determine if we need to upgrade.
-struct UpgradeStep {}
-impl UpgradeStep {
-    /// get migrating steps such as [(beta.4, beta.5), (beta.5, beta.6)]
-    pub fn get_upgrade_steps(old_version: &str, cur_version: &str) -> Vec<(usize, usize)> {
-        if let Some(idx_old) = Self::version_to_index(old_version) {
-            if let Some(idx_cur) = Self::version_to_index(cur_version) {
-                return Self::check_tasks(idx_old, idx_cur);
-            }
-        }
-        vec![]
-    }
-
-    /// convert version string into index
-    fn version_to_index(version: &str) -> Option<usize> {
-        for i in 0..G_HISTORIES.len() {
-            if version == G_HISTORIES[i].0 {
-                return Some(i);
-            }
-        }
-        None
-    }
-
-    /// check migrating
-    fn check_upgrade(idx_version: usize) -> (usize, usize) {
-        // find left
-        let mut idx_left = idx_version;
-        let mut idx_right = idx_version + 1;
-
-        for i in (0..(idx_version + 1)).rev() {
-            if G_HISTORIES[i].1 == true {
-                idx_left = i;
-                break;
-            }
-        }
-
-        for i in (idx_version + 1)..G_HISTORIES.len() {
-            if G_HISTORIES[i].1 == true {
-                idx_right = i;
-                break;
-            }
-        }
-        (idx_left, idx_right)
-    }
-
-    /// check all migrating steps
-    fn check_tasks(idx_old: usize, idx_target: usize) -> Vec<(usize, usize)> {
-        let mut res: Vec<(usize, usize)> = vec![];
-        let mut cur_idx = idx_old;
-
-        loop {
-            let upgrade = Self::check_upgrade(cur_idx);
-            cur_idx = upgrade.1;
-            if cur_idx >= idx_target {
-                if cur_idx == idx_target && G_HISTORIES[idx_target].1 == true {
-                    res.push(upgrade);
-                }
-                break;
-            } else {
-                res.push(upgrade);
-            }
-        }
-        res
-    }
-}
-
-/// upgrade module structure
+/// upgrade module
 pub struct Upgrade {}
 impl Upgrade {
-    /// initialize upgrade module
+    /// initialize and run upgrade module
+    ///
     /// requires the path to the data storage folder
     pub fn init(storage_path: String) -> bool {
+        // get current version from Cargo.toml
         let cur_version: &str = env!("CARGO_PKG_VERSION");
+        println!("running libqaul {}", cur_version);
         let mut old_version: String = String::from(cur_version.clone());
+        let storage_path_buf = Path::new(&storage_path);
 
         // read old version
-        let path = Path::new(storage_path.as_str()).join("version");
+        let path = storage_path_buf.join("version");
         if path.exists() == false {
-            // create new version file
-            if let Err(_) = fs::write(path.clone(), cur_version) {
+            // check if there is already a configuration file
+            let config_path = storage_path_buf.join("config.yaml");
+            if config_path.exists() {
+                old_version = "2.0.0-beta.8".to_string();
+            }
+            // create new version file otherwise
+            else if let Err(_) = fs::write(path.clone(), cur_version) {
                 println!(
                     "failed to creating version file path: {}",
                     path.to_str().unwrap()
@@ -107,92 +49,57 @@ impl Upgrade {
                 return false;
             }
         } else {
-            let old_version_str = fs::read_to_string(path).unwrap();
-            old_version = old_version_str.clone();
-        }
-        println!("checking version {}", cur_version);
-
-        // check upgrade task
-        let tasks = UpgradeStep::get_upgrade_steps(old_version.as_str(), cur_version.clone());
-        if tasks.len() == 0 {
-            return true;
+            old_version = fs::read_to_string(path).unwrap();
         }
 
-        // first backup
-        println!("");
-        println!(
-            "#Starting migration\n\t##backup old version {}  ...",
-            old_version
-        );
-        backup::Backup::backup(storage_path.clone(), old_version.as_str());
-
-        Self::upgrade_all(storage_path.clone(), &tasks)
+        // check if old version is equal to new version
+        if cur_version == old_version {
+            println!("libqaul data on latest version");
+        } else {
+            // run upgrade steps if the old and the new version differ
+            return Self::upgrade(&storage_path_buf, &old_version);
+        }
+        true
     }
 
-    /// process all migrating steps
-    fn upgrade_all(storage_path: String, tasks: &Vec<(usize, usize)>) -> bool {
-        for (old_idx, next_idx) in tasks {
-            if Self::upgrade_one(
-                storage_path.clone(),
-                G_HISTORIES[*old_idx].0,
-                G_HISTORIES[*next_idx].0,
-            ) == false
-            {
-                println!(
-                    "\t\tmigrating from {} to {} was failed!",
-                    G_HISTORIES[*old_idx].0, G_HISTORIES[*next_idx].0
-                );
-                return false;
+    /// process the upgrade steps one after the next
+    fn upgrade(storage_path: &Path, old_version: &str) -> bool {
+        println!("running upgrade check for version {}", old_version);
+        let mut version = Version::parse(old_version).unwrap();
+
+        // Move the existing content to the backup folder
+        if Backup::backup(storage_path, old_version) == false {
+            println!("backup failed");
+            return false;
+        }
+        let mut backup_path = storage_path.join("backup").join(old_version);
+
+        // upgrade one version after the other
+        // put new upgrade version below this chain.
+
+        // upgrade to version 2.0.0-beta.9
+        if version < Version::parse("2.0.0-beta.9").unwrap() {
+            match v2_0_0_beta_9::VersionUpgrade::upgrade(storage_path, &backup_path) {
+                Ok((new_version, new_path)) => {
+                    // update values
+                    version = Version::parse(&new_version).unwrap();
+                    backup_path = new_path;
+                }
+                Err(e) => {
+                    println!("Upgrade to 2.0.0-beta.9 failed: {}", e);
+                    return false;
+                }
             }
         }
 
-        let last_version = G_HISTORIES[tasks[tasks.len() - 1].1].0;
-
-        //restore the upgraded last version
-        println!("\n\t#restore latest upgraded {}", last_version);
-        if backup::Backup::restore(storage_path.clone(), last_version) == true {
-            //remove the latest upgraded
-            backup::Backup::remove_folder(
-                Path::new(storage_path.as_str())
-                    .join("backup")
-                    .join(last_version)
-                    .to_str()
-                    .unwrap(),
-            );
+        // restore the upgraded last version
+        log::trace!("restore upgraded version {}", version);
+        if backup::Backup::restore(&storage_path, &backup_path) == true {
+            // remove the latest upgraded
+            backup::Backup::remove_folder(&storage_path.join("backup").join(version.to_string()));
             return true;
         }
+
         false
-    }
-
-    /// process one migration step
-    fn upgrade_one(storage_path: String, old_version: &str, next_version: &str) -> bool {
-        println!("\n\t##upgrade one {} - {}", old_version, next_version);
-
-        let old_path = Path::new(storage_path.as_str())
-            .join("backup")
-            .join(old_version);
-        let next_path = Path::new(storage_path.as_str())
-            .join("backup")
-            .join(next_version);
-
-        let mut result = false;
-        match old_version {
-            "2.0.0-beta.4" => {
-                result = v2_0_0_beta_10::Mig200b4To200b5::do_process(
-                    old_path.to_str().unwrap(),
-                    next_path.to_str().unwrap(),
-                    next_version,
-                );
-            }
-            _ => {
-                println!("undefined migrating version");
-            }
-        }
-
-        if result == true {
-            // remove old version
-            backup::Backup::remove_folder(old_path.to_str().unwrap());
-        }
-        result
     }
 }

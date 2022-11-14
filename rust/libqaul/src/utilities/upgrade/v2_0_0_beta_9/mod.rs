@@ -3,53 +3,67 @@
 
 //! # Upgrade to new version 2.0.0-beta.10
 //!
-//! Breaking changes that need to be upgraded
+//! Breaking changes that need to be upgraded:
 //!
-//! * InternetPeer structure added name field: config.internet.peers<InternetPeer>
+//! * configuration file: InternetPeer structure added name field:
+//!   config.internet.peers<InternetPeer>
 
-use super::backup;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 mod old_config;
 
-/// # Upgrade Logic
-pub struct Mig200b4To200b5 {}
-impl Mig200b4To200b5 {
-    /// process migrating
-    pub fn do_process(old_path: &str, new_path: &str, new_version: &str) -> bool {
-        //cleanup dest
-        backup::Backup::remove_folder(new_path);
+use super::backup;
 
-        //create dest
-        if let Err(_) = std::fs::create_dir(new_path) {
-            println!("failed to creating destinaton folder");
-            return false;
+/// # Version Upgrade Logic
+pub struct VersionUpgrade {}
+impl VersionUpgrade {
+    /// Upgrade to new Version
+    ///
+    /// Returns a result, containing a tuple with ( new_version, new_path )
+    pub fn upgrade(storage_path: &Path, old_path: &Path) -> Result<(String, PathBuf), String> {
+        let version = "2.0.0-beta.9";
+        println!("upgrade to version {}", version);
+        let new_path = storage_path.join("backup").join(version);
+
+        // cleanup dest
+        backup::Backup::remove_folder(&new_path);
+
+        // create dest
+        if let Err(_) = std::fs::create_dir(&new_path) {
+            return Err("failed to create destinaton folder".to_string());
         }
 
-        //move unchanged contents
-        println!("\t\tmove contents..");
-        if Self::move_contents(old_path, new_path) == false {
-            return false;
+        // move unchanged contents
+        println!("move content");
+        if Self::move_content(Path::new(old_path), &new_path) == false {
+            return Err("Error moving content".to_string());
         }
 
-        //create new version file
-        println!("\t\tcreate version file..");
-        let path = Path::new(new_path).join("version");
-        if let Err(_) = std::fs::write(path, new_version) {
+        // create new version file
+        println!("create version file");
+        let path = Path::new(new_path.to_str().unwrap()).join("version");
+        if let Err(_) = std::fs::write(path, version) {
             println!("failed to create version file!");
         }
 
-        //update config.yaml
-        println!("\t\tmigrating config.yaml..");
-        Self::upgrade_config(old_path, new_path)
+        // update config.yaml
+        println!("upgrade config.yaml");
+        if !Self::upgrade_config(old_path, &new_path) {
+            return Err("configuration upgrade failed".to_string());
+        }
+
+        // remove old backup
+        backup::Backup::remove_folder(old_path);
+
+        Ok((version.to_string(), new_path))
     }
 
     /// upgrade config structure
-    fn upgrade_config(old_path: &str, new_path: &str) -> bool {
-        //load old config
-        if let Some(old_cfg) = old_config::Configuration::load(
-            Path::new(old_path).join("config.yaml").to_str().unwrap(),
-        ) {
+    fn upgrade_config(old_path: &Path, new_path: &Path) -> bool {
+        // load old config
+        if let Some(old_cfg) =
+            old_config::Configuration::load(old_path.join("config.yaml").to_str().unwrap())
+        {
             let node = crate::storage::configuration::Node {
                 initialized: old_cfg.node.initialized,
                 id: old_cfg.node.id.clone(),
@@ -122,14 +136,19 @@ impl Mig200b4To200b5 {
         false
     }
 
-    /// move unchanged contents
-    fn move_contents(old_path: &str, new_path: &str) -> bool {
+    /// move unchanged content
+    ///
+    /// TODO: write this function more generic in backup, to only
+    /// provide paths of folders and files, that should be ignored by the backup
+    fn move_content(old_path: &Path, new_path: &Path) -> bool {
         let mut files: Vec<String> = vec![];
         let mut folders: Vec<String> = vec![];
+
         for entry_res in std::fs::read_dir(old_path).unwrap() {
             let entry = entry_res.unwrap();
             let file_name_buf = entry.file_name();
             let file_name = file_name_buf.to_str().unwrap();
+
             if entry.file_type().unwrap().is_dir() {
                 if file_name.starts_with(".") {
                     continue;
@@ -144,9 +163,10 @@ impl Mig200b4To200b5 {
                 files.push(path);
             }
         }
-        if backup::Backup::move_files(&files, old_path, new_path) == false {
+
+        if super::backup::Backup::move_files(&files, old_path, new_path) == false {
             return false;
         }
-        backup::Backup::move_folders(&folders, old_path, new_path)
+        super::backup::Backup::move_folders(&folders, old_path, new_path)
     }
 }

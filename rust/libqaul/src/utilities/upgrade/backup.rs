@@ -3,9 +3,8 @@
 
 //! # Backup Utility Functions
 
-use std::fs;
+use fs_extra;
 use std::path::Path;
-extern crate fs_extra;
 
 /// Backup functions to move stored data
 /// to the backup folder
@@ -23,114 +22,116 @@ impl Backup {
     // }
 
     /// move file
-    pub fn move_file(file: &str, to: &str) -> bool {
+    pub fn move_file(file: &Path, to: &Path) -> bool {
         let options = fs_extra::file::CopyOptions::new();
         if let Err(_) = fs_extra::file::move_file(file, to, &options) {
-            println!("Error: move file {} {}", file, to);
+            println!(
+                "Error: move file {} {}",
+                file.to_string_lossy(),
+                to.to_string_lossy()
+            );
             return false;
         }
         true
     }
 
     /// move folder
-    pub fn move_folder(folder: &str, to: &str) -> bool {
+    pub fn move_folder(folder: &Path, to: &Path) -> bool {
         let mut options = fs_extra::dir::CopyOptions::new();
         options.content_only = true;
         if let Err(_) = fs_extra::dir::move_dir(folder, to, &options) {
-            println!("Error: move folder {} {}", folder, to);
+            println!(
+                "Error: move folder {} {}",
+                folder.to_string_lossy(),
+                to.to_string_lossy()
+            );
             return false;
         }
         true
     }
 
     /// remove folder
-    pub fn remove_folder(folder: &str) -> bool {
-        if let Err(_) = fs::remove_dir_all(folder) {
-            println!("Error: remove folder {}", folder);
+    pub fn remove_folder(folder: &Path) -> bool {
+        if let Err(_) = fs_extra::dir::remove(folder) {
+            println!("Error: remove folder {}", folder.to_string_lossy());
             return false;
         }
         true
     }
 
     /// move files
-    pub fn move_files(files: &Vec<String>, src_path: &str, dst_path: &str) -> bool {
+    pub fn move_files(files: &Vec<String>, src_path: &Path, dst_path: &Path) -> bool {
         for file in files {
-            if let Some(src) = Path::new(src_path).join(file.as_str()).to_str() {
-                if let Some(dst) = Path::new(dst_path).join(file.as_str()).to_str() {
-                    if Self::move_file(src, dst) == false {
-                        return false;
-                    }
-                }
+            if !Self::move_file(&src_path.join(file), &dst_path.join(file)) {
+                return false;
             }
         }
         true
     }
 
     /// move folders
-    pub fn move_folders(folders: &Vec<String>, src_path: &str, dst_path: &str) -> bool {
+    pub fn move_folders(folders: &Vec<String>, src_path: &Path, dst_path: &Path) -> bool {
         for folder in folders {
-            if let Some(src) = Path::new(src_path).join(folder.as_str()).to_str() {
-                if let Some(dst) = Path::new(dst_path).join(folder.as_str()).to_str() {
-                    if Self::move_folder(src, dst) == false {
-                        return false;
-                    }
-                }
+            if Self::move_folder(&src_path.join(folder), &dst_path.join(folder)) == false {
+                return false;
             }
         }
         true
     }
 
     /// backup storage folder into /backup/{old_version}
-    pub fn backup(storage_path: String, old_version: &str) -> bool {
+    pub fn backup(storage_path: &Path, old_version: &str) -> bool {
         // enumerate all files and folders
         let mut files: Vec<String> = vec![];
         let mut folders: Vec<String> = vec![];
-        for entry_res in std::fs::read_dir(storage_path.as_str()).unwrap() {
+
+        // run through all files and collect those that we want to backup
+        for entry_res in std::fs::read_dir(storage_path).unwrap() {
             let entry = entry_res.unwrap();
             let file_name_buf = entry.file_name();
             let file_name = file_name_buf.to_str().unwrap();
+
             if entry.file_type().unwrap().is_dir() {
-                if file_name.starts_with(".") || file_name == "backup" || file_name == "logs" {
-                    continue;
+                // define which folders to backup
+                if file_name.starts_with("12D3KooW") || file_name == "node.db" {
+                    let path = String::from(file_name);
+                    folders.push(path);
                 }
-                let path = String::from(file_name);
-                folders.push(path);
             } else {
-                let path = String::from(file_name);
-                files.push(path);
+                // define which files to backup
+                if file_name == "version" || file_name == "config.yaml" {
+                    let path = String::from(file_name);
+                    files.push(path);
+                }
             }
         }
 
         // destination path
-        let path_dest = Path::new(storage_path.as_str())
-            .join("backup")
-            .join(old_version);
+        let path_dest = Path::new(&storage_path).join("backup").join(old_version);
 
-        //start backup
-        //clear destination folder
-        Self::remove_folder(path_dest.to_str().unwrap());
-        //create dest dir
-        if let Err(_) = std::fs::create_dir(path_dest.to_str().unwrap()) {
-            println!("failed to crete destination folder");
+        // start backup
+        // clear destination folder
+        Self::remove_folder(&path_dest);
+        // create dest dir
+        if let Err(_) = std::fs::create_dir_all(&path_dest) {
+            println!("failed to create destination folder");
             return false;
         }
 
         // move files
-        if Self::move_files(&files, storage_path.as_str(), path_dest.to_str().unwrap()) == false {
+        if Self::move_files(&files, storage_path, path_dest.as_path()) == false {
             return false;
         }
-
-        Self::move_folders(&folders, storage_path.as_str(), path_dest.to_str().unwrap())
+        // move folders
+        Self::move_folders(&folders, storage_path, path_dest.as_path())
     }
 
-    /// restore contents from /backup/{version} to stroage folder
-    pub fn restore(storage_path: String, version: &str) -> bool {
+    /// restore content from /backup/{version} to storage folder
+    pub fn restore(storage_path: &Path, backup_path: &Path) -> bool {
         let mut files: Vec<String> = vec![];
         let mut folders: Vec<String> = vec![];
-        let scr_path = Path::new(storage_path.as_str())
-            .join("backup")
-            .join(version);
-        for entry_res in std::fs::read_dir(scr_path.to_str().unwrap()).unwrap() {
+
+        for entry_res in std::fs::read_dir(backup_path).unwrap() {
             let entry = entry_res.unwrap();
             let file_name_buf = entry.file_name();
             let file_name = file_name_buf.to_str().unwrap();
@@ -145,10 +146,11 @@ impl Backup {
                 files.push(path);
             }
         }
-        // move files
-        if Self::move_files(&files, scr_path.to_str().unwrap(), storage_path.as_str()) == false {
+
+        // move files & folders
+        if Self::move_files(&files, backup_path, storage_path) == false {
             return false;
         }
-        Self::move_folders(&folders, scr_path.to_str().unwrap(), storage_path.as_str())
+        Self::move_folders(&folders, backup_path, storage_path)
     }
 }
