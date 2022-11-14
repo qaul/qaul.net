@@ -15,7 +15,7 @@ class FileHistoryEntity {
     required this.groupId,
   });
 
-  final int id;
+  final String id;
   final String name;
   final String extension;
   final int size;
@@ -26,7 +26,7 @@ class FileHistoryEntity {
 
   factory FileHistoryEntity.fromRpcEntry(FileHistoryEntry file) {
     return FileHistoryEntity(
-      id: file.fileId.toInt(),
+      id: file.fileId.toStringUnsigned(),
       name: file.fileName,
       extension: file.fileExtension,
       size: file.fileSize,

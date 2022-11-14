@@ -59,24 +59,7 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
           itemBuilder: (context, file, index) {
             return Padding(
               padding: const EdgeInsets.all(4.0),
-              child: ListTile(
-                onTap: () => _openFile(file),
-                leading: FaIcon(_getIconFrom(extension: file.extension)),
-                isThreeLine: true,
-                title: Text(file.name),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    Text(file.description),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${DateFormat('EEEE, MMMM d yyyy, h:mm a').format(file.time)} · Size: ${filesize(file.size)}',
-                      style: const TextStyle(fontStyle: FontStyle.italic),
-                    ),
-                  ],
-                ),
-              ),
+              child: _FileHistoryTile(file: file),
             );
           },
         ),
@@ -101,8 +84,24 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
       _controller.error = error;
     }
   }
+}
 
-  void _openFile(FileHistoryEntity file) async {
+class _FileHistoryTile extends ConsumerWidget {
+  const _FileHistoryTile({Key? key, required this.file}) : super(key: key);
+  final FileHistoryEntity file;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context).textTheme;
+    return ListTile(
+      onTap: () => _openFile(file, ref),
+      leading: FaIcon(_getIconFrom(extension: file.extension)),
+      isThreeLine: true,
+      subtitle: _getContent(ref, file: file, theme: theme),
+    );
+  }
+
+  void _openFile(FileHistoryEntity file, WidgetRef ref) async {
     if (Platform.isIOS || Platform.isAndroid) {
       OpenFile.open(file.filePath(ref.read));
       return;
@@ -118,6 +117,54 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
         return;
       }
     }
+  }
+
+  Widget _getContent(
+    WidgetRef ref, {
+    required FileHistoryEntity file,
+    required TextTheme theme,
+  }) {
+    const imageExts = ['gif', 'png', 'jpg', 'jpeg'];
+
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(file.name, style: theme.titleSmall),
+        const SizedBox(height: 4),
+        Text(file.description),
+        const SizedBox(height: 8),
+        Text(
+          '${DateFormat('EEEE, MMMM d yyyy, h:mm a').format(file.time)} · Size: ${filesize(file.size)}',
+          style: const TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ],
+    );
+
+    if (imageExts.contains(file.extension)) {
+      final img = File.fromUri(Uri.file(file.filePath(ref.read)));
+      if (!img.existsSync()) return content;
+
+      content = Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                img,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            content,
+          ],
+        ),
+      );
+    }
+    return content;
   }
 
   IconData _getIconFrom({required String extension}) {
