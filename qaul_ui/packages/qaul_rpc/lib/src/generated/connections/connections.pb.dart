@@ -19,6 +19,7 @@ enum Connections_Message {
   internetNodesAdd, 
   internetNodesRemove, 
   internetNodesState, 
+  internetNodesRename, 
   notSet
 }
 
@@ -29,15 +30,17 @@ class Connections extends $pb.GeneratedMessage {
     3 : Connections_Message.internetNodesAdd,
     4 : Connections_Message.internetNodesRemove,
     5 : Connections_Message.internetNodesState,
+    6 : Connections_Message.internetNodesRename,
     0 : Connections_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Connections', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5])
+    ..oo(0, [1, 2, 3, 4, 5, 6])
     ..aOM<InternetNodesRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRequest', subBuilder: InternetNodesRequest.create)
     ..aOM<InternetNodesList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesList', subBuilder: InternetNodesList.create)
     ..aOM<InternetNodesEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesAdd', subBuilder: InternetNodesEntry.create)
     ..aOM<InternetNodesEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRemove', subBuilder: InternetNodesEntry.create)
     ..aOM<InternetNodesEntry>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesState', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesEntry>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRename', subBuilder: InternetNodesEntry.create)
     ..hasRequiredFields = false
   ;
 
@@ -48,6 +51,7 @@ class Connections extends $pb.GeneratedMessage {
     InternetNodesEntry? internetNodesAdd,
     InternetNodesEntry? internetNodesRemove,
     InternetNodesEntry? internetNodesState,
+    InternetNodesEntry? internetNodesRename,
   }) {
     final _result = create();
     if (internetNodesRequest != null) {
@@ -64,6 +68,9 @@ class Connections extends $pb.GeneratedMessage {
     }
     if (internetNodesState != null) {
       _result.internetNodesState = internetNodesState;
+    }
+    if (internetNodesRename != null) {
+      _result.internetNodesRename = internetNodesRename;
     }
     return _result;
   }
@@ -145,6 +152,17 @@ class Connections extends $pb.GeneratedMessage {
   void clearInternetNodesState() => clearField(5);
   @$pb.TagNumber(5)
   InternetNodesEntry ensureInternetNodesState() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  InternetNodesEntry get internetNodesRename => $_getN(5);
+  @$pb.TagNumber(6)
+  set internetNodesRename(InternetNodesEntry v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasInternetNodesRename() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearInternetNodesRename() => clearField(6);
+  @$pb.TagNumber(6)
+  InternetNodesEntry ensureInternetNodesRename() => $_ensure(5);
 }
 
 class InternetNodesRequest extends $pb.GeneratedMessage {
@@ -235,6 +253,7 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enabled')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..hasRequiredFields = false
   ;
 
@@ -242,6 +261,7 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   factory InternetNodesEntry({
     $core.String? address,
     $core.bool? enabled,
+    $core.String? name,
   }) {
     final _result = create();
     if (address != null) {
@@ -249,6 +269,9 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
     }
     if (enabled != null) {
       _result.enabled = enabled;
+    }
+    if (name != null) {
+      _result.name = name;
     }
     return _result;
   }
@@ -290,5 +313,14 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   $core.bool hasEnabled() => $_has(1);
   @$pb.TagNumber(2)
   void clearEnabled() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get name => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set name($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearName() => clearField(3);
 }
 

@@ -63,7 +63,7 @@ object ConnectionsKt {
 
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -78,7 +78,7 @@ object ConnectionsKt {
       }
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -89,7 +89,7 @@ object ConnectionsKt {
     }
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -216,6 +216,45 @@ object ConnectionsKt {
     fun hasInternetNodesState(): kotlin.Boolean {
       return _builder.hasInternetNodesState()
     }
+
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     */
+    var internetNodesRename: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry
+      @JvmName("getInternetNodesRename")
+      get() = _builder.getInternetNodesRename()
+      @JvmName("setInternetNodesRename")
+      set(value) {
+        _builder.setInternetNodesRename(value)
+      }
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     */
+    fun clearInternetNodesRename() {
+      _builder.clearInternetNodesRename()
+    }
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     * @return Whether the internetNodesRename field is set.
+     */
+    fun hasInternetNodesRename(): kotlin.Boolean {
+      return _builder.hasInternetNodesRename()
+    }
     val messageCase: qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase
       @JvmName("getMessageCase")
       get() = _builder.getMessageCase()
@@ -243,4 +282,7 @@ val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNode
 
 val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesStateOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
   get() = if (hasInternetNodesState()) getInternetNodesState() else null
+
+val qaul.rpc.connections.ConnectionsOuterClass.ConnectionsOrBuilder.internetNodesRenameOrNull: qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry?
+  get() = if (hasInternetNodesRename()) getInternetNodesRename() else null
 

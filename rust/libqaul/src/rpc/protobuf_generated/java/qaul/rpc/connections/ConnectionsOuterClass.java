@@ -16,7 +16,7 @@ public final class ConnectionsOuterClass {
   }
   /**
    * <pre>
-   * Information about the system actions that led to 
+   * Information about the system actions that led to
    * the creation of this message.
    * </pre>
    *
@@ -36,7 +36,7 @@ public final class ConnectionsOuterClass {
     REQUEST(0),
     /**
      * <pre>
-     * Add Internet Node 
+     * Add Internet Node
      * Successfully added an address
      * </pre>
      *
@@ -91,7 +91,7 @@ public final class ConnectionsOuterClass {
     public static final int REQUEST_VALUE = 0;
     /**
      * <pre>
-     * Add Internet Node 
+     * Add Internet Node
      * Successfully added an address
      * </pre>
      *
@@ -255,7 +255,7 @@ public final class ConnectionsOuterClass {
 
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -265,7 +265,7 @@ public final class ConnectionsOuterClass {
     boolean hasInternetNodesList();
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -275,7 +275,7 @@ public final class ConnectionsOuterClass {
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList getInternetNodesList();
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -373,6 +373,36 @@ public final class ConnectionsOuterClass {
      */
     qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesStateOrBuilder();
 
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     * @return Whether the internetNodesRename field is set.
+     */
+    boolean hasInternetNodesRename();
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     * @return The internetNodesRename.
+     */
+    qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesRename();
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     */
+    qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesRenameOrBuilder();
+
     public qaul.rpc.connections.ConnectionsOuterClass.Connections.MessageCase getMessageCase();
   }
   /**
@@ -406,115 +436,6 @@ public final class ConnectionsOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Connections(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.Builder subBuilder = null;
-              if (messageCase_ == 1) {
-                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 1;
-              break;
-            }
-            case 18: {
-              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder subBuilder = null;
-              if (messageCase_ == 2) {
-                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 2;
-              break;
-            }
-            case 26: {
-              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder subBuilder = null;
-              if (messageCase_ == 3) {
-                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 3;
-              break;
-            }
-            case 34: {
-              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder subBuilder = null;
-              if (messageCase_ == 4) {
-                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 4;
-              break;
-            }
-            case 42: {
-              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder subBuilder = null;
-              if (messageCase_ == 5) {
-                subBuilder = ((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_).toBuilder();
-              }
-              message_ =
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
-                message_ = subBuilder.buildPartial();
-              }
-              messageCase_ = 5;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.connections.ConnectionsOuterClass.internal_static_qaul_rpc_connections_Connections_descriptor;
@@ -538,6 +459,7 @@ public final class ConnectionsOuterClass {
       INTERNET_NODES_ADD(3),
       INTERNET_NODES_REMOVE(4),
       INTERNET_NODES_STATE(5),
+      INTERNET_NODES_RENAME(6),
       MESSAGE_NOT_SET(0);
       private final int value;
       private MessageCase(int value) {
@@ -560,6 +482,7 @@ public final class ConnectionsOuterClass {
           case 3: return INTERNET_NODES_ADD;
           case 4: return INTERNET_NODES_REMOVE;
           case 5: return INTERNET_NODES_STATE;
+          case 6: return INTERNET_NODES_RENAME;
           case 0: return MESSAGE_NOT_SET;
           default: return null;
         }
@@ -624,7 +547,7 @@ public final class ConnectionsOuterClass {
     public static final int INTERNET_NODES_LIST_FIELD_NUMBER = 2;
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -637,7 +560,7 @@ public final class ConnectionsOuterClass {
     }
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -653,7 +576,7 @@ public final class ConnectionsOuterClass {
     }
     /**
      * <pre>
-     * returns a list of all internet nodes and 
+     * returns a list of all internet nodes and
      * an information about why this message has been sent.
      * </pre>
      *
@@ -805,6 +728,52 @@ public final class ConnectionsOuterClass {
       return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
     }
 
+    public static final int INTERNET_NODES_RENAME_FIELD_NUMBER = 6;
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     * @return Whether the internetNodesRename field is set.
+     */
+    @java.lang.Override
+    public boolean hasInternetNodesRename() {
+      return messageCase_ == 6;
+    }
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     * @return The internetNodesRename.
+     */
+    @java.lang.Override
+    public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesRename() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+      }
+      return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * Rename internet node.
+     * libqaul returns an internet_nodes_list message.
+     * </pre>
+     *
+     * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+     */
+    @java.lang.Override
+    public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesRenameOrBuilder() {
+      if (messageCase_ == 6) {
+         return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+      }
+      return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -834,7 +803,10 @@ public final class ConnectionsOuterClass {
       if (messageCase_ == 5) {
         output.writeMessage(5, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
       }
-      unknownFields.writeTo(output);
+      if (messageCase_ == 6) {
+        output.writeMessage(6, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
+      }
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -863,7 +835,11 @@ public final class ConnectionsOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
       }
-      size += unknownFields.getSerializedSize();
+      if (messageCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_);
+      }
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -900,10 +876,14 @@ public final class ConnectionsOuterClass {
           if (!getInternetNodesState()
               .equals(other.getInternetNodesState())) return false;
           break;
+        case 6:
+          if (!getInternetNodesRename()
+              .equals(other.getInternetNodesRename())) return false;
+          break;
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -935,10 +915,14 @@ public final class ConnectionsOuterClass {
           hash = (37 * hash) + INTERNET_NODES_STATE_FIELD_NUMBER;
           hash = (53 * hash) + getInternetNodesState().hashCode();
           break;
+        case 6:
+          hash = (37 * hash) + INTERNET_NODES_RENAME_FIELD_NUMBER;
+          hash = (53 * hash) + getInternetNodesRename().hashCode();
+          break;
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1059,22 +1043,35 @@ public final class ConnectionsOuterClass {
 
       // Construct using qaul.rpc.connections.ConnectionsOuterClass.Connections.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (internetNodesRequestBuilder_ != null) {
+          internetNodesRequestBuilder_.clear();
+        }
+        if (internetNodesListBuilder_ != null) {
+          internetNodesListBuilder_.clear();
+        }
+        if (internetNodesAddBuilder_ != null) {
+          internetNodesAddBuilder_.clear();
+        }
+        if (internetNodesRemoveBuilder_ != null) {
+          internetNodesRemoveBuilder_.clear();
+        }
+        if (internetNodesStateBuilder_ != null) {
+          internetNodesStateBuilder_.clear();
+        }
+        if (internetNodesRenameBuilder_ != null) {
+          internetNodesRenameBuilder_.clear();
+        }
         messageCase_ = 0;
         message_ = null;
         return this;
@@ -1136,6 +1133,13 @@ public final class ConnectionsOuterClass {
             result.message_ = message_;
           } else {
             result.message_ = internetNodesStateBuilder_.build();
+          }
+        }
+        if (messageCase_ == 6) {
+          if (internetNodesRenameBuilder_ == null) {
+            result.message_ = message_;
+          } else {
+            result.message_ = internetNodesRenameBuilder_.build();
           }
         }
         result.messageCase_ = messageCase_;
@@ -1208,11 +1212,15 @@ public final class ConnectionsOuterClass {
             mergeInternetNodesState(other.getInternetNodesState());
             break;
           }
+          case INTERNET_NODES_RENAME: {
+            mergeInternetNodesRename(other.getInternetNodesRename());
+            break;
+          }
           case MESSAGE_NOT_SET: {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1227,17 +1235,72 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.connections.ConnectionsOuterClass.Connections parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getInternetNodesRequestFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getInternetNodesListFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getInternetNodesAddFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getInternetNodesRemoveFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 4;
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getInternetNodesStateFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 5;
+                break;
+              } // case 42
+              case 50: {
+                input.readMessage(
+                    getInternetNodesRenameFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                messageCase_ = 6;
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.connections.ConnectionsOuterClass.Connections) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int messageCase_ = 0;
@@ -1447,7 +1510,7 @@ public final class ConnectionsOuterClass {
           qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesListOrBuilder> internetNodesListBuilder_;
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1460,7 +1523,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1483,7 +1546,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1504,7 +1567,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1523,7 +1586,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1551,7 +1614,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1575,7 +1638,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1586,7 +1649,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -1605,7 +1668,7 @@ public final class ConnectionsOuterClass {
       }
       /**
        * <pre>
-       * returns a list of all internet nodes and 
+       * returns a list of all internet nodes and
        * an information about why this message has been sent.
        * </pre>
        *
@@ -2190,6 +2253,193 @@ public final class ConnectionsOuterClass {
         onChanged();;
         return internetNodesStateBuilder_;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> internetNodesRenameBuilder_;
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       * @return Whether the internetNodesRename field is set.
+       */
+      @java.lang.Override
+      public boolean hasInternetNodesRename() {
+        return messageCase_ == 6;
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       * @return The internetNodesRename.
+       */
+      @java.lang.Override
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry getInternetNodesRename() {
+        if (internetNodesRenameBuilder_ == null) {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        } else {
+          if (messageCase_ == 6) {
+            return internetNodesRenameBuilder_.getMessage();
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      public Builder setInternetNodesRename(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
+        if (internetNodesRenameBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          message_ = value;
+          onChanged();
+        } else {
+          internetNodesRenameBuilder_.setMessage(value);
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      public Builder setInternetNodesRename(
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder builderForValue) {
+        if (internetNodesRenameBuilder_ == null) {
+          message_ = builderForValue.build();
+          onChanged();
+        } else {
+          internetNodesRenameBuilder_.setMessage(builderForValue.build());
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      public Builder mergeInternetNodesRename(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry value) {
+        if (internetNodesRenameBuilder_ == null) {
+          if (messageCase_ == 6 &&
+              message_ != qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance()) {
+            message_ = qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.newBuilder((qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            message_ = value;
+          }
+          onChanged();
+        } else {
+          if (messageCase_ == 6) {
+            internetNodesRenameBuilder_.mergeFrom(value);
+          } else {
+            internetNodesRenameBuilder_.setMessage(value);
+          }
+        }
+        messageCase_ = 6;
+        return this;
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      public Builder clearInternetNodesRename() {
+        if (internetNodesRenameBuilder_ == null) {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+            onChanged();
+          }
+        } else {
+          if (messageCase_ == 6) {
+            messageCase_ = 0;
+            message_ = null;
+          }
+          internetNodesRenameBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder getInternetNodesRenameBuilder() {
+        return getInternetNodesRenameFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      @java.lang.Override
+      public qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder getInternetNodesRenameOrBuilder() {
+        if ((messageCase_ == 6) && (internetNodesRenameBuilder_ != null)) {
+          return internetNodesRenameBuilder_.getMessageOrBuilder();
+        } else {
+          if (messageCase_ == 6) {
+            return (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_;
+          }
+          return qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * Rename internet node.
+       * libqaul returns an internet_nodes_list message.
+       * </pre>
+       *
+       * <code>.qaul.rpc.connections.InternetNodesEntry internet_nodes_rename = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder> 
+          getInternetNodesRenameFieldBuilder() {
+        if (internetNodesRenameBuilder_ == null) {
+          if (!(messageCase_ == 6)) {
+            message_ = qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.getDefaultInstance();
+          }
+          internetNodesRenameBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.Builder, qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntryOrBuilder>(
+                  (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) message_,
+                  getParentForChildren(),
+                  isClean());
+          message_ = null;
+        }
+        messageCase_ = 6;
+        onChanged();;
+        return internetNodesRenameBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2223,7 +2473,18 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Connections(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2278,45 +2539,6 @@ public final class ConnectionsOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private InternetNodesRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.connections.ConnectionsOuterClass.internal_static_qaul_rpc_connections_InternetNodesRequest_descriptor;
@@ -2344,7 +2566,7 @@ public final class ConnectionsOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2353,7 +2575,7 @@ public final class ConnectionsOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2368,7 +2590,7 @@ public final class ConnectionsOuterClass {
       }
       qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest other = (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2379,7 +2601,7 @@ public final class ConnectionsOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2500,18 +2722,13 @@ public final class ConnectionsOuterClass {
 
       // Construct using qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2590,7 +2807,7 @@ public final class ConnectionsOuterClass {
 
       public Builder mergeFrom(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest other) {
         if (other == qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2605,17 +2822,30 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -2651,7 +2881,18 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InternetNodesRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2784,64 +3025,6 @@ public final class ConnectionsOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private InternetNodesList(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-
-              info_ = rawValue;
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                nodes_ = new java.util.ArrayList<qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              nodes_.add(
-                  input.readMessage(qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          nodes_ = java.util.Collections.unmodifiableList(nodes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.connections.ConnectionsOuterClass.internal_static_qaul_rpc_connections_InternetNodesList_descriptor;
@@ -2971,7 +3154,7 @@ public final class ConnectionsOuterClass {
       for (int i = 0; i < nodes_.size(); i++) {
         output.writeMessage(2, nodes_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2988,7 +3171,7 @@ public final class ConnectionsOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, nodes_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3006,7 +3189,7 @@ public final class ConnectionsOuterClass {
       if (info_ != other.info_) return false;
       if (!getNodesList()
           .equals(other.getNodesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3023,7 +3206,7 @@ public final class ConnectionsOuterClass {
         hash = (37 * hash) + NODES_FIELD_NUMBER;
         hash = (53 * hash) + getNodesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3148,19 +3331,13 @@ public final class ConnectionsOuterClass {
 
       // Construct using qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNodesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3169,10 +3346,11 @@ public final class ConnectionsOuterClass {
 
         if (nodesBuilder_ == null) {
           nodes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          nodes_ = null;
           nodesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -3287,7 +3465,7 @@ public final class ConnectionsOuterClass {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3302,17 +3480,48 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                info_ = input.readEnum();
+
+                break;
+              } // case 8
+              case 18: {
+                qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry m =
+                    input.readMessage(
+                        qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.parser(),
+                        extensionRegistry);
+                if (nodesBuilder_ == null) {
+                  ensureNodesIsMutable();
+                  nodes_.add(m);
+                } else {
+                  nodesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesList) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -3763,7 +3972,18 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InternetNodesList(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -3816,6 +4036,26 @@ public final class ConnectionsOuterClass {
      * @return The enabled.
      */
     boolean getEnabled();
+
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
   }
   /**
    * <pre>
@@ -3837,6 +4077,7 @@ public final class ConnectionsOuterClass {
     }
     private InternetNodesEntry() {
       address_ = "";
+      name_ = "";
     }
 
     @java.lang.Override
@@ -3850,56 +4091,6 @@ public final class ConnectionsOuterClass {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private InternetNodesEntry(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              address_ = s;
-              break;
-            }
-            case 16: {
-
-              enabled_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (com.google.protobuf.UninitializedMessageException e) {
-        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -3975,6 +4166,52 @@ public final class ConnectionsOuterClass {
       return enabled_;
     }
 
+    public static final int NAME_FIELD_NUMBER = 3;
+    private volatile java.lang.Object name_;
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3995,7 +4232,10 @@ public final class ConnectionsOuterClass {
       if (enabled_ != false) {
         output.writeBool(2, enabled_);
       }
-      unknownFields.writeTo(output);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
+      }
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4011,7 +4251,10 @@ public final class ConnectionsOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, enabled_);
       }
-      size += unknownFields.getSerializedSize();
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
+      }
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4030,7 +4273,9 @@ public final class ConnectionsOuterClass {
           .equals(other.getAddress())) return false;
       if (getEnabled()
           != other.getEnabled()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4046,7 +4291,9 @@ public final class ConnectionsOuterClass {
       hash = (37 * hash) + ENABLED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getEnabled());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4169,18 +4416,13 @@ public final class ConnectionsOuterClass {
 
       // Construct using qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -4188,6 +4430,8 @@ public final class ConnectionsOuterClass {
         address_ = "";
 
         enabled_ = false;
+
+        name_ = "";
 
         return this;
       }
@@ -4217,6 +4461,7 @@ public final class ConnectionsOuterClass {
         qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry result = new qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry(this);
         result.address_ = address_;
         result.enabled_ = enabled_;
+        result.name_ = name_;
         onBuilt();
         return result;
       }
@@ -4272,7 +4517,11 @@ public final class ConnectionsOuterClass {
         if (other.getEnabled() != false) {
           setEnabled(other.getEnabled());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -4287,17 +4536,45 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                address_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                enabled_ = input.readBool();
+
+                break;
+              } // case 16
+              case 26: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (qaul.rpc.connections.ConnectionsOuterClass.InternetNodesEntry) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -4439,6 +4716,102 @@ public final class ConnectionsOuterClass {
         onChanged();
         return this;
       }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * name
+       * </pre>
+       *
+       * <code>string name = 3;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * name
+       * </pre>
+       *
+       * <code>string name = 3;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * name
+       * </pre>
+       *
+       * <code>string name = 3;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * name
+       * </pre>
+       *
+       * <code>string name = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * name
+       * </pre>
+       *
+       * <code>string name = 3;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4472,7 +4845,18 @@ public final class ConnectionsOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InternetNodesEntry(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4522,7 +4906,7 @@ public final class ConnectionsOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\035connections/connections.proto\022\024qaul.rp" +
-      "c.connections\"\213\003\n\013Connections\022L\n\026interne" +
+      "c.connections\"\326\003\n\013Connections\022L\n\026interne" +
       "t_nodes_request\030\001 \001(\0132*.qaul.rpc.connect" +
       "ions.InternetNodesRequestH\000\022F\n\023internet_" +
       "nodes_list\030\002 \001(\0132\'.qaul.rpc.connections." +
@@ -4532,15 +4916,17 @@ public final class ConnectionsOuterClass {
       "(\0132(.qaul.rpc.connections.InternetNodesE" +
       "ntryH\000\022H\n\024internet_nodes_state\030\005 \001(\0132(.q" +
       "aul.rpc.connections.InternetNodesEntryH\000" +
-      "B\t\n\007message\"\026\n\024InternetNodesRequest\"v\n\021I" +
-      "nternetNodesList\022(\n\004info\030\001 \001(\0162\032.qaul.rp" +
-      "c.connections.Info\0227\n\005nodes\030\002 \003(\0132(.qaul" +
-      ".rpc.connections.InternetNodesEntry\"6\n\022I" +
-      "nternetNodesEntry\022\017\n\007address\030\001 \001(\t\022\017\n\007en" +
-      "abled\030\002 \001(\010*~\n\004Info\022\013\n\007REQUEST\020\000\022\017\n\013ADD_" +
-      "SUCCESS\020\001\022\025\n\021ADD_ERROR_INVALID\020\002\022\022\n\016REMO" +
-      "VE_SUCCESS\020\005\022\021\n\rSTATE_SUCCESS\020\006\022\032\n\026REMOV" +
-      "E_ERROR_NOT_FOUND\020\007b\006proto3"
+      "\022I\n\025internet_nodes_rename\030\006 \001(\0132(.qaul.r" +
+      "pc.connections.InternetNodesEntryH\000B\t\n\007m" +
+      "essage\"\026\n\024InternetNodesRequest\"v\n\021Intern" +
+      "etNodesList\022(\n\004info\030\001 \001(\0162\032.qaul.rpc.con" +
+      "nections.Info\0227\n\005nodes\030\002 \003(\0132(.qaul.rpc." +
+      "connections.InternetNodesEntry\"D\n\022Intern" +
+      "etNodesEntry\022\017\n\007address\030\001 \001(\t\022\017\n\007enabled" +
+      "\030\002 \001(\010\022\014\n\004name\030\003 \001(\t*~\n\004Info\022\013\n\007REQUEST\020" +
+      "\000\022\017\n\013ADD_SUCCESS\020\001\022\025\n\021ADD_ERROR_INVALID\020" +
+      "\002\022\022\n\016REMOVE_SUCCESS\020\005\022\021\n\rSTATE_SUCCESS\020\006" +
+      "\022\032\n\026REMOVE_ERROR_NOT_FOUND\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4551,7 +4937,7 @@ public final class ConnectionsOuterClass {
     internal_static_qaul_rpc_connections_Connections_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_connections_Connections_descriptor,
-        new java.lang.String[] { "InternetNodesRequest", "InternetNodesList", "InternetNodesAdd", "InternetNodesRemove", "InternetNodesState", "Message", });
+        new java.lang.String[] { "InternetNodesRequest", "InternetNodesList", "InternetNodesAdd", "InternetNodesRemove", "InternetNodesState", "InternetNodesRename", "Message", });
     internal_static_qaul_rpc_connections_InternetNodesRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_qaul_rpc_connections_InternetNodesRequest_fieldAccessorTable = new
@@ -4569,7 +4955,7 @@ public final class ConnectionsOuterClass {
     internal_static_qaul_rpc_connections_InternetNodesEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_rpc_connections_InternetNodesEntry_descriptor,
-        new java.lang.String[] { "Address", "Enabled", });
+        new java.lang.String[] { "Address", "Enabled", "Name", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

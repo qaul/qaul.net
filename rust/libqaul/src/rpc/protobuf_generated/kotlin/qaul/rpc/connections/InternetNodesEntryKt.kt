@@ -71,6 +71,31 @@ object InternetNodesEntryKt {
     fun clearEnabled() {
       _builder.clearEnabled()
     }
+
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     */
+    var name: kotlin.String
+      @JvmName("getName")
+      get() = _builder.getName()
+      @JvmName("setName")
+      set(value) {
+        _builder.setName(value)
+      }
+    /**
+     * <pre>
+     * name
+     * </pre>
+     *
+     * <code>string name = 3;</code>
+     */
+    fun clearName() {
+      _builder.clearName()
+    }
   }
 }
 @kotlin.jvm.JvmSynthetic

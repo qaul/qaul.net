@@ -20,7 +20,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-/// Information about the system actions that led to 
+/// Information about the system actions that led to
 /// the creation of this message.
 enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
   typealias RawValue = Int
@@ -30,7 +30,7 @@ enum Qaul_Rpc_Connections_Info: SwiftProtobuf.Enum {
   /// internet nodes request message.
   case request // = 0
 
-  /// Add Internet Node 
+  /// Add Internet Node
   /// Successfully added an address
   case addSuccess // = 1
 
@@ -112,7 +112,7 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesRequest(newValue)}
   }
 
-  /// returns a list of all internet nodes and 
+  /// returns a list of all internet nodes and
   /// an information about why this message has been sent.
   var internetNodesList: Qaul_Rpc_Connections_InternetNodesList {
     get {
@@ -152,13 +152,23 @@ struct Qaul_Rpc_Connections_Connections {
     set {message = .internetNodesState(newValue)}
   }
 
+  /// Rename internet node.
+  /// libqaul returns an internet_nodes_list message.
+  var internetNodesRename: Qaul_Rpc_Connections_InternetNodesEntry {
+    get {
+      if case .internetNodesRename(let v)? = message {return v}
+      return Qaul_Rpc_Connections_InternetNodesEntry()
+    }
+    set {message = .internetNodesRename(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable {
     /// Request a list of all internet nodes.
     /// libqaul returns an internet_nodes_list message.
     case internetNodesRequest(Qaul_Rpc_Connections_InternetNodesRequest)
-    /// returns a list of all internet nodes and 
+    /// returns a list of all internet nodes and
     /// an information about why this message has been sent.
     case internetNodesList(Qaul_Rpc_Connections_InternetNodesList)
     /// Add a new internet node address.
@@ -170,6 +180,9 @@ struct Qaul_Rpc_Connections_Connections {
     /// Update an internet node state.
     /// libqaul returns an internet_nodes_list message.
     case internetNodesState(Qaul_Rpc_Connections_InternetNodesEntry)
+    /// Rename internet node.
+    /// libqaul returns an internet_nodes_list message.
+    case internetNodesRename(Qaul_Rpc_Connections_InternetNodesEntry)
 
   #if !swift(>=4.1)
     static func ==(lhs: Qaul_Rpc_Connections_Connections.OneOf_Message, rhs: Qaul_Rpc_Connections_Connections.OneOf_Message) -> Bool {
@@ -195,6 +208,10 @@ struct Qaul_Rpc_Connections_Connections {
       }()
       case (.internetNodesState, .internetNodesState): return {
         guard case .internetNodesState(let l) = lhs, case .internetNodesState(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.internetNodesRename, .internetNodesRename): return {
+        guard case .internetNodesRename(let l) = lhs, case .internetNodesRename(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -258,6 +275,9 @@ struct Qaul_Rpc_Connections_InternetNodesEntry {
   /// enabled
   var enabled: Bool = false
 
+  /// name
+  var name: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -286,6 +306,7 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
     3: .standard(proto: "internet_nodes_add"),
     4: .standard(proto: "internet_nodes_remove"),
     5: .standard(proto: "internet_nodes_state"),
+    6: .standard(proto: "internet_nodes_rename"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -359,6 +380,19 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
           self.message = .internetNodesState(v)
         }
       }()
+      case 6: try {
+        var v: Qaul_Rpc_Connections_InternetNodesEntry?
+        var hadOneofValue = false
+        if let current = self.message {
+          hadOneofValue = true
+          if case .internetNodesRename(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.message = .internetNodesRename(v)
+        }
+      }()
       default: break
       }
     }
@@ -389,6 +423,10 @@ extension Qaul_Rpc_Connections_Connections: SwiftProtobuf.Message, SwiftProtobuf
     case .internetNodesState?: try {
       guard case .internetNodesState(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }()
+    case .internetNodesRename?: try {
+      guard case .internetNodesRename(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     }()
     case nil: break
     }
@@ -464,6 +502,7 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "address"),
     2: .same(proto: "enabled"),
+    3: .same(proto: "name"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -474,6 +513,7 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.address) }()
       case 2: try { try decoder.decodeSingularBoolField(value: &self.enabled) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.name) }()
       default: break
       }
     }
@@ -486,12 +526,16 @@ extension Qaul_Rpc_Connections_InternetNodesEntry: SwiftProtobuf.Message, SwiftP
     if self.enabled != false {
       try visitor.visitSingularBoolField(value: self.enabled, fieldNumber: 2)
     }
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Connections_InternetNodesEntry, rhs: Qaul_Rpc_Connections_InternetNodesEntry) -> Bool {
     if lhs.address != rhs.address {return false}
     if lhs.enabled != rhs.enabled {return false}
+    if lhs.name != rhs.name {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
