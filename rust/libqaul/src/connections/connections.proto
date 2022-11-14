@@ -1,35 +1,32 @@
 syntax = "proto3";
 package qaul.rpc.connections;
 
-
 // Connections rpc message container
 message Connections {
     oneof message {
         // Request a list of all internet nodes.
         // libqaul returns an internet_nodes_list message.
         InternetNodesRequest internet_nodes_request = 1;
-        // returns a list of all internet nodes and 
+        // returns a list of all internet nodes and
         // an information about why this message has been sent.
         InternetNodesList internet_nodes_list = 2;
         // Add a new internet node address.
         // libqaul returns an internet_nodes_list message.
         InternetNodesEntry internet_nodes_add = 3;
-        // Rename internet node.
-        // libqaul returns an internet_nodes_list message.
-        InternetNodesEntry internet_nodes_rename = 4;
         // Remove an internet node address.
         // libqaul returns an internet_nodes_list message.
-        InternetNodesEntry internet_nodes_remove = 5;
+        InternetNodesEntry internet_nodes_remove = 4;
         // Update an internet node state.
         // libqaul returns an internet_nodes_list message.
-        InternetNodesEntry internet_nodes_state = 6;
+        InternetNodesEntry internet_nodes_state = 5;
+        // Rename internet node.
+        // libqaul returns an internet_nodes_list message.
+        InternetNodesEntry internet_nodes_rename = 6;
     }
 }
 
 // UI request for Internet nodes list
-message InternetNodesRequest {
-
-}
+message InternetNodesRequest {}
 
 // Internet Nodes List
 //
@@ -48,18 +45,18 @@ message InternetNodesList {
     repeated InternetNodesEntry nodes = 2;
 }
 
-// Information about the system actions that led to 
+// Information about the system actions that led to
 // the creation of this message.
 enum Info {
     // Internet Nodes Request
     // By default, this message is sent due to an
     // internet nodes request message.
     REQUEST = 0;
-    // Add Internet Node 
+    // Add Internet Node
     // Successfully added an address
     ADD_SUCCESS = 1;
     // Error: not a valid multiaddress
-    ADD_ERROR_INVALID = 2;    
+    ADD_ERROR_INVALID = 2;
     // Remove Internet Node
     // Successfully removed the address
     REMOVE_SUCCESS = 5;
@@ -76,8 +73,8 @@ enum Info {
 message InternetNodesEntry {
     // address
     string address = 1;
-   // name
-    string name = 2;
     // enabled
-    bool enabled = 3;
+    bool enabled = 2;
+    // name
+    string name = 3;
 }

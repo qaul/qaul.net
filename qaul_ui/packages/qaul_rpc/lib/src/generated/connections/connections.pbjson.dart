@@ -32,6 +32,7 @@ const Connections$json = const {
     const {'1': 'internet_nodes_add', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesAdd'},
     const {'1': 'internet_nodes_remove', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesRemove'},
     const {'1': 'internet_nodes_state', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesState'},
+    const {'1': 'internet_nodes_rename', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesRename'},
   ],
   '8': const [
     const {'1': 'message'},
@@ -39,7 +40,7 @@ const Connections$json = const {
 };
 
 /// Descriptor for `Connections`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List connectionsDescriptor = $convert.base64Decode('CgtDb25uZWN0aW9ucxJiChZpbnRlcm5ldF9ub2Rlc19yZXF1ZXN0GAEgASgLMioucWF1bC5ycGMuY29ubmVjdGlvbnMuSW50ZXJuZXROb2Rlc1JlcXVlc3RIAFIUaW50ZXJuZXROb2Rlc1JlcXVlc3QSWQoTaW50ZXJuZXRfbm9kZXNfbGlzdBgCIAEoCzInLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNMaXN0SABSEWludGVybmV0Tm9kZXNMaXN0ElgKEmludGVybmV0X25vZGVzX2FkZBgDIAEoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeUgAUhBpbnRlcm5ldE5vZGVzQWRkEl4KFWludGVybmV0X25vZGVzX3JlbW92ZRgEIAEoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeUgAUhNpbnRlcm5ldE5vZGVzUmVtb3ZlElwKFGludGVybmV0X25vZGVzX3N0YXRlGAUgASgLMigucWF1bC5ycGMuY29ubmVjdGlvbnMuSW50ZXJuZXROb2Rlc0VudHJ5SABSEmludGVybmV0Tm9kZXNTdGF0ZUIJCgdtZXNzYWdl');
+final $typed_data.Uint8List connectionsDescriptor = $convert.base64Decode('CgtDb25uZWN0aW9ucxJiChZpbnRlcm5ldF9ub2Rlc19yZXF1ZXN0GAEgASgLMioucWF1bC5ycGMuY29ubmVjdGlvbnMuSW50ZXJuZXROb2Rlc1JlcXVlc3RIAFIUaW50ZXJuZXROb2Rlc1JlcXVlc3QSWQoTaW50ZXJuZXRfbm9kZXNfbGlzdBgCIAEoCzInLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNMaXN0SABSEWludGVybmV0Tm9kZXNMaXN0ElgKEmludGVybmV0X25vZGVzX2FkZBgDIAEoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeUgAUhBpbnRlcm5ldE5vZGVzQWRkEl4KFWludGVybmV0X25vZGVzX3JlbW92ZRgEIAEoCzIoLnFhdWwucnBjLmNvbm5lY3Rpb25zLkludGVybmV0Tm9kZXNFbnRyeUgAUhNpbnRlcm5ldE5vZGVzUmVtb3ZlElwKFGludGVybmV0X25vZGVzX3N0YXRlGAUgASgLMigucWF1bC5ycGMuY29ubmVjdGlvbnMuSW50ZXJuZXROb2Rlc0VudHJ5SABSEmludGVybmV0Tm9kZXNTdGF0ZRJeChVpbnRlcm5ldF9ub2Rlc19yZW5hbWUYBiABKAsyKC5xYXVsLnJwYy5jb25uZWN0aW9ucy5JbnRlcm5ldE5vZGVzRW50cnlIAFITaW50ZXJuZXROb2Rlc1JlbmFtZUIJCgdtZXNzYWdl');
 @$core.Deprecated('Use internetNodesRequestDescriptor instead')
 const InternetNodesRequest$json = const {
   '1': 'InternetNodesRequest',
@@ -64,8 +65,9 @@ const InternetNodesEntry$json = const {
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
     const {'1': 'enabled', '3': 2, '4': 1, '5': 8, '10': 'enabled'},
+    const {'1': 'name', '3': 3, '4': 1, '5': 9, '10': 'name'},
   ],
 };
 
 /// Descriptor for `InternetNodesEntry`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internetNodesEntryDescriptor = $convert.base64Decode('ChJJbnRlcm5ldE5vZGVzRW50cnkSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIYCgdlbmFibGVkGAIgASgIUgdlbmFibGVk');
+final $typed_data.Uint8List internetNodesEntryDescriptor = $convert.base64Decode('ChJJbnRlcm5ldE5vZGVzRW50cnkSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIYCgdlbmFibGVkGAIgASgIUgdlbmFibGVkEhIKBG5hbWUYAyABKAlSBG5hbWU=');

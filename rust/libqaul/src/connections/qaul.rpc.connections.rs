@@ -12,7 +12,7 @@ pub mod connections {
         /// libqaul returns an internet_nodes_list message.
         #[prost(message, tag="1")]
         InternetNodesRequest(super::InternetNodesRequest),
-        /// returns a list of all internet nodes and 
+        /// returns a list of all internet nodes and
         /// an information about why this message has been sent.
         #[prost(message, tag="2")]
         InternetNodesList(super::InternetNodesList),
@@ -20,18 +20,18 @@ pub mod connections {
         /// libqaul returns an internet_nodes_list message.
         #[prost(message, tag="3")]
         InternetNodesAdd(super::InternetNodesEntry),
-        /// Rename internet node.
-        /// libqaul returns an internet_nodes_list message.
-        #[prost(message, tag="4")]
-        InternetNodesRename(super::InternetNodesEntry),
         /// Remove an internet node address.
         /// libqaul returns an internet_nodes_list message.
-        #[prost(message, tag="5")]
+        #[prost(message, tag="4")]
         InternetNodesRemove(super::InternetNodesEntry),
         /// Update an internet node state.
         /// libqaul returns an internet_nodes_list message.
-        #[prost(message, tag="6")]
+        #[prost(message, tag="5")]
         InternetNodesState(super::InternetNodesEntry),
+        /// Rename internet node.
+        /// libqaul returns an internet_nodes_list message.
+        #[prost(message, tag="6")]
+        InternetNodesRename(super::InternetNodesEntry),
     }
 }
 /// UI request for Internet nodes list
@@ -66,14 +66,14 @@ pub struct InternetNodesEntry {
     /// address
     #[prost(string, tag="1")]
     pub address: ::prost::alloc::string::String,
-    /// name
-    #[prost(string, tag="2")]
-    pub name: ::prost::alloc::string::String,
     /// enabled
-    #[prost(bool, tag="3")]
+    #[prost(bool, tag="2")]
     pub enabled: bool,
+    /// name
+    #[prost(string, tag="3")]
+    pub name: ::prost::alloc::string::String,
 }
-/// Information about the system actions that led to 
+/// Information about the system actions that led to
 /// the creation of this message.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -82,7 +82,7 @@ pub enum Info {
     /// By default, this message is sent due to an
     /// internet nodes request message.
     Request = 0,
-    /// Add Internet Node 
+    /// Add Internet Node
     /// Successfully added an address
     AddSuccess = 1,
     /// Error: not a valid multiaddress
