@@ -1,6 +1,6 @@
 [package]
 name = "libqaul"
-version = "2.0.0-beta.8"
+version = "2.0.0-beta.9"
 authors = ["qaul.net community <contact@qaul.net>"]
 edition = "2021"
 license = "AGPL"
@@ -52,7 +52,8 @@ sha2 = "0.10.2"
 noise-protocol = { git = "https://github.com/qaul/noise-rust.git" }
 noise-rust-crypto = { git = "https://github.com/qaul/noise-rust.git", features = ["use-x25519", "use-chacha20poly1305", "use-sha2"] }
 crc = "^3.0.0"
-fs_extra="1.2.0"
+fs_extra = "1.2.0"
+semver = "1.0"
 
 # only for desktop platforms: Linux, Mac, Windows
 directories = "4.0"
