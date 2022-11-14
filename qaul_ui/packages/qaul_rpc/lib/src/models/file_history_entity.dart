@@ -2,8 +2,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../qaul_rpc.dart';
 import '../generated/services/chat/chatfile_rpc.pb.dart';
+import '../utils.dart';
 
-class FileHistoryEntity {
+class FileHistoryEntity with FilePathResolverMixin {
   FileHistoryEntity({
     required this.id,
     required this.name,
@@ -37,10 +38,6 @@ class FileHistoryEntity {
     );
   }
 
-  String filePath(Reader read) {
-    var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
-    var uuid = read(defaultUserProvider)!.idBase58;
-
-    return '$storagePath/$uuid/files/$id.$extension';
-  }
+  String filePath(Reader read) =>
+      getFilePath(read, id: id, extension: extension);
 }

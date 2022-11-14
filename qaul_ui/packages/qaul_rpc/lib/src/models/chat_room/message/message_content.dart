@@ -84,7 +84,7 @@ class GroupEventContent extends MessageContent {
   List<Object?> get props => [userIdBase58, type];
 }
 
-class FileShareContent extends MessageContent {
+class FileShareContent extends MessageContent with FilePathResolverMixin {
   const FileShareContent({
     required this.historyIndex,
     required this.fileId,
@@ -104,10 +104,6 @@ class FileShareContent extends MessageContent {
 
   String get extension => fileName.split('.').last;
 
-  String filePath(Reader read) {
-    var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
-    var uuid = read(defaultUserProvider)!.idBase58;
-
-    return '$storagePath/$uuid/files/$fileId.$extension';
-  }
+  String filePath(Reader read) =>
+      getFilePath(read, id: fileId, extension: extension);
 }
