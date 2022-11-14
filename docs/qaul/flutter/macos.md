@@ -108,23 +108,37 @@ flutter run -d macos
 
 ## Build Distributable (*.dmg) MacOS Application
 
-You can build the qaul flutter app from the terminal:
+_**Step 1: Archiving the App**_:
+
+To manually create a release archive, you can do the following:
+
+1. Open the project in XCode: `open qaul_ui/macos/Runner.xcworkspace`;
+2. Press `Product >> Archive`;
+3. Once done, the **Organizer** window should open by itself (if not, open it via `Window >> Organizer`):
+    1. Select the `Archives` sub-menu over the left panel;
+    2. Select the archive you've just created in the middle panel and;
+    3. Select the `Distribute App` option in the right panel to upload the archive to be notarized.
+
+_**Step 2: Notarizing**_:
+
+The steps below outline what to do in each screen of the "Distribute App" dialog:
+
+1. **Select a method of distribution**
+   > select the "Developer ID" option and press *Next*;
+2. **Select a destination**
+   > select "Upload" and press *Next*;
+3. **Select certificate and Developer ID profiles**
+   > select your **Developer ID Application** certificate; No profile is required. Press *Next*;
+
+Once this is done, wait until the app is properly notarized - you should receive an email confirming the process is complete.
+
+After that, you can export the newly-notarized app from the Organizer window itself (you may need to `View >> Reload Organizer`).
+> Export it onto `utilities/installers/macos`.
+
+_**Step 3: Generating the dmg**_:
 
 ```sh
-# move into the flutter directory
-cd qaul_ui
-
-# build the release version of the app
-flutter build macos
-```
-
-To build the dmg file, we'll make use of [appdmg](https://www.npmjs.com/package/appdmg):
-
-```sh
-# Install appdmg
-npx appdmg --version
-
 # Build dmg file
-cd ../utilities/installers/macos
-npx appdmg ./config.json ./qaul.dmg
+cd ../utilities/installers/macos/bin
+./dmgbuild
 ```
