@@ -134,11 +134,16 @@ class LibqaulWorker {
   Future<void> requestNodes() async => await _sendMessage(Modules.CONNECTIONS,
       Connections(internetNodesRequest: InternetNodesRequest()));
 
-  Future<void> addNode(String address) async => await _sendMessage(
-      Modules.CONNECTIONS,
-      Connections(
-        internetNodesAdd: InternetNodesEntry(address: address, enabled: true),
-      ));
+  Future<void> addNode(String address, [String? name]) async =>
+      await _sendMessage(
+          Modules.CONNECTIONS,
+          Connections(
+            internetNodesAdd: InternetNodesEntry(
+              address: address,
+              enabled: true,
+              name: name,
+            ),
+          ));
 
   Future<void> removeNode(String address) async => await _sendMessage(
       Modules.CONNECTIONS,

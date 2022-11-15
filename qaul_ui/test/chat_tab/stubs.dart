@@ -50,7 +50,8 @@ class StubLibqaulWorker implements LibqaulWorker {
   void addDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
-  Future<void> addNode(String address) => throw UnimplementedError();
+  Future<void> addNode(String address, [String? name]) =>
+      throw UnimplementedError();
 
   @override
   Future<void> blockUser(User u) => throw UnimplementedError();

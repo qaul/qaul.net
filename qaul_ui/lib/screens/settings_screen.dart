@@ -147,19 +147,14 @@ class _InternetNodesList extends HookConsumerWidget {
       worker.removeNode(nodeAddress);
     }, []);
 
-    final addNode = useCallback((String nodeAddress) {
+    final addNode = useCallback((String nodeAddress, [String? name]) {
       final worker = ref.read(qaulWorkerProvider);
-      worker.addNode(nodeAddress);
+      worker.addNode(nodeAddress, name);
     }, []);
 
     final setNodeState = useCallback((String address, bool value) {
       final worker = ref.read(qaulWorkerProvider);
       worker.setNodeState(address, active: value);
-    }, []);
-
-    final renameNode = useCallback((String address, String name) {
-      final worker = ref.read(qaulWorkerProvider);
-      worker.renameNode(address, name: name);
     }, []);
 
     final refreshNodes = useCallback(() async {
@@ -183,9 +178,9 @@ class _InternetNodesList extends HookConsumerWidget {
               final res = await showDialog(
                   context: context, builder: (_) => _AddNodeDialog());
 
-              if (res is! String) return;
+              if (res is! _AddNodeDialogResponse) return;
 
-              addNode(res);
+              addNode(res.address, res.name);
             },
             rowBuilder: (context, i) {
               var node = nodes[i];
@@ -224,13 +219,14 @@ class _InternetNodesList extends HookConsumerWidget {
                     builder: (_) => _AddNodeDialog(
                       ip: node.ip,
                       port: node.port,
+                      name: node.name,
                       isIPv4: node.isIPv4,
                     ),
                   );
 
-                  if (res is! String) return;
+                  if (res is! _AddNodeDialogResponse) return;
                   removeNode(nodeAddr);
-                  addNode(res);
+                  addNode(res.address, res.name);
                 },
               );
             },
@@ -246,9 +242,8 @@ class _InternetNodesList extends HookConsumerWidget {
                     builder: (_) => _AddNodeDialog(isIPv4: false),
                   );
 
-                  if (res is! String) return;
-
-                  addNode(res);
+                  if (res is! _AddNodeDialogResponse) return;
+                  addNode(res.address, res.name);
                 },
               ),
               const SizedBox(width: 12.0),
@@ -265,17 +260,19 @@ class _AddNodeDialogResponse {
   final String address;
   final String name;
 
-  _AddNodeDialogResponse(this.address, this.name);
+  _AddNodeDialogResponse({required this.address, required this.name});
 }
 
 class _AddNodeDialog extends HookWidget {
   _AddNodeDialog({
     Key? key,
+    this.name,
     this.ip,
     this.port,
     this.isIPv4 = true,
   }) : super(key: key);
 
+  final String? name;
   final String? ip;
   final String? port;
 
@@ -295,16 +292,21 @@ class _AddNodeDialog extends HookWidget {
   bool _isValidIP(String? value) =>
       isIPv4 ? isValidIPv4(value) : isValidIPv6(value);
 
-  String _buildIPAddress({required String ip, required String port}) {
-    return isIPv4 ? '/ip4/$ip/tcp/$port' : '/ip6/$ip/tcp/$port';
+  _AddNodeDialogResponse _buildIPAddress(
+      {required String ip, required String port, required String name}) {
+    return _AddNodeDialogResponse(
+      address: isIPv4 ? '/ip4/$ip/tcp/$port' : '/ip6/$ip/tcp/$port',
+      name: name,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final nameCtrl = useTextEditingController(text: name);
     final ipCtrl = useTextEditingController(text: ip);
     final portCtrl = useTextEditingController(text: port);
 
-    final l18ns = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     var orientation = MediaQuery.of(context).orientation;
     final tcpField = [
       _spacer,
@@ -317,7 +319,7 @@ class _AddNodeDialog extends HookWidget {
           keyboardType: TextInputType.number,
           validator: (val) {
             if (isValidPort(val)) return null;
-            return l18ns.invalidPortMessage;
+            return l10n.invalidPortMessage;
           },
         ),
       ),
@@ -325,12 +327,19 @@ class _AddNodeDialog extends HookWidget {
 
     return AlertDialog(
       title:
-          orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
+          orientation == Orientation.landscape ? null : Text(l10n.addNodeCTA),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextField(
+              autofocus: true,
+              controller: nameCtrl,
+              decoration: _decoration(l10n.name),
+              keyboardType: TextInputType.name,
+            ),
+            const SizedBox(height: 20),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -338,13 +347,12 @@ class _AddNodeDialog extends HookWidget {
                 _spacer,
                 Expanded(
                   child: TextFormField(
-                    autofocus: true,
                     controller: ipCtrl,
                     inputFormatters: [_formatter],
                     decoration: _decoration('ip', hint: _hint),
                     validator: (val) {
                       if (_isValidIP(val)) return null;
-                      return l18ns.invalidIPMessage;
+                      return l10n.invalidIPMessage;
                     },
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -364,17 +372,21 @@ class _AddNodeDialog extends HookWidget {
       ),
       actions: [
         TextButton(
-          child: Text(l18ns.okDialogButton),
+          child: Text(l10n.okDialogButton),
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
             Navigator.pop(
               context,
-              _buildIPAddress(ip: ipCtrl.text, port: portCtrl.text),
+              _buildIPAddress(
+                ip: ipCtrl.text,
+                port: portCtrl.text,
+                name: nameCtrl.text,
+              ),
             );
           },
         ),
         TextButton(
-          child: Text(l18ns.cancelDialogButton),
+          child: Text(l10n.cancelDialogButton),
           onPressed: () => Navigator.pop(context),
         ),
       ],
