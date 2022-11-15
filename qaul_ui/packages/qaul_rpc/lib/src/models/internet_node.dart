@@ -6,15 +6,21 @@ import '../generated/connections/connections.pb.dart';
 final connectedNodesProvider = StateProvider<List<InternetNode>>((ref) => []);
 
 class InternetNode extends Equatable {
-  const InternetNode(
+  InternetNode(
     this.address, {
     required this.isActive,
     required this.name,
-  });
+  })  : isIPv4 = address.contains('/ip4/'),
+        ip = address.replaceAll('/ip4/', '').split('/').first,
+        port = address.split('/').last;
 
   final String address;
   final bool isActive;
   final String name;
+
+  final bool isIPv4;
+  final String ip;
+  final String port;
 
   @override
   List<Object?> get props => [address];
