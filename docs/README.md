@@ -3,6 +3,7 @@
 ## Internet Independent Wireless Mesh Communication App
 
 [![CircleCI](https://circleci.com/gh/qaul/qaul.net/tree/main.svg?style=shield)](https://circleci.com/gh/qaul/qaul.net/tree/main)
+[![GitHub Super-Linter](https://github.com/qaul/qaul.net/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 ![http://qaul.net/](_media/qaul-net.png)
 
