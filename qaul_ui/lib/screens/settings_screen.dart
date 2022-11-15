@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -156,6 +157,11 @@ class _InternetNodesList extends HookConsumerWidget {
       worker.setNodeState(address, active: value);
     }, []);
 
+    final renameNode = useCallback((String address, String name) {
+      final worker = ref.read(qaulWorkerProvider);
+      worker.renameNode(address, name: name);
+    }, []);
+
     final refreshNodes = useCallback(() async {
       final worker = ref.read(qaulWorkerProvider);
       await worker.requestNodes();
@@ -213,25 +219,14 @@ class _InternetNodesList extends HookConsumerWidget {
                   ],
                 ),
                 onTap: () async {
-                  String? res;
-                  if (nodeAddr.contains('/ip4/')) {
-                    final ip =
-                        nodeAddr.replaceAll('/ip4/', '').split('/').first;
-                    final port = nodeAddr.split('/').last;
-                    res = await showDialog(
-                      context: context,
-                      builder: (_) => _AddNodeDialog(ip: ip, port: port),
-                    );
-                  }
-                  if (nodeAddr.contains('/ip6/')) {
-                    final ip =
-                        nodeAddr.replaceAll('/ip6/', '').split('/').first;
-                    final port = nodeAddr.split('/').last;
-                    res = await showDialog(
-                      context: context,
-                      builder: (_) => _AddIPv6NodeDialog(ip: ip, port: port),
-                    );
-                  }
+                  final res = await showDialog(
+                    context: context,
+                    builder: (_) => _AddNodeDialog(
+                      ip: node.ip,
+                      port: node.port,
+                      isIPv4: node.isIPv4,
+                    ),
+                  );
 
                   if (res is! String) return;
                   removeNode(nodeAddr);
@@ -247,7 +242,9 @@ class _InternetNodesList extends HookConsumerWidget {
                 splashRadius: 24,
                 onPressed: () async {
                   final res = await showDialog(
-                      context: context, builder: (_) => _AddIPv6NodeDialog());
+                    context: context,
+                    builder: (_) => _AddNodeDialog(isIPv4: false),
+                  );
 
                   if (res is! String) return;
 
@@ -264,120 +261,44 @@ class _InternetNodesList extends HookConsumerWidget {
   }
 }
 
+class _AddNodeDialogResponse {
+  final String address;
+  final String name;
+
+  _AddNodeDialogResponse(this.address, this.name);
+}
+
 class _AddNodeDialog extends HookWidget {
   _AddNodeDialog({
     Key? key,
     this.ip,
     this.port,
+    this.isIPv4 = true,
   }) : super(key: key);
 
   final String? ip;
   final String? port;
 
+  /// If [false], will be considered IPv6
+  final bool isIPv4;
+
   final _formKey = GlobalKey<FormState>();
 
-  @override
-  Widget build(BuildContext context) {
-    final ipCtrl = useTextEditingController(text: ip);
-    final portCtrl = useTextEditingController(text: port);
+  String get _descriptor => isIPv4 ? '/ip4/' : '/ip6/';
 
-    final l18ns = AppLocalizations.of(context)!;
-    var orientation = MediaQuery.of(context).orientation;
-    final tcpField = [
-      _spacer,
-      Text('/tcp/', style: _fixedTextStyle),
-      _spacer,
-      Expanded(
-        child: TextFormField(
-          controller: portCtrl,
-          decoration: _decoration('port', hint: '9229'),
-          keyboardType: TextInputType.number,
-          validator: (val) {
-            if (isValidPort(val)) return null;
-            return l18ns.invalidPortMessage;
-          },
-        ),
-      ),
-    ];
+  TextInputFormatter get _formatter =>
+      isIPv4 ? IPv4TextInputFormatter() : IPv6TextInputFormatter();
 
-    return AlertDialog(
-      title:
-          orientation == Orientation.landscape ? null : Text(l18ns.addNodeCTA),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('/ip4/', style: _fixedTextStyle),
-                _spacer,
-                Expanded(
-                  child: TextFormField(
-                    autofocus: true,
-                    controller: ipCtrl,
-                    inputFormatters: [IPv4TextInputFormatter()],
-                    decoration: _decoration('ip', hint: '000.000.000.000'),
-                    validator: (val) {
-                      if (isValidIPv4(val)) return null;
-                      return l18ns.invalidIPMessage;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    enableInteractiveSelection: false,
-                  ),
-                ),
-                if (orientation == Orientation.landscape) ...tcpField,
-              ],
-            ),
-            if (orientation == Orientation.portrait) ...[
-              const SizedBox(height: 20),
-              Row(children: tcpField),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(l18ns.okDialogButton),
-          onPressed: () {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
-            Navigator.pop(context, '/ip4/${ipCtrl.text}/tcp/${portCtrl.text}');
-          },
-        ),
-        TextButton(
-          child: Text(l18ns.cancelDialogButton),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
+  String get _hint =>
+      isIPv4 ? '000.000.000.000' : '0000:0000:0000:0000:0000:0000:0000:0000';
+
+  bool _isValidIP(String? value) =>
+      isIPv4 ? isValidIPv4(value) : isValidIPv6(value);
+
+  String _buildIPAddress({required String ip, required String port}) {
+    return isIPv4 ? '/ip4/$ip/tcp/$port' : '/ip6/$ip/tcp/$port';
   }
 
-  SizedBox get _spacer => const SizedBox(width: 4, height: 4);
-
-  TextStyle get _fixedTextStyle => TextStyle(
-      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
-
-  InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
-        isDense: true,
-        hintText: hint,
-        labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.all(12),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      );
-}
-
-class _AddIPv6NodeDialog extends HookWidget {
-  _AddIPv6NodeDialog({this.ip, this.port});
-
-  final String? ip;
-  final String? port;
-
-  final _formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
     final ipCtrl = useTextEditingController(text: ip);
@@ -413,19 +334,16 @@ class _AddIPv6NodeDialog extends HookWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('/ip6/', style: _fixedTextStyle),
+                Text(_descriptor, style: _fixedTextStyle),
                 _spacer,
                 Expanded(
                   child: TextFormField(
                     autofocus: true,
                     controller: ipCtrl,
-                    inputFormatters: [IPv6TextInputFormatter()],
-                    decoration: _decoration(
-                      'ip',
-                      hint: '0000:0000:0000:0000:0000:0000:0000:0000',
-                    ),
+                    inputFormatters: [_formatter],
+                    decoration: _decoration('ip', hint: _hint),
                     validator: (val) {
-                      if (isValidIPv6(val)) return null;
+                      if (_isValidIP(val)) return null;
                       return l18ns.invalidIPMessage;
                     },
                     keyboardType: const TextInputType.numberWithOptions(
@@ -449,7 +367,10 @@ class _AddIPv6NodeDialog extends HookWidget {
           child: Text(l18ns.okDialogButton),
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
-            Navigator.pop(context, '/ip6/${ipCtrl.text}/tcp/${portCtrl.text}');
+            Navigator.pop(
+              context,
+              _buildIPAddress(ip: ipCtrl.text, port: portCtrl.text),
+            );
           },
         ),
         TextButton(
