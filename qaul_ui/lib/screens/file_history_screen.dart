@@ -95,9 +95,38 @@ class _FileHistoryTile extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     return ListTile(
       onTap: () => _openFile(file, ref),
-      leading: FaIcon(_getIconFrom(extension: file.extension)),
+      leading: _getLeading(ref),
       isThreeLine: true,
       subtitle: _getContent(ref, file: file, theme: theme),
+    );
+  }
+
+  Widget _getLeading(WidgetRef ref) {
+    DecorationImage? image;
+
+    const imageExts = ['gif', 'png', 'jpg', 'jpeg'];
+    if (imageExts.contains(file.extension)) {
+      final img = File.fromUri(Uri.file(file.filePath(ref.read)));
+      if (img.existsSync()) {
+        image = DecorationImage(
+          fit: BoxFit.cover,
+          image: FileImage(img),
+        );
+      }
+    }
+
+    return Container(
+      width: 80,
+      height: double.maxFinite,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(8),
+        image: image,
+      ),
+      child: image == null
+          ? FaIcon(_getIconFrom(extension: file.extension))
+          : const SizedBox(),
     );
   }
 
@@ -124,9 +153,7 @@ class _FileHistoryTile extends ConsumerWidget {
     required FileHistoryEntity file,
     required TextTheme theme,
   }) {
-    const imageExts = ['gif', 'png', 'jpg', 'jpeg'];
-
-    Widget content = Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(file.name, style: theme.titleSmall),
@@ -139,32 +166,6 @@ class _FileHistoryTile extends ConsumerWidget {
         ),
       ],
     );
-
-    if (imageExts.contains(file.extension)) {
-      final img = File.fromUri(Uri.file(file.filePath(ref.read)));
-      if (!img.existsSync()) return content;
-
-      content = Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                img,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-            content,
-          ],
-        ),
-      );
-    }
-    return content;
   }
 
   IconData _getIconFrom({required String extension}) {
