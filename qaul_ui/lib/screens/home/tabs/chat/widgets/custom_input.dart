@@ -175,7 +175,7 @@ class _CustomInputState extends State<_CustomInput> {
                                         ),
                                       if (widget.onPickImagePressed != null)
                                         _AttachmentButton(
-                                          icon: Icons.add_photo_alternate,
+                                          icon: Icons.add_a_photo,
                                           onPressed: () => _sendFilePressed(
                                               widget.onPickImagePressed),
                                         ),
