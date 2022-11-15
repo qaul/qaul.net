@@ -1,9 +1,9 @@
 [package]
 name = "qaul_info"
 edition = "2021"
-description = "qaul.net routing-info protocol for libp2p"
+description = "qaul routing-info protocol for libp2p"
 version = "0.1.0"
-authors = ["qaul.net community <contact@qaul.net>"]
+authors = ["qaul community <contact@qaul.net>"]
 license = "AGPL"
 
 [dependencies]

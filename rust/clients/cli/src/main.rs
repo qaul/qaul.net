@@ -3,7 +3,7 @@
 
 //! # qaul RPC CLI Client
 //!
-//! This client uses all the functionality of the qaul.net
+//! This client uses all the functionality of the qaul
 //! RPC system and
 
 use async_std::io;

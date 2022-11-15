@@ -1,4 +1,4 @@
-# qaul.net Security Overview
+# qaul Security Overview
 
 ## Identification
 

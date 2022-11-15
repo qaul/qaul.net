@@ -1,8 +1,8 @@
-# Build qaul.net for Raspberry Pi
+# Build qaul for Raspberry Pi
 
-qaul.net cannot be built on raspberry pi directly, as the
+qaul cannot be built on raspberry pi directly, as the
 protobuf compiler does not run on ARM.
-To build qaul.net for Raspberry Pi's ARM architecture, you
+To build qaul for Raspberry Pi's ARM architecture, you
 can cross-compile it on your development machine and transfer the
 binaries to the raspberry pi.
 

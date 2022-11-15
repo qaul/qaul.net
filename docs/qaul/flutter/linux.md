@@ -1,4 +1,4 @@
-# Build qaul.net on Linux
+# Build qaul on Linux
 
 ## Install Prerequisits
 
@@ -15,10 +15,10 @@ git clone https://github.com/qaul/qaul.net.git
 cd qaul.net
 ```
 
-## Build qaul.net
+## Build qaul
 
 1) [Build libqaul](qaul/rust/rust-build.md)
   * Build's libqaul
   * Build's qaul CLI rust applications.
 2) [Build qaul desktop app](qaul/flutter/flutter-install.md)
-  * Build's the qaul.net flutter app.
+  * Build's the qaul flutter app.

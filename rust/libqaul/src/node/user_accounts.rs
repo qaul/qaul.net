@@ -3,7 +3,7 @@
 
 //! User Account Module
 //!
-//! In qaul.net each user is defined by the following things
+//! In qaul each user is defined by the following things
 //!
 //! * user ID (hash of the public key)
 //! * Public / private key

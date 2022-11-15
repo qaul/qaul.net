@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=qaul.net – قول
+Name=qaul – قول
 Comment=Internet Independent Wireless Mesh Communication
 Exec=qaul
 Icon=${SNAP}/meta/gui/qaul.png

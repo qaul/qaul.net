@@ -71,7 +71,7 @@ steps:
           -u "${CIRCLE_PROJECT_USERNAME}" \
           -r "${CIRCLE_PROJECT_REPONAME}" \
           -c "${CIRCLE_SHA1}" \
-          -n "qaul.net App - v${VERSION}" \
+          -n "qaul App - ${VERSION}" \
           -b "${DESCRIPTION}" \
           -replace \
           "${TAG}" .

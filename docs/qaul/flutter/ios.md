@@ -1,6 +1,6 @@
-# Build qaul.net for iOS
+# Build qaul for iOS
 
-In order to build qaul.net for iOS you need an apple computer.
+In order to build qaul for iOS you need an apple computer.
 
 ## Pre-requisites
 
@@ -71,9 +71,9 @@ After installation open it and install the following things:
 
 The Qaul GUI is built using Flutter. Instructions to have it installed can be found in [this document](flutter-install.md).
 
-## Build & Run qaul.net iOS App
+## Build & Run qaul iOS App
 
-To build and run the qaul.net desktop app you have to perform the following steps:
+To build and run the qaul desktop app you have to perform the following steps:
 
 1) Build libqaul shared library
 2) Build & run the flutter iOS app

@@ -36,7 +36,7 @@
 
     <application
             tools:replace="android:label"
-            android:label="qaul.net – قول"
+            android:label="qaul – قول"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
         <activity

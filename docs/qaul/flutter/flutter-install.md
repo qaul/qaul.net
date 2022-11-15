@@ -29,7 +29,7 @@ flutter config --enable-linux-desktop
 
 ### Install Flutter Plugin for Android Studio
 
-In order to develop and test the qaul.net with it's flutter GUI we recommend to install Android Studio as an IDE.
+In order to develop and test the qaul with it's flutter GUI we recommend to install Android Studio as an IDE.
 You can download and install it from it's official web page:
 
 <https://developer.android.com/studio>
@@ -53,7 +53,7 @@ Check the following resources:
 * [Build rust code](qaul/rust/rust-build.md)
 
 
-## Build & Test qaul.net App on your System
+## Build & Test qaul App on your System
 
 Open the folder 'flutter' of the qaul repository in Android Studio.
 

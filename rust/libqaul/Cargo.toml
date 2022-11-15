@@ -1,7 +1,7 @@
 [package]
 name = "libqaul"
 version = "2.0.0-beta.9"
-authors = ["qaul.net community <contact@qaul.net>"]
+authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 license = "AGPL"
 

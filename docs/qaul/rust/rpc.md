@@ -36,7 +36,7 @@ The files can be found here:
 ## RPC package Definitions For Different Programming Languages
 
 The `.proto` files can automatically be translated into most programming language.
-All currently used languages by qaul.net are already pre-created.
+All currently used languages by qaul are already pre-created.
 You can find them in the folder `rust/libqaul/src/rpc/protobuf_generated`.
 
 * cpp

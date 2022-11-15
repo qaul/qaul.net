@@ -3,7 +3,7 @@
 
 //! # libqaul
 //!
-//! Library for qaul.net
+//! Library for qaul
 
 use filetime::FileTime;
 use futures::prelude::*;

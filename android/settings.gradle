@@ -6,7 +6,7 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "qaul.net – قول"
+rootProject.name = "qaul – قول"
 include ':app'
 include ':libqaul'
 include ':blemodule'

@@ -1,6 +1,6 @@
-# qaul.net Flutter UI
+# qaul Flutter UI
 
-This folder contains the Flutter UI of the qaul.net app.
+This folder contains the Flutter UI of the qaul app.
 
 ## l10n: Adding a new language support:
 

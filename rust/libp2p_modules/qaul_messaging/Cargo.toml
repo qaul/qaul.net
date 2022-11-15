@@ -3,7 +3,7 @@ name = "qaul_messaging"
 edition = "2018"
 description = "qaul messaging protocol for libp2p"
 version = "0.1.0"
-authors = ["qaul.net community <contact@qaul.net>"]
+authors = ["qaul community <contact@qaul.net>"]
 license = "AGPL"
 
 [dependencies]

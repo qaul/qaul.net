@@ -34,7 +34,7 @@ while getopts 'hf' OPTION; do
 done
 shift "$((OPTIND - 1))"
 
-PRODUCT_NAME="qaul.net – قول.app"
+PRODUCT_NAME="qaul – قول.app"
 EXPORT_PATH="build/macos/Build/Products/Release"
 APP_PATH="$EXPORT_PATH/$PRODUCT_NAME"
 
@@ -87,7 +87,7 @@ if [ "$TYPE" == 'full' ]; then
   #spctl -vvv --assess --type exec <NOTARIZED APP PATH>
   #xcrun stapler validate <NOTARIZED APP PATH>
 
-  #sed -i sed "s/\"qaul.net – قول.app\"/\"<NOTARIZED APP PATH>\"/g" config.json
+  #sed -i sed "s/\"qaul – قول.app\"/\"<NOTARIZED APP PATH>\"/g" config.json
 fi
 
 # -------------------------------------------------------------------------------

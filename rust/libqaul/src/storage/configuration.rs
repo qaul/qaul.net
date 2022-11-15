@@ -3,7 +3,7 @@
 
 //! # Configuration
 //!
-//! **Configure qaul.net via a config file, or from the commandline.**
+//! **Configure qaul via a config file, or from the commandline.**
 //!
 //! On the first startup a `config.yaml` file is saved.
 //! It can be configured and will be read on the next startup.

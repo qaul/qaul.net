@@ -1,4 +1,4 @@
-# Build qaul.net on Windows
+# Build qaul on Windows
 
 ## Prerequisits
 ### Install Visual Studio
@@ -57,7 +57,7 @@ flutter doctor
 flutter config --enable-windows-desktop
 ```
 
-## Build qaul.net
+## Build qaul
 
 ### Build Rust libqaul library and CLI binaries
 

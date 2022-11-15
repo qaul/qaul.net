@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "qaul_ui" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 Open Community Project Association https://ocpa.ch" "\0"
             VALUE "OriginalFilename", "qaul.exe" "\0"
-            VALUE "ProductName", "qaul.net" "\0"
+            VALUE "ProductName", "qaul" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

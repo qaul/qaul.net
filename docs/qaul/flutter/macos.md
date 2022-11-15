@@ -1,6 +1,6 @@
-# Build qaul.net on MacOS
+# Build qaul on MacOS
 
-In order to build qaul.net on your Apple MacOS machine, follow the steps below.
+In order to build qaul on your Apple MacOS machine, follow the steps below.
 
 ## Pre-requisites
 
@@ -72,9 +72,9 @@ After installation open it and install the following things:
 
 The Qaul GUI is built using Flutter. Instructions to have it installed can be found in [this document](flutter-install.md).
 
-## Build & Run qaul.net MacOS Desktop App
+## Build & Run qaul MacOS Desktop App
 
-To build and run the qaul.net desktop app you have to perform the following steps:
+To build and run the qaul desktop app you have to perform the following steps:
 
 1) Build libqaul shared library
 2) Build & Run the flutter MacOS desktop app

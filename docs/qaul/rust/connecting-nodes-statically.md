@@ -33,7 +33,7 @@ a random free port where it starts to listen on.
 ## Configuring a Static Node
 
 In order for the a node to be approachable by others you need to fix the network port to a specific number.
-By default qaul.net nodes shall listen on port `9229`.
+By default qaul nodes shall listen on port `9229`.
 
 Your new internet configuration looks like this: `/ip4/0.0.0.0/tcp/9229`
 

@@ -1,4 +1,4 @@
-# Build qaul.net for Raspberry Pi using Docker
+# Build qaul for Raspberry Pi using Docker
 
 You can build the binaries for Rasperry Pi on 
 your computer using a presetup docker container 
@@ -14,7 +14,7 @@ to build it easily.
 ## Build Docker Container
 
 To be able to use the docker container to build
-qaul.net you first have to build the docker container.
+qaul you first have to build the docker container.
 
 ```sh
 # build docker container
@@ -23,11 +23,11 @@ docker-compose build
 
 ## Build Binary for Raspberry Pi
 
-Now you can start the docker container to build qaul.net for 
+Now you can start the docker container to build qaul for 
 raspberry pi.
 
 ```sh
-# Build qaul.net for raspberry pi
+# Build qaul for raspberry pi
 docker-compose up
 ```
 

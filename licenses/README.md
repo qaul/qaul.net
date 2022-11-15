@@ -1,4 +1,4 @@
-# qaul.net Licenses
+# qaul – قول Licenses
 
 **qaul is a fully free and open source software. It is published under the
 [AGPLv3], the [GNU Affero General Public License version 3 or later].**
@@ -27,7 +27,7 @@ qaul is licensed under the
 
 ## Website and Documentation
 
-The documentation & web site of qaul.net are published under the
+The documentation & web site of qaul are published under the
 [Creative Commons Attribution 4.0 International](cc-by.md) license.
 
 Feel free to edit, change and redistribute the documentation to
@@ -36,7 +36,7 @@ make this project more accessible.
 
 ## Additional Licenses
 
-qaul.net includes many libraries that may have different, compatible
+qaul includes many libraries that may have different, compatible
 open-source and free software licenses. You can find below a
 non-conclusive list of libraries and their licenses.
 

@@ -2,7 +2,7 @@
 
 ![logo](_media/qaul-net.png)
 
-# qaul.net
+# qaul – قول
 
 > Internet Independent Wireless Mesh Communication App
 
