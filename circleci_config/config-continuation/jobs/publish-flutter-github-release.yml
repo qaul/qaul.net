@@ -40,7 +40,7 @@ steps:
       name: Publish Release on GitHub
       command: |
         VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
-        TAG="v${VERSION}-flutter"
+        TAG="v${VERSION}"
 
         cd artifacts
 
@@ -51,7 +51,7 @@ steps:
         SNAP_FILE=$(filename snap | cut -f1)
         ARCH_FILE=$(filename xcarchive | cut -f1)
 
-        DESCRIPTION=$(cat ../../utilities/release-templates/flutter-release-template.md \
+        DESCRIPTION=$(cat ../../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
           | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \

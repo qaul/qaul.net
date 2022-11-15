@@ -53,14 +53,14 @@ steps:
       name: Publish Release on GitHub
       command: |
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-        TAG="v${VERSION}-rust"
+        TAG="v${VERSION}"
 
         cd artifacts
 
         AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
         ARMHF_FILE=$(filename deb | grep "armhf" |cut -f1)
 
-        DESCRIPTION=$(cat ../utilities/release-templates/rust-release-template.md \
+        DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/DEB_AMD/${AMD64_FILE}/g" \
           | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
