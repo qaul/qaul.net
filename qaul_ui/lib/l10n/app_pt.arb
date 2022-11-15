@@ -111,5 +111,6 @@
   "groupChatMessageHint": "Mensagem de grupo",
   "inviteUser": "Convidar usuário",
   "notifications": "Notificações",
-  "fileHistory": "Arquivos recebidos"
+  "fileHistory": "Arquivos recebidos",
+  "emptyNodeName": "Sem nome"
 }

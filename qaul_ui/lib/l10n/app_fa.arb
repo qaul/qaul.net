@@ -105,5 +105,6 @@
   "groupChatMessageHint": "پیام چت گروهی",
   "inviteUser": "دعوت از کاربر",
   "notifications": "اطلاعیه",
-  "fileHistory": "تاریخچه فایل"
+  "fileHistory": "تاریخچه فایل",
+  "emptyNodeName": "بدون نام"
 }

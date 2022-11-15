@@ -105,5 +105,6 @@
   "groupChatMessageHint": "رسالة دردشة جماعية",
   "inviteUser": "قم بدعوة المستخدم",
   "notifications": "إشعارات",
-  "fileHistory": "ملف التاريخ"
+  "fileHistory": "ملف التاريخ",
+  "emptyNodeName": "بدون اسم"
 }

@@ -161,6 +161,7 @@ class _InternetNodesList extends HookConsumerWidget {
       await worker.requestNodes();
     }, []);
 
+    final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
     return CronTaskDecorator(
       callback: refreshNodes,
@@ -183,11 +184,18 @@ class _InternetNodesList extends HookConsumerWidget {
             rowBuilder: (context, i) {
               var node = nodes[i];
               var nodeAddr = node.address;
+
               return ListTile(
                 contentPadding: const EdgeInsets.all(4.0),
                 title: Text(
+                  node.name.isNotEmpty && node.name != 'undefined'
+                      ? node.name
+                      : l10n.emptyNodeName,
+                  style: textTheme.titleMedium,
+                ),
+                subtitle: Text(
                   nodeAddr,
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: textTheme.titleSmall,
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,

@@ -105,5 +105,6 @@
   "groupChatMessageHint": "Повідомлення групового чату",
   "inviteUser": "Запросити користувача",
   "notifications": "Сповіщення",
-  "fileHistory": "Історія файлів"
+  "fileHistory": "Історія файлів",
+  "emptyNodeName": "Без назви"
 }

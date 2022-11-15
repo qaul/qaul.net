@@ -108,5 +108,6 @@
   "groupChatMessageHint": "Pesan obrolan grup",
   "inviteUser": "Undang pengguna",
   "notifications": "Pemberitahuan",
-  "fileHistory": "Riwayat berkas"
+  "fileHistory": "Riwayat berkas",
+  "emptyNodeName": "Tanpa nama"
 }
