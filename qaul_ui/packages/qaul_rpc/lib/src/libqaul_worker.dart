@@ -151,6 +151,13 @@ class LibqaulWorker {
     _sendMessage(Modules.CONNECTIONS, msg);
   }
 
+  void renameNode(String address, {required String name}) {
+    var msg = Connections(
+      internetNodesRename: InternetNodesEntry(address: address, name: name),
+    );
+    _sendMessage(Modules.CONNECTIONS, msg);
+  }
+
   // -------------------
   Future<void> getDefaultUserAccount() async {
     final message = UserAccounts(getDefaultUserAccount: true);
@@ -264,7 +271,8 @@ class LibqaulWorker {
     await _sendMessage(Modules.CHATFILE, msg);
   }
 
-  Future<List<FileHistoryEntity>> getFileHistory({int? page = 0, int? itemsPerPage = 20}) async {
+  Future<List<FileHistoryEntity>> getFileHistory(
+      {int? page = 0, int? itemsPerPage = 20}) async {
     Future<void> sendFileHistoryRequest() async {
       final msg = ChatFile(
         fileHistory: FileHistoryRequest(offset: page, limit: itemsPerPage),
