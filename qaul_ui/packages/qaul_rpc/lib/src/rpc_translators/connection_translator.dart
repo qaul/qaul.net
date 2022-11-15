@@ -5,14 +5,17 @@ class ConnectionTranslator extends RpcModuleTranslator {
   Modules get type => Modules.CONNECTIONS;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(
+    List<int> data,
+    Reader reader,
+  ) async {
     final message = Connections.fromBuffer(data);
     switch (message.whichMessage()) {
       case Connections_Message.internetNodesList:
         final nodes = message
             .ensureInternetNodesList()
             .nodes
-            .map((e) => InternetNode(e.address, isActive: e.enabled))
+            .map(InternetNode.fromRpcInternetNodesEntry)
             .toList();
         return RpcTranslatorResponse(type, nodes);
       default:

@@ -146,6 +146,9 @@ class StubLibqaulWorker implements LibqaulWorker {
 
   @override
   Future<void> verifyUser(User u) => throw UnimplementedError();
+
+  @override
+  void renameNode(String address, {required String name}) {}
 }
 
 class NullChatNotificationController implements ChatNotificationController {
