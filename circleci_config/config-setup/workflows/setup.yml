@@ -30,8 +30,7 @@ jobs:
                   else
                     echo '  "run-flutter-tagged-workflow": true'
                   fi
-                fi
-                if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?.*$ ]]; then
+                elif [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?.*$ ]]; then
                   if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
                     echo '  "run-rust-android-tagged-workflow": true'
                   elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
