@@ -803,7 +803,7 @@ jobs:
                 name: Add utilities/bin to PATH
             - run:
                 command: |
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
 
                     cd artifacts
@@ -934,8 +934,8 @@ jobs:
         steps:
             - checkout-project
             - run:
-                command: |-
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+                command: |
+                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}-flutter"
                     if [ $TAG != $CIRCLE_TAG ]; then
                       echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"

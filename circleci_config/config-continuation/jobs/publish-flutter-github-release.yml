@@ -39,7 +39,7 @@ steps:
   - run:
       name: Publish Release on GitHub
       command: |
-        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
         TAG="v${VERSION}"
 
         cd artifacts
