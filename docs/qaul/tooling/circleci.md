@@ -19,12 +19,12 @@ It tests that libqaul successfully compiles to the Linux platform.
 ### Build libqaul binaries
 This task builds the library binaries to all platforms and creates a new Github release, where you can download them.
 
-To trigger such a task, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org) and ending with the "-rust" suffix.
+To trigger such a task, one must create an annotated tag starting with "v" followed by the new [SemVer](https://semver.org).
 
 !> You should use the version described in `rust/libqaul/Cargo.toml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of Cargo.toml **will fail** the pipeline.
 
 #### Platform-specific release pipelines
-Optionally, you may add another suffix, describing the platform you'd like to build and release for.
+Optionally, you may add a suffix describing the platform you'd like to build and release for.
 This is specially useful when a pipeline fails for a single platform. In that case, you may push
 a hotfix for the desired platform and tag a platform-specific release.
 
@@ -32,10 +32,10 @@ The options are: `.*-android`; `.*-ios`; `.*-linux`; `.*-macos`; `.*-windows`.
 
 ```bash
 # Creates annotated tag - **ALL Platforms**
-git tag -a v<SemVer>-rust -m '<brief message>'
+git tag -a v<SemVer> -m '<brief message>'
 
 # [Optional] Platform-specific tag
-git tag -a v<SemVer>-rust-android -m '<message>'
+git tag -a v<SemVer>-android -m '<message>'
 
 # Pushes both commits and annotated tags (available since Git 1.8.3)
 git push --follow-tags
@@ -49,9 +49,19 @@ To trigger this workflow, one must create an annotated tag starting with "v" fol
 
 !> You should use the version described in `qaul_ui/pubspec.yaml` as the release version, and update it accordingly. Any diversion between the git tag's version and that of pubspec.yaml **will fail** the pipeline.
 
+#### Platform-specific release pipelines
+Optionally, you may add a suffix, describing the platform you'd like to build and release for.
+This is specially useful when a pipeline fails for a single platform. In that case, you may push
+a hotfix for the desired platform and tag a platform-specific release.
+
+The options are: `.*-android`; `.*-ios`; `.*-linux`; `.*-macos`; `.*-windows`.
+
 ```bash
 # Creates annotated tag
 git tag -a v<SemVer>-flutter -m '<brief message>'
+
+# [Optional] Platform-specific tag
+git tag -a v<SemVer>-flutter-android -m '<message>'
 
 # Pushes both commits and annotated tags (available since Git 1.8.3)
 git push --follow-tags
