@@ -15,8 +15,8 @@ name: Lint Code Base
 # Start the job on all push #
 #############################
 on:
-#  push:
-#    branches-ignore: [main]
+  push:
+    branches-ignore: [main]
     # Remove the line above to run when pushing to main
   pull_request:
     branches: [main]
@@ -51,6 +51,7 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
+          # Validate only new/edited files
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
