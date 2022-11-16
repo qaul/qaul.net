@@ -91,7 +91,7 @@ impl Default for Internet {
             active: true,
             peers: vec![InternetPeer {
                 address: String::from("/ip4/144.91.74.192/tcp/9229"),
-                name: String::from("default server"),
+                name: String::from("qaul Community Node"),
                 enabled: false,
             }],
             do_listen: false,
