@@ -47,7 +47,7 @@ class UserDetailsHeading extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Qaul ${l10n!.publicKey}',
+                            '${l10n!.publicKey}',
                             style: theme.titleMedium,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
