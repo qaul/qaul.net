@@ -205,9 +205,8 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
-                    gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
+                    gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
+                    gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
                 name: Download Libqaul AAR Files from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -235,8 +234,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+                    gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -272,8 +270,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+                    gh release download --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.so File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -294,8 +291,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+                    gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
                 name: Download Libqaul *.dylib File from latest Github Release
             - run:
                 command: |
@@ -339,14 +335,8 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    echo "Using repo: $REPO_URL"
-
                     export PATH="/c/Program Files/Github CLI:${PATH}"
-
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
-                    echo "Found latest tag: $LATEST_TAG"
-
-                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+                    gh release download --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.dll File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -611,9 +601,8 @@ jobs:
                     gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
                     gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
 
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
-                    gh release download "$LATEST_TAG" --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
+                    gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
+                    gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
                 name: Download Libqaul AAR Files from latest Github Release
             - flutter/install_sdk_and_pub:
                 flutter_version: $FLUTTER_VERSION
@@ -650,8 +639,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+                    gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -703,8 +691,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+                    gh release download --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.so File from latest Github Release
             - flutter/install_sdk_and_pub:
                 flutter_version: $FLUTTER_VERSION
@@ -728,8 +715,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+                    gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
                 name: Download Libqaul *.dylib File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -760,13 +746,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    echo "Using repo: $REPO_URL"
-
                     export PATH="/c/Program Files/Github CLI:${PATH}"
-
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-rust" | cut -f 3 | /usr/bin/sort --reverse --version-sort | head -n 1)
-                    echo "Found latest tag: $LATEST_TAG"
-
                     gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.dll File from latest Github Release
             - install-flutter:
@@ -968,10 +948,10 @@ jobs:
         steps:
             - checkout-project
             - run:
-                command: |-
+                command: |
                     VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-                    TAG="v$VERSION-rust-.*"
-                    if [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
+                    TAG="v$VERSION"
+                    if ! [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
                       echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"
                       echo "Please update app version at rust/libqaul/Cargo.toml"
                       exit 1
