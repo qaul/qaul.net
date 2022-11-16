@@ -5,8 +5,8 @@ steps:
       name: Verify that Git tag matches Rust version
       command: |
         VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-        TAG="v$VERSION-rust-.*"
-        if [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
+        TAG="v$VERSION"
+        if ! [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
           echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"
           echo "Please update app version at rust/libqaul/Cargo.toml"
           exit 1
