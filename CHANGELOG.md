@@ -10,13 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Added
 
 - Internet Nodes now have an optional alias name.
-- new upgrade module to automatically migrate versions with incompatible configuration or data base structures.
+- New upgrade module to automatically migrate versions with incompatible configuration or data base structures.
 - All chat files display screen.
+- New Mainland Chinese user interface translation.
+- New Taiwanese Chinese user interface translation.
 
 Changed
 
-- upgraded some rust libraries to newest versions.
-- many UI updates
+- Upgraded some rust libraries to newest versions.
+- Many UI updates.
 
 ## [2.0.0 beta 8] 2022-11-10
 
