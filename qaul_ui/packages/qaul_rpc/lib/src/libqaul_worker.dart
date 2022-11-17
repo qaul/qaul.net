@@ -277,19 +277,22 @@ class LibqaulWorker {
   }
 
   Future<List<FileHistoryEntity>> getFileHistory(
-      {int? page = 0, int? itemsPerPage = 20}) async {
+      {int page = 0, int itemsPerPage = 20}) async {
     Future<void> sendFileHistoryRequest() async {
       final msg = ChatFile(
-        fileHistory: FileHistoryRequest(offset: page, limit: itemsPerPage),
-      );
+          fileHistory: FileHistoryRequest(
+        offset: page * itemsPerPage,
+        limit: itemsPerPage,
+      ));
       await _sendMessage(Modules.CHATFILE, msg);
     }
 
     List<FileHistoryEntity> newItems = [];
     try {
+      await sendFileHistoryRequest();
+
       for (var i = 0; i < 5; i++) {
-        await sendFileHistoryRequest();
-        await Future.delayed(Duration(milliseconds: (i + 1) * 10));
+        await Future.delayed(Duration(milliseconds: (i + 1) * 500));
         newItems = _reader(fileHistoryEntitiesProvider);
         if (newItems.isNotEmpty) break;
       }
