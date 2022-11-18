@@ -61,9 +61,9 @@ steps:
         ARMHF_FILE=$(filename deb | grep "armhf" |cut -f1)
 
         # Flutter Filenames make use of Flutter's App Version
-        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }')
+        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 
-        APK_FILE="qaul-$(echo "$FLUTTER_VERSION" | sed 's/+.*$//')"
+        APK_FILE="qaul-$VERSION.apk"
         LINUX_FILE="qaul-$VERSION.snap"
         MACOS_FILE="qaul-$VERSION.dmg"
         WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION.exe"

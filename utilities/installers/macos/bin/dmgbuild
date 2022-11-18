@@ -95,7 +95,7 @@ fi
 echo ""
 echo "Retrieving application version..."
 
-VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2}')
+VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 echo "Using App Version: $VERSION"
 
 cd ../utilities/installers/macos || exit 1
