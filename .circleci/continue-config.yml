@@ -808,35 +808,15 @@ jobs:
 
                     cd artifacts
 
-                    AAB_FILE=$(filename aab | cut -f1)
-                    DMG_FILE=$(filename dmg | cut -f1)
-                    EXE_FILE=$(filename exe | cut -f1)
-                    IPA_FILE=$(filename ipa | cut -f1)
-                    SNAP_FILE=$(filename snap | cut -f1)
-                    ARCH_FILE=$(filename xcarchive | cut -f1)
-
-                    DESCRIPTION=$(cat ../../utilities/release-templates/release-template.md \
-                      | sed "s/TAGNAME/${TAG}/g" \
-                      | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
-                      | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \
-                      | sed "s/IPAVERSION/${IPA_FILE}/g" \
-                      | sed "s/XCAVERSION/${ARCH_FILE}/g" \
-                      | sed "s/MACOSVERSION/${DMG_FILE}/g" \
-                      | sed "s/WINDOWSVERSION/${EXE_FILE}/g" \
-                    )
-
                     echo "Version Found: $VERSION"
                     echo "Tag built:     $TAG"
-                    echo "Description built:"
-                    echo "$DESCRIPTION"
                     echo ""
 
                     ghr -t "${GITHUB_TOKEN}" \
                       -u "${CIRCLE_PROJECT_USERNAME}" \
                       -r "${CIRCLE_PROJECT_REPONAME}" \
                       -c "${CIRCLE_SHA1}" \
-                      -n "qaul App - ${VERSION}" \
-                      -b "${DESCRIPTION}" \
+                      -n "qaul - v${RUST_VERSION}" \
                       -replace \
                       "${TAG}" .
                 name: Publish Release on GitHub
@@ -894,21 +874,33 @@ jobs:
                 name: Add utilities/bin to PATH
             - run:
                 command: |
-                    VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-                    TAG="v${VERSION}"
+                    RUST_VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
+                    TAG="v${RUST_VERSION}"
 
                     cd artifacts
 
                     AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
                     ARMHF_FILE=$(filename deb | grep "armhf" |cut -f1)
 
+                    # Flutter Filenames make use of Flutter's App Version
+                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }')
+
+                    APK_FILE="qaul-$(echo "$FLUTTER_VERSION" | sed 's/+.*$//')"
+                    LINUX_FILE="qaul-$VERSION.snap"
+                    MACOS_FILE="qaul-$VERSION.dmg"
+                    WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION.exe"
+
                     DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
                       | sed "s/TAGNAME/${TAG}/g" \
                       | sed "s/DEB_AMD/${AMD64_FILE}/g" \
                       | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
+                      | sed "s/APKVERSION/${APK_FILE}/g" \
+                      | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
+                      | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
+                      | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
                     )
 
-                    echo "Version Found: $VERSION"
+                    echo "Version Found: $RUST_VERSION"
                     echo "Tag built:     $TAG"
                     echo "Description:"
                     echo "$DESCRIPTION"
@@ -918,7 +910,7 @@ jobs:
                       -u "${CIRCLE_PROJECT_USERNAME}" \
                       -r "${CIRCLE_PROJECT_REPONAME}" \
                       -c "${CIRCLE_SHA1}" \
-                      -n "Libqaul and CLI - v${VERSION}" \
+                      -n "qaul - v${RUST_VERSION}" \
                       -b "${DESCRIPTION}" \
                       -replace \
                       "${TAG}" .
