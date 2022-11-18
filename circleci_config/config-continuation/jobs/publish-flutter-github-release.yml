@@ -44,34 +44,14 @@ steps:
 
         cd artifacts
 
-        AAB_FILE=$(filename aab | cut -f1)
-        DMG_FILE=$(filename dmg | cut -f1)
-        EXE_FILE=$(filename exe | cut -f1)
-        IPA_FILE=$(filename ipa | cut -f1)
-        SNAP_FILE=$(filename snap | cut -f1)
-        ARCH_FILE=$(filename xcarchive | cut -f1)
-
-        DESCRIPTION=$(cat ../../utilities/release-templates/release-template.md \
-          | sed "s/TAGNAME/${TAG}/g" \
-          | sed "s/SNAPVERSION/${SNAP_FILE}/g" \
-          | sed "s/ANDROIDVERSION/${AAB_FILE}/g" \
-          | sed "s/IPAVERSION/${IPA_FILE}/g" \
-          | sed "s/XCAVERSION/${ARCH_FILE}/g" \
-          | sed "s/MACOSVERSION/${DMG_FILE}/g" \
-          | sed "s/WINDOWSVERSION/${EXE_FILE}/g" \
-        )
-
         echo "Version Found: $VERSION"
         echo "Tag built:     $TAG"
-        echo "Description built:"
-        echo "$DESCRIPTION"
         echo ""
 
         ghr -t "${GITHUB_TOKEN}" \
           -u "${CIRCLE_PROJECT_USERNAME}" \
           -r "${CIRCLE_PROJECT_REPONAME}" \
           -c "${CIRCLE_SHA1}" \
-          -n "qaul App - ${VERSION}" \
-          -b "${DESCRIPTION}" \
+          -n "qaul - v${RUST_VERSION}" \
           -replace \
           "${TAG}" .
