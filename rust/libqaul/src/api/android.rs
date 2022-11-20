@@ -9,12 +9,60 @@
 
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
-
-use jni::objects::{JClass, JString};
-use jni::sys::{jstring, jbyteArray, jint};
+extern crate log;
+/// Modules for integrating with JavaVM
 use jni::JNIEnv;
+use jni::objects::{JClass, JValue, JObject, JString, GlobalRef};
+use jni::{JavaVM, JNIVersion, AttachGuard, NativeMethod};
+use jni::sys::{jstring, jarray, jbyteArray,jint, jclass, JNI_ERR, JNI_VERSION_1_6};
+
+use lazy_static::*;
+use std::{
+    ffi::{c_void, CStr, CString},
+    sync::{mpsc, Mutex},
+    thread,
+};
+
+extern crate android_logger;
+
+use log::Level;
+use android_logger::{Config,FilterBuilder};
+
+lazy_static! {
+    // jvm
+    static ref JVM_GLOBAL: Mutex<Option<JavaVM>> = Mutex::new(None);
+    //callback
+    static ref JNI_CALLBACK: Mutex<Option<GlobalRef>> = Mutex::new(None);
+}
 
 
+#[no_mangle]
+pub fn nativeSetCallback(env: JNIEnv, _obj: JObject, callback: JObject) {
+    let callback = env.new_global_ref(JObject::from(callback)).unwrap();
+
+    let mut ptr_fn = JNI_CALLBACK.lock().unwrap();
+    *ptr_fn = Some(callback);
+}
+
+#[no_mangle]
+unsafe fn JNI_OnLoad(java_vm:JavaVM, _: *mut std::os::raw::c_void) -> jint {
+    let class_name: &str = "net/qaul/ble/core/BleWrapperClass";
+
+    let jni_methods = [
+        jni::NativeMethod {
+            name: jni::strings::JNIString::from("nativeSetCallback"),
+            sig: jni::strings::JNIString::from("(Lnet/qaul/ble/core/BleWrapperClass$ILibqaulCallback;)V"),
+            fn_ptr: nativeSetCallback as *mut c_void,
+        }
+    ];
+    let ok = Android::register_natives(&java_vm, class_name, jni_methods.as_ref());
+
+    let mut ptr_jvm = JVM_GLOBAL.lock().unwrap();
+    *ptr_jvm = Some(java_vm);
+    
+    JNI_VERSION_1_6
+} 
+    
 /// dummy function to test the functionality
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(
@@ -150,4 +198,89 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive(
     let buf: [u8; 0] = [0; 0];
     let empty_array = env.byte_array_from_slice(&buf).unwrap();
     empty_array
+}
+
+
+pub struct Android {
+
+}
+
+impl Android {
+    /// send an sys message to Android BLE Module
+    /// This function will call the Android BLE Module's "receiveRequest" function.
+    pub fn send_to_android(message: Vec<u8>) {
+        Self::call_java_callback(message);
+    }
+    
+    unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
+        let env: JNIEnv = jvm.get_env().unwrap();
+        let jni_version = env.get_version().unwrap();
+        let version: jint = jni_version.into();
+    
+        let clazz = match env.find_class(class_name) {
+            Ok(clazz) => clazz,
+            Err(e) => {
+         //       log::error!("java class not found : {:?}", e);
+                return JNI_ERR;
+            }
+        };
+        let result = env.register_native_methods(clazz, &methods);
+    
+        if result.is_ok() {
+         //   log::info!("register_natives : succeed");
+            version
+        } else {
+         //   log::error!("register_natives : failed ");
+            JNI_ERR
+        }
+    }
+
+    fn call_jvm<F>(callback: &Mutex<Option<GlobalRef>>, run: F)
+    where
+        F: Fn(JObject, &JNIEnv) + Send + 'static,
+    {
+        let ptr_jvm = JVM_GLOBAL.lock().unwrap();
+        if (*ptr_jvm).is_none() {
+            return;
+        }
+        let ptr_fn = callback.lock().unwrap();
+        if (*ptr_fn).is_none() {
+            return;
+        }
+        let jvm: &JavaVM = (*ptr_jvm).as_ref().unwrap();
+        match jvm.attach_current_thread_permanently() {
+            Ok(env) => {
+                let obj = (*ptr_fn).as_ref().unwrap().as_obj();
+                run(obj, &env);
+                if let Ok(true) = env.exception_check() {
+                    let _ = env.exception_describe();
+                    let _ = env.exception_clear();
+                }
+            }
+            Err(e) => {
+                log::debug!("jvm attach_current_thread failed: {:?}", e);
+            }
+        }
+    }
+
+
+    pub fn call_java_callback(fun_type:Vec<u8>) {
+        
+        Self::call_jvm(&JNI_CALLBACK, move |obj: JObject, env: &JNIEnv| {
+            let jmessage:jbyteArray = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
+            match env.call_method(
+                obj,
+                "OnLibqaulMessage",
+                "([B)V",
+                &[JValue::from(JObject::from(jmessage))],
+            ) {
+                Ok(jvalue) => {
+                    log::debug!("callback succeed: {:?}", jvalue);
+                }
+                Err(e) => {
+                    log::error!("callback failed : {:?}", e);
+                }
+            }
+        });
+    }
 }

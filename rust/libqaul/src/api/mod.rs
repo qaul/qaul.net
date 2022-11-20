@@ -25,7 +25,7 @@ mod c;
 /// android module
 /// The module only compiled, when the compile target is android.
 #[cfg(target_os = "android")]
-mod android;
+pub mod android;
 
 /// start libqaul in an own thread
 ///
