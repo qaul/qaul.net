@@ -46,25 +46,62 @@ open class BleWrapperClass(context: AppCompatActivity) {
     private var advertMode = "low_latency"
     private var isFromMessage = false
 
+    public var mHandler: Handler? = null
+	
+	/**
+	* Constructor of BleWrapperClass
+	*/
+    init{
+        this.also { sInstance = it }
+        mHandler = Handler()
+		
+		loadLibqaul()
+        nativeSetCallback(object: ILibqaulCallback {
+            override fun OnLibqaulMessage(data: ByteArray){
+                AppLog.i("===libqaul===","This was called from libqaul.  :-)")
+
+                mHandler?.post {
+                    BleWrapperClass.sInstance.receiveRequest(ByteString.copyFrom(data), null)
+                }
+            }
+        })
+    }
+
     /**
      * Static Member Declaration
      */
     companion object {
         val serviceManager = this
+        lateinit var sInstance:BleWrapperClass
 
         const val LOCATION_PERMISSION_REQ_CODE = 111
         const val LOCATION_ENABLE_REQ_CODE = 112
         const val REQUEST_ENABLE_BT = 113
         const val BLE_PERMISSION_REQ_CODE_12 = 114
+	}
+
+    interface ILibqaulCallback {
+        fun OnLibqaulMessage(data: ByteArray)
+    }
+
+    external fun nativeSetCallback(callback:ILibqaulCallback)
+
+    /**
+     * This Method set BleRequestCallback
+     */
+    open fun setBleRequestCallback(callback: BleRequestCallback?) {
+        bleCallback = callback
     }
 
     /**
      * This Method get BLERequest from UI & Return BLEResponse by Callback Interface Method
      */
-    open fun receiveRequest(data: ByteString, callback: BleRequestCallback) {
+    open fun receiveRequest(data: ByteString, callback: BleRequestCallback?) {
         val bleReq: BleOuterClass.Ble = BleOuterClass.Ble.parseFrom(data)
         if (bleReq.isInitialized) {
-            bleCallback = callback
+            if(callback != null)
+                bleCallback = callback
+
             Log.e(TAG, bleReq.messageCase.toString())
             when (bleReq.messageCase) {
                 BleOuterClass.Ble.MessageCase.INFO_REQUEST -> {
@@ -83,7 +120,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                         startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
                         startResult.errorMessage = "qaul id is required"
                         bleRes.startResult = startResult.build()
-                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                        sendResponse(bleRes)
                     }
                 }
                 BleOuterClass.Ble.MessageCase.STOP_REQUEST -> {
@@ -106,6 +143,21 @@ open class BleWrapperClass(context: AppCompatActivity) {
     }
 
     /**
+     * This Method Will send response message to App & libqaul library
+     */
+    private fun sendResponse(bleRes:BleOuterClass.Ble.Builder) {
+        mHandler?.post{
+            //callback response for App
+
+            bleCallback?.bleResponse(bleRes.build().toByteString())
+
+            //callback response for libqaul
+            net.qaul.libqaul.syssend(bleRes.build().toByteArray())
+        }
+
+    }
+
+    /**
      * This Method Will Stop the Service & Advertisement.
      */
     private fun stopService() {
@@ -117,7 +169,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
             stopResult.success = false
             stopResult.errorMessage = "Advertisement & Scanning is not Running"
             bleRes.stopResult = stopResult.build()
-            bleCallback?.bleResponse(data = bleRes.build().toByteString())
+            sendResponse(bleRes)
         }
     }
 
@@ -141,7 +193,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
                     startResult.errorMessage = "Advertisement already Started"
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 } else {
                     startAdvertiseAndCallback()
                 }
@@ -154,7 +206,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
                     startResult.errorMessage = "Scanning already Started"
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 } else {
                     startScanAndCallback()
                 }
@@ -186,7 +238,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                         }
                         startResult.errorMessage = errorText
                         bleRes.startResult = startResult.build()
-                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                        sendResponse(bleRes)
                     }
 
                     override fun stopAdvertiseRes(status: Boolean, errorText: String) {
@@ -195,7 +247,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                         stopResult.success = status
                         stopResult.errorMessage = errorText
                         bleRes.stopResult = stopResult.build()
-                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                        sendResponse(bleRes)
                     }
 
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
@@ -208,7 +260,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                         directReceived.data =
                             ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
-                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                        sendResponse(bleRes)
                     }
                 }
             )
@@ -236,7 +288,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     }
                     startResult.errorMessage = errorText
                     bleRes.startResult = startResult.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 }
 
                 override fun stopScanRes(status: Boolean, errorText: String) {
@@ -245,7 +297,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     stopResult.success = status
                     stopResult.errorMessage = errorText
                     bleRes.stopResult = stopResult.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 }
 
                 override fun deviceFound(bleDevice: BLEScanDevice) {
@@ -254,7 +306,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     deviceDiscovered.rssi = bleDevice.deviceRSSI
                     deviceDiscovered.qaulId = ByteString.copyFrom(bleDevice.qaulId)
                     bleRes.deviceDiscovered = deviceDiscovered.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 }
 
                 override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
@@ -264,7 +316,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     try {
                         deviceUnavailable.qaulId = ByteString.copyFrom(bleDevice.qaulId)
                         bleRes.deviceUnavailable = deviceUnavailable.build()
-                        bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                        sendResponse(bleRes)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -282,7 +334,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     directSendResult.success = success
                     directSendResult.id = ByteString.copyFrom(id.toByteArray(Charset.forName("UTF-8")))
                     bleRes.directSendResult = directSendResult.build()
-                    bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                    sendResponse(bleRes)
                 }
 
             }
@@ -318,19 +370,19 @@ open class BleWrapperClass(context: AppCompatActivity) {
                     deviceInfoBuilder.name = adapter.name
                 }
                 deviceInfoBuilder.bleSupport = isBLeSupported()
-                deviceInfoBuilder.advExtended = adapter.isLeExtendedAdvertisingSupported
-                deviceInfoBuilder.le2M = adapter.isLe2MPhySupported
-                deviceInfoBuilder.leCoded = adapter.isLeCodedPhySupported
-                deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    deviceInfoBuilder.advExtended = adapter.isLeExtendedAdvertisingSupported
+                    deviceInfoBuilder.le2M = adapter.isLe2MPhySupported
+                    deviceInfoBuilder.leCoded = adapter.isLeCodedPhySupported
+                    deviceInfoBuilder.advExtendedBytes = adapter.leMaximumAdvertisingDataLength
 
-                //Return true if LE Periodic Advertising feature is supported.
-                deviceInfoBuilder.lePeriodicAdvSupport =
-                    adapter.isLePeriodicAdvertisingSupported
-
-                //Return true if the multi advertisement is supported by the chipset
-                deviceInfoBuilder.leMultipleAdvSupport =
-                    adapter.isMultipleAdvertisementSupported
-
+                    //Return true if LE Periodic Advertising feature is supported.
+                    deviceInfoBuilder.lePeriodicAdvSupport =
+                        adapter.isLePeriodicAdvertisingSupported
+                    //Return true if the multi advertisement is supported by the chipset
+                    deviceInfoBuilder.leMultipleAdvSupport =
+                        adapter.isMultipleAdvertisementSupported
+                }
                 //Return true if offloaded filters are supported true if chipset supports on-chip filtering
                 deviceInfoBuilder.offloadFilterSupport = adapter.isOffloadedFilteringSupported
 
@@ -343,7 +395,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                 bleResInfoResponse.device = deviceInfoBuilder.build()
             }
             bleRes.infoResponse = bleResInfoResponse.build()
-            bleCallback?.bleResponse(data = bleRes.build().toByteString())
+            sendResponse(bleRes)
         }
     }
 
@@ -678,7 +730,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
                 }
                 startResult.errorMessage = errorText
                 bleRes.startResult = startResult.build()
-                bleCallback?.bleResponse(data = bleRes.build().toByteString())
+                sendResponse(bleRes)
             }
             else -> {
                 startService(context = context)
@@ -686,3 +738,4 @@ open class BleWrapperClass(context: AppCompatActivity) {
         }
     }
 }
+

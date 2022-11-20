@@ -1,23 +1,12 @@
 package net.qaul.libqaul
 
-// qaul ble module
+import java.util.*
 
-import net.qaul.ble.AppLog
-import net.qaul.ble.callback.BleRequestCallback
-import net.qaul.ble.core.BleWrapperClass
-import net.qaul.ble.core.BleWrapperClass.Companion.BLE_PERMISSION_REQ_CODE_12
-import net.qaul.ble.core.BleWrapperClass.Companion.LOCATION_ENABLE_REQ_CODE
-import net.qaul.ble.core.BleWrapperClass.Companion.LOCATION_PERMISSION_REQ_CODE
-import net.qaul.ble.core.BleWrapperClass.Companion.REQUEST_ENABLE_BT
-// ble protobuf communication
-import com.google.gson.Gson
-import com.google.protobuf.ByteString
-import qaul.sys.ble.BleOuterClass
+
 
 /// hello message from lib qaul
-/// dummy function for testing
+// dummy function for testing
 external fun hello(): String
-
 /// start libqaul
 /// this also intializes the logging
 external fun start(path: String)
@@ -49,17 +38,8 @@ external fun sysreceivequeue(): Int
 /// receive an SYS message from libqaul to BLE library
 external fun sysreceive(): ByteArray
 
+
 /// load rust libqaul shared library
 fun loadLibqaul() {
-    println("load libqaul")
     System.loadLibrary("libqaul")
-    println("libqaul loaded")
-
-    println("BLE test")
-/*
-    val bleReq: BleOuterClass.Ble.Builder = BleOuterClass.Ble.newBuilder()
-    bleReq.infoRequest = BleOuterClass.BleInfoRequest.getDefaultInstance()
-    bleWrapperClass.receiveRequest(data = bleReq.build().toByteString(), callback = this)
-*/
-    println("BLE test sent")
 }
