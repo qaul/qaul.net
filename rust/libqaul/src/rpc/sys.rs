@@ -10,14 +10,24 @@
 //! 
 //! * BLE module
 
+// use core::slice::SlicePattern;
+
 use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
 use state::Storage;
-
+use futures::executor::block_on;
+use std::thread;
 use crate::connections::{
     lan::Lan,
     internet::Internet,
 };
 use crate::connections::ble::Ble;
+
+#[cfg(target_os = "android")]
+use crate::api::android::Android;
+
+
+
+/// 
 
 
 /// receiving end of the mpsc channel
@@ -26,7 +36,6 @@ static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
 static EXTERN_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
 /// sending end of th mpsc channel for libqaul to send
 static LIBQAUL_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
-
 
 /// Handling of SYS messages of libqaul
 pub struct Sys {
@@ -85,8 +94,8 @@ impl Sys {
             },
         }
     }
-
-    /// Process received binary protobuf encoded SYS message
+	
+	/// Process received binary protobuf encoded SYS message
     /// 
     /// This function will decode the message from the binary
     /// protobuf format to rust structures and send it to 
@@ -99,6 +108,10 @@ impl Sys {
     /// sends a SYS message to the outside
     pub fn send_message(data: Vec<u8>) {
         // send the message
-        Self::send_to_extern(data);
+        //Self::send_to_extern(data);
+
+        #[cfg(target_os = "android")]
+        Android::send_to_android(data);
+           
     }
 }
