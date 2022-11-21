@@ -85,10 +85,10 @@ class _PublicState extends _BaseTabState<_Public> {
                   (u) => u.idBase58 == (msg.senderIdBase58 ?? ''),
                 );
                 if (author == null) return const SizedBox.shrink();
-
                 return QaulListTile.user(
                   author,
                   useUserColorOnName: true,
+                  isContentSelectable: true,
                   content: Text(msg.content ?? '', style: theme.bodyText1),
                   trailingMetadata: Text(
                     sentAt,
