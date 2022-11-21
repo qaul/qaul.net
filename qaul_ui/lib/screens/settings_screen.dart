@@ -19,48 +19,33 @@ class SettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const IconButtonFactory(),
-        title: Row(
-          children: [
-            const Icon(Icons.settings),
-            const SizedBox(width: 8),
-            Text(l10n.settings),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: MediaQuery.of(context).viewPadding.copyWith(
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const LanguageSelectDropDown(),
-              const SizedBox(height: 20),
-              const ThemeSelectDropdown(),
-              const SizedBox(height: 20),
-              SettingsSection(
-                name: l10n.notifications,
-                icon: const FaIcon(FontAwesomeIcons.solidBell),
-                content: const _NotificationOptions(),
-              ),
-              const SizedBox(height: 20),
-              const SettingsSection(
-                name: 'Network',
-                icon: FaIcon(FontAwesomeIcons.networkWired),
-                content: Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: _InternetNodesList(),
-                ),
-              ),
-            ],
+    return ResponsiveScaffold(
+      title: l10n.settings,
+      icon: Icons.settings,
+      body: ListView(
+        padding: MediaQuery.of(context)
+            .viewPadding
+            .copyWith(left: 20, right: 20, top: 20),
+        children: [
+          const LanguageSelectDropDown(),
+          const SizedBox(height: 20),
+          const ThemeSelectDropdown(),
+          const SizedBox(height: 20),
+          SettingsSection(
+            name: l10n.notifications,
+            icon: const FaIcon(FontAwesomeIcons.solidBell),
+            content: const _NotificationOptions(),
           ),
-        ),
+          const SizedBox(height: 20),
+          const SettingsSection(
+            name: 'Network',
+            icon: FaIcon(FontAwesomeIcons.networkWired),
+            content: Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: _InternetNodesList(),
+            ),
+          ),
+        ],
       ),
     );
   }
