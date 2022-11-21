@@ -13,6 +13,7 @@ class QaulListTile extends StatelessWidget {
     this.tapRoutesToDetailsScreen = false,
     this.nameTapRoutesToDetailsScreen = false,
     this.avatarTapRoutesToDetailsScreen = true,
+    this.isContentSelectable = false,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         assert(user != null || room != null),
         super(key: key);
@@ -29,6 +30,7 @@ class QaulListTile extends StatelessWidget {
     bool tapRoutesToDetailsScreen = false,
     bool nameTapRoutesToDetailsScreen = false,
     bool avatarTapRoutesToDetailsScreen = true,
+    bool isContentSelectable = false,
   }) {
     return QaulListTile._(
       user: user,
@@ -41,6 +43,7 @@ class QaulListTile extends StatelessWidget {
       nameTapRoutesToDetailsScreen: nameTapRoutesToDetailsScreen,
       avatarTapRoutesToDetailsScreen: avatarTapRoutesToDetailsScreen,
       useUserColorOnName: useUserColorOnName,
+      isContentSelectable: isContentSelectable,
     );
   }
 
@@ -91,6 +94,8 @@ class QaulListTile extends StatelessWidget {
   final bool avatarTapRoutesToDetailsScreen;
 
   final bool useUserColorOnName;
+
+  final bool isContentSelectable;
 
   Color get _userColor => colorGenerationStrategy(user!.idBase58);
 
@@ -146,6 +151,11 @@ class QaulListTile extends StatelessWidget {
       );
     }
 
+    Widget? contentWidget = content;
+    if (content != null && isContentSelectable) {
+      contentWidget = SelectionArea(child: content!);
+    }
+
     return InkWell(
       onTap: onTap ?? onTapFallback,
       child: Padding(
@@ -160,9 +170,9 @@ class QaulListTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   tileTitle,
-                  if (content != null) ...[
+                  if (contentWidget != null) ...[
                     const SizedBox(height: 4),
-                    content!,
+                    contentWidget,
                   ]
                 ],
               ),
