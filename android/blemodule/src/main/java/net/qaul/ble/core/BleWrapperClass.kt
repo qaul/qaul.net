@@ -55,7 +55,7 @@ open class BleWrapperClass(context: AppCompatActivity) {
         this.also { sInstance = it }
         mHandler = Handler()
 		
-		loadLibqaul()
+	net.qaul.libqaul.loadLibqaul()
         nativeSetCallback(object: ILibqaulCallback {
             override fun OnLibqaulMessage(data: ByteArray){
                 AppLog.i("===libqaul===","This was called from libqaul.  :-)")
