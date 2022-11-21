@@ -42,4 +42,6 @@ part 'qaul_list_tile.dart';
 
 part 'qaul_table.dart';
 
+part 'responsive_scaffold.dart';
+
 part 'settings_section.dart';

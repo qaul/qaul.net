@@ -41,17 +41,9 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const IconButtonFactory(),
-        title: Row(
-          children: [
-            const Icon(Icons.history),
-            const SizedBox(width: 8),
-            Text(l10n.fileHistory),
-          ],
-        ),
-      ),
+    return ResponsiveScaffold(
+      icon: Icons.history,
+      title: l10n.fileHistory,
       body: PagedListView<int, FileHistoryEntity>(
         pagingController: _controller,
         builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(

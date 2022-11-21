@@ -20,17 +20,9 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        leading: const IconButtonFactory(),
-        title: Row(
-          children: [
-            const FaIcon(FontAwesomeIcons.headset),
-            const SizedBox(width: 8),
-            Text(l10n.support),
-          ],
-        ),
-      ),
+    return ResponsiveScaffold(
+      icon: FontAwesomeIcons.headset,
+      title: l10n.support,
       body: FutureBuilder<bool>(
           future: emailLogger.hasLogsStored(reader: ref.read),
           builder: (context, snapshot) {

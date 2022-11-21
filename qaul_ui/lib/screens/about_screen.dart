@@ -12,17 +12,9 @@ class AboutScreen extends StatelessWidget {
     final l18ns = AppLocalizations.of(context)!;
     var bundle = DefaultAssetBundle.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const IconButtonFactory(),
-        title: Row(
-          children: [
-            const Icon(Icons.info_outline_rounded),
-            const SizedBox(width: 8),
-            Text(l18ns.about),
-          ],
-        ),
-      ),
+    return ResponsiveScaffold(
+      icon: Icons.info_outline_rounded,
+      title: l18ns.about,
       body: FutureBuilder<String>(
           future: bundle.loadString('assets/license/agpl-3.0.md'),
           builder: (context, ss) {
