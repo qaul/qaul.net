@@ -60,8 +60,9 @@ class LibqaulWorker {
     _getLibqaulLogsStoragePath();
 
     Timer.periodic(const Duration(milliseconds: 100), (_) async {
-      final n = await _lib.checkReceiveQueue();
-      if (n > 0) _receiveResponse();
+      while ((await _lib.checkReceiveQueue()) > 0) {
+        await _receiveResponse();
+      }
     });
     Timer.periodic(const Duration(seconds: 2), (_) async {
       if (_heartbeats.length == 5) {
