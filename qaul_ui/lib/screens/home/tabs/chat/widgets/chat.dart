@@ -216,7 +216,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       body: CronTaskDecorator(
         callback: () => refreshCurrentRoom(),
-        schedule: const Duration(milliseconds: 1000),
+        schedule: const Duration(milliseconds: 300),
         child: SafeArea(
           bottom: false,
           child: Chat(
