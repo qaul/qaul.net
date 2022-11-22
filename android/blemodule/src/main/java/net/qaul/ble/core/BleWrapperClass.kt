@@ -36,7 +36,7 @@ import qaul.sys.ble.BleOuterClass
 import java.nio.charset.Charset
 
 @SuppressLint("MissingPermission")
-open class BleWrapperClass(context: AppCompatActivity) {
+open class BleWrapperClass(context: Activity) {
     private val TAG: String = BleWrapperClass::class.java.simpleName
     private val context = context
     private var errorText = ""
