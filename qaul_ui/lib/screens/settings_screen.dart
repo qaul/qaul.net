@@ -67,54 +67,57 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.publicNotificationsEnabled),
-            PlatformAwareSwitch(
-              value: UserPrefsHelper().publicTabNotificationsEnabled,
-              onChanged: (val) {
-                UserPrefsHelper().publicTabNotificationsEnabled = val;
-                setState(() {});
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.chatNotificationsEnabled),
-            PlatformAwareSwitch(
-              value: UserPrefsHelper().chatNotificationsEnabled,
-              onChanged: (val) {
-                UserPrefsHelper().chatNotificationsEnabled = val;
-                setState(() {});
-              },
-            ),
-          ],
-        ),
-        if (_notificationsAreEnabled) ...[
-          const SizedBox(height: 20),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.notifyOnlyForVerifiedUsers),
-              PlatformAwareSwitch(
-                value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
-                onChanged: (val) {
-                  UserPrefsHelper().notifyOnlyForVerifiedUsers = val;
-                  setState(() {});
-                },
-              ),
-            ],
+    return DefaultTextStyle(
+      maxLines: 2,
+      style: Theme.of(context)
+          .textTheme
+          .labelLarge!
+          .copyWith(overflow: TextOverflow.ellipsis),
+      child: Column(
+        children: [
+          _buildConfigurationOption(
+            label: l10n.publicNotificationsEnabled,
+            value: UserPrefsHelper().publicTabNotificationsEnabled,
+            onValueChanged: (val) =>
+                UserPrefsHelper().publicTabNotificationsEnabled = val,
           ),
+          const SizedBox(height: 20),
+          _buildConfigurationOption(
+            label: l10n.chatNotificationsEnabled,
+            value: UserPrefsHelper().chatNotificationsEnabled,
+            onValueChanged: (val) =>
+                UserPrefsHelper().chatNotificationsEnabled = val,
+          ),
+          if (_notificationsAreEnabled) ...[
+            const SizedBox(height: 20),
+            _buildConfigurationOption(
+              label: l10n.notifyOnlyForVerifiedUsers,
+              value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
+              onValueChanged: (val) =>
+                  UserPrefsHelper().notifyOnlyForVerifiedUsers = val,
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildConfigurationOption(
+      {required String label,
+      required bool value,
+      required Function(bool newValue) onValueChanged}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: Text(label)),
+        PlatformAwareSwitch(
+          value: value,
+          onChanged: (val) {
+            onValueChanged(val);
+            setState(() {});
+          },
+        ),
       ],
     );
   }
