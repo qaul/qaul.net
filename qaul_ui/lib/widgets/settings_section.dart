@@ -28,12 +28,7 @@ class SettingsSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        LayoutBuilder(builder: (context, constraints) {
-          return SizedBox(
-            width: constraints.constrainWidth(400),
-            child: content,
-          );
-        }),
+        content,
       ],
     );
   }
