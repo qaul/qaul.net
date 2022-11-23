@@ -18,7 +18,7 @@ echo "Retrieving application version..."
 cd ../../../qaul_ui || exit 1
 
 if [ ! -f pubspec.yaml ]; then
-    echo "pubspec.yaml not found!"
+    echo "pubspec.yaml not found!" >&2
     exit 1
 fi
 
@@ -37,10 +37,8 @@ sed -i "s/version\:\W\+[0-9]\+\.[0-9]\+\.[0-9]\+/version: $VERSION/g" snapcraft.
 mkdir local
 echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > local/snapcraft.login
 snapcraft login --with local/snapcraft.login
-#set +o pipefail
 
-# shellcheck disable=SC2103
-cd ..
+cd .. || exit 0
 
 echo ""
 echo "Building Flutter application..."
@@ -50,8 +48,6 @@ git config --global --add safe.directory /root/development/flutter
 snapcraft
 
 mv ./*.snap "qaul-$VERSION.snap"
-# TODO cannot upload via CircleCI due to the directive:
-#     - human review required due to 'deny-connection' constraint (interface attributes)
-# snapcraft upload "qaul-$VERSION.snap" --release=stable
+snapcraft upload "qaul-$VERSION.snap" --release=stable
 
 realpath "qaul-$VERSION.snap"
