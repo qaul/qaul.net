@@ -39,8 +39,8 @@ class SettingsScreen extends HookConsumerWidget {
           const SizedBox(height: 20),
           SettingsSection(
             name: l10n.network,
-            icon: FaIcon(FontAwesomeIcons.networkWired),
-            content: Padding(
+            icon: const FaIcon(FontAwesomeIcons.networkWired),
+            content: const Padding(
               padding: EdgeInsets.only(top: 20),
               child: _InternetNodesList(),
             ),
