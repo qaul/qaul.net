@@ -24,6 +24,7 @@ android/app/src/main/jniLibs
 
 # MacOS specific
 .DS_Store
+qaul_ui/macos/*.app
 utilities/installers/macos/*.app
 utilities/installers/macos/*.dmg
 utilities/installers/macos/*.jsonsed
