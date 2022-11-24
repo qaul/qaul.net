@@ -20,19 +20,21 @@ use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
     mdns::{Mdns, MdnsConfig, MdnsEvent},
+    mdns,
+    mdns::async_io::{Mdns},
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping,
-    swarm::Swarm,
+    swarm::{ Swarm, NetworkBehaviour},
     tcp::{GenTcpConfig, TcpTransport},
-    yamux, NetworkBehaviour, Transport,
+    yamux, async_io::Transport,
 };
 use prost::Message;
 use std::time::Duration;
 
 // DNS is excluded on mobile, as it is not working there
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::{dns::DnsConfig, websocket::WsConfig};
+use libp2p::{dns::DnsConfig};
 
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
@@ -81,15 +83,15 @@ impl QaulLanBehaviour {
     fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Lan);
     }
-    fn mdsn_event(&mut self, event: MdnsEvent) {
+    fn mdsn_event(&mut self, event: mdns::Event) {
         match event {
-            MdnsEvent::Discovered(discovered_list) => {
+            mdns::Event::Discovered(discovered_list) => {
                 for (peer, _addr) in discovered_list {
                     log::trace!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
                     self.floodsub.add_node_to_partial_view(peer);
                 }
             }
-            MdnsEvent::Expired(expired_list) => {
+            mdns::Event::Expired(expired_list) => {
                 for (peer, _addr) in expired_list {
                     if !self.mdns.has_node(&peer) {
                         log::trace!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
@@ -116,7 +118,7 @@ impl QaulLanBehaviour {
 #[derive(Debug)]
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
-    Mdns(MdnsEvent),
+    Mdns(mdns::Event),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
@@ -128,8 +130,8 @@ impl From<FloodsubEvent> for QaulLanEvent {
     }
 }
 
-impl From<MdnsEvent> for QaulLanEvent {
-    fn from(event: MdnsEvent) -> Self {
+impl From<mdns::Event> for QaulLanEvent {
+    fn from(event: mdns::Event) -> Self {
         Self::Mdns(event)
     }
 }
@@ -171,15 +173,9 @@ impl Lan {
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         let transport = async {
-            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
+            let tcp = Transport::new(Config::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
-            let ws_dns_tcp = WsConfig::new(
-                DnsConfig::system(TcpTransport::new(GenTcpConfig::new().nodelay(true)))
-                    .await
-                    .unwrap(),
-            );
-
-            dns_tcp.or_transport(ws_dns_tcp)
+            dns_tcp
         }
         .await;
 
