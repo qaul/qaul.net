@@ -13,7 +13,7 @@
   "publicNavButtonTooltip": "Стрічка",
   "usersNavButtonTooltip": "Люди",
   "chatNavButtonTooltip": "Розмови",
-  "netNavButtonTooltip": "Мережа",
+  "network": "Мережа",
   "createPublicPostTooltip": "Створити допис",
   "submitPostTooltip": "Надіслати",
   "newChatTooltip": "Нова розмова",

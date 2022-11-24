@@ -16,7 +16,7 @@
   "publicNavButtonTooltip": "Public",
   "usersNavButtonTooltip": "Users",
   "chatNavButtonTooltip": "Chat",
-  "netNavButtonTooltip": "Network",
+  "network": "Network",
   "createPublicPostTooltip": "Create post",
   "submitPostTooltip": "Submit",
   "newChatTooltip": "New chat",

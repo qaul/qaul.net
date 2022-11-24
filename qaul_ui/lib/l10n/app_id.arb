@@ -16,7 +16,7 @@
   "publicNavButtonTooltip": "Umpan",
   "usersNavButtonTooltip": "Pengguna",
   "chatNavButtonTooltip": "Mengobrol",
-  "netNavButtonTooltip": "Jaringan",
+  "network": "Jaringan",
   "createPublicPostTooltip": "Buat unggahan",
   "submitPostTooltip": "Kirim",
   "newChatTooltip": "Obrolan Baru",

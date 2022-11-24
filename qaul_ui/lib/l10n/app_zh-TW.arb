@@ -16,7 +16,7 @@
   "publicNavButtonTooltip": "公開",
   "usersNavButtonTooltip": "用戶",
   "chatNavButtonTooltip": "聊天",
-  "netNavButtonTooltip": "網路",
+  "network": "網路",
   "createPublicPostTooltip": "創建帖子",
   "submitPostTooltip": "提交",
   "newChatTooltip": "新建聊天",

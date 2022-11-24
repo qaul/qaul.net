@@ -250,7 +250,7 @@ class QaulNavBarItem extends HookConsumerWidget {
         break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
-        tooltip = l18ns!.netNavButtonTooltip;
+        tooltip = l18ns!.network;
         sizeFactor = 1.1;
         break;
     }

@@ -13,7 +13,7 @@
   "publicNavButtonTooltip": "Público",
   "usersNavButtonTooltip": "Usuários",
   "chatNavButtonTooltip": "Conversas",
-  "netNavButtonTooltip": "Conexões",
+  "network": "Conexões",
   "createPublicPostTooltip": "Criar postagem",
   "submitPostTooltip": "Submeter",
   "newChatTooltip": "Nova conversa",

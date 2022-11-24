@@ -16,7 +16,7 @@
     "publicNavButtonTooltip": "Общедоступный",
     "usersNavButtonTooltip": "Пользователи",
     "chatNavButtonTooltip": "Чат",
-    "netNavButtonTooltip": "Сеть",
+    "network": "Сеть",
     "createPublicPostTooltip": "Создать сообщение",
     "submitPostTooltip": "Отправить",
     "newChatTooltip": "Новый чат",
@@ -31,7 +31,7 @@
     "darkTheme": "Темная тема",
     "internetNodes": "Интернет-узлы",
     "address": "Адрес",
-    "name": "Имя",  
+    "name": "Имя",
     "connections": "Соединения",
     "allConnectionsFilterLabel": "Показать всю сеть",
     "ping": "Пинг",
@@ -82,7 +82,7 @@
     "addIPv6NodeCTA": "Добавить узел IPv6",
     "knownAddresses": "Известные адреса",
     "noOpenChats": "Нет открытых чатов",
-    "groupInvite": "Приглашение в группу",  
+    "groupInvite": "Приглашение в группу",
     "createNewGroup": "Создать новую группу",
     "invite": "Пригласить",
     "groupName": "Название группы",
@@ -130,4 +130,3 @@
     "fileHistory": "История файлов",
     "emptyNodeName": "Без имени"
   }
-  

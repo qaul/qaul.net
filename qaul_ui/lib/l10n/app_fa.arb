@@ -13,7 +13,7 @@
   "publicNavButtonTooltip": "عمومی",
   "usersNavButtonTooltip": "کاربران",
   "chatNavButtonTooltip": "گفتگو",
-  "netNavButtonTooltip": "شبکه",
+  "network": "شبکه",
   "createPublicPostTooltip": "ایجاد مطلب",
   "submitPostTooltip": "ارسال",
   "newChatTooltip": "گفتگوی جدید",
