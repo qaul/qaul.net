@@ -319,6 +319,7 @@ impl UserAccounts {
         let key_type: String;
         let key_base58: String;
 
+        #[allow(unreachable_patterns)]
         match key {
             PublicKey::Ed25519(key) => {
                 key_type = "Ed25519".to_owned();

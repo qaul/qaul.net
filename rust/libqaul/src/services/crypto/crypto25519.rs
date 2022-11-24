@@ -29,6 +29,7 @@ impl Crypto25519 {
     ///
     pub fn private_key_to_montgomery(key: Keypair) -> Option<Vec<u8>> {
         // get ed25519 keypair
+        #[allow(irrefutable_let_patterns)]
         if let Keypair::Ed25519(ed25519_keypair) = key {
             // get dalek keypair as bytes
             //
@@ -75,6 +76,7 @@ impl Crypto25519 {
     ///
     pub fn public_key_to_montgomery(key: PublicKey) -> Option<x25519_dalek::PublicKey> {
         // get ed25519 structure
+        #[allow(irrefutable_let_patterns)]
         if let PublicKey::Ed25519(ed25519_pub) = key {
             // convert to dalek public key in bytes form
             let dalek_pub_bytes = ed25519_pub.encode();
