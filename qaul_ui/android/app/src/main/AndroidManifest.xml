@@ -35,6 +35,12 @@
             android:label="qaul – قول"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
+		<service
+            android:enabled="true"
+            android:name="net.qaul.ble.service.BleService"
+            android:label="BleService">
+        </service>
+		
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
