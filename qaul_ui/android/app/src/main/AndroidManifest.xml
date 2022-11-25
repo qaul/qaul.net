@@ -44,6 +44,12 @@
                 android:name="de.julianassmann.flutter_background.IsolateHolderService"
                 android:exported="false" />
 
+	<service
+            android:enabled="true"
+            android:name="net.qaul.ble.service.BleService"
+            android:label="BleService">
+        </service>
+		
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
