@@ -22,10 +22,9 @@ class SettingsScreen extends HookConsumerWidget {
     return ResponsiveScaffold(
       title: l10n.settings,
       icon: Icons.settings,
-      body: ListView(
-        padding: MediaQuery.of(context)
-            .viewPadding
-            .copyWith(left: 20, right: 20, top: 20),
+      wrapWithScrollable: true,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const LanguageSelectDropDown(),
           const SizedBox(height: 20),
