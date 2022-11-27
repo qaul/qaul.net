@@ -11,6 +11,29 @@ class _PublicState extends _BaseTabState<_Public> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    return Navigator(
+      initialRoute: 'public/main',
+      onGenerateRoute: (RouteSettings settings) {
+        WidgetBuilder builder;
+        switch (settings.name) {
+          case 'public/main':
+            builder = (BuildContext context) => const _PublicTabView();
+            break;
+          default:
+            throw Exception('Invalid route: ${settings.name}');
+        }
+        return MaterialPageRoute<void>(builder: builder, settings: settings);
+      },
+    );
+  }
+}
+
+class _PublicTabView extends HookConsumerWidget {
+  const _PublicTabView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       ref.read(publicNotificationControllerProvider).initialize();
       return () {};
