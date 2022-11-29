@@ -18,6 +18,7 @@
 //! listen: /ip4/0.0.0.0/tcp/9229
 //! ```
 
+use libp2p::swarm::keep_alive;
 use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
@@ -56,6 +57,7 @@ use std::time::Duration;
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: identify::Behaviour,
+    pub keep_alive: keep_alive::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -69,6 +71,9 @@ impl QaulInternetBehaviour {
             }
             QaulInternetEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
+            }
+            QaulInternetEvent::KeepAlive(ev) => {
+                self.keep_alive_event(ev);
             }
             QaulInternetEvent::Ping(ev) => {
                 self.ping_event(ev);
@@ -87,6 +92,9 @@ impl QaulInternetBehaviour {
     }
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Internet);
+    }
+    fn keep_alive_event(&mut self, event: void::Void) {
+        log::trace!("Internet KeepAlive event: {:?}", event);
     }
     fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Internet);
@@ -148,6 +156,7 @@ static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage:
 pub enum QaulInternetEvent {
     Floodsub(FloodsubEvent),
     Identify(identify::Event),
+    KeepAlive(void::Void),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
@@ -162,6 +171,12 @@ impl From<FloodsubEvent> for QaulInternetEvent {
 impl From<identify::Event> for QaulInternetEvent {
     fn from(event: identify::Event) -> Self {
         Self::Identify(event)
+    }
+}
+
+impl From<void::Void> for QaulInternetEvent {
+    fn from(event: void::Void) -> Self {
+        Self::KeepAlive(event)
     }
 }
 
@@ -238,7 +253,7 @@ impl Internet {
         // * set timeout
         // * set maximal failures
         let mut ping_config = ping::Config::new();
-        ping_config = ping_config.with_keep_alive(true);
+
         let config = Configuration::get();
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
@@ -253,12 +268,13 @@ impl Internet {
                     "/ipfs/0.1.0".into(),
                     Node::get_keys().public(),
                 )),
+                keep_alive: libp2p::swarm::keep_alive::Behaviour::default(),
                 ping: ping::Behaviour::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
             };
             behaviour.floodsub.subscribe(Node::get_topic());
-            Swarm::new(transport_upgraded, behaviour, Node::get_id())
+            Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
         };
 
         log::trace!("Internet.init() swarm created");
