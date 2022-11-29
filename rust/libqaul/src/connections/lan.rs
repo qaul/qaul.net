@@ -19,22 +19,22 @@
 use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
-    mdns::{Mdns, MdnsConfig, MdnsEvent},
     mdns,
-    mdns::async_io::{Mdns},
+    mdns::{async_io::Behaviour as Mdns, Config},
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping,
-    swarm::{ Swarm, NetworkBehaviour},
-    tcp::{GenTcpConfig, TcpTransport},
-    yamux, async_io::Transport,
+    swarm::{NetworkBehaviour, Swarm},
+    tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
+    yamux,
 };
 use prost::Message;
 use std::time::Duration;
 
 // DNS is excluded on mobile, as it is not working there
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::{dns::DnsConfig};
+use libp2p::dns::DnsConfig;
+use libp2p::Transport;
 
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
@@ -173,7 +173,7 @@ impl Lan {
         // create tcp transport with DNS for all other devices
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         let transport = async {
-            let tcp = Transport::new(Config::new().nodelay(true));
+            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
             dns_tcp
         }
@@ -210,7 +210,7 @@ impl Lan {
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = Mdns::new(MdnsConfig::default()).unwrap();
+            let mdns = Mdns::new(Config::default()).unwrap();
 
             log::trace!("Lan::init() swarm mdns module created");
 

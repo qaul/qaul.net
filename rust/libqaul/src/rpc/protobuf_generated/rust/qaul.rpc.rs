@@ -4,18 +4,18 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct QaulRpc {
     /// which module to approach
-    #[prost(enumeration="Modules", tag="1")]
+    #[prost(enumeration = "Modules", tag = "1")]
     pub module: i32,
     /// can be used to identify responses
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub request_id: ::prost::alloc::string::String,
     /// authorisation
     /// binary user id
-    #[prost(bytes="vec", tag="3")]
+    #[prost(bytes = "vec", tag = "3")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
     /// the protobuf encoded binary message data
     /// which is passed to the module.
-    #[prost(bytes="vec", tag="4")]
+    #[prost(bytes = "vec", tag = "4")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// Identification to which module the message shall be

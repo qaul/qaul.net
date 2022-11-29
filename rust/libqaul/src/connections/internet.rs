@@ -24,13 +24,14 @@ use libp2p::{
     identify, mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping,
-    swarm::{ Swarm, NetworkBehaviour },
-    tcp::{GenTcpConfig, TcpTransport},
-    yamux, Multiaddr, PeerId, Transport
+    swarm::{NetworkBehaviour, Swarm},
+    tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
+    yamux, Multiaddr, PeerId,
 };
 // DNS is excluded on mobile, as it is not working there
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::{dns::DnsConfig};
+use libp2p::dns::DnsConfig;
+use libp2p::Transport;
 use prost::Message;
 
 use crate::node::Node;
@@ -211,7 +212,7 @@ impl Internet {
         let transport = async {
             let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
             let dns_tcp = DnsConfig::system(tcp).await.unwrap();
-            dns_tcp.or_transport(ws_dns_tcp)
+            dns_tcp
         }
         .await;
 

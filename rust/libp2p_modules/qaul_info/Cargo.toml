@@ -7,7 +7,7 @@ authors = ["qaul community <contact@qaul.net>"]
 license = "AGPL"
 
 [dependencies]
-libp2p = { version = "0.49.0", features = ["async-std", "floodsub", "identify", "mdns", "mplex", "noise", "ping", "tcp", "yamux"] }
+libp2p = { git = "https://github.com/qaul/rust-libp2p.git", branch = "ios-build-fix", features = ["full"] }
 cuckoofilter = "0.5.0"
 fnv = "1.0"
 futures = "0.3.21"
