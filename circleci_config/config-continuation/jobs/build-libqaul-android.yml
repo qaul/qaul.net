@@ -20,7 +20,7 @@ steps:
       command: cd rust/libqaul && cargo install cargo-ndk
   - run:
       name: Build Libqaul JniLibs for Android
-      command: cd rust/libqaul && sh build_libqaul_android.sh
+      command: cd rust/libqaul && sh build_libqaul_android.sh release
   - save-sccache-cache
   - restore_cache:
       key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
