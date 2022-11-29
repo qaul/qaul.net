@@ -24,7 +24,7 @@ use libp2p::{
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping,
-    swarm::{NetworkBehaviour, Swarm},
+    swarm::{keep_alive, NetworkBehaviour, Swarm},
     tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
     yamux,
 };
@@ -49,6 +49,7 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
+    pub keep_alive: keep_alive::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -62,6 +63,9 @@ impl QaulLanBehaviour {
             }
             QaulLanEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
+            }
+            QaulLanEvent::KeepAlive(ev) => {
+                self.keep_alive_event(ev);
             }
             QaulLanEvent::Ping(ev) => {
                 self.ping_event(ev);
@@ -79,6 +83,9 @@ impl QaulLanBehaviour {
     }
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Lan);
+    }
+    fn keep_alive_event(&mut self, event: void::Void) {
+        log::trace!("QaulLanBehaviour::keep_alive_event: {:?}", event);
     }
     fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Lan);
@@ -119,6 +126,7 @@ impl QaulLanBehaviour {
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
     Mdns(mdns::Event),
+    KeepAlive(void::Void),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
@@ -133,6 +141,12 @@ impl From<FloodsubEvent> for QaulLanEvent {
 impl From<mdns::Event> for QaulLanEvent {
     fn from(event: mdns::Event) -> Self {
         Self::Mdns(event)
+    }
+}
+
+impl From<void::Void> for QaulLanEvent {
+    fn from(event: void::Void) -> Self {
+        Self::KeepAlive(event)
     }
 }
 
@@ -198,7 +212,7 @@ impl Lan {
         //
         // * keep connection alive
         let mut ping_config = ping::Config::new();
-        ping_config = ping_config.with_keep_alive(true);
+
         let config = Configuration::get();
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
@@ -219,6 +233,7 @@ impl Lan {
             let mut behaviour = QaulLanBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
                 mdns,
+                keep_alive: libp2p::swarm::keep_alive::Behaviour::default(),
                 ping: ping::Behaviour::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
@@ -230,7 +245,7 @@ impl Lan {
 
             log::trace!("Lan::init() swarm behaviour floodsub subscribed");
 
-            Swarm::new(transport_upgraded, behaviour, Node::get_id())
+            Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
         };
 
         log::trace!("Lan::init() swarm created");
