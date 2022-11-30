@@ -376,7 +376,7 @@ jobs:
                 command: cd rust/libqaul && cargo install cargo-ndk
                 name: Install Cargo NDK
             - run:
-                command: cd rust/libqaul && sh build_libqaul_android.sh
+                command: cd rust/libqaul && sh build_libqaul_android.sh release
                 name: Build Libqaul JniLibs for Android
             - save-sccache-cache
             - restore_cache:
@@ -879,13 +879,20 @@ jobs:
 
                     cd artifacts
 
+                    # Get debian file names
                     AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-                    ARMHF_FILE=$(filename deb | grep "armhf" |cut -f1)
+                    ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
+                    # Replace `~` with `-` in debian file names
+                    mv "$AMD64_FILE.deb" "$(echo "$AMD64_FILE" | sed 's/\~/-/').deb"
+                    mv "$ARMHF_FILE.deb" "$(echo "$ARMHF_FILE" | sed 's/\~/-/').deb"
+                    # Replace files names with new values
+                    AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+                    ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
 
                     # Flutter Filenames make use of Flutter's App Version
-                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }')
+                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 
-                    APK_FILE="qaul-$(echo "$FLUTTER_VERSION" | sed 's/+.*$//')"
+                    APK_FILE="qaul-$VERSION.apk"
                     LINUX_FILE="qaul-$VERSION.snap"
                     MACOS_FILE="qaul-$VERSION.dmg"
                     WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION.exe"
