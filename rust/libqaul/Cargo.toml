@@ -13,9 +13,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 default = []
 
 [dependencies]
-#libp2p = { version = "0.49.0", features = ["async-std", "floodsub", "identify", "mdns", "mplex", "noise", "ping", "tcp", "yamux", "websocket", "dns"] }
-## customized rust-libp2p 0.50
-libp2p = { git = "https://github.com/qaul/rust-libp2p.git", branch = "ios-build-fix", features = ["full"] }
+libp2p = { version = "0.50.0", features = ["async-std", "macros", "floodsub", "identify", "mdns", "mplex", "noise", "ping", "tcp", "yamux", "websocket", "dns"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 futures = "0.3.15"
 serde = {version = "=1.0", features = ["derive"] }
