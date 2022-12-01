@@ -55,6 +55,14 @@ steps:
         RUST_VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
         TAG="v${RUST_VERSION}"
 
+        # Flutter Filenames make use of Flutter's App Version
+        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+
+        APK_FILE="qaul-$FLUTTER_VERSION"
+        LINUX_FILE="qaul-$FLUTTER_VERSION"
+        MACOS_FILE="qaul-$FLUTTER_VERSION"
+        WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
+
         cd artifacts
 
         # Get debian file names
@@ -66,15 +74,10 @@ steps:
         # Replace files names with new values
         AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
         ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
-
-        # Flutter Filenames make use of Flutter's App Version
-        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
-
-        APK_FILE="qaul-$VERSION.apk"
-        LINUX_FILE="qaul-$VERSION.snap"
-        MACOS_FILE="qaul-$VERSION.dmg"
-        WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION.exe"
-
+        
+        echo "Using debian amd artifact name: $AMD64_FILE"
+        echo "Using debian arm artifact name: $ARMHF_FILE"
+        
         DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/DEB_AMD/${AMD64_FILE}/g" \
