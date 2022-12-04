@@ -1,13 +1,18 @@
 #! /bin/bash
 set -eo pipefail
 
-function printHelp() {
-  echo "script usage: $(basename "$0") [-f]"
-  echo '-f'
-  echo '     [Full-mode] Compile Flutter app, notarize and create the dmg'
-  echo ''
-  echo 'By default, will only create the dmg'
-}
+#-----------------------------------------------------------------NoticeStart-
+# Utilities
+#
+# Copyright (c) 2022 Open Community Project Association https://ocpa.ch
+# This software is published under the AGPLv3 license.
+#-----------------------------------------------------------------NoticeEnd---
+#
+# dmgbuild
+#
+# DESCRIPTION
+#   Archives MacOS app, bundles into a dmg and notarizes it
+#
 
 # Pre-step: assert that the script is being run from the correct path
 PATTERN="^.*/installers/macos/bin\$"
@@ -17,95 +22,37 @@ if [[ ! $(pwd) =~ $PATTERN ]]; then
 fi
 
 # Initialize variables
-while getopts 'hf' OPTION; do
-  case "$OPTION" in
-  f)
-    TYPE="full"
-    ;;
-  h)
-    printHelp
-    exit 0
-    ;;
-  \?)
-    printHelp >&2
-    exit 1
-    ;;
-  esac
-done
-shift "$((OPTIND - 1))"
-
-PRODUCT_NAME="qaul – قول.app"
-EXPORT_PATH="build/macos/Build/Products/Release"
-APP_PATH="$EXPORT_PATH/$PRODUCT_NAME"
+PRODUCT_NAME="qaul – قول"
 
 cd ../../../../qaul_ui || exit 1
 
-if [ "$TYPE" == 'full' ]; then
-  # -------------------------------------------------------------------------------
-  # STEP 1 - Compile Signed MacOS App
-  echo ""
-  echo "Building MacOS Flutter App..."
-
-  flutter build macos --release
-
-  #codesign --force --verbose --timestamp --options=runtime \
-  #  --sign "Developer ID Application: Verein zur Forderung von offenen Community-Projekten" \
-  #  "$APP_PATH"
-
-  # -------------------------------------------------------------------------------
-  # STEP 2 - Validate and Notarize App
-  # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution
-  echo ""
-  echo "Validating App signature..."
-  # use codesign -vvv for extra verbosity
-  # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735
-  codesign -vv --deep --strict "$APP_PATH"
-  codesign -dvv "$APP_PATH"
-
-  echo ""
-  echo "Submitting the application for notarization..."
-
-  ZIP_PATH="$EXPORT_PATH/$PRODUCT_NAME.zip"
-  ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
-
-  # This assumes that a valid profile named "NOTARY_PASSWORD" is available in the Keychain.
-  # The following command creates such profile:
-  # xcrun notarytool store-credentials "NOTARY_PASSWORD" \
-  #               --apple-id "AC_USERNAME" \
-  #               --team-id <WWDRTeamID> \
-  #               --password <secret_2FA_password>
-  # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow
-  # See: https://support.apple.com/en-us/HT204397
-  xcrun notarytool submit "$ZIP_PATH" --keychain-profile "NOTARY_PASSWORD" --wait
-
-  xcrun stapler staple "$APP_PATH"
-
-  #echo ""
-  #echo "Validating the Notarized App..."
-  # add the --raw option to generate a more detailed output
-  # See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087721
-  #spctl -vvv --assess --type exec <NOTARIZED APP PATH>
-  #xcrun stapler validate <NOTARIZED APP PATH>
-
-  #sed -i sed "s/\"qaul – قول.app\"/\"<NOTARIZED APP PATH>\"/g" config.json
+if [ ! -f pubspec.yaml ]; then
+  echo "pubspec.yaml not found!" >&2
+  exit 1
 fi
-
-# -------------------------------------------------------------------------------
-# STEP 3 - Build and sign *.dmg
-echo ""
-echo "Retrieving application version..."
 
 VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 echo "Using App Version: $VERSION"
 
-cd ../utilities/installers/macos || exit 1
+echo ""
+echo "Building MacOS Flutter App..."
+echo ""
+flutter build macos --release
+
+cd macos || exit 1
 
 echo ""
-echo "Updating app version on config.json..."
-
-sed -i sed "s/\"title\": \".*\"/\"title\": \"qaul-$VERSION\"/g" config.json
-
+echo "Archiving MacOS App..."
 echo ""
-echo "Updating the signing identity on config.json..."
 
-npx appdmg ./config.json "qaul-$VERSION.dmg"
+xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release archive
+
+if [ -f "/tmp/xcode_archive.out" ]; then
+  EXPORT_PATH=$(cat "/tmp/xcode_archive.out")
+
+  cp "${EXPORT_PATH}${PRODUCT_NAME}.dmg" "${EXPORT_PATH}qaul-$VERSION.dmg"
+  echo "${EXPORT_PATH}qaul-$VERSION.dmg"
+else
+  echo "an error occurred archiving and notarizing the app" >&2
+  exit 1
+fi
