@@ -1252,5 +1252,6 @@ workflows:
     build-rust:
         jobs:
             - build-libqaul-linux
+            - build-libqaul-android
         when: << pipeline.parameters.run-rust-workflow >>
 
