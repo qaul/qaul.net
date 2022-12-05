@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -eo pipefail
 
 #-----------------------------------------------------------------NoticeStart-
 # Utilities
@@ -60,4 +61,4 @@ jniLibs=../../android/libqaul/src/main/jniLibs
 rm -rf ${jniLibs}
 
 # 4. build libqaul for all targets
-cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64  -o $jniLibs build ${buildTypeCargo}
+cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o $jniLibs build ${buildTypeCargo}
