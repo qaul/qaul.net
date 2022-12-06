@@ -108,6 +108,8 @@ flutter run -d macos
 
 ## Build Distributable (*.dmg) MacOS Application
 
+!> This section is now deprecated as the Notarization process is now automated - just trigger an Archive, and you're good to go. Leaving here for reference.
+
 _**Step 1: Archiving the App**_:
 
 To manually create a release archive, you can do the following:
