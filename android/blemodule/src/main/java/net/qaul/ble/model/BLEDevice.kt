@@ -22,7 +22,7 @@ class BLEDevice : BLEScanDevice() {
     override var qaulId: ByteArray? = null
 
     companion object {
-        private const val TAG = "BLEScanDevice"
+        private const val TAG = "qaul-blemodule BLEScanDevice"
     }
 
     override fun toString(): String {

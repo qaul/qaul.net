@@ -30,7 +30,7 @@ import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity(), BleRequestCallback {
 
-    private val TAG: String = "MainActivity"
+    private val TAG: String = "qaul-blemodule MainActivity"
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var bleWrapperClass: BleWrapperClass

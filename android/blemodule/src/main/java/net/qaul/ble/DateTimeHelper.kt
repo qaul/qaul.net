@@ -11,7 +11,7 @@ import java.util.*
 
 class DateTimeHelper {
     companion object {
-        private val TAG = DateTimeHelper::class.java.simpleName
+        private val TAG:String = "qaul-blemodule DateTimeHelper"
         const val DATE_FORMAT = "yyyy-MM-dd"
         const val DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss"
         const val DISPLAY_TIME_DATE = "hh:mm a, dd MMM yyyy"

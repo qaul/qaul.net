@@ -25,7 +25,7 @@ import java.util.*
 @SuppressLint("MissingPermission")
 class BleService : LifecycleService() {
     var bleCallback: BleScanCallBack? = null
-    private val TAG: String = BleService::class.java.simpleName
+    private val TAG: String = "qaul-blemodule BleService"
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var bleAdvertiseCallback: BleAdvertiseCallback? = null
     private var qaulId: ByteArray? = null

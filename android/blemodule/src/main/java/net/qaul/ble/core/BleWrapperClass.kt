@@ -37,7 +37,7 @@ import java.nio.charset.Charset
 
 @SuppressLint("MissingPermission")
 open class BleWrapperClass(context: Activity) {
-    private val TAG: String = BleWrapperClass::class.java.simpleName
+    private val TAG: String = "qaul-blemodule BleWrapperClass"
     private val context = context
     private var errorText = ""
     private var noRights = false
