@@ -7,7 +7,7 @@ import android.text.TextUtils
 
 object BLEUtils {
     private val HEX_ARRAY = "0123456789ABCDEF".toCharArray()
-    const val TAG = "BLEUtils"
+    const val TAG = "qaul-blemodule BLEUtils"
     fun byteToHex(byteArray: ByteArray?): String {
         val stringBuilder = StringBuffer()
 

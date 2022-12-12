@@ -18,7 +18,7 @@ import java.util.*
 class RemoteLog(private val context: Context) {
     private var bw: BufferedWriter? = null
     private var fw: FileWriter? = null
-    private val TAG = javaClass.simpleName
+    private val TAG:String = "qaul-blemodule RemoteLog"
     private var logDir: File? = null
     private val DIR_NAME: String = "LogFile"
     private val FILE_NAME: String = "log.txt"
