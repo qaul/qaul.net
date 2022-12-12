@@ -505,6 +505,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     companion object {
-        private val TAG = BleActor::class.java.simpleName
+        private val TAG:String = "qaul-blemodule BleActor"
     }
 }
