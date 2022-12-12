@@ -56,6 +56,10 @@ class _LogStorageManager {
   String get titlePrefix => 'qaul_log';
 
   Future<String> get _storeDirectory async {
+    if (Platform.isLinux && Platform.environment.containsKey('SNAP_COMMON')) {
+      return Future.value('${Platform.environment['SNAP_COMMON']}/Logs');
+    }
+
     final dir = (Platform.isAndroid)
         ? (await getExternalStorageDirectory())!.path
         : (await getApplicationSupportDirectory()).path;

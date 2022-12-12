@@ -18,6 +18,7 @@ apps:
     command: qaul
     extensions: [ flutter-stable ]
     plugs:
+      - home
       - network
     slots:
       - dbus-qaul
