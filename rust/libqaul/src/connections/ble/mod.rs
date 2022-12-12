@@ -165,8 +165,41 @@ impl Ble {
     fn info_received(message: proto::BleInfoResponse) {
         //ble.devices.extend(message.device);
         if let Some(device) = message.device {
+            // log received info
+            log::info!("=========================");
+            log::info!("BLE info received");
+            log::info!("-------------------------");
+            log::info!("BLE Supported: {}", device.ble_support);
+            log::info!("ID: {}", device.id);
+            log::info!("Name: {}", device.name);
+            log::info!("Bluetooth Enabled: {}", device.bluetooth_on);
+            log::info!("Advertisement Extended: {}", device.adv_extended);
+            if device.adv_extended {
+                log::info!("    bytes: {}", device.adv_extended_bytes);
+            }
+            log::info!("2M supported: {}", device.le_2m);
+            log::info!("LE coded supported: {}", device.le_coded);
+            log::info!("LE audio supported: {}", device.le_audio);
+            log::info!(
+                "LE periodic advertisement supported: {}",
+                device.le_periodic_adv_support
+            );
+            log::info!(
+                "LE multiple advertisement supported: {}",
+                device.le_multiple_adv_support
+            );
+            log::info!(
+                "offload filter supported: {}",
+                device.offload_filter_support
+            );
+            log::info!(
+                "offload scan batching supported: {}",
+                device.offload_scan_batching_support
+            );
+            log::info!("=========================");
+
+            // save to state
             {
-                // save to state
                 let mut ble = BLE.get().write().unwrap();
                 ble.devices.push(device);
             }
@@ -211,10 +244,11 @@ impl Ble {
     /// check start module result
     fn module_start_result(message: proto::BleStartResult) {
         if message.success {
+            log::info!("BLE Module sucessfully started");
             Self::status_set(ModuleStatus::StartSuccess);
         } else {
             // TODO: manage rights, etc.
-            log::error!("BLE start error: {}", message.error_message);
+            log::warn!("BLE start error: {}", message.error_message);
 
             match message.error_reason {
                 // proto::BleError::UnknownError
@@ -298,6 +332,8 @@ impl Ble {
     /// * BLE translation table
     /// * BLE Neighbours list
     fn node_discovered(small_id: Vec<u8>, node_id: Vec<u8>) {
+        log::info!("BLE node discovered");
+
         // create node entry
         let node = BleNode {
             id: node_id,
@@ -316,6 +352,7 @@ impl Ble {
         // add it to neighbours table
         match PeerId::from_bytes(&node.id) {
             Ok(node_id) => {
+                log::info!("    Node ID: {}", node_id.to_base58());
                 Neighbours::update_node(ConnectionModule::Ble, node_id, 50);
             }
             Err(e) => {
@@ -370,6 +407,7 @@ impl Ble {
 
     /// a new device got discovered via bluetooth
     fn device_discovered(message: proto::BleDeviceDiscovered) {
+        log::info!("BLE device discovered: {:?}", message.qaul_id.clone());
         // check if node is known
         if let Some(node) = Neighbours::node_from_small_id(message.qaul_id.clone()) {
             // add it to translation table
@@ -382,6 +420,10 @@ impl Ble {
 
     /// a formerly discovered device became unavailable
     fn device_unavailable(message: proto::BleDeviceUnavailable) {
+        log::info!(
+            "BLE device became unavailable: {:?}",
+            message.qaul_id.clone()
+        );
         // get state
         let mut nodes = NODES.get().write().unwrap();
 
@@ -410,6 +452,8 @@ impl Ble {
     ///
     /// Received identity information from another node
     fn identification_received(small_id: Vec<u8>, identification: proto_net::Identification) {
+        log::info!("BLE identification received from {:?}", small_id.clone());
+
         // add node id
         if let Some(node) = identification.node {
             // remove node from to_confirm
@@ -432,6 +476,7 @@ impl Ble {
     ///
     /// Send identity information to another node
     fn identification_send(_small_id: Vec<u8>, request: bool) {
+        log::info!("BLE send identity information");
         // get node ID
         let node_id = Node::get_id();
 
@@ -455,6 +500,7 @@ impl Ble {
     /// * sender_id: the small qaul id of the sending node (this node)
     /// * data: the binary data of the message to send
     pub fn message_send(receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
+        log::info!("BLE send message to {:?}", receiver_id.clone());
         // create a random UUID as message id
         let message_id = Uuid::new_v4().as_bytes().to_vec();
 
@@ -484,6 +530,7 @@ impl Ble {
     /// result of message sending
     fn message_send_result(result: proto::BleDirectSendResult) {
         if result.success {
+            log::info!("BLE message successfully sent")
         } else {
             log::error!("error sending BLE message");
         }
@@ -491,6 +538,7 @@ impl Ble {
 
     /// send routing info message
     pub fn send_routing_info(node_id: PeerId, data: Vec<u8>) {
+        log::info!("BLE send routing information");
         let message = proto_net::ble_message::Message::Info(data);
 
         Self::create_send_message(QaulId::to_small(node_id), message);
@@ -498,6 +546,8 @@ impl Ble {
 
     /// send messaging message
     pub fn send_messaging_message(node_id: PeerId, data: Vec<u8>) {
+        log::info!("BLE send messaging message to {}", node_id.to_base58());
+
         let message = proto_net::ble_message::Message::Messaging(data);
 
         Self::create_send_message(QaulId::to_small(node_id), message);
@@ -505,6 +555,8 @@ impl Ble {
 
     /// send feed message
     pub fn send_feed_message(_topic: Topic, data: Vec<u8>) {
+        log::info!("BLE send public message");
+
         // find all nodes, that are only connected through BLE
         let nodes = Neighbours::get_ble_only_nodes();
 
@@ -555,6 +607,7 @@ impl Ble {
         match proto_net::BleMessage::decode(&message.data[..]) {
             Ok(ble_message) => match ble_message.message {
                 Some(proto_net::ble_message::Message::Info(data)) => {
+                    log::info!("BLE routing info received");
                     let received = qaul_info::QaulInfoReceived {
                         received_from: node_id,
                         data,
@@ -562,6 +615,7 @@ impl Ble {
                     crate::router::info::RouterInfo::received(received);
                 }
                 Some(proto_net::ble_message::Message::Feed(data)) => {
+                    log::info!("BLE public message received");
                     match feed::proto_net::FeedContainer::decode(&data[..]) {
                         Ok(feed_container) => {
                             feed::Feed::received(ConnectionModule::Ble, node_id, feed_container);
@@ -572,6 +626,7 @@ impl Ble {
                     }
                 }
                 Some(proto_net::ble_message::Message::Messaging(data)) => {
+                    log::info!("BLE messaging message received");
                     let received = qaul_messaging::QaulMessagingReceived {
                         received_from: node_id,
                         data,
@@ -579,6 +634,7 @@ impl Ble {
                     messaging::Messaging::received(received);
                 }
                 Some(proto_net::ble_message::Message::Identification(identification)) => {
+                    log::info!("BLE identification received");
                     Self::identification_received(message.from, identification);
                 }
                 _ => {
