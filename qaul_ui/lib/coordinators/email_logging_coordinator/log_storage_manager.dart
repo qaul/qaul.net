@@ -57,14 +57,14 @@ class _LogStorageManager {
 
   Future<String> get _storeDirectory async {
     if (Platform.isLinux && Platform.environment.containsKey('SNAP_COMMON')) {
-      return Future.value('${Platform.environment['SNAP_COMMON']}/Logs');
+      return Future.value('${Platform.environment['SNAP_COMMON']}/ui_logs');
     }
 
     final dir = (Platform.isAndroid)
         ? (await getExternalStorageDirectory())!.path
         : (await getApplicationSupportDirectory()).path;
-    if (Platform.isWindows) return '$dir\\Logs';
-    return '$dir/Logs';
+    if (Platform.isWindows) return '$dir\\ui_logs';
+    return '$dir/ui_logs';
   }
 
   Future<bool> get isEmpty async => (await logs).map((e) => e.path).isEmpty;
