@@ -2,8 +2,16 @@
 
 ## Install Prerequisits
 
+Make sure you have the following tools installed, that you are 
+going to need for the further installation: git, curl
+
+```sh
+# Debian & Ubuntu
+sudo apt install git curl
+```
+
 * [Install Rust](qaul/rust/rust-install.md)
-* [Install Flutter](qaul//flutterflutter-install.md)
+* [Install Flutter](qaul/flutter/flutter-install.md)
 
 ## Clone Repository
 

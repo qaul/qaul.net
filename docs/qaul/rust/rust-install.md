@@ -7,12 +7,16 @@ on your computer.
 
 Easiest install is via rustup: <https://rustup.rs/>
 
+## Further Tools needed for Rust Compilation
 
-## On Linux
+Install the following additional tools:
 
-Install compiler tool chain for C code
+* compiler tool chain for C code
+* protobuf compiler: protoc
+
+### On Linux
 
 ```sh
 # Debian, Ubuntu, Mint
-sudo apt install build-essential
+sudo apt install build-essential protobuf-compiler
 ```
