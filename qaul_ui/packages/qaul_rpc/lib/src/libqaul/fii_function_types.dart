@@ -5,9 +5,9 @@ part of 'libqaul.dart';
 
 // start function
 // C function definition:
-//   void start();
-typedef StartFunctionRust = Void Function();
-typedef StartFunctionDart = void Function();
+//   void start(const char *s);
+typedef StartFunctionRust = Void Function(Pointer<Uint8>);
+typedef StartFunctionDart = void Function(Pointer<Uint8>);
 
 // start libqaul function on a desktop OS
 // C function definition:

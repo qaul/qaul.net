@@ -49,21 +49,35 @@ class LibqaulFFI extends LibqaulInterface {
 
   @override
   Future<void> start() async {
-    StartDesktopFunctionDart start;
     // check what system we are initializing
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    if (Platform.isLinux && Platform.environment.containsKey('SNAP_COMMON')) {
+      _log.finer("flutter start snap libqaul");
+      // start libqaul with path to storage location
+      final start =
+          _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+
+      final path = '${Platform.environment['SNAP_COMMON']}';
+
+      final pathBytes = Uint8List.fromList(path.codeUnits);
+      final buffer = malloc<Uint8>(pathBytes.length);
+
+      try {
+        for (var i = 0; i < pathBytes.length; i++) {
+          buffer[i] = pathBytes[i];
+        }
+
+        start(buffer);
+      } finally {
+        malloc.free(buffer);
+      }
+    } else {
       _log.finer("flutter start_desktop libqaul");
       // start libqaul with finding paths to save the configuration files
-      start = _lib!
+      final start = _lib!
           .lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>(
               'start_desktop');
-    } else {
-      _log.finer("flutter start libqaul");
-      // start libqaul without path to storage location
-      start =
-          _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+      start();
     }
-    start();
   }
 
   @override
