@@ -20,6 +20,7 @@ apps:
     plugs:
       - home
       - network
+      - process-control
     slots:
       - dbus-qaul
 
