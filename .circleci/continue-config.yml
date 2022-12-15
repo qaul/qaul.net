@@ -1012,6 +1012,11 @@ workflows:
         jobs:
             - test-flutter
             - analyze-flutter
+            - integration-test-flutter-ios:
+                filters:
+                    branches:
+                        only:
+                            - main
             - integration-test-flutter-macos:
                 filters:
                     branches:
@@ -1059,11 +1064,9 @@ workflows:
                 requires:
                     - build-and-deploy-flutter-ios
         when:
-            and:
-                - false
-                - or:
-                    - << pipeline.parameters.run-flutter-tagged-workflow >>
-                    - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+            or:
+                - << pipeline.parameters.run-flutter-tagged-workflow >>
+                - << pipeline.parameters.run-flutter-ios-tagged-workflow >>
     build-and-deploy-flutter-linux:
         jobs:
             - verify-version-flutter:
