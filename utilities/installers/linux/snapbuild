@@ -33,7 +33,7 @@ if [ -d local ]; then rm -rf local; fi
 mkdir local
 
 openssl aes-256-cbc -d \
-  -in credentials.enc \
+  -in snap_credentials.enc \
   -out local/snapcraft.login \
   -k "$SNAPCRAFT_CREDENTIALS_KEY"
 
