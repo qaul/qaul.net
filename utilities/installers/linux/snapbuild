@@ -29,13 +29,23 @@ echo "Updating app version on snapcraft.yaml and logging into snapcraft..."
 sed -i "s/^version:.*$/version: $VERSION/g" snapcraft.yaml
 
 mkdir -p local
-echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > local/snapcraft.login
+#echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > local/snapcraft.login
+echo "$SNAPCRAFT_LOGIN_FILE" > local/snapcraft.login
 
-echo "credentials are: '$SNAPCRAFT_LOGIN_FILE'"
+echo "credentials are: '${SNAPCRAFT_LOGIN_FILE}'"
 
 snapcraft login --with local/snapcraft.login
 
 cd .. || exit 0
+
+if ! which flutter > /dev/null; then
+    echo ""
+    echo "Flutter not found, installing..."
+    echo "Installing Flutter..."
+    FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) "3.3.1")
+    echo "export PATH=${FL_PATH}:${PATH}"
+    flutter pub get
+fi
 
 echo ""
 echo "Building Flutter application..."
