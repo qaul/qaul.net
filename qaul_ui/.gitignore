@@ -149,6 +149,8 @@ unlinked_spec.ds
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
 **/linux/flutter/generated_plugins.cmake
+**/snap/local/
+**/snap/local/snapcraft.login
 
 # Coverage
 coverage/
