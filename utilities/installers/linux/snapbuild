@@ -1,4 +1,5 @@
 #! /bin/bash
+set -eo pipefail
 
 # required to upgrade ubuntu base due to incompatible libraries
 echo "Updating dependencies..."
@@ -42,7 +43,7 @@ if ! which flutter > /dev/null; then
     echo ""
     echo "Flutter not found, installing..."
     FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) "3.3.1")
-    echo "export PATH=${FL_PATH}:${PATH}"
+    export PATH="${FL_PATH}:${PATH}"
     flutter pub get
 fi
 
