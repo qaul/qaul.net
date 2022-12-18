@@ -61,7 +61,7 @@ snapcraft
 mv ./*.snap "qaul-$VERSION.snap"
 
 # if file contains string "devmode" then it is not a release build
-if grep -q "confinement: devmode" "snapcraft.yaml"; then
+if grep -q "confinement: devmode" "snap/snapcraft.yaml"; then
   echo "Snap built with devmode enabled. Publishing to beta branch."
   snapcraft upload "qaul-$VERSION.snap" --release=beta
 else
