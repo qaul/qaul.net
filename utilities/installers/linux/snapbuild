@@ -53,7 +53,7 @@ cd .. || exit 0
 
 echo ""
 echo "Copying liblibqaul.so to /usr/lib..."
-cp ../rust/target/release/libqaul.so /usr/lib
+cp ../rust/target/release/liblibqaul.so /usr/lib
 
 echo ""
 echo "Building Flutter application..."
