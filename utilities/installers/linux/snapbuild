@@ -59,6 +59,13 @@ git config --global --add safe.directory /root/development/flutter
 snapcraft
 
 mv ./*.snap "qaul-$VERSION.snap"
-snapcraft upload "qaul-$VERSION.snap" --release=stable
+
+# if file contains string "devmode" then it is not a release build
+if grep -q "confinement: devmode" "snapcraft.yaml"; then
+  echo "Snap built with devmode enabled. Publishing to beta branch."
+  snapcraft upload "qaul-$VERSION.snap" --release=beta
+else
+  snapcraft upload "qaul-$VERSION.snap" --release=stable
+fi
 
 realpath "qaul-$VERSION.snap"
