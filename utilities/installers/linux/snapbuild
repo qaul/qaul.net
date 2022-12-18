@@ -52,6 +52,10 @@ snapcraft login --with local/snapcraft.login
 cd .. || exit 0
 
 echo ""
+echo "Copying liblibqaul.so to /usr/lib..."
+cp ../rust/target/release/libqaul.so /usr/lib
+
+echo ""
 echo "Building Flutter application..."
 
 git config --global --add safe.directory /root/development/flutter
@@ -60,7 +64,6 @@ snapcraft
 
 mv ./*.snap "qaul-$VERSION.snap"
 
-# if file contains string "devmode" then it is not a release build
 if grep -q "confinement: devmode" "snap/snapcraft.yaml"; then
   echo "Snap built with devmode enabled. Publishing to beta branch."
   snapcraft upload "qaul-$VERSION.snap" --release=beta

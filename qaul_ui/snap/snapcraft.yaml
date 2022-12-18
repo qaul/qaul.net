@@ -30,3 +30,7 @@ parts:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
+
+layout:
+  /usr/lib/liblibqaul.so:
+    bind-file: $SNAP/bin/lib/liblibqaul.so
