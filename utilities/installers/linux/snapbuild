@@ -1,7 +1,6 @@
 #! /bin/bash
 set -eo pipefail
 
-
 if ! which flutter > /dev/null; then
   echo "Flutter not found. Please install Flutter before running this script." >&2
   exit 1
@@ -12,7 +11,12 @@ echo "Updating dependencies..."
 
 sed -i "s/xenial/focal/g" /etc/apt/sources.list
 apt-get -qq update
-apt-get -qq install -y wget tar unzip zip lib32stdc++6 lib32z1 git clang cmake ninja-build pkg-config libgtk-3-dev curl apt-utils openssl
+apt-get -qq install -y wget tar unzip zip lib32stdc++6 lib32z1 git clang cmake ninja-build pkg-config libgtk-3-dev curl apt-utils
+
+echo ""
+
+flutter config --enable-linux-desktop
+flutter doctor --verbose
 
 echo ""
 echo "Retrieving application version..."
@@ -43,7 +47,6 @@ mkdir local
 #  -out local/snapcraft.login \
 #  -k "$SNAPCRAFT_CREDENTIALS_KEY"
 echo "$SNAPCRAFT_LOGIN_FILE" | base64 --decode --ignore-garbage > local/snapcraft.login
-
 snapcraft login --with local/snapcraft.login
 
 cd .. || exit 0
@@ -51,7 +54,7 @@ cd .. || exit 0
 echo ""
 echo "Building Flutter application..."
 
-git config --global --add safe.directory "$FL_PATH"
+git config --global --add safe.directory /root/development/flutter
 
 snapcraft
 
