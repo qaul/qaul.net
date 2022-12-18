@@ -21,6 +21,7 @@ apps:
       - home
       - network
       - process-control
+      - system-observe
     slots:
       - dbus-qaul
 
