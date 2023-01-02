@@ -26,11 +26,15 @@ apps:
       - dbus-qaul
 
 parts:
+  add-libqaul:
+    plugin: dump
+    source: https://github.com/qaul/qaul.net/releases/download/latest/liblibqaul.so
+    organize:
+      liblibqaul.so: $SNAP/bin/lib/liblibqaul.so
+
   qaul:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
-
-layout:
-  /usr/lib/liblibqaul.so:
-    bind-file: $SNAP/bin/lib/liblibqaul.so
+    after:
+      - add-libqaul
