@@ -28,7 +28,7 @@ apps:
 parts:
   add-libqaul:
     plugin: dump
-    source: https://github.com/qaul/qaul.net/releases/download/latest/liblibqaul.so
+    source: ../rust/target/release/libqaul.so
     organize:
       liblibqaul.so: $SNAP/bin/lib/liblibqaul.so
 
