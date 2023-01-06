@@ -3,9 +3,67 @@ version: 2.0.0-beta.12
 summary: qaul - Internet Independent Wireless Mesh Communication App
 description: Communicate directly from device to device via your local wifi network, or via the shared wifi network of your phone. Mesh local clouds together via manually added static nodes. Use this peer to peer communication method to communicate internet independently and completely off-the-grid.
 
-confinement: strict
-base: core18
-grade: stable
+base: core22
+
+grade: devel
+confinement: devmode
+
+
+parts:
+  flutter-git:
+    source: https://github.com/flutter/flutter.git
+    source-branch: stable
+    plugin: nil
+    override-build: |
+      set -eux
+      mkdir -p $CRAFT_PART_INSTALL/usr/bin
+      mkdir -p $CRAFT_PART_INSTALL/usr/libexec
+      cp -r $CRAFT_PART_SRC $CRAFT_PART_INSTALL/usr/libexec/flutter
+      ln -sf $CRAFT_PART_INSTALL/usr/libexec/flutter/bin/flutter $CRAFT_PART_INSTALL/usr/bin/flutter
+      export PATH="$CRAFT_PART_INSTALL/usr/bin:$PATH"
+      flutter doctor
+      flutter channel stable
+      flutter upgrade
+    build-packages:
+      - clang
+      - cmake
+      - curl
+      - ninja-build
+      - unzip
+    override-prime: ''
+
+  rust-deps:
+    plugin: nil
+    build-packages:
+      - curl
+    override-pull: |
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+  libqaul:
+    plugin: rust
+    #rust-path: [libqaul]
+    source: https://github.com/qaul/qaul.net.git
+    after: [rust-deps]
+    build-packages:
+      - protobuf-compiler
+    override-build: |
+      ls -alt
+      cd rust || exit 1
+      cargo build --release
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin/lib
+      cp target/release/liblibqaul.so $SNAPCRAFT_PART_INSTALL/bin/lib
+
+  qaul:
+    plugin: nil
+    source: .
+    after: [flutter-git]
+    override-build: |
+      set -eux
+      flutter pub get || true
+      flutter build linux --release -v
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp -r build/linux/*/release/bundle/* $CRAFT_PART_INSTALL/bin/
+
 
 slots:
   dbus-qaul:
@@ -13,18 +71,18 @@ slots:
     bus: session
     name: net.qaul.qaul
 
+
+environment:
+  LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib
+
+
 apps:
   qaul:
-    command: qaul
-    extensions: [ flutter-stable ]
+    command: bin/qaul
+    extensions: [gnome]
     plugs:
       - home
       - network
+      - network-bind
     slots:
       - dbus-qaul
-
-parts:
-  qaul:
-    source: .
-    plugin: flutter
-    flutter-target: lib/main.dart

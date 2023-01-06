@@ -28,7 +28,12 @@ class LibqaulFFI extends LibqaulInterface {
     if (Platform.isLinux) {
       // find the library in the rust target build folder
       // TODO: target Raspberry
-      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
+      if (Platform.isLinux && Platform.environment.containsKey('SNAP')) {
+        _lib = DynamicLibrary.open(
+            '${Platform.environment['SNAP']}/bin/lib/liblibqaul.so');
+      } else {
+        _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
+      }
     } else if (Platform.isMacOS) {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open('liblibqaul.dylib');
