@@ -6,21 +6,22 @@ description: Communicate directly from device to device via your local wifi netw
 base: core22
 
 grade: devel
-confinement: devmode
+confinement: strict
 
 
 parts:
   flutter-git:
     source: https://github.com/flutter/flutter.git
     source-branch: stable
+    source-depth: 1
     plugin: nil
     override-build: |
       set -eux
-      mkdir -p $CRAFT_PART_INSTALL/usr/bin
-      mkdir -p $CRAFT_PART_INSTALL/usr/libexec
-      cp -r $CRAFT_PART_SRC $CRAFT_PART_INSTALL/usr/libexec/flutter
-      ln -sf $CRAFT_PART_INSTALL/usr/libexec/flutter/bin/flutter $CRAFT_PART_INSTALL/usr/bin/flutter
-      export PATH="$CRAFT_PART_INSTALL/usr/bin:$PATH"
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/libexec
+      cp -r $SNAPCRAFT_PART_SRC $SNAPCRAFT_PART_INSTALL/usr/libexec/flutter
+      ln -sf $SNAPCRAFT_PART_INSTALL/usr/libexec/flutter/bin/flutter $SNAPCRAFT_PART_INSTALL/usr/bin/flutter
+      export PATH="$SNAPCRAFT_PART_INSTALL/usr/bin:$PATH"
       flutter doctor
       flutter channel stable
       flutter upgrade
@@ -41,13 +42,11 @@ parts:
 
   libqaul:
     plugin: rust
-    #rust-path: [libqaul]
     source: https://github.com/qaul/qaul.net.git
     after: [rust-deps]
     build-packages:
       - protobuf-compiler
     override-build: |
-      ls -alt
       cd rust || exit 1
       cargo build --release
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin/lib
@@ -61,28 +60,38 @@ parts:
       set -eux
       flutter pub get || true
       flutter build linux --release -v
-      mkdir -p $CRAFT_PART_INSTALL/bin
-      cp -r build/linux/*/release/bundle/* $CRAFT_PART_INSTALL/bin/
-
-
-slots:
-  dbus-qaul:
-    interface: dbus
-    bus: session
-    name: net.qaul.qaul
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/gui
+      cp -r build/linux/*/release/bundle/* $SNAPCRAFT_PART_INSTALL/bin/
+      cp -r snap/gui/* $SNAPCRAFT_PART_INSTALL/gui/
 
 
 environment:
   LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib
 
 
+slots:
+  dbus-qaul:
+    interface: dbus
+    name: net.qaul.app
+    bus: session
+
+
 apps:
   qaul:
     command: bin/qaul
-    extensions: [gnome]
+    desktop: gui/qaul.desktop
+#    common-id: net.qaul.app.desktop
+#    extensions: [gnome]
+    extensions:
+      - gnome-3-38
     plugs:
-      - home
+      - desktop
+      - desktop-legacy
       - network
       - network-bind
+      - network-manager
+      - network-manager-observe
+      - process-control
     slots:
       - dbus-qaul
