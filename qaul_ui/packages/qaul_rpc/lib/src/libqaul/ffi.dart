@@ -28,7 +28,11 @@ class LibqaulFFI extends LibqaulInterface {
     if (Platform.isLinux) {
       // find the library in the rust target build folder
       // TODO: target Raspberry
-      _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
+      try{
+        _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
+      } catch (e) {
+        debugPrint("$e");
+      }
     } else if (Platform.isMacOS) {
       // find the library in the rust target build folder
       _lib = DynamicLibrary.open('liblibqaul.dylib');
@@ -50,13 +54,13 @@ class LibqaulFFI extends LibqaulInterface {
   @override
   Future<void> start() async {
     // check what system we are initializing
-    if (Platform.isLinux && Platform.environment.containsKey('SNAP_COMMON')) {
+    if (Platform.isLinux && Platform.environment.containsKey('SNAP_USER_COMMON')) {
       _log.finer("flutter start snap libqaul");
       // start libqaul with path to storage location
       final start =
           _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
 
-      final path = '${Platform.environment['SNAP_COMMON']}';
+      final path = '${Platform.environment['SNAP_USER_COMMON']}';
 
       final pathBytes = Uint8List.fromList(path.codeUnits);
       final buffer = malloc<Uint8>(pathBytes.length);
