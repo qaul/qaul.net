@@ -19,12 +19,68 @@ apps:
     extensions: [ flutter-stable ]
     plugs:
       - home
+      - mount-observe
       - network
+      - process-control
+      - system-observe
+
     slots:
       - dbus-qaul
 
 parts:
+  rust-deps:
+    plugin: nil
+    build-packages:
+      - curl
+    override-pull: |
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+  libqaul:
+    plugin: nil
+    source: https://github.com/qaul/qaul.net.git
+    after: [ rust-deps ]
+    build-packages:
+      - protobuf-compiler
+    override-build: |
+      export PATH="$HOME/.cargo/bin:$PATH"
+      cargo --version
+
+      cd rust/libqaul || exit 1
+      
+      rm build.rs
+      cargo build --release
+      
+      cd ..
+
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin/lib
+      cp target/release/liblibqaul.so $SNAPCRAFT_PART_INSTALL/bin/lib
+
   qaul:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
+    override-pull: |
+      snapcraftctl pull
+      flutter clean
+    override-build: |
+      BEFORE="_lib = DynamicLibrary.open('../rust/target/\$mode/liblibqaul.so');"
+      AFTER="_lib = DynamicLibrary.open('\${Platform.environment['SNAP']}/bin/lib/liblibqaul.so');"
+      sed -i -e "s|$BEFORE|$AFTER|g" packages/qaul_rpc/lib/src/libqaul/ffi.dart
+      
+      snapcraftctl build
+
+  assets:
+    plugin: nil
+    stage-packages:
+      - dmz-cursor-theme
+      - fonts-dejavu
+      - fonts-freefont-ttf
+      - fonts-ubuntu
+
+layout:
+  /usr/share/fonts:
+    bind: $SNAP/usr/share/fonts
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+  /usr/share/icons:
+    bind: $SNAP/usr/share/icons
