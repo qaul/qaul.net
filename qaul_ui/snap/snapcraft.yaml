@@ -84,3 +84,6 @@ layout:
     bind: $SNAP/etc/fonts
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
+
+environment:
+  LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib
