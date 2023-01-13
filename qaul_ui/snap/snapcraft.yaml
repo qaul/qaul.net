@@ -41,6 +41,9 @@ parts:
     after: [ rust-deps ]
     build-packages:
       - protobuf-compiler
+      - libc-bin
+    stage-packages:
+      - libc-bin
     override-build: |
       export PATH="$HOME/.cargo/bin:$PATH"
       cargo --version
@@ -86,4 +89,4 @@ layout:
     bind: $SNAP/usr/share/icons
 
 environment:
-  LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib
+  LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib:/var/lib/snapd/snap/core18
