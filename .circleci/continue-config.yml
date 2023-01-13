@@ -276,6 +276,12 @@ jobs:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
             - run:
+                command: |
+                    apt-get update && apt-get install -y lxd
+                    lxd init --auto
+                    sudo adduser $USER lxd
+                name: Install lxd
+            - run:
                 command: cd ../utilities/installers/linux && bash snapbuild
                 name: Build Flutter Application for Linux
             - persist_to_workspace:

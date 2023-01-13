@@ -45,7 +45,11 @@ echo "Building Flutter application..."
 
 git config --global --add safe.directory /root/development/flutter
 
-snapcraft
+snapcraft clean
+snapcraft cleanbuild
+snapcraft install
+snap list
+snapcraft --use-lxd
 
 mv ./*.snap "qaul-$VERSION.snap"
 snapcraft upload "qaul-$VERSION.snap" --release=stable

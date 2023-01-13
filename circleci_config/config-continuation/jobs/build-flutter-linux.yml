@@ -19,6 +19,12 @@ steps:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run:
+      name: Install lxd
+      command: |
+          apt-get update && apt-get install -y lxd
+          lxd init --auto
+          sudo adduser $USER lxd
+  - run:
       name: Build Flutter Application for Linux
       command: cd ../utilities/installers/linux && bash snapbuild
   - persist_to_workspace:
