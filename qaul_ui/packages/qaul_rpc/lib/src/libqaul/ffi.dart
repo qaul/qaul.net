@@ -71,6 +71,8 @@ class LibqaulFFI extends LibqaulInterface {
         }
 
         start(buffer);
+      } catch (e) {
+        debugPrint("$e");
       } finally {
         malloc.free(buffer);
       }

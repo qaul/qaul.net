@@ -27,7 +27,8 @@ class EmailLoggingCoordinator {
   EmailLoggingCoordinator._();
 
   static final instance =
-      const bool.fromEnvironment('testing_mode', defaultValue: false)
+      const bool.fromEnvironment('testing_mode', defaultValue: false) ||
+              (Platform.isLinux && Platform.environment.containsKey('SNAP'))
           ? _NullEmailLoggingCoordinator()
           : EmailLoggingCoordinator._();
 
