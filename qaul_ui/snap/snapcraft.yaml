@@ -21,6 +21,7 @@ apps:
       - home
       - mount-observe
       - network
+      - network-control
       - process-control
       - system-observe
 
