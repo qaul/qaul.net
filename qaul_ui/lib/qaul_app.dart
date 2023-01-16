@@ -136,6 +136,19 @@ class QaulApp extends PlatformAwareBuilder {
                   Intl.defaultLocale = locale.toLanguageTag();
                   return locale;
                 }
+
+                final List<Locale> systemLocales = WidgetsBinding.instance.window.locales;
+                for (final systemLocale in systemLocales) {
+                  final lang = Locale.fromSubtags(languageCode: systemLocale.languageCode);
+                  if (supportedLocales.contains(systemLocale)) {
+                    Intl.defaultLocale = systemLocale.toLanguageTag();
+                    return systemLocale;
+                  } else if (supportedLocales.contains(lang)) {
+                    Intl.defaultLocale = systemLocale.toLanguageTag();
+                    return lang;
+                  }
+                }
+
                 return const Locale.fromSubtags(languageCode: 'en');
               },
               builder: (context, child) {
