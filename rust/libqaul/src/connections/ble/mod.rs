@@ -169,6 +169,11 @@ impl Ble {
             log::info!("=========================");
             log::info!("BLE info received");
             log::info!("-------------------------");
+            log::info!("This Devices ID");
+            let node_id = Node::get_id();
+            log::info!("- Node ID: {}", node_id.to_base58());
+            log::info!("- Small Node ID: {:?}", QaulId::to_small(node_id));
+            log::info!("-------------------------");
             log::info!("BLE Supported: {}", device.ble_support);
             log::info!("ID: {}", device.id);
             log::info!("Name: {}", device.name);
@@ -213,6 +218,8 @@ impl Ble {
 
     /// start module
     pub fn module_start() {
+        log::info!("BLE send start request");
+
         let qaul_id;
         {
             let ble = BLE.get().write().unwrap();
@@ -243,8 +250,9 @@ impl Ble {
 
     /// check start module result
     fn module_start_result(message: proto::BleStartResult) {
+        log::info!("BLE module start result received");
         if message.success {
-            log::info!("BLE Module sucessfully started");
+            log::info!("BLE Module successfully started");
             Self::status_set(ModuleStatus::StartSuccess);
         } else {
             // TODO: manage rights, etc.
@@ -253,14 +261,15 @@ impl Ble {
             match message.error_reason {
                 // proto::BleError::UnknownError
                 0 => {
-                    log::error!("BLE unknown error");
+                    log::error!("BLE unknown start error");
                 }
                 // proto::BleError::RightsMissing
                 1 => {
-                    log::error!("BLE rights missing");
+                    log::warn!("BLE rights missing");
 
                     // request rights from GUI
                     // create rights request message
+                    log::info!("BLE rights requested");
                     let rights_request = proto_rpc::RightsRequest {};
 
                     // create BLE RPC message
@@ -284,17 +293,19 @@ impl Ble {
                 }
                 // proto::BleError::Timeout
                 2 => {
-                    log::error!("BLE timeout error");
+                    log::error!("BLE start timeout error");
                 }
                 _ => {
-                    log::error!("BLE undefined error");
+                    log::error!("BLE undefined start error");
                 }
             }
         }
     }
 
-    /// start module
+    /// stop module
     pub fn module_stop() {
+        log::info!("BLE send stop request");
+
         // create stop message
         let message = proto::BleStopRequest {};
 
@@ -316,6 +327,7 @@ impl Ble {
     /// check start module result
     fn module_stop_result(message: proto::BleStopResult) {
         if message.success {
+            log::info!("BLE module successfully stopped");
             // update module status
             Self::status_set(ModuleStatus::Stopped);
         } else {
@@ -410,9 +422,14 @@ impl Ble {
         log::info!("BLE device discovered: {:?}", message.qaul_id.clone());
         // check if node is known
         if let Some(node) = Neighbours::node_from_small_id(message.qaul_id.clone()) {
+            log::info!(
+                "BLE discovered Node ID: {}",
+                QaulId::bytes_to_log_string(&node.id)
+            );
             // add it to translation table
             Self::node_discovered(message.qaul_id, node.id);
         } else {
+            log::info!("BLE discovered Node ID unknown");
             // confirm node
             Self::node_to_confirm(message.qaul_id);
         }
@@ -475,8 +492,9 @@ impl Ble {
     /// Send Identification
     ///
     /// Send identity information to another node
-    fn identification_send(_small_id: Vec<u8>, request: bool) {
+    fn identification_send(receiver_small_id: Vec<u8>, request: bool) {
         log::info!("BLE send identity information");
+
         // get node ID
         let node_id = Node::get_id();
 
@@ -491,7 +509,7 @@ impl Ble {
         // create unified message
         let message = proto_net::ble_message::Message::Identification(identification);
 
-        Self::create_send_message(QaulId::to_small(node_id), message);
+        Self::create_send_message(receiver_small_id, message);
     }
 
     /// send message
@@ -570,7 +588,7 @@ impl Ble {
     }
 
     /// create the message
-    fn create_send_message(small_id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(receiver_small_id: Vec<u8>, message: proto_net::ble_message::Message) {
         // get small qaul id of this node
         let sender_id = Node::get_small_id();
 
@@ -586,7 +604,7 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Self::message_send(small_id, sender_id, buf);
+        Self::message_send(receiver_small_id, sender_id, buf);
     }
 
     /// BLE message received
@@ -769,6 +787,7 @@ impl Ble {
                     }
                     Some(proto_rpc::ble::Message::RightsResult(rights_result)) => {
                         if rights_result.rights_granted {
+                            log::info!("BLE rights granted");
                             Self::module_start();
                         } else {
                             log::error!("BLE rights not granted");
