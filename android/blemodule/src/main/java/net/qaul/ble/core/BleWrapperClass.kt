@@ -102,14 +102,14 @@ open class BleWrapperClass(context: Activity) {
             if(callback != null)
                 bleCallback = callback
 
-            Log.e(TAG, bleReq.messageCase.toString())
+            Log.i(TAG, bleReq.messageCase.toString())
             when (bleReq.messageCase) {
                 BleOuterClass.Ble.MessageCase.INFO_REQUEST -> {
                     getDeviceInfo()
                 }
                 BleOuterClass.Ble.MessageCase.START_REQUEST -> {
                     qaulId = bleReq.startRequest.qaulId.toByteArray()
-                    AppLog.e(TAG, "qaulid : " + qaulId?.size)
+                    AppLog.i(TAG, "qaulid : " + qaulId?.size)
                     advertMode = bleReq.startRequest.powerSetting.toString()
                     if (qaulId != null) {
                         startService(context = context)
@@ -146,6 +146,7 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will send response message to App & libqaul library
      */
     private fun sendResponse(bleRes:BleOuterClass.Ble.Builder) {
+        Log.i(TAG, "sendResponse()")
         mHandler?.post{
             //callback response for App
 
@@ -161,6 +162,8 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will Stop the Service & Advertisement.
      */
     private fun stopService() {
+        Log.i(TAG, "stopService()")
+
         if (BleService().isRunning()) {
             BleService.bleService?.stop()
         } else {
@@ -177,14 +180,22 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will Start BLEService
      */
     private fun startService(context: Context) {
+        Log.i(TAG, "startService()")
+
         if (isBleScanConditionSatisfy()) {
+            Log.i(TAG, "startService() isBleScanConditionSatisfy")
+
             if (!BleService().isRunning()) {
+                Log.i(TAG, "startService() is not running")
+
                 BleService().start(context = context)
                 Handler(Looper.myLooper()!!).postDelayed({
                     startAdvertiseAndCallback()
                     startScanAndCallback()
                 }, 500)
             } else {
+                Log.i(TAG, "startService() is already running")
+
                 if (BleService.bleService!!.isAdvertiserRunning()) {
                     AppLog.e(TAG, "Already Started")
                     val bleRes = BleOuterClass.Ble.newBuilder()
@@ -219,6 +230,8 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private fun startAdvertiseAndCallback() {
+        Log.i(TAG, "startAdvertiseAndCallback()")
+
         if (qaulId != null) {
             BleService.bleService?.startAdvertise(
                 qaul_id = qaulId!!, mode = advertMode,
@@ -271,6 +284,8 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will Assign Callback & Data to Start Scan and Receive Callback
      */
     private fun startScanAndCallback() {
+        Log.i(TAG, "startScanAndCallback()")
+
         BleService.bleService?.startScan(
             object : BleService.BleScanCallBack {
                 override fun startScanRes(
@@ -345,6 +360,8 @@ open class BleWrapperClass(context: Activity) {
      * This Method Return Device Information Regarding BLE Functionality & Permissions
      */
     private fun getDeviceInfo() {
+        Log.i(TAG, "getDeviceInfo()")
+
         val bluetoothManager =
             context.getSystemService(LifecycleService.BLUETOOTH_SERVICE) as BluetoothManager
         val adapter = bluetoothManager.adapter
@@ -488,6 +505,8 @@ open class BleWrapperClass(context: Activity) {
      * Request User to Enable Bluetooth
      */
     private fun enableBluetooth(context: Activity, requestCode: Int): Boolean {
+        Log.i(TAG, "enableBluetooth()")
+
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
@@ -509,6 +528,8 @@ open class BleWrapperClass(context: Activity) {
      * Disable Bluetooth
      */
     private fun disableBluetooth(): Boolean {
+        Log.i(TAG, "disableBluetooth()")
+
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
@@ -521,6 +542,8 @@ open class BleWrapperClass(context: Activity) {
      */
     private fun isBluetoothPermissionAllowed(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Log.i(TAG, "isBluetoothPermissionAllowed() Yes")
+
             return hasPermission(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
@@ -529,6 +552,7 @@ open class BleWrapperClass(context: Activity) {
                 )
             )
         }
+        Log.i(TAG, "isBluetoothPermissionAllowed() No")
         return false
     }
 
@@ -536,6 +560,8 @@ open class BleWrapperClass(context: Activity) {
      * Checks if Location Permission is Allowed or Not
      */
     private fun isLocationPermissionAllowed(): Boolean {
+        Log.i(TAG, "isLocationPermissionAllowed()")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return hasPermission(
                 arrayOf(
@@ -552,6 +578,8 @@ open class BleWrapperClass(context: Activity) {
      * Checks if Given Permissions (input as array) are Allowed or Not
      */
     private fun hasPermission(permissions: Array<String>?): Boolean {
+        Log.i(TAG, "hasPermission()")
+
         if (permissions != null) {
             for (permission in permissions) {
                 if (ActivityCompat.checkSelfPermission(
@@ -571,6 +599,8 @@ open class BleWrapperClass(context: Activity) {
         activity: Activity?,
         requestCode: Int
     ) {
+        Log.i(TAG, "enableLocationPermission()")
+
         ActivityCompat.requestPermissions(
             activity!!,
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -585,6 +615,8 @@ open class BleWrapperClass(context: Activity) {
         activity: Activity?,
         requestCode: Int
     ) {
+        Log.i(TAG, "enableBlePermission()")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             ActivityCompat.requestPermissions(
                 activity!!,
@@ -602,6 +634,8 @@ open class BleWrapperClass(context: Activity) {
      * Request User to Turn On Location
      */
     private fun enableLocation(context: Activity, locationReqCode: Int) {
+        Log.i(TAG, "enableLocation()")
+
         val googleApiClient: GoogleApiClient = GoogleApiClient.Builder(context)
             .addApi(LocationServices.API).build()
         googleApiClient.connect()
@@ -625,7 +659,7 @@ open class BleWrapperClass(context: Activity) {
                     "All location settings are satisfied."
                 )
                 LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
-                    AppLog.i(
+                    AppLog.e(
                         TAG,
                         "Location settings are not satisfied. Show the user a dialog to upgrade location settings "
                     )
@@ -634,13 +668,13 @@ open class BleWrapperClass(context: Activity) {
                         // in onActivityResult().
                         status.startResolutionForResult(activity1, locationReqCode)
                     } catch (e: IntentSender.SendIntentException) {
-                        AppLog.i(
+                        AppLog.e(
                             TAG,
                             "PendingIntent unable to execute request."
                         )
                     }
                 }
-                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> AppLog.i(
+                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> AppLog.e(
                     TAG,
                     "Location settings are inadequate, and cannot be fixed here. Dialog not created."
                 )
@@ -649,9 +683,11 @@ open class BleWrapperClass(context: Activity) {
     }
 
     /**
-     * Checks if BLE Regarding All the Requirements Are Satisfies or Not
+     * Checks if BLE Regarding All the Requirements Are Satisfied or Not
      */
     private fun isBleScanConditionSatisfy(): Boolean {
+        Log.i(TAG, "isBleScanConditionsSatisfy()")
+
         var isBleScanConditionSatisfy = true
         if (!isBLeSupported()) {
             AppLog.e(TAG, "isBLeSupport : false")
@@ -700,6 +736,8 @@ open class BleWrapperClass(context: Activity) {
     }
 
     fun onResult(requestCode: Int, status: Boolean) {
+        Log.i(TAG, "onResult()")
+        
         when {
             !status -> {
                 when (requestCode) {
