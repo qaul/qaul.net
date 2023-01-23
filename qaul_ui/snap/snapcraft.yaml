@@ -73,9 +73,11 @@ parts:
       
       snapcraftctl build
 
-  assets:
+  # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
+  assets-and-dependencies:
     plugin: nil
     stage-packages:
+      - zenity
       - dmz-cursor-theme
       - fonts-dejavu
       - fonts-freefont-ttf
