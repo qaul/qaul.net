@@ -248,7 +248,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               onAttachmentPressed: (room.messages?.isEmpty ?? true)
                   ? null
                   : ({types.PartialText? text}) async {
-                      final result = await FilePicker.platform.pickFiles();
+                      FilePickerResult? result;
+                      try {
+                        result = await FilePicker.platform.pickFiles();
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
 
                       if (result != null && result.files.single.path != null) {
                         File file = File(result.files.single.path!);
