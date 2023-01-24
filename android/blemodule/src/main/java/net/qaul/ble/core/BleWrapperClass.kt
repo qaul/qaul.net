@@ -704,6 +704,7 @@ open class BleWrapperClass(context: Activity) {
                 RemoteLog[context]!!.addDebugLog("$TAG:isBluetoothPermissionGranted() : false")
                 isBleScanConditionSatisfy = false
                 enableBlePermission(context, BLE_PERMISSION_REQ_CODE_12)
+                // TODO: Catch permission result, request location permission & send startResult message
                 return false
             }
         } else {
@@ -715,6 +716,7 @@ open class BleWrapperClass(context: Activity) {
                 RemoteLog[context]!!.addDebugLog("$TAG:isLocationPermissionGranted() : false")
                 isBleScanConditionSatisfy = false
                 enableLocationPermission(context, LOCATION_PERMISSION_REQ_CODE)
+                // TODO Catch permission result & send startResult message
                 return false
             }
         }
@@ -737,7 +739,7 @@ open class BleWrapperClass(context: Activity) {
 
     fun onResult(requestCode: Int, status: Boolean) {
         Log.i(TAG, "onResult()")
-        
+
         when {
             !status -> {
                 when (requestCode) {
