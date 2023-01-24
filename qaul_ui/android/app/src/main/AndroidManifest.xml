@@ -23,6 +23,9 @@
     <!-- Android 12 and higher -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Android 13 and higher -->
     <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
 
     <!-- Storage Permissions only needed for Android ...  -->
