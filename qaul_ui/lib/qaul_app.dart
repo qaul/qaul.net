@@ -144,7 +144,7 @@ class QaulApp extends PlatformAwareBuilder {
                     Intl.defaultLocale = systemLocale.toLanguageTag();
                     return systemLocale;
                   } else if (supportedLocales.contains(lang)) {
-                    Intl.defaultLocale = systemLocale.toLanguageTag();
+                    Intl.defaultLocale = lang.toLanguageTag();
                     return lang;
                   }
                 }

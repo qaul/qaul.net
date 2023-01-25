@@ -76,20 +76,14 @@ parts:
   # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
   assets-and-dependencies:
     plugin: nil
+    after:
+      - qaul
     stage-packages:
       - zenity
       - dmz-cursor-theme
       - fonts-dejavu
       - fonts-freefont-ttf
       - fonts-ubuntu
-
-layout:
-  /usr/share/fonts:
-    bind: $SNAP/usr/share/fonts
-  /etc/fonts:
-    bind: $SNAP/etc/fonts
-  /usr/share/icons:
-    bind: $SNAP/usr/share/icons
 
 environment:
   LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib:/var/lib/snapd/snap/core18
