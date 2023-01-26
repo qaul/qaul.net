@@ -64,7 +64,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
         (Intl.defaultLocale?.startsWith('pt') ?? false)
             ? '${l18ns!.connections} ${_buildCapitalizedEnumName()}'
             : '${_buildCapitalizedEnumName()} ${l18ns!.connections}',
-        style: theme.headline5);
+        style: theme.headlineSmall);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -77,7 +77,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
           const SizedBox(height: 12),
           users.isEmpty
               ? Text(l18ns.noneAvailableMessage,
-                  style: theme.subtitle1!.copyWith(fontStyle: FontStyle.italic))
+                  style: theme.titleMedium!.copyWith(fontStyle: FontStyle.italic))
               : Table(
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   columnWidths: const {
@@ -115,7 +115,7 @@ class _AvailableConnectionsTable extends ConsumerWidget {
                         TableCell(
                             child: Text(
                                 data.nodeIDBase58 == null ? l18ns.unknown : data.nodeIDBase58!,
-                                style: theme.caption)),
+                                style: theme.bodySmall)),
                       ]);
                     }),
                   ],

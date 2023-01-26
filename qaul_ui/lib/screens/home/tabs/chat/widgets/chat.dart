@@ -258,6 +258,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       if (result != null && result.files.single.path != null) {
                         File file = File(result.files.single.path!);
 
+                        // ignore: use_build_context_synchronously
+                        if (!context.mounted) return;
                         showModalBottomSheet(
                           context: context,
                           builder: (_) {
@@ -289,6 +291,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           if (result != null) {
                             File file = File(result.path);
 
+                            // ignore: use_build_context_synchronously
+                            if (!context.mounted) return;
                             showModalBottomSheet(
                               context: context,
                               builder: (_) {

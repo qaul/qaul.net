@@ -29,14 +29,14 @@ class UserDetailsHeading extends StatelessWidget {
                   children: [
                     Text(
                       user.name,
-                      style: theme.headline6,
+                      style: theme.titleLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       user.idBase58,
-                      style: theme.subtitle2,
+                      style: theme.titleSmall,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),

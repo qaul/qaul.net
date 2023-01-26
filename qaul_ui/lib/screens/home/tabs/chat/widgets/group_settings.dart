@@ -35,7 +35,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
             QaulAvatar.groupLarge(),
             const SizedBox(height: 28.0),
             !isAdmin
-                ? Text(room.name ?? '', style: theme.headline3)
+                ? Text(room.name ?? '', style: theme.displaySmall)
                 : TextFormField(
                     key: _nameKey,
                     controller: nameCtrl,

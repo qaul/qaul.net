@@ -112,10 +112,10 @@ class _PublicTabView extends HookConsumerWidget {
                   author,
                   useUserColorOnName: true,
                   isContentSelectable: true,
-                  content: Text(msg.content ?? '', style: theme.bodyText1),
+                  content: Text(msg.content ?? '', style: theme.bodyLarge),
                   trailingMetadata: Text(
                     sentAt,
-                    style: theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                    style: theme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
                   ),
                   nameTapRoutesToDetailsScreen: true,
                 );
@@ -174,7 +174,7 @@ class _CreatePublicMessage extends HookConsumerWidget {
               autofocus: true,
               controller: controller,
               keyboardType: TextInputType.multiline,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.titleMedium,
               decoration: InputDecoration(
                 hintText: l10n.publicNoteHintText,
               ),

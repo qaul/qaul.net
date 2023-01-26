@@ -171,7 +171,7 @@ class UserDetailsScreen extends HookConsumerWidget {
             children: [
               Text(
                 description,
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -239,7 +239,7 @@ class _VerifyUserDialog extends HookConsumerWidget {
             const SizedBox(height: 24),
             Text(
               l10n.securityNumberDialogDesc,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
           ],

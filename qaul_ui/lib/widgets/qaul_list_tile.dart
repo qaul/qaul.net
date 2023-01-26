@@ -107,9 +107,9 @@ class QaulListTile extends StatelessWidget {
       user?.name ?? room?.name ?? 'Undefined Name',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: theme.bodyText1!.copyWith(
+      style: theme.bodyLarge!.copyWith(
         fontWeight: FontWeight.bold,
-        color: useUserColorOnName ? _userColor : theme.bodyText1!.color,
+        color: useUserColorOnName ? _userColor : theme.bodyLarge!.color,
       ),
     );
 

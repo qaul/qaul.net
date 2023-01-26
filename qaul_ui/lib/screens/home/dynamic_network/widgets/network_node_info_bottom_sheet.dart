@@ -57,7 +57,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
               node.user,
               content: Text(
                 'ID: ${node.user.idBase58}',
-                style: theme.caption!.copyWith(fontSize: 10),
+                style: theme.bodySmall!.copyWith(fontSize: 10),
               ),
             ),
             const SizedBox(height: 12),
@@ -101,7 +101,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
                     TableCell(
                       child: Text(
                         info?.nodeIDBase58 ?? '-',
-                        style: theme.caption!.copyWith(fontSize: 10),
+                        style: theme.bodySmall!.copyWith(fontSize: 10),
                       ),
                     ),
                   ]);

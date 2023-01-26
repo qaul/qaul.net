@@ -22,7 +22,7 @@ class EmptyStateTextDecorator extends StatelessWidget {
             child: IgnorePointer(
               child: Text(
                 text,
-                style: theme.bodyText1!
+                style: theme.bodyLarge!
                     .copyWith(color: Theme.of(context).disabledColor),
               ),
             ),

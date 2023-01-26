@@ -40,7 +40,7 @@ class _UsersState extends _BaseTabState<_Users> {
 
                   var userId = Text(
                     'ID: ${user.idBase58}',
-                    style: theme.caption!.copyWith(fontSize: 10),
+                    style: theme.bodySmall!.copyWith(fontSize: 10),
                   );
                   var content = !hasConnections
                       ? userId

@@ -90,7 +90,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
   Widget build(BuildContext context) {
     var color = widget.isDefaultUser ? Colors.lightBlue.shade700 : Colors.white;
 
-    var style = Theme.of(context).textTheme.bodyText1!.copyWith(
+    var style = Theme.of(context).textTheme.bodyLarge!.copyWith(
           color: widget.isDefaultUser ? Colors.white : Colors.black,
           fontSize: 17,
           fontWeight: FontWeight.w400,

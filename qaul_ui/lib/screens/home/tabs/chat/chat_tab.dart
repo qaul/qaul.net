@@ -107,7 +107,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                                 locale:
                                     Locale.parse(Intl.defaultLocale ?? 'en'),
                               ),
-                        style: theme.caption!
+                        style: theme.bodySmall!
                             .copyWith(fontStyle: FontStyle.italic),
                       ),
                       const Icon(Icons.chevron_right),
@@ -144,7 +144,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                               locale: Locale.parse(Intl.defaultLocale ?? 'en'),
                             ),
                       style:
-                          theme.caption!.copyWith(fontStyle: FontStyle.italic),
+                          theme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -226,7 +226,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     if (message is TextMessageContent) {
       return Text(
         (message).content,
-        style: theme.bodyText1,
+        style: theme.bodyLarge,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
@@ -236,7 +236,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       return Text(
         '${message.fileName} · ${filesize(message.size)}',
         maxLines: 2,
-        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         overflow: TextOverflow.ellipsis,
       );
     } else {
@@ -258,14 +258,14 @@ class _ChatState extends _BaseTabState<_Chat> {
     if (message.type == GroupEventContentType.created) {
       return Text(
         l10n.groupStateEventCreated,
-        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
     } else if (message.type == GroupEventContentType.closed) {
       return Text(
         l10n.groupStateEventClosed,
-        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );
@@ -302,7 +302,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
       return Text(
         l10n.groupMemberEvent(u.name, event),
-        style: theme.bodyText1!.copyWith(fontStyle: FontStyle.italic),
+        style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       );

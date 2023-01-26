@@ -21,7 +21,7 @@ class FileMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var style = Theme.of(context).textTheme.bodyText1!.copyWith(
+    var style = Theme.of(context).textTheme.bodyLarge!.copyWith(
           color: isDefaultUser ? Colors.white : Colors.black,
           fontSize: 16,
           fontWeight: FontWeight.w400,
