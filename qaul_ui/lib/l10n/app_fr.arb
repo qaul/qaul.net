@@ -104,7 +104,7 @@
     "securityNumberDialogDesc": "Veuillez vous assurer que la personne que vous essayez de vérifier voit le même numéro de sécurité sur son écran lorsqu'elle tente de vous vérifier.",
     "groupStateEventCreated": "Le groupe a été créé",
     "groupStateEventClosed": "Le groupe a été fermé",
-    "groupMemberEvent": "\"{nom d'utilisateur}\"a {événement} le groupe",
+    "groupMemberEvent": "\"{username}\" a {event} le groupe",
     "groupEventInvited": "invité à",
     "groupEventJoined": "rejoint",
     "groupEventLeft": "gauche",
