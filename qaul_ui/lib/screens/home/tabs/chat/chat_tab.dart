@@ -280,19 +280,19 @@ class _ChatState extends _BaseTabState<_Chat> {
       String event = '';
       switch (message.type) {
         case GroupEventContentType.invited:
-          event = l10n.groupEventInvited;
+          event = l10n.groupEventInvited(u.name);
           break;
         case GroupEventContentType.inviteAccepted:
-          event = l10n.groupEventInviteAccepted;
+          event = l10n.groupEventInviteAccepted(u.name);
           break;
         case GroupEventContentType.joined:
-          event = l10n.groupEventJoined;
+          event = l10n.groupEventJoined(u.name);
           break;
         case GroupEventContentType.left:
-          event = l10n.groupEventLeft;
+          event = l10n.groupEventLeft(u.name);
           break;
         case GroupEventContentType.removed:
-          event = l10n.groupEventRemoved;
+          event = l10n.groupEventRemoved(u.name);
           break;
         case GroupEventContentType.none:
         case GroupEventContentType.created:
@@ -301,7 +301,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       }
 
       return Text(
-        l10n.groupMemberEvent(u.name, event),
+        event,
         style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
