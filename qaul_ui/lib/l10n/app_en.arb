@@ -104,25 +104,46 @@
   "securityNumberDialogDesc": "Please ensure that the person you're trying to verify sees the same security number on their screen when attempting to verify you.",
   "groupStateEventCreated": "The group has been created",
   "groupStateEventClosed": "The group has been closed",
-  "groupMemberEvent": "\"{username}\" has {event} the group",
-  "@groupMemberEvent": {
-    "description": "Describe a group member event.",
+  "groupEventInvited": "\"{username}\" has been invited to the group",
+  "@groupEventInvited": {
     "placeholders": {
       "username": {
-        "type": "String",
-        "example": "johnDoe"
-      },
-      "event": {
-        "type": "String",
-        "example": "joined"
+        "type": "string"
       }
     }
   },
-  "groupEventInvited": "been invited to",
-  "groupEventJoined": "joined",
-  "groupEventLeft": "left",
-  "groupEventRemoved": "been removed from",
-  "groupEventInviteAccepted": "accepted the invite to",
+  "groupEventJoined": "\"{username}\" has joined the group",
+  "@groupEventJoined": {
+    "placeholders": {
+      "username": {
+        "type": "string"
+      }
+    }
+  },
+  "groupEventLeft": "\"{username}\" has left the group",
+  "@groupEventLeft": {
+    "placeholders": {
+      "username": {
+        "type": "string"
+      }
+    }
+  },
+  "groupEventRemoved": "\"{username}\" was removed from the group",
+  "@groupEventRemoved": {
+    "placeholders": {
+      "username": {
+        "type": "string"
+      }
+    }
+  },
+  "groupEventInviteAccepted": "\"{username}\" accepted the invite to the group",
+  "@groupEventInviteAccepted": {
+    "placeholders": {
+      "username": {
+        "type": "string"
+      }
+    }
+  },
   "securePrivateMessageHint": "Secure private message",
   "groupChatMessageHint": "Group chat message",
   "inviteUser": "Invite user",
@@ -130,4 +151,3 @@
   "fileHistory": "File history",
   "emptyNodeName": "No name"
 }
-
