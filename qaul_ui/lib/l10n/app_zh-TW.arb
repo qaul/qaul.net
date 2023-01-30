@@ -1,9 +1,6 @@
  {
   "languageName": "英語",
   "createAccountHeading": "選擇用戶名",
-  "@createAccountHeading": {
-    "description":"CTA在文本字段頂部的呈現"
-  },
   "okDialogButton": "確定",
   "cancelDialogButton": "取消",
   "backButtonTooltip": "返回",
@@ -104,23 +101,9 @@
   "securityNumberDialogDesc": "請確保您嘗試驗證的人在嘗試驗證您時在他們的屏幕上看到相同的安全號碼。",
   "groupStateEventCreated": "群組已創建",
   "groupStateEventClosed": "群已關閉",
-  "groupMemberEvent": "\"{username}\" 有 {event} 該群組",
-  "@groupMemberEvent": {
-    "description": "描述一個群成員事件。",
-    "placeholders": {
-      "username": {
-        "type": "字符串",
-        "example": "張三"
-      },
-      "event": {
-        "type": "字符串",
-        "example": "加入"
-      }
-    }
-  },
-  "groupEventInvited": "被邀請",
-  "groupEventJoined": "已加入",
-  "groupEventLeft": "退出",
-  "groupEventRemoved": "已被移除",
-  "groupEventInviteAccepted": "接受邀請"
+  "groupEventInvited": "\"{username}\" 有 被邀請 該群組",
+  "groupEventJoined": "\"{username}\" 有 已加入 該群組",
+  "groupEventLeft": "\"{username}\" 有 退出 該群組",
+  "groupEventRemoved": "\"{username}\" 有 已被移除 該群組",
+  "groupEventInviteAccepted": "\"{username}\" 有 接受邀請 該群組"
 }

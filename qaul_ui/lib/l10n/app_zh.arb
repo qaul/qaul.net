@@ -1,9 +1,6 @@
 {
   "languageName": "英语",
   "createAccountHeading": "选择用户名",
-  "@createAccountHeading": {
-    "description": "CTA按钮在文本框上方显示"
-  },
   "okDialogButton": "确定",
   "cancelDialogButton": "取消",
   "backButtonTooltip": "返回",
@@ -104,24 +101,10 @@
   "securityNumberDialogDesc": "请确保您的验证对象在验证您时也能看到同样的安全码。",
   "groupStateEventCreated": "已成功创建群组",
   "groupStateEventClosed": "该群组已被关闭",
-  "groupMemberEvent": "\"{username}\" 已 {event} 该群组",
-  "@groupMemberEvent": {
-    "description": "群组成员行为",
-    "placeholders": {
-      "username": {
-        "type": "字符串",
-        "example": "张三"
-      },
-      "event": {
-        "type": "字符串",
-        "example": "加入"
-      }
-    }
-  },
-  "groupEventInvited": "被邀请加入",
-  "groupEventJoined": "加入",
-  "groupEventLeft": "退出",
-  "groupEventRemoved": "被移出",
-  "groupEventInviteAccepted": "接受邀请加入"
+  "groupEventInvited": "\"{username}\" 已 被邀请加入 该群组",
+  "groupEventJoined": "\"{username}\" 已 加入 该群组",
+  "groupEventLeft": "\"{username}\" 已 退出 该群组",
+  "groupEventRemoved": "\"{username}\" 已 被移出 该群组",
+  "groupEventInviteAccepted": "\"{username}\" 已 接受邀请加入 该群组"
 }
 

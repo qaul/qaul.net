@@ -19,7 +19,7 @@
   "network": "Network",
   "createPublicPostTooltip": "Create post",
   "submitPostTooltip": "Submit",
-  "newChatTooltip": "New chat",
+  "newChatTooltip": "Chat",
   "createGroupHint": "Group name",
   "publicNotificationsEnabled": "Public Posts",
   "chatNotificationsEnabled": "Chat Messages",
