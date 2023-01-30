@@ -30,17 +30,6 @@ while true; do
   fi
 done
 
-if [ "$CLEAN" == "true" ]; then
-  rm -r ../../android/libqaul/src/main/jniLibs
-fi
-
-# build libqaul
-cd ../../rust/libqaul || exit 1
-
-if [ "$CLEAN" == "true" ]; then
-  cargo clean
-fi
-./build_libqaul_android.sh
 
 # android aar
 cd ../../android || exit 1
