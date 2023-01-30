@@ -1,9 +1,6 @@
 {
     "languageName": "Français",
     "createAccountHeading": "Choisissez un nom d'utilisateur",
-    "@createAccountHeading": {
-      "description": "CTA rendu au-dessus du champ de texte"
-    },
     "okDialogButton": "OK",
     "cancelDialogButton": "ANNULER",
     "backButtonTooltip": "Retour",
@@ -104,12 +101,11 @@
     "securityNumberDialogDesc": "Veuillez vous assurer que la personne que vous essayez de vérifier voit le même numéro de sécurité sur son écran lorsqu'elle tente de vous vérifier.",
     "groupStateEventCreated": "Le groupe a été créé",
     "groupStateEventClosed": "Le groupe a été fermé",
-    "groupMemberEvent": "\"{username}\" a {event} le groupe",
-    "groupEventInvited": "invité à",
-    "groupEventJoined": "rejoint",
-    "groupEventLeft": "gauche",
-    "groupEventRemoved": "retiré de",
-    "groupEventInviteAccepted": "a accepté l'invitation de",
+    "groupEventInvited": "\"{username}\" a été invité au groupe",
+    "groupEventJoined": "\"{username}\" a rejoint le groupe",
+    "groupEventLeft": "\"{username}\" a quitté le groupe",
+    "groupEventRemoved": "\"{username}\" a retiré du groupe",
+    "groupEventInviteAccepted": "\"{username}\" a accepté l'invitation au groupe",
     "securePrivateMessageHint": "Message privé sécurisé",
     "groupChatMessageHint": "Message de discussion de groupe",
     "inviteUser": "Inviter un utilisateur",

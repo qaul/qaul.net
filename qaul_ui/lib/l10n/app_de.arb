@@ -1,9 +1,6 @@
 {
   "languageName": "Deutsch",
   "createAccountHeading": "Wähle einen Nutzernamen",
-  "@createAccountHeading": {
-    "description": "CTA rendered on top of text field"
-  },
   "okDialogButton": "OK",
   "cancelDialogButton": "Abbrechen",
   "backButtonTooltip": "Zurück",
@@ -19,7 +16,7 @@
   "network": "Netzwerk",
   "createPublicPostTooltip": "Mitteilung erstellen",
   "submitPostTooltip": "Absenden",
-  "newChatTooltip": "Neuer Chat",
+  "newChatTooltip": "Chat",
   "createGroupHint": "Gruppen Name",
   "publicNotificationsEnabled": "Öffentliche Mitteilungen",
   "chatNotificationsEnabled": "Chat Nachrichten",
@@ -104,25 +101,11 @@
   "securityNumberDialogDesc": "Bitte versichere dich, dass die Person die du verifizerien möchtest, die exakt gleiche Sicherheitsnummer angezeigt bekommt, wenn sie versucht dich zu verifizieren.",
   "groupStateEventCreated": "Die Gruppe wurde erstellt",
   "groupStateEventClosed": "Die Gruppe wurde geschlossen",
-  "groupMemberEvent": "\"{username}\" {event}",
-  "@groupMemberEvent": {
-    "description": "Describe a group member event.",
-    "placeholders": {
-      "username": {
-        "type": "String",
-        "example": "johnDoe"
-      },
-      "event": {
-        "type": "String",
-        "example": "joined"
-      }
-    }
-  },
-  "groupEventInvited": "wurde eigeladen",
-  "groupEventJoined": "ist der Gruppe beigetreten",
-  "groupEventLeft": "hat die Gruppe verlassen",
-  "groupEventRemoved": "wurde aus der Gruppe entfernt",
-  "groupEventInviteAccepted": "hat die Einladung aktzeptiert",
+  "groupEventInvited": "\"{username}\" wurde eigeladen",
+  "groupEventJoined": "\"{username}\" ist der Gruppe beigetreten",
+  "groupEventLeft": "\"{username}\" hat die Gruppe verlassen",
+  "groupEventRemoved": "\"{username}\" wurde aus der Gruppe entfernt",
+  "groupEventInviteAccepted": "\"{username}\" hat die Einladung aktzeptiert",
   "securePrivateMessageHint": "verschlüsselte private Nachricht",
   "groupChatMessageHint": "Gruppen Chat-Nachricht",
   "inviteUser": "Kontakt einladen",
@@ -130,4 +113,3 @@
   "fileHistory": "Alle Chat Dateien",
   "emptyNodeName": "Unbenannt"
 }
-

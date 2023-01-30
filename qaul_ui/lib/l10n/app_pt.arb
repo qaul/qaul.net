@@ -101,7 +101,7 @@
   "securityNumberDialogDesc": "Se certifique que essa pessoa vê o número de segurança abaixo quando tenta verificar você.",
   "groupStateEventCreated": "O grupo foi criado",
   "groupStateEventClosed": "O grupo foi fechado",
-  "groupEventInvited": "\"{username\" foi convidado para o grupo",
+  "groupEventInvited": "\"{username}\" foi convidado para o grupo",
   "groupEventJoined": "\"{username}\" entrou no grupo",
   "groupEventLeft": "\"{username}\" deixou o grupo",
   "groupEventRemoved": "\"{username}\" foi removido do grupo",

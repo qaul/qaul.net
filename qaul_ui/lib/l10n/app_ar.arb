@@ -1,9 +1,6 @@
 {
   "languageName": "اللغة العربية",
   "createAccountHeading": "اختر اسم مستخدم",
-  "@createAccountHeading": {
-    "description": "CTA rendered on top of text field"
-  },
   "start": "ابدأ",
   "createUserAccount": "إنشاء ملف تعريف المستخدم",
   "learnMore": "تعرف على موقع qaul",
@@ -104,25 +101,11 @@
   "securityNumberDialogDesc": "يرجى التأكد من أن الشخص الذي تحاول التحقق منه يرى نفس رقم الأمان على شاشته عند محاولة التحقق منك.",
   "groupStateEventCreated": "تم إنشاء المجموعة",
   "groupStateEventClosed": "تم إغلاق المجموعة",
-  "groupMemberEvent": "\"{username}\"  {event} المجموعة",
-  "@groupMemberEvent": {
-    "description": "Describe a group member event.",
-    "placeholders": {
-      "username": {
-        "type": "String",
-        "example": "johnDoe"
-      },
-      "event": {
-        "type": "String",
-        "example": "joined"
-      }
-    }
-  },
-  "groupEventInvited": "دُعي إلى",
-  "groupEventJoined": "انضم إلى",
-  "groupEventLeft": "ترك",
-  "groupEventRemoved": "أزيل من",
-  "groupEventInviteAccepted": "قبل الدعوة إلى",
+  "groupEventInvited": "{username} دُعي إلى المجموعة",
+  "groupEventJoined": "{username} انضم إلى المجموعة",
+  "groupEventLeft": "{username} ترك المجموعة",
+  "groupEventRemoved": "{username} أزيل من المجموعة",
+  "groupEventInviteAccepted": "{username}  قبل الدعوة إلى المجموعة",
   "securePrivateMessageHint": "رسالة خاصة آمنة",
   "groupChatMessageHint": "رسالة دردشة جماعية",
   "inviteUser": "قم بدعوة المستخدم",

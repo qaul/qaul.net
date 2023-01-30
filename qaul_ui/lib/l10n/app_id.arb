@@ -1,9 +1,6 @@
 {
   "languageName": "Bahasa Indonesia",
   "createAccountHeading": "Pilih nama pengguna",
-  "@createAccountHeading": {
-    "description": "CTA dirender di atas bidang teks"
-  },
   "okDialogButton": "OKE",
   "cancelDialogButton": "BATAL",
   "backButtonTooltip": "Kembali",

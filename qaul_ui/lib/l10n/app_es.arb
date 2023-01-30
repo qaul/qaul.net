@@ -1,9 +1,6 @@
 {
   "languageName": "Español",
   "createAccountHeading": "Elije tu nombre de usuario",
-  "@createAccountHeading": {
-    "description": "CTA renderizado sobre un campo de texto"
-  },
   "okDialogButton": "OK",
   "cancelDialogButton": "CANCELAR",
   "backButtonTooltip": "Atras",
@@ -104,25 +101,11 @@
   "securityNumberDialogDesc": "Asegúrate de que la persona que intentas verificar vea el mismo número de seguridad en su pantalla cuando intenta verificarte.",
   "groupStateEventCreated": "El grupo ha sido creado",
   "groupStateEventClosed": "El grupo ha sido cerrado",
-  "groupMemberEvent": "\"{username}\" ha {event} al grupo",
-  "@groupMemberEvent": {
-    "description": "Describe el evento de miembro de grupo.",
-    "placeholders": {
-      "username": {
-        "type": "String",
-        "example": "johnDoe"
-      },
-      "event": {
-        "type": "String",
-        "example": "se unió"
-      }
-    }
-  },
-  "groupEventInvited": "ha sido invitado a",
-  "groupEventJoined": "unido",
-  "groupEventLeft": "izquierda",
-  "groupEventRemoved": "fue eliminado de",
-  "groupEventInviteAccepted": "aceptó la invitación a",
+  "groupEventInvited": "\"{username}\" ha sido invitado al grupo",
+  "groupEventJoined": "\"{username}\" ha unido al grupo",
+  "groupEventLeft": "\"{username}\" dejó el grupo",
+  "groupEventRemoved": "\"{username}\" fue eliminado del grupo",
+  "groupEventInviteAccepted": "\"{username}\" ha aceptó la invitación al grupo",
   "securePrivateMessageHint": "Mensaje privado seguro",
   "groupChatMessageHint": "Mensaje de chat grupal",
   "inviteUser": "Invitar usuario",
