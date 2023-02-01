@@ -108,7 +108,7 @@
   "@groupEventInvited": {
     "placeholders": {
       "username": {
-        "type": "string"
+        "type": "String"
       }
     }
   },
@@ -116,7 +116,7 @@
   "@groupEventJoined": {
     "placeholders": {
       "username": {
-        "type": "string"
+        "type": "String"
       }
     }
   },
@@ -124,7 +124,7 @@
   "@groupEventLeft": {
     "placeholders": {
       "username": {
-        "type": "string"
+        "type": "String"
       }
     }
   },
@@ -132,7 +132,7 @@
   "@groupEventRemoved": {
     "placeholders": {
       "username": {
-        "type": "string"
+        "type": "String"
       }
     }
   },
@@ -140,7 +140,7 @@
   "@groupEventInviteAccepted": {
     "placeholders": {
       "username": {
-        "type": "string"
+        "type": "String"
       }
     }
   },
