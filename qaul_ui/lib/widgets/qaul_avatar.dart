@@ -111,12 +111,12 @@ class _SmallQaulAvatar extends QaulAvatar {
       return super.build(context, ref);
     }
 
-    return Badge(
+    return badges.Badge(
       elevation: 0.0,
       toAnimate: false,
       padding: const EdgeInsets.all(6),
       borderSide: const BorderSide(color: Colors.white, width: 1.5),
-      position: BadgePosition.bottomEnd(bottom: 0, end: 0),
+      position: badges.BadgePosition.bottomEnd(bottom: 0, end: 0),
       badgeColor: Colors.greenAccent.shade700,
       child: super.build(context, ref),
     );
