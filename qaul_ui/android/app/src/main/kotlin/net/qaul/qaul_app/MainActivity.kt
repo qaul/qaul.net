@@ -18,9 +18,22 @@ import io.flutter.plugin.common.MethodChannel
 // import the libqaul AAR android library
 import net.qaul.libqaul.*
 import net.qaul.ble.core.BleWrapperClass
+import net.qaul.ble.AppLog
+import net.qaul.ble.RemoteLog
+
+import android.content.pm.PackageManager
+import android.content.Intent
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "libqaul"
+    private var bleWrapperClass: BleWrapperClass? = null
+
+    companion object{
+        const val LOCATION_PERMISSION_REQ_CODE = 111
+        const val LOCATION_ENABLE_REQ_CODE = 112
+        const val REQUEST_ENABLE_BT = 113
+        const val BLE_PERMISSION_REQ_CODE_12 = 114
+    }
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
         super.configureFlutterEngine(FlutterEngine)
@@ -29,7 +42,7 @@ class MainActivity: FlutterActivity() {
         libqaulLoad()
 		
 		//initialize BleModule initialize -- must be before startLibqaul()
-        BleWrapperClass(context = this)
+        bleWrapperClass = BleWrapperClass(context = this)
 		
         // setup message channel between flutter and android
         MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
@@ -130,5 +143,73 @@ class MainActivity: FlutterActivity() {
     /// receive an RPC message from libqaul
     private fun receiveRpcMessage(): ByteArray {
         return receive()
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
+            AppLog.e(
+                "MainActivity",
+                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+            )
+            if (grantResults.isNotEmpty()) {
+                for (grantResult in grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
+                        bleWrapperClass?.onResult(requestCode = requestCode, status = false)
+                        break
+                    }
+                }
+                bleWrapperClass?.onResult(requestCode = requestCode, status = true)
+            }
+        } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
+            AppLog.e(
+                "MainActivity",
+                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+            )
+            if (grantResults.isNotEmpty()) {
+                for (grantResult in grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        AppLog.e("MainActivity", "grantResults- IF $grantResult")
+                        bleWrapperClass?.onResult(requestCode = requestCode, status = false)
+                        break
+                    }
+                }
+                bleWrapperClass?.onResult(requestCode = requestCode, status = true)
+            }
+        }
+    }
+
+    /**
+     * This Method Will Be Called When User Accept/Decline Asked to Turn On
+     * Bluetooth and/or Location(GPS) From BLEModule
+     * After Response It Will Send User's Response to BLEModule
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        AppLog.e(
+            "MainActivity",
+            "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
+        )
+        if (requestCode == LOCATION_ENABLE_REQ_CODE) {
+            if (resultCode == RESULT_OK) {
+                AppLog.e("MainActivity", "Location Yes")
+                bleWrapperClass?.onResult(requestCode = requestCode, status = true)
+            } else {
+                AppLog.e("MainActivity", "Location No")
+                bleWrapperClass?.onResult(requestCode = requestCode, status = false)
+            }
+        } else if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                AppLog.e("MainActivity", "BT Yes")
+                bleWrapperClass?.onResult(requestCode = requestCode, status = true)
+            } else {
+                AppLog.e("MainActivity", "BT No")
+                bleWrapperClass?.onResult(requestCode = requestCode, status = false)
+            }
+        }
     }
 }
