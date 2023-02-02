@@ -5,7 +5,7 @@ services:
     image: qaul.net/qauld:latest
     restart: unless-stopped
     volumes:
-      - /your/path/to/internal/config:/srv/qaul
+      - /your/path/to/config:/srv/qaul
     ports:
       - "8778:9229"
     user: 1000:1000
