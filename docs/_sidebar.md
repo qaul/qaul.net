@@ -1,6 +1,8 @@
 * [Qaul](qaul/README.md)
     * [Commit Guidelines](qaul/commit-guidelines.md)
     * [Glossary](qaul/glossary.md)
+    * **Self-Hosting**:
+      * [Your own community node](qaul/infra/self-hosting-qauld.md)
     * **Tooling**
         * [Configure Lefthook](qaul/tooling/configure_lefthook.md)
         * [CircleCI](qaul/tooling/circleci.md)
