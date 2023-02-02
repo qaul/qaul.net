@@ -1,4 +1,4 @@
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -363,7 +363,7 @@ class _TabNotificationBadge extends StatelessWidget {
       builder: (context, count, _) {
         return Stack(
           children: [
-            Badge(
+            badges.Badge(
               showBadge: count != null,
               badgeColor: Colors.lightBlue,
               badgeContent: Text(
@@ -374,7 +374,7 @@ class _TabNotificationBadge extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              position: BadgePosition.bottomEnd(bottom: 8, end: 8),
+              position: badges.BadgePosition.bottomEnd(bottom: 8, end: 8),
               child: child,
             ),
             Positioned.fill(

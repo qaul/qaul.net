@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 #-----------------------------------------------------------------NoticeStart-
 # Utilities
 #
@@ -19,7 +18,6 @@
 #
 # 2. To compile in release mode:
 #   sh build_libqaul_android.sh release
-
 # Pre-step: assert that the script is being run from rust/libqaul
 PATTERN="^.*/rust/libqaul$"
 if [[ ! $(pwd) =~ $PATTERN ]]; then
