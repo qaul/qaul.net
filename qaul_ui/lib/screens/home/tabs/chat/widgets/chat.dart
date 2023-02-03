@@ -560,19 +560,19 @@ extension _MessageExtension on Message {
       String event = '';
       switch (message.type) {
         case GroupEventContentType.invited:
-          event = l10n.groupEventInvited;
+          event = l10n.groupEventInvited(author.name);
           break;
         case GroupEventContentType.inviteAccepted:
-          event = l10n.groupEventInviteAccepted;
+          event = l10n.groupEventInviteAccepted(author.name);
           break;
         case GroupEventContentType.joined:
-          event = l10n.groupEventJoined;
+          event = l10n.groupEventJoined(author.name);
           break;
         case GroupEventContentType.left:
-          event = l10n.groupEventLeft;
+          event = l10n.groupEventLeft(author.name);
           break;
         case GroupEventContentType.removed:
-          event = l10n.groupEventRemoved;
+          event = l10n.groupEventRemoved(author.name);
           break;
         case GroupEventContentType.none:
         case GroupEventContentType.created:
@@ -580,7 +580,7 @@ extension _MessageExtension on Message {
           break;
       }
 
-      return l10n.groupMemberEvent(author.name, event);
+      return event;
     }
   }
 }

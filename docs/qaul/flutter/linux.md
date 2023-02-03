@@ -3,11 +3,11 @@
 ## Install Prerequisits
 
 Make sure you have the following tools installed, that you are 
-going to need for the further installation: git, curl
+going to need for the further installation: git, curl, protobuf-compiler
 
 ```sh
 # Debian & Ubuntu
-sudo apt install git curl
+sudo apt install git curl protobuf-compiler
 ```
 
 * [Install Rust](qaul/rust/rust-install.md)

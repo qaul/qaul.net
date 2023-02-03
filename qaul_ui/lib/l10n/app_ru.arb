@@ -1,9 +1,6 @@
 {
     "languageName": "Русский",
     "createAccountHeading": "Выберите имя пользователя",
-    "@createAccountHeading": {
-      "description": "CTA отображается поверх текстового поля"
-    },
     "okDialogButton": "ОК",
     "cancelDialogButton": "ОТМЕНА",
     "backButtonTooltip": "Назад",
@@ -104,25 +101,11 @@
     "securityNumberDialogDesc": "Пожалуйста, убедитесь, что пользователь, которого вы пытаетесь подтвердить, видит тот же номер безопасности на своем экране при попытке подтверждения.",
     "groupStateEventCreated": "Группа создана",
     "groupStateEventClosed": "Группа закрыта",
-    "groupMemberEvent": "\"{username}\" имеет {event} группу",
-    "@groupMemberEvent": {
-      "description": "Опишите событие участника группы.",
-      "placeholders": {
-        "username": {
-          "type": "Строка",
-          "example": "Джон Lо"
-        },
-        "event": {
-          "type": "Строка",
-          "example": "присоединился"
-        }
-      }
-    },
-    "groupEventInvited": "был приглашен",
-    "groupEventJoined": "присоединился",
-    "groupEventLeft": "вышел",
-    "groupEventRemoved": "был удален из",
-    "groupEventInviteAccepted": "принял приглашение",
+    "groupEventInvited": "\"{username}\" имеет был приглашен группу",
+    "groupEventJoined": "\"{username}\" имеет присоединился группу",
+    "groupEventLeft": "\"{username}\" имеет вышел группу",
+    "groupEventRemoved": "\"{username}\" имеет был удален из группу",
+    "groupEventInviteAccepted": "\"{username}\" имеет принял приглашение группу",
     "securePrivateMessageHint": "Защищенное личное сообщение",
     "groupChatMessageHint": "Сообщение группового чата",
     "inviteUser": "Пригласить пользователя",

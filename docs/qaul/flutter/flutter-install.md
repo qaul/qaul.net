@@ -55,7 +55,7 @@ Check the following resources:
 
 ## Build & Test qaul App on your System
 
-Open the folder 'flutter' of the qaul repository in Android Studio.
+Open the folder 'qaul_ui' of the qaul repository in Android Studio.
 
 When opening the project for the first time, you need to set the path to your flutter SDK directory in Android Studio.
 To do that run the following steps:
