@@ -387,7 +387,7 @@ class LibqaulWorker {
       // TODO mode to ble_translator
       if (Platform.isAndroid) {
         final permissions = await [
-          Permission.bluetooth,
+          // Permission.bluetooth,
           Permission.bluetoothScan,
           Permission.bluetoothConnect,
           Permission.bluetoothAdvertise

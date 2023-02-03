@@ -80,14 +80,18 @@ apply plugin: 'com.google.protobuf'
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.google.android.material:material:1.3.0"
-	implementation "com.google.protobuf:protobuf-java:3.1.0"
+//	implementation "com.google.protobuf:protobuf-java:3.1.0"  //Commented by Vishal 3-2-23
 	implementation "com.google.protobuf:protoc:3.1.0"
 	implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-service:2.3.1"
-	
-    debugImplementation (name: 'libqaul-debug', ext: 'aar')
-    releaseImplementation (name: 'libqaul-release', ext: 'aar')
 
-    debugImplementation (name: 'blemodule-debug', ext: 'aar')
-    releaseImplementation (name: 'blemodule-release', ext: 'aar')
+	//Changes By Vishal - 3-2-23 Start
+//    debugImplementation (name: 'libqaul-debug', ext: 'aar')
+//    releaseImplementation (name: 'libqaul-release', ext: 'aar')
+//
+//    debugImplementation (name: 'blemodule-debug', ext: 'aar')
+//    releaseImplementation (name: 'blemodule-release', ext: 'aar')
+    implementation project(':libqaul')
+    implementation project(':blemodule')
+    //Changed By Vishal - 3-2-23
 }
