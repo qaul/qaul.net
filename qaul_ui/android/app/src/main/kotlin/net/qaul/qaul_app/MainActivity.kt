@@ -37,7 +37,6 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
         super.configureFlutterEngine(FlutterEngine)
-
         // load libqaul
         libqaulLoad()
 		
