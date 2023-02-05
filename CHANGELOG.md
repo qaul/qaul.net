@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 beta 13] 2023-02-05
+
+Added
+
+- Spanish translation
+- qauld docker image with docker-compose management
+- iOS testflight listing
+
+Fixed
+
+- Snap: ultimately fixed: rights blockings, libqaul compilation for snap store, access rights, etc.
+- UI:
+  - default locale on startup screen
+
+Changed
+
+- better translation strings for translators
+- upgraded to stable flutter version 3.7
+
 ## [2.0.0 beta 12] 2022-12-13
 
 Fixed
