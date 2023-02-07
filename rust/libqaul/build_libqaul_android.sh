@@ -55,7 +55,7 @@ rustup target add \
 cargo install cargo-ndk
 
 # 3. clean jni location
-jniLibs=../../android/libqaul/src/main/jniLibs
+jniLibs=../../qaul_ui/android/libqaul/src/main/jniLibs
 rm -rf ${jniLibs}
 
 # 4. build libqaul for all targets
