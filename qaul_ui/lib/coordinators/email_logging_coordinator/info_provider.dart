@@ -13,6 +13,6 @@ class _InfoProvider {
 
   static Future<Map<String, dynamic>> getDeviceInfo() async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
-    return deviceInfo.toMap();
+    return deviceInfo.data;
   }
 }

@@ -13,7 +13,10 @@ class LanguageSelectDropDown extends ConsumerWidget {
         'assets/icons/language.svg',
         width: 24,
         height: 24,
-        color: Theme.of(context).iconTheme.color,
+        colorFilter: ColorFilter.mode(
+          Theme.of(context).iconTheme.color!,
+          BlendMode.srcATop,
+        ),
       ),
       content: const _LanguageDropdown(),
     );

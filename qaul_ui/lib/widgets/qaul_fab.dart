@@ -30,7 +30,7 @@ class QaulFAB extends StatelessWidget {
         svgAsset,
         width: 48,
         height: 48,
-        color: Colors.grey.shade600,
+        colorFilter: ColorFilter.mode(Colors.grey.shade600, BlendMode.srcATop),
       ),
     );
   }

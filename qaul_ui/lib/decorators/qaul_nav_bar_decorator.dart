@@ -268,9 +268,11 @@ class QaulNavBarItem extends HookConsumerWidget {
           splashRadius: 0.01,
           icon: SvgPicture.asset(
             svgPath,
-            color: selected.value ? activeColor : theme.iconTheme.color,
             fit: BoxFit.cover,
-            clipBehavior: Clip.none,
+            colorFilter: ColorFilter.mode(
+              selected.value ? activeColor : theme.iconTheme.color!,
+              BlendMode.srcATop,
+            ),
           ),
           onPressed: () => controller.goToTab(tab),
         ),
@@ -365,7 +367,7 @@ class _TabNotificationBadge extends StatelessWidget {
           children: [
             Badge(
               showBadge: count != null,
-              badgeColor: Colors.lightBlue,
+              badgeStyle: const BadgeStyle(badgeColor: Colors.lightBlue),
               badgeContent: Text(
                 '${count ?? ''}',
                 style: const TextStyle(
