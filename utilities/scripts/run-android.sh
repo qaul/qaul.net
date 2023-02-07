@@ -30,10 +30,6 @@ while true; do
   fi
 done
 
-if [ "$CLEAN" == "true" ]; then
-  rm -r ../../android/libqaul/src/main/jniLibs
-fi
-
 # build libqaul
 cd ../../rust/libqaul || exit 1
 
@@ -42,27 +38,10 @@ if [ "$CLEAN" == "true" ]; then
 fi
 ./build_libqaul_android.sh
 
-# android aar
-cd ../../android || exit 1
 
-if [ "$CLEAN" == "true" ]; then
-  ./gradlew clean
-fi
-
-# build andorid aar
-./gradlew assemble
-
-# copy aar files to flutter
-if [ "$(uname)" = 'Darwin' ]; then
-  install -b -d ../qaul_ui/android/app/libs libqaul/build/outputs/aar
-  install -b -d ../qaul_ui/android/app/libs blemodule/build/outputs/aar
-elif [ "$(expr substr "$(uname -s)" 1 5)" = 'Linux' ]; then
-  install -D libqaul/build/outputs/aar/*.aar ../qaul_ui/android/app/libs
-  install -D blemodule/build/outputs/aar/*.aar ../qaul_ui/android/app/libs
-fi
 
 # flutter
-cd ../qaul_ui || exit 1
+cd ../../qaul_ui || exit 1
 
 ## clean flutter
 if [ "$CLEAN" == "true" ]; then
