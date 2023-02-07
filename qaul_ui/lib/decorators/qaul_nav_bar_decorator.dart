@@ -367,7 +367,7 @@ class _TabNotificationBadge extends StatelessWidget {
       builder: (context, count, _) {
         return Stack(
           children: [
-            badges.Badge(
+            Badge(
               showBadge: count != null,
               badgeStyle: const BadgeStyle(badgeColor: Colors.lightBlue),
               badgeContent: Text(
@@ -378,7 +378,7 @@ class _TabNotificationBadge extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              position: badges.BadgePosition.bottomEnd(bottom: 8, end: 8),
+              position: BadgePosition.bottomEnd(bottom: 8, end: 8),
               child: child,
             ),
             Positioned.fill(
