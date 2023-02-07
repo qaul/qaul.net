@@ -20,6 +20,7 @@ set -eo pipefail
 # --- Note: ---
 #   In case the `gradlew` commands fail with a `LockTimeoutException`, you can attempt to delete gradle's lockfiles with:
 #   `find ~/.gradle -type f -name "*.lock" | while read -r f; do rm "$f"; done`
+
 while true; do
   if [ "$1" = "--clean" ]; then
     CLEAN=true
@@ -29,6 +30,17 @@ while true; do
   fi
 done
 
+if [ "$CLEAN" == "true" ]; then
+  rm -r ../../android/libqaul/src/main/jniLibs
+fi
+
+# build libqaul
+cd ../../rust/libqaul || exit 1
+
+if [ "$CLEAN" == "true" ]; then
+  cargo clean
+fi
+./build_libqaul_android.sh
 
 # android aar
 cd ../../android || exit 1
