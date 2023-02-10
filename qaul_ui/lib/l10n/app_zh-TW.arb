@@ -1,5 +1,5 @@
  {
-  "languageName": "英語",
+  "languageName": "繁體中文",
   "createAccountHeading": "選擇用戶名",
   "okDialogButton": "確定",
   "cancelDialogButton": "取消",
@@ -7,7 +7,7 @@
   "sendTooltip": "發送",
   "sendFileTooltip": "發送文件",
   "start": "開始",
-  "createUserAccount": "創建用戶資料",
+  "createUserAccount": "建立賬號",
   "learnMore": "了解更多qaul.net",
   "userAccountNavButtonTooltip": "您的賬戶",
   "publicNavButtonTooltip": "公開",
