@@ -16,4 +16,5 @@ steps:
       name: Push qauld Docker image
       command: |
         docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
+        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
         docker push "qaulnet/qauld:${CIRCLE_TAG}"

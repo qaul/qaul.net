@@ -209,6 +209,7 @@ jobs:
             - deploy:
                 command: |
                     docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
+                    docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
                     docker push "qaulnet/qauld:${CIRCLE_TAG}"
                 name: Push qauld Docker image
         working_directory: ~/qaul-libp2p/utilities/qauld-docker
