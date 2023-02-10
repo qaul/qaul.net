@@ -40,3 +40,6 @@ run-rust-macos-tagged-workflow:
 run-rust-windows-tagged-workflow:
   type: boolean
   default: false
+run-docker-tagged-workflow:
+  type: boolean
+  default: false

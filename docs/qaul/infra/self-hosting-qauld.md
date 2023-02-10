@@ -8,7 +8,7 @@ There are two ways of running it: using **docker** or through **docker-compose**
 
 ### Using docker-compose
 
-A [`docker-compose`](https://github.com/qaul/qaul.net/utilities/qauld-docker/docker-compose.yml) file is available as an example.
+A [`docker-compose`](https://github.com/qaul/qaul.net/blob/main/utilities/qauld-docker/docker-compose.yml) file is available as an example.
 
 Before running it, change the place where the internal qauld configuration is bound to on your host:
 `/your/path/to/config:/srv/qaul`
@@ -38,5 +38,5 @@ docker run \
   --publish 8778:9229 \
   --volume /your/path/to/config:/srv/qaul \
   --restart=always \
-  qaul.net/qauld
+  qaulnet/qauld
 ```

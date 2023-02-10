@@ -1,0 +1,19 @@
+docker:
+  - image: cimg/base:2022.06
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
+working_directory: ~/qaul-libp2p/utilities/qauld-docker
+steps:
+  - checkout-project
+  - setup_remote_docker:
+      docker_layer_caching: true
+  - run:
+      name: Build qauld Docker image
+      command: |
+        docker build -t qauld .
+  - deploy:
+      name: Push qauld Docker image
+      command: |
+        docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
+        docker push "qaulnet/qauld:${CIRCLE_TAG}"

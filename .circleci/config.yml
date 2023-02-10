@@ -57,8 +57,11 @@ workflows:
                                   echo '  "run-rust-macos-tagged-workflow": true'
                                 elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
                                   echo '  "run-rust-windows-tagged-workflow": true'
+                                elif [[ "$CIRCLE_TAG" =~ ^.*-docker$ ]]; then
+                                  echo '  "run-docker-tagged-workflow": true'
                                 else
                                   echo '  "run-rust-tagged-workflow": true'
+                                  echo '  "run-docker-tagged-workflow": true'
                                 fi
                               fi
                               echo '}'
