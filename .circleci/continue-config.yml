@@ -208,8 +208,8 @@ jobs:
                 name: Build qauld Docker image
             - deploy:
                 command: |
-                    docker tag qauld "qaul.net/qauld:${CIRCLE_TAG}"
-                    docker push "qaul.net/qauld:${CIRCLE_TAG}"
+                    docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
+                    docker push "qaulnet/qauld:${CIRCLE_TAG}"
                 name: Push qauld Docker image
         working_directory: ~/qaul-libp2p/utilities/qauld-docker
     build-and-deploy-flutter-android:
