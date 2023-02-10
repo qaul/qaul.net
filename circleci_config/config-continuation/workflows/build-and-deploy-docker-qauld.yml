@@ -1,0 +1,3 @@
+when: << pipeline.parameters.run-docker-tagged-workflow >>
+jobs:
+  - build-and-deploy-docker-qauld: { 'filters': { 'tags': { 'only': '/.*/' } } }

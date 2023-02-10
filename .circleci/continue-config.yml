@@ -192,6 +192,26 @@ jobs:
             - checkout-project
             - install-flutter-deps
             - run: flutter analyze
+    build-and-deploy-docker-qauld:
+        docker:
+            - auth:
+                password: $DOCKERHUB_PASSWORD
+                username: $DOCKERHUB_USERNAME
+              image: cimg/base:2022.06
+        steps:
+            - checkout-project
+            - setup_remote_docker:
+                docker_layer_caching: true
+            - run:
+                command: |
+                    docker build -t qauld .
+                name: Build qauld Docker image
+            - deploy:
+                command: |
+                    docker tag qauld "qaul.net/qauld:${CIRCLE_TAG}"
+                    docker push "qaul.net/qauld:${CIRCLE_TAG}"
+                name: Push qauld Docker image
+        working_directory: ~/qaul-libp2p/utilities/qauld-docker
     build-and-deploy-flutter-android:
         executor: flutter-android
         steps:
@@ -964,6 +984,9 @@ orbs:
     flutter: circleci/flutter@1.1.0
     win: circleci/windows@4.1
 parameters:
+    run-docker-tagged-workflow:
+        default: false
+        type: boolean
     run-flutter-android-tagged-workflow:
         default: false
         type: boolean
@@ -1013,6 +1036,13 @@ workflows:
             - test-flutter
             - analyze-flutter
         when: << pipeline.parameters.run-flutter-workflow >>
+    build-and-deploy-docker-qauld:
+        jobs:
+            - build-and-deploy-docker-qauld:
+                filters:
+                    tags:
+                        only: /.*/
+        when: << pipeline.parameters.run-docker-tagged-workflow >>
     build-and-deploy-flutter-android:
         jobs:
             - verify-version-flutter:
