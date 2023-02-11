@@ -297,14 +297,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
             - run:
-                command: |
-                    security create-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
-                    security default-keychain -s qaul-keychain
-                    security unlock-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
-                    security set-keychain-settings -lut 7200 qaul-keychain
-                name: null
-            - run:
-                command: echo "$Certificates" | base64 --decode > certificate.cer
+                command: echo "$Certificates" | base64 --decode > certificate.p12
                 context: Resources
                 name: decode Certificates
             - run:

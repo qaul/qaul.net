@@ -12,16 +12,9 @@ steps:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run:
-      name:
-      command: |
-        security create-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
-        security default-keychain -s qaul-keychain
-        security unlock-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
-        security set-keychain-settings -lut 7200 qaul-keychain
-  - run:
         name: decode Certificates
         context: Resources
-        command: echo "$Certificates" | base64 --decode > certificate.cer
+        command: echo "$Certificates" | base64 --decode > certificate.p12
   - run:
       name: Create and set the default keychain, add certificate to keychain, then build and notarize app
       context: Resources
