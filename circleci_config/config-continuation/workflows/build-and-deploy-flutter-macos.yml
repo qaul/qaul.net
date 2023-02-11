@@ -1,7 +1,5 @@
 when:
   and:
-    # TODO: Reinstate once MacOS app signing on pipeline is fixed
-    - false
     - or:
         - << pipeline.parameters.run-flutter-tagged-workflow >>
         - << pipeline.parameters.run-flutter-macos-tagged-workflow >>

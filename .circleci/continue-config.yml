@@ -1089,7 +1089,6 @@ workflows:
                     - build-flutter-macos
         when:
             and:
-                - false
                 - or:
                     - << pipeline.parameters.run-flutter-tagged-workflow >>
                     - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
