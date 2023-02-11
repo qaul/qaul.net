@@ -8,27 +8,16 @@ steps:
       name: Download Libqaul *.dylib File from latest Github Release
       command: |
         gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
-  - run:
-      name: Install node-appdmg
-      command: |
-        npm install -g appdmg
-        appdmg --version || npx appdmg --version
   - install-flutter:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run:
-      name: Build MacOS Application
-      command: |
-        flutter config --enable-macos-desktop
-        flutter build macos
-
-        ls build/macos/Build/Products/Release
-  - run:
-      name: Build *.dmg File
+      name: Build MacOS Application and *.dmg File
       command: |
         cd ../utilities/installers/macos/bin
-        sh dmgbuild
+        DMG_PATH="$(sh dmgbuild)"
+        cp "$DMG_PATH" .
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - utilities/installers/macos/*.dmg
+        - utilities/installers/macos/bin/*.dmg
