@@ -25,8 +25,10 @@ steps:
   - run:
       name: Add certificate to keychain
       command: |
+        sudo security authorizationdb write com.apple.trust-settings.admin allow
         sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/qaul-keychain.keychain macos/Certificates.cer
         xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id "$NOTARYTOOL_USERNAME" --team-id "$NOTARYTOOL_TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
+        sudo security authorizationdb remove com.apple.trust-settings.admin
   - run:
       name: Build and notarize app
       command: |
