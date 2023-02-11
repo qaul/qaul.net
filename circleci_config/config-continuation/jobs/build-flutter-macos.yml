@@ -12,11 +12,12 @@ steps:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run:
-      name: Build MacOS Application and *.dmg File
-      command: |
-        cd ../utilities/installers/macos/bin
-        DMG_PATH="$(sh dmgbuild)"
-        cp "$DMG_PATH" .
+        name: decode Certificates
+        context: Resources
+        command: echo "$Certificates" | base64 -D -o Certificates.cer
+  - run:
+      name: fastlane
+      command: cd macos && bundle exec fastlane release_ci
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:

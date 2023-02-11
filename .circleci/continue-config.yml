@@ -297,11 +297,12 @@ jobs:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
             - run:
-                command: |
-                    cd ../utilities/installers/macos/bin
-                    DMG_PATH="$(sh dmgbuild)"
-                    cp "$DMG_PATH" .
-                name: Build MacOS Application and *.dmg File
+                command: echo "$Certificates" | base64 -D -o Certificates.cer
+                context: Resources
+                name: decode Certificates
+            - run:
+                command: cd macos && bundle exec fastlane release_ci
+                name: fastlane
             - persist_to_workspace:
                 paths:
                     - utilities/installers/macos/bin/*.dmg

@@ -1,0 +1,19 @@
+
+platform :macos do
+    before_all do
+        setup_circle_ci
+        import_certificate(
+          keychain_name: ENV["MATCH_KEYCHAIN_NAME"] || "default",
+          keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"],
+          certificate_path: 'Certificates.cer',
+          certificate_password: ENV["CERTIFICATE_PASSWORD"] || "default"
+        )
+    end
+
+    lane :release_ci do
+        sh("xcrun", "notarytool", "store-credentials NOTARY_PASSWORD", "--apple-id $NOTARYTOOL_USERNAME", "--team-id $NOTARYTOOL_TEAM_ID", "--password $NOTARYTOOL_PASSWORD")
+        Dir.chdir "../../../utilities/installers/macos/bin" do
+            sh("./dmgbuild")
+        end
+    end
+end
