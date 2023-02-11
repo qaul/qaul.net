@@ -11,7 +11,8 @@ platform :mac do
     end
 
     lane :release_ci do
-        sh("xcrun", "notarytool", "store-credentials", "NOTARY_PASSWORD", "--apple-id", "$NOTARYTOOL_USERNAME", "--team-id", "$NOTARYTOOL_TEAM_ID", "--password", "$NOTARYTOOL_PASSWORD")
+        #sh("xcrun", "notarytool", "store-credentials", "NOTARY_PASSWORD", "--apple-id", "$NOTARYTOOL_USERNAME", "--team-id", "$NOTARYTOOL_TEAM_ID", "--password", "$NOTARYTOOL_PASSWORD")
+        sh "xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id \"$NOTARYTOOL_USERNAME\" --team-id \"$NOTARYTOOL_TEAM_ID\" --password \"$NOTARYTOOL_PASSWORD\""
         Dir.chdir "../../../utilities/installers/macos/bin" do
             sh("./dmgbuild")
         end
