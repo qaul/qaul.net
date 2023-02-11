@@ -14,7 +14,7 @@ steps:
   - run:
         name: decode Certificates
         context: Resources
-        command: echo "$Certificates" | base64 -D -o Certificates.cer
+        command: echo "$Certificates" | base64 -D -o macos/Certificates.cer
   - run:
       name: fastlane
       command: cd macos && bundle exec fastlane mac release_ci
