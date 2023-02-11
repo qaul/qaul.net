@@ -301,7 +301,7 @@ jobs:
                 context: Resources
                 name: decode Certificates
             - run:
-                command: cd macos && bundle exec fastlane release_ci
+                command: cd macos && bundle exec fastlane mac release_ci
                 name: fastlane
             - persist_to_workspace:
                 paths:
