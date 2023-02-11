@@ -317,7 +317,9 @@ jobs:
             - run:
                 command: |
                     #cd macos && bundle exec fastlane mac release_ci
-                    cd ../utilities/installers/macos/bin && ./dmgbuild
+                    cd ../utilities/installers/macos/bin
+                    chmod +x dmgbuild
+                    ./dmgbuild
                 name: Build and notarize app
             - persist_to_workspace:
                 paths:

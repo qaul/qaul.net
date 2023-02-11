@@ -33,7 +33,9 @@ steps:
       name: Build and notarize app
       command: |
         #cd macos && bundle exec fastlane mac release_ci
-        cd ../utilities/installers/macos/bin && ./dmgbuild
+        cd ../utilities/installers/macos/bin
+        chmod +x dmgbuild
+        ./dmgbuild
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
