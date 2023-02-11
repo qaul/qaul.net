@@ -12,7 +12,7 @@ steps:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run:
-      name: Create and set the default keychain
+      name:
       command: |
         security create-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
         security default-keychain -s qaul-keychain
@@ -21,18 +21,23 @@ steps:
   - run:
         name: decode Certificates
         context: Resources
-        command: echo "$Certificates" | base64 --decode > macos/Certificates.cer
+        command: echo "$Certificates" | base64 --decode > certificate.cer
   - run:
-      name: Add certificate to keychain
+      name: Create and set the default keychain, add certificate to keychain, then build and notarize app
+      context: Resources
       command: |
-        sudo security authorizationdb write com.apple.trust-settings.admin allow
-        sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/qaul-keychain.keychain macos/Certificates.cer
+        security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+        security default-keychain -s build.keychain
+        
+        security import certificate.p12 -k build.keychain -P $CertificatesPassword -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+        
+        # TODO REMOVE DEBUG LOG
+        security find-identity -v
+        
         xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id "$NOTARYTOOL_USERNAME" --team-id "$NOTARYTOOL_TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
-        sudo security authorizationdb remove com.apple.trust-settings.admin
-  - run:
-      name: Build and notarize app
-      command: |
-        #cd macos && bundle exec fastlane mac release_ci
+        
         cd ../utilities/installers/macos/bin
         chmod +x dmgbuild
         ./dmgbuild

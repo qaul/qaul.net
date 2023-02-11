@@ -302,25 +302,30 @@ jobs:
                     security default-keychain -s qaul-keychain
                     security unlock-keychain -p "$KEYCHAIN_PASSWORD" qaul-keychain
                     security set-keychain-settings -lut 7200 qaul-keychain
-                name: Create and set the default keychain
+                name: null
             - run:
-                command: echo "$Certificates" | base64 --decode > macos/Certificates.cer
+                command: echo "$Certificates" | base64 --decode > certificate.cer
                 context: Resources
                 name: decode Certificates
             - run:
                 command: |
-                    sudo security authorizationdb write com.apple.trust-settings.admin allow
-                    sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/qaul-keychain.keychain macos/Certificates.cer
+                    security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+                    security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+                    security default-keychain -s build.keychain
+
+                    security import certificate.p12 -k build.keychain -P $CertificatesPassword -T /usr/bin/codesign
+                    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+                    # TODO REMOVE DEBUG LOG
+                    security find-identity -v
+
                     xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id "$NOTARYTOOL_USERNAME" --team-id "$NOTARYTOOL_TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
-                    sudo security authorizationdb remove com.apple.trust-settings.admin
-                name: Add certificate to keychain
-            - run:
-                command: |
-                    #cd macos && bundle exec fastlane mac release_ci
+
                     cd ../utilities/installers/macos/bin
                     chmod +x dmgbuild
                     ./dmgbuild
-                name: Build and notarize app
+                context: Resources
+                name: Create and set the default keychain, add certificate to keychain, then build and notarize app
             - persist_to_workspace:
                 paths:
                     - utilities/installers/macos/bin/*.dmg
