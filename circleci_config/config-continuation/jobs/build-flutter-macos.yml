@@ -17,7 +17,7 @@ steps:
         command: echo "$Certificates" | base64 -D -o Certificates.cer
   - run:
       name: fastlane
-      command: cd macos && bundle exec fastlane release_ci
+      command: cd macos && bundle exec fastlane macos release_ci
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
