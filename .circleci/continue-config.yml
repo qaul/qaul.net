@@ -308,8 +308,15 @@ jobs:
                 context: Resources
                 name: decode Certificates
             - run:
-                command: cd macos && bundle exec fastlane mac release_ci
-                name: fastlane
+                command: |
+                    sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/qaul-keychain.keychain macos/Certificates.cer
+                    xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id "$NOTARYTOOL_USERNAME" --team-id "$NOTARYTOOL_TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
+                name: Add certificate to keychain
+            - run:
+                command: |
+                    #cd macos && bundle exec fastlane mac release_ci
+                    cd ../utilities/installers/macos/bin && ./dmgbuild
+                name: Build and notarize app
             - persist_to_workspace:
                 paths:
                     - utilities/installers/macos/bin/*.dmg

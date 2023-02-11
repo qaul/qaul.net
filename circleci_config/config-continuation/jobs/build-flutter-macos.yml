@@ -23,8 +23,15 @@ steps:
         context: Resources
         command: echo "$Certificates" | base64 --decode > macos/Certificates.cer
   - run:
-      name: fastlane
-      command: cd macos && bundle exec fastlane mac release_ci
+      name: Add certificate to keychain
+      command: |
+        sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/qaul-keychain.keychain macos/Certificates.cer
+        xcrun notarytool store-credentials NOTARY_PASSWORD --apple-id "$NOTARYTOOL_USERNAME" --team-id "$NOTARYTOOL_TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
+  - run:
+      name: Build and notarize app
+      command: |
+        #cd macos && bundle exec fastlane mac release_ci
+        cd ../utilities/installers/macos/bin && ./dmgbuild
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
