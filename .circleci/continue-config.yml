@@ -297,7 +297,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
             - run:
-                command: echo "$Certificates" | base64 -D -o Certificates.cer
+                command: echo "$Certificates" | base64 --decode > macos/Certificates.cer
                 context: Resources
                 name: decode Certificates
             - run:
