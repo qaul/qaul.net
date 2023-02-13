@@ -609,6 +609,8 @@ impl Ble {
 
     /// BLE message received
     fn message_received(message: proto::BleDirectReceived) {
+        log::info!("BLE message received");
+
         // get node ID of sender
         let node_id: PeerId;
         if let Some(id) = Self::get_node_id(message.from.clone()) {
