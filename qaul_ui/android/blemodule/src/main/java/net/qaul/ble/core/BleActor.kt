@@ -67,9 +67,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     /**
      * Use to make connection to device
      */
-
     private fun connectDevice(): Boolean {
-        AppLog.e(TAG, "connectDevice : $bluetoothDevice")
+        AppLog.i(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
             listener!!.onConnectionFailed(bleScanDevice = bleDevice!!)
         }
@@ -256,6 +255,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     fun send(data: String): Int {
+        AppLog.i(TAG, "send data")
         var data = data
         while (data.length > 20) {
             sendQueue.add(data.substring(0, 20))
