@@ -1,1280 +1,1264 @@
-# ---------------------------------------------------
-# ----- config.yml ----------------------------------
-# ----- GENERATED CODE - DO NOT MODIFY BY HAND ------
-# ---------------------------------------------------
-
 commands:
-    checkout-project:
-        description: Invokes the checkout CircleCI step, declaring `path` as the root of the project
-        steps:
-            - restore_cache:
-                keys:
-                    - source-v1-{{ .Branch }}-{{ .Revision }}
-                    - source-v1-{{ .Branch }}-
-                    - source-v1-
-                name: Restore GIT cache
-            - checkout:
-                path: ~/qaul-libp2p
-            - save_cache:
-                key: source-v1-{{ .Branch }}-{{ .Revision }}
-                name: Save GIT cache
-                paths:
-                    - .git
-    install-bundler-deps:
-        description: Install Bundle dependencies
-        steps:
-            - restore_cache:
-                keys:
-                    - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
-                    - gem-cache-v2-{{ arch }}-
-                name: Restore Bundle cache
-            - run:
-                command: bundle check || sudo bundle install --path vendor/bundle
-                name: Install Bundle
-            - save_cache:
-                key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
-                name: Save Bundle cache
-                paths:
-                    - vendor/bundle
-    install-cocoapods-deps:
-        description: Install Pods dependencies
-        steps:
-            - restore_cache:
-                key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
-                name: Restore CocoaPods cache
-            - run:
-                command: pod install
-                name: Install CocoaPods
-            - save_cache:
-                key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
-                name: Save CocoaPods cache
-                paths:
-                    - ./Pods
-    install-flutter:
-        description: Install Flutter SDK & add bin folder to BASH_ENV
-        parameters:
-            version:
-                type: string
-        steps:
-            - run:
-                command: |
-                    FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) << parameters.version >>)
-                    echo "export PATH=${FL_PATH}:${PATH}" >> $BASH_ENV
-                name: Install Flutter
-    install-flutter-deps:
-        description: Install Flutter dependencies
-        parameters:
-            dart-tool-cache:
-                default: .dart_tool
-                type: string
-            pub-cache:
-                default: ~/.pub-cache
-                type: string
-        steps:
-            - run: flutter doctor --verbose
-            - run:
-                command: |
-                    cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
-                name: Prepare For Cache Key
-            - restore_cache:
-                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
-                name: Restore Flutter pub cache
-            - run:
-                command: flutter pub get
-                name: Install Flutter Dependencies
-            - save_cache:
-                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
-                name: Save Flutter pub cache
-                paths:
-                    - << parameters.dart-tool-cache >>
-                    - << parameters.pub-cache >>
-    restore-sccache-cache:
-        steps:
-            - restore_cache:
-                key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}
-                name: Restore sccache cache
-    save-sccache-cache:
-        steps:
-            - save_cache:
-                key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
-                name: Save sccache cache
-                paths:
-                    - ~/.cache/sccache
-    setup-sccache:
-        description: Installs and configures sccache as a wrapper for rustc
-        steps:
-            - run:
-                command: |
-                    cargo install sccache
-                    # This configures Rust to use sccache.
-                    echo 'export "RUSTC_WRAPPER"="sccache"' >> $BASH_ENV
-                    # This is the maximum space sccache cache will use on disk.
-                    echo 'export "SCCACHE_CACHE_SIZE"="1G"' >> $BASH_ENV
-                    sccache --version
-                name: Install sccache
+  checkout-project:
+    description: Invokes the checkout CircleCI step, declaring `path` as the root of the project
+    steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+          name: Restore GIT cache
+      - checkout:
+          path: ~/qaul-libp2p
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          name: Save GIT cache
+          paths:
+            - .git
+  install-bundler-deps:
+    description: Install Bundle dependencies
+    steps:
+      - restore_cache:
+          keys:
+            - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+            - gem-cache-v2-{{ arch }}-
+          name: Restore Bundle cache
+      - run:
+          command: bundle check || sudo bundle install --path vendor/bundle
+          name: Install Bundle
+      - save_cache:
+          key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+          name: Save Bundle cache
+          paths:
+            - vendor/bundle
+  install-cocoapods-deps:
+    description: Install Pods dependencies
+    steps:
+      - restore_cache:
+          key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+          name: Restore CocoaPods cache
+      - run:
+          command: pod install
+          name: Install CocoaPods
+      - save_cache:
+          key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+          name: Save CocoaPods cache
+          paths:
+            - ./Pods
+  install-flutter:
+    description: Install Flutter SDK & add bin folder to BASH_ENV
+    parameters:
+      version:
+        type: string
+    steps:
+      - run:
+          command: |
+            FL_PATH=$(bash <(curl -s https://raw.githubusercontent.com/brenodt/flutter_utilities/main/bin/flinstall) << parameters.version >>)
+            echo "export PATH=${FL_PATH}:${PATH}" >> $BASH_ENV
+          name: Install Flutter
+  install-flutter-deps:
+    description: Install Flutter dependencies
+    parameters:
+      dart-tool-cache:
+        default: .dart_tool
+        type: string
+      pub-cache:
+        default: ~/.pub-cache
+        type: string
+    steps:
+      - run: flutter doctor --verbose
+      - run:
+          command: |
+            cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+          name: Prepare For Cache Key
+      - restore_cache:
+          key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+          name: Restore Flutter pub cache
+      - run:
+          command: flutter pub get
+          name: Install Flutter Dependencies
+      - save_cache:
+          key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+          name: Save Flutter pub cache
+          paths:
+            - << parameters.dart-tool-cache >>
+            - << parameters.pub-cache >>
+  restore-sccache-cache:
+    steps:
+      - restore_cache:
+          key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}
+          name: Restore sccache cache
+  save-sccache-cache:
+    steps:
+      - save_cache:
+          key: sccache-cache-stable-{{ arch }}-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
+          name: Save sccache cache
+          paths:
+            - ~/.cache/sccache
+  setup-sccache:
+    description: Installs and configures sccache as a wrapper for rustc
+    steps:
+      - run:
+          command: |
+            cargo install sccache
+            # This configures Rust to use sccache.
+            echo 'export "RUSTC_WRAPPER"="sccache"' >> $BASH_ENV
+            # This is the maximum space sccache cache will use on disk.
+            echo 'export "SCCACHE_CACHE_SIZE"="1G"' >> $BASH_ENV
+            sccache --version
+          name: Install sccache
 executors:
-    flutter:
-        docker:
-            - image: cirrusci/flutter:3.7.0
-        working_directory: ~/qaul-libp2p/qaul_ui
-    flutter-android:
-        docker:
-            - image: cimg/android:2021.10
-        environment:
-            _JAVA_OPTIONS: -Xmx2048m
-            FASTLANE_LANE: upload_beta_playstore
-            FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.7.0
-            GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m"
-            LANG: en_US.UTF-8
-            LC_ALL: en_US.UTF-8
-            REPO_URL: https://github.com/qaul/qaul.net
-            SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
-        resource_class: large
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui/android
-    flutter-ios:
-        environment:
-            FASTLANE_LANE: upload_testflight
-            FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.7.0
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui/ios
-    flutter-linux:
-        docker:
-            - image: snapcore/snapcraft:edge
-        environment:
-            FLUTTER_VERSION: 3.7.0
-            REPO_URL: https://github.com/qaul/qaul.net
-        working_directory: ~/qaul-libp2p/qaul_ui
-    flutter-macos:
-        environment:
-            FLUTTER_VERSION: 3.7.0
-            REPO_URL: https://github.com/qaul/qaul.net
-        macos:
-            xcode: 14.0.1
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui
-    flutter-ubuntu-lean:
-        docker:
-            - image: cimg/base:2022.05
-        working_directory: ~/qaul-libp2p/qaul_ui
-    rust-android:
-        docker:
-            - image: cimg/android:2022.03-ndk
-        environment:
-            ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        resource_class: large
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
-    rust-linux:
-        docker:
-            - image: cimg/rust:1.64.0
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
-    rust-macos:
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        macos:
-            xcode: 13.0.0
-        shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
+  flutter:
+    docker:
+      - image: cirrusci/flutter:3.7.0
+    working_directory: ~/qaul-libp2p/qaul_ui
+  flutter-android:
+    docker:
+      - image: cimg/android:2021.10
+    environment:
+      _JAVA_OPTIONS: -Xmx2048m
+      FASTLANE_LANE: upload_beta_playstore
+      FL_OUTPUT_DIR: output
+      FLUTTER_VERSION: 3.7.0
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m"
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      REPO_URL: https://github.com/qaul/qaul.net
+      SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
+    resource_class: large
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p/qaul_ui/android
+  flutter-ios:
+    environment:
+      FASTLANE_LANE: upload_testflight
+      FL_OUTPUT_DIR: output
+      FLUTTER_VERSION: 3.7.0
+      REPO_URL: https://github.com/qaul/qaul.net
+    macos:
+      xcode: 13.0.0
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p/qaul_ui/ios
+  flutter-linux:
+    environment:
+      FLUTTER_VERSION: 3.7.0
+      REPO_URL: https://github.com/qaul/qaul.net
+    machine:
+      image: ubuntu-2004:202010-01
+    working_directory: ~/qaul-libp2p/qaul_ui
+  flutter-macos:
+    environment:
+      FLUTTER_VERSION: 3.7.0
+      REPO_URL: https://github.com/qaul/qaul.net
+    macos:
+      xcode: 14.0.1
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p/qaul_ui
+  flutter-ubuntu-lean:
+    docker:
+      - image: cimg/base:2022.05
+    working_directory: ~/qaul-libp2p/qaul_ui
+  rust-android:
+    docker:
+      - image: cimg/android:2022.03-ndk
+    environment:
+      ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    resource_class: large
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p
+  rust-linux:
+    docker:
+      - image: cimg/rust:1.64.0
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p
+  rust-macos:
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    macos:
+      xcode: 13.0.0
+    shell: /bin/bash --login -o pipefail
+    working_directory: ~/qaul-libp2p
 jobs:
-    analyze-flutter:
-        executor: flutter
-        steps:
-            - checkout-project
-            - install-flutter-deps
-            - run: flutter analyze
-    build-and-deploy-docker-qauld:
-        docker:
-            - auth:
-                password: $DOCKERHUB_PASSWORD
-                username: $DOCKERHUB_USERNAME
-              image: cimg/base:2022.06
-        steps:
-            - checkout-project
-            - setup_remote_docker:
-                docker_layer_caching: true
-            - run:
-                command: |
-                    docker build -t qauld .
-                name: Build qauld Docker image
-            - deploy:
-                command: |
-                    docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
-                    docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
-                    docker push "qaulnet/qauld:${CIRCLE_TAG}"
-                name: Push qauld Docker image
-        working_directory: ~/qaul-libp2p/utilities/qauld-docker
-    build-and-deploy-flutter-android:
-        executor: flutter-android
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                    sudo apt update
-                    sudo apt install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
-                    gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
-                name: Download Libqaul AAR Files from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
-                name: Install Bundler
-            - install-bundler-deps
-            - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
-            - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
-            - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > fastlane/google-credentials.json
-            - run:
-                command: bundle exec fastlane $FASTLANE_LANE
-                name: fastlane
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/build/app/outputs/bundle/release/*.aab
-                root: ~/qaul-libp2p
-    build-and-deploy-flutter-ios:
-        executor: flutter-ios
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
-                name: Download Libqaul *.a File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - install-bundler-deps
-            - install-cocoapods-deps
-            - run:
-                command: flutter build ios --release --no-codesign --config-only
-                name: Build Flutter iOS Configuration
-            - run:
-                command: bundle exec fastlane $FASTLANE_LANE
-                name: fastlane
-            - store_artifacts:
-                destination: output
-                path: output
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/ios/output/gym/Runner.ipa
-                root: ~/qaul-libp2p
-    build-flutter-linux:
-        executor: flutter-linux
-        steps:
-            - checkout-project
-            - run:
-                command: apt-get update && apt-get install -y curl apt-transport-https xz-utils
-                name: Install core package dependencies
-            - run:
-                command: |
-                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                    sudo apt update
-                    sudo apt install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
-                name: Download Libqaul *.so File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: cd ../utilities/installers/linux && bash snapbuild
-                name: Build Flutter Application for Linux
-            - persist_to_workspace:
-                paths:
-                    - qaul_ui/*.snap
-                root: ~/qaul-libp2p
-    build-flutter-macos:
-        executor: flutter-macos
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
-                name: Download Libqaul *.dylib File from latest Github Release
-            - run:
-                command: |
-                    npm install -g appdmg
-                    appdmg --version || npx appdmg --version
-                name: Install node-appdmg
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: |
-                    flutter config --enable-macos-desktop
-                    flutter build macos
-
-                    ls build/macos/Build/Products/Release
-                name: Build MacOS Application
-            - run:
-                command: |
-                    cd ../utilities/installers/macos/bin
-                    sh dmgbuild
-                name: Build *.dmg File
-            - persist_to_workspace:
-                paths:
-                    - utilities/installers/macos/*.dmg
-                root: ~/qaul-libp2p
-    build-flutter-windows:
-        environment:
-            FLUTTER_VERSION: 3.7.0
-            REPO_URL: https://github.com/qaul/qaul.net
-        executor:
-            name: win/server-2022
-            shell: bash.exe
-            size: medium
-        steps:
-            - checkout-project
-            - run:
-                command: choco install innosetup -y
-                name: Install InnoSetup
-            - run:
-                command: choco install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    export PATH="/c/Program Files/Github CLI:${PATH}"
-                    gh release download --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
-                name: Download Libqaul *.dll File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - run:
-                command: |
-                    export PATH="${HOME}/development/flutter/bin:${PATH}"
-                    flutter config --enable-windows-desktop
-                    flutter build windows
-                name: Build Flutter Application for Windows
-            - run:
-                command: cd ../utilities/installers/windows/bin && bash build_windows_installer
-                name: Run iscc
-            - persist_to_workspace:
-                paths:
-                    - utilities\installers\windows\*.exe
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
-    build-libqaul-android:
-        executor: rust-android
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    sudo apt update
-                    sudo apt install -y protobuf-compiler
-                    protoc --version
-                name: Install protoc
-            - run:
-                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                name: Install Rust
-            - setup-sccache
-            - restore-sccache-cache
-            - run:
-                command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-                name: Install build targets for android in rust
-            - run:
-                command: cd rust/libqaul && cargo install cargo-ndk
-                name: Install Cargo NDK
-            - run:
-                command: cd rust/libqaul && ./build_libqaul_android.sh release
-                name: Build Libqaul JniLibs for Android
-            - save-sccache-cache
-            - restore_cache:
-                key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
-            - run:
-                command: cd android && sh gradlew assemble
-                name: Build AAR Library
-            - save_cache:
-                key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
-                paths:
-                    - ~/.gradle
-            - persist_to_workspace:
-                paths:
-                    - android/libqaul/build/outputs/aar/libqaul-debug.aar
-                    - android/libqaul/build/outputs/aar/libqaul-release.aar
-                    - android/blemodule/build/outputs/aar/blemodule-debug.aar
-                    - android/blemodule/build/outputs/aar/blemodule-release.aar
-                root: ~/qaul-libp2p
-    build-libqaul-ios:
-        executor: rust-macos
-        steps:
-            - checkout-project
-            - run:
-                command: brew install cmake
-                name: Install CMake
-            - run:
-                command: |
-                    brew install protobuf
-                    protoc --version
-                name: Install protoc
-            - run:
-                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                name: Install Rust
-            - setup-sccache
-            - restore-sccache-cache
-            - run:
-                command: rustup target add aarch64-apple-ios x86_64-apple-ios
-                name: Install build targets for iOS in rust
-            - run:
-                command: cd rust/libqaul && cargo install cargo-lipo
-                name: Install Cargo Lipo
-            - run:
-                command: cd rust/libqaul && sh build_libqaul_ios.sh
-                name: Build Libqaul *.a Library for iOS
-            - save-sccache-cache
-            - persist_to_workspace:
-                paths:
-                    - rust/target/universal/release/liblibqaul.a
-                root: ~/qaul-libp2p
-    build-libqaul-linux:
-        executor: rust-linux
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    sudo apt update
-                    sudo apt install -y protobuf-compiler
-                    protoc --version
-                name: Install protoc
-            - setup-sccache
-            - restore-sccache-cache
-            - run:
-                command: cd rust && cargo build --release
-                name: Build Libqaul for Linux
-            - save-sccache-cache
-            - run:
-                command: |
-                    cd rust/target/release
-                    mkdir cli-binaries
-                    mv qauld qaul-cli cli-binaries
-                    cd cli-binaries
-                    zip linux-cli-binaries *
-                name: zip command-line binaries
-            - persist_to_workspace:
-                paths:
-                    - rust/target/release/liblibqaul.so
-                    - rust/target/release/cli-binaries/linux-cli-binaries.zip
-                root: ~/qaul-libp2p
-    build-libqaul-macos:
-        executor: rust-macos
-        steps:
-            - checkout-project
-            - run:
-                command: brew install cmake
-                name: Install CMake
-            - run:
-                command: |
-                    brew install protobuf
-                    protoc --version
-                name: Install protoc
-            - run:
-                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                name: Install Rust
-            - setup-sccache
-            - restore-sccache-cache
-            - run:
-                command: |
-                    cd rust/libqaul
-                    sh build_libqaul_macos.sh release
-                name: Build Libqaul *.dylib Library for MacOS
-            - save-sccache-cache
-            - run:
-                command: |
-                    cd rust/target/release
-
-                    # Storing pre-compiled dylib
-                    mv liblibqaul.dylib liblibqaul.dylib.old
-                    # compiling CLI tools (qaul-cli, qauld)
-                    cargo build --release
-                    # Replacing newly compiled dylib with correct one
-                    mv -f liblibqaul.dylib.old liblibqaul.dylib
-
-                    mkdir cli-binaries
-                    mv qauld qaul-cli cli-binaries
-                    cd cli-binaries
-                    zip macos-cli-binaries *
-                name: zip command-line binaries
-            - persist_to_workspace:
-                paths:
-                    - rust/target/release/liblibqaul.dylib
-                    - rust/target/release/cli-binaries/macos-cli-binaries.zip
-                root: ~/qaul-libp2p
-    build-libqaul-windows:
-        environment:
-            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-        executor:
-            name: win/default
-            shell: bash.exe
-            size: medium
-        steps:
-            - checkout-project
-            - run:
-                command: choco install cmake -y
-                name: Install CMake
-                shell: powershell.exe
-            - run:
-                command: |
-                    choco install protoc -y
-                    protoc --version
-                name: Install protoc
-                shell: powershell.exe
-            - run:
-                command: |
-                    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                    export PATH="/c/Users/circleci/.cargo/bin:$PATH"
-                    cargo --version
-                    rustup --version
-                    rustc --version
-                name: Install Rust
-            - run:
-                command: |
-                    export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
-                    cd rust && cargo build --release
-                name: Build dll Libqaul
-                no_output_timeout: 30m
-            - run:
-                command: |
-                    cd rust/target/release
-                    mkdir cli-binaries
-                    mv qauld qaul-cli cli-binaries
-                    cd cli-binaries
-                    tar -a -c -f windows-cli-binaries.zip *
-                name: zip command-line binaries
-            - persist_to_workspace:
-                paths:
-                    - rust/target/release/libqaul.dll
-                    - rust/target/release/cli-binaries/windows-cli-binaries.zip
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
-    build-qauld-linux:
-        executor: rust-linux
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    sudo apt update
-                    sudo apt install -y protobuf-compiler
-                    sudo apt install -y gcc-arm-linux-gnueabihf
-                    protoc --version
-                name: Install protoc
-            - setup-sccache
-            - restore-sccache-cache
-            - run:
-                command: cd rust && cargo install cargo-deb
-                name: Install cargo-deb package
-            - run:
-                command: cd rust/clients/qauld && cargo deb
-                name: Build qauld for Linux
-            - run:
-                command: cd rust && rustup target add armv7-unknown-linux-gnueabihf
-                name: Add ARM Target for Raspberry pi
-            - run:
-                command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
-                name: Build qauld for Raspberry pi
-            - save-sccache-cache
-            - persist_to_workspace:
-                paths:
-                    - rust/target/debian/*.deb
-                    - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb
-                root: ~/qaul-libp2p
-    integration-test-flutter-android:
-        environment:
-            _JAVA_OPTIONS: -Xmx3g
-            FLUTTER_VERSION: 3.3.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        executor:
-            name: android/android-machine
-            resource-class: 2xlarge
-            tag: 2021.10.1
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                    sudo apt update
-                    sudo apt install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "0\.2\.0" | cut -f 3 | sort --reverse --version-sort | head -n 1)
-                    gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
-                    gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
-
-                    gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
-                    gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
-                name: Download Libqaul AAR Files from latest Github Release
-            - flutter/install_sdk_and_pub:
-                flutter_version: $FLUTTER_VERSION
-            - flutter/install_android_gradle
-            - flutter/install_android_gem
-            - android/create-avd:
-                additional-args: --sdcard 4096M
-                avd-name: myavd
-                install: true
-                system-image: system-images;android-29;default;x86
-            - android/start-emulator:
-                avd-name: myavd
-                no-window: true
-                post-emulator-launch-assemble-command: ""
-                restore-gradle-cache-prefix: v1a
-            - run:
-                command: |
-                    echo "Available devices:"
-                    flutter devices && echo "\n"
-
-                    sed -i -e 's/-Xmx1536M/-Xmx3g/' android/gradle.properties
-                    sed -i -e 's/# //g' android/gradle.properties
-                    cat android/gradle.properties
-
-                    flutter test integration_test --dart-define=testing_mode=true
-                name: Run integration tests on Android Emulator
-        working_directory: ~/qaul-libp2p/qaul_ui
-    integration-test-flutter-ios:
-        executor: flutter-ios
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
-                name: Download Libqaul *.a File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - install-bundler-deps
-            - install-cocoapods-deps
-            - run:
-                command: |
-                    brew tap wix/brew
-                    brew install applesimutils
-                name: Install applesimutils
-            - run:
-                command: |
-                    cd ..  # qaul_ui root
-
-                    ./bin/replace_registrar_flutter_ios.py
-
-                    ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
-                    echo "Using device ID: $ID"
-
-                    echo "Booting simulator..."
-                    xcrun simctl boot "$ID"
-
-                    echo "Available devices:"
-                    flutter devices && echo "\n"
-
-                    flutter test integration_test -d "$ID" --dart-define=testing_mode=true
-                name: Run integration tests on iOS Simulator
-            - store_artifacts:
-                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
-    integration-test-flutter-linux:
-        environment:
-            FLUTTER_VERSION: 3.3.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        executor: flutter-ubuntu-lean
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    sudo apt-get update
-                    sudo apt install -y -qq wget tar unzip zip lib32stdc++6 lib32z1 clang ninja-build pkg-config libgtk-3-dev curl apt-transport-https xz-utils git cmake
-                name: Install core package dependencies
-            - run:
-                command: |
-                    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-                    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                    sudo apt update
-                    sudo apt install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
-                name: Download Libqaul *.so File from latest Github Release
-            - flutter/install_sdk_and_pub:
-                flutter_version: $FLUTTER_VERSION
-            - run:
-                command: |
-                    echo "Available devices:"
-                    flutter devices && echo "\n"
-
-                    flutter config --enable-linux-desktop
-
-                    export DISPLAY=:99
-                    sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-                    flutter test integration_test --dart-define=testing_mode=true -d linux
-                name: Run integration tests on Linux
-    integration-test-flutter-macos:
-        executor: flutter-macos
-        steps:
-            - checkout-project
-            - run:
-                command: brew install gh
-                name: Install Github CLI
-            - run:
-                command: |
-                    gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
-                name: Download Libqaul *.dylib File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - install-flutter-deps
-            - run:
-                command: |
-                    flutter config --enable-macos-desktop
-
-                    echo "Available devices:"
-                    flutter devices && echo "\n"
-
-                    flutter test integration_test --dart-define=testing_mode=true -d macos
-                name: Run integration tests on MacOS
-            - store_artifacts:
-                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
-    integration-test-flutter-windows:
-        environment:
-            FLUTTER_VERSION: 3.3.1
-            REPO_URL: https://github.com/qaul/qaul.net
-        executor:
-            name: win/server-2022
-            shell: bash.exe
-            size: medium
-        steps:
-            - checkout-project
-            - run:
-                command: choco install gh -y
-                name: Install Github CLI
-            - run:
-                command: |
-                    export PATH="/c/Program Files/Github CLI:${PATH}"
-                    gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
-                name: Download Libqaul *.dll File from latest Github Release
-            - install-flutter:
-                version: $FLUTTER_VERSION
-            - run:
-                command: |
-                    export PATH="${HOME}/development/flutter/bin:${PATH}"
-                    flutter config --enable-windows-desktop
-
-                    echo "Available devices:"
-                    flutter devices && echo "\n"
-
-                    flutter test integration_test --dart-define=testing_mode=true -d windows
-                name: Run integration tests on Windows
-        working_directory: ~/qaul-libp2p/qaul_ui
-    publish-flutter-github-release:
-        executor: flutter-ubuntu-lean
-        steps:
-            - checkout-project
-            - attach_workspace:
-                at: ~/qaul-libp2p
-            - run:
-                command: |
-                    mkdir artifacts
-                    # Android
-                    cp build/app/outputs/bundle/release/*.aab ./artifacts/
-                    # iOS
-                    cp ios/output/gym/Runner.ipa ./artifacts/
-                    # MacOS
-                    cp ../utilities/installers/macos/*.dmg ./artifacts/
-                    # Windows
-                    cp ../utilities/installers/windows/*.exe ./artifacts/
-                    # Linux
-                    cp *.snap ./artifacts/
-
-                    # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
-                    exit 0
-                name: Copy executables to ./artifacts
-                shell: /bin/bash --login +eo pipefail
-            - run:
-                command: |
-                    GHR_VERSION=0.14.0
-                    GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    wget "$GHR_URL"
-                    tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
-                name: Install ghr
-            - run:
-                command: |
-                    cd ../utilities/bin
-                    chmod +x filename
-                    echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
-                name: Add utilities/bin to PATH
-            - run:
-                command: |
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
-                    TAG="v${VERSION}"
-
-                    cd artifacts
-
-                    echo "Version Found: $VERSION"
-                    echo "Tag built:     $TAG"
-                    echo ""
-
-                    ghr -t "${GITHUB_TOKEN}" \
-                      -u "${CIRCLE_PROJECT_USERNAME}" \
-                      -r "${CIRCLE_PROJECT_REPONAME}" \
-                      -c "${CIRCLE_SHA1}" \
-                      -n "qaul - v${RUST_VERSION}" \
-                      -replace \
-                      "${TAG}" .
-                name: Publish Release on GitHub
-    publish-rust-github-release:
-        executor: rust-linux
-        steps:
-            - checkout-project
-            - attach_workspace:
-                at: ~/qaul-libp2p
-            - run:
-                command: |
-                    mkdir artifacts
-
-                    # Android
-                    cp -a android/blemodule/build/outputs/aar/. ./artifacts/
-                    cp -a android/libqaul/build/outputs/aar/. ./artifacts/
-
-                    # iOS
-                    cp rust/target/release/liblibqaul.dylib ./artifacts/
-
-                    # Linux - libqaul
-                    cp rust/target/release/liblibqaul.so ./artifacts/
-                    cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
-
-                    # Linux - qauld debian installers
-                    cp rust/target/debian/*.deb ./artifacts/
-                    cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
-
-                    # MacOS
-                    cp rust/target/universal/release/liblibqaul.a ./artifacts/
-                    cp rust/target/release/cli-binaries/macos-cli-binaries.zip ./artifacts/
-
-                    # Windows
-                    cp rust/target/release/libqaul.dll ./artifacts/
-                    cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
-
-                    # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
-                    exit 0
-                name: Copy binaries to ./artifacts
-                shell: /bin/bash --login +eo pipefail
-            - run:
-                command: |
-                    GHR_VERSION=0.14.0
-                    GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    wget "$GHR_URL"
-                    tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
-                    echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
-                name: Install ghr
-            - run:
-                command: |
-                    cd utilities/bin
-                    chmod +x filename
-                    echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
-                name: Add utilities/bin to PATH
-            - run:
-                command: |
-                    RUST_VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-                    TAG="v${RUST_VERSION}"
-
-                    # Flutter Filenames make use of Flutter's App Version
-                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
-
-                    APK_FILE="qaul-$FLUTTER_VERSION"
-                    LINUX_FILE="qaul-$FLUTTER_VERSION"
-                    MACOS_FILE="qaul-$FLUTTER_VERSION"
-                    WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
-
-                    cd artifacts
-
-                    # Get debian file names
-                    AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-                    ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
-                    # Replace `~` with `-` in debian file names
-                    mv "$AMD64_FILE.deb" "$(echo "$AMD64_FILE" | sed 's/\~/-/').deb"
-                    mv "$ARMHF_FILE.deb" "$(echo "$ARMHF_FILE" | sed 's/\~/-/').deb"
-                    # Replace files names with new values
-                    AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-                    ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
-
-                    echo "Using debian amd artifact name: $AMD64_FILE"
-                    echo "Using debian arm artifact name: $ARMHF_FILE"
-
-                    DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
-                      | sed "s/TAGNAME/${TAG}/g" \
-                      | sed "s/DEB_AMD/${AMD64_FILE}/g" \
-                      | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
-                      | sed "s/APKVERSION/${APK_FILE}/g" \
-                      | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
-                      | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
-                      | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
-                    )
-
-                    echo "Version Found: $RUST_VERSION"
-                    echo "Tag built:     $TAG"
-                    echo "Description:"
-                    echo "$DESCRIPTION"
-                    echo ""
-
-                    ghr -t "${GITHUB_TOKEN}" \
-                      -u "${CIRCLE_PROJECT_USERNAME}" \
-                      -r "${CIRCLE_PROJECT_REPONAME}" \
-                      -c "${CIRCLE_SHA1}" \
-                      -n "qaul - v${RUST_VERSION}" \
-                      -b "${DESCRIPTION}" \
-                      -replace \
-                      "${TAG}" .
-                name: Publish Release on GitHub
-    test-flutter:
-        executor: flutter
-        steps:
-            - checkout-project
-            - install-flutter-deps
-            - run: flutter test
-    verify-version-flutter:
-        executor: flutter-ubuntu-lean
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
-                    PATTERN="^v${VERSION}-flutter(-android|-ios|-linux|-macos|-windows)?$"
-                    if [[ ! "$CIRCLE_TAG" =~ $PATTERN ]]; then
-                      echo "Git tag: $CIRCLE_TAG does not match the version of this app: $VERSION"
-                      echo "Please update app version at qaul_ui/pubspec.yaml"
-                      exit 1
-                    fi
-                name: Verify that Git tag matches Flutter version
-    verify-version-rust:
-        executor: rust-linux
-        steps:
-            - checkout-project
-            - run:
-                command: |
-                    VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
-                    TAG="v$VERSION"
-                    if ! [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
-                      echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"
-                      echo "Please update app version at rust/libqaul/Cargo.toml"
-                      exit 1
-                    fi
-                name: Verify that Git tag matches Rust version
+  analyze-flutter:
+    executor: flutter
+    steps:
+      - checkout-project
+      - install-flutter-deps
+      - run: flutter analyze
+  build-and-deploy-docker-qauld:
+    docker:
+      - auth:
+          password: $DOCKERHUB_PASSWORD
+          username: $DOCKERHUB_USERNAME
+        image: cimg/base:2022.06
+    steps:
+      - checkout-project
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          command: |
+            docker build -t qauld .
+          name: Build qauld Docker image
+      - deploy:
+          command: |
+            docker tag qauld "qaulnet/qauld:${CIRCLE_TAG}"
+            docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+            docker push "qaulnet/qauld:${CIRCLE_TAG}"
+          name: Push qauld Docker image
+    working_directory: ~/qaul-libp2p/utilities/qauld-docker
+  build-and-deploy-flutter-android:
+    executor: flutter-android
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
+            gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
+          name: Download Libqaul AAR Files from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - install-flutter-deps
+      - run:
+          command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
+          name: Install Bundler
+      - install-bundler-deps
+      - run: echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+      - run: echo "$PLAY_STORE_UPLOAD_KEY_INFO" | base64 --decode > key.properties
+      - run: echo "$PLAY_STORE_JSON_KEY" | base64 --decode > fastlane/google-credentials.json
+      - run:
+          command: bundle exec fastlane $FASTLANE_LANE
+          name: fastlane
+      - persist_to_workspace:
+          paths:
+            - qaul_ui/build/app/outputs/bundle/release/*.aab
+          root: ~/qaul-libp2p
+  build-and-deploy-flutter-ios:
+    executor: flutter-ios
+    steps:
+      - checkout-project
+      - run:
+          command: brew install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+          name: Download Libqaul *.a File from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - install-flutter-deps
+      - install-bundler-deps
+      - install-cocoapods-deps
+      - run:
+          command: flutter build ios --release --no-codesign --config-only
+          name: Build Flutter iOS Configuration
+      - run:
+          command: bundle exec fastlane $FASTLANE_LANE
+          name: fastlane
+      - store_artifacts:
+          destination: output
+          path: output
+      - persist_to_workspace:
+          paths:
+            - qaul_ui/ios/output/gym/Runner.ipa
+          root: ~/qaul-libp2p
+  build-flutter-linux:
+    executor: flutter-linux
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            sudo apt update && sudo apt install -y snapd
+            sudo snap install snapcraft --edge --classic
+            sudo snap install lxd
+          name: Install core package dependencies
+      - run:
+          command: cd ../utilities/installers/linux && bash snapbuild
+          name: Build Flutter Application for Linux
+      - persist_to_workspace:
+          paths:
+            - qaul_ui/*.snap
+          root: ~/qaul-libp2p
+  build-flutter-macos:
+    executor: flutter-macos
+    steps:
+      - checkout-project
+      - run:
+          command: brew install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+          name: Download Libqaul *.dylib File from latest Github Release
+      - run:
+          command: |
+            npm install -g appdmg
+            appdmg --version || npx appdmg --version
+          name: Install node-appdmg
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - install-flutter-deps
+      - run:
+          command: |
+            flutter config --enable-macos-desktop
+            flutter build macos
+            
+            ls build/macos/Build/Products/Release
+          name: Build MacOS Application
+      - run:
+          command: |
+            cd ../utilities/installers/macos/bin
+            sh dmgbuild
+          name: Build *.dmg File
+      - persist_to_workspace:
+          paths:
+            - utilities/installers/macos/*.dmg
+          root: ~/qaul-libp2p
+  build-flutter-windows:
+    environment:
+      FLUTTER_VERSION: 3.7.0
+      REPO_URL: https://github.com/qaul/qaul.net
+    executor:
+      name: win/server-2022
+      shell: bash.exe
+      size: medium
+    steps:
+      - checkout-project
+      - run:
+          command: choco install innosetup -y
+          name: Install InnoSetup
+      - run:
+          command: choco install gh -y
+          name: Install Github CLI
+      - run:
+          command: |
+            export PATH="/c/Program Files/Github CLI:${PATH}"
+            gh release download --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+          name: Download Libqaul *.dll File from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - run:
+          command: |
+            export PATH="${HOME}/development/flutter/bin:${PATH}"
+            flutter config --enable-windows-desktop
+            flutter build windows
+          name: Build Flutter Application for Windows
+      - run:
+          command: cd ../utilities/installers/windows/bin && bash build_windows_installer
+          name: Run iscc
+      - persist_to_workspace:
+          paths:
+            - utilities\installers\windows\*.exe
+          root: ~/qaul-libp2p
+    working_directory: ~/qaul-libp2p/qaul_ui
+  build-libqaul-android:
+    executor: rust-android
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            sudo apt update
+            sudo apt install -y protobuf-compiler
+            protoc --version
+          name: Install protoc
+      - run:
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          name: Install Rust
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+          name: Install build targets for android in rust
+      - run:
+          command: cd rust/libqaul && cargo install cargo-ndk
+          name: Install Cargo NDK
+      - run:
+          command: cd rust/libqaul && ./build_libqaul_android.sh release
+          name: Build Libqaul JniLibs for Android
+      - save-sccache-cache
+      - restore_cache:
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
+      - run:
+          command: cd android && sh gradlew assemble
+          name: Build AAR Library
+      - save_cache:
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
+          paths:
+            - ~/.gradle
+      - persist_to_workspace:
+          paths:
+            - android/libqaul/build/outputs/aar/libqaul-debug.aar
+            - android/libqaul/build/outputs/aar/libqaul-release.aar
+            - android/blemodule/build/outputs/aar/blemodule-debug.aar
+            - android/blemodule/build/outputs/aar/blemodule-release.aar
+          root: ~/qaul-libp2p
+  build-libqaul-ios:
+    executor: rust-macos
+    steps:
+      - checkout-project
+      - run:
+          command: brew install cmake
+          name: Install CMake
+      - run:
+          command: |
+            brew install protobuf
+            protoc --version
+          name: Install protoc
+      - run:
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          name: Install Rust
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          command: rustup target add aarch64-apple-ios x86_64-apple-ios
+          name: Install build targets for iOS in rust
+      - run:
+          command: cd rust/libqaul && cargo install cargo-lipo
+          name: Install Cargo Lipo
+      - run:
+          command: cd rust/libqaul && sh build_libqaul_ios.sh
+          name: Build Libqaul *.a Library for iOS
+      - save-sccache-cache
+      - persist_to_workspace:
+          paths:
+            - rust/target/universal/release/liblibqaul.a
+          root: ~/qaul-libp2p
+  build-libqaul-linux:
+    executor: rust-linux
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            sudo apt update
+            sudo apt install -y protobuf-compiler
+            protoc --version
+          name: Install protoc
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          command: cd rust && cargo build --release
+          name: Build Libqaul for Linux
+      - save-sccache-cache
+      - run:
+          command: |
+            cd rust/target/release
+            mkdir cli-binaries
+            mv qauld qaul-cli cli-binaries
+            cd cli-binaries
+            zip linux-cli-binaries *
+          name: zip command-line binaries
+      - persist_to_workspace:
+          paths:
+            - rust/target/release/liblibqaul.so
+            - rust/target/release/cli-binaries/linux-cli-binaries.zip
+          root: ~/qaul-libp2p
+  build-libqaul-macos:
+    executor: rust-macos
+    steps:
+      - checkout-project
+      - run:
+          command: brew install cmake
+          name: Install CMake
+      - run:
+          command: |
+            brew install protobuf
+            protoc --version
+          name: Install protoc
+      - run:
+          command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          name: Install Rust
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          command: |
+            cd rust/libqaul
+            sh build_libqaul_macos.sh release
+          name: Build Libqaul *.dylib Library for MacOS
+      - save-sccache-cache
+      - run:
+          command: |
+            cd rust/target/release
+            
+            # Storing pre-compiled dylib
+            mv liblibqaul.dylib liblibqaul.dylib.old
+            # compiling CLI tools (qaul-cli, qauld)
+            cargo build --release
+            # Replacing newly compiled dylib with correct one
+            mv -f liblibqaul.dylib.old liblibqaul.dylib
+            
+            mkdir cli-binaries
+            mv qauld qaul-cli cli-binaries
+            cd cli-binaries
+            zip macos-cli-binaries *
+          name: zip command-line binaries
+      - persist_to_workspace:
+          paths:
+            - rust/target/release/liblibqaul.dylib
+            - rust/target/release/cli-binaries/macos-cli-binaries.zip
+          root: ~/qaul-libp2p
+  build-libqaul-windows:
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    executor:
+      name: win/default
+      shell: bash.exe
+      size: medium
+    steps:
+      - checkout-project
+      - run:
+          command: choco install cmake -y
+          name: Install CMake
+          shell: powershell.exe
+      - run:
+          command: |
+            choco install protoc -y
+            protoc --version
+          name: Install protoc
+          shell: powershell.exe
+      - run:
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            export PATH="/c/Users/circleci/.cargo/bin:$PATH"
+            cargo --version
+            rustup --version
+            rustc --version
+          name: Install Rust
+      - run:
+          command: |
+            export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
+            cd rust && cargo build --release
+          name: Build dll Libqaul
+          no_output_timeout: 30m
+      - run:
+          command: |
+            cd rust/target/release
+            mkdir cli-binaries
+            mv qauld qaul-cli cli-binaries
+            cd cli-binaries
+            tar -a -c -f windows-cli-binaries.zip *
+          name: zip command-line binaries
+      - persist_to_workspace:
+          paths:
+            - rust/target/release/libqaul.dll
+            - rust/target/release/cli-binaries/windows-cli-binaries.zip
+          root: ~/qaul-libp2p
+    working_directory: ~/qaul-libp2p
+  build-qauld-linux:
+    executor: rust-linux
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            sudo apt update
+            sudo apt install -y protobuf-compiler
+            sudo apt install -y gcc-arm-linux-gnueabihf
+            protoc --version
+          name: Install protoc
+      - setup-sccache
+      - restore-sccache-cache
+      - run:
+          command: cd rust && cargo install cargo-deb
+          name: Install cargo-deb package
+      - run:
+          command: cd rust/clients/qauld && cargo deb
+          name: Build qauld for Linux
+      - run:
+          command: cd rust && rustup target add armv7-unknown-linux-gnueabihf
+          name: Add ARM Target for Raspberry pi
+      - run:
+          command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
+          name: Build qauld for Raspberry pi
+      - save-sccache-cache
+      - persist_to_workspace:
+          paths:
+            - rust/target/debian/*.deb
+            - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb
+          root: ~/qaul-libp2p
+  integration-test-flutter-android:
+    environment:
+      _JAVA_OPTIONS: -Xmx3g
+      FLUTTER_VERSION: 3.3.1
+      REPO_URL: https://github.com/qaul/qaul.net
+    executor:
+      name: android/android-machine
+      resource-class: 2xlarge
+      tag: 2021.10.1
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            LATEST_TAG=$(gh release list --repo "$REPO_URL" | grep -E "0\.2\.0" | cut -f 3 | sort --reverse --version-sort | head -n 1)
+            gh release download "$LATEST_TAG" --pattern "libqaul-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+            gh release download "$LATEST_TAG" --pattern "blemodule-debug.aar" --repo "$REPO_URL" --dir android/app/libs
+            
+            gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir android/app/libs
+            gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir android/app/libs
+          name: Download Libqaul AAR Files from latest Github Release
+      - flutter/install_sdk_and_pub:
+          flutter_version: $FLUTTER_VERSION
+      - flutter/install_android_gradle
+      - flutter/install_android_gem
+      - android/create-avd:
+          additional-args: --sdcard 4096M
+          avd-name: myavd
+          install: true
+          system-image: system-images;android-29;default;x86
+      - android/start-emulator:
+          avd-name: myavd
+          no-window: true
+          post-emulator-launch-assemble-command: ""
+          restore-gradle-cache-prefix: v1a
+      - run:
+          command: |
+            echo "Available devices:"
+            flutter devices && echo "\n"
+            
+            sed -i -e 's/-Xmx1536M/-Xmx3g/' android/gradle.properties
+            sed -i -e 's/# //g' android/gradle.properties
+            cat android/gradle.properties
+            
+            flutter test integration_test --dart-define=testing_mode=true
+          name: Run integration tests on Android Emulator
+    working_directory: ~/qaul-libp2p/qaul_ui
+  integration-test-flutter-ios:
+    executor: flutter-ios
+    steps:
+      - checkout-project
+      - run:
+          command: brew install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+          name: Download Libqaul *.a File from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - install-flutter-deps
+      - install-bundler-deps
+      - install-cocoapods-deps
+      - run:
+          command: |
+            brew tap wix/brew
+            brew install applesimutils
+          name: Install applesimutils
+      - run:
+          command: |
+            cd ..  # qaul_ui root
+            
+            ./bin/replace_registrar_flutter_ios.py
+            
+            ID=$(xcrun simctl list devices | grep "iPhone 13 Pro Max" | head -1 | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})")
+            echo "Using device ID: $ID"
+            
+            echo "Booting simulator..."
+            xcrun simctl boot "$ID"
+            
+            echo "Available devices:"
+            flutter devices && echo "\n"
+            
+            flutter test integration_test -d "$ID" --dart-define=testing_mode=true
+          name: Run integration tests on iOS Simulator
+      - store_artifacts:
+          path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+  integration-test-flutter-linux:
+    environment:
+      FLUTTER_VERSION: 3.3.1
+      REPO_URL: https://github.com/qaul/qaul.net
+    executor: flutter-ubuntu-lean
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            sudo apt-get update
+            sudo apt install -y -qq wget tar unzip zip lib32stdc++6 lib32z1 clang ninja-build pkg-config libgtk-3-dev curl apt-transport-https xz-utils git cmake
+          name: Install core package dependencies
+      - run:
+          command: |
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh -y
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "*.so" --repo "$REPO_URL" --dir ../rust/target/release
+          name: Download Libqaul *.so File from latest Github Release
+      - flutter/install_sdk_and_pub:
+          flutter_version: $FLUTTER_VERSION
+      - run:
+          command: |
+            echo "Available devices:"
+            flutter devices && echo "\n"
+            
+            flutter config --enable-linux-desktop
+            
+            export DISPLAY=:99
+            sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+            flutter test integration_test --dart-define=testing_mode=true -d linux
+          name: Run integration tests on Linux
+  integration-test-flutter-macos:
+    executor: flutter-macos
+    steps:
+      - checkout-project
+      - run:
+          command: brew install gh
+          name: Install Github CLI
+      - run:
+          command: |
+            gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+          name: Download Libqaul *.dylib File from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - install-flutter-deps
+      - run:
+          command: |
+            flutter config --enable-macos-desktop
+            
+            echo "Available devices:"
+            flutter devices && echo "\n"
+            
+            flutter test integration_test --dart-define=testing_mode=true -d macos
+          name: Run integration tests on MacOS
+      - store_artifacts:
+          path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+  integration-test-flutter-windows:
+    environment:
+      FLUTTER_VERSION: 3.3.1
+      REPO_URL: https://github.com/qaul/qaul.net
+    executor:
+      name: win/server-2022
+      shell: bash.exe
+      size: medium
+    steps:
+      - checkout-project
+      - run:
+          command: choco install gh -y
+          name: Install Github CLI
+      - run:
+          command: |
+            export PATH="/c/Program Files/Github CLI:${PATH}"
+            gh release download "$LATEST_TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+          name: Download Libqaul *.dll File from latest Github Release
+      - install-flutter:
+          version: $FLUTTER_VERSION
+      - run:
+          command: |
+            export PATH="${HOME}/development/flutter/bin:${PATH}"
+            flutter config --enable-windows-desktop
+            
+            echo "Available devices:"
+            flutter devices && echo "\n"
+            
+            flutter test integration_test --dart-define=testing_mode=true -d windows
+          name: Run integration tests on Windows
+    working_directory: ~/qaul-libp2p/qaul_ui
+  publish-flutter-github-release:
+    executor: flutter-ubuntu-lean
+    steps:
+      - checkout-project
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          command: |
+            mkdir artifacts
+            # Android
+            cp build/app/outputs/bundle/release/*.aab ./artifacts/
+            # iOS
+            cp ios/output/gym/Runner.ipa ./artifacts/
+            # MacOS
+            cp ../utilities/installers/macos/*.dmg ./artifacts/
+            # Windows
+            cp ../utilities/installers/windows/*.exe ./artifacts/
+            # Linux
+            cp *.snap ./artifacts/
+            
+            # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
+            exit 0
+          name: Copy executables to ./artifacts
+          shell: /bin/bash --login +eo pipefail
+      - run:
+          command: |
+            GHR_VERSION=0.14.0
+            GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            wget "$GHR_URL"
+            tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+          name: Install ghr
+      - run:
+          command: |
+            cd ../utilities/bin
+            chmod +x filename
+            echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
+          name: Add utilities/bin to PATH
+      - run:
+          command: |
+            VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+            TAG="v${VERSION}"
+            
+            cd artifacts
+            
+            echo "Version Found: $VERSION"
+            echo "Tag built:     $TAG"
+            echo ""
+            
+            ghr -t "${GITHUB_TOKEN}" \
+              -u "${CIRCLE_PROJECT_USERNAME}" \
+              -r "${CIRCLE_PROJECT_REPONAME}" \
+              -c "${CIRCLE_SHA1}" \
+              -n "qaul - v${RUST_VERSION}" \
+              -replace \
+              "${TAG}" .
+          name: Publish Release on GitHub
+  publish-rust-github-release:
+    executor: rust-linux
+    steps:
+      - checkout-project
+      - attach_workspace:
+          at: ~/qaul-libp2p
+      - run:
+          command: |
+            mkdir artifacts
+            
+            # Android
+            cp -a android/blemodule/build/outputs/aar/. ./artifacts/
+            cp -a android/libqaul/build/outputs/aar/. ./artifacts/
+            
+            # iOS
+            cp rust/target/release/liblibqaul.dylib ./artifacts/
+            
+            # Linux - libqaul
+            cp rust/target/release/liblibqaul.so ./artifacts/
+            cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+            
+            # Linux - qauld debian installers
+            cp rust/target/debian/*.deb ./artifacts/
+            cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
+            
+            # MacOS
+            cp rust/target/universal/release/liblibqaul.a ./artifacts/
+            cp rust/target/release/cli-binaries/macos-cli-binaries.zip ./artifacts/
+            
+            # Windows
+            cp rust/target/release/libqaul.dll ./artifacts/
+            cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
+            
+            # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
+            exit 0
+          name: Copy binaries to ./artifacts
+          shell: /bin/bash --login +eo pipefail
+      - run:
+          command: |
+            GHR_VERSION=0.14.0
+            GHR_URL=https://github.com/tcnksm/ghr/releases/download/v${GHR_VERSION}/ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            wget "$GHR_URL"
+            tar xzf ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            rm -r ghr_v${GHR_VERSION}_linux_amd64.tar.gz
+            echo "export PATH=$(pwd)/ghr_v${GHR_VERSION}_linux_amd64:${PATH}" >> $BASH_ENV
+          name: Install ghr
+      - run:
+          command: |
+            cd utilities/bin
+            chmod +x filename
+            echo "export PATH=$(pwd):${PATH}" > $BASH_ENV
+          name: Add utilities/bin to PATH
+      - run:
+          command: |
+            RUST_VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
+            TAG="v${RUST_VERSION}"
+            
+            # Flutter Filenames make use of Flutter's App Version
+            FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+            
+            APK_FILE="qaul-$FLUTTER_VERSION"
+            LINUX_FILE="qaul-$FLUTTER_VERSION"
+            MACOS_FILE="qaul-$FLUTTER_VERSION"
+            WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
+            
+            cd artifacts
+            
+            # Get debian file names
+            AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+            ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
+            # Replace `~` with `-` in debian file names
+            mv "$AMD64_FILE.deb" "$(echo "$AMD64_FILE" | sed 's/\~/-/').deb"
+            mv "$ARMHF_FILE.deb" "$(echo "$ARMHF_FILE" | sed 's/\~/-/').deb"
+            # Replace files names with new values
+            AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+            ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
+            
+            echo "Using debian amd artifact name: $AMD64_FILE"
+            echo "Using debian arm artifact name: $ARMHF_FILE"
+            
+            DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
+              | sed "s/TAGNAME/${TAG}/g" \
+              | sed "s/DEB_AMD/${AMD64_FILE}/g" \
+              | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
+              | sed "s/APKVERSION/${APK_FILE}/g" \
+              | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
+              | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
+              | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
+            )
+            
+            echo "Version Found: $RUST_VERSION"
+            echo "Tag built:     $TAG"
+            echo "Description:"
+            echo "$DESCRIPTION"
+            echo ""
+            
+            ghr -t "${GITHUB_TOKEN}" \
+              -u "${CIRCLE_PROJECT_USERNAME}" \
+              -r "${CIRCLE_PROJECT_REPONAME}" \
+              -c "${CIRCLE_SHA1}" \
+              -n "qaul - v${RUST_VERSION}" \
+              -b "${DESCRIPTION}" \
+              -replace \
+              "${TAG}" .
+          name: Publish Release on GitHub
+  test-flutter:
+    executor: flutter
+    steps:
+      - checkout-project
+      - install-flutter-deps
+      - run: flutter test
+  verify-version-flutter:
+    executor: flutter-ubuntu-lean
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+            PATTERN="^v${VERSION}-flutter(-android|-ios|-linux|-macos|-windows)?$"
+            if [[ ! "$CIRCLE_TAG" =~ $PATTERN ]]; then
+              echo "Git tag: $CIRCLE_TAG does not match the version of this app: $VERSION"
+              echo "Please update app version at qaul_ui/pubspec.yaml"
+              exit 1
+            fi
+          name: Verify that Git tag matches Flutter version
+  verify-version-rust:
+    executor: rust-linux
+    steps:
+      - checkout-project
+      - run:
+          command: |
+            VERSION=$(cd rust/libqaul && cargo generate-lockfile -q && cargo pkgid | cut -d# -f2 | cut -d: -f2)
+            TAG="v$VERSION"
+            if ! [[ "$CIRCLE_TAG" =~ "$TAG" ]]; then
+              echo "Git tag: $CIRCLE_TAG does not match the version of this app: $TAG"
+              echo "Please update app version at rust/libqaul/Cargo.toml"
+              exit 1
+            fi
+          name: Verify that Git tag matches Rust version
 orbs:
-    android: circleci/android@2.1.2
-    flutter: circleci/flutter@1.1.0
-    win: circleci/windows@4.1
+  android: circleci/android@2.1.2
+  flutter: circleci/flutter@1.1.0
+  win: circleci/windows@4.1
 parameters:
-    run-docker-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-android-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-ios-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-linux-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-macos-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-windows-tagged-workflow:
-        default: false
-        type: boolean
-    run-flutter-workflow:
-        default: false
-        type: boolean
-    run-rust-android-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-ios-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-linux-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-macos-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-windows-tagged-workflow:
-        default: false
-        type: boolean
-    run-rust-workflow:
-        default: false
-        type: boolean
+  run-docker-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-android-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-ios-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-linux-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-macos-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-windows-tagged-workflow:
+    default: false
+    type: boolean
+  run-flutter-workflow:
+    default: false
+    type: boolean
+  run-rust-android-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-ios-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-linux-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-macos-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-windows-tagged-workflow:
+    default: false
+    type: boolean
+  run-rust-workflow:
+    default: false
+    type: boolean
 version: 2.1
 workflows:
-    analyze-and-test-flutter:
-        jobs:
-            - test-flutter
-            - analyze-flutter
-        when: << pipeline.parameters.run-flutter-workflow >>
-    build-and-deploy-docker-qauld:
-        jobs:
-            - build-and-deploy-docker-qauld:
-                filters:
-                    tags:
-                        only: /.*/
-        when: << pipeline.parameters.run-docker-tagged-workflow >>
-    build-and-deploy-flutter-android:
-        jobs:
-            - verify-version-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-and-deploy-flutter-android:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - publish-flutter-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-and-deploy-flutter-android
-        when:
-            or:
-                - << pipeline.parameters.run-flutter-tagged-workflow >>
-                - << pipeline.parameters.run-flutter-android-tagged-workflow >>
-    build-and-deploy-flutter-ios:
-        jobs:
-            - verify-version-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-and-deploy-flutter-ios:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - publish-flutter-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-and-deploy-flutter-ios
-        when:
-            or:
-                - << pipeline.parameters.run-flutter-tagged-workflow >>
-                - << pipeline.parameters.run-flutter-ios-tagged-workflow >>
-    build-and-deploy-flutter-linux:
-        jobs:
-            - verify-version-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-flutter-linux:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - publish-flutter-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-flutter-linux
-        when:
-            or:
-                - << pipeline.parameters.run-flutter-tagged-workflow >>
-                - << pipeline.parameters.run-flutter-linux-tagged-workflow >>
-    build-and-deploy-flutter-macos:
-        jobs:
-            - verify-version-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-flutter-macos:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - publish-flutter-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-flutter-macos
-        when:
-            and:
-                - false
-                - or:
-                    - << pipeline.parameters.run-flutter-tagged-workflow >>
-                    - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
-    build-and-deploy-flutter-windows:
-        jobs:
-            - verify-version-flutter:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-flutter-windows:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-flutter
-            - publish-flutter-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-flutter-windows
-        when:
-            or:
-                - << pipeline.parameters.run-flutter-tagged-workflow >>
-                - << pipeline.parameters.run-flutter-windows-tagged-workflow >>
-    build-and-deploy-rust-android:
-        jobs:
-            - verify-version-rust:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-libqaul-android:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - publish-rust-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-libqaul-android
-        when:
-            or:
-                - << pipeline.parameters.run-rust-tagged-workflow >>
-                - << pipeline.parameters.run-rust-android-tagged-workflow >>
-    build-and-deploy-rust-ios:
-        jobs:
-            - verify-version-rust:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-libqaul-ios:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - publish-rust-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-libqaul-ios
-        when:
-            or:
-                - << pipeline.parameters.run-rust-tagged-workflow >>
-                - << pipeline.parameters.run-rust-ios-tagged-workflow >>
-    build-and-deploy-rust-linux:
-        jobs:
-            - verify-version-rust:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-libqaul-linux:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - build-qauld-linux:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - publish-rust-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-libqaul-linux
-                    - build-qauld-linux
-        when:
-            or:
-                - << pipeline.parameters.run-rust-tagged-workflow >>
-                - << pipeline.parameters.run-rust-linux-tagged-workflow >>
-    build-and-deploy-rust-macos:
-        jobs:
-            - verify-version-rust:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-libqaul-macos:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - publish-rust-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-libqaul-macos
-        when:
-            or:
-                - << pipeline.parameters.run-rust-tagged-workflow >>
-                - << pipeline.parameters.run-rust-macos-tagged-workflow >>
-    build-and-deploy-rust-windows:
-        jobs:
-            - verify-version-rust:
-                filters:
-                    tags:
-                        only: /.*/
-            - build-libqaul-windows:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - verify-version-rust
-            - publish-rust-github-release:
-                filters:
-                    tags:
-                        only: /.*/
-                requires:
-                    - build-libqaul-windows
-        when:
-            or:
-                - << pipeline.parameters.run-rust-tagged-workflow >>
-                - << pipeline.parameters.run-rust-windows-tagged-workflow >>
-    build-rust:
-        jobs:
+  analyze-and-test-flutter:
+    jobs:
+      - test-flutter
+      - analyze-flutter
+    when: << pipeline.parameters.run-flutter-workflow >>
+  build-and-deploy-docker-qauld:
+    jobs:
+      - build-and-deploy-docker-qauld:
+          filters:
+            tags:
+              only: /.*/
+    when: << pipeline.parameters.run-docker-tagged-workflow >>
+  build-and-deploy-flutter-android:
+    jobs:
+      - verify-version-flutter:
+          filters:
+            tags:
+              only: /.*/
+      - build-and-deploy-flutter-android:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-flutter
+      - publish-flutter-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-and-deploy-flutter-android
+    when:
+      or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-android-tagged-workflow >>
+  build-and-deploy-flutter-ios:
+    jobs:
+      - verify-version-flutter:
+          filters:
+            tags:
+              only: /.*/
+      - build-and-deploy-flutter-ios:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-flutter
+      - publish-flutter-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-and-deploy-flutter-ios
+    when:
+      or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-ios-tagged-workflow >>
+  build-and-deploy-flutter-linux:
+    jobs:
+      - verify-version-flutter:
+          filters:
+            tags:
+              only: /.*/
+      - build-flutter-linux:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-flutter
+      - publish-flutter-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-flutter-linux
+    when:
+      or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-linux-tagged-workflow >>
+  build-and-deploy-flutter-macos:
+    jobs:
+      - verify-version-flutter:
+          filters:
+            tags:
+              only: /.*/
+      - build-flutter-macos:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-flutter
+      - publish-flutter-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-flutter-macos
+    when:
+      and:
+        - false
+        - or:
+            - << pipeline.parameters.run-flutter-tagged-workflow >>
+            - << pipeline.parameters.run-flutter-macos-tagged-workflow >>
+  build-and-deploy-flutter-windows:
+    jobs:
+      - verify-version-flutter:
+          filters:
+            tags:
+              only: /.*/
+      - build-flutter-windows:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-flutter
+      - publish-flutter-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-flutter-windows
+    when:
+      or:
+        - << pipeline.parameters.run-flutter-tagged-workflow >>
+        - << pipeline.parameters.run-flutter-windows-tagged-workflow >>
+  build-and-deploy-rust-android:
+    jobs:
+      - verify-version-rust:
+          filters:
+            tags:
+              only: /.*/
+      - build-libqaul-android:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - publish-rust-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-libqaul-android
+    when:
+      or:
+        - << pipeline.parameters.run-rust-tagged-workflow >>
+        - << pipeline.parameters.run-rust-android-tagged-workflow >>
+  build-and-deploy-rust-ios:
+    jobs:
+      - verify-version-rust:
+          filters:
+            tags:
+              only: /.*/
+      - build-libqaul-ios:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - publish-rust-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-libqaul-ios
+    when:
+      or:
+        - << pipeline.parameters.run-rust-tagged-workflow >>
+        - << pipeline.parameters.run-rust-ios-tagged-workflow >>
+  build-and-deploy-rust-linux:
+    jobs:
+      - verify-version-rust:
+          filters:
+            tags:
+              only: /.*/
+      - build-libqaul-linux:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - build-qauld-linux:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - publish-rust-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
             - build-libqaul-linux
-        when: << pipeline.parameters.run-rust-workflow >>
+            - build-qauld-linux
+    when:
+      or:
+        - << pipeline.parameters.run-rust-tagged-workflow >>
+        - << pipeline.parameters.run-rust-linux-tagged-workflow >>
+  build-and-deploy-rust-macos:
+    jobs:
+      - verify-version-rust:
+          filters:
+            tags:
+              only: /.*/
+      - build-libqaul-macos:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - publish-rust-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-libqaul-macos
+    when:
+      or:
+        - << pipeline.parameters.run-rust-tagged-workflow >>
+        - << pipeline.parameters.run-rust-macos-tagged-workflow >>
+  build-and-deploy-rust-windows:
+    jobs:
+      - verify-version-rust:
+          filters:
+            tags:
+              only: /.*/
+      - build-libqaul-windows:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - verify-version-rust
+      - publish-rust-github-release:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - build-libqaul-windows
+    when:
+      or:
+        - << pipeline.parameters.run-rust-tagged-workflow >>
+        - << pipeline.parameters.run-rust-windows-tagged-workflow >>
+  build-rust:
+    jobs:
+      - build-libqaul-linux
+    when: << pipeline.parameters.run-rust-workflow >>
 

@@ -58,8 +58,8 @@ flutter-ios:
     FLUTTER_VERSION: "3.7.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux:
-  docker:
-    - image: snapcore/snapcraft:edge
+  machine:
+    image: ubuntu-2004:202010-01
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
     FLUTTER_VERSION: "3.7.0"
