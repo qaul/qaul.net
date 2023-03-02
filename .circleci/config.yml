@@ -1,70 +1,65 @@
-# ---------------------------------------------------
-# ----- config.yml ----------------------------------
-# ----- GENERATED CODE - DO NOT MODIFY BY HAND ------
-# ---------------------------------------------------
-
 orbs:
-    continuation: circleci/continuation@0.3.1
-    path-filtering: circleci/path-filtering@0.1.3
+  continuation: circleci/continuation@0.3.1
+  path-filtering: circleci/path-filtering@0.1.3
 setup: true
 version: 2.1
 workflows:
-    setup:
-        jobs:
-            - path-filtering/filter:
-                base-revision: main
-                config-path: .circleci/continue-config.yml
-                mapping: |
-                    qaul_ui/.* run-flutter-workflow true
-                    rust/.* run-rust-workflow true
-                name: default-setup
-            - continuation/continue:
-                configuration_path: .circleci/continue-config.yml
-                filters:
-                    branches:
-                        ignore: /.*/
-                    tags:
-                        only: /.*/
-                name: tag-setup
-                parameters: /tmp/pipeline-parameters.json
-                pre-steps:
-                    - run:
-                        command: |
-                            {
-                              echo '{'
-                              if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-flutter.*$ ]]; then
-                                if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
-                                  echo '  "run-flutter-android-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
-                                  echo '  "run-flutter-ios-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-linux$ ]]; then
-                                  echo '  "run-flutter-linux-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-macos$ ]]; then
-                                  echo '  "run-flutter-macos-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
-                                  echo '  "run-flutter-windows-tagged-workflow": true'
-                                else
-                                  echo '  "run-flutter-tagged-workflow": true'
-                                fi
-                              elif [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?.*$ ]]; then
-                                if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
-                                  echo '  "run-rust-android-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
-                                  echo '  "run-rust-ios-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-linux$ ]]; then
-                                  echo '  "run-rust-linux-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-macos$ ]]; then
-                                  echo '  "run-rust-macos-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
-                                  echo '  "run-rust-windows-tagged-workflow": true'
-                                elif [[ "$CIRCLE_TAG" =~ ^.*-docker$ ]]; then
-                                  echo '  "run-docker-tagged-workflow": true'
-                                else
-                                  echo '  "run-rust-tagged-workflow": true'
-                                  echo '  "run-docker-tagged-workflow": true'
-                                fi
-                              fi
-                              echo '}'
-                            } > /tmp/pipeline-parameters.json
-                        name: Define tagged pipeline parameters
+  setup:
+    jobs:
+      - path-filtering/filter:
+          base-revision: main
+          config-path: .circleci/continue-config.yml
+          mapping: |
+            qaul_ui/.* run-flutter-workflow true
+            rust/.* run-rust-workflow true
+          name: default-setup
+      - continuation/continue:
+          configuration_path: .circleci/continue-config.yml
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+          name: tag-setup
+          parameters: /tmp/pipeline-parameters.json
+          pre-steps:
+            - run:
+                command: |
+                  {
+                    echo '{'
+                    if [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?-flutter.*$ ]]; then
+                      if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
+                        echo '  "run-flutter-android-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
+                        echo '  "run-flutter-ios-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-linux$ ]]; then
+                        echo '  "run-flutter-linux-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-macos$ ]]; then
+                        echo '  "run-flutter-macos-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
+                        echo '  "run-flutter-windows-tagged-workflow": true'
+                      else
+                        echo '  "run-flutter-tagged-workflow": true'
+                      fi
+                    elif [[ "$CIRCLE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\-[a-zA-Z]*(\.[0-9]+)?)?(\+([0-9])+)?.*$ ]]; then
+                      if [[ "$CIRCLE_TAG" =~ ^.*-android$ ]]; then
+                        echo '  "run-rust-android-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-ios$ ]]; then
+                        echo '  "run-rust-ios-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-linux$ ]]; then
+                        echo '  "run-rust-linux-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-macos$ ]]; then
+                        echo '  "run-rust-macos-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-windows$ ]]; then
+                        echo '  "run-rust-windows-tagged-workflow": true'
+                      elif [[ "$CIRCLE_TAG" =~ ^.*-docker$ ]]; then
+                        echo '  "run-docker-tagged-workflow": true'
+                      else
+                        echo '  "run-rust-tagged-workflow": true'
+                        echo '  "run-docker-tagged-workflow": true'
+                      fi
+                    fi
+                    echo '}'
+                  } > /tmp/pipeline-parameters.json
+                name: Define tagged pipeline parameters
 
