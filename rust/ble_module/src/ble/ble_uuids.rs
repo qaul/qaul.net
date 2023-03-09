@@ -12,6 +12,3 @@ pub fn read_char() -> Uuid {
 pub fn msg_char() -> Uuid {
     Uuid::parse_str("99e91402-80ed-4943-9bcb-39c532a76023").unwrap()
 }
-pub fn gd_char() -> Uuid {
-    Uuid::parse_str("99e91403-80ed-4943-9bcb-39c532a76023").unwrap()
-}
