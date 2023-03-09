@@ -7,7 +7,7 @@
 
 // TODO: remove local import, import instead from libqaul
 pub mod proto_sys {
-    include!("./qaul.sys.ble.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.sys.ble.rs");
 }
 pub mod msg_loop;
 pub mod utils;
@@ -64,6 +64,7 @@ pub fn init() -> BleRpc {
 }
 
 /// send rpc message ui ---> ble_module
+#[allow(dead_code)]
 pub fn send_to_ble_module(binary_message: Bytes) {
     if let Err(err) = EXTERN_SEND.get().try_send(binary_message) {
         error!("{:?}", err);
@@ -72,11 +73,13 @@ pub fn send_to_ble_module(binary_message: Bytes) {
 
 /// check whether there are new messages in
 /// the receiving rpc channel ble_module ---> ui
+#[allow(dead_code)]
 pub fn receive_from_ble_module() -> Result<Vec<u8>, crossbeam_channel::TryRecvError> {
     EXTERN_RECEIVE.get().try_recv()
 }
 
 /// get the number of messages in the receiving cue
+#[allow(dead_code)]
 pub fn queue_length_ble_to_ui() -> usize {
     BLE_MODULE_SEND.get().len()
 }
