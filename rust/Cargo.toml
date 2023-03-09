@@ -3,6 +3,9 @@ members = [
     # qaul library
     "libqaul",
 
+    # ble module
+    "ble_module",
+
     # binaries
     "clients/cli",
     "clients/qauld",
