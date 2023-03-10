@@ -237,21 +237,22 @@ class QaulNavBarItem extends HookConsumerWidget {
       case TabType.users:
         svgPath = 'assets/icons/people.svg';
         tooltip = l18ns!.usersNavButtonTooltip;
+        sizeFactor = 1.45;
         break;
       case TabType.public:
         svgPath = 'assets/icons/public.svg';
         tooltip = l18ns!.publicNavButtonTooltip;
-        sizeFactor = 1.2;
+        sizeFactor = 1.5;
         break;
       case TabType.chat:
         svgPath = 'assets/icons/chat.svg';
         tooltip = l18ns!.chatNavButtonTooltip;
-        sizeFactor = 1.1;
+        sizeFactor = 1.45;
         break;
       case TabType.network:
         svgPath = 'assets/icons/network.svg';
         tooltip = l18ns!.network;
-        sizeFactor = 1.1;
+        sizeFactor = 1.3;
         break;
     }
 
@@ -268,7 +269,8 @@ class QaulNavBarItem extends HookConsumerWidget {
           splashRadius: 0.01,
           icon: SvgPicture.asset(
             svgPath,
-            fit: BoxFit.cover,
+            // fit: BoxFit.cover,
+            fit: BoxFit.contain,
             colorFilter: ColorFilter.mode(
               selected.value ? activeColor : theme.iconTheme.color!,
               BlendMode.srcATop,
