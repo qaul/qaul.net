@@ -61,6 +61,10 @@ directories = "6.0"
 qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
+# Linux BLE module
+[target.'cfg(target_os = "linux")'.dependencies]
+ble_module = { path = "../ble_module" }
+
 [build-dependencies]
 prost-build = "0.14"
 
