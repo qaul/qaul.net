@@ -134,8 +134,3 @@ pub fn send_rpc_count() -> i32 {
 pub fn send_sys(binary_message: Vec<u8>) {
     Sys::send_to_libqaul(binary_message);
 }
-
-/// receive a SYS message from libqaul
-pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
-    Sys::receive_from_libqaul()
-}

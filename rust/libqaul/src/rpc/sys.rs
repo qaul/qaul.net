@@ -36,13 +36,11 @@ impl Sys {
     /// Return the receiving channel for libqaul.
     pub fn init() -> Receiver<Vec<u8>> {
         // create channels
-        let (libqaul_send, extern_receive) = unbounded();
+        //let (libqaul_send, extern_receive) = unbounded();
         let (extern_send, libqaul_receive) = unbounded();
 
         // save to state
-        EXTERN_RECEIVE.set(extern_receive);
         EXTERN_SEND.set(extern_send);
-        LIBQAUL_SEND.set(libqaul_send.clone());
 
         // return libqaul receiving channel
         libqaul_receive
@@ -100,7 +98,11 @@ impl Sys {
     /// sends a SYS message to the outside
     #[allow(unused_variables)]
     pub fn send_message(data: Vec<u8>) {
-        // send the message
+        // send to linux BLE module
+        #[cfg(target_os = "linux")]
+        ble_module::rpc::send_to_ble_module(data);
+
+        // send to android BLE module
         #[cfg(target_os = "android")]
         Android::send_to_android(data);
     }
