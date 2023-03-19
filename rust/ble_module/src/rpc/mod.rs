@@ -13,7 +13,6 @@ pub mod msg_loop;
 pub mod utils;
 
 use async_trait::async_trait;
-use bytes::Bytes;
 use prost::Message;
 use state::Storage;
 
@@ -22,7 +21,7 @@ use proto_sys::Ble;
 /// receiver of the mpsc channel: ui ---> ble_module
 static EXTERN_RECEIVE: Storage<crossbeam_channel::Receiver<Vec<u8>>> = Storage::new();
 /// sender of the mpsc channel: ui ---> ble_module
-static EXTERN_SEND: Storage<async_std::channel::Sender<Bytes>> = Storage::new();
+static EXTERN_SEND: Storage<async_std::channel::Sender<Vec<u8>>> = Storage::new();
 /// sender handle of the mpsc channel: ble_module ---> ui
 static BLE_MODULE_SEND: Storage<crossbeam_channel::Sender<Vec<u8>>> = Storage::new();
 
@@ -32,7 +31,7 @@ pub trait SysRpcReceiver {
 }
 
 pub struct BleRpc {
-    receiver: async_std::channel::Receiver<Bytes>,
+    receiver: async_std::channel::Receiver<Vec<u8>>,
 }
 
 #[async_trait]
@@ -49,7 +48,7 @@ impl SysRpcReceiver for BleRpc {
 
 /// Initialize RPC module
 /// Create the sending and receiving channels and persist them across threads.
-/// Return the receiver for the channel ui ---> ble_module
+/// Return the receiver for the channel libqaul ---> ble_module
 pub fn init() -> BleRpc {
     // create channels
     let (ble_send, ui_rec) = crossbeam_channel::bounded::<Vec<u8>>(32);
@@ -63,16 +62,16 @@ pub fn init() -> BleRpc {
     BleRpc { receiver: ble_rec }
 }
 
-/// send rpc message ui ---> ble_module
+/// send sys message libqaul ---> ble_module
 #[allow(dead_code)]
-pub fn send_to_ble_module(binary_message: Bytes) {
+pub fn send_to_ble_module(binary_message: Vec<u8>) {
     if let Err(err) = EXTERN_SEND.get().try_send(binary_message) {
-        error!("{:?}", err);
+        log::error!("{:?}", err);
     }
 }
 
 /// check whether there are new messages in
-/// the receiving rpc channel ble_module ---> ui
+/// the receiving sys channel ble_module ---> libqaul
 #[allow(dead_code)]
 pub fn receive_from_ble_module() -> Result<Vec<u8>, crossbeam_channel::TryRecvError> {
     EXTERN_RECEIVE.get().try_recv()
@@ -84,22 +83,22 @@ pub fn queue_length_ble_to_ui() -> usize {
     BLE_MODULE_SEND.get().len()
 }
 
-/// send rpc message ble_module ---> ui
+/// send sys message ble_module ---> libqaul
 pub fn send_to_ui(binary_message: Vec<u8>) {
     if let Err(err) = BLE_MODULE_SEND.get().try_send(binary_message) {
-        error!("{:?}", err);
+        log::error!("{:?}", err);
     }
 }
 
-/// Process received binary protobuf encoded RPC message
+/// Process received binary protobuf encoded SYS message
 ///
 /// This function will decode the message from the binary
 /// protobuf format to a rust struct and return it
-pub fn process_received_message(data: Bytes) -> Option<Ble> {
-    match Ble::decode(data.clone()) {
+pub fn process_received_message(data: Vec<u8>) -> Option<Ble> {
+    match Ble::decode(&data[..]) {
         Ok(ble) => Some(ble),
         Err(err) => {
-            error!("{:#?}", err);
+            log::error!("{:#?}", err);
             None
         }
     }
