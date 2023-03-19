@@ -94,12 +94,12 @@ impl IdleBleService {
                 .ble_handles
                 .push(QaulBleHandle::AdvertisementHandle(handle)),
             Err(err) => {
-                error!("{:#?}", err);
+                log::error!("{:#?}", err);
                 return QaulBleService::Idle(self);
             }
         };
 
-        debug!(
+        log::debug!(
             "Advertising qaul main BLE service at UUID {}",
             main_service_uuid()
         );
@@ -121,7 +121,7 @@ impl IdleBleService {
                     fun: Box::new(move |req| {
                         let value = qaul_id.clone();
                         async move {
-                            debug!("Read request {:?} with value {:x?}", &req, &value);
+                            log::debug!("Read request {:?} with value {:x?}", &req, &value);
                             Ok(value.to_vec())
                         }
                         .boxed()
@@ -164,7 +164,7 @@ impl IdleBleService {
         match self.adapter.serve_gatt_application(app).await {
             Ok(handle) => self.ble_handles.push(QaulBleHandle::AppHandle(handle)),
             Err(err) => {
-                error!("{:#?}", err);
+                log::error!("{:#?}", err);
                 return QaulBleService::Idle(self);
             }
         };
@@ -187,7 +187,7 @@ impl IdleBleService {
                 _ => None,
             }),
             Err(err) => {
-                error!("{:#?}", err);
+                log::error!("{:#?}", err);
                 return QaulBleService::Idle(self);
             }
         };
@@ -215,11 +215,13 @@ impl IdleBleService {
         while let Some(evt) = merged_ble_streams.next().await {
             match evt {
                 BleMainLoopEvent::Stop => {
-                    info!("Received stop signal, stopping advertising, scanning, and listening.");
+                    log::info!(
+                        "Received stop signal, stopping advertising, scanning, and listening."
+                    );
                     break;
                 }
                 BleMainLoopEvent::MessageReceived(e) => {
-                    info!(
+                    log::info!(
                         "Received {} bytes of data from {}",
                         e.0.len(),
                         mac_to_string(&e.1)
@@ -247,7 +249,7 @@ impl IdleBleService {
                             }
                         }
                         Err(err) => {
-                            error!("{:#?}", err);
+                            log::error!("{:#?}", err);
                         }
                     }
                 }
@@ -272,7 +274,7 @@ impl IdleBleService {
 
         let stringified_addr = mac_to_string(&device.address());
         let uuids = device.uuids().await?.unwrap_or_default();
-        trace!(
+        log::trace!(
             "Discovered device {} with service UUIDs {:?}",
             &stringified_addr,
             &uuids
@@ -281,11 +283,11 @@ impl IdleBleService {
         if !uuids.contains(&main_service_uuid()) {
             return Ok(msg_receivers);
         }
-        debug!("Discovered qaul bluetooth device {}", &stringified_addr);
+        log::debug!("Discovered qaul bluetooth device {}", &stringified_addr);
 
         if !device.is_connected().await? {
             device.connect().await?;
-            info!("Connected to device {}", &stringified_addr);
+            log::info!("Connected to device {}", &stringified_addr);
         }
 
         for service in device.services().await? {
@@ -297,7 +299,7 @@ impl IdleBleService {
                 let flags = char.flags().await?;
                 if flags.notify || flags.indicate {
                     msg_receivers.push(char.notify_io().await?);
-                    info!(
+                    log::info!(
                         "Setting up notification for characteristic {} of device {}",
                         char.uuid().await?,
                         &stringified_addr
@@ -331,7 +333,7 @@ impl IdleBleService {
                         reader.device_address(),
                     )))
                     .await
-                    .map_err(|err| error!("{:#?}", err));
+                    .map_err(|err| log::error!("{:#?}", err));
             }
         });
     }
@@ -351,7 +353,7 @@ impl StartedBleService {
 
         if !device.is_connected().await? {
             device.connect().await?;
-            info!("Connected to device {}", &stringified_addr);
+            log::info!("Connected to device {}", &stringified_addr);
         }
 
         for service in device.services().await? {
@@ -369,7 +371,7 @@ impl StartedBleService {
 
     pub async fn stop(self) -> QaulBleService {
         if let Err(err) = self.stop_handle.send(true).await {
-            error!("Failed to stop bluetooth service: {:#?}", &err);
+            log::error!("Failed to stop bluetooth service: {:#?}", &err);
             send_stop_unsuccessful(err.to_string());
             return QaulBleService::Started(self);
         }
