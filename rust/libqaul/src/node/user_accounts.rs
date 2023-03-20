@@ -52,8 +52,12 @@ impl UserAccounts {
         let mut iter = IntoIterator::into_iter(config_users);
 
         while let Some(user) = iter.next() {
-            let mut basedecode = base64::decode(&user.keys).unwrap();
-            let keys = Keypair::Ed25519(ed25519::Keypair::decode(&mut basedecode).unwrap());
+            let mut basedecode = base64::Engine::general_purpose::STANDARD
+                .decode(&user.keys)
+                .unwrap();
+            let keys = ed25519::Keypair::decode(&mut basedecode)
+                .unwrap()
+                .into_ed25519();
             let id = PeerId::from(keys.public());
 
             // check if saved ID and the id from the keypair are equal
@@ -82,8 +86,8 @@ impl UserAccounts {
     pub fn create(name: String) -> UserAccount {
         // create user
         let keys_ed25519 = ed25519::Keypair::generate();
-        let keys_config = base64::encode(keys_ed25519.encode());
-        let keys = Keypair::Ed25519(keys_ed25519);
+        let keys_config = base64::Engine::general_purpose::STANDARD.encode(keys_ed25519.encode());
+        let keys = keys_ed25519.into_ed25519();
         let id = PeerId::from(keys.public());
         let user = UserAccount {
             id,
@@ -320,10 +324,10 @@ impl UserAccounts {
         let key_base58: String;
 
         #[allow(unreachable_patterns)]
-        match key {
-            PublicKey::Ed25519(key) => {
+        match key.into_ed25519() {
+            Some(ed_key) => {
                 key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(key.encode()).into_string();
+                key_base58 = bs58::encode(ed_key.encode()).into_string();
             }
             _ => {
                 key_type = "UNDEFINED".to_owned();
