@@ -540,10 +540,10 @@ impl Users {
         let key_base58: String;
 
         #[allow(unreachable_patterns)]
-        match key {
-            PublicKey::Ed25519(key) => {
+        match key.into_ed25519 {
+            Some(ed_key) => {
                 key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(key.encode()).into_string();
+                key_base58 = bs58::encode(ed_key.encode()).into_string();
             }
             _ => {
                 key_type = "UNDEFINED".to_owned();
