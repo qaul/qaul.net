@@ -65,7 +65,7 @@ impl Node {
     fn new() {
         // create node
         let keys_ed25519 = ed25519::Keypair::generate();
-        let keys = Keypair::Ed25519(keys_ed25519.clone());
+        let keys = keys_ed25519.into_ed25519();
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
         let node = Node { id, keys, topic };
@@ -73,7 +73,8 @@ impl Node {
         // save node to configuration file
         {
             let mut config = Configuration::get_mut();
-            config.node.keys = base64::encode(keys_ed25519.encode());
+            config.node.keys =
+                base64::Engine::general_purpose::STANDARD.encode(&keys_ed25519.encode());
             config.node.id = id.to_string();
             config.node.initialized = 1;
         }
@@ -89,8 +90,12 @@ impl Node {
     /// start an existing node from the config parameters
     fn from_config() {
         let config = Configuration::get();
-        let mut basedecode = base64::decode(&config.node.keys).unwrap();
-        let keys = Keypair::Ed25519(ed25519::Keypair::decode(&mut basedecode).unwrap());
+        let mut basedecode = base64::Engine::general_purpose::STANDARD
+            .decode(&config.node.keys)
+            .unwrap();
+        let keys = ed25519::Keypair::decode(&mut basedecode)
+            .unwrap()
+            .into_ed25519();
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
 
