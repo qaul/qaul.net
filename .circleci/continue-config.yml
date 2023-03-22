@@ -164,9 +164,9 @@ executors:
         working_directory: ~/qaul-libp2p/qaul_ui
     rust-android:
         docker:
-            - image: cimg/android:2022.03-ndk
+            - image: cimg/android:2023.02-ndk
         environment:
-            ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/22.1.7171670
+            ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/25.2.9519653
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         resource_class: large
         shell: /bin/bash --login -o pipefail
