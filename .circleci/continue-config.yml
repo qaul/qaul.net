@@ -173,7 +173,7 @@ executors:
         working_directory: ~/qaul-libp2p
     rust-linux:
         docker:
-            - image: cimg/rust:1.64.0
+            - image: cimg/rust:1.65.0
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         shell: /bin/bash --login -o pipefail
@@ -443,7 +443,7 @@ jobs:
             - run:
                 command: |
                     sudo apt update
-                    sudo apt install -y protobuf-compiler
+                    sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
                     protoc --version
                 name: Install protoc
             - setup-sccache

@@ -5,7 +5,7 @@ steps:
       name: Install protoc
       command: |
         sudo apt update
-        sudo apt install -y protobuf-compiler
+        sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
         protoc --version
   - setup-sccache
   - restore-sccache-cache
