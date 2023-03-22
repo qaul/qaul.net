@@ -44,7 +44,7 @@ jobs:
                   elif [[ "$CIRCLE_TAG" =~ ^.*-docker$ ]]; then
                     echo '  "run-docker-tagged-workflow": true'
                   else
-                    echo '  "run-rust-tagged-workflow": true'
+                    echo '  "run-rust-tagged-workflow": true,'
                     echo '  "run-docker-tagged-workflow": true'
                   fi
                 fi
