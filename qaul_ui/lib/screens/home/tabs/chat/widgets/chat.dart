@@ -131,17 +131,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    var l10n = AppLocalizations.of(context)!;
-    if (room.isGroupChatRoom) {
-      _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
-    }
+    _updateMenuOptionsBasedOnRoomType();
   }
 
   @override
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
+    _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -198,20 +195,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         titleSpacing: 0,
         actions: [
-          PopupMenuButton<String>(
-            onSelected: _handleClick,
-            iconSize: 36,
-            splashRadius: 20,
-            icon: const Icon(Icons.more_vert),
-            itemBuilder: (BuildContext context) {
-              return _overflowMenuOptions.keys.map((String key) {
-                return PopupMenuItem<String>(
-                  value: key,
-                  child: Text(_overflowMenuOptions[key]!),
-                );
-              }).toList();
-            },
-          ),
+          if (_overflowMenuOptions.isNotEmpty)
+            PopupMenuButton<String>(
+              onSelected: _handleClick,
+              iconSize: 36,
+              splashRadius: 20,
+              icon: const Icon(Icons.more_vert),
+              itemBuilder: (BuildContext context) {
+                return _overflowMenuOptions.keys.map((String key) {
+                  return PopupMenuItem<String>(
+                    value: key,
+                    child: Text(_overflowMenuOptions[key]!),
+                  );
+                }).toList();
+              },
+            ),
         ],
       ),
       body: CronTaskDecorator(
@@ -468,6 +466,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       isReceiving = s == MessageState.receiving;
     }
     return isReceiving;
+  }
+
+  void _updateMenuOptionsBasedOnRoomType() {
+    var l10n = AppLocalizations.of(context)!;
+    if (room.isGroupChatRoom && _overflowMenuOptions.isEmpty) {
+      _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
+    }
+    if (room.isDirectChat && _overflowMenuOptions.isNotEmpty) {
+      _overflowMenuOptions.clear();
+    }
   }
 }
 
