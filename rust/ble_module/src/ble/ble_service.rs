@@ -71,7 +71,7 @@ impl IdleBleService {
         mut self,
         qaul_id: Bytes,
         advert_mode: Option<i16>,
-        mut internal_sender: Sender<Vec<u8>>,
+        mut internal_sender: BleResultSender,
     ) -> QaulBleService {
         // ==================================================================================
         // ------------------------- SET UP ADVERTISEMENT -----------------------------------
@@ -232,7 +232,7 @@ impl IdleBleService {
                                 e.0.len(),
                                 mac_to_string(&e.1)
                             );
-                            send_direct_received(e.1 .0.to_vec(), e.0, &mut internal_sender)
+                            internal_sender.send_direct_received(e.1 .0.to_vec(), e.0)
                         }
                         BleMainLoopEvent::MainCharEvent(_e) => {
                             // TODO: should main character events be sent to the UI?
@@ -282,7 +282,7 @@ impl IdleBleService {
     async fn on_device_discovered(
         &self,
         device: &Device,
-        sender: &mut Sender<Vec<u8>>,
+        sender: &mut BleResultSender,
     ) -> Result<Vec<CharacteristicReader>, Box<dyn Error>> {
         let mut msg_receivers: Vec<CharacteristicReader> = vec![];
 
@@ -324,7 +324,7 @@ impl IdleBleService {
                         .borrow_mut()
                         .insert(remote_qaul_id.clone(), device.address());
                     let rssi = device.rssi().await?.unwrap_or(999) as i32;
-                    send_device_found(remote_qaul_id, rssi, sender)
+                    sender.send_device_found(remote_qaul_id, rssi)
                 }
             }
         }
@@ -397,14 +397,14 @@ impl StartedBleService {
         Ok(())
     }
 
-    pub async fn stop(self, sender: &mut Sender<Vec<u8>>) -> QaulBleService {
+    pub async fn stop(self, sender: &mut BleResultSender) -> QaulBleService {
         if let Err(err) = self.cmd_handle.send(BleMainLoopEvent::Stop).await {
             log::error!("Failed to stop bluetooth service: {:#?}", &err);
-            send_stop_unsuccessful(err.to_string(), sender);
+            sender.send_stop_unsuccessful(err.to_string());
             return QaulBleService::Started(self);
         }
 
-        send_stop_successful(sender);
+        sender.send_stop_successful();
 
         QaulBleService::Idle(self.join_handle.await)
     }
