@@ -5,15 +5,7 @@ use bytes::Bytes;
 
 use crate::{
     ble::ble_service::{get_device_info, QaulBleService},
-    rpc::{
-        proto_sys::ble::Message::*,
-        utils::{
-            send_ble_sys_msg, send_direct_send_error, send_direct_send_success,
-            send_result_already_running, send_result_not_running, send_start_successful,
-            send_stop_successful,
-        },
-        SysRpcReceiver,
-    },
+    rpc::{proto_sys::ble::Message::*, utils::BleResultSender, SysRpcReceiver},
 };
 
 use super::BleRpc;
@@ -21,7 +13,7 @@ use super::BleRpc;
 pub async fn listen_for_sys_msgs(
     mut rpc_receiver: BleRpc,
     mut ble_service: QaulBleService,
-    internal_sender: async_std::channel::Sender<Vec<u8>>,
+    internal_sender: BleResultSender,
 ) -> Result<(), Box<dyn Error>> {
     let mut local_sender_handle = internal_sender.clone();
     loop {
@@ -46,13 +38,13 @@ pub async fn listen_for_sys_msgs(
                             log::debug!(
                                 "Set up advertisement and scan filter, entering BLE main loop."
                             );
-                            send_start_successful(&mut local_sender_handle);
+                            local_sender_handle.send_start_successful();
                         }
                         QaulBleService::Started(_) => {
                             log::warn!(
                                 "Received Start Request, but bluetooth service is already running!"
                             );
-                            send_result_already_running(&mut local_sender_handle)
+                            local_sender_handle.send_result_already_running()
                         }
                     },
                     StopRequest(_) => match ble_service {
@@ -63,26 +55,21 @@ pub async fn listen_for_sys_msgs(
                             log::warn!(
                                 "Received Stop Request, but bluetooth service is not running!"
                             );
-                            send_stop_successful(&mut local_sender_handle); // Is this really a success case?
+                            local_sender_handle.send_stop_successful(); // Is this really a success case?
                         }
                     },
                     DirectSend(req) => match ble_service {
                         QaulBleService::Started(ref mut svc) => {
                             let receiver_id = req.receiver_id.clone();
                             match svc.direct_send(req).await {
-                                Ok(_) => {
-                                    send_direct_send_success(receiver_id, &mut local_sender_handle)
-                                }
-                                Err(err) => send_direct_send_error(
-                                    receiver_id,
-                                    err.to_string(),
-                                    &mut local_sender_handle,
-                                ),
+                                Ok(_) => local_sender_handle.send_direct_send_success(receiver_id),
+                                Err(err) => local_sender_handle
+                                    .send_direct_send_error(receiver_id, err.to_string()),
                             }
                         }
                         QaulBleService::Idle(_) => {
                             log::warn!("Received Direct Send Request, but bluetooth service is not running!");
-                            send_result_not_running(&mut local_sender_handle)
+                            local_sender_handle.send_result_not_running()
                         }
                     },
                     InfoRequest(_) => {
@@ -90,7 +77,7 @@ pub async fn listen_for_sys_msgs(
                         spawn(async move {
                             match get_device_info().await {
                                 Ok(info) => {
-                                    send_ble_sys_msg(InfoResponse(info), &mut sender_handle_clone)
+                                    sender_handle_clone.send_ble_sys_msg(InfoResponse(info))
                                 }
                                 Err(err) => log::error!("Error getting device info: {:#?}", &err),
                             }

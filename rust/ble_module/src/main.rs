@@ -15,7 +15,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use crate::ble::ble_service::IdleBleService;
+use crate::{ble::ble_service::IdleBleService, rpc::utils::BleResultSender};
 
 /// initialize and start the ble_module
 ///
@@ -103,7 +103,7 @@ async fn main() {
 
     spawn(async move { while let Some(result) = rx.next().await {} });
 
-    listen_for_sys_msgs(rpc_receiver, ble_service, tx)
+    listen_for_sys_msgs(rpc_receiver, ble_service, BleResultSender::new(tx))
         .await
         .unwrap_or_else(|err| {
             error!("{:#?}", err);
