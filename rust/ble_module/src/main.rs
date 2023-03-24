@@ -5,9 +5,9 @@ extern crate simplelog;
 mod ble;
 mod rpc;
 
-
+use async_std::{stream::StreamExt, task::spawn};
 use filetime::FileTime;
-use rpc::{msg_loop::listen_for_sys_msgs};
+use rpc::msg_loop::listen_for_sys_msgs;
 use simplelog::*;
 use std::{
     collections::BTreeMap,
@@ -99,8 +99,14 @@ async fn main() {
         std::process::exit(1);
     });
 
-    listen_for_sys_msgs(rpc_receiver, ble_service).await.unwrap_or_else(|err| {
-        error!("{:#?}", err);
-        std::process::exit(1);
-    });
+    let (tx, mut rx) = async_std::channel::unbounded::<Vec<u8>>();
+
+    spawn(async move { while let Some(result) = rx.next().await {} });
+
+    listen_for_sys_msgs(rpc_receiver, ble_service, tx)
+        .await
+        .unwrap_or_else(|err| {
+            error!("{:#?}", err);
+            std::process::exit(1);
+        });
 }
