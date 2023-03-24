@@ -18,12 +18,8 @@ use state::Storage;
 
 use proto_sys::Ble;
 
-/// receiver of the mpsc channel: ui ---> ble_module
-static EXTERN_RECEIVE: Storage<crossbeam_channel::Receiver<Vec<u8>>> = Storage::new();
-/// sender of the mpsc channel: ui ---> ble_module
+/// sender of the mpsc channel: libqaul ---> ble_module
 static EXTERN_SEND: Storage<async_std::channel::Sender<Vec<u8>>> = Storage::new();
-/// sender handle of the mpsc channel: ble_module ---> ui
-static BLE_MODULE_SEND: Storage<crossbeam_channel::Sender<Vec<u8>>> = Storage::new();
 
 #[async_trait]
 pub trait SysRpcReceiver {
@@ -51,12 +47,9 @@ impl SysRpcReceiver for BleRpc {
 /// Return the receiver for the channel libqaul ---> ble_module
 pub fn init() -> BleRpc {
     // create channels
-    let (ble_send, ui_rec) = crossbeam_channel::bounded::<Vec<u8>>(32);
-    let (ui_send, ble_rec) = async_std::channel::bounded(32);
+    let (libqaul_send, ble_rec) = async_std::channel::bounded(32);
     // save to state
-    EXTERN_RECEIVE.set(ui_rec);
-    EXTERN_SEND.set(ui_send);
-    BLE_MODULE_SEND.set(ble_send);
+    EXTERN_SEND.set(libqaul_send);
 
     // return ble receiver
     BleRpc { receiver: ble_rec }
@@ -66,26 +59,6 @@ pub fn init() -> BleRpc {
 #[allow(dead_code)]
 pub fn send_to_ble_module(binary_message: Vec<u8>) {
     if let Err(err) = EXTERN_SEND.get().try_send(binary_message) {
-        log::error!("{:?}", err);
-    }
-}
-
-/// check whether there are new messages in
-/// the receiving sys channel ble_module ---> libqaul
-#[allow(dead_code)]
-pub fn receive_from_ble_module() -> Result<Vec<u8>, crossbeam_channel::TryRecvError> {
-    EXTERN_RECEIVE.get().try_recv()
-}
-
-/// get the number of messages in the receiving cue
-#[allow(dead_code)]
-pub fn queue_length_ble_to_ui() -> usize {
-    BLE_MODULE_SEND.get().len()
-}
-
-/// send sys message ble_module ---> libqaul
-pub fn send_to_ui(binary_message: Vec<u8>) {
-    if let Err(err) = BLE_MODULE_SEND.get().try_send(binary_message) {
         log::error!("{:?}", err);
     }
 }
