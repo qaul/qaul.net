@@ -6,6 +6,7 @@
 //! qaul BLE module for Linux
 
 use crate::ble::ble_service::IdleBleService;
+use async_std::task::spawn;
 use futures::executor::block_on;
 use rpc::msg_loop::listen_for_sys_msgs;
 use std::thread;
@@ -32,10 +33,10 @@ async fn main_loop() {
         std::process::exit(1);
     });
 
-    listen_for_sys_msgs(rpc_receiver, ble_service)
-        .await
-        .unwrap_or_else(|err| {
-            log::error!("{:#?}", err);
-            std::process::exit(1);
-        });
+    // listen_for_sys_msgs(rpc_receiver, ble_service)
+    //     .await
+    //     .unwrap_or_else(|err| {
+    //         log::error!("{:#?}", err);
+    //         std::process::exit(1);
+    //     });
 }
