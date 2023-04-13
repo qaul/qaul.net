@@ -55,6 +55,15 @@ object BLEUtils {
         return 0
     }
 
+    fun <T> List<T>.removeConcurrent(data: Any) {
+        val itr: MutableIterator<T> = this.toMutableList().iterator()
+        while (itr.hasNext()) {
+            val t = itr.next()
+            if (t == data) {
+                itr.remove()
+            }
+        }
+    }
     fun byteToInt(data: Byte?): Int {
         if (data == null) {
             return 0
