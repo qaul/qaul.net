@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleService
 import com.google.gson.Gson
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
+import net.qaul.ble.BLEUtils.removeConcurrent
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
@@ -73,8 +74,7 @@ class BleService : LifecycleService() {
      * This Method Will Set the necessary data and start the advertisement
      */
     fun startAdvertise(
-        qaul_id: ByteArray,
-        mode: String, bleCallback: BleAdvertiseCallback
+        qaul_id: ByteArray, mode: String, bleCallback: BleAdvertiseCallback
     ) {
         bleService?.qaulId = qaul_id
         bleService?.advertMode = mode
@@ -87,12 +87,10 @@ class BleService : LifecycleService() {
             bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
             if (bluetoothAdapter != null) {
                 AppLog.e(
-                    TAG,
-                    "Peripheral supported"
+                    TAG, "Peripheral supported"
                 )
                 val mainService = BluetoothGattService(
-                    UUID.fromString(SERVICE_UUID),
-                    BluetoothGattService.SERVICE_TYPE_PRIMARY
+                    UUID.fromString(SERVICE_UUID), BluetoothGattService.SERVICE_TYPE_PRIMARY
                 )
                 val mainChar = BluetoothGattCharacteristic(
                     UUID.fromString(READ_CHAR),
@@ -104,8 +102,7 @@ class BleService : LifecycleService() {
                 mainService.addCharacteristic(mainChar)
 
                 val msgService = BluetoothGattService(
-                    UUID.fromString(MSG_SERVICE_UUID),
-                    BluetoothGattService.SERVICE_TYPE_PRIMARY
+                    UUID.fromString(MSG_SERVICE_UUID), BluetoothGattService.SERVICE_TYPE_PRIMARY
                 )
 
                 val msgChar = BluetoothGattCharacteristic(
@@ -131,34 +128,27 @@ class BleService : LifecycleService() {
                 dataBuilder.setIncludeDeviceName(true)
                 when (advertMode) {
                     "low_power" -> {
-                        settingsBuilder
-                            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
+                        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
                     }
                     "balanced" -> {
-                        settingsBuilder
-                            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
                     }
                     "low_latency" -> {
-                        settingsBuilder
-                            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+                        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     }
                     "UNRECOGNIZED" -> {
-                        settingsBuilder
-                            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+                        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     }
                 }
-                settingsBuilder
-                    .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+                settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 settingsBuilder.setConnectable(true)
 
                 bluetoothLeAdvertiser!!.startAdvertising(
-                    settingsBuilder.build(),
-                    dataBuilder.build(), advertiseCallback
+                    settingsBuilder.build(), dataBuilder.build(), advertiseCallback
                 )
             } else {
                 AppLog.e(
-                    TAG,
-                    "Peripheral not supported"
+                    TAG, "Peripheral not supported"
                 )
             }
         }
@@ -213,8 +203,7 @@ class BleService : LifecycleService() {
             bleService?.stopSelf()
         } else {
             bleAdvertiseCallback?.stopAdvertiseRes(
-                status = false,
-                errorText = "$TAG not started"
+                status = false, errorText = "$TAG not started"
             )
             bleCallback?.stopScanRes(status = false, errorText = "")
             AppLog.e(TAG, "$TAG not started")
@@ -248,9 +237,7 @@ class BleService : LifecycleService() {
         val failMsg = "Scanning failed: $errorText"
         AppLog.e(TAG, failMsg)
         bleService?.bleCallback?.startScanRes(
-            status = false,
-            errorText = failMsg,
-            unknownError = unknownError
+            status = false, errorText = failMsg, unknownError = unknownError
         )
     }
 
@@ -271,33 +258,35 @@ class BleService : LifecycleService() {
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
         AppLog.d(TAG, "device : " + device.address)
         if (blackList.find { it.macAddress == device.address } == null) {
-            val selectItem = devicesList.find { it.macAddress == device.address }
-            if (selectItem == null) {
-                AppLog.d(TAG, "device : " + device.address)
-                AppLog.d(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
-                RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
-                val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
-                bleDevice.bluetoothDevice = device
-                bleDevice.scanResult = result
-                bleDevice.name = device.name
-                bleDevice.deviceRSSI = rssi
-                bleDevice.macAddress = device.address
-                bleDevice.isConnectable = result.isConnectable
-                bleDevice.lastFoundTime = System.currentTimeMillis()
-                devicesList.add(bleDevice)
-                if (result.isConnectable) {
-                    connectDevice(bleDevice, isFromMessage = false)
+            val selectItem = devicesList.toMutableList().find { it.macAddress == device.address }
+//            handler.postDelayed({
+                if (selectItem == null) {
+                    AppLog.d(TAG, "device : " + device.address)
+                    AppLog.d(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
+                    RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
+                    val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
+                    bleDevice.bluetoothDevice = device
+                    bleDevice.scanResult = result
+                    bleDevice.name = device.name
+                    bleDevice.deviceRSSI = rssi
+                    bleDevice.macAddress = device.address
+                    bleDevice.isConnectable = result.isConnectable
+                    bleDevice.lastFoundTime = System.currentTimeMillis()
+                    devicesList.add(bleDevice)
+                    if (result.isConnectable) {
+                        connectDevice(bleDevice, isFromMessage = false)
+                    }
+                } else {
+                    val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
+                    if (selectItemIgnore != null) {
+                        selectItemIgnore.deviceRSSI = rssi
+                        selectItemIgnore.scanResult = result
+                        selectItemIgnore.name = device.name
+                        selectItemIgnore.isConnectable = result.isConnectable
+                        selectItemIgnore.lastFoundTime = System.currentTimeMillis()
+                    }
                 }
-            } else {
-                val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
-                if (selectItemIgnore != null) {
-                    selectItemIgnore.deviceRSSI = rssi
-                    selectItemIgnore.scanResult = result
-                    selectItemIgnore.name = device.name
-                    selectItemIgnore.isConnectable = result.isConnectable
-                    selectItemIgnore.lastFoundTime = System.currentTimeMillis()
-                }
-            }
+//            }, 5000)
         }
     }
 
@@ -329,8 +318,7 @@ class BleService : LifecycleService() {
      */
     private fun startGattServer(services: ArrayList<BluetoothGattService>) {
         gattServer = bluetoothManager!!.openGattServer(
-            this,
-            gattServerCallback
+            this, gattServerCallback
         )
         gattServer?.addService(services[0])
     }
@@ -341,8 +329,7 @@ class BleService : LifecycleService() {
     private var gattServerCallback: BluetoothGattServerCallback =
         object : BluetoothGattServerCallback() {
             override fun onConnectionStateChange(
-                device: BluetoothDevice, status: Int,
-                newState: Int
+                device: BluetoothDevice, status: Int, newState: Int
             ) {
                 super.onConnectionStateChange(device, status, newState)
             }
@@ -353,28 +340,23 @@ class BleService : LifecycleService() {
 
             override fun onCharacteristicReadRequest(
                 device: BluetoothDevice,
-                requestId: Int, offset: Int,
+                requestId: Int,
+                offset: Int,
                 characteristic: BluetoothGattCharacteristic
             ) {
                 super.onCharacteristicReadRequest(
-                    device, requestId, offset,
-                    characteristic
+                    device, requestId, offset, characteristic
                 )
                 AppLog.e(TAG, "Request Received : " + qaulId?.size)
                 gattServer?.sendResponse(
-                    device,
-                    requestId,
-                    0,
-                    0,
-                    getStoredValue(characteristic)
+                    device, requestId, 0, 0, getStoredValue(characteristic)
                 )
             }
 
             private fun getStoredValue(characteristic: BluetoothGattCharacteristic): ByteArray {
                 val `val` = ByteArray(characteristic.value.size)
                 System.arraycopy(
-                    characteristic.value, 0, `val`, 0,
-                    characteristic.value.size
+                    characteristic.value, 0, `val`, 0, characteristic.value.size
                 )
 
                 return `val`
@@ -382,16 +364,17 @@ class BleService : LifecycleService() {
 
             override fun onCharacteristicWriteRequest(
                 device: BluetoothDevice,
-                requestId: Int, characteristic: BluetoothGattCharacteristic,
-                preparedWrite: Boolean, responseNeeded: Boolean, offset: Int,
+                requestId: Int,
+                characteristic: BluetoothGattCharacteristic,
+                preparedWrite: Boolean,
+                responseNeeded: Boolean,
+                offset: Int,
                 value: ByteArray
             ) {
                 super.onCharacteristicWriteRequest(
-                    device, requestId,
-                    characteristic, preparedWrite, responseNeeded, offset,
-                    value
+                    device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-                AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
+                AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
                 AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
@@ -399,11 +382,7 @@ class BleService : LifecycleService() {
                     bleDevice = receiveList.find { it.macAddress == device.address }
                 }
                 gattServer!!.sendResponse(
-                    device,
-                    requestId,
-                    BluetoothGatt.GATT_SUCCESS,
-                    offset,
-                    value
+                    device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
@@ -416,13 +395,13 @@ class BleService : LifecycleService() {
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.forName("UTF-8"))
+                            bleDevice.qaulId =
+                                msgObject.qaulId
                             bleDevice.bluetoothDevice = device
                             receiveList.add(bleDevice)
                         }
                         bleAdvertiseCallback!!.onMessageReceived(
-                            bleDevice = bleDevice,
-                            BLEUtils.hexToByteArray(oldValue)!!
+                            bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!
                         )
                         msgMap.remove(device.address)
                     } else {
@@ -438,13 +417,13 @@ class BleService : LifecycleService() {
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId!!.toByteArray(Charset.forName("UTF-8"))
+                            bleDevice.qaulId =
+                                msgObject.qaulId
                             bleDevice.bluetoothDevice = device
                             receiveList.add(bleDevice)
                         }
                         bleAdvertiseCallback!!.onMessageReceived(
-                            bleDevice = bleDevice,
-                            BLEUtils.hexToByteArray(s)!!
+                            bleDevice = bleDevice, BLEUtils.hexToByteArray(s)!!
                         )
                     } else if (s.startsWith("2424")) {
                         msgMap[device.address] = s
@@ -452,7 +431,6 @@ class BleService : LifecycleService() {
                         AppLog.e("onCharacteristicWriteRequest()", "Invalid data received.")
                     }
                 }
-
             }
 
             override fun onDescriptorReadRequest(
@@ -475,18 +453,11 @@ class BleService : LifecycleService() {
                 value: ByteArray
             ) {
                 super.onDescriptorWriteRequest(
-                    device,
-                    requestId,
-                    descriptor,
-                    preparedWrite,
-                    responseNeeded,
-                    offset,
-                    value
+                    device, requestId, descriptor, preparedWrite, responseNeeded, offset, value
                 )
                 AppLog.e(TAG, "onDescriptorWriteRequest()")
                 gattServer?.sendResponse(
-                    device, requestId,
-                    BluetoothGatt.GATT_SUCCESS, offset, value
+                    device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
             }
 
@@ -508,9 +479,7 @@ class BleService : LifecycleService() {
             isAdvertisementRunning = true
             AppLog.e(TAG, successMsg)
             bleService?.bleAdvertiseCallback?.startAdvertiseRes(
-                status = true,
-                errorText = successMsg,
-                unknownError = false
+                status = true, errorText = successMsg, unknownError = false
             )
         }
 
@@ -542,9 +511,7 @@ class BleService : LifecycleService() {
             val failMsg = "Advertisement failed: $errorText"
             AppLog.e(TAG, failMsg)
             bleService?.bleAdvertiseCallback?.startAdvertiseRes(
-                status = false,
-                errorText = failMsg,
-                unknownError = unknownError
+                status = false, errorText = failMsg, unknownError = unknownError
             )
         }
     }
@@ -563,8 +530,7 @@ class BleService : LifecycleService() {
             bleService?.outOfRangeChecker?.removeCallbacks(outRangeRunnable)
             stopScan()
             bleAdvertiseCallback?.stopAdvertiseRes(
-                status = true,
-                errorText = "Advertisement Stopped"
+                status = true, errorText = "Advertisement Stopped"
             )
             bleCallback?.stopScanRes(status = true, errorText = "Scanning Stopped")
             bleService?.stopSelf()
@@ -601,7 +567,8 @@ class BleService : LifecycleService() {
         }
         uuidList.clear()
         uuidList.add(ParcelUuid.fromString(SERVICE_UUID))
-//        setFilter(uuidList)
+        // TODO: DK
+        setFilter(uuidList)
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
@@ -617,15 +584,13 @@ class BleService : LifecycleService() {
             }
         }
 
-        scanSettings =
-            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+        // TODO: DK Change check
+        scanSettings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
         bleScanner.startScan(filters, scanSettings, scanCallback)
         if (!isScanRunning()) {
             bleService?.bleCallback?.startScanRes(
-                status = true,
-                errorText = "Scanning Started",
-                unknownError = false
+                status = true, errorText = "Scanning Started", unknownError = false
             )
             isScanningRunning = true
             startOutRangeChecker()
@@ -647,7 +612,7 @@ class BleService : LifecycleService() {
             for (bLEDevice in ignoreList) {
                 if (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
-                    devicesList.remove(bLEDevice)
+                    devicesList.removeConcurrent(bLEDevice)
 //                    ignoreList.remove(bLEDevice)
                 } else {
                     AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
@@ -704,16 +669,13 @@ class BleService : LifecycleService() {
             }
 
             override fun onCharacteristicWrite(
-                gatt: BluetoothGatt?,
-                characteristic: BluetoothGattCharacteristic?
+                gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
             ) {
 
             }
 
             override fun onMessageSent(
-                gatt: BluetoothGatt?,
-                value: ByteArray,
-                id: String
+                gatt: BluetoothGatt?, value: ByteArray, id: String
             ) {
                 bleCallback?.onMessageSent(id = id, success = true, data = value)
             }
@@ -750,16 +712,20 @@ class BleService : LifecycleService() {
             bleDevice = receiveList.find { it.qaulId.contentEquals(to) }
         }
         val msg = Message()
-        msg.message = String(message)
-        msg.qaulId = String(from)
+        msg.message = message
+        msg.qaulId = from
+//        msg.message = "String(message) String(message) String(message) String(message) String(message) String(message) String(message) String(message) String(message) String(message)   String(message) String(message) String(message) String(message) String(message)   String(message) String(message) String(message) String(message) String(message)   String(message) String(message) String(message) String(message) String(message)   String(message) String(message) String(message) String(message) String(message) "
+//        msg.qaulId = "String(from)"
         if (bleDevice != null) {
             val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
             bleActor.messageId = id
-            val btArray =  Gson().toJson(msg).toByteArray(Charset.forName("UTF-8"))
+            val btArray = Gson().toJson(msg).toByteArray()
             val delimiter = ByteArray(2)
             delimiter[0] = 36
             delimiter[1] = 36
+//            bleActor.tempData = BLEUtils.hexToByteArray("24247B226D657373616765223A225C222C5C625C75303030315C7530303132285C6E5C75303032365C7530303030245C625C75303030315C753030313220EFBFBD5C753030336320EFBFBDEFBFBDEFBFBDC9BF5C753030336534EFBFBD5C7530303031EFBFBD5EC49FEFBFBDEFBFBDEFBFBDEFBFBDEFBFBDEFBFBD2352C68CEFBFBD777CEFBFBD62222C227161756C5F6964223A22EFBFBD5C753030336320EFBFBDEFBFBDEFBFBDC9BF5C753030336534EFBFBD5C7530303031EFBFBD5EC49F227D2424")!!
             bleActor.tempData = delimiter + btArray + delimiter
+            AppLog.e("zzz", "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}")
         } else {
             bleCallback?.onMessageSent(id = id, success = false, data = ByteArray(0))
         }

@@ -43,10 +43,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             disconnectedFromDevice = true
             refreshDeviceCache(mBluetoothGatt!!)
             if (mBluetoothGatt != null) {
-                mBluetoothGatt!!.disconnect()
-                Handler(Looper.myLooper()!!).postDelayed({
+                mBluetoothGatt?.disconnect()
+                Handler(Looper.getMainLooper()).postDelayed({
                     if (mBluetoothGatt != null) {
-                        mBluetoothGatt!!.close()
+                        mBluetoothGatt?.close()
                         mBluetoothGatt = null
                     }
                 }, 200)
@@ -191,9 +191,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     }
                 }
             }
-            AppLog.d(
-                TAG,
-                "onCharacteristicWrite : " + characteristic.uuid.toString() + " , data : " + BLEUtils.byteToHex(
+            AppLog.e(
+                "zzz ",
+                "onCharacteristicWrite --------------> : " + " , data : " + BLEUtils.byteToHex(
                     characteristic.value
                 )
             )
@@ -255,13 +255,14 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     fun send(data: String): Int {
-        AppLog.i(TAG, "send data")
+        AppLog.e(TAG, "send data")
         var data = data
         while (data.length > 20) {
             sendQueue.add(data.substring(0, 20))
             data = data.substring(20)
         }
-        sendQueue.add(data)
+        if (data.isNotEmpty())
+            sendQueue.add(data)
         if (!isWriting) _send()
         return 0
     }
@@ -510,6 +511,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     companion object {
-        private val TAG:String = "qaul-blemodule BleActor"
+        private val TAG: String = "qaul-blemodule BleActor"
     }
 }
