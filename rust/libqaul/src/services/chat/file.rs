@@ -23,6 +23,7 @@ use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
     sync::RwLock,
+    thread,
 };
 
 use super::ChatStorage;
@@ -518,7 +519,7 @@ impl ChatFile {
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
 
         // TODO: start in new async thread here
-
+        let handle = thread::spawn(move || {
         // copy file
         if let Err(e) = fs::copy(path_name.clone(), file_path) {
             log::error!("copy file error {}", e.to_string());
@@ -618,9 +619,9 @@ impl ChatFile {
             };
             left_size = left_size - read_size;
 
-            if let Err(e) = file.read(&mut buffer) {
-                return Err(e.to_string());
-            }
+            // if let Err(e) = file.read(&mut buffer) {
+                // return Err(e.to_string());
+            // }
 
             // pack chat file container
             let data = proto_net::ChatFileContainer {
@@ -645,14 +646,13 @@ impl ChatFile {
 
             chunk_index = chunk_index + 1;
         }
-
         // set file status to sent
         ChatStorage::udate_status(
             &user_account.id,
             &message_id,
             super::rpc_proto::MessageStatus::Sent,
         );
-
+    }).join().unwrap();
         Ok(true)
     }
 
