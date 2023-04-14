@@ -416,8 +416,9 @@ pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     let has_multiple_adv_support = adapter
         .supported_advertising_features()
         .await?
-        .unwrap()
-        .contains(&bluer::adv::PlatformFeature::HardwareOffload);
+        .map_or(false, |feats| {
+            feats.contains(&bluer::adv::PlatformFeature::HardwareOffload)
+        });
     let max_adv_length = adapter
         .supported_advertising_capabilities()
         .await?
