@@ -113,6 +113,9 @@ impl Ble {
         // get small BLE ID
         let ble_id = Node::get_small_id();
 
+        #[cfg(target_os = "linux")]
+        ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
+
         // initialize local state
         {
             // create node states
