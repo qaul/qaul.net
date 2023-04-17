@@ -292,6 +292,12 @@ impl Internet {
         )
         .expect("swarm can be started");
 
+        Swarm::listen_on(
+            &mut swarm,
+            "/ip6/::/tcp/0".parse().expect("can get a local socket"),
+        )
+        .expect("swarm can be started");
+
         log::trace!("Internet.init() Swarm::listen_on");
 
         // connect to remote peers that are specified in

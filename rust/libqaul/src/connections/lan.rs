@@ -259,6 +259,11 @@ impl Lan {
         )
         .expect("swarm can be started");
 
+        Swarm::listen_on(
+            &mut swarm,
+            "/ip6/::/tcp/0".parse().expect("can get a local socket"),
+        )
+        .expect("swarm can be started");
         log::trace!("Lan::init() swarm connected");
 
         let lan = Lan { swarm };
