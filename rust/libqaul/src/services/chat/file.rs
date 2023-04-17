@@ -439,8 +439,8 @@ impl ChatFile {
 
     /// send a file from RPC to users
     fn send(
-        user_account: &UserAccount,
-        group_id: &Vec<u8>,
+        user_account: &'static UserAccount,
+        group_id: &'static Vec<u8>,
         path_name: String,
         description: String,
     ) -> Result<bool, String> {
@@ -519,7 +519,7 @@ impl ChatFile {
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
 
         // TODO: start in new async thread here
-        let handle = thread::spawn(move || {
+        thread::spawn(move || {
         // copy file
         if let Err(e) = fs::copy(path_name.clone(), file_path) {
             log::error!("copy file error {}", e.to_string());
@@ -987,14 +987,14 @@ impl ChatFile {
                     Some(proto_rpc::chat_file::Message::SendFileRequest(send_req)) => {
                         let user_account = UserAccounts::get_by_id(account_id).unwrap();
 
-                        if let Err(e) = Self::send(
-                            &user_account,
-                            &send_req.group_id,
-                            send_req.path_name,
-                            send_req.description,
-                        ) {
-                            log::error!("file rpc send file failed {}", e.to_string());
-                        }
+                        // if let Err(e) = Self::send(
+                        //     &user_account,
+                        //     &send_req.group_id,
+                        //     send_req.path_name,
+                        //     send_req.description,
+                        // ) {
+                        //     log::error!("file rpc send file failed {}", e.to_string());
+                        // }
                     }
                     Some(proto_rpc::chat_file::Message::FileHistory(history_req)) => {
                         log::trace!("lib->file->history");
