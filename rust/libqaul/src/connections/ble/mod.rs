@@ -616,11 +616,13 @@ impl Ble {
         if let Some(id) = Self::get_node_id(message.from.clone()) {
             node_id = id;
         } else {
+            log::warn!("BLE node ID not found");
+            return;
             // TODO: find a better solution in the future
             //
             // if we don't know the ID of the peer yet,
             // put in our peer ID
-            node_id = Node::get_id();
+            //node_id = Node::get_id();
         }
 
         // decode and distribute messages
