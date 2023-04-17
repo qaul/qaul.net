@@ -36,6 +36,7 @@ use crate::utilities::timestamp::Timestamp;
 static LOCAL: Storage<RwLock<RoutingTable>> = Storage::new();
 static INTERNET: Storage<RwLock<ConnectionTable>> = Storage::new();
 static LAN: Storage<RwLock<ConnectionTable>> = Storage::new();
+static BLE: Storage<RwLock<ConnectionTable>> = Storage::new();
 
 /// Connection entry for UserEntry
 struct NeighbourEntry {
@@ -91,6 +92,11 @@ impl ConnectionTable {
                 table: HashMap::new(),
             };
             LAN.set(RwLock::new(lan));
+
+            let ble = ConnectionTable {
+                table: HashMap::new(),
+            };
+            BLE.set(RwLock::new(ble));
 
             let local = RoutingTable {
                 table: HashMap::new(),
@@ -161,6 +167,11 @@ impl ConnectionTable {
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Internet) {
             Self::fill_received_routing_info(ConnectionModule::Internet, neighbour_id, rtt, info);
         }
+
+        // try Bluetooth module
+        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Ble) {
+            Self::fill_received_routing_info(ConnectionModule::Ble, neighbour_id, rtt, info);
+        }
     }
 
     /// populate connection table with incoming routing information
@@ -229,7 +240,7 @@ impl ConnectionTable {
         match module {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-            ConnectionModule::Ble => return,
+            ConnectionModule::Ble => connection_table = BLE.get().write().unwrap(),
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -322,6 +333,9 @@ impl ConnectionTable {
         // calculate from internet module
         table = Self::calculate_intermediary_table(table, ConnectionModule::Internet);
 
+        // calculate from ble module
+        table = Self::calculate_intermediary_table(table, ConnectionModule::Ble);
+
         // set table as new active routing table
         RoutingTable::set(table);
     }
@@ -352,7 +366,7 @@ impl ConnectionTable {
         match conn.clone() {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-            ConnectionModule::Ble => return table,
+            ConnectionModule::Ble => connection_table = BLE.get().write().unwrap(),
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
@@ -528,7 +542,7 @@ impl ConnectionTable {
         match conn {
             ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
             ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
-            ConnectionModule::Ble => return connections_list,
+            ConnectionModule::Ble => connection_table = BLE.get().read().unwrap(),
             ConnectionModule::Local => return connections_list,
             ConnectionModule::None => return connections_list,
         }
