@@ -53,7 +53,7 @@ internet:
   do_listen: false
   # multi address configuring the port the internet module listens on
   # 0.0.0.0 - the module is listening on all addresses.
-  # 0 - the port number 9229 zero means the module listens on port 9229 for incoming connections
+  # 9229 - the port number 9229 zero means the module listens on port 9229 for incoming connections
   listen: /ip4/0.0.0.0/tcp/9229
 
 # User Accounts Configuration
