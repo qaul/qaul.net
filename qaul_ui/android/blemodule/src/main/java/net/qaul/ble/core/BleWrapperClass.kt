@@ -131,9 +131,9 @@ open class BleWrapperClass(context: Activity) {
 //                    if (isSend) {
 //                        isSend = false
 
-                    if (System.currentTimeMillis() - 3000 < lastMillieTime) {
-                        return
-                    }
+//                    if (System.currentTimeMillis() - 3000 < lastMillieTime) {
+//                        return
+//                    }
 
                     lastMillieTime = System.currentTimeMillis()
 
