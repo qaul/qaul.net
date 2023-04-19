@@ -15,7 +15,7 @@
 //! peers:
 //!   - /ip4/144.91.74.192/tcp/9229
 //! do_listen: false
-//! listen: /ip4/0.0.0.0/tcp/9229
+//! listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
 //! ```
 
 use libp2p::swarm::keep_alive;
@@ -286,7 +286,7 @@ impl Internet {
             &mut swarm,
             config
                 .internet
-                .listen
+                .listen[0]
                 .parse()
                 .expect("can get a local socket"),
         )
@@ -294,7 +294,11 @@ impl Internet {
 
         Swarm::listen_on(
             &mut swarm,
-            "/ip6/::/tcp/0".parse().expect("can get a local socket"),
+            config
+                .internet
+                .listen[1]
+                .parse()
+                .expect("can get a local socket"),
         )
         .expect("swarm can be started");
 

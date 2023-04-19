@@ -45,14 +45,14 @@ impl Default for Node {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Lan {
     pub active: bool,
-    pub listen: String,
+    pub listen: Vec<String>,
 }
 
 impl Default for Lan {
     fn default() -> Self {
         Lan {
             active: true,
-            listen: String::from("/ip4/0.0.0.0/tcp/0"),
+            listen: vec![String::from("/ip4/0.0.0.0/tcp/0"),String::from("/ip6/::/tcp/0")],
         }
     }
 }
@@ -70,12 +70,11 @@ pub struct Internet {
     pub active: bool,
     pub peers: Vec<InternetPeer>,
     pub do_listen: bool,
-    pub listen: String,
+    pub listen: Vec<String>,
 }
 
 impl Default for Internet {
     fn default() -> Self {
-        let mut listen_str: String = "/ip4/0.0.0.0/tcp/".to_string();
         let mut port: u16 = 0;
         if let Some(port_str) = super::super::get_default_config("port") {
             match port_str.parse::<u16>() {
@@ -85,7 +84,8 @@ impl Default for Internet {
                 _ => {}
             }
         }
-        listen_str.push_str(port.to_string().as_str());
+        let listen_ipv4: String = format!("/ip4/0.0.0.0/tcp/{}", port);
+        let listen_ipv6: String = format!("/ip6/::/tcp/{}", port);
 
         Internet {
             active: true,
@@ -96,9 +96,9 @@ impl Default for Internet {
             }],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
-            listen: String::from("/ip4/0.0.0.0/tcp/9229"),
+            listen: vec![String::from("/ip4/0.0.0.0/tcp/9229"),String::from("/ip6/::/tcp/9229")],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            listen: listen_str.clone(),
+            listen: vec![listen_ipv4,listen_ipv6],
         }
     }
 }
