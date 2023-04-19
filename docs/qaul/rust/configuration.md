@@ -40,7 +40,7 @@ lan:
   # and port of the LAN module
   # 0.0.0.0 - the module is listening on all addresses.
   # 0 - the port number 0 zero means the lan module chooses a random free port
-  listen: /ip4/0.0.0.0/tcp/0
+  listen: [/ip4/0.0.0.0/tcp/0, /ip6/::/tcp/0]
 
 # Internet Connection Module Configuration
 internet:
@@ -54,7 +54,7 @@ internet:
   # multi address configuring the port the internet module listens on
   # 0.0.0.0 - the module is listening on all addresses.
   # 9229 - the port number 9229 zero means the module listens on port 9229 for incoming connections
-  listen: /ip4/0.0.0.0/tcp/9229
+  listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
 
 # User Accounts Configuration
 # It contains a list with all the user accounts registered on this node

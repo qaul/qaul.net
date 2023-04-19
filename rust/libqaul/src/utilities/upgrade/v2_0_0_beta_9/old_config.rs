@@ -25,7 +25,7 @@ impl Node {}
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Lan {
     pub active: bool,
-    pub listen: String,
+    pub listen: Vec<String>,
 }
 
 impl Lan {}
@@ -42,7 +42,7 @@ pub struct Internet {
     pub active: bool,
     pub peers: Vec<InternetPeer>,
     pub do_listen: bool,
-    pub listen: String,
+    pub listen: Vec<String>,
 }
 
 impl Internet {}

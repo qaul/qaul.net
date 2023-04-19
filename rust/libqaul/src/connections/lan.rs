@@ -255,13 +255,13 @@ impl Lan {
         let config = Configuration::get();
         Swarm::listen_on(
             &mut swarm,
-            config.lan.listen.parse().expect("can get a local socket"),
+            config.lan.listen[0].parse().expect("can get a local socket"),
         )
         .expect("swarm can be started");
 
         Swarm::listen_on(
             &mut swarm,
-            "/ip6/::/tcp/0".parse().expect("can get a local socket"),
+            config.lan.listen[1].parse().expect("can get a local socket"),
         )
         .expect("swarm can be started");
         log::trace!("Lan::init() swarm connected");
