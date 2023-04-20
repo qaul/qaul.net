@@ -686,6 +686,7 @@ class BleService : LifecycleService() {
                 val queue = hashMap[gatt?.device?.address]
                 if (queue?.isNotEmpty() == true) {
                     queue.remove()
+                    hashMap[gatt?.device?.address!!] = queue
                 }
 
                 Log.e("zzz", "onMessageSent:SIZE ->  ${queue?.size} ")
