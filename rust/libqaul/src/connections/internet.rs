@@ -11,11 +11,13 @@
 //!
 //! ```yaml
 //! internet:
-//! active: true
-//! peers:
-//!   - /ip4/144.91.74.192/tcp/9229
-//! do_listen: false
-//! listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
+//!   active: true
+//!   peers:
+//!   - address: /ip4/144.91.74.192/tcp/9229
+//!     name: qaul Community Node
+//!     enabled: false
+//!   do_listen: false
+//!   listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
 //! ```
 
 use libp2p::swarm::keep_alive;
@@ -279,30 +281,14 @@ impl Internet {
 
         log::trace!("Internet.init() swarm created");
 
-        // connect swarm to the listening interface in
-        // the configuration config.internet.listen
+        // connect swarm to the listening interfaces defined in
+        // the configuration array config.internet.listen
         let config = Configuration::get();
-        Swarm::listen_on(
-            &mut swarm,
-            config
-                .internet
-                .listen[0]
-                .parse()
-                .expect("can get a local socket"),
-        )
-        .expect("swarm can be started");
 
-        Swarm::listen_on(
-            &mut swarm,
-            config
-                .internet
-                .listen[1]
-                .parse()
-                .expect("can get a local socket"),
-        )
-        .expect("swarm can be started");
-
-        log::trace!("Internet.init() Swarm::listen_on");
+        for listen in &config.lan.listen {
+            Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
+                .expect("swarm can be started");
+        }
 
         // connect to remote peers that are specified in
         // the configuration config.internet.peers

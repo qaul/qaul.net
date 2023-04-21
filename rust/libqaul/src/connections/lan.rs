@@ -11,9 +11,11 @@
 //! The module is configured in the configuration file:
 //!
 //! ```yaml
-//! [lan]
-//! active = true
-//! listen = "/ip4/0.0.0.0/tcp/0"
+//! lan:
+//!   active: true
+//!   listen:
+//!   - /ip4/0.0.0.0/tcp/0
+//!   - /ip6/::/tcp/0
 //! ```
 
 use libp2p::{
@@ -250,21 +252,14 @@ impl Lan {
 
         log::trace!("Lan::init() swarm created");
 
-        // connect swarm to the listening interface in
-        // the configuration config.lan.listen
+        // connect swarm to the defined listening interfaces in
+        // the configuration array config.lan.listen
         let config = Configuration::get();
-        Swarm::listen_on(
-            &mut swarm,
-            config.lan.listen[0].parse().expect("can get a local socket"),
-        )
-        .expect("swarm can be started");
 
-        Swarm::listen_on(
-            &mut swarm,
-            config.lan.listen[1].parse().expect("can get a local socket"),
-        )
-        .expect("swarm can be started");
-        log::trace!("Lan::init() swarm connected");
+        for listen in &config.lan.listen {
+            Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
+                .expect("swarm can be started");
+        }
 
         let lan = Lan { swarm };
 
