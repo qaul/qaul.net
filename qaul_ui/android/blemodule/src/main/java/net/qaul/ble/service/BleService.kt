@@ -47,6 +47,7 @@ class BleService : LifecycleService() {
     private var filters: ArrayList<ScanFilter> = arrayListOf()
     private var scanSettings: ScanSettings? = null
     private val msgMap = Collections.synchronizedMap(hashMapOf<String, String>())
+    private val actorMap = Collections.synchronizedMap(hashMapOf<String, BleActor>())
     private val handler = Handler(Looper.getMainLooper())
 
     //
@@ -630,7 +631,7 @@ class BleService : LifecycleService() {
      * This Method Will be Used to set Callback for Device Connection and Connect to Device
      */
     private fun connectDevice(device: BLEScanDevice, isFromMessage: Boolean): BleActor {
-        val baseBleActor = BleActor(this, object : BleActor.BleConnectionListener {
+        class BleConnectionListener : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
             }
@@ -654,6 +655,7 @@ class BleService : LifecycleService() {
             override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
                 AppLog.e(TAG, " onConnectionFailed : ${bleScanDevice.macAddress}")
                 devicesList.remove(bleScanDevice)
+                actorMap.remove(bleScanDevice.macAddress)
             }
 
             override fun onCharacteristicRead(
@@ -681,15 +683,15 @@ class BleService : LifecycleService() {
             override fun onMessageSent(
                 gatt: BluetoothGatt?, value: ByteArray, id: String
             ) {
-                bleCallback?.onMessageSent(id = id, success = true, data = value)
 
                 val queue = hashMap[gatt?.device?.address]
                 if (queue?.isNotEmpty() == true) {
-                    queue.remove()
+                    queue.poll()
                     hashMap[gatt?.device?.address!!] = queue
                 }
-
                 Log.e("zzz", "onMessageSent:SIZE ->  ${queue?.size} ")
+
+                bleCallback?.onMessageSent(id = id, success = true, data = value)
 
                 sendMessageFromQueu(gatt?.device?.address!!)
 
@@ -713,9 +715,14 @@ class BleService : LifecycleService() {
                 AppLog.e(TAG, " addToIgnoreList : ${ignoreList.toString()}")
             }
 
-        })
-        baseBleActor.setDevice(device = device, isFromMessage = isFromMessage)
-        return baseBleActor
+        }
+        val baseBleActor = if (actorMap[device.macAddress] == null) {
+            BleActor(this, BleConnectionListener())
+        } else {
+            actorMap[device.macAddress]
+        }
+        baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
+        return baseBleActor!!
     }
 
     /**
@@ -757,7 +764,7 @@ class BleService : LifecycleService() {
 
             if (!queue.isNullOrEmpty()) {
 
-                if ((isFromSendMessage && queue.size == 1) || !isFromSendMessage) {
+                if (!isFromSendMessage || queue.size == 1) {
 
                     var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
                     if (bleDevice == null) {
@@ -789,7 +796,8 @@ class BleService : LifecycleService() {
                             bleCallback?.onMessageSent(
                                 id = mesTrip.first, success = false, data = ByteArray(0)
                             )
-                            queue.remove()
+                            queue.poll()
+                            hashMap[macAddress] = queue
                         }
                     }
                 }
