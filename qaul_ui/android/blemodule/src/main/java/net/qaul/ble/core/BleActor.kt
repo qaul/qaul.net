@@ -74,7 +74,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
         failTimer = Timer()
         failedTask = ConnectionFailedTask()
-        failTimer!!.schedule(failedTask, 20000)
+        failTimer!!.schedule(failedTask, 5000)
         try {
             mBluetoothGatt =
                 bluetoothDevice!!.connectGatt(
@@ -159,13 +159,13 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             }
             if (isFromMessage) {
 //                gatt.requestMtu(180)
-                send(String(tempData, Charset.forName("UTF-8")))
+                send(BLEUtils.byteToHex(tempData))
                 return
             }
             if (characteristic.uuid.toString()
                     .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
             ) {
-                disConnectedDevice()
+//                disConnectedDevice()
             }
         }
 
@@ -175,6 +175,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
+            AppLog.e(
+                "zzz ",
+                "onCharacteristicWrite --------------> : " + " , data : " + BLEUtils.byteToHex(
+                    characteristic.value
+                )
+            )
             if (listener != null) {
                 if (messageId.isEmpty() || messageId.isBlank()) {
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
@@ -186,17 +192,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                             value = tempData,
                             id = messageId
                         )
-                        disConnectedDevice()
+//                        disConnectedDevice()
                         tempData = ByteArray(0)
                     }
                 }
             }
-            AppLog.e(
-                "zzz ",
-                "onCharacteristicWrite --------------> : " + " , data : " + BLEUtils.byteToHex(
-                    characteristic.value
-                )
-            )
+
         }
 
         override fun onCharacteristicChanged(
@@ -257,9 +258,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     fun send(data: String): Int {
         AppLog.e(TAG, "send data")
         var data = data
-        while (data.length > 20) {
-            sendQueue.add(data.substring(0, 20))
-            data = data.substring(20)
+        while (data.length > 40) {
+            sendQueue.add(data.substring(0, 40))
+            data = data.substring(40)
         }
         if (data.isNotEmpty())
             sendQueue.add(data)
@@ -273,7 +274,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             return false
         }
         AppLog.e(TAG, "_send(): Sending: " + sendQueue.peek())
-        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
+        val tx = BLEUtils.hexToByteArray(sendQueue.poll())
+//        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
         isWriting = true // Set the write in progress flag
         writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx, attempt)
         return true
@@ -366,20 +368,23 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      */
     internal inner class ConnectionFailedTask : TimerTask() {
         override fun run() {
-            failTimer!!.cancel()
-            failedTask!!.cancel()
             if (listener != null) {
                 listener!!.onConnectionFailed(bleDevice!!)
-                if (isFromMessage) {
-                    if (mBluetoothGatt != null) {
-                        BleService.bleService!!.bleCallback?.onMessageSent(
-                            id = messageId,
-                            success = false,
-                            data = tempData
-                        )
+                disConnectedDevice()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isFromMessage) {
+                        if (mBluetoothGatt != null) {
+                            BleService.bleService!!.bleCallback?.onMessageSent(
+                                id = messageId,
+                                success = false,
+                                data = tempData
+                            )
+                        }
                     }
-                }
+                },1000)
             }
+            failTimer!!.cancel()
+            failedTask!!.cancel()
         }
     }
 
@@ -511,6 +516,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     companion object {
-        private val TAG: String = "qaul-blemodule BleActor"
+        private val TAG: String = "zzz qaul-blemodule BleActor"
     }
 }
