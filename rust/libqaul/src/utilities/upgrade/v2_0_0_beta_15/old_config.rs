@@ -19,7 +19,15 @@ pub struct Node {
     pub keys: String,
 }
 
-impl Node {}
+impl Default for Node {
+    fn default() -> Self {
+        Node {
+            initialized: 0,
+            id: String::from(""),
+            keys: String::from(""),
+        }
+    }
+}
 
 /// LAN Connection Module
 #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -33,6 +41,7 @@ impl Lan {}
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct InternetPeer {
     pub address: String,
+    pub name: String,
     pub enabled: bool,
 }
 
@@ -118,12 +127,9 @@ pub struct Configuration {
     pub routing: RoutingOptions,
 }
 
-impl Configuration {}
-
-/// Configuration implementation of libqaul
 impl Configuration {
-    /// Initialize configuration
-    pub fn load(path: &str) -> Option<Configuration> {
+     /// Initialize configuration
+     pub fn load(path: &str) -> Option<Configuration> {
         if let Ok(c) = Config::builder().add_source(File::with_name(path)).build() {
             return Some(c.try_deserialize::<Configuration>().unwrap());
         }
