@@ -80,7 +80,7 @@ impl VersionUpgrade {
             for peer in &old_cfg.internet.peers {
                 peers.push(crate::storage::configuration::InternetPeer {
                     address: peer.address.clone(),
-                    name: String::from(""),
+                    name: peer.name.clone(),
                     enabled: peer.enabled,
                 });
             }
