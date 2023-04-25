@@ -23,6 +23,7 @@ import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.model.Message
 import java.nio.charset.Charset
 import java.util.*
+import java.util.concurrent.Executors
 
 @SuppressLint("MissingPermission")
 class BleService : LifecycleService() {
@@ -49,6 +50,8 @@ class BleService : LifecycleService() {
     private val msgMap = Collections.synchronizedMap(hashMapOf<String, String>())
     private val actorMap = Collections.synchronizedMap(hashMapOf<String, BleActor>())
     private val handler = Handler(Looper.getMainLooper())
+    private var lastWriteTime = System.currentTimeMillis() + 60000
+    private var executor = Executors.newSingleThreadExecutor()
 
     //
     private val hashMap: HashMap<String, Queue<Triple<String, ByteArray, ByteArray>>> = hashMapOf()
@@ -76,20 +79,26 @@ class BleService : LifecycleService() {
         AppLog.e(TAG, "$TAG started")
     }
 
+    fun getRandomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length).map { allowedChars.random() }.joinToString("")
+    }
+
     /**
      * This Method Will Set the necessary data and start the advertisement
      */
     fun startAdvertise(
         qaul_id: ByteArray, mode: String, bleCallback: BleAdvertiseCallback
     ) {
+        val name = getRandomString(5)
         bleService?.qaulId = qaul_id
         bleService?.advertMode = mode
         bleService?.bleAdvertiseCallback = bleCallback
 
-        val t = Thread {
+        Executors.newSingleThreadExecutor().execute {
             bluetoothManager = bleService!!.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             bluetoothAdapter = bluetoothManager!!.adapter
-            bluetoothAdapter!!.name = "qaul"
+            bluetoothAdapter!!.name = name
             bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
             if (bluetoothAdapter != null) {
                 AppLog.e(
@@ -158,7 +167,7 @@ class BleService : LifecycleService() {
                 )
             }
         }
-        t.start()
+//        t.start()
 
     }
 
@@ -641,6 +650,9 @@ class BleService : LifecycleService() {
                 if (!blackList.contains(bleScanDevice) && !ignoreList.contains(bleScanDevice)) {
                     devicesList.remove(bleScanDevice)
                 }
+                if (System.currentTimeMillis() - 60000 > lastWriteTime) {
+                    bleCallback?.restartService()
+                }
             }
 
             override fun onServiceDiscovered(macAddress: String?) {
@@ -653,7 +665,6 @@ class BleService : LifecycleService() {
             }
 
             override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
-                AppLog.e(TAG, " onConnectionFailed : ${bleScanDevice.macAddress}")
                 devicesList.remove(bleScanDevice)
                 actorMap.remove(bleScanDevice.macAddress)
             }
@@ -677,7 +688,8 @@ class BleService : LifecycleService() {
             override fun onCharacteristicWrite(
                 gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
             ) {
-
+                lastWriteTime = System.currentTimeMillis()
+                AppLog.e("zzz lastWriteTime", "$lastWriteTime")
             }
 
             override fun onMessageSent(
@@ -716,6 +728,7 @@ class BleService : LifecycleService() {
             }
 
         }
+
         val baseBleActor = if (actorMap[device.macAddress] == null) {
             BleActor(this, BleConnectionListener())
         } else {
@@ -735,8 +748,7 @@ class BleService : LifecycleService() {
         }
 
         AppLog.e(
-            "zzz",
-            "sendMessage   ${BLEUtils.byteToHex(message)}"
+            "zzz", "sendMessage   ${BLEUtils.byteToHex(message)}"
         )
         var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
         bleDevice?.let {
@@ -757,52 +769,55 @@ class BleService : LifecycleService() {
         }
     }
 
+
     private fun sendMessageFromQueu(macAddress: String, isFromSendMessage: Boolean = false) {
-        if (hashMap.isNotEmpty()) {
+        Thread.sleep(100)
+        executor.execute {
+            if (hashMap.isNotEmpty()) {
+                val queue = hashMap[macAddress]
 
-            val queue = hashMap[macAddress]
+                if (!queue.isNullOrEmpty()) {
 
-            if (!queue.isNullOrEmpty()) {
+                    if (!isFromSendMessage || queue.size == 1) {
+                        var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
+                        if (bleDevice == null) {
+                            bleDevice = receiveList.find { it.macAddress.contentEquals(macAddress) }
+                        }
+                        val messageFormQueue = queue.peek()
 
-                if (!isFromSendMessage || queue.size == 1) {
-
-                    var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
-                    if (bleDevice == null) {
-                        bleDevice = receiveList.find { it.macAddress.contentEquals(macAddress) }
-                    }
-                    val messageFormQueue = queue.peek()
-
-                    messageFormQueue?.let { mesTrip ->
-                        val msg = Message()
-                        msg.message = mesTrip.third
-                        msg.qaulId = mesTrip.second
-                        if (bleDevice != null) {
-                            val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
-                            bleActor.messageId = mesTrip.first
-                            val btArray = Gson().toJson(msg).toByteArray()
-                            val delimiter = ByteArray(2)
-                            delimiter[0] = 36
-                            delimiter[1] = 36
-                            bleActor.tempData = delimiter + btArray + delimiter
-                            AppLog.e(
-                                "zzz",
-                                "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
-                            )
-                        } else {
-                            AppLog.e(
-                                "zzz",
-                                "data------------>onMessageSent Failed"
-                            )
-                            bleCallback?.onMessageSent(
-                                id = mesTrip.first, success = false, data = ByteArray(0)
-                            )
-                            queue.poll()
-                            hashMap[macAddress] = queue
+                        messageFormQueue?.let { mesTrip ->
+                            val msg = Message()
+                            msg.message = mesTrip.third
+                            msg.qaulId = mesTrip.second
+                            if (bleDevice != null) {
+                                val bleActor =
+                                    connectDevice(device = bleDevice, isFromMessage = true)
+                                bleActor.messageId = mesTrip.first
+                                val btArray = Gson().toJson(msg).toByteArray()
+                                val delimiter = ByteArray(2)
+                                delimiter[0] = 36
+                                delimiter[1] = 36
+                                bleActor.tempData = delimiter + btArray + delimiter
+                                AppLog.e(
+                                    "zzz",
+                                    "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
+                                )
+                            } else {
+                                AppLog.e(
+                                    "zzz", "data------------>onMessageSent Failed"
+                                )
+                                bleCallback?.onMessageSent(
+                                    id = mesTrip.first, success = false, data = ByteArray(0)
+                                )
+                                queue.poll()
+                                hashMap[macAddress] = queue
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 
     /**
@@ -823,6 +838,7 @@ class BleService : LifecycleService() {
         fun deviceFound(bleDevice: BLEScanDevice)
         fun deviceOutOfRange(bleDevice: BLEScanDevice)
         fun onMessageSent(id: String, success: Boolean, data: ByteArray)
+        fun restartService()
     }
 
 }
