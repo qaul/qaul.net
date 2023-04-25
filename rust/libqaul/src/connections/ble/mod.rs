@@ -613,8 +613,14 @@ impl Ble {
 
         // get node ID of sender
         let node_id: PeerId;
-        if let Some(id) = Self::get_node_id(message.from.clone()) {
-            node_id = id;
+        if let Some(node) = Neighbours::node_from_small_id(message.from.clone()) {
+            match PeerId::from_bytes(&node.id) {
+                Ok(id) => node_id = id,
+                Err(e) => {
+                    log::error!("Neighbour ID Vec error: {}", e);
+                    return;
+                }
+            }
         } else {
             log::warn!("BLE node ID not found");
             return;
