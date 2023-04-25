@@ -131,9 +131,11 @@ open class BleWrapperClass(context: Activity) {
 //                    if (isSend) {
 //                        isSend = false
 
-//                    if (System.currentTimeMillis() - 3000 < lastMillieTime) {
+                    AppLog.e("zzz", " DIRECT_SEND ")
+//                    if (System.currentTimeMillis() - 7000 < lastMillieTime) {
 //                        return
 //                    }
+
 
                     lastMillieTime = System.currentTimeMillis()
 
@@ -192,7 +194,6 @@ open class BleWrapperClass(context: Activity) {
      */
     private fun startService(context: Context) {
         Log.i(TAG, "startService()")
-
         if (isBleScanConditionSatisfy()) {
             Log.i(TAG, "startService() isBleScanConditionSatisfy")
 
@@ -244,8 +245,7 @@ open class BleWrapperClass(context: Activity) {
         Log.i(TAG, "startAdvertiseAndCallback()")
 
         if (qaulId != null) {
-            BleService.bleService?.startAdvertise(
-                qaul_id = qaulId!!,
+            BleService.bleService?.startAdvertise(qaul_id = qaulId!!,
                 mode = advertMode,
                 object : BleService.BleAdvertiseCallback {
                     override fun startAdvertiseRes(
@@ -358,6 +358,11 @@ open class BleWrapperClass(context: Activity) {
                 directSendResult.id = ByteString.copyFrom(id.toByteArray(Charset.forName("UTF-8")))
                 bleRes.directSendResult = directSendResult.build()
                 sendResponse(bleRes)
+            }
+
+            override fun restartService() {
+//                BleService.bleService?.stop()
+//                Handler(Looper.getMainLooper()).postDelayed({ startService(context) }, 500)
             }
 
         })
