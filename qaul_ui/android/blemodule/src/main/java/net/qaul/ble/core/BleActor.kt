@@ -70,19 +70,16 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     private fun connectDevice(): Boolean {
         AppLog.i(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
+            AppLog.e("zzz", "connectDevice : $bluetoothDevice")
             listener!!.onConnectionFailed(bleScanDevice = bleDevice!!)
         }
         failTimer = Timer()
         failedTask = ConnectionFailedTask()
-        failTimer!!.schedule(failedTask, 5000)
+        failTimer!!.schedule(failedTask, 20000)
         try {
-            mBluetoothGatt =
-                bluetoothDevice!!.connectGatt(
-                    mContext,
-                    false,
-                    mGattCallback,
-                    BluetoothDevice.TRANSPORT_LE
-                )
+            mBluetoothGatt = bluetoothDevice!!.connectGatt(
+                mContext, false, mGattCallback, BluetoothDevice.TRANSPORT_LE
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -101,10 +98,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTED")
                 listener!!.onConnected(bluetoothDevice!!.address)
                 try {
-                    if (failedTask != null && failTimer != null) {
-                        failTimer!!.cancel()
-                        failedTask!!.cancel()
-                    }
+                    cancelTimer()
                     if (mBluetoothGatt != null) {
                         mBluetoothGatt!!.discoverServices()
                     }
@@ -118,19 +112,14 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     mBluetoothGatt!!.close()
                     mBluetoothGatt = null
                 }
-                if (failedTask != null && failTimer != null) {
-                    failTimer!!.cancel()
-                    failedTask!!.cancel()
-                }
+                cancelTimer()
                 if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
                 if (!disconnectedFromDevice) listener!!.onDisconnected(bleDevice!!) else disconnectedFromDevice =
                     false
                 if (isFromMessage) {
                     if (mBluetoothGatt != null) {
                         BleService.bleService!!.bleCallback?.onMessageSent(
-                            id = messageId,
-                            success = false,
-                            data = tempData
+                            id = messageId, success = false, data = tempData
                         )
                     }
                 }
@@ -143,9 +132,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
 
         override fun onCharacteristicRead(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic,
-            status: Int
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
             AppLog.d(
@@ -165,14 +152,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             if (characteristic.uuid.toString()
                     .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
             ) {
-//                disConnectedDevice()
+//                disConnectedDevice() //onCharacteristicRead
             }
         }
 
         override fun onCharacteristicWrite(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic,
-            status: Int
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
             AppLog.e(
@@ -188,11 +173,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     isWriting = false
                     if (!_send()) {
                         listener!!.onMessageSent(
-                            gatt = gatt,
-                            value = tempData,
-                            id = messageId
+                            gatt = gatt, value = tempData, id = messageId
                         )
-//                        disConnectedDevice()
+                        disConnectedDevice() //onCharacteristicWrite
                         tempData = ByteArray(0)
                     }
                 }
@@ -201,8 +184,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
 
         override fun onCharacteristicChanged(
-            gatt: BluetoothGatt,
-            characteristic: BluetoothGattCharacteristic
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
             AppLog.d(
@@ -217,17 +199,13 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
 
         override fun onDescriptorRead(
-            gatt: BluetoothGatt,
-            descriptor: BluetoothGattDescriptor,
-            status: Int
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
         ) {
             super.onDescriptorRead(gatt, descriptor, status)
         }
 
         override fun onDescriptorWrite(
-            gatt: BluetoothGatt,
-            descriptor: BluetoothGattDescriptor,
-            status: Int
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
             if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) {
@@ -255,15 +233,21 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
+    private fun cancelTimer() {
+        if (failedTask != null && failTimer != null) {
+            failTimer!!.cancel()
+            failedTask!!.cancel()
+        }
+    }
+
     fun send(data: String): Int {
-        AppLog.e(TAG, "send data")
+        AppLog.e("zzz", "send data")
         var data = data
         while (data.length > 40) {
             sendQueue.add(data.substring(0, 40))
             data = data.substring(40)
         }
-        if (data.isNotEmpty())
-            sendQueue.add(data)
+        if (data.isNotEmpty()) sendQueue.add(data)
         if (!isWriting) _send()
         return 0
     }
@@ -320,7 +304,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             }
             if (!isQaulDevice) {
                 listener?.addToBlackList(this.bleDevice!!)
-                disConnectedDevice()
+                disConnectedDevice() //discoverServices
                 return
             }
             if (listener != null) {
@@ -370,18 +354,17 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         override fun run() {
             if (listener != null) {
                 listener!!.onConnectionFailed(bleDevice!!)
+                AppLog.e("zzz", "ConnectionFailedTask : $bluetoothDevice")
                 disConnectedDevice()
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (isFromMessage) {
                         if (mBluetoothGatt != null) {
                             BleService.bleService!!.bleCallback?.onMessageSent(
-                                id = messageId,
-                                success = false,
-                                data = tempData
+                                id = messageId, success = false, data = tempData
                             )
                         }
                     }
-                },1000)
+                }, 1000)
             }
             failTimer!!.cancel()
             failedTask!!.cancel()
@@ -393,8 +376,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      */
     private fun refreshDeviceCache(gatt: BluetoothGatt) {
         try {
-            val localMethod =
-                gatt.javaClass.getMethod("refresh", *arrayOfNulls(0))
+            val localMethod = gatt.javaClass.getMethod("refresh", *arrayOfNulls(0))
             localMethod.invoke(gatt, *arrayOfNulls(0))
         } catch (localException: Exception) {
         }
@@ -421,10 +403,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * User write data to device
      */
     fun writeServiceData(
-        serUUID: String,
-        charUUID: String,
-        data: ByteArray?,
-        attempt: Int
+        serUUID: String, charUUID: String, data: ByteArray?, attempt: Int
     ): Boolean {
         if (attempt < 3) {
             if (data != null) {
@@ -453,10 +432,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     try {
                         mBluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             bluetoothDevice!!.connectGatt(
-                                mContext,
-                                false,
-                                mGattCallback,
-                                BluetoothDevice.TRANSPORT_LE
+                                mContext, false, mGattCallback, BluetoothDevice.TRANSPORT_LE
                             )
                         } else {
                             bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
@@ -473,9 +449,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             }
         }
         BleService.bleService!!.bleCallback?.onMessageSent(
-            id = messageId,
-            success = false,
-            data = data!!
+            id = messageId, success = false, data = data!!
         )
         return false
     }
@@ -496,19 +470,15 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         )
 
         fun onCharacteristicWrite(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?
+            gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
         )
 
         fun onMessageSent(
-            gatt: BluetoothGatt?,
-            value: ByteArray, id: String
+            gatt: BluetoothGatt?, value: ByteArray, id: String
         )
 
         fun onCharacteristicChanged(
-            macAddress: String?,
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?
+            macAddress: String?, gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
         )
 
         fun addToBlackList(bleScanDevice: BLEScanDevice)
