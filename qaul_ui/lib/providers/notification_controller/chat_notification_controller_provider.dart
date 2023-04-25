@@ -1,6 +1,7 @@
 part of '../providers.dart';
 
-final chatNotificationControllerProvider = Provider((ref) => ChatNotificationController(ref));
+final chatNotificationControllerProvider =
+    Provider((ref) => ChatNotificationController(ref));
 
 class ChatNotificationController extends NotificationController<List<ChatRoom>>
     with DataProcessingStrategy<ChatRoom> {
@@ -27,7 +28,8 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
       }));
     }
     ref.read(qaulWorkerProvider).getAllChatRooms();
-    _log.config('Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats');
+    _log.config(
+        'Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats');
   }
 
   @override
@@ -39,13 +41,18 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   // ***************************************************************************
   @override
   Iterable<ChatRoom> entriesToBeProcessed(List<ChatRoom> values) {
-    var newMessages = List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
-      ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
+    var newMessages =
+        List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
+          ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
     if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
-      final verifiedIds =
-          ref.read(usersProvider).where((u) => u.isVerified ?? false).map((e) => e.id);
+      final verifiedIds = ref
+          .read(usersProvider)
+          .where((u) => u.isVerified ?? false)
+          .map((e) => e.id);
       newMessages = newMessages
-          .where((room) => verifiedIds.where((id) => id.equals(room.conversationId)).isNotEmpty)
+          .where((room) => verifiedIds
+              .where((id) => id.equals(room.conversationId))
+              .isNotEmpty)
           .toList();
     }
     _log.fine('Chat Rooms updated. New ones are: $newMessages');
@@ -58,24 +65,26 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   bool _hasNewMessage(ChatRoom r1) {
     final r2 = _chats.firstWhereOrNull((r2) => r2.roomIdBase58 == r1.idBase58);
     if (r2 == null) return false;
-    return r2.lastMessageIndex < (r1.lastMessageIndex ?? 1);
+    return r2.unreadCount < r1.unreadCount;
   }
 
   @override
   LocalNotification? process(ChatRoom value) {
     _updateLocalCachedChatWith(value);
     if (currentVisibleHomeTab == TabType.chat) return null;
-    if (!UserPrefsHelper().chatNotificationsEnabled || _lastMessageIsFromLocalUser(value)) {
+    if (!UserPrefsHelper().chatNotificationsEnabled ||
+        _lastMessageIsFromLocalUser(value)) {
       return null;
     }
     if (value.lastMessagePreview is! TextMessageContent) {
-      _log.info('message of type ${value.lastMessagePreview.runtimeType} received, but no notification was sent');
+      _log.info(
+          'message of type ${value.lastMessagePreview.runtimeType} received, but no notification was sent');
       return null;
     }
 
     return LocalNotification(
       id: value.hashCode,
-      title: value.name ?? 'New Message',
+      title: value.name == null || value.name!.isEmpty ? 'New Message' : value.name!,
       body: (value.lastMessagePreview as TextMessageContent).content,
       payload: 'qaul://chat/${value.idBase58}',
     );
@@ -85,7 +94,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
       localUser.id.equals(r1.lastMessageSenderId ?? []);
 
   void _updateLocalCachedChatWith(ChatRoom r) {
-    var newChatData = _ChatData(r.idBase58, r.lastMessageIndex ?? 1);
+    var newChatData = _ChatData(r.idBase58, r.unreadCount);
     _log.fine('updating cached chat (${r.name}) data: $newChatData');
     final res = _chats.indexWhere((r2) => r2.roomIdBase58 == r.idBase58);
     res.isNegative ? _chats.add(newChatData) : _chats[res] = newChatData;
@@ -97,18 +106,19 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
 
 @immutable
 class _ChatData {
-  const _ChatData(this.roomIdBase58, this.lastMessageIndex);
+  const _ChatData(this.roomIdBase58, this.unreadCount);
 
   _ChatData.fromJson(Map<String, dynamic> json)
       : roomIdBase58 = json['roomIdBase58'],
-        lastMessageIndex = json['lastMessageIndex'];
+        unreadCount = json['unreadCount'];
 
   final String roomIdBase58;
-  final int lastMessageIndex;
+  final int unreadCount;
 
   Map<String, dynamic> toJson() =>
-      {'roomIdBase58': roomIdBase58, 'lastMessageIndex': lastMessageIndex};
+      {'roomIdBase58': roomIdBase58, 'unreadCount': unreadCount};
 
   @override
-  String toString() => 'ChatData(lastMessageIndex: $lastMessageIndex, roomIdBase58: $roomIdBase58)';
+  String toString() =>
+      'ChatData(unreadCount: $unreadCount, roomIdBase58: $roomIdBase58)';
 }

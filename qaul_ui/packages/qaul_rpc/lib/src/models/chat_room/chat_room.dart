@@ -1,5 +1,7 @@
 library chat_room;
 
+import 'dart:math' as math;
+
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
@@ -126,7 +128,7 @@ class ChatRoom with EquatableMixin implements Comparable {
     return ChatRoom(
       conversationId: conversationId,
       messages: c.messageList.map((e) => Message.fromChatMessage(e)).toList(),
-      lastMessageIndex: lastMessageIndex,
+      lastMessageIndex: c.messageList.fold<int>(0, maxIndex),
       name: name,
       lastMessageTime: lastMessageTime,
       unreadCount: unreadCount,
@@ -138,4 +140,6 @@ class ChatRoom with EquatableMixin implements Comparable {
       status: status,
     );
   }
+
+  int maxIndex(int curr, ChatMessage c) => math.max(curr, c.index.toInt());
 }
