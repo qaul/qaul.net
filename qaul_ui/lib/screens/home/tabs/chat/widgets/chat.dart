@@ -182,7 +182,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             (room.isGroupChatRoom)
                 ? QaulAvatar.groupSmall()
-                : QaulAvatar.small(badgeEnabled: false, user: otherUser),
+                : QaulAvatar.small(user: otherUser),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
