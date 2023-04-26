@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 beta 15] Unreleased
+
+This release has breaking changes in the configuration file.
+
+- The listening string became a string array on both, the LAN & Internet configuration:
+  - old: `listen: /ip4/0.0.0.0/tcp/0`
+  - new: `listen: [/ip4/0.0.0.0/tcp/0, /ip6/::/tcp/0]`
+
+The qaul upgrade process will take care of the automated forward update.
+If you want to roll back to an older version, you must roll back the `config.yaml` manually.
+
+Added
+
+- Android: app keeps running in the Background.
+  - This release requires the Android permission to always run in the background.
+- Run libqaul IPv4 & IPv6 dual stack by default.
+  - LAN & INTERNET mode are now listening for incoming connections on IPv4 and IPv6
+- Amount of listening interfaces is freely configurable in the configuration file.
+  - This feature mainly targets the qauld community nodes, which can configure 0-n interfaces per module.
+- Show user online status in direct chatroom.
+
+Fixed
+
+- Chat menu options sometimes misleading or not present.
+- Fixed several documentation mistakes.
+
 ## [2.0.0 beta 14] 2023-03-20
 
 Added
