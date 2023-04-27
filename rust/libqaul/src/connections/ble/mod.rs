@@ -623,12 +623,14 @@ impl Ble {
             }
         } else {
             log::warn!("BLE node ID not found");
-            return;
             // TODO: find a better solution in the future
+            //
+            // Idea: there could be a specific BLE unknown node ID
+            //       that only allows for node ID identification messages.
             //
             // if we don't know the ID of the peer yet,
             // put in our peer ID
-            //node_id = Node::get_id();
+            node_id = Node::get_id();
         }
 
         // decode and distribute messages
