@@ -21,7 +21,6 @@ import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.model.Message
-import java.nio.charset.Charset
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -661,7 +660,9 @@ class BleService : LifecycleService() {
 
             override fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor) {
                 AppLog.e(TAG, " onDescriptorWrite : ${bleScanDevice.macAddress}")
+//                if (!bleActor.isFromMessage) {
                 bleActor.readServiceData(SERVICE_UUID, READ_CHAR)
+//            }
             }
 
             override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
