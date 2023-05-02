@@ -49,7 +49,7 @@ flutter-android:
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
   macos:
-    xcode: 14.0.1
+    xcode: 14.1.0
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui/ios
   environment:

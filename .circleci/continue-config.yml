@@ -140,7 +140,7 @@ executors:
             FLUTTER_VERSION: 3.7.0
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
-            xcode: 13.0.0
+            xcode: 14.1.0
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul-libp2p/qaul_ui/ios
     flutter-linux:
