@@ -21,8 +21,7 @@
 use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
-    mdns,
-    mdns::{async_io::Behaviour as Mdns, Config},
+    mdns::{self, async_io::Behaviour as Mdns},
     mplex,
     noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
     ping,
@@ -224,17 +223,30 @@ impl Lan {
         let mut swarm = {
             log::trace!("Lan::init() swarm creation started");
 
-            // create MDNS behaviour
-            // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = Mdns::new(Config::default()).unwrap();
+            // create MDNS behaviour with custom configuration
+            //
+            // the default configuration is:
+            //
+            // - ttl: Duration::from_secs(6 * 60),
+            // - query_interval: Duration::from_secs(5 * 60),
+            // - enable_ipv6: false,
+            //
+            // ```rs
+            // let mdns_behaviour = Mdns::new(mdns::Config::default()).unwrap();
+            // ```
+            let mdns_config = mdns::Config {
+                ttl: Duration::from_secs(6 * 60),
+                query_interval: Duration::from_secs(3 * 60),
+                enable_ipv6: true,
+            };
+            let mdns_behaviour = Mdns::new(mdns_config).unwrap();
 
             log::trace!("Lan::init() swarm mdns module created");
 
-            // TODO: set shorter re-advertisement time
-            //       see here: libp2p-mdns/src/behaviour.rs
+            // create LAN behaviour
             let mut behaviour = QaulLanBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
-                mdns,
+                mdns: mdns_behaviour,
                 keep_alive: libp2p::swarm::keep_alive::Behaviour::default(),
                 ping: ping::Behaviour::new(ping_config),
                 qaul_info: QaulInfo::new(Node::get_id()),
