@@ -53,6 +53,21 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final worker = ref.read(qaulWorkerProvider);
+    final defaultUser = ref.watch(defaultUserProvider)!;
+
+    final mobile =
+        Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
+    final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
+      if (mobile) {
+        openChat(room,
+            ref: ref,
+            context: context,
+            user: defaultUser,
+            otherUser: otherUser);
+      } else {
+        ref.read(currentOpenChatRoom.notifier).state = room;
+      }
+    }, [mobile]);
 
     final loading = useState(false);
     final nameCtrl = useTextEditingController();
@@ -101,20 +116,13 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                   loading.value = true;
 
                   var name = nameCtrl.text;
-                  worker.createGroup(name);
-                  for (var i = 0; i < 60; i++) {
-                    final groups = ref.read(chatRoomsProvider);
-                    if (groups.where((g) => g.name == name).isNotEmpty) break;
-
-                    worker.getAllChatRooms();
-                    await Future.delayed(const Duration(milliseconds: 1000));
-                  }
+                  await createChatGroup(name, worker, ref);
+                  if (!isMounted()) return;
 
                   final group = ref
                       .read(chatRoomsProvider)
                       .firstWhereOrNull((g) => g.name == name);
                   if (group == null) {
-                    if (!isMounted()) return;
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(l10n.genericErrorMessage),
                     ));
@@ -122,7 +130,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     return;
                   }
 
-                  if (!isMounted()) return;
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -131,12 +138,11 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                   );
 
                   if (!isMounted()) return;
-                  Navigator.pop(
-                    context,
-                    ref
-                        .read(chatRoomsProvider)
-                        .firstWhereOrNull((g) => g.name == name),
-                  );
+                  var chatRoom = ref
+                      .read(chatRoomsProvider)
+                      .firstWhereOrNull((g) => g.name == name);
+                  if (chatRoom != null) setOpenChat(chatRoom);
+                  Navigator.pop(context, chatRoom);
                 },
               ),
             ],
@@ -151,6 +157,18 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> createChatGroup(
+      String name, LibqaulWorker worker, WidgetRef ref) async {
+    worker.createGroup(name);
+    for (var i = 0; i < 60; i++) {
+      final groups = ref.read(chatRoomsProvider);
+      if (groups.where((g) => g.name == name).isNotEmpty) break;
+
+      worker.getAllChatRooms();
+      await Future.delayed(const Duration(milliseconds: 1000));
+    }
   }
 }
 
