@@ -23,6 +23,8 @@ class HomeScreen extends HookConsumerWidget {
 
     final gotoToPubTab = useCallback(() => tabCtrl.goToTab(TabType.public), []);
 
+    final disablePageViewScroll = useState(false);
+
     return WillPopScope(
       onWillPop: () async {
         if (Platform.isAndroid) gotoToPubTab();
@@ -34,10 +36,12 @@ class HomeScreen extends HookConsumerWidget {
             key: key,
             controller: tabCtrl.pageController,
             allowImplicitScrolling: true,
-            physics: _isMobile ? const PageScrollPhysics() : const NeverScrollableScrollPhysics(),
+            physics: !disablePageViewScroll.value && _isMobile
+                ? const PageScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
             children: [
               const UserAccountScreen(),
-              BaseTab.public(),
+              BaseTab.public(disablePageViewScroll: disablePageViewScroll),
               BaseTab.users(),
               BaseTab.chat(),
               const DynamicNetworkScreen(),
