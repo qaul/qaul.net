@@ -1,7 +1,9 @@
 part of 'tab.dart';
 
 class _Public extends BaseTab {
-  const _Public({Key? key}) : super(key: key);
+  const _Public({Key? key, required this.disablePageViewScroll})
+      : super(key: key);
+  final ValueNotifier<bool> disablePageViewScroll;
 
   @override
   _PublicState createState() => _PublicState();
@@ -18,7 +20,8 @@ class _PublicState extends _BaseTabState<_Public> {
         WidgetBuilder builder;
         switch (settings.name) {
           case 'public/main':
-            builder = (BuildContext context) => const _PublicTabView();
+            builder = (BuildContext context) =>
+                _PublicTabView(widget.disablePageViewScroll);
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -30,7 +33,9 @@ class _PublicState extends _BaseTabState<_Public> {
 }
 
 class _PublicTabView extends HookConsumerWidget {
-  const _PublicTabView({Key? key}) : super(key: key);
+  const _PublicTabView(this.disablePageViewScroll, {Key? key})
+      : super(key: key);
+  final ValueNotifier<bool> disablePageViewScroll;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,7 +65,8 @@ class _PublicTabView extends HookConsumerWidget {
 
     final onCreatePublicMessagePressed = useCallback(
       () async {
-        showModalBottomSheet(
+        disablePageViewScroll.value = true;
+        await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           barrierColor: Colors.transparent,
@@ -71,6 +77,7 @@ class _PublicTabView extends HookConsumerWidget {
             );
           },
         );
+        disablePageViewScroll.value = false;
       },
       [],
     );
@@ -115,7 +122,8 @@ class _PublicTabView extends HookConsumerWidget {
                   content: Text(msg.content ?? '', style: theme.bodyLarge),
                   trailingMetadata: Text(
                     sentAt,
-                    style: theme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
+                    style:
+                        theme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
                   ),
                   nameTapRoutesToDetailsScreen: true,
                 );
