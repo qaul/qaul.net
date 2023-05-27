@@ -55,12 +55,18 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              FutureBuilder(
-                                future: emailLogger.logStorageSize,
-                                builder: (context, snapshot) {
-                                  final size = snapshot.data ?? '0.0 KB';
-                                  return Text('${l10n.totalLogsSize} $size');
-                                },
+                              Expanded(
+                                child: FutureBuilder(
+                                  future: emailLogger.logStorageSize,
+                                  builder: (context, snapshot) {
+                                    final size = snapshot.data ?? '0.0 KB';
+                                    return Text(
+                                      '${l10n.totalLogsSize} $size',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    );
+                                  },
+                                ),
                               ),
                               TextButton(
                                 child: Text(l10n.deleteLogs),
@@ -80,29 +86,33 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                 Expanded(
                   child: DisabledStateDecorator(
                     isDisabled: !emailLogger.loggingEnabled,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(l10n.logsDescription1),
-                        const SizedBox(height: 8, width: double.maxFinite),
-                        Text(l10n.logsDescription2),
-                        const SizedBox(height: 20, width: double.maxFinite),
-                        TextButton(
-                          onPressed: hasLogs
-                              ? () async {
-                                  await emailLogger.sendLogs(reader: ref.read);
-                                  await emailLogger.deleteLogs();
-                                  if (!mounted) return;
-                                  Navigator.pop(context);
-                                }
-                              : null,
-                          child: Text(
-                            hasLogs ? l10n.sendLogs : l10n.noLogsAvailable,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(l10n.logsDescription1),
+                          const SizedBox(height: 8),
+                          Text(l10n.logsDescription2),
+                          const SizedBox(height: 20),
+                          TextButton(
+                            onPressed: hasLogs
+                                ? () async {
+                                    await emailLogger.sendLogs(
+                                        reader: ref.read);
+                                    await emailLogger.deleteLogs();
+                                    if (!mounted) return;
+                                    Navigator.pop(context);
+                                  }
+                                : null,
+                            child: Text(
+                              hasLogs ? l10n.sendLogs : l10n.noLogsAvailable,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20, width: double.maxFinite),
-                      ],
+                          const SizedBox(height: 20, width: double.maxFinite),
+                        ],
+                      ),
                     ),
                   ),
                 ),
