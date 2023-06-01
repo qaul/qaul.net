@@ -11,6 +11,7 @@ use futures_ticker::Ticker;
 //use async_std::stream;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
+use std::thread;
 use std::time::Duration;
 
 use libqaul;
@@ -62,9 +63,18 @@ async fn main() {
     // listen for new commands from CLI
     let mut stdin = io::BufReader::new(io::stdin()).lines();
 
-    // connect the matrix bot with the qaul-cli
-    relay_bot::connect();
-    
+    thread::spawn(|| {
+        // connect the matrix bot with the qaul-cli
+        match relay_bot::connect() {
+            Ok(_) => {
+                println!("Matrix-Bridge connecting");
+            }
+            Err(error) => {
+                println!("{}", error);
+            }
+        }
+    });
+
     // check RPC once every 10 milliseconds
     // TODO: interval is only in unstable. Use it once it is stable.
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
