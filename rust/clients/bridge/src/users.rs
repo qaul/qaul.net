@@ -6,6 +6,7 @@
 //! Request and get
 
 use prost::Message;
+use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 use super::rpc::Rpc;
@@ -14,6 +15,16 @@ use super::rpc::Rpc;
 mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
 }
+
+use crate::relay_bot::MATRIX_CLIENT;
+
+use matrix_sdk::{
+    room::Room,
+    ruma::{
+        events::{room::message::MessageEventContent, AnyMessageEventContent},
+        RoomId,
+    },
+};
 
 /// users function handling
 pub struct Users {}
@@ -166,7 +177,8 @@ impl Users {
                     println!("All known Users");
                     println!("No. | User Name | User Id | Veryfied | Blocked | Connectivity");
                     println!("    | Group ID | Public Key");
-
+                    // Send the Response to matrix room
+                    Self::matrix_rpc(proto_userlist.user.clone());
                     for user in proto_userlist.user {
                         let mut verified = "N";
                         let mut blocked = "N";
@@ -181,7 +193,7 @@ impl Users {
                         if user.connectivity == 1 {
                             onlined = "Online";
                         }
-                        println!(
+                        let users_list = format!(
                             "{} | {} | {:?} | {} | {} | {}",
                             line,
                             user.name,
@@ -190,6 +202,8 @@ impl Users {
                             blocked,
                             onlined
                         );
+                        println!("{}", users_list);
+
                         let group_uuid;
                         match Uuid::from_slice(&user.group_id) {
                             Ok(uuid) => {
@@ -242,5 +256,36 @@ impl Users {
                 log::error!("{:?}", error);
             }
         }
+    }
+
+    /// Connect RPC function call with the Matrix Room and send message
+    fn matrix_rpc(users_list: Vec<self::proto::UserEntry>) {
+        // Get the Room based on RoomID from the client information
+        let matrix_client = MATRIX_CLIENT.get();
+        let room_id = RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").unwrap();
+        let room = matrix_client.get_room(&room_id).unwrap();
+        let mut result = String::new();
+        if users_list.len() == 0 {
+            result.push_str(&format!("No users Found"));
+        } else {
+            let mut number = 1;
+            for user in users_list {
+                result.push_str(&format!("{} : {}\n", number, user.name));
+                number += 1;
+            }
+        }
+        // Check if the room is already joined or not
+        if let Room::Joined(room) = room {
+            // Build the message content to send to matrix
+            let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
+                result,
+            ));
+
+            let rt = Runtime::new().unwrap();
+            rt.block_on(async {
+                // Sends messages into the matrix room
+                room.send(content, None).await.unwrap();
+            });
+        };
     }
 }
