@@ -4,10 +4,21 @@
 //! # Feed module functions
 
 use prost::Message;
+use tokio::runtime::Runtime;
 use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs"); }
+
+use crate::relay_bot::MATRIX_CLIENT;
+
+use matrix_sdk::{
+    room::Room,
+    ruma::{
+        events::{room::message::MessageEventContent, AnyMessageEventContent},
+        RoomId,
+    },
+};
 
 /// feed module function handling
 pub struct Feed {}
@@ -47,6 +58,7 @@ impl Feed {
 
     /// create and send feed message via rpc
     fn send_feed_message(message_text: String) {
+        Self::matrix_rpc(message_text.clone());
         // create feed send message
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Send(
@@ -119,6 +131,27 @@ impl Feed {
             Err(error) => {
                 log::error!("{:?}", error);
             },
+        }
+    }
+
+    fn matrix_rpc(message: String) {
+        // Get the Room based on RoomID from the client information
+        let matrix_client = MATRIX_CLIENT.get();
+        let room_id = RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").unwrap();
+        let room = matrix_client.get_room(&room_id).unwrap();
+        
+        // Check if the room is already joined or not
+        if let Room::Joined(room) = room {
+            // Build the message content to send to matrix
+            let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
+                message,
+            ));
+ 
+            let rt = Runtime::new().unwrap();
+            rt.block_on(async {
+                // Sends messages into the matrix room
+                room.send(content, None).await.unwrap();
+            });
         }
     }
 }
