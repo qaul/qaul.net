@@ -21,6 +21,13 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
 }
+use crate::cli::Cli;
+enum EventType {
+    Cli(String),
+}
+
+// Setup a storage object for the Client to make it available globally
+pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
 
 async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Room) {
     if let Room::Joined(room) = room {
@@ -45,29 +52,36 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     content: msg_text,
                 })),
             };
+
             // encode message
             let mut buf = Vec::with_capacity(proto_message.encoded_len());
             proto_message
                 .encode(&mut buf)
                 .expect("Vec<u8> provides capacity as needed");
 
-            // send message
+            // send message to the qaul feed
             Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
 
+            // on receiving !qaul in matrix, Send message
             if msg_body.contains("!qaul") {
                 let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
                     "I am a message sent from qaul network\n",
                 ));
-
-                // send our message to the matrix room we found the "!qaul command
                 room.send(content, None).await.unwrap();
             }
 
+            // on receiving !users-list in matrix, Send it to command line
             if msg_body.contains("!users-list") {
-                // Here I need to trigger the RPC call from users.rs file.
-                todo!();
+                let input_line = "users list".to_string();
+                let evt = Some(EventType::Cli(input_line));
+                if let Some(event) = evt {
+                    match event {
+                        EventType::Cli(line) => {
+                            Cli::process_command(line);
+                        }
+                    }
+                }
             }
-            // If we are successfull in triggering for user-list, we can add all CLI commands in qaul to matrix commands.
         } else {
             println!("Sent the message in the matrix room by !qaul-bot");
         }
@@ -82,7 +96,7 @@ async fn login(
     // the location for `JsonStore` to save files to
     let mut home = dirs::config_dir().expect("no home directory found");
     home.push("qaul/matrix");
-    println!("{:?}",home);
+    println!("{:?}", home);
     let client_config = ClientConfig::new().store_path(home);
     let homeserver_url = Url::parse(&homeserver_url).expect("Couldn't parse the homeserver URL");
 
@@ -97,10 +111,13 @@ async fn login(
     // messages. If the `StateStore` finds saved state in the location given the
     // initial sync will be skipped in favor of loading state from the store
     client.sync_once(SyncSettings::default()).await.unwrap();
-    // add our CommandBot to be notified of incoming messages, we do this after the
+    
     // initial sync to avoid responding to messages before the bot was running.
     client.register_event_handler(on_room_message).await;
 
+    // Store matrix client inside storage stack.
+    MATRIX_CLIENT.set(client.clone());
+  
     // since we called `sync_once` before we entered our sync loop we must pass
     // that sync token to `sync`
     let settings = SyncSettings::default().token(client.sync_token().await.unwrap());

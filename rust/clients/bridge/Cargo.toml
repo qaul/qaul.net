@@ -20,5 +20,5 @@ serde = {version = "=1.0", features = ["derive"] }
 uuid = { version = "1.1.2", features = ["v4"] }
 matrix-sdk = "0.4.0"
 url = "2.3.1"
-tokio = { version = "1.7.1", default-features = false, features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.28.2", default-features = false, features = ["rt-multi-thread", "macros"] }
 dirs = "5.0.1"
