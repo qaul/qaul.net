@@ -36,6 +36,10 @@ impl Users {
     pub fn cli(command: &str) {
         match command {
             // request list of all users
+            cmd if cmd.starts_with("matrix") => {
+                Self::request_matrix_user_list();
+            }
+
             cmd if cmd.starts_with("list") => {
                 Self::request_user_list();
             }
@@ -62,6 +66,20 @@ impl Users {
             // unknown command
             _ => log::error!("unknown users command"),
         }
+    }
+
+    /// returns the list of users connected to matrix room
+    fn request_matrix_user_list() {
+        let matrix_client = MATRIX_CLIENT.get();
+        let room_id = RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").unwrap();
+        let room = matrix_client.get_room(&room_id).unwrap();
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async {
+            let members = room.joined_members().await.unwrap();
+            for member in members {
+                println!("{:#?}", member.display_name().unwrap());
+            }
+        });
     }
 
     /// create rpc request for user list
@@ -277,9 +295,8 @@ impl Users {
         // Check if the room is already joined or not
         if let Room::Joined(room) = room {
             // Build the message content to send to matrix
-            let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
-                result,
-            ));
+            let content =
+                AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(result));
 
             let rt = Runtime::new().unwrap();
             rt.block_on(async {
