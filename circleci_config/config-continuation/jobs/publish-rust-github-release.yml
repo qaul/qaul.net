@@ -62,18 +62,18 @@ steps:
         LINUX_FILE="qaul-$FLUTTER_VERSION"
         MACOS_FILE="qaul-$FLUTTER_VERSION"
         WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
+        
+        AMD64_FILE="qauld_amd64.deb"
+        ARMHF_FILE="qauld_armhf.deb"
 
         cd artifacts
 
         # Get debian file names
-        AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-        ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
-        # Replace `~` with `-` in debian file names
-        mv "$AMD64_FILE.deb" "$(echo "$AMD64_FILE" | sed 's/\~/-/').deb"
-        mv "$ARMHF_FILE.deb" "$(echo "$ARMHF_FILE" | sed 's/\~/-/').deb"
-        # Replace files names with new values
-        AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-        ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
+        ORIGINAL_AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+        ORIGINAL_ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
+        # Rename original debian file names
+        mv "$ORIGINAL_AMD64_FILE.deb" "$AMD64_FILE"
+        mv "$ORIGINAL_ARMHF_FILE.deb" "$ARMHF_FILE"
         
         echo "Using debian amd artifact name: $AMD64_FILE"
         echo "Using debian arm artifact name: $ARMHF_FILE"
