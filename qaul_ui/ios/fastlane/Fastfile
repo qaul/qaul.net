@@ -62,7 +62,7 @@ platform :ios do
     pilot(
       distribute_external: true,
       notify_external_testers: true,
-      groups: ["App Store Connect Users"],
+      groups: ["App Store Connect Users", "External Testers"],
       changelog: "New build by CircleCI"
     )
   end
