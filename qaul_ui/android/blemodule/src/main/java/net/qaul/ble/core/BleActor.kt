@@ -13,7 +13,6 @@ import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.model.BLEScanDevice
 import net.qaul.ble.service.BleService
-import java.nio.charset.Charset
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -39,7 +38,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * Disconnect current device.
      */
     fun disConnectedDevice() {
-        if (mBluetoothGatt != null) {
+        if (mBluetoothGatt != null && BleService.bleService != null) {
             disconnectedFromDevice = true
             refreshDeviceCache(mBluetoothGatt!!)
             if (mBluetoothGatt != null) {
@@ -58,10 +57,18 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * Set device in Actor
      */
     fun setDevice(device: BLEScanDevice?, isFromMessage: Boolean) {
-        bleDevice = device
-        bluetoothDevice = device!!.bluetoothDevice
         this.isFromMessage = isFromMessage
-        connectDevice()
+//        if (mBluetoothGatt != null && !isFromMessage) {
+            bleDevice = device
+            bluetoothDevice = device!!.bluetoothDevice
+        Handler(Looper.getMainLooper()).postDelayed({
+            connectDevice()
+        },500)
+//        } else {
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                send(BLEUtils.byteToHex(tempData))
+//            }, 500)
+//        }
     }
 
     /**
@@ -93,6 +100,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTING) {
+                AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTING")
             }
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTED")
@@ -357,6 +365,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 listener!!.onConnectionFailed(bleDevice!!)
                 AppLog.e("zzz", "ConnectionFailedTask : $bluetoothDevice")
                 disConnectedDevice()
+                listener!!.onDisconnected(bleDevice!!)
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (isFromMessage) {
                         if (mBluetoothGatt != null) {
