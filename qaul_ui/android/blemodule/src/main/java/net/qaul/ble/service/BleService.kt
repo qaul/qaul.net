@@ -730,13 +730,14 @@ class BleService : LifecycleService() {
 
         }
 
-        val baseBleActor = if (actorMap[device.macAddress] == null) {
-            BleActor(this, BleConnectionListener())
-        } else {
-            actorMap[device.macAddress]
-        }
-        baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
-        return baseBleActor!!
+//        val baseBleActor = if (actorMap[device.macAddress] == null) {
+//            BleActor(this, BleConnectionListener())
+//        } else {
+//            actorMap[device.macAddress]
+//        }
+        val baseBleActor = BleActor(this, BleConnectionListener())
+        baseBleActor.setDevice(device = device, isFromMessage = isFromMessage)
+        return baseBleActor
     }
 
     /**
@@ -772,13 +773,11 @@ class BleService : LifecycleService() {
 
 
     private fun sendMessageFromQueu(macAddress: String, isFromSendMessage: Boolean = false) {
-        Thread.sleep(100)
+        Thread.sleep(10)
         executor.execute {
             if (hashMap.isNotEmpty()) {
                 val queue = hashMap[macAddress]
-
                 if (!queue.isNullOrEmpty()) {
-
                     if (!isFromSendMessage || queue.size == 1) {
                         var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
                         if (bleDevice == null) {
@@ -793,16 +792,19 @@ class BleService : LifecycleService() {
                             if (bleDevice != null) {
                                 val bleActor =
                                     connectDevice(device = bleDevice, isFromMessage = true)
-                                bleActor.messageId = mesTrip.first
-                                val btArray = Gson().toJson(msg).toByteArray()
-                                val delimiter = ByteArray(2)
-                                delimiter[0] = 36
-                                delimiter[1] = 36
-                                bleActor.tempData = delimiter + btArray + delimiter
-                                AppLog.e(
-                                    "zzz",
-                                    "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
-                                )
+//                                Handler(Looper.getMainLooper()).postDelayed({
+                                    bleActor.messageId = mesTrip.first
+                                    val btArray = Gson().toJson(msg).toByteArray()
+                                    val delimiter = ByteArray(2)
+                                    delimiter[0] = 36
+                                    delimiter[1] = 36
+                                    bleActor.tempData = delimiter + btArray + delimiter
+                                    AppLog.e(
+                                        "zzz",
+                                        "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
+                                    )
+//                                },500)
+
                             } else {
                                 AppLog.e(
                                     "zzz", "data------------>onMessageSent Failed"
@@ -818,7 +820,6 @@ class BleService : LifecycleService() {
                 }
             }
         }
-
     }
 
     /**
