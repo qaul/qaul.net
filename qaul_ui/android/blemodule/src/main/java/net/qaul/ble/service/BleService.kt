@@ -298,9 +298,13 @@ class BleService : LifecycleService() {
                     selectItemIgnore.name = device.name
                     selectItemIgnore.isConnectable = result.isConnectable
                     selectItemIgnore.lastFoundTime = System.currentTimeMillis()
+                } else {
+                    AppLog.d(TAG, "device ignored: " + device.address)
                 }
             }
 //            }, 5000)
+        } else {
+            AppLog.d(TAG, "device blacklisted: " + device.address)
         }
     }
 
@@ -627,6 +631,7 @@ class BleService : LifecycleService() {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     devicesList.removeConcurrent(bLEDevice)
 //                    ignoreList.remove(bLEDevice)
+                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range")
                 } else {
                     AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
                 }
@@ -666,6 +671,7 @@ class BleService : LifecycleService() {
             }
 
             override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
+                AppLog.d(TAG, " onConnectionFailed : ${bleScanDevice.macAddress}")
                 devicesList.remove(bleScanDevice)
                 actorMap.remove(bleScanDevice.macAddress)
             }
