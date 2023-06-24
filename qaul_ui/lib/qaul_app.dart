@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
@@ -40,9 +40,7 @@ class QaulApp extends PlatformAwareBuilder {
           // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
           shadowColor: Colors.grey.shade300,
           titleTextStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black),
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
           iconTheme: IconThemeData(color: Colors.grey.shade600),
           actionsIconTheme: IconThemeData(color: Colors.grey.shade600),
           shape: BorderDirectional(
@@ -137,9 +135,11 @@ class QaulApp extends PlatformAwareBuilder {
                   return locale;
                 }
 
-                final List<Locale> systemLocales = WidgetsBinding.instance.window.locales;
+                final List<Locale> systemLocales =
+                    WidgetsBinding.instance.window.locales;
                 for (final systemLocale in systemLocales) {
-                  final lang = Locale.fromSubtags(languageCode: systemLocale.languageCode);
+                  final lang = Locale.fromSubtags(
+                      languageCode: systemLocale.languageCode);
                   if (supportedLocales.contains(systemLocale)) {
                     Intl.defaultLocale = systemLocale.toLanguageTag();
                     return systemLocale;
@@ -156,17 +156,14 @@ class QaulApp extends PlatformAwareBuilder {
                   return child ?? const SizedBox();
                 }
 
-                return ResponsiveWrapper.builder(
-                  child,
-                  minWidth: 370,
+                return ResponsiveBreakpoints.builder(
+                  child: child!,
                   breakpoints: const [
-                    ResponsiveBreakpoint.resize(350.0,
-                        name: 'ANDROID', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.resize(480, name: MOBILE),
-                    ResponsiveBreakpoint.resize(680,
-                        name: 'MOBILE_LANDSCAPE', scaleFactor: 0.8),
-                    ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                    ResponsiveBreakpoint.resize(1000, name: DESKTOP),
+                    Breakpoint(start: 0, end: 350, name: "ANDROID"),
+                    Breakpoint(start: 351, end: 480, name: MOBILE),
+                    Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
+                    Breakpoint(start: 681, end: 800, name: TABLET),
+                    Breakpoint(start: 801, end: 1920, name: DESKTOP),
                   ],
                 );
               },
