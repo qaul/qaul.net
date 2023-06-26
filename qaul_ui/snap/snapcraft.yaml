@@ -15,8 +15,10 @@ slots:
 
 apps:
   qaul:
-    command: qaul
-    extensions: [ flutter-stable ]
+    command: bin/qaul
+    desktop: bin/data/flutter_assets/assets/qaul.desktop
+#    extensions: [ flutter-stable ]
+    extensions: [ gnome ]
     plugs:
       - home
       - mount-observe
@@ -24,6 +26,13 @@ apps:
       - network-control
       - process-control
       - system-observe
+
+      - appstream-metadata
+      - desktop
+      - desktop-launch
+      - desktop-legacy
+      - network-manager
+      - network-manager-observe
 
     slots:
       - dbus-qaul
@@ -35,6 +44,26 @@ parts:
       - curl
     override-pull: |
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+  flutter-deps:
+    plugin: nil
+    source: https://github.com/flutter/flutter.git
+    source-tag: 3.10.0
+    override-build: |
+      set -eux
+      mkdir -p $CRAFT_PART_INSTALL/usr/bin
+      mkdir -p $CRAFT_PART_INSTALL/usr/libexec
+      cp -r $CRAFT_PART_SRC $CRAFT_PART_INSTALL/usr/libexec/flutter
+      ln -sf $CRAFT_PART_INSTALL/usr/libexec/flutter/bin/flutter $CRAFT_PART_INSTALL/usr/bin/flutter
+      export PATH="$CRAFT_PART_INSTALL/usr/bin:$PATH"
+      flutter doctor
+    build-packages:
+      - clang
+      - cmake
+      - curl
+      - ninja-build
+      - unzip
+    override-prime: ''
 
   libqaul:
     plugin: nil
@@ -60,18 +89,35 @@ parts:
       cp target/release/liblibqaul.so $SNAPCRAFT_PART_INSTALL/bin/lib
 
   qaul:
+    plugin: nil
+    after: [ flutter-deps ]
     source: .
-    plugin: flutter
-    flutter-target: lib/main.dart
-    override-pull: |
-      snapcraftctl pull
-      flutter clean
+    build-packages:
+      - jq
+#    flutter-target: lib/main.dart
+#    override-pull: |
+#      snapcraftctl pull
+#      flutter clean
+#    override-build: |
+#      BEFORE="_lib = DynamicLibrary.open('../rust/target/\$mode/liblibqaul.so');"
+#      AFTER="_lib = DynamicLibrary.open('\${Platform.environment['SNAP']}/bin/lib/liblibqaul.so');"
+#      sed -i -e "s|$BEFORE|$AFTER|g" packages/qaul_rpc/lib/src/libqaul/ffi.dart
+#
+#      snapcraftctl build
     override-build: |
+      set -eux
+                      
       BEFORE="_lib = DynamicLibrary.open('../rust/target/\$mode/liblibqaul.so');"
       AFTER="_lib = DynamicLibrary.open('\${Platform.environment['SNAP']}/bin/lib/liblibqaul.so');"
       sed -i -e "s|$BEFORE|$AFTER|g" packages/qaul_rpc/lib/src/libqaul/ffi.dart
       
-      snapcraftctl build
+      flutter pub get || true
+      flutter build linux --release -v
+      craftctl set version="$(jq -r '.version' build/flutter_assets/version.json)"
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cp -r build/linux/*/release/bundle/* $CRAFT_PART_INSTALL/bin/
+      sed -i -e 's|\(Icon=\).*|\1/bin/data/flutter_assets/assets/software.png|' \
+          $CRAFT_PART_INSTALL/bin/data/flutter_assets/assets/software.desktop
 
   # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
   assets-and-dependencies:
