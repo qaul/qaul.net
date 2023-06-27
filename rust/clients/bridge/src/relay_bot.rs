@@ -4,7 +4,12 @@
 //! # Relay Bot functions
 //!
 //! Logging in and listening for the message on matrix room and sending messages from qaul.
+use libqaul::storage::configuration::{MatrixConfiguration};
+use std::{path::Path, sync::RwLock};
+// use state::Storage;
 use super::rpc::Rpc;
+use config::*;
+use libqaul::storage::Storage;
 use matrix_sdk::{
     room::Room,
     ruma::events::{
@@ -15,6 +20,7 @@ use matrix_sdk::{
 };
 use prost::Message;
 use url::Url;
+// static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 /// include generated protobuf RPC rust definition file
 mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
@@ -28,6 +34,7 @@ enum EventType {
 
 // Setup a storage object for the Client to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
+pub static MATRIX_CONFIG: state::Storage<RwLock<MatrixConfiguration>> = state::Storage::new();
 
 async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Room) {
     if let Room::Joined(room) = room {
@@ -111,13 +118,13 @@ async fn login(
     // messages. If the `StateStore` finds saved state in the location given the
     // initial sync will be skipped in favor of loading state from the store
     client.sync_once(SyncSettings::default()).await.unwrap();
-    
+
     // initial sync to avoid responding to messages before the bot was running.
     client.register_event_handler(on_room_message).await;
 
     // Store matrix client inside storage stack.
     MATRIX_CLIENT.set(client.clone());
-  
+
     // since we called `sync_once` before we entered our sync loop we must pass
     // that sync token to `sync`
     let settings = SyncSettings::default().token(client.sync_token().await.unwrap());
@@ -130,8 +137,28 @@ async fn login(
 #[tokio::main]
 pub async fn connect() -> Result<(), matrix_sdk::Error> {
     println!("Connecting to Matrix Bot");
-    // TODO : Instead of passing direct arguments, Either take them from CLI or pass it secretly.
-    // this is something which we don't need to be exposed.
-    login("https://matrix.org", "qaul-bot", "qaul123promise").await?;
+
+    // Configuration for starting of the bot
+    let path_string = Storage::get_path();
+    let path = Path::new(path_string.as_str());
+    let config_path = path.join("matrix.yaml");
+    let config: MatrixConfiguration = match Config::builder()
+        .add_source(File::with_name(&config_path.to_str().unwrap()))
+        .build()
+    {
+        Err(_) => {
+            log::error!("no configuration file found, creating one.");
+            MatrixConfiguration::default()
+        }
+        Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
+    };
+
+    MATRIX_CONFIG.set(RwLock::new(config.clone()));
+    login(
+        &config.relay_bot.homeserver,
+        &config.relay_bot.bot_id,
+        &config.relay_bot.bot_password,
+    )
+    .await?;
     Ok(())
 }

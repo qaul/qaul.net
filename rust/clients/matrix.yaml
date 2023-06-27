@@ -1,0 +1,7 @@
+relay_bot: 
+  homeserver: "https://matrix.org"
+  bot_id: "qaul-bot"
+  bot_password: "qaul123promise"
+
+feed:
+  last_index : 70
