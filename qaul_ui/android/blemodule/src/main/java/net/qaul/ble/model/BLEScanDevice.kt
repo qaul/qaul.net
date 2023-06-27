@@ -20,4 +20,5 @@ abstract class BLEScanDevice  {
     abstract var isConnectable: Boolean
     abstract var lastFoundTime: Long?
     abstract var qaulId: ByteArray?
+    abstract var isConnected: Boolean
 }
