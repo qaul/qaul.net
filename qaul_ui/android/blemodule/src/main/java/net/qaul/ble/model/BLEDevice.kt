@@ -20,6 +20,7 @@ class BLEDevice : BLEScanDevice() {
     override var isConnectable = true
     override var lastFoundTime: Long? = null
     override var qaulId: ByteArray? = null
+    override var isConnected = false
 
     companion object {
         private const val TAG = "qaul-blemodule BLEScanDevice"
