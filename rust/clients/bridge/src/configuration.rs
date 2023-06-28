@@ -1,6 +1,11 @@
-/// Configuration Structure of libqaul
-///
-/// This structure contains the entire configuration of libqaul.
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Matrix Configuration object for running binary
+//!
+//! This file contains the data structure to configure the bot which
+//! connects qaul with the matrix.
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
