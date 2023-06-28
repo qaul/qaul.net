@@ -4,7 +4,7 @@
 //! # Relay Bot functions
 //!
 //! Logging in and listening for the message on matrix room and sending messages from qaul.
-use libqaul::storage::configuration::{MatrixConfiguration};
+use super::configuration::MatrixConfiguration;
 use std::{path::Path, sync::RwLock};
 // use state::Storage;
 use super::rpc::Rpc;

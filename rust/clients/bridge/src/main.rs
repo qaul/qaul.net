@@ -21,6 +21,7 @@ mod ble;
 mod chat;
 mod chatfile;
 mod cli;
+mod configuration;
 mod connections;
 mod debug;
 mod dtn;
