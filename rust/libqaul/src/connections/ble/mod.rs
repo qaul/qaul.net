@@ -375,6 +375,12 @@ impl Ble {
 
     /// add a node to the available nodes list
     fn node_to_confirm(small_id: Vec<u8>) {
+        // check if node confirmation request has already been sent
+        if let true = Self::node_confirmation_in_progress(&small_id) {
+            log::info!("node id confirmation in progress");
+            return;
+        }
+
         // create node entry
         let confirm = ToConfirm {
             small_id: small_id.clone(),
@@ -390,6 +396,21 @@ impl Ble {
 
         // send identification message
         Self::identification_send(small_id, true);
+    }
+
+    /// Check if node is already scheduled for confirmation
+    fn node_confirmation_in_progress(small_id: &Vec<u8>) -> bool {
+        // get state
+        let nodes = TO_CONFIRM.get().read().unwrap();
+
+        // search node
+        if let Some(to_confirm) = nodes.get(small_id) {
+            if to_confirm.detected_at > Timestamp::get_timestamp() - (30 * 1000) {
+                return true;
+            }
+        }
+
+        false
     }
 
     /// find node ID from small id
