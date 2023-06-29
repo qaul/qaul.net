@@ -101,6 +101,9 @@ parts:
       flutter pub get || true
       flutter build linux --release -v
 
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp -r build/linux/*/release/bundle/* $SNAPCRAFT_PART_INSTALL/bin/
+
   # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
   assets-and-dependencies:
     plugin: nil
