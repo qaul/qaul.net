@@ -4,7 +4,7 @@ summary: qaul - Internet Independent Wireless Mesh Communication App
 description: Communicate directly from device to device via your local wifi network, or via the shared wifi network of your phone. Mesh local clouds together via manually added static nodes. Use this peer to peer communication method to communicate internet independently and completely off-the-grid.
 
 confinement: strict
-base: core18
+base: core20
 grade: stable
 
 slots:
@@ -16,8 +16,7 @@ slots:
 apps:
   qaul:
     command: bin/qaul
-#    extensions: [ flutter-stable ]
-    extensions: [gnome-3-28]
+    extensions: [gnome-3-38]
     plugs:
       - home
       - mount-observe
@@ -117,4 +116,6 @@ parts:
       - fonts-ubuntu
 
 environment:
+  # (patch): flag required for app to work on RPi 4 - see https://forum.snapcraft.io/t/flutter-snap-app-on-rp4-with-unable-to-create-a-gl-context/25286/2
+  GDK_GL: gles
   LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib:/var/lib/snapd/snap/core18
