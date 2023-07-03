@@ -12,7 +12,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
 }
 
-use crate::relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG};
+use crate::{relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG}, configuration::MatrixConfiguration};
 
 use matrix_sdk::{
     room::Room,
@@ -123,6 +123,7 @@ impl Feed {
                             if message.index> last_index_matrix {
                                 Self::matrix_send(message.content);
                                 config.feed.last_index = message.index;
+                                MatrixConfiguration::save(config.clone());
                             }      
                         }
                         // MATRIX_CONFIG.set(config.clone().into()) is not helping to save;

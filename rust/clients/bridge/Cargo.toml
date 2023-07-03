@@ -23,3 +23,4 @@ url = "2.3.1"
 tokio = { version = "1.28.2", default-features = false, features = ["rt-multi-thread", "macros"] }
 dirs = "5.0.1"
 config = "0.13.3"
+serde_yaml = "0.9.22"

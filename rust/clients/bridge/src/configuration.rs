@@ -6,7 +6,9 @@
 //! This file contains the data structure to configure the bot which
 //! connects qaul with the matrix.
 
+use crate::libqaul::storage::Storage;
 use serde::{Deserialize, Serialize};
+use std::{fs, path::Path, sync::RwLockWriteGuard};
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct MatrixConfiguration {
@@ -23,6 +25,16 @@ impl Default for MatrixConfiguration {
     }
 }
 
+impl MatrixConfiguration {
+    pub fn save(config: MatrixConfiguration) {
+        println!("{:#?}", config);
+        let path_string = Storage::get_path();
+        let path = Path::new(path_string.as_str());
+        let config_path = path.join("matrix.yaml");
+        let yaml = serde_yaml::to_string(&config).expect("Could not encode into YAML values");
+        fs::write(config_path, yaml).expect("Could not write config");
+    }
+}
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct RelayBot {
     pub homeserver: String,
