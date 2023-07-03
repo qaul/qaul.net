@@ -22,11 +22,11 @@ impl QaulInfoProtocol {
 }
 
 impl UpgradeInfo for QaulInfoProtocol {
-    type Info = &'static [u8];
+    type Info = &'static str;
     type InfoIter = iter::Once<Self::Info>;
 
     fn protocol_info(&self) -> Self::InfoIter {
-        iter::once(b"/qaul_info/1.0.0")
+        iter::once("/qaul_info/1.0.0")
     }
 }
 
@@ -50,11 +50,11 @@ where
 }
 
 impl UpgradeInfo for QaulInfoData {
-    type Info = &'static [u8];
+    type Info = &'static str;
     type InfoIter = iter::Once<Self::Info>;
 
     fn protocol_info(&self) -> Self::InfoIter {
-        iter::once(b"/qaul_info/1.0.0")
+        iter::once("/qaul_info/1.0.0")
     }
 }
 
@@ -73,5 +73,11 @@ where
 
             Ok(())
         })
+    }
+}
+
+impl AsRef<[u8]> for QaulInfoData {
+    fn as_ref(&self) -> &[u8] {
+        &self.data
     }
 }

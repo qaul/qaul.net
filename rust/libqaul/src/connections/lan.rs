@@ -23,8 +23,7 @@ use libp2p::{
     floodsub::{Floodsub, FloodsubEvent},
     mdns,
     mdns::{async_io::Behaviour as Mdns, Config},
-    mplex,
-    noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
+    noise::Config as NoiseConfig,
     ping,
     swarm::{keep_alive, NetworkBehaviour, Swarm},
     tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
@@ -47,7 +46,7 @@ use qaul_info::{QaulInfo, QaulInfoEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 
 #[derive(NetworkBehaviour)]
-#[behaviour(out_event = "QaulLanEvent")]
+#[behaviour(to_swarm = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
@@ -176,7 +175,7 @@ pub struct Lan {
 
 impl Lan {
     /// Initialize swarm for LAN connection module
-    pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Lan {
+    pub async fn init(auth_keys: NoiseConfig) -> Lan {
         log::trace!("Lan::init() start");
 
         // TCP transport without DNS resolution on android
@@ -200,10 +199,7 @@ impl Lan {
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
             .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-            .multiplex(upgrade::SelectUpgrade::new(
-                yamux::YamuxConfig::default(),
-                mplex::MplexConfig::default(),
-            ))
+            .multiplex(upgrade::ReadyUpgrade::new(yamux::Config::default()))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
 
@@ -226,7 +222,7 @@ impl Lan {
 
             // create MDNS behaviour
             // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = Mdns::new(Config::default()).unwrap();
+            let mdns = Mdns::new(Config::default(), Node::get_id()).unwrap();
 
             log::trace!("Lan::init() swarm mdns module created");
 
