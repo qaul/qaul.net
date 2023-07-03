@@ -3,8 +3,9 @@
 
 //! Event handling for connection modules
 
-use libp2p::ping::{Event, Failure, Success};
+use libp2p::ping::{Event, Failure};
 use std::convert::TryFrom;
+use std::time::Duration;
 
 use qaul_info::QaulInfoEvent;
 use qaul_messaging::QaulMessagingEvent;
@@ -50,14 +51,16 @@ pub fn ping_event(event: Event, module: ConnectionModule) {
     match event {
         Event {
             peer,
-            result: Result::Ok(Success::Ping { rtt }),
+            result: Result::Ok(Duration { secs, nanos }),
+            connection,
         } => {
             log::debug!(
-                "PingSuccess::Ping: rtt to {} is {} ms",
+                "PingSuccess::Ping: connection_id: {}, rtt to {} is {} ms",
                 peer,
-                rtt.as_millis()
+                connection,
+                secs * 1000 + nanos / 1_000_000
             );
-            let rtt_micros = u32::try_from(rtt.as_micros());
+            let rtt_micros = u32::try_from(secs * 1_000_000 + nanos / 1_000).ok();
             match rtt_micros {
                 Ok(micros) => Neighbours::update_node(module, peer, micros),
                 Err(_) => Neighbours::update_node(module, peer, 4294967295),
@@ -65,25 +68,29 @@ pub fn ping_event(event: Event, module: ConnectionModule) {
         }
         Event {
             peer,
-            result: Result::Ok(Success::Pong),
+            result: Result::Ok(Duration { .. }),
+            connection: _,
         } => {
             log::debug!("PingSuccess::Pong from {}", peer);
         }
         Event {
             peer,
             result: Result::Err(Failure::Timeout),
+            connection: _,
         } => {
             log::debug!("PingFailure::Timeout to {}", peer);
         }
         Event {
             peer,
             result: Result::Err(Failure::Other { error }),
+            connection: _,
         } => {
             log::debug!("PingFailure::Other {} error: {}", peer, error);
         }
         Event {
             peer,
             result: Result::Err(Failure::Unsupported),
+            connection: _,
         } => {
             log::debug!("PingFailure::Unsupported by peer {}", peer);
         }

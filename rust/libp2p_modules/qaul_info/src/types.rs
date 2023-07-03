@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 
 //! # Qaul Routing Info Types
-//! 
+//!
 //! Definitions of the network messages sent by the
 //! qaul routing info behaviour.
 
@@ -18,7 +18,7 @@ pub struct QaulRoutingInfoMessage {
     pub data: Vec<u8>,
 }
 
-/// a message we sent 
+/// a message we sent
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct QaulInfoSend {
     /// node id we need to send the message to
