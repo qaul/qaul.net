@@ -10,11 +10,9 @@ pub mod protocol;
 pub mod types;
 
 use libp2p::{
-    core::{connection::ConnectionId, Multiaddr, PeerId},
-    swarm::{
-        IntoConnectionHandler, NetworkBehaviour, NetworkBehaviourAction, NotifyHandler,
-        OneShotHandler, PollParameters,
-    },
+    core::Multiaddr,
+    swarm::{NetworkBehaviour, NotifyHandler, OneShotHandler, PollParameters, ToSwarm},
+    PeerId,
 };
 use std::{
     collections::VecDeque,
@@ -27,9 +25,7 @@ use protocol::QaulInfoProtocol;
 /// Network behaviour that handles the qaul_info protocol.
 pub struct QaulInfo {
     /// Events that need to be handed to the outside when polling.
-    events: VecDeque<
-        NetworkBehaviourAction<QaulInfoEvent, <QaulInfo as NetworkBehaviour>::ConnectionHandler>,
-    >,
+    events: VecDeque<ToSwarm<QaulInfoEvent, QaulInfoData>>,
 
     #[allow(dead_code)]
     config: QaulInfoConfig,
@@ -55,32 +51,59 @@ impl QaulInfo {
         let message = QaulInfoData { data };
 
         // Schedule message for sending
-        self.events
-            .push_back(NetworkBehaviourAction::NotifyHandler {
-                peer_id: node_id,
-                handler: NotifyHandler::Any,
-                event: message,
-            });
+        self.events.push_back(ToSwarm::NotifyHandler {
+            peer_id: node_id,
+            handler: NotifyHandler::Any,
+            event: message,
+        });
     }
 }
 
 impl NetworkBehaviour for QaulInfo {
     type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>;
-    type OutEvent = QaulInfoEvent;
+    type ToSwarm = QaulInfoEvent;
 
-    fn new_handler(&mut self) -> Self::ConnectionHandler {
-        Default::default()
-    }
-
-    fn addresses_of_peer(&mut self, _id: &PeerId) -> Vec<Multiaddr> {
-        Vec::new()
-    }
-
-    fn inject_event(
+    fn poll(
         &mut self,
-        received_from: PeerId,
-        _connection: ConnectionId,
-        event: InnerMessage,
+        _: &mut Context<'_>,
+        _: &mut impl PollParameters,
+    ) -> Poll<ToSwarm<Self::ToSwarm, QaulInfoData>> {
+        if let Some(event) = self.events.pop_front() {
+            return Poll::Ready(event);
+        }
+
+        Poll::Pending
+    }
+
+    fn handle_established_inbound_connection(
+        &mut self,
+        _connection_id: libp2p::swarm::ConnectionId,
+        _peer: libp2p::PeerId,
+        _local_addr: &Multiaddr,
+        _remote_addr: &Multiaddr,
+    ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
+        todo!()
+    }
+
+    fn handle_established_outbound_connection(
+        &mut self,
+        _connection_id: libp2p::swarm::ConnectionId,
+        _peer: libp2p::PeerId,
+        _addr: &Multiaddr,
+        _role_override: libp2p::core::Endpoint,
+    ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
+        todo!()
+    }
+
+    fn on_swarm_event(&mut self, _event: libp2p::swarm::FromSwarm<Self::ConnectionHandler>) {
+        todo!()
+    }
+
+    fn on_connection_handler_event(
+        &mut self,
+        peer_id: libp2p::PeerId,
+        _connection_id: libp2p::swarm::ConnectionId,
+        event: libp2p::swarm::THandlerOutEvent<Self>,
     ) {
         // We received one of the following event notification
         let qaul_info_data = match event {
@@ -91,104 +114,14 @@ impl NetworkBehaviour for QaulInfo {
         };
 
         // forward the message to the user
-        self.events.push_back(NetworkBehaviourAction::GenerateEvent(
-            QaulInfoEvent::Message(QaulInfoReceived {
-                received_from,
-                data: qaul_info_data.data,
-            }),
-        ));
+        self.events
+            .push_back(ToSwarm::GenerateEvent(QaulInfoEvent::Message(
+                QaulInfoReceived {
+                    received_from: peer_id,
+                    data: qaul_info_data.data,
+                },
+            )));
     }
-
-    fn poll(
-        &mut self,
-        _: &mut Context<'_>,
-        _: &mut impl PollParameters,
-    ) -> Poll<NetworkBehaviourAction<Self::OutEvent, THandlerInEvent<Self>>> {
-        if let Some(event) = self.events.pop_front() {
-            return Poll::Ready(event);
-        }
-
-        Poll::Pending
-    }
-
-    fn inject_connection_established(
-        &mut self,
-        _peer_id: &PeerId,
-        _connection_id: &ConnectionId,
-        _endpoint: &libp2p::core::ConnectedPoint,
-        _failed_addresses: Option<&Vec<Multiaddr>>,
-        _other_established: usize,
-    ) {
-    }
-
-    fn inject_connection_closed(
-        &mut self,
-        _: &PeerId,
-        _: &ConnectionId,
-        _: &libp2p::core::ConnectedPoint,
-        _: <Self::ConnectionHandler as IntoConnectionHandler>::Handler,
-        _remaining_established: usize,
-    ) {
-    }
-
-    fn inject_address_change(
-        &mut self,
-        _: &PeerId,
-        _: &ConnectionId,
-        _old: &libp2p::core::ConnectedPoint,
-        _new: &libp2p::core::ConnectedPoint,
-    ) {
-    }
-
-    fn inject_dial_failure(
-        &mut self,
-        _peer_id: Option<PeerId>,
-        _handler: Self::ConnectionHandler,
-        _error: &libp2p::swarm::DialError,
-    ) {
-    }
-
-    fn inject_listen_failure(
-        &mut self,
-        _local_addr: &Multiaddr,
-        _send_back_addr: &Multiaddr,
-        _handler: Self::ConnectionHandler,
-    ) {
-    }
-
-    fn inject_new_listener(&mut self, _id: libp2p::core::transport::ListenerId) {}
-
-    fn inject_new_listen_addr(
-        &mut self,
-        _id: libp2p::core::transport::ListenerId,
-        _addr: &Multiaddr,
-    ) {
-    }
-
-    fn inject_expired_listen_addr(
-        &mut self,
-        _id: libp2p::core::transport::ListenerId,
-        _addr: &Multiaddr,
-    ) {
-    }
-
-    fn inject_listener_error(
-        &mut self,
-        _id: libp2p::core::transport::ListenerId,
-        _err: &(dyn std::error::Error + 'static),
-    ) {
-    }
-
-    fn inject_listener_closed(
-        &mut self,
-        _id: libp2p::core::transport::ListenerId,
-        _reason: Result<(), &std::io::Error>,
-    ) {
-    }
-
-    fn inject_new_external_addr(&mut self, _addr: &Multiaddr) {}
-
-    fn inject_expired_external_addr(&mut self, _addr: &Multiaddr) {}
 }
 
 /// Transmission between the `OneShotHandler` of the protocols handler
@@ -220,6 +153,15 @@ impl From<()> for InnerMessage {
 pub enum QaulInfoEvent {
     /// A message has been received.
     Message(QaulInfoReceived),
+}
+
+impl From<QaulInfoEvent> for QaulInfoData {
+    #[inline]
+    fn from(event: QaulInfoEvent) -> QaulInfoData {
+        match event {
+            QaulInfoEvent::Message(data) => QaulInfoData { data: data.data },
+        }
+    }
 }
 
 /// Configuration options for the qaul info behaviour
