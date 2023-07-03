@@ -1,21 +1,22 @@
 /// The main libqaul RPC message container.
 /// All RPC messages from and to libqaul are packed
 /// into this container.
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct QaulRpc {
     /// which module to approach
-    #[prost(enumeration="Modules", tag="1")]
+    #[prost(enumeration = "Modules", tag = "1")]
     pub module: i32,
     /// can be used to identify responses
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub request_id: ::prost::alloc::string::String,
     /// authorisation
     /// binary user id
-    #[prost(bytes="vec", tag="3")]
+    #[prost(bytes = "vec", tag = "3")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
     /// the protobuf encoded binary message data
     /// which is passed to the module.
-    #[prost(bytes="vec", tag="4")]
+    #[prost(bytes = "vec", tag = "4")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// Identification to which module the message shall be
@@ -86,6 +87,27 @@ impl Modules {
             Modules::Ble => "BLE",
             Modules::Rtc => "RTC",
             Modules::Dtn => "DTN",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "NONE" => Some(Self::None),
+            "RPC" => Some(Self::Rpc),
+            "NODE" => Some(Self::Node),
+            "USERACCOUNTS" => Some(Self::Useraccounts),
+            "USERS" => Some(Self::Users),
+            "ROUTER" => Some(Self::Router),
+            "FEED" => Some(Self::Feed),
+            "CONNECTIONS" => Some(Self::Connections),
+            "DEBUG" => Some(Self::Debug),
+            "GROUP" => Some(Self::Group),
+            "CHAT" => Some(Self::Chat),
+            "CHATFILE" => Some(Self::Chatfile),
+            "BLE" => Some(Self::Ble),
+            "RTC" => Some(Self::Rtc),
+            "DTN" => Some(Self::Dtn),
+            _ => None,
         }
     }
 }
