@@ -82,7 +82,7 @@ async fn main() {
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
-    let mut feed_ticker = Ticker::new(Duration::from_secs(10));
+    let mut feed_ticker = Ticker::new(Duration::from_secs(2));
     // loop and poll CLI and RPC
     loop {
         let evt = {

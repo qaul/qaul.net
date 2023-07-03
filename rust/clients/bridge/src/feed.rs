@@ -60,7 +60,6 @@ impl Feed {
 
     /// create and send feed message via rpc
     fn send_feed_message(message_text: String) {
-        Self::matrix_rpc(message_text.clone());
         // create feed send message
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Send(
@@ -107,15 +106,9 @@ impl Feed {
             Ok(feed) => {
                 match feed.message {
                     Some(proto::feed::Message::Received(proto_feedlist)) => {
-                        // TODO : Applying a check whether we want to send to matrix or not.
-                        // otherwise it will send all messages into matrix which is not good usecase.
-
-                        // List header
-                        println!("====================================");
-                        println!("Received Feed Messages");
-                        println!("------------------------------------");
-
+                        // The configuration Object from matrix.yaml
                         let mut config = MATRIX_CONFIG.get().write().unwrap();
+                        let last_index_matrix = config.feed.last_index;
                         // print all messages in the feed list
                         for message in proto_feedlist.feed_message {
                             print!{"[{}] ", message.index};
@@ -127,8 +120,10 @@ impl Feed {
                             println!("From {}", message.sender_id_base58);
                             println!("\t{}", message.content);
                             println!("");
-                            Self::matrix_rpc(message.content);
-                            config.feed.last_index = message.index;
+                            if message.index> last_index_matrix {
+                                Self::matrix_send(message.content);
+                                config.feed.last_index = message.index;
+                            }      
                         }
                         // MATRIX_CONFIG.set(config.clone().into()) is not helping to save;
                         MATRIX_CONFIG.set(config.clone().into());
@@ -144,7 +139,7 @@ impl Feed {
         }
     }
 
-    fn matrix_rpc(message: String) {
+    fn matrix_send(message: String) {
         // Get the Room based on RoomID from the client information
         let matrix_client = MATRIX_CLIENT.get();
         let room_id = RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").unwrap();
