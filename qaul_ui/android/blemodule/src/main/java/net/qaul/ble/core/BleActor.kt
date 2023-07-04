@@ -59,11 +59,11 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     fun setDevice(device: BLEScanDevice?, isFromMessage: Boolean) {
         this.isFromMessage = isFromMessage
 //        if (mBluetoothGatt != null && !isFromMessage) {
-            bleDevice = device
-            bluetoothDevice = device!!.bluetoothDevice
+        bleDevice = device
+        bluetoothDevice = device!!.bluetoothDevice
         Handler(Looper.getMainLooper()).postDelayed({
             connectDevice()
-        },500)
+        }, 500)
 //        } else {
 //            Handler(Looper.getMainLooper()).postDelayed({
 //                send(BLEUtils.byteToHex(tempData))
