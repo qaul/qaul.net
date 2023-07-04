@@ -122,7 +122,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 }
                 cancelTimer()
                 if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
-                listener!!.onDisconnected(bleDevice!!)
+//                listener!!.onDisconnected(bleDevice!!)
                 if (!disconnectedFromDevice) listener!!.onDisconnected(bleDevice!!) else disconnectedFromDevice =
                     false
                 if (isFromMessage) {
@@ -150,14 +150,19 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     characteristic.value
                 )
             )
-            if (listener != null) {
-                listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
-            }
+
+
+
             if (isFromMessage) {
 //                gatt.requestMtu(180)
                 send(BLEUtils.byteToHex(tempData))
                 return
             }
+
+            if (listener != null) {
+                listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
+            }
+
 
             if (characteristic.uuid.toString()
                     .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
@@ -190,7 +195,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     }
                 }
             }
-
         }
 
         override fun onCharacteristicChanged(
