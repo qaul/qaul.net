@@ -407,6 +407,7 @@ class BleService : LifecycleService() {
                 gattServer!!.sendResponse(
                     device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
+                Log.e(TAG, "Device Address:: ${device.address}")
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
@@ -414,18 +415,23 @@ class BleService : LifecycleService() {
                         oldValue += s
                         val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
                             .removePrefix("$$")
-                        val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        if (bleDevice == null) {
-                            bleDevice = BLEScanDevice.getDevice()
-                            bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId
-                            bleDevice.bluetoothDevice = device
-                            receiveList.add(bleDevice)
+                        Log.e(TAG, "Msg Data:: $msgData")
+                        if (!msgData.contains("$$")) {
+                            val msgObject = Gson().fromJson(msgData, Message::class.java)
+                            if (bleDevice == null) {
+                                bleDevice = BLEScanDevice.getDevice()
+                                bleDevice.macAddress = device.address
+                                bleDevice.qaulId = msgObject.qaulId
+                                bleDevice.bluetoothDevice = device
+                                receiveList.add(bleDevice)
+                            }
+                            bleAdvertiseCallback!!.onMessageReceived(
+                                bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!
+                            )
+                            msgMap.remove(device.address)
+                        } else {
+                            Log.e(TAG, "onCharacteristicWriteRequest:  contain $$")
                         }
-                        bleAdvertiseCallback!!.onMessageReceived(
-                            bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!
-                        )
-                        msgMap.remove(device.address)
                     } else {
                         oldValue += s
                         msgMap[device.address] = oldValue
@@ -606,8 +612,7 @@ class BleService : LifecycleService() {
         }
 
         // TODO: DK Change check
-        scanSettings =
-            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+        scanSettings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
         bleScanner.startScan(filters, scanSettings, scanCallback)
         if (!isScanRunning()) {
@@ -684,6 +689,7 @@ class BleService : LifecycleService() {
 //                device.isConnected = false
 //                ignoreList.removeConcurrent(bleScanDevice)
                 actorMap.remove(bleScanDevice.macAddress)
+                Log.e(TAG, "Device Mac Address:: ${bleScanDevice.macAddress}")
                 devicesList.removeConcurrent(bleScanDevice)
             }
 
@@ -713,17 +719,15 @@ class BleService : LifecycleService() {
             override fun onMessageSent(
                 gatt: BluetoothGatt?, value: ByteArray, id: String
             ) {
-
                 val queue = hashMap[gatt?.device?.address]
                 if (queue?.isNotEmpty() == true) {
                     Log.e("zzz", "onMessageSent:SIZE ->  queue.isNotEmpty()  ")
                     queue.poll()
                     hashMap[gatt?.device?.address!!] = queue
                 }
+
                 Log.e("zzz", "onMessageSent:SIZE ->  ${queue?.size} ")
-
                 bleCallback?.onMessageSent(id = id, success = true, data = value)
-
                 sendMessageFromQueu(gatt?.device?.address!!)
 
             }
