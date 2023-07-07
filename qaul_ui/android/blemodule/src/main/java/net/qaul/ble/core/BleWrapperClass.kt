@@ -15,7 +15,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -25,6 +24,7 @@ import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.model.BLEScanDevice
@@ -274,7 +274,7 @@ open class BleWrapperClass(context: Activity) {
                     }
 
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
-                        AppLog.e("zzz", "---->onMessageReceived $message")
+                        AppLog.e("zzz", "---->onMessageReceived---> ${BLEUtils.byteToHex(message)}")
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
                         val msgData = String(message).removeSuffix("$$").removePrefix("$$")
