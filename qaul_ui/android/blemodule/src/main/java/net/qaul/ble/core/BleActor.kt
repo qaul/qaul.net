@@ -271,7 +271,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             AppLog.e("TAG", "_send(): EMPTY QUEUE")
             return false
         }
-        AppLog.e(TAG, "_send(): Sending: " + sendQueue.peek())
+        AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
         val tx = BLEUtils.hexToByteArray(sendQueue.poll())
 //        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
         isWriting = true // Set the write in progress flag
@@ -321,6 +321,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 disConnectedDevice() //discoverServices
                 return
             }
+
             if (listener != null) {
                 listener!!.onServiceDiscovered(bluetoothDevice!!.address)
             }

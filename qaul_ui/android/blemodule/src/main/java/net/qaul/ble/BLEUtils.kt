@@ -4,6 +4,8 @@
 package net.qaul.ble
 
 import android.text.TextUtils
+import android.util.Log
+
 
 object BLEUtils {
     private val HEX_ARRAY = "0123456789ABCDEF".toCharArray()
@@ -60,10 +62,13 @@ object BLEUtils {
         while (itr.hasNext()) {
             val t = itr.next()
             if (t == data) {
-                itr.remove()
+                val remove = itr.remove()
             }
         }
+        Log.e(TAG, "removeConcurrent: ------------------- ${this.toMutableList().iterator()}")
     }
+
+
     fun byteToInt(data: Byte?): Int {
         if (data == null) {
             return 0
