@@ -202,8 +202,9 @@ impl Feed {
                 .swarm
                 .behaviour_mut()
                 .floodsub
-                .publish(Node::get_topic(), buf);
+                .publish(Node::get_topic(), buf.clone());
         }
+        crate::connections::ble::Ble::send_feed_message(Node::get_topic(), buf);
     }
 
     /// Process a received message
