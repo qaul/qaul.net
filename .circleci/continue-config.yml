@@ -1128,6 +1128,7 @@ workflows:
                         only: /.*/
                 requires:
                     - build-flutter-linux
+                    - build-flutter-linux-arm
         when:
             or:
                 - << pipeline.parameters.run-flutter-tagged-workflow >>

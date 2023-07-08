@@ -19,6 +19,7 @@ jobs:
   - publish-flutter-github-release:
       requires:
         - build-flutter-linux
+        - build-flutter-linux-arm
       filters:
         tags:
           only: /.*/
