@@ -29,7 +29,8 @@ echo "Building Flutter application..."
 lxd init --auto
 snapcraft --use-lxd
 
-mv ./*.snap "qaul-$VERSION.snap"
-snapcraft upload "qaul-$VERSION.snap" --release=candidate
+FILENAME="qaul-$(uname -m)-$VERSION.snap"
+mv ./*.snap "$FILENAME"
+snapcraft upload "$FILENAME" --release=candidate
 
-realpath "qaul-$VERSION.snap"
+realpath "$FILENAME"

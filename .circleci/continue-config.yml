@@ -150,6 +150,14 @@ executors:
         machine:
             image: ubuntu-2004:202010-01
         working_directory: ~/qaul-libp2p/qaul_ui
+    flutter-linux-arm:
+        environment:
+            FLUTTER_VERSION: 3.7.0
+            REPO_URL: https://github.com/qaul/qaul.net
+        machine:
+            image: ubuntu-2004:202101-01
+        resource_class: arm.medium
+        working_directory: ~/qaul-libp2p/qaul_ui
     flutter-macos:
         environment:
             FLUTTER_VERSION: 3.7.0
@@ -277,6 +285,23 @@ jobs:
                 root: ~/qaul-libp2p
     build-flutter-linux:
         executor: flutter-linux
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    sudo apt update && sudo apt install -y snapd
+                    sudo snap install snapcraft --edge --classic
+                    sudo snap install lxd
+                name: Install core package dependencies
+            - run:
+                command: cd ../utilities/installers/linux && bash snapbuild
+                name: Build Flutter Application for Linux
+            - persist_to_workspace:
+                paths:
+                    - qaul_ui/*.snap
+                root: ~/qaul-libp2p
+    build-flutter-linux-arm:
+        executor: flutter-linux-arm
         steps:
             - checkout-project
             - run:
@@ -891,7 +916,8 @@ jobs:
                     FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 
                     APK_FILE="qaul-$FLUTTER_VERSION"
-                    LINUX_FILE="qaul-$FLUTTER_VERSION"
+                    LINUX_FILE="qaul-amd64-$FLUTTER_VERSION"
+                    LINUX_ARM_FILE="qaul-arm64-$FLUTTER_VERSION"
                     MACOS_FILE="qaul-$FLUTTER_VERSION"
                     WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
 
@@ -916,6 +942,7 @@ jobs:
                       | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
                       | sed "s/APKVERSION/${APK_FILE}/g" \
                       | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
+                      | sed "s/ARMSNAPVERSION/${LINUX_ARM_FILE}/g" \
                       | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
                       | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
                     )
@@ -1084,6 +1111,12 @@ workflows:
                     tags:
                         only: /.*/
             - build-flutter-linux:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-flutter
+            - build-flutter-linux-arm:
                 filters:
                     tags:
                         only: /.*/

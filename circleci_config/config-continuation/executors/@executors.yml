@@ -64,6 +64,14 @@ flutter-linux:
   environment:
     FLUTTER_VERSION: "3.7.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
+flutter-linux-arm:
+  machine:
+    image: ubuntu-2004:202101-01
+  resource_class: arm.medium
+  working_directory: ~/qaul-libp2p/qaul_ui
+  environment:
+    FLUTTER_VERSION: "3.7.0"
+    REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
     xcode: 14.0.1
