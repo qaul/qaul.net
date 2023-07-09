@@ -2,31 +2,24 @@
 // This software is published under the AGPLv3 license.
 
 //! # Android-API for libqaul
-//! 
+//!
 //! This is the Android FFI of libqaul.
-//! 
+//!
 //! LibqaulKt references the name libqaul.kt, which is the kotlin file exposing the functions.
 
 #![cfg(target_os = "android")]
 #![allow(non_snake_case)]
+extern crate android_logger;
 extern crate log;
-/// Modules for integrating with JavaVM
-use jni::JNIEnv;
-use jni::objects::{JClass, JValue, JObject, JString, GlobalRef};
-use jni::{JavaVM, JNIVersion, AttachGuard, NativeMethod};
-use jni::sys::{jstring, jarray, jbyteArray,jint, jclass, JNI_ERR, JNI_VERSION_1_6};
 
 use lazy_static::*;
-use std::{
-    ffi::{c_void, CStr, CString},
-    sync::{mpsc, Mutex},
-    thread,
-};
+use std::{ffi::c_void, sync::Mutex};
 
-extern crate android_logger;
-
-use log::Level;
-use android_logger::{Config,FilterBuilder};
+/// Modules for integrating with JavaVM
+use jni::objects::{GlobalRef, JClass, JObject, JString, JValue};
+use jni::sys::{jbyteArray, jint, jstring, JNI_ERR, JNI_VERSION_1_6};
+use jni::JNIEnv;
+use jni::{JavaVM, NativeMethod};
 
 lazy_static! {
     // jvm
@@ -34,7 +27,6 @@ lazy_static! {
     //callback
     static ref JNI_CALLBACK: Mutex<Option<GlobalRef>> = Mutex::new(None);
 }
-
 
 #[no_mangle]
 pub fn nativeSetCallback(env: JNIEnv, _obj: JObject, callback: JObject) {
@@ -45,35 +37,35 @@ pub fn nativeSetCallback(env: JNIEnv, _obj: JObject, callback: JObject) {
 }
 
 #[no_mangle]
-unsafe fn JNI_OnLoad(java_vm:JavaVM, _: *mut std::os::raw::c_void) -> jint {
+unsafe fn JNI_OnLoad(java_vm: JavaVM, _: *mut std::os::raw::c_void) -> jint {
     let class_name: &str = "net/qaul/ble/core/BleWrapperClass";
 
-    let jni_methods = [
-        jni::NativeMethod {
-            name: jni::strings::JNIString::from("nativeSetCallback"),
-            sig: jni::strings::JNIString::from("(Lnet/qaul/ble/core/BleWrapperClass$ILibqaulCallback;)V"),
-            fn_ptr: nativeSetCallback as *mut c_void,
-        }
-    ];
+    let jni_methods = [jni::NativeMethod {
+        name: jni::strings::JNIString::from("nativeSetCallback"),
+        sig: jni::strings::JNIString::from(
+            "(Lnet/qaul/ble/core/BleWrapperClass$ILibqaulCallback;)V",
+        ),
+        fn_ptr: nativeSetCallback as *mut c_void,
+    }];
     let ok = Android::register_natives(&java_vm, class_name, jni_methods.as_ref());
+    if ok == JNI_ERR {
+        log::error!("android jni: register natives failed");
+    }
 
     let mut ptr_jvm = JVM_GLOBAL.lock().unwrap();
     *ptr_jvm = Some(java_vm);
-    
+
     JNI_VERSION_1_6
-} 
-    
+}
+
 /// dummy function to test the functionality
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(
-  env: JNIEnv,
-  _: JClass,
-) -> jstring {
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(env: JNIEnv, _: JClass) -> jstring {
     // create a string
     let output = env
         .new_string(format!("Hello qaul!"))
         .expect("Couldn't create java string!");
-    
+
     // return the raw pointer
     output.into_inner()
 }
@@ -81,9 +73,9 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(
 /// start libqaul from android
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
-  env: JNIEnv,
-  _: JClass,
-  path: JString,
+    env: JNIEnv,
+    _: JClass,
+    path: JString,
 ) {
     // get path string
     let android_path: String = env
@@ -98,8 +90,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
 /// check if libqaul finished initializing
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
-  _env: JNIEnv,
-  _: JClass,
+    _env: JNIEnv,
+    _: JClass,
 ) -> bool {
     super::initialization_finished()
 }
@@ -122,7 +114,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
     _env: JNIEnv,
     _: JClass,
 ) -> jint {
-    // return the number of RPC messages in the pipeline to be 
+    // return the number of RPC messages in the pipeline to be
     // received by the GUI
     super::receive_rpc_queued() as jint
 }
@@ -152,9 +144,9 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive(
         // convert message to java byte array
         let byte_array = env.byte_array_from_slice(&message).unwrap();
         // return byte array
-        return byte_array
+        return byte_array;
     }
-    
+
     // there is no message and we return an empty array
     let buf: [u8; 0] = [0; 0];
     let empty_array = env.byte_array_from_slice(&buf).unwrap();
@@ -162,7 +154,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive(
 }
 
 /// # BLE Module Functions
-/// 
+///
 /// Set's up the system protobuf communication pipelines
 /// between libqaul and the BLE module library.
 
@@ -191,19 +183,16 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive(
         // convert message to java byte array
         let byte_array = env.byte_array_from_slice(&message).unwrap();
         // return byte array
-        return byte_array
+        return byte_array;
     }
-    
+
     // there is no message and we return an empty array
     let buf: [u8; 0] = [0; 0];
     let empty_array = env.byte_array_from_slice(&buf).unwrap();
     empty_array
 }
 
-
-pub struct Android {
-
-}
+pub struct Android {}
 
 impl Android {
     /// send an sys message to Android BLE Module
@@ -211,26 +200,26 @@ impl Android {
     pub fn send_to_android(message: Vec<u8>) {
         Self::call_java_callback(message);
     }
-    
+
     unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
         let env: JNIEnv = jvm.get_env().unwrap();
         let jni_version = env.get_version().unwrap();
         let version: jint = jni_version.into();
-    
+
         let clazz = match env.find_class(class_name) {
             Ok(clazz) => clazz,
             Err(e) => {
-         //       log::error!("java class not found : {:?}", e);
+                log::error!("java class not found : {:?}", e);
                 return JNI_ERR;
             }
         };
         let result = env.register_native_methods(clazz, &methods);
-    
+
         if result.is_ok() {
-         //   log::info!("register_natives : succeed");
+            //   log::info!("register_natives : succeed");
             version
         } else {
-         //   log::error!("register_natives : failed ");
+            //   log::error!("register_natives : failed ");
             JNI_ERR
         }
     }
@@ -263,11 +252,9 @@ impl Android {
         }
     }
 
-
-    pub fn call_java_callback(fun_type:Vec<u8>) {
-        
+    pub fn call_java_callback(fun_type: Vec<u8>) {
         Self::call_jvm(&JNI_CALLBACK, move |obj: JObject, env: &JNIEnv| {
-            let jmessage:jbyteArray = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
+            let jmessage: jbyteArray = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
             match env.call_method(
                 obj,
                 "OnLibqaulMessage",

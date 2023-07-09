@@ -413,31 +413,6 @@ impl Ble {
         false
     }
 
-    /// find node ID from small id
-    fn find_node(small_id: Vec<u8>) -> Option<Vec<u8>> {
-        // get nodes table
-        let nodes = NODES.get().write().unwrap();
-
-        // search for small id
-        if let Some(node) = nodes.get(&small_id) {
-            return Some(node.id.clone());
-        }
-
-        None
-    }
-
-    /// find node ID from small ID
-    fn get_node_id(small_id: Vec<u8>) -> Option<PeerId> {
-        if let Some(id) = Self::find_node(small_id) {
-            match PeerId::from_bytes(&id) {
-                Ok(peer) => return Some(peer),
-                Err(e) => log::error!("{}", e),
-            }
-        }
-
-        None
-    }
-
     /// a new device got discovered via bluetooth
     fn device_discovered(message: proto::BleDeviceDiscovered) {
         log::info!("BLE device discovered: {:?}", message.qaul_id.clone());

@@ -2,33 +2,23 @@
 // This software is published under the AGPLv3 license.
 
 //! # Process SYS Messages
-//! 
+//!
 //! The SYS messages are defined in the protobuf format.
 //! They are used to send between libqaul and the host OS.
-//! 
+//!
 //! They are used for the following modules:
-//! 
+//!
 //! * BLE module
 
 // use core::slice::SlicePattern;
 
-use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
-use state::Storage;
-use futures::executor::block_on;
-use std::thread;
-use crate::connections::{
-    lan::Lan,
-    internet::Internet,
-};
 use crate::connections::ble::Ble;
+use crate::connections::{internet::Internet, lan::Lan};
+use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
+use state::Storage;
 
 #[cfg(target_os = "android")]
 use crate::api::android::Android;
-
-
-
-/// 
-
 
 /// receiving end of the mpsc channel
 static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
@@ -38,13 +28,10 @@ static EXTERN_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
 static LIBQAUL_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
 
 /// Handling of SYS messages of libqaul
-pub struct Sys {
-
-}
-
+pub struct Sys {}
 
 impl Sys {
-    /// Initialize SYS module 
+    /// Initialize SYS module
     /// Create the sending and receiving channels and put them to state.
     /// Return the receiving channel for libqaul.
     pub fn init() -> Receiver<Vec<u8>> {
@@ -61,21 +48,21 @@ impl Sys {
         libqaul_receive
     }
 
-    /// send sys message from the outside to the inside 
+    /// send sys message from the outside to the inside
     /// of the worker thread of libqaul.
     pub fn send_to_libqaul(binary_message: Vec<u8>) {
         let sender = EXTERN_SEND.get().clone();
         match sender.send(binary_message) {
-            Ok(()) => {},
+            Ok(()) => {}
             Err(err) => {
                 // log error message
                 log::error!("{:?}", err);
-            },
+            }
         }
     }
 
     /// check the receiving sys channel if there
-    /// are new messages from inside libqaul for 
+    /// are new messages from inside libqaul for
     /// the outside.
     pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
         let receiver = EXTERN_RECEIVE.get().clone();
@@ -84,34 +71,37 @@ impl Sys {
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
+    #[allow(dead_code)]
     pub fn send_to_extern(message: Vec<u8>) {
         let sender = LIBQAUL_SEND.get().clone();
         match sender.send(message) {
-            Ok(()) => {},
+            Ok(()) => {}
             Err(err) => {
                 // log error message
                 log::error!("{:?}", err);
-            },
+            }
         }
     }
-	
-	/// Process received binary protobuf encoded SYS message
-    /// 
+
+    /// Process received binary protobuf encoded SYS message
+    ///
     /// This function will decode the message from the binary
-    /// protobuf format to rust structures and send it to 
+    /// protobuf format to rust structures and send it to
     /// the module responsible.
-    pub fn process_received_message( data: Vec<u8>, _lan: Option<&mut Lan>, _internet: Option<&mut Internet> ) {
+    pub fn process_received_message(
+        data: Vec<u8>,
+        _lan: Option<&mut Lan>,
+        _internet: Option<&mut Internet>,
+    ) {
         // as there is only BLE module just forward the data
         Ble::sys_received(data);
     }
 
     /// sends a SYS message to the outside
+    #[allow(unused_variables)]
     pub fn send_message(data: Vec<u8>) {
         // send the message
-        //Self::send_to_extern(data);
-
         #[cfg(target_os = "android")]
         Android::send_to_android(data);
-           
     }
 }
