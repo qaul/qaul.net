@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 beta 16] 2023-07-09
+
+This release newly includes the android BLE-module.
+
+Added
+
+- Android: BLE-module
+- UI: Automatically open Group Chat after it is created.
+- Added Raspberry 64 bit build documentation and build-script for libqaul
+
+Fixed
+
+- Fixed many things related to the BLE-Module, BLE-Manager, BLE connection.
+- Fixed a layout issue on the support screen, to allow multiple lines for some text.
+
 ## [2.0.0 beta 15] 2023-05-01
 
 This release has breaking changes in the configuration file.
