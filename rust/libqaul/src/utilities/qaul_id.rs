@@ -115,7 +115,7 @@ impl QaulId {
     ///
     /// Create a meaningful log string without ever returning an error.
     pub fn bytes_to_log_string(bytes: &Vec<u8>) -> String {
-        let mut result = "".to_string();
+        let result: String;
 
         // check if the vector is a valid qaul ID
         if let Ok(id) = PeerId::from_bytes(bytes) {

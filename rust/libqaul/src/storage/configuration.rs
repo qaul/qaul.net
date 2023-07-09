@@ -52,7 +52,10 @@ impl Default for Lan {
     fn default() -> Self {
         Lan {
             active: true,
-            listen: vec![String::from("/ip4/0.0.0.0/tcp/0"),String::from("/ip6/::/tcp/0")],
+            listen: vec![
+                String::from("/ip4/0.0.0.0/tcp/0"),
+                String::from("/ip6/::/tcp/0"),
+            ],
         }
     }
 }
@@ -84,7 +87,10 @@ impl Default for Internet {
                 _ => {}
             }
         }
+        // allow unused_variable needed for android
+        #[allow(unused_variables)]
         let listen_ipv4: String = format!("/ip4/0.0.0.0/tcp/{}", port);
+        #[allow(unused_variables)]
         let listen_ipv6: String = format!("/ip6/::/tcp/{}", port);
 
         Internet {
@@ -96,9 +102,12 @@ impl Default for Internet {
             }],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
-            listen: vec![String::from("/ip4/0.0.0.0/tcp/9229"),String::from("/ip6/::/tcp/9229")],
+            listen: vec![
+                String::from("/ip4/0.0.0.0/tcp/9229"),
+                String::from("/ip6/::/tcp/9229"),
+            ],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            listen: vec![listen_ipv4,listen_ipv6],
+            listen: vec![listen_ipv4, listen_ipv6],
         }
     }
 }
