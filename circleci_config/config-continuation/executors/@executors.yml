@@ -12,7 +12,7 @@ rust-android:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
 rust-linux:
   docker:
-    - image: cimg/rust:1.65.0
+    - image: cimg/rust:1.69.0
   working_directory: ~/qaul-libp2p
   shell: /bin/bash --login -o pipefail
   environment:
