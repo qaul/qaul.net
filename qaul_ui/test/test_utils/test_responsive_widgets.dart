@@ -68,7 +68,7 @@ extension ScreenSizeManager on WidgetTester {
   }) async {
     final size = Size(width, height);
     await binding.setSurfaceSize(size);
-    binding.window.physicalSizeTestValue = size;
-    binding.window.devicePixelRatioTestValue = pixelDensity;
+    binding.platformDispatcher.implicitView?.physicalSize = size;
+    binding.platformDispatcher.implicitView?.devicePixelRatio = pixelDensity;
   }
 }

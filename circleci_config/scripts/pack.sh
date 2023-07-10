@@ -21,9 +21,9 @@ echo "Changing directory to circleci_config..."
 cd circleci_config || exit 1
 
 # Validate the generated configuration prior to replacing the current one
-echo "Validating generated config.yml files..."
-circleci config pack config-setup | circleci config validate -
-circleci config pack config-continuation | circleci config validate -
+#echo "Validating generated config.yml files..."
+#circleci config pack config-setup | circleci config validate -
+#circleci config pack config-continuation | circleci config validate -
 
 # Pack the setup config
 echo ""

@@ -351,9 +351,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 hideBackgroundOnEmojiMessages: true,
                 showName: showName && !prevMsgWasFromSamePerson,
                 emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                nameBuilder: (id) {
-                  var user =
-                      room.members.firstWhereOrNull((u) => id == u.idBase58);
+                nameBuilder: (usr) {
+                  var user = room.members
+                      .firstWhereOrNull((u) => usr.id == u.idBase58);
                   if (user == null) return const SizedBox();
                   final color = colorGenerationStrategy(user.idBase58);
                   return Padding(

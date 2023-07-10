@@ -89,18 +89,18 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       const QaulNavBarItem(TabType.account),
       Expanded(
         child: vertical
-            ? Column(
+            ? const Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                children: [
                   QaulNavBarItem(TabType.public),
                   QaulNavBarItem(TabType.users),
                   QaulNavBarItem(TabType.chat),
                   QaulNavBarItem(TabType.network),
                 ],
               )
-            : Row(
+            : const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                children: [
                   QaulNavBarItem(TabType.public),
                   QaulNavBarItem(TabType.users),
                   QaulNavBarItem(TabType.chat),

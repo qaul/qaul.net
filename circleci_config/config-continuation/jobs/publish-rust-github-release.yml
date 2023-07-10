@@ -59,7 +59,8 @@ steps:
         FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
 
         APK_FILE="qaul-$FLUTTER_VERSION"
-        LINUX_FILE="qaul-$FLUTTER_VERSION"
+        LINUX_FILE="qaul-amd64-$FLUTTER_VERSION"
+        LINUX_ARM_FILE="qaul-arm64-$FLUTTER_VERSION"
         MACOS_FILE="qaul-$FLUTTER_VERSION"
         WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
         
@@ -84,6 +85,7 @@ steps:
           | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
           | sed "s/APKVERSION/${APK_FILE}/g" \
           | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
+          | sed "s/ARMSNAPVERSION/${LINUX_ARM_FILE}/g" \
           | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
           | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
         )

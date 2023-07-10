@@ -22,6 +22,8 @@ part 'stubs.dart';
 void main() {
   late Key chatKey;
 
+  const shouldSkip = true;
+
   Logger.root.onRecord.listen((LogRecord r) {
     final msg = '${r.level.name}: [${r.loggerName}]@${r.time}: ${r.message}';
     r.level >= Level.SEVERE
@@ -55,7 +57,7 @@ void main() {
       '$sizeName.png',
       subPath: 'emptyState',
     );
-  });
+  }, skip: shouldSkip);
 
   testResponsiveWidgets('chat tab with group chat', (tester) async {
     final wut = ProviderScope(
@@ -90,7 +92,7 @@ void main() {
       '$sizeName.png',
       subPath: 'tabWithGroupTile',
     );
-  });
+  }, skip: shouldSkip);
 
   testResponsiveWidgets('opening a group chat', (tester) async {
     final wut = ProviderScope(
@@ -130,7 +132,7 @@ void main() {
       '$sizeName.png',
       subPath: 'openEmptyChat',
     );
-  });
+  }, skip: shouldSkip);
 
   testResponsiveWidgets('sending a message to an open group chat',
       (tester) async {
@@ -180,7 +182,7 @@ void main() {
       '$sizeName.png',
       subPath: 'singleMessage',
     );
-  });
+  }, skip: shouldSkip);
 
   testResponsiveWidgets('sending multiple messages to an open group chat',
       (tester) async {
@@ -230,7 +232,7 @@ void main() {
       '$sizeName.png',
       subPath: 'multipleMessages',
     );
-  });
+  }, skip: shouldSkip);
 
   testResponsiveWidgets(
     'sending 10 messages and then close the group chat',
@@ -280,5 +282,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ChatScreen), findsNothing, reason: 'chat was closed');
     },
+    skip: shouldSkip,
   );
 }

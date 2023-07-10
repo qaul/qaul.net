@@ -1,0 +1,16 @@
+executor: flutter-linux-arm
+steps:
+  - checkout-project
+  - run:
+      name: Install core package dependencies
+      command: |
+        sudo apt update && sudo apt install -y snapd
+        sudo snap install snapcraft --edge --classic
+        sudo snap install lxd
+  - run:
+      name: Build Flutter Application for Linux
+      command: cd ../utilities/installers/linux && bash snapbuild
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - qaul_ui/*.snap

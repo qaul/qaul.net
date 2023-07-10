@@ -10,9 +10,16 @@ jobs:
       filters:
         tags:
           only: /.*/
+  - build-flutter-linux-arm:
+      requires:
+        - verify-version-flutter
+      filters:
+        tags:
+          only: /.*/
   - publish-flutter-github-release:
       requires:
         - build-flutter-linux
+        - build-flutter-linux-arm
       filters:
         tags:
           only: /.*/
