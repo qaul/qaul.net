@@ -136,7 +136,7 @@ class QaulApp extends PlatformAwareBuilder {
                 }
 
                 final List<Locale> systemLocales =
-                    WidgetsBinding.instance.window.locales;
+                    View.of(context).platformDispatcher.locales;
                 for (final systemLocale in systemLocales) {
                   final lang = Locale.fromSubtags(
                       languageCode: systemLocale.languageCode);

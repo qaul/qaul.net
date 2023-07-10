@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flame_forge2d/flame_forge2d.dart' hide World;
 import 'package:flutter/cupertino.dart' hide Draggable;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Draggable;
@@ -54,11 +54,13 @@ class DynamicNetworkScreen extends HookConsumerWidget {
   }
 }
 
-class _DynamicNetworkGameEngine extends Forge2DGame
-    with HasTappables, HasDraggables {
+class _DynamicNetworkGameEngine extends Forge2DGame {
   _DynamicNetworkGameEngine({required this.root})
       : super(gravity: Vector2(0, 0));
   final NetworkNode root;
+
+  final theWorld = World();
+  late final CameraComponent cameraComponent;
 
   @override
   Color backgroundColor() => Colors.transparent;
@@ -66,22 +68,25 @@ class _DynamicNetworkGameEngine extends Forge2DGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final boundaries = _createBoundaries(this);
+    cameraComponent = CameraComponent(world: theWorld);
+    addAll([cameraComponent, theWorld]);
+
+    final boundaries = _createBoundaries(this, cameraComponent);
     boundaries.forEach(add);
 
-    final worldCenter = screenToWorld(size * camera.zoom / 2);
-    add(_NetworkNodeComponent(
+    final center = screenToWorld(size * cameraComponent.viewfinder.zoom / 2);
+    theWorld.add(_NetworkNodeComponent(
       root,
-      worldCenter,
+      center,
       radius: 8,
       openBottomSheetOnTap: false,
     ));
   }
 }
 
-List<_Wall> _createBoundaries(Forge2DGame game) {
+List<_Wall> _createBoundaries(Forge2DGame game, CameraComponent camera) {
   final topLeft = Vector2.zero();
-  final bottomRight = game.screenToWorld(game.camera.viewport.effectiveSize);
+  final bottomRight = game.screenToWorld(camera.viewport.size);
   final topRight = Vector2(bottomRight.x, topLeft.y);
   final bottomLeft = Vector2(topLeft.x, bottomRight.y);
 
@@ -120,7 +125,7 @@ class _Wall extends BodyComponent {
 }
 
 class _NetworkNodeComponent extends BodyComponent
-    with Tappable, Draggable, ContactCallbacks {
+    with TapCallbacks, DragCallbacks, ContactCallbacks {
   _NetworkNodeComponent(
     this.node,
     this._position, {
@@ -339,7 +344,8 @@ class _NetworkNodeComponent extends BodyComponent
   // Draggable methods
   // **************************
   @override
-  bool onDragStart(DragStartInfo info) {
+  bool onDragStart(DragStartEvent info) {
+    super.onDragStart(info);
     if (ballParent != null) return true;
 
     _timer?.cancel();
@@ -347,7 +353,7 @@ class _NetworkNodeComponent extends BodyComponent
   }
 
   @override
-  bool onDragUpdate(DragUpdateInfo info) {
+  bool onDragUpdate(DragUpdateEvent info) {
     if (ballParent != null) return true;
 
     final mouseJointDef = MouseJointDef()
@@ -363,12 +369,13 @@ class _NetworkNodeComponent extends BodyComponent
       mouseJoint = MouseJoint(mouseJointDef);
       world.createJoint(mouseJoint!);
     }
-    mouseJoint?.setTarget(info.eventPosition.game);
+    mouseJoint?.setTarget(info.canvasPosition);
     return false;
   }
 
   @override
-  bool onDragEnd(DragEndInfo info) {
+  bool onDragEnd(DragEndEvent info) {
+    super.onDragEnd(info);
     if (ballParent != null || mouseJoint == null) return true;
 
     world.destroyJoint(mouseJoint!);
@@ -378,7 +385,8 @@ class _NetworkNodeComponent extends BodyComponent
   }
 
   @override
-  bool onDragCancel() {
+  bool onDragCancel(DragCancelEvent info) {
+    super.onDragCancel(info);
     if (ballParent != null) return true;
 
     restartTimer();
