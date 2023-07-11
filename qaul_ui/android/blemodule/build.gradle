@@ -7,11 +7,23 @@ plugins {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.6.1'
+        // brenodt (Jul-07-23): for apple m1, add protoc_platform=osx-x86_64 in $HOME/.gradle/gradle.properties
+        // https://github.com/grpc/grpc-java/issues/7690
+        if (project.hasProperty('protoc_platform')) {
+            artifact = "com.google.protobuf:protoc:3.6.1:${protoc_platform}"
+        } else {
+            artifact = "com.google.protobuf:protoc:3.6.1"
+        }
     }
     plugins {
         javalite {
-            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+            // brenodt (Jul-07-23): The codegen for lite comes as a separate artifact
+            // https://github.com/grpc/grpc-java/issues/7690
+            if (project.hasProperty('protoc_platform')) {
+                artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0:${protoc_platform}"
+            } else {
+                artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
+            }
         }
     }
     generateProtoTasks {
@@ -70,7 +82,7 @@ processResources {
 
 
 dependencies {
-	implementation project(':libqaul')
+    implementation project(':libqaul')
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
