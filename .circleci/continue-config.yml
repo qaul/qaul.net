@@ -230,13 +230,17 @@ jobs:
                     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
                     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
                     sudo apt update
-                    sudo apt install gh
-                name: Install Github CLI
+                    sudo apt install gh unzip
+                name: Install Github CLI and unzip
             - run:
                 command: |
-                    gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
-                    gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
-                name: Download Libqaul AAR Files from latest Github Release
+                    gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir qaul_ui/android/libqaul/src/main/jniLibs
+                name: Download Libqaul jniLibs from latest Github Release
+            - run:
+                command: |
+                    cd qaul_ui/android/libqaul/src/main/jniLibs
+                    unzip jniLibs.zip
+                name: Unzip compressed jniLibs
             - install-flutter:
                 version: $FLUTTER_VERSION
             - install-flutter-deps
@@ -414,21 +418,14 @@ jobs:
                 command: cd rust/libqaul && ./build_libqaul_android.sh release
                 name: Build Libqaul JniLibs for Android
             - save-sccache-cache
-            - restore_cache:
-                key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
             - run:
-                command: cd android && sh gradlew assemble
-                name: Build AAR Library
-            - save_cache:
-                key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
-                paths:
-                    - ~/.gradle
+                command: |
+                    cd qaul_ui/android/libqaul/src/main/jniLibs
+                    zip -r jniLibs *
+                name: zip jniLibs
             - persist_to_workspace:
                 paths:
-                    - android/libqaul/build/outputs/aar/libqaul-debug.aar
-                    - android/libqaul/build/outputs/aar/libqaul-release.aar
-                    - android/blemodule/build/outputs/aar/blemodule-debug.aar
-                    - android/blemodule/build/outputs/aar/blemodule-release.aar
+                    - qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip
                 root: ~/qaul-libp2p
     build-libqaul-ios:
         executor: rust-macos
@@ -866,8 +863,7 @@ jobs:
                     mkdir artifacts
 
                     # Android
-                    cp -a android/blemodule/build/outputs/aar/. ./artifacts/
-                    cp -a android/libqaul/build/outputs/aar/. ./artifacts/
+                    qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip ./artifacts/
 
                     # iOS
                     cp rust/target/release/liblibqaul.dylib ./artifacts/

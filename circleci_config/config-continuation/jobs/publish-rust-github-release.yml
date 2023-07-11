@@ -10,8 +10,7 @@ steps:
         mkdir artifacts
 
         # Android
-        cp -a android/blemodule/build/outputs/aar/. ./artifacts/
-        cp -a android/libqaul/build/outputs/aar/. ./artifacts/
+        qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip ./artifacts/
 
         # iOS
         cp rust/target/release/liblibqaul.dylib ./artifacts/

@@ -22,19 +22,12 @@ steps:
       name: Build Libqaul JniLibs for Android
       command: cd rust/libqaul && ./build_libqaul_android.sh release
   - save-sccache-cache
-  - restore_cache:
-      key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
   - run:
-      name: Build AAR Library
-      command: cd android && sh gradlew assemble
-  - save_cache:
-      paths:
-        - ~/.gradle
-      key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/libqaul/build.gradle" }}-{{ checksum  "android/blemodule/build.gradle" }}
+      name: zip jniLibs
+      command: |
+        cd qaul_ui/android/libqaul/src/main/jniLibs
+        zip -r jniLibs *
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - android/libqaul/build/outputs/aar/libqaul-debug.aar
-        - android/libqaul/build/outputs/aar/libqaul-release.aar
-        - android/blemodule/build/outputs/aar/blemodule-debug.aar
-        - android/blemodule/build/outputs/aar/blemodule-release.aar
+        - qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip
