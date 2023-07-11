@@ -863,7 +863,7 @@ jobs:
                     mkdir artifacts
 
                     # Android
-                    qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip ./artifacts/
+                    cp qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip ./artifacts/
 
                     # iOS
                     cp rust/target/release/liblibqaul.dylib ./artifacts/
