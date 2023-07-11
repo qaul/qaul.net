@@ -2,17 +2,21 @@ executor: flutter-android
 steps:
   - checkout-project
   - run:
-      name: Install Github CLI
+      name: Install Github CLI and unzip
       command: |
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
-        sudo apt install gh
+        sudo apt install gh unzip
   - run:
-      name: Download Libqaul AAR Files from latest Github Release
+      name: Download Libqaul jniLibs from latest Github Release
       command: |
-        gh release download --pattern "libqaul-release.aar" --repo "$REPO_URL" --dir app/libs
-        gh release download --pattern "blemodule-release.aar" --repo "$REPO_URL" --dir app/libs
+        gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir qaul_ui/android/libqaul/src/main/jniLibs
+  - run:
+      name: Unzip compressed jniLibs
+      command: |
+        cd qaul_ui/android/libqaul/src/main/jniLibs
+        unzip jniLibs.zip
   - install-flutter:
       version: "$FLUTTER_VERSION"
   - install-flutter-deps
