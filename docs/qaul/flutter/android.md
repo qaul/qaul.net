@@ -75,32 +75,7 @@ The build script builds the shared libqaul library for different android
 targets and copies them to the appropriate location in the android folder 
 `android/app/src/main/jniLibs`.
 
-
-## Build Android Libqaul AAR Library
-
-Now an Android AAR libqaul library needs to be built with the previously built 
-rust libqaul.so in it.
-
-```sh
-# move to projects toplevel android folder
-cd android
-
-# Build aar for debug & release
-./gradlew assemble
-```
-
 ## Build the qaul Android App 
-
-### Add the Libqaul AAR Library onto Flutter
-
-```sh
-# create android's deps folder
-mkdir qaul_ui/android/app/libs
-
-# assuming aar files are at their default spot
-cp android/libqaul/build/outputs/aar/libqaul-debug.aar qaul_ui/android/app/libs
-cp android/blemodule/build/outputs/aar/blemodule-debug.aar qaul_ui/android/app/libs
-```
 
 ### Build and Run a debuggable Android Version for your Phone
 
@@ -113,6 +88,11 @@ cd qaul_ui
 
 # build and run the qaul app on your phone
 flutter run
+```
+
+!> Note: for apple m1, add `protoc_platform=osx-x86_64` in `$HOME/.gradle/gradle.properties`
+```bash
+echo "protoc_platform=osx-x86_64" >> "$HOME/.gradle/gradle.properties"
 ```
 
 To see the debug messages via logcat, open logcat in a second terminal, 
