@@ -23,30 +23,54 @@ import net.qaul.ble.RemoteLog
 
 import android.content.pm.PackageManager
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "libqaul"
     private var bleWrapperClass: BleWrapperClass? = null
+    private var flutterEngine: FlutterEngine? = null
 
     companion object{
         const val LOCATION_PERMISSION_REQ_CODE = 111
         const val LOCATION_ENABLE_REQ_CODE = 112
         const val REQUEST_ENABLE_BT = 113
         const val BLE_PERMISSION_REQ_CODE_12 = 114
+
+        lateinit var permissionHandler: PermissionHandler
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        permissionHandler = PermissionHandler(this)
     }
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
         super.configureFlutterEngine(FlutterEngine)
+        this.flutterEngine = FlutterEngine
+
         // load libqaul
         libqaulLoad()
 		
 		//initialize BleModule initialize -- must be before startLibqaul()
         bleWrapperClass = BleWrapperClass(context = this)
+
+        // Start the FlutterBackgroundService
+        val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 		
         // setup message channel between flutter and android
         MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             when {
+                call.method == "exit_app" -> {
+                    stopServiceAndFinish()
+                    result.success(true)
+                }
                 call.method == "getPlatformVersion" -> {
                     val res = getSystemVersion()
                     result.success(res)
@@ -90,6 +114,17 @@ class MainActivity: FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    private fun stopServiceAndFinish() {
+        val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
+        stopService(serviceIntent)
+        flutterEngine?.let { engine ->
+            engine.destroy()
+            flutterEngine = null
+        }
+        finishAffinity()
+        finish()
     }
 
     /// get android system version
@@ -145,10 +180,12 @@ class MainActivity: FlutterActivity() {
     }
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String?>,
+        permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
             AppLog.e(
                 "MainActivity",

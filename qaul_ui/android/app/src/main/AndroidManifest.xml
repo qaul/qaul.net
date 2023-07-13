@@ -34,6 +34,8 @@
 
     <!-- Required to run qaul constantly in the background -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
@@ -44,15 +46,15 @@
             android:icon="@mipmap/ic_launcher">
 
         <service
-                android:name="de.julianassmann.flutter_background.IsolateHolderService"
-                android:exported="false" />
+            android:name=".FlutterBackgroundService"
+            android:exported="false" />
 
 	    <service
                 android:enabled="true"
                 android:name="net.qaul.ble.service.BleService"
                 android:label="BleService">
         </service>
-		
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -62,7 +64,8 @@
                 android:hardwareAccelerated="true"
                 android:windowSoftInputMode="adjustResize"
                 android:showWhenLocked="true"
-                android:turnScreenOn="true">
+                android:turnScreenOn="true"
+                android:excludeFromRecents="true">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

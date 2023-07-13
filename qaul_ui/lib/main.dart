@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
@@ -22,21 +20,21 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     Logger.root.level = kDebugMode ? Level.CONFIG : Level.FINE;
 
-    if (Platform.isAndroid) {
-      const androidConfig = FlutterBackgroundAndroidConfig(
-        notificationTitle: "qaul.net",
-        notificationText: "The app is running in the Background",
-        notificationImportance: AndroidNotificationImportance.Max,
-        notificationIcon: AndroidResource(name: 'ic_notification'),
-        showBadge: true,
-        enableWifiLock: true,
-      );
-      bool success = await FlutterBackground.initialize(
-        androidConfig: androidConfig,
-      );
-
-      if (success) FlutterBackground.enableBackgroundExecution();
-    }
+    // if (Platform.isAndroid) {
+    //   const androidConfig = FlutterBackgroundAndroidConfig(
+    //     notificationTitle: "qaul.net",
+    //     notificationText: "The app is running in the Background",
+    //     notificationImportance: AndroidNotificationImportance.Max,
+    //     notificationIcon: AndroidResource(name: 'ic_notification'),
+    //     showBadge: true,
+    //     enableWifiLock: true,
+    //   );
+    //   bool success = await FlutterBackground.initialize(
+    //     androidConfig: androidConfig,
+    //   );
+    //
+    //   if (success) FlutterBackground.enableBackgroundExecution();
+    // }
 
     await Initializer.initialize(_container.read);
 
