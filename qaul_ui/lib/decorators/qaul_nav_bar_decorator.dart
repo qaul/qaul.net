@@ -1,5 +1,8 @@
+import 'dart:io' show Platform;
+
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,15 +27,9 @@ class QaulNavBarDecorator extends StatefulWidget {
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   final _pageViewKey = GlobalKey();
 
-  Map<String, String> get _overflowMenuOptions => {
-        'settings': AppLocalizations.of(context)!.settings,
-        'about': AppLocalizations.of(context)!.about,
-        'support': AppLocalizations.of(context)!.support,
-        'old-network': AppLocalizations.of(context)!.routingDataTable,
-        'files': AppLocalizations.of(context)!.fileHistory,
-      };
+  Map<String, String> _overflowMenuOptions = {};
 
-  void _handleClick(String value) {
+  void _handleClick(String value) async {
     switch (value) {
       case 'settings':
         Navigator.pushNamed(context, NavigationHelper.settings);
@@ -63,7 +60,28 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
       case 'files':
         Navigator.pushNamed(context, NavigationHelper.fileHistory);
         break;
+      case 'quit':
+        const MethodChannel('libqaul').invokeMethod('exit_app');
+        // SystemNavigator.pop();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final options = {
+        'settings': AppLocalizations.of(context)!.settings,
+        'about': AppLocalizations.of(context)!.about,
+        'support': AppLocalizations.of(context)!.support,
+        'old-network': AppLocalizations.of(context)!.routingDataTable,
+        'files': AppLocalizations.of(context)!.fileHistory,
+      };
+      if (Platform.isAndroid) {
+        options['quit'] = AppLocalizations.of(context)!.exit;
+      }
+      setState(() => _overflowMenuOptions = options);
+    });
   }
 
   @override
