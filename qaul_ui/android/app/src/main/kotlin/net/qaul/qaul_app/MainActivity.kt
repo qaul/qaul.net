@@ -26,12 +26,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
     private val CHANNEL = "libqaul"
     private var bleWrapperClass: BleWrapperClass? = null
     private var flutterEngine: FlutterEngine? = null
 
-    companion object{
+    companion object {
         const val LOCATION_PERMISSION_REQ_CODE = 111
         const val LOCATION_ENABLE_REQ_CODE = 112
         const val REQUEST_ENABLE_BT = 113
@@ -51,8 +51,8 @@ class MainActivity: FlutterActivity() {
 
         // load libqaul
         libqaulLoad()
-		
-		//initialize BleModule initialize -- must be before startLibqaul()
+
+        //initialize BleModule initialize -- must be before startLibqaul()
         bleWrapperClass = BleWrapperClass(context = this)
 
         // Start the FlutterBackgroundService
@@ -62,7 +62,7 @@ class MainActivity: FlutterActivity() {
         } else {
             startService(serviceIntent)
         }
-		
+
         // setup message channel between flutter and android
         MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
@@ -71,6 +71,7 @@ class MainActivity: FlutterActivity() {
                     stopServiceAndFinish()
                     result.success(true)
                 }
+
                 call.method == "getPlatformVersion" -> {
                     val res = getSystemVersion()
                     result.success(res)
@@ -178,6 +179,7 @@ class MainActivity: FlutterActivity() {
     private fun receiveRpcMessage(): ByteArray {
         return receive()
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
