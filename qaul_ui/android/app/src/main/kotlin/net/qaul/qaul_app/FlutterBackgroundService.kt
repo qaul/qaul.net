@@ -127,7 +127,7 @@ class FlutterBackgroundService : Service() {
 
     private fun acquireWifiLock() {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, WIFILOCK_TAG)
+        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, WIFILOCK_TAG)
         wifiLock?.acquire()
     }
 
