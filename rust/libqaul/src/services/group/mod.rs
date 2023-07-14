@@ -390,7 +390,7 @@ impl Group {
     }
 
     /// Process incoming RPC request messages for group chat module
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::Group::decode(&data[..]) {
@@ -418,7 +418,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -448,7 +448,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
 
@@ -470,7 +470,7 @@ impl Group {
                                 Rpc::send_message(
                                     proto_message.encode_to_vec(),
                                     crate::rpc::proto::Modules::Group.into(),
-                                    "".to_string(),
+                                    request_id,
                                     Vec::new(),
                                 );
                             }
@@ -488,7 +488,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -501,7 +501,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -531,7 +531,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -559,7 +559,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -591,7 +591,7 @@ impl Group {
                         Rpc::send_message(
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
 

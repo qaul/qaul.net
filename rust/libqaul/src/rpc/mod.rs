@@ -175,7 +175,7 @@ impl Rpc {
                     }
                     Some(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
-                        Group::rpc(message.data, message.user_id);
+                        Group::rpc(message.data, message.user_id, message.request_id);
                     }
                     Some(Modules::Rtc) => {
                         log::trace!("Message Modules::Group received");
