@@ -1,28 +1,17 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
-// This software is published under the AGPLv3 license.
-
-/// Main entry point of the qaul android app
-///
-/// It starts and configures the flutter GUI,
-/// set's up the communication channels,
-/// and starts libqaul via the android libqaul AAR.
-/// Everything in this function is running in the main thread.
-
 package net.qaul.qaul_app
 
+// import the libqaul AAR android library
+
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-
-// import the libqaul AAR android library
-import net.qaul.libqaul.*
-import net.qaul.ble.core.BleWrapperClass
 import net.qaul.ble.AppLog
-import net.qaul.ble.RemoteLog
+import net.qaul.ble.core.BleWrapperClass
+import net.qaul.libqaul.*
 
-import android.content.pm.PackageManager
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 
@@ -60,8 +49,9 @@ class MainActivity : FlutterActivity() {
         bleWrapperClass = BleWrapperClass(context = this)
 
         // setup message channel between flutter and android
-        MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
-            call, result ->
+        MethodChannel(
+            FlutterEngine.dartExecutor.binaryMessenger, CHANNEL
+        ).setMethodCallHandler { call, result ->
             when {
                 // utility methods
                 call.method == "isBackgroundExecutionEnabled" -> {
@@ -204,8 +194,7 @@ class MainActivity : FlutterActivity() {
 
         if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
             AppLog.e(
-                "MainActivity",
-                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+                "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
             )
             if (grantResults.isNotEmpty()) {
                 for (grantResult in grantResults) {
@@ -219,8 +208,7 @@ class MainActivity : FlutterActivity() {
             }
         } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
             AppLog.e(
-                "MainActivity",
-                "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+                "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
             )
             if (grantResults.isNotEmpty()) {
                 for (grantResult in grantResults) {
@@ -243,8 +231,7 @@ class MainActivity : FlutterActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         AppLog.e(
-            "MainActivity",
-            "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
+            "MainActivity", "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
         )
         if (requestCode == LOCATION_ENABLE_REQ_CODE) {
             if (resultCode == RESULT_OK) {
