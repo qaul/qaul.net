@@ -16,7 +16,6 @@ import androidx.lifecycle.LifecycleService
 import com.google.gson.Gson
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
-import net.qaul.ble.BLEUtils.removeConcurrent
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
@@ -40,7 +39,7 @@ class BleService : LifecycleService() {
     private lateinit var scanCallback: ScanCallback
     private lateinit var bleScanner: BluetoothLeScanner
     private val outOfRangeChecker = Handler(Looper.getMainLooper())
-    private val devicesList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+    private val devicesList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
     private val ignoreList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
     private val receiveList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
     private val blackList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
@@ -271,13 +270,13 @@ class BleService : LifecycleService() {
      * This Method Will Parse Result of ScanResult according to Device
      */
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
-        AppLog.e(TAG, "device : " + device.address)
+//        AppLog.e(TAG, "device : " + device.address)
         if (blackList.find { it.macAddress == device.address } == null) {
             val selectItem = devicesList.toMutableList().find { it.macAddress == device.address }
 //            handler.postDelayed({
             if (selectItem == null) {
-                AppLog.e(TAG, "device : " + device.address)
-                AppLog.e(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
+//                AppLog.e(TAG, "device : " + device.address)
+//                AppLog.e(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
                 RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
                 val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
                 bleDevice.bluetoothDevice = device
@@ -289,6 +288,7 @@ class BleService : LifecycleService() {
                 bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
                 if (result.isConnectable) {
+                    AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
                     connectDevice(bleDevice, isFromMessage = false)
                 }
             } else {
@@ -410,7 +410,7 @@ class BleService : LifecycleService() {
                 gattServer!!.sendResponse(
                     device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
-                Log.e(TAG, "Device Address:: ${device.address}")
+//                Log.e(TAG, "Device Address:: ${device.address}")
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
@@ -602,9 +602,10 @@ class BleService : LifecycleService() {
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
-                AppLog.d(TAG, "device : " + result!!.device.address)
-                RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result.device.address)
-                parseBLEFrame(result.device, result.rssi, result)
+
+
+                RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result!!.device.address)
+                parseBLEFrame(result!!.device, result.rssi, result)
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -644,12 +645,12 @@ class BleService : LifecycleService() {
                 if (bLEDevice.lastFoundTime != null && (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000)) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     AppLog.e(TAG, " outRangeRunnable-  REMOVE HERE  -> ${bLEDevice.macAddress} ")
-                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
-                    devicesList.removeConcurrent(bLEDevice)
+//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
+                    devicesList.remove(bLEDevice)
                     ignoreList.remove(bLEDevice)
-                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
+//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
                 } else {
-                    AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
+//                    AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
                 }
             }
         }
@@ -670,8 +671,15 @@ class BleService : LifecycleService() {
 //                bleScanDevice.isConnected = false
 //                device.isConnected = false
                 if (!blackList.contains(bleScanDevice)) {
-                    AppLog.e(TAG, " onDisconnected-  REMOVE HERE  -> ${bleScanDevice.macAddress} ")
-                    devicesList.removeConcurrent(bleScanDevice)
+                    AppLog.e(
+                        TAG,
+                        " onDisconnected-  REMOVE HERE  devicesList.size -> ${devicesList.size} "
+                    )
+                    devicesList.remove(bleScanDevice)
+                    AppLog.e(
+                        TAG,
+                        " onDisconnected-  REMOVE HERE devicesList.size -> ${devicesList.size}  "
+                    )
 //                    ignoreList.removeConcurrent(bleScanDevice)
                 }
                 if (System.currentTimeMillis() - 60000 > lastWriteTime) {
@@ -700,7 +708,7 @@ class BleService : LifecycleService() {
                     TAG,
                     "REMOVE HERE onConnectionFailedDevice Mac Address:: ${bleScanDevice.macAddress}"
                 )
-                devicesList.removeConcurrent(bleScanDevice)
+                devicesList.remove(bleScanDevice)
             }
 
             override fun onCharacteristicRead(
@@ -752,23 +760,23 @@ class BleService : LifecycleService() {
 
             override fun addToBlackList(bleScanDevice: BLEScanDevice) {
                 blackList.add(bleScanDevice)
-                AppLog.e(TAG, " addToBlackList : ${blackList.toString()}")
+                AppLog.e(TAG, " addToBlackList : $blackList")
             }
 
             override fun addToIgnoreList(bleScanDevice: BLEScanDevice) {
                 ignoreList.add(bleScanDevice)
-                AppLog.e(TAG, " addToIgnoreList : ${ignoreList.toString()}")
+                AppLog.e(TAG, " addToIgnoreList : $ignoreList")
             }
 
         }
 
 //        device.isConnected = true
-//        val baseBleActor = if (actorMap[device.macAddress] == null) {
-//            BleActor(this, BleConnectionListener())
-//        } else {
-//            actorMap[device.macAddress]
-//        }
-        val baseBleActor = BleActor(this, BleConnectionListener())
+        val baseBleActor = if (actorMap[device.macAddress] == null) {
+            BleActor(this, BleConnectionListener())
+        } else {
+            actorMap[device.macAddress]
+        }
+//        val baseBleActor = BleActor(this, BleConnectionListener())
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor!!
     }
@@ -811,14 +819,6 @@ class BleService : LifecycleService() {
             if (hashMap.isNotEmpty()) {
                 val queue = hashMap[macAddress]
                 if (!queue.isNullOrEmpty()) {
-//                    if (queue.size > 10) {
-//                        val item = queue.last()
-//                        if (item != null) {
-//                            queue.clear()
-//                            queue.add(item)
-//                            AppLog.e("zzz", "LastItemAdded")
-//                        }
-//                    }
                     if (!isFromSendMessage || queue.size == 1) {
                         var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
                         if (bleDevice == null) {
@@ -831,6 +831,10 @@ class BleService : LifecycleService() {
                             msg.message = mesTrip.third
                             msg.qaulId = mesTrip.second
                             if (bleDevice != null) {
+                                AppLog.e(
+                                    TAG,
+                                    "-------------------> HERE FOR CONNECTION   sendMessageFromQueu "
+                                )
                                 val bleActor =
                                     connectDevice(device = bleDevice, isFromMessage = true)
 //                                Handler(Looper.getMainLooper()).postDelayed({

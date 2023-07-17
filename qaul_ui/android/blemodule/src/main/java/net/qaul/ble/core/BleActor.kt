@@ -61,9 +61,13 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
 //        if (mBluetoothGatt != null && !isFromMessage) {
         bleDevice = device
         bluetoothDevice = device!!.bluetoothDevice
+
+
+
         Handler(Looper.getMainLooper()).postDelayed({
             connectDevice()
         }, 500)
+
 //        } else {
 //            Handler(Looper.getMainLooper()).postDelayed({
 //                send(BLEUtils.byteToHex(tempData))
@@ -144,13 +148,10 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
-            AppLog.d(
-                TAG,
-                "onCharacteristicRead : " + characteristic.uuid.toString() + " , data : " + BLEUtils.byteToHex(
-                    characteristic.value
-                )
+            AppLog.e(
+                "zzz",
+                "onCharacteristicRead : " + characteristic.uuid.toString() + " , isFromMessage->  $isFromMessage"
             )
-
 
 
             if (isFromMessage) {
@@ -171,16 +172,17 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             }
         }
 
+
         override fun onCharacteristicWrite(
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
-            AppLog.e(
-                "zzz ",
-                "onCharacteristicWrite --------------> : " + " , data : " + BLEUtils.byteToHex(
-                    characteristic.value
-                )
-            )
+//            AppLog.e(
+//                "zzz ",
+//                "onCharacteristicWrite --------------> $listener  $messageId $ :  , data : " + BLEUtils.byteToHex(
+//                    characteristic.value
+//                )
+//            )
             if (listener != null) {
                 if (messageId.isEmpty() || messageId.isBlank()) {
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
@@ -255,7 +257,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     fun send(data: String): Int {
-        AppLog.e("zzz", "send data")
+//        AppLog.e("zzz", "send data----------------->   isWriting $isWriting  data $data")
         var data = data
         while (data.length > 40) {
             sendQueue.add(data.substring(0, 40))
@@ -423,9 +425,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     ): Boolean {
         if (attempt < 3) {
             if (data != null) {
-                AppLog.d(
+                AppLog.e(
                     TAG,
-                    "writeServiceData : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
+                    "writeServiceData -----------> : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
                         data
                     )
                 )
@@ -452,8 +454,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                             )
                         } else {
                             bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
-
                         }
+
                         this.attempt = attempt + 1
                         tempData = data
                         isReconnect = true
@@ -502,6 +504,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     companion object {
-        private val TAG: String = "zzz qaul-blemodule BleActor"
+        private val TAG: String = "qaul-blemodule BleActor"
     }
 }
