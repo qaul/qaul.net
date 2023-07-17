@@ -43,8 +43,6 @@ open class BleWrapperClass(context: Activity) {
     private var bleCallback: BleRequestCallback? = null
     private var qaulId: ByteArray? = null
     private var advertMode = "low_latency"
-    private var lastMillieTime: Long = 0
-    private var isFromMessage = false
 
     public var mHandler: Handler? = null
 
@@ -128,16 +126,7 @@ open class BleWrapperClass(context: Activity) {
 
 
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
-//                    if (isSend) {
-//                        isSend = false
-
                     AppLog.e("zzz", " DIRECT_SEND ")
-//                    if (System.currentTimeMillis() - 7000 < lastMillieTime) {
-//                        return
-//                    }
-
-
-                    lastMillieTime = System.currentTimeMillis()
 
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
@@ -148,7 +137,6 @@ open class BleWrapperClass(context: Activity) {
                             from = bleDirectSend.senderId.toByteArray()
                         )
                     }
-//                    }
                 }
                 else -> {}
             }
@@ -159,12 +147,12 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will send response message to App & libqaul library
      */
     private fun sendResponse(bleRes: BleOuterClass.Ble.Builder) {
-        AppLog.e("TAG", "sendResponse()")
+//        AppLog.e("TAG", "sendResponse()-----------> ${bleRes.messageCase} $bleRes")
         mHandler?.post {
             //callback response for App
 
             bleCallback?.bleResponse(bleRes.build().toByteString())
-            AppLog.e(TAG, "sendResponse:: $bleRes")
+//            AppLog.e(TAG, "sendResponse:: $bleRes")
             //callback response for libqaul
             net.qaul.libqaul.syssend(bleRes.build().toByteArray())
         }
