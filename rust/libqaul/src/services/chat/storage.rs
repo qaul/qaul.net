@@ -325,7 +325,10 @@ impl ChatStorage {
         let search_key = Self::get_db_key_from_vec(group_id, u64::MAX);
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
-            return value.index + 1;
+            // check if result is really of the same group
+            if group_id.to_owned() == value.group_id {
+                return value.index + 1;
+            }
         }
 
         return 0;
