@@ -28,7 +28,7 @@ dependencies:
   filesize: ^2.0.1
   fixnum: ^1.0.1
   flame: ^1.2.1
-  flame_forge2d: ^0.14.0
+  flame_forge2d: ^0.14.1
   fluent_ui: ^4.2.0
   flutter_chat_types: ^3.4.5
   flutter_chat_ui: ^1.6.6
