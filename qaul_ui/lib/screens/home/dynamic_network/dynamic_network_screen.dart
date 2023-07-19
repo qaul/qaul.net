@@ -55,7 +55,7 @@ class DynamicNetworkScreen extends HookConsumerWidget {
 }
 
 class _DynamicNetworkGameEngine extends Forge2DGame
-    with HasTappablesBridge, HasDraggables {
+    with HasTappables, HasDraggables {
   _DynamicNetworkGameEngine({required this.root})
       : super(gravity: Vector2(0, 0));
   final NetworkNode root;
