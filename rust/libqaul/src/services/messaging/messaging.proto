@@ -100,7 +100,10 @@ message Confirmation {
 //
 // This message is for crypto specific tasks,
 // such as completing a handshake.
-message CryptoService {}
+message CryptoService {
+    // message data
+    bytes content = 1;
+}
 
 // rtc stream mesasge
 message RtcStreamMessage {

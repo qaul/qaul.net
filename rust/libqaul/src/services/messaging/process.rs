@@ -12,6 +12,7 @@ use prost::Message;
 use crate::node::user_accounts::UserAccount;
 use crate::router;
 use crate::services::chat::{self, rpc_proto, ChatFile, ChatStorage};
+use crate::services::crypto::sessionmanager::CryptoSessionManager;
 use crate::services::crypto::Crypto;
 use crate::services::dtn;
 use crate::services::group::{self, Group, GroupId};
@@ -58,9 +59,19 @@ impl MessagingProcess {
                     confirmation.clone(),
                 );
             }
-            Some(super::proto::messaging::Message::CryptoService(_crypto)) => {
+            Some(super::proto::messaging::Message::CryptoService(cryptoservice)) => {
+                log::trace!(
+                    "received cryptoservice message from {}",
+                    sender_id.clone().to_string()
+                );
+                // process crypto service message
+                CryptoSessionManager::process_cryptoservice_container(
+                    sender_id,
+                    user_account.clone(),
+                    cryptoservice.content,
+                );
+
                 // send confirm message
-                // TODO: pass on the user_account
                 if let Err(e) =
                     super::Messaging::send_confirmation(&user_account.id, sender_id, signature)
                 {
@@ -273,7 +284,12 @@ impl MessagingProcess {
                     Some(super::proto::envelop_payload::Payload::Encrypted(encrypted)) => {
                         // decrypt data
                         let decrypted: Vec<u8>;
-                        match Crypto::decrypt(encrypted, user_account.clone(), sender_id.clone()) {
+                        match Crypto::decrypt(
+                            encrypted,
+                            user_account.clone(),
+                            sender_id.clone(),
+                            &container.signature,
+                        ) {
                             Some(decryption_result) => decrypted = decryption_result,
                             None => {
                                 log::error!("decryption error");

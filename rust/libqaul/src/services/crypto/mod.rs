@@ -17,10 +17,12 @@ use serde::{Deserialize, Serialize};
 
 mod crypto25519;
 mod noise;
+pub mod sessionmanager;
 mod storage;
 
-use super::messaging::proto;
+use super::messaging;
 use crate::node::user_accounts::UserAccount;
+use crate::services::crypto::sessionmanager::CryptoSessionManager;
 pub use crypto25519::Crypto25519;
 pub use noise::CryptoNoise;
 pub use storage::CryptoAccount;
@@ -110,11 +112,11 @@ impl Crypto {
         data: Vec<u8>,
         user_account: UserAccount,
         remote_id: PeerId,
-    ) -> Option<proto::Encrypted> {
+    ) -> Option<messaging::proto::Encrypted> {
         let nonce: u64;
-        let encrypted_option: Option<Vec<u8>>;
+        let encrypted_option;
         let session_id: u32;
-        let process_state: proto::CryptoState;
+        let process_state: messaging::proto::CryptoState;
 
         // get data base object
         let crypto_account = CryptoStorage::get_db_ref(user_account.id.clone());
@@ -122,53 +124,19 @@ impl Crypto {
         // check if there is a handshake state?
         match crypto_account.get_state(remote_id) {
             Some(session) => {
-                log::trace!("encrypt with existing session_id {}", session.session_id);
-
-                // get session id
-                session_id = session.session_id;
-
-                // encrypt in accordance to session state
-                match session.state {
-                    CryptoProcessState::HalfOutgoing => {
-                        log::trace!("session state HalfOutgoing");
-                        // we cannot send more messages at the moment, before we haven't
-                        // received the handshake confirmation.
-                        // TODO: build functionality to send further asymmetrically encrypted messages
-                        log::error!("Can't send further messages after handshake");
-                        return None;
-                    }
-                    CryptoProcessState::HalfIncoming => {
-                        log::trace!("session state HalfIncoming");
-                        // encrypt handshake 2 message
-                        (encrypted_option, nonce) =
-                            CryptoNoise::encrypt_noise_kk_handshake_2::<
-                                X25519,
-                                ChaCha20Poly1305,
-                                Sha256,
-                                &[u8],
-                            >(data, crypto_account, session, remote_id);
-
-                        process_state = proto::CryptoState::Handshake;
-                    }
-                    CryptoProcessState::Transport => {
-                        log::trace!("session state Transport");
-
-                        // encrypt transport message
-                        (encrypted_option, nonce) =
-                            CryptoNoise::encrypt_noise_kk_transport::<
-                                X25519,
-                                ChaCha20Poly1305,
-                                Sha256,
-                                &[u8],
-                            >(data, crypto_account, session, remote_id);
-
-                        process_state = proto::CryptoState::Transport;
-                    }
+                // encrypt with existing crypto state
+                if let Some((my_encrypted_option, my_nonce, my_session_id, my_process_state)) =
+                    Self::encrypt_with_state(data, remote_id, crypto_account, session)
+                {
+                    encrypted_option = my_encrypted_option;
+                    nonce = my_nonce;
+                    session_id = my_session_id;
+                    process_state = my_process_state;
+                } else {
+                    return None;
                 }
             }
             None => {
-                log::trace!("encrypt with new session");
-
                 // create new session and start handshake
                 (encrypted_option, nonce, session_id) =
                     CryptoNoise::encrypt_noise_kk_handshake_1::<
@@ -178,25 +146,105 @@ impl Crypto {
                         &[u8],
                     >(data, user_account, crypto_account, remote_id);
 
-                process_state = proto::CryptoState::Handshake;
+                log::trace!("encrypt with new session_id: {}", session_id);
+
+                process_state = messaging::proto::CryptoState::Handshake;
             }
         }
+
         // create and return encrypted message
         if let Some(encrypted_data) = encrypted_option {
-            let mut data_messages: Vec<proto::Data> = Vec::new();
-            data_messages.push(proto::Data {
+            return Some(Self::create_encrypted_protobuf(
                 nonce,
-                data: encrypted_data,
-            });
-
-            return Some(proto::Encrypted {
-                state: process_state.into(),
                 session_id,
-                data: data_messages,
-            });
+                encrypted_data,
+                process_state,
+            ));
         }
 
         None
+    }
+
+    /// Encrypt a message with a specific crypto state
+    fn encrypt_with_state(
+        data: Vec<u8>,
+        remote_id: PeerId,
+        crypto_account: CryptoAccount,
+        crypto_state: CryptoState,
+    ) -> Option<(Option<Vec<u8>>, u64, u32, messaging::proto::CryptoState)> {
+        let nonce: u64;
+        let encrypted_option: Option<Vec<u8>>;
+        let session_id: u32;
+        let process_state: messaging::proto::CryptoState;
+
+        log::trace!(
+            "encrypt with existing session_id {}",
+            crypto_state.session_id
+        );
+
+        // get session id
+        session_id = crypto_state.session_id;
+
+        // encrypt in accordance to session state
+        match crypto_state.state {
+            CryptoProcessState::HalfOutgoing => {
+                log::trace!("session state HalfOutgoing");
+                // we cannot send more messages at the moment, before we haven't
+                // received the handshake confirmation.
+                // TODO: build functionality to send further asymmetrically encrypted messages
+                log::error!("Can't send further messages after handshake");
+                return None;
+            }
+            CryptoProcessState::HalfIncoming => {
+                log::trace!("session state HalfIncoming");
+                // encrypt handshake 2 message
+                (encrypted_option, nonce) =
+                    CryptoNoise::encrypt_noise_kk_handshake_2::<
+                        X25519,
+                        ChaCha20Poly1305,
+                        Sha256,
+                        &[u8],
+                    >(data, crypto_account, crypto_state, remote_id);
+
+                process_state = messaging::proto::CryptoState::Handshake;
+            }
+            CryptoProcessState::Transport => {
+                log::trace!("session state Transport");
+
+                // encrypt transport message
+                (encrypted_option, nonce) =
+                    CryptoNoise::encrypt_noise_kk_transport::<
+                        X25519,
+                        ChaCha20Poly1305,
+                        Sha256,
+                        &[u8],
+                    >(data, crypto_account, crypto_state, remote_id);
+
+                process_state = messaging::proto::CryptoState::Transport;
+            }
+        }
+
+        return Some((encrypted_option, nonce, session_id, process_state));
+    }
+
+    /// Create encrypted protobuf message
+    fn create_encrypted_protobuf(
+        nonce: u64,
+        session_id: u32,
+        encrypted_data: Vec<u8>,
+        process_state: messaging::proto::CryptoState,
+    ) -> messaging::proto::Encrypted {
+        let mut data_messages: Vec<messaging::proto::Data> = Vec::new();
+        data_messages.push(messaging::proto::Data {
+            nonce,
+            data: encrypted_data,
+        });
+
+        return messaging::proto::Encrypted {
+            state: process_state.into(),
+            session_id,
+            data: data_messages,
+        };
     }
 
     /// Decrypt an incoming message
@@ -213,14 +261,19 @@ impl Crypto {
     ///
     /// The function returns the decrypted data on success or none otherwise.
     pub fn decrypt(
-        message: proto::Encrypted,
+        message: messaging::proto::Encrypted,
         user_account: UserAccount,
         remote_id: PeerId,
+        message_id: &Vec<u8>,
     ) -> Option<Vec<u8>> {
         // get data base object
         let crypto_account = CryptoStorage::get_db_ref(user_account.id.clone());
 
-        log::trace!("decrypt session_id: {}", message.session_id);
+        log::trace!(
+            "decrypt message\n\tmessage_id: {}\n\tsession_id: {}",
+            bs58::encode(message_id).into_string(),
+            message.session_id
+        );
 
         // check if there is a handshake state?
         match crypto_account.get_state_by_id(remote_id, message.session_id) {
@@ -229,11 +282,14 @@ impl Crypto {
 
                 // decide how to go further
                 match (
-                    proto::CryptoState::from_i32(message.state),
+                    messaging::proto::CryptoState::from_i32(message.state),
                     session.state.clone(),
                 ) {
-                    (Some(proto::CryptoState::Handshake), CryptoProcessState::HalfOutgoing) => {
-                        log::debug!("decrypt {}: second handshake", session.session_id);
+                    (
+                        Some(messaging::proto::CryptoState::Handshake),
+                        CryptoProcessState::HalfOutgoing,
+                    ) => {
+                        log::trace!("decrypt {}: second handshake", session.session_id);
 
                         // decrypt second handshake message
                         for data in message.data {
@@ -246,13 +302,16 @@ impl Crypto {
                                 data.data, session, crypto_account, remote_id
                             );
 
-                            // TODO: check if there are unprocessed messages in cache
+                            // return second handshake confirmation message
 
                             return message;
                         }
                     }
-                    (Some(proto::CryptoState::Transport), CryptoProcessState::Transport) => {
-                        log::debug!(
+                    (
+                        Some(messaging::proto::CryptoState::Transport),
+                        CryptoProcessState::Transport,
+                    ) => {
+                        log::trace!(
                             "decrypt session {}: decrypt transport message",
                             session.session_id
                         );
@@ -269,8 +328,11 @@ impl Crypto {
                             );
                         }
                     }
-                    (Some(proto::CryptoState::Transport), CryptoProcessState::HalfOutgoing) => {
-                        log::debug!(
+                    (
+                        Some(messaging::proto::CryptoState::Transport),
+                        CryptoProcessState::HalfOutgoing,
+                    ) => {
+                        log::trace!(
                             "decrypt session {}: saving incoming transport, as handshake is not completed",
                             session.session_id
                         );
@@ -303,24 +365,77 @@ impl Crypto {
                 log::trace!("decrypt no session found");
 
                 // check what kind of message we are getting
-                match proto::CryptoState::from_i32(message.state) {
-                    Some(proto::CryptoState::Handshake) => {
-                        log::debug!("decrypt incoming first handshake");
+                match messaging::proto::CryptoState::from_i32(message.state) {
+                    Some(messaging::proto::CryptoState::Handshake) => {
+                        log::trace!("decrypt incoming first handshake");
 
                         // decrypt new handshake
                         for data in message.data {
-                            return CryptoNoise::decrypt_noise_kk_handshake_1::<
-                                X25519,
-                                ChaCha20Poly1305,
-                                Sha256,
-                                &[u8],
-                            >(
-                                data.data,
-                                crypto_account,
-                                remote_id,
-                                user_account,
-                                message.session_id,
-                            );
+                            if let Some((decrypted_data, crypto_state)) =
+                                CryptoNoise::decrypt_noise_kk_handshake_1::<
+                                    X25519,
+                                    ChaCha20Poly1305,
+                                    Sha256,
+                                    &[u8],
+                                >(
+                                    data.data,
+                                    crypto_account.clone(),
+                                    remote_id,
+                                    user_account.clone(),
+                                    message.session_id,
+                                )
+                            {
+                                // create confirmation messaging message
+                                let messaging_message =
+                                    CryptoSessionManager::create_second_handshake_message(
+                                        message_id.to_owned(),
+                                    );
+
+                                // encrypt confirmation message
+                                if let Some((Some(message), nonce, session_id, crypto_state)) =
+                                    Self::encrypt_with_state(
+                                        messaging_message,
+                                        remote_id,
+                                        crypto_account,
+                                        crypto_state,
+                                    )
+                                {
+                                    log::trace!(
+                                        "create first handshake cryptoservice confirmation message"
+                                    );
+                                    let encrypted_message = Self::create_encrypted_protobuf(
+                                        nonce,
+                                        session_id,
+                                        message,
+                                        crypto_state,
+                                    );
+
+                                    // pack and send encrypted message
+                                    match messaging::Messaging::pack_and_send_encrypted_data(
+                                        &user_account,
+                                        &remote_id,
+                                        encrypted_message,
+                                        message_id,
+                                        true,
+                                    ) {
+                                        Ok(message_signature) => {
+                                            log::trace!("sending cryptoservice secondhandshake message with\n\tsignature: {}", bs58::encode(message_signature).into_string());
+                                        }
+                                        Err(error_message) => log::error!(
+                                            "failed sending 2nd handshake message {}",
+                                            error_message
+                                        ),
+                                    }
+                                } else {
+                                    log::error!("failed encrypting cryptosession 2nd handshake confirmation");
+                                }
+
+                                // return decrypted first handshake message
+                                return Some(decrypted_data);
+                            } else {
+                                // decryption of first handshake failed
+                                return None;
+                            }
                         }
                     }
                     _ => {

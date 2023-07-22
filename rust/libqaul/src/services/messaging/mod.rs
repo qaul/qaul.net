@@ -176,14 +176,20 @@ impl Messaging {
         }
     }
 
-    /// process confirmation message and return (sender_id, message_id)
+    /// Process confirmation message
+    ///
+    /// Removes the message from the unconfirmed table and notifies
+    /// the related service (if needed) that the message was received.
     pub fn on_confirmed_message(
         signature: &Vec<u8>,
         sender_id: PeerId,
         user_account: UserAccount,
         confirmation: proto::Confirmation,
     ) {
-        log::trace!("message confirmed");
+        log::trace!(
+            "incoming confirmation message for signature: {}",
+            bs58::encode(signature).into_string()
+        );
 
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
@@ -309,13 +315,17 @@ impl Messaging {
     }
 
     /// pack, sign and schedule a message for sending
+    ///
+    /// The function returns the message signature on success,
+    /// otherwise an error message string.
+
     pub fn pack_and_send_message(
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
         _message_type: MessagingServiceType,
         message_id: &Vec<u8>,
-        is_common_message: bool,
+        message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
         log::trace!("pack_and_send_message to {}", receiver.to_base58());
 
@@ -330,10 +340,31 @@ impl Messaging {
             None => return Err("Encryption error occurred".to_string()),
         }
 
+        return Self::pack_and_send_encrypted_data(
+            user_account,
+            receiver,
+            encrypted_message,
+            message_id,
+            message_needs_confirmation,
+        );
+    }
+
+    /// pack, sign and schedule encrypted message data
+    ///
+    /// The function returns the message signature on success,
+    /// otherwise an error message string.
+    pub fn pack_and_send_encrypted_data(
+        user_account: &UserAccount,
+        receiver: &PeerId,
+        encrypted_message: proto::Encrypted,
+        message_id: &Vec<u8>,
+        message_needs_confirmation: bool,
+    ) -> Result<Vec<u8>, String> {
         log::trace!(
-            "sender_id: {}, receiver_id: {}",
+            "pack_and_send_encrypted_data\n\tsender_id: {},\n\treceiver_id: {},\n\tneeds confirmation: {:?}",
             user_account.id.to_base58(),
-            receiver.to_base58()
+            receiver.to_base58(),
+            message_needs_confirmation
         );
 
         let envelop_payload = proto::EnvelopPayload {
@@ -364,7 +395,7 @@ impl Messaging {
             };
 
             // in common message case, save into unconfirmed table
-            if is_common_message {
+            if message_needs_confirmation {
                 Self::save_unconfirmed_message(
                     MessagingServiceType::Chat,
                     message_id,
@@ -378,7 +409,7 @@ impl Messaging {
             Self::schedule_message(
                 receiver.clone(),
                 container,
-                is_common_message,
+                message_needs_confirmation,
                 false,
                 false,
                 false,
@@ -545,6 +576,12 @@ impl Messaging {
         receiver_id: &PeerId,
         signature: &Vec<u8>,
     ) -> Result<Vec<u8>, String> {
+        log::trace!(
+            "send confirmation message to\n\tuser_id: {}\n\tfor signature: {}",
+            user_id.to_string(),
+            bs58::encode(signature).into_string()
+        );
+
         if let Some(user) = UserAccounts::get_by_id(user_id.clone()) {
             // create timestamp
             let timestamp = Timestamp::get_timestamp();

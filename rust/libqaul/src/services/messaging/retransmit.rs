@@ -59,7 +59,7 @@ impl MessagingRetransmit {
                             let receiver =
                                 PeerId::from_bytes(&unconfirmed_message.receiver_id).unwrap();
 
-                            log::error!(
+                            log::trace!(
                                 "retrans message, signature: {}",
                                 bs58::encode(container.signature.clone()).into_string()
                             );
