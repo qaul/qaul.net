@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: rpc/debug.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -21,6 +25,11 @@ enum Debug_Message {
 }
 
 class Debug extends $pb.GeneratedMessage {
+  factory Debug() => create();
+  Debug._() : super();
+  factory Debug.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Debug.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Debug_Message> _Debug_MessageByTag = {
     1 : Debug_Message.heartbeatRequest,
     2 : Debug_Message.heartbeatResponse,
@@ -31,54 +40,18 @@ class Debug extends $pb.GeneratedMessage {
     7 : Debug_Message.deleteLibqaulLogsRequest,
     0 : Debug_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Debug', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Debug', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6, 7])
-    ..aOM<HeartbeatRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatRequest', subBuilder: HeartbeatRequest.create)
-    ..aOM<HeartbeatResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'heartbeatResponse', subBuilder: HeartbeatResponse.create)
-    ..aOM<Panic>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'panic', subBuilder: Panic.create)
-    ..aOM<LogToFile>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logToFile', subBuilder: LogToFile.create)
-    ..aOM<StoragePathRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathRequest', subBuilder: StoragePathRequest.create)
-    ..aOM<StoragePathResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePathResponse', subBuilder: StoragePathResponse.create)
-    ..aOM<DeleteLibqaulLogsRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deleteLibqaulLogsRequest', subBuilder: DeleteLibqaulLogsRequest.create)
+    ..aOM<HeartbeatRequest>(1, _omitFieldNames ? '' : 'heartbeatRequest', subBuilder: HeartbeatRequest.create)
+    ..aOM<HeartbeatResponse>(2, _omitFieldNames ? '' : 'heartbeatResponse', subBuilder: HeartbeatResponse.create)
+    ..aOM<Panic>(3, _omitFieldNames ? '' : 'panic', subBuilder: Panic.create)
+    ..aOM<LogToFile>(4, _omitFieldNames ? '' : 'logToFile', subBuilder: LogToFile.create)
+    ..aOM<StoragePathRequest>(5, _omitFieldNames ? '' : 'storagePathRequest', subBuilder: StoragePathRequest.create)
+    ..aOM<StoragePathResponse>(6, _omitFieldNames ? '' : 'storagePathResponse', subBuilder: StoragePathResponse.create)
+    ..aOM<DeleteLibqaulLogsRequest>(7, _omitFieldNames ? '' : 'deleteLibqaulLogsRequest', subBuilder: DeleteLibqaulLogsRequest.create)
     ..hasRequiredFields = false
   ;
 
-  Debug._() : super();
-  factory Debug({
-    HeartbeatRequest? heartbeatRequest,
-    HeartbeatResponse? heartbeatResponse,
-    Panic? panic,
-    LogToFile? logToFile,
-    StoragePathRequest? storagePathRequest,
-    StoragePathResponse? storagePathResponse,
-    DeleteLibqaulLogsRequest? deleteLibqaulLogsRequest,
-  }) {
-    final _result = create();
-    if (heartbeatRequest != null) {
-      _result.heartbeatRequest = heartbeatRequest;
-    }
-    if (heartbeatResponse != null) {
-      _result.heartbeatResponse = heartbeatResponse;
-    }
-    if (panic != null) {
-      _result.panic = panic;
-    }
-    if (logToFile != null) {
-      _result.logToFile = logToFile;
-    }
-    if (storagePathRequest != null) {
-      _result.storagePathRequest = storagePathRequest;
-    }
-    if (storagePathResponse != null) {
-      _result.storagePathResponse = storagePathResponse;
-    }
-    if (deleteLibqaulLogsRequest != null) {
-      _result.deleteLibqaulLogsRequest = deleteLibqaulLogsRequest;
-    }
-    return _result;
-  }
-  factory Debug.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Debug.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -88,8 +61,10 @@ class Debug extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Debug copyWith(void Function(Debug) updates) => super.copyWith((message) => updates(message as Debug)) as Debug; // ignore: deprecated_member_use
+  Debug copyWith(void Function(Debug) updates) => super.copyWith((message) => updates(message as Debug)) as Debug;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Debug create() => Debug._();
   Debug createEmptyInstance() => create();
@@ -180,14 +155,15 @@ class Debug extends $pb.GeneratedMessage {
 }
 
 class HeartbeatRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HeartbeatRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  factory HeartbeatRequest() => create();
+  HeartbeatRequest._() : super();
+  factory HeartbeatRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory HeartbeatRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HeartbeatRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  HeartbeatRequest._() : super();
-  factory HeartbeatRequest() => create();
-  factory HeartbeatRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory HeartbeatRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -197,8 +173,10 @@ class HeartbeatRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HeartbeatRequest copyWith(void Function(HeartbeatRequest) updates) => super.copyWith((message) => updates(message as HeartbeatRequest)) as HeartbeatRequest; // ignore: deprecated_member_use
+  HeartbeatRequest copyWith(void Function(HeartbeatRequest) updates) => super.copyWith((message) => updates(message as HeartbeatRequest)) as HeartbeatRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HeartbeatRequest create() => HeartbeatRequest._();
   HeartbeatRequest createEmptyInstance() => create();
@@ -209,14 +187,15 @@ class HeartbeatRequest extends $pb.GeneratedMessage {
 }
 
 class HeartbeatResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HeartbeatResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  factory HeartbeatResponse() => create();
+  HeartbeatResponse._() : super();
+  factory HeartbeatResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory HeartbeatResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'HeartbeatResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  HeartbeatResponse._() : super();
-  factory HeartbeatResponse() => create();
-  factory HeartbeatResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory HeartbeatResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -226,8 +205,10 @@ class HeartbeatResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  HeartbeatResponse copyWith(void Function(HeartbeatResponse) updates) => super.copyWith((message) => updates(message as HeartbeatResponse)) as HeartbeatResponse; // ignore: deprecated_member_use
+  HeartbeatResponse copyWith(void Function(HeartbeatResponse) updates) => super.copyWith((message) => updates(message as HeartbeatResponse)) as HeartbeatResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static HeartbeatResponse create() => HeartbeatResponse._();
   HeartbeatResponse createEmptyInstance() => create();
@@ -238,14 +219,15 @@ class HeartbeatResponse extends $pb.GeneratedMessage {
 }
 
 class Panic extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Panic', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  factory Panic() => create();
+  Panic._() : super();
+  factory Panic.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Panic.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Panic', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  Panic._() : super();
-  factory Panic() => create();
-  factory Panic.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Panic.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -255,8 +237,10 @@ class Panic extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Panic copyWith(void Function(Panic) updates) => super.copyWith((message) => updates(message as Panic)) as Panic; // ignore: deprecated_member_use
+  Panic copyWith(void Function(Panic) updates) => super.copyWith((message) => updates(message as Panic)) as Panic;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Panic create() => Panic._();
   Panic createEmptyInstance() => create();
@@ -267,23 +251,16 @@ class Panic extends $pb.GeneratedMessage {
 }
 
 class LogToFile extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LogToFile', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enable')
+  factory LogToFile() => create();
+  LogToFile._() : super();
+  factory LogToFile.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory LogToFile.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'LogToFile', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'enable')
     ..hasRequiredFields = false
   ;
 
-  LogToFile._() : super();
-  factory LogToFile({
-    $core.bool? enable,
-  }) {
-    final _result = create();
-    if (enable != null) {
-      _result.enable = enable;
-    }
-    return _result;
-  }
-  factory LogToFile.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory LogToFile.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -293,8 +270,10 @@ class LogToFile extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  LogToFile copyWith(void Function(LogToFile) updates) => super.copyWith((message) => updates(message as LogToFile)) as LogToFile; // ignore: deprecated_member_use
+  LogToFile copyWith(void Function(LogToFile) updates) => super.copyWith((message) => updates(message as LogToFile)) as LogToFile;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static LogToFile create() => LogToFile._();
   LogToFile createEmptyInstance() => create();
@@ -314,14 +293,15 @@ class LogToFile extends $pb.GeneratedMessage {
 }
 
 class StoragePathRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoragePathRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  factory StoragePathRequest() => create();
+  StoragePathRequest._() : super();
+  factory StoragePathRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoragePathRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StoragePathRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  StoragePathRequest._() : super();
-  factory StoragePathRequest() => create();
-  factory StoragePathRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StoragePathRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -331,8 +311,10 @@ class StoragePathRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  StoragePathRequest copyWith(void Function(StoragePathRequest) updates) => super.copyWith((message) => updates(message as StoragePathRequest)) as StoragePathRequest; // ignore: deprecated_member_use
+  StoragePathRequest copyWith(void Function(StoragePathRequest) updates) => super.copyWith((message) => updates(message as StoragePathRequest)) as StoragePathRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static StoragePathRequest create() => StoragePathRequest._();
   StoragePathRequest createEmptyInstance() => create();
@@ -343,23 +325,16 @@ class StoragePathRequest extends $pb.GeneratedMessage {
 }
 
 class StoragePathResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoragePathResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storagePath')
+  factory StoragePathResponse() => create();
+  StoragePathResponse._() : super();
+  factory StoragePathResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoragePathResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StoragePathResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'storagePath')
     ..hasRequiredFields = false
   ;
 
-  StoragePathResponse._() : super();
-  factory StoragePathResponse({
-    $core.String? storagePath,
-  }) {
-    final _result = create();
-    if (storagePath != null) {
-      _result.storagePath = storagePath;
-    }
-    return _result;
-  }
-  factory StoragePathResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StoragePathResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -369,8 +344,10 @@ class StoragePathResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  StoragePathResponse copyWith(void Function(StoragePathResponse) updates) => super.copyWith((message) => updates(message as StoragePathResponse)) as StoragePathResponse; // ignore: deprecated_member_use
+  StoragePathResponse copyWith(void Function(StoragePathResponse) updates) => super.copyWith((message) => updates(message as StoragePathResponse)) as StoragePathResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static StoragePathResponse create() => StoragePathResponse._();
   StoragePathResponse createEmptyInstance() => create();
@@ -390,14 +367,15 @@ class StoragePathResponse extends $pb.GeneratedMessage {
 }
 
 class DeleteLibqaulLogsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteLibqaulLogsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
+  factory DeleteLibqaulLogsRequest() => create();
+  DeleteLibqaulLogsRequest._() : super();
+  factory DeleteLibqaulLogsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteLibqaulLogsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteLibqaulLogsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  DeleteLibqaulLogsRequest._() : super();
-  factory DeleteLibqaulLogsRequest() => create();
-  factory DeleteLibqaulLogsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeleteLibqaulLogsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -407,8 +385,10 @@ class DeleteLibqaulLogsRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DeleteLibqaulLogsRequest copyWith(void Function(DeleteLibqaulLogsRequest) updates) => super.copyWith((message) => updates(message as DeleteLibqaulLogsRequest)) as DeleteLibqaulLogsRequest; // ignore: deprecated_member_use
+  DeleteLibqaulLogsRequest copyWith(void Function(DeleteLibqaulLogsRequest) updates) => super.copyWith((message) => updates(message as DeleteLibqaulLogsRequest)) as DeleteLibqaulLogsRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DeleteLibqaulLogsRequest create() => DeleteLibqaulLogsRequest._();
   DeleteLibqaulLogsRequest createEmptyInstance() => create();
@@ -418,3 +398,6 @@ class DeleteLibqaulLogsRequest extends $pb.GeneratedMessage {
   static DeleteLibqaulLogsRequest? _defaultInstance;
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

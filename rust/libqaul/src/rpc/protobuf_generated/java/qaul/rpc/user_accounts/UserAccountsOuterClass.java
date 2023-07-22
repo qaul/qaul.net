@@ -74,7 +74,7 @@ public final class UserAccountsOuterClass {
      */
     qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccountOrBuilder getMyUserAccountOrBuilder();
 
-    public qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts.MessageCase getMessageCase();
+    qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -102,11 +102,6 @@ public final class UserAccountsOuterClass {
       return new UserAccounts();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.user_accounts.UserAccountsOuterClass.internal_static_qaul_rpc_user_accounts_UserAccounts_descriptor;
@@ -121,6 +116,7 @@ public final class UserAccountsOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -449,11 +445,13 @@ public final class UserAccountsOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -532,6 +530,7 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (createUserAccountBuilder_ != null) {
           createUserAccountBuilder_.clear();
         }
@@ -569,33 +568,31 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts buildPartial() {
         qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts result = new qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts(this);
-        if (messageCase_ == 1) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 2) {
-          if (createUserAccountBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = createUserAccountBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (defaultUserAccountBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = defaultUserAccountBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (myUserAccountBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = myUserAccountBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.user_accounts.UserAccountsOuterClass.UserAccounts result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 2 &&
+            createUserAccountBuilder_ != null) {
+          result.message_ = createUserAccountBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            defaultUserAccountBuilder_ != null) {
+          result.message_ = defaultUserAccountBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            myUserAccountBuilder_ != null) {
+          result.message_ = myUserAccountBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -745,6 +742,7 @@ public final class UserAccountsOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       /**
        * <code>bool get_default_user_account = 1;</code>
@@ -769,6 +767,7 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder setGetDefaultUserAccount(boolean value) {
+
         messageCase_ = 1;
         message_ = value;
         onChanged();
@@ -925,7 +924,7 @@ public final class UserAccountsOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return createUserAccountBuilder_;
       }
 
@@ -1067,7 +1066,7 @@ public final class UserAccountsOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return defaultUserAccountBuilder_;
       }
 
@@ -1209,7 +1208,7 @@ public final class UserAccountsOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return myUserAccountBuilder_;
       }
       @java.lang.Override
@@ -1319,11 +1318,6 @@ public final class UserAccountsOuterClass {
       return new CreateUserAccount();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.user_accounts.UserAccountsOuterClass.internal_static_qaul_rpc_user_accounts_CreateUserAccount_descriptor;
@@ -1338,7 +1332,8 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <code>string name = 1;</code>
      * @return The name.
@@ -1483,11 +1478,13 @@ public final class UserAccountsOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1566,8 +1563,8 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         name_ = "";
-
         return this;
       }
 
@@ -1594,9 +1591,16 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount buildPartial() {
         qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount result = new qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount(this);
-        result.name_ = name_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
       }
 
       @java.lang.Override
@@ -1645,6 +1649,7 @@ public final class UserAccountsOuterClass {
         if (other == qaul.rpc.user_accounts.UserAccountsOuterClass.CreateUserAccount.getDefaultInstance()) return this;
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -1675,7 +1680,7 @@ public final class UserAccountsOuterClass {
                 break;
               case 10: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -1693,6 +1698,7 @@ public final class UserAccountsOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object name_ = "";
       /**
@@ -1735,11 +1741,9 @@ public final class UserAccountsOuterClass {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1748,8 +1752,8 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -1760,12 +1764,10 @@ public final class UserAccountsOuterClass {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1884,11 +1886,6 @@ public final class UserAccountsOuterClass {
       return new DefaultUserAccount();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.user_accounts.UserAccountsOuterClass.internal_static_qaul_rpc_user_accounts_DefaultUserAccount_descriptor;
@@ -1903,7 +1900,7 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int USER_ACCOUNT_EXISTS_FIELD_NUMBER = 1;
-    private boolean userAccountExists_;
+    private boolean userAccountExists_ = false;
     /**
      * <code>bool user_account_exists = 1;</code>
      * @return The userAccountExists.
@@ -1936,7 +1933,7 @@ public final class UserAccountsOuterClass {
      */
     @java.lang.Override
     public qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccountOrBuilder getMyUserAccountOrBuilder() {
-      return getMyUserAccount();
+      return myUserAccount_ == null ? qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.getDefaultInstance() : myUserAccount_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2065,11 +2062,13 @@ public final class UserAccountsOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2148,12 +2147,11 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userAccountExists_ = false;
-
-        if (myUserAccountBuilder_ == null) {
-          myUserAccount_ = null;
-        } else {
-          myUserAccount_ = null;
+        myUserAccount_ = null;
+        if (myUserAccountBuilder_ != null) {
+          myUserAccountBuilder_.dispose();
           myUserAccountBuilder_ = null;
         }
         return this;
@@ -2182,14 +2180,21 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount buildPartial() {
         qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount result = new qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount(this);
-        result.userAccountExists_ = userAccountExists_;
-        if (myUserAccountBuilder_ == null) {
-          result.myUserAccount_ = myUserAccount_;
-        } else {
-          result.myUserAccount_ = myUserAccountBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.user_accounts.UserAccountsOuterClass.DefaultUserAccount result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userAccountExists_ = userAccountExists_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.myUserAccount_ = myUserAccountBuilder_ == null
+              ? myUserAccount_
+              : myUserAccountBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -2270,14 +2275,14 @@ public final class UserAccountsOuterClass {
                 break;
               case 8: {
                 userAccountExists_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 input.readMessage(
                     getMyUserAccountFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -2295,6 +2300,7 @@ public final class UserAccountsOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean userAccountExists_ ;
       /**
@@ -2311,8 +2317,9 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserAccountExists(boolean value) {
-        
+
         userAccountExists_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2321,7 +2328,7 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserAccountExists() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userAccountExists_ = false;
         onChanged();
         return this;
@@ -2335,7 +2342,7 @@ public final class UserAccountsOuterClass {
        * @return Whether the myUserAccount field is set.
        */
       public boolean hasMyUserAccount() {
-        return myUserAccountBuilder_ != null || myUserAccount_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
@@ -2357,11 +2364,11 @@ public final class UserAccountsOuterClass {
             throw new NullPointerException();
           }
           myUserAccount_ = value;
-          onChanged();
         } else {
           myUserAccountBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -2371,11 +2378,11 @@ public final class UserAccountsOuterClass {
           qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.Builder builderForValue) {
         if (myUserAccountBuilder_ == null) {
           myUserAccount_ = builderForValue.build();
-          onChanged();
         } else {
           myUserAccountBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -2383,38 +2390,38 @@ public final class UserAccountsOuterClass {
        */
       public Builder mergeMyUserAccount(qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount value) {
         if (myUserAccountBuilder_ == null) {
-          if (myUserAccount_ != null) {
-            myUserAccount_ =
-              qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.newBuilder(myUserAccount_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            myUserAccount_ != null &&
+            myUserAccount_ != qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.getDefaultInstance()) {
+            getMyUserAccountBuilder().mergeFrom(value);
           } else {
             myUserAccount_ = value;
           }
-          onChanged();
         } else {
           myUserAccountBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
        * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
        */
       public Builder clearMyUserAccount() {
-        if (myUserAccountBuilder_ == null) {
-          myUserAccount_ = null;
-          onChanged();
-        } else {
-          myUserAccount_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        myUserAccount_ = null;
+        if (myUserAccountBuilder_ != null) {
+          myUserAccountBuilder_.dispose();
           myUserAccountBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
        * <code>.qaul.rpc.user_accounts.MyUserAccount my_user_account = 2;</code>
        */
       public qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.Builder getMyUserAccountBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getMyUserAccountFieldBuilder().getBuilder();
       }
@@ -2605,11 +2612,6 @@ public final class UserAccountsOuterClass {
       return new MyUserAccount();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.user_accounts.UserAccountsOuterClass.internal_static_qaul_rpc_user_accounts_MyUserAccount_descriptor;
@@ -2624,7 +2626,8 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <code>string name = 1;</code>
      * @return The name.
@@ -2662,7 +2665,7 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes id = 2;</code>
      * @return The id.
@@ -2673,7 +2676,8 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int ID_BASE58_FIELD_NUMBER = 3;
-    private volatile java.lang.Object idBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object idBase58_ = "";
     /**
      * <code>string id_base58 = 3;</code>
      * @return The idBase58.
@@ -2711,7 +2715,7 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int KEY_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString key_;
+    private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes key = 4;</code>
      * @return The key.
@@ -2722,7 +2726,8 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int KEY_TYPE_FIELD_NUMBER = 5;
-    private volatile java.lang.Object keyType_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object keyType_ = "";
     /**
      * <code>string key_type = 5;</code>
      * @return The keyType.
@@ -2760,7 +2765,8 @@ public final class UserAccountsOuterClass {
     }
 
     public static final int KEY_BASE58_FIELD_NUMBER = 6;
-    private volatile java.lang.Object keyBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object keyBase58_ = "";
     /**
      * <code>string key_base58 = 6;</code>
      * @return The keyBase58.
@@ -2957,11 +2963,13 @@ public final class UserAccountsOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3040,18 +3048,13 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         name_ = "";
-
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         idBase58_ = "";
-
         key_ = com.google.protobuf.ByteString.EMPTY;
-
         keyType_ = "";
-
         keyBase58_ = "";
-
         return this;
       }
 
@@ -3078,14 +3081,31 @@ public final class UserAccountsOuterClass {
       @java.lang.Override
       public qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount buildPartial() {
         qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount result = new qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount(this);
-        result.name_ = name_;
-        result.id_ = id_;
-        result.idBase58_ = idBase58_;
-        result.key_ = key_;
-        result.keyType_ = keyType_;
-        result.keyBase58_ = keyBase58_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.idBase58_ = idBase58_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.key_ = key_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.keyType_ = keyType_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.keyBase58_ = keyBase58_;
+        }
       }
 
       @java.lang.Override
@@ -3134,6 +3154,7 @@ public final class UserAccountsOuterClass {
         if (other == qaul.rpc.user_accounts.UserAccountsOuterClass.MyUserAccount.getDefaultInstance()) return this;
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.getId() != com.google.protobuf.ByteString.EMPTY) {
@@ -3141,6 +3162,7 @@ public final class UserAccountsOuterClass {
         }
         if (!other.getIdBase58().isEmpty()) {
           idBase58_ = other.idBase58_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getKey() != com.google.protobuf.ByteString.EMPTY) {
@@ -3148,10 +3170,12 @@ public final class UserAccountsOuterClass {
         }
         if (!other.getKeyType().isEmpty()) {
           keyType_ = other.keyType_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (!other.getKeyBase58().isEmpty()) {
           keyBase58_ = other.keyBase58_;
+          bitField0_ |= 0x00000020;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -3182,32 +3206,32 @@ public final class UserAccountsOuterClass {
                 break;
               case 10: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 idBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 34: {
                 key_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
                 keyType_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 50: {
                 keyBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 50
               default: {
@@ -3225,6 +3249,7 @@ public final class UserAccountsOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object name_ = "";
       /**
@@ -3267,11 +3292,9 @@ public final class UserAccountsOuterClass {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3280,8 +3303,8 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -3292,12 +3315,10 @@ public final class UserAccountsOuterClass {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3317,11 +3338,9 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3330,7 +3349,7 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -3377,11 +3396,9 @@ public final class UserAccountsOuterClass {
        */
       public Builder setIdBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         idBase58_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3390,8 +3407,8 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearIdBase58() {
-        
         idBase58_ = getDefaultInstance().getIdBase58();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -3402,12 +3419,10 @@ public final class UserAccountsOuterClass {
        */
       public Builder setIdBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         idBase58_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3427,11 +3442,9 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder setKey(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         key_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -3440,7 +3453,7 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         key_ = getDefaultInstance().getKey();
         onChanged();
         return this;
@@ -3487,11 +3500,9 @@ public final class UserAccountsOuterClass {
        */
       public Builder setKeyType(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         keyType_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -3500,8 +3511,8 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearKeyType() {
-        
         keyType_ = getDefaultInstance().getKeyType();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -3512,12 +3523,10 @@ public final class UserAccountsOuterClass {
        */
       public Builder setKeyTypeBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         keyType_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -3563,11 +3572,9 @@ public final class UserAccountsOuterClass {
        */
       public Builder setKeyBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         keyBase58_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -3576,8 +3583,8 @@ public final class UserAccountsOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearKeyBase58() {
-        
         keyBase58_ = getDefaultInstance().getKeyBase58();
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -3588,12 +3595,10 @@ public final class UserAccountsOuterClass {
        */
       public Builder setKeyBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         keyBase58_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }

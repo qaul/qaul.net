@@ -203,6 +203,7 @@ public final class MessagingOuterClass {
   /**
    * <pre>
    * qaul network messaging service
+   *
    * is responsible to distribute messages to users
    * the container contains the entire message with signature
    * </pre>
@@ -229,11 +230,6 @@ public final class MessagingOuterClass {
       return new Container();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Container_descriptor;
@@ -248,7 +244,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int SIGNATURE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString signature_;
+    private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * signed by sending user
@@ -297,7 +293,7 @@ public final class MessagingOuterClass {
      */
     @java.lang.Override
     public qaul.net.messaging.MessagingOuterClass.EnvelopeOrBuilder getEnvelopeOrBuilder() {
-      return getEnvelope();
+      return envelope_ == null ? qaul.net.messaging.MessagingOuterClass.Envelope.getDefaultInstance() : envelope_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -425,11 +421,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Container parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Container parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -474,6 +472,7 @@ public final class MessagingOuterClass {
     /**
      * <pre>
      * qaul network messaging service
+     *
      * is responsible to distribute messages to users
      * the container contains the entire message with signature
      * </pre>
@@ -510,12 +509,11 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         signature_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (envelopeBuilder_ == null) {
-          envelope_ = null;
-        } else {
-          envelope_ = null;
+        envelope_ = null;
+        if (envelopeBuilder_ != null) {
+          envelopeBuilder_.dispose();
           envelopeBuilder_ = null;
         }
         return this;
@@ -544,14 +542,21 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Container buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Container result = new qaul.net.messaging.MessagingOuterClass.Container(this);
-        result.signature_ = signature_;
-        if (envelopeBuilder_ == null) {
-          result.envelope_ = envelope_;
-        } else {
-          result.envelope_ = envelopeBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Container result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.signature_ = signature_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.envelope_ = envelopeBuilder_ == null
+              ? envelope_
+              : envelopeBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -632,14 +637,14 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 signature_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 input.readMessage(
                     getEnvelopeFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -657,6 +662,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -681,11 +687,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         signature_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -698,7 +702,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSignature() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
@@ -716,7 +720,7 @@ public final class MessagingOuterClass {
        * @return Whether the envelope field is set.
        */
       public boolean hasEnvelope() {
-        return envelopeBuilder_ != null || envelope_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <pre>
@@ -746,11 +750,11 @@ public final class MessagingOuterClass {
             throw new NullPointerException();
           }
           envelope_ = value;
-          onChanged();
         } else {
           envelopeBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -764,11 +768,11 @@ public final class MessagingOuterClass {
           qaul.net.messaging.MessagingOuterClass.Envelope.Builder builderForValue) {
         if (envelopeBuilder_ == null) {
           envelope_ = builderForValue.build();
-          onChanged();
         } else {
           envelopeBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -780,17 +784,18 @@ public final class MessagingOuterClass {
        */
       public Builder mergeEnvelope(qaul.net.messaging.MessagingOuterClass.Envelope value) {
         if (envelopeBuilder_ == null) {
-          if (envelope_ != null) {
-            envelope_ =
-              qaul.net.messaging.MessagingOuterClass.Envelope.newBuilder(envelope_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            envelope_ != null &&
+            envelope_ != qaul.net.messaging.MessagingOuterClass.Envelope.getDefaultInstance()) {
+            getEnvelopeBuilder().mergeFrom(value);
           } else {
             envelope_ = value;
           }
-          onChanged();
         } else {
           envelopeBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -801,14 +806,13 @@ public final class MessagingOuterClass {
        * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
        */
       public Builder clearEnvelope() {
-        if (envelopeBuilder_ == null) {
-          envelope_ = null;
-          onChanged();
-        } else {
-          envelope_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        envelope_ = null;
+        if (envelopeBuilder_ != null) {
+          envelopeBuilder_.dispose();
           envelopeBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -819,7 +823,7 @@ public final class MessagingOuterClass {
        * <code>.qaul.net.messaging.Envelope envelope = 2;</code>
        */
       public qaul.net.messaging.MessagingOuterClass.Envelope.Builder getEnvelopeBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getEnvelopeFieldBuilder().getBuilder();
       }
@@ -985,11 +989,6 @@ public final class MessagingOuterClass {
       return new Envelope();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Envelope_descriptor;
@@ -1004,7 +1003,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString senderId_;
+    private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the qaul ID of the sender
@@ -1019,7 +1018,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int RECEIVER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString receiverId_;
+    private com.google.protobuf.ByteString receiverId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the qaul ID of the receiver
@@ -1034,7 +1033,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int PAYLOAD_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString payload_;
+    private com.google.protobuf.ByteString payload_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * payload
@@ -1179,11 +1178,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Envelope parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Envelope parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1262,12 +1263,10 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         senderId_ = com.google.protobuf.ByteString.EMPTY;
-
         receiverId_ = com.google.protobuf.ByteString.EMPTY;
-
         payload_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -1294,11 +1293,22 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Envelope buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Envelope result = new qaul.net.messaging.MessagingOuterClass.Envelope(this);
-        result.senderId_ = senderId_;
-        result.receiverId_ = receiverId_;
-        result.payload_ = payload_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Envelope result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.receiverId_ = receiverId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.payload_ = payload_;
+        }
       }
 
       @java.lang.Override
@@ -1382,17 +1392,17 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 senderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 receiverId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 payload_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -1410,6 +1420,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -1434,11 +1445,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1451,7 +1460,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
@@ -1480,11 +1489,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setReceiverId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         receiverId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1497,7 +1504,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearReceiverId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         receiverId_ = getDefaultInstance().getReceiverId();
         onChanged();
         return this;
@@ -1526,11 +1533,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setPayload(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         payload_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -1543,7 +1548,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearPayload() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         payload_ = getDefaultInstance().getPayload();
         onChanged();
         return this;
@@ -1662,7 +1667,7 @@ public final class MessagingOuterClass {
      */
     com.google.protobuf.ByteString getDtn();
 
-    public qaul.net.messaging.MessagingOuterClass.EnvelopPayload.PayloadCase getPayloadCase();
+    qaul.net.messaging.MessagingOuterClass.EnvelopPayload.PayloadCase getPayloadCase();
   }
   /**
    * <pre>
@@ -1690,11 +1695,6 @@ public final class MessagingOuterClass {
       return new EnvelopPayload();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_EnvelopPayload_descriptor;
@@ -1709,6 +1709,7 @@ public final class MessagingOuterClass {
     }
 
     private int payloadCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object payload_;
     public enum PayloadCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1960,11 +1961,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.EnvelopPayload parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.EnvelopPayload parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2043,6 +2046,7 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (encryptedBuilder_ != null) {
           encryptedBuilder_.clear();
         }
@@ -2074,19 +2078,23 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.EnvelopPayload buildPartial() {
         qaul.net.messaging.MessagingOuterClass.EnvelopPayload result = new qaul.net.messaging.MessagingOuterClass.EnvelopPayload(this);
-        if (payloadCase_ == 1) {
-          if (encryptedBuilder_ == null) {
-            result.payload_ = payload_;
-          } else {
-            result.payload_ = encryptedBuilder_.build();
-          }
-        }
-        if (payloadCase_ == 2) {
-          result.payload_ = payload_;
-        }
-        result.payloadCase_ = payloadCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.EnvelopPayload result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.net.messaging.MessagingOuterClass.EnvelopPayload result) {
+        result.payloadCase_ = payloadCase_;
+        result.payload_ = this.payload_;
+        if (payloadCase_ == 1 &&
+            encryptedBuilder_ != null) {
+          result.payload_ = encryptedBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -2214,6 +2222,7 @@ public final class MessagingOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.Encrypted, qaul.net.messaging.MessagingOuterClass.Encrypted.Builder, qaul.net.messaging.MessagingOuterClass.EncryptedOrBuilder> encryptedBuilder_;
@@ -2389,7 +2398,7 @@ public final class MessagingOuterClass {
           payload_ = null;
         }
         payloadCase_ = 1;
-        onChanged();;
+        onChanged();
         return encryptedBuilder_;
       }
 
@@ -2428,10 +2437,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setDtn(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  payloadCase_ = 2;
+        if (value == null) { throw new NullPointerException(); }
+        payloadCase_ = 2;
         payload_ = value;
         onChanged();
         return this;
@@ -2626,11 +2633,6 @@ public final class MessagingOuterClass {
       return new Encrypted();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Encrypted_descriptor;
@@ -2645,7 +2647,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int STATE_FIELD_NUMBER = 1;
-    private int state_;
+    private int state_ = 0;
     /**
      * <pre>
      * state of the crypto session
@@ -2666,13 +2668,12 @@ public final class MessagingOuterClass {
      * @return The state.
      */
     @java.lang.Override public qaul.net.messaging.MessagingOuterClass.CryptoState getState() {
-      @SuppressWarnings("deprecation")
-      qaul.net.messaging.MessagingOuterClass.CryptoState result = qaul.net.messaging.MessagingOuterClass.CryptoState.valueOf(state_);
+      qaul.net.messaging.MessagingOuterClass.CryptoState result = qaul.net.messaging.MessagingOuterClass.CryptoState.forNumber(state_);
       return result == null ? qaul.net.messaging.MessagingOuterClass.CryptoState.UNRECOGNIZED : result;
     }
 
     public static final int SESSION_ID_FIELD_NUMBER = 2;
-    private int sessionId_;
+    private int sessionId_ = 0;
     /**
      * <pre>
      * crypto session id
@@ -2687,6 +2688,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int DATA_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.net.messaging.MessagingOuterClass.Data> data_;
     /**
      * <pre>
@@ -2883,11 +2885,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Encrypted parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Encrypted parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2966,17 +2970,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         state_ = 0;
-
         sessionId_ = 0;
-
         if (dataBuilder_ == null) {
           data_ = java.util.Collections.emptyList();
         } else {
           data_ = null;
           dataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -3003,20 +3006,32 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Encrypted buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Encrypted result = new qaul.net.messaging.MessagingOuterClass.Encrypted(this);
-        int from_bitField0_ = bitField0_;
-        result.state_ = state_;
-        result.sessionId_ = sessionId_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.messaging.MessagingOuterClass.Encrypted result) {
         if (dataBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000004) != 0)) {
             data_ = java.util.Collections.unmodifiableList(data_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000004);
           }
           result.data_ = data_;
         } else {
           result.data_ = dataBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Encrypted result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.state_ = state_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.sessionId_ = sessionId_;
+        }
       }
 
       @java.lang.Override
@@ -3073,7 +3088,7 @@ public final class MessagingOuterClass {
           if (!other.data_.isEmpty()) {
             if (data_.isEmpty()) {
               data_ = other.data_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
             } else {
               ensureDataIsMutable();
               data_.addAll(other.data_);
@@ -3086,7 +3101,7 @@ public final class MessagingOuterClass {
               dataBuilder_.dispose();
               dataBuilder_ = null;
               data_ = other.data_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
               dataBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getDataFieldBuilder() : null;
@@ -3123,12 +3138,12 @@ public final class MessagingOuterClass {
                 break;
               case 8: {
                 state_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 sessionId_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
@@ -3183,8 +3198,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setStateValue(int value) {
-        
         state_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3198,8 +3213,7 @@ public final class MessagingOuterClass {
        */
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.CryptoState getState() {
-        @SuppressWarnings("deprecation")
-        qaul.net.messaging.MessagingOuterClass.CryptoState result = qaul.net.messaging.MessagingOuterClass.CryptoState.valueOf(state_);
+        qaul.net.messaging.MessagingOuterClass.CryptoState result = qaul.net.messaging.MessagingOuterClass.CryptoState.forNumber(state_);
         return result == null ? qaul.net.messaging.MessagingOuterClass.CryptoState.UNRECOGNIZED : result;
       }
       /**
@@ -3215,7 +3229,7 @@ public final class MessagingOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         state_ = value.getNumber();
         onChanged();
         return this;
@@ -3229,7 +3243,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearState() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         state_ = 0;
         onChanged();
         return this;
@@ -3258,8 +3272,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSessionId(int value) {
-        
+
         sessionId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3272,7 +3287,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSessionId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         sessionId_ = 0;
         onChanged();
         return this;
@@ -3281,9 +3296,9 @@ public final class MessagingOuterClass {
       private java.util.List<qaul.net.messaging.MessagingOuterClass.Data> data_ =
         java.util.Collections.emptyList();
       private void ensureDataIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           data_ = new java.util.ArrayList<qaul.net.messaging.MessagingOuterClass.Data>(data_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000004;
          }
       }
 
@@ -3488,7 +3503,7 @@ public final class MessagingOuterClass {
       public Builder clearData() {
         if (dataBuilder_ == null) {
           data_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
         } else {
           dataBuilder_.clear();
@@ -3600,7 +3615,7 @@ public final class MessagingOuterClass {
           dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.net.messaging.MessagingOuterClass.Data, qaul.net.messaging.MessagingOuterClass.Data.Builder, qaul.net.messaging.MessagingOuterClass.DataOrBuilder>(
                   data_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000004) != 0),
                   getParentForChildren(),
                   isClean());
           data_ = null;
@@ -3678,6 +3693,7 @@ public final class MessagingOuterClass {
     /**
      * <pre>
      * message nonce for encryption
+     *
      * each nonce is only used once per key
      * and increases by one fore each new data package.
      * </pre>
@@ -3726,11 +3742,6 @@ public final class MessagingOuterClass {
       return new Data();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Data_descriptor;
@@ -3745,10 +3756,11 @@ public final class MessagingOuterClass {
     }
 
     public static final int NONCE_FIELD_NUMBER = 1;
-    private long nonce_;
+    private long nonce_ = 0L;
     /**
      * <pre>
      * message nonce for encryption
+     *
      * each nonce is only used once per key
      * and increases by one fore each new data package.
      * </pre>
@@ -3762,7 +3774,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int DATA_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString data_;
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the encrypted message data slice
@@ -3899,11 +3911,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Data parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Data parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3982,10 +3996,9 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         nonce_ = 0L;
-
         data_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -4012,10 +4025,19 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Data buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Data result = new qaul.net.messaging.MessagingOuterClass.Data(this);
-        result.nonce_ = nonce_;
-        result.data_ = data_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Data result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.nonce_ = nonce_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.data_ = data_;
+        }
       }
 
       @java.lang.Override
@@ -4096,12 +4118,12 @@ public final class MessagingOuterClass {
                 break;
               case 8: {
                 nonce_ = input.readUInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 data_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -4119,11 +4141,13 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long nonce_ ;
       /**
        * <pre>
        * message nonce for encryption
+       *
        * each nonce is only used once per key
        * and increases by one fore each new data package.
        * </pre>
@@ -4138,6 +4162,7 @@ public final class MessagingOuterClass {
       /**
        * <pre>
        * message nonce for encryption
+       *
        * each nonce is only used once per key
        * and increases by one fore each new data package.
        * </pre>
@@ -4147,14 +4172,16 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setNonce(long value) {
-        
+
         nonce_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * message nonce for encryption
+       *
        * each nonce is only used once per key
        * and increases by one fore each new data package.
        * </pre>
@@ -4163,7 +4190,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearNonce() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         nonce_ = 0L;
         onChanged();
         return this;
@@ -4196,11 +4223,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         data_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4215,7 +4240,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearData() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;
@@ -4450,7 +4475,7 @@ public final class MessagingOuterClass {
      */
     qaul.net.messaging.MessagingOuterClass.CommonMessageOrBuilder getCommonMessageOrBuilder();
 
-    public qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase getMessageCase();
+    qaul.net.messaging.MessagingOuterClass.Messaging.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -4478,11 +4503,6 @@ public final class MessagingOuterClass {
       return new Messaging();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Messaging_descriptor;
@@ -4497,6 +4517,7 @@ public final class MessagingOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -5000,11 +5021,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Messaging parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Messaging parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5083,6 +5106,7 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (confirmationMessageBuilder_ != null) {
           confirmationMessageBuilder_.clear();
         }
@@ -5129,51 +5153,43 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Messaging buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Messaging result = new qaul.net.messaging.MessagingOuterClass.Messaging(this);
-        if (messageCase_ == 1) {
-          if (confirmationMessageBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = confirmationMessageBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (dtnResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (cryptoServiceBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = cryptoServiceBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (rtcStreamMessageBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = rtcStreamMessageBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (groupInviteMessageBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInviteMessageBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (commonMessageBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = commonMessageBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Messaging result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.net.messaging.MessagingOuterClass.Messaging result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            confirmationMessageBuilder_ != null) {
+          result.message_ = confirmationMessageBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            dtnResponseBuilder_ != null) {
+          result.message_ = dtnResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            cryptoServiceBuilder_ != null) {
+          result.message_ = cryptoServiceBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            rtcStreamMessageBuilder_ != null) {
+          result.message_ = rtcStreamMessageBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            groupInviteMessageBuilder_ != null) {
+          result.message_ = groupInviteMessageBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            commonMessageBuilder_ != null) {
+          result.message_ = commonMessageBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -5347,6 +5363,7 @@ public final class MessagingOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.messaging.MessagingOuterClass.Confirmation, qaul.net.messaging.MessagingOuterClass.Confirmation.Builder, qaul.net.messaging.MessagingOuterClass.ConfirmationOrBuilder> confirmationMessageBuilder_;
@@ -5522,7 +5539,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return confirmationMessageBuilder_;
       }
 
@@ -5700,7 +5717,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return dtnResponseBuilder_;
       }
 
@@ -5878,7 +5895,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return cryptoServiceBuilder_;
       }
 
@@ -6056,7 +6073,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return rtcStreamMessageBuilder_;
       }
 
@@ -6234,7 +6251,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return groupInviteMessageBuilder_;
       }
 
@@ -6412,7 +6429,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return commonMessageBuilder_;
       }
       @java.lang.Override
@@ -6506,6 +6523,7 @@ public final class MessagingOuterClass {
   /**
    * <pre>
    * message received confirmation
+   *
    * every message that was received by a user
    * sends an acknowledgment package, to the sender
    * to confirm the receive.
@@ -6533,11 +6551,6 @@ public final class MessagingOuterClass {
       return new Confirmation();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Confirmation_descriptor;
@@ -6552,7 +6565,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int SIGNATURE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString signature_;
+    private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message ID
@@ -6567,7 +6580,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int RECEIVED_AT_FIELD_NUMBER = 2;
-    private long receivedAt_;
+    private long receivedAt_ = 0L;
     /**
      * <pre>
      * received at timestamp
@@ -6702,11 +6715,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Confirmation parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Confirmation parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6751,6 +6766,7 @@ public final class MessagingOuterClass {
     /**
      * <pre>
      * message received confirmation
+     *
      * every message that was received by a user
      * sends an acknowledgment package, to the sender
      * to confirm the receive.
@@ -6788,10 +6804,9 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         signature_ = com.google.protobuf.ByteString.EMPTY;
-
         receivedAt_ = 0L;
-
         return this;
       }
 
@@ -6818,10 +6833,19 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Confirmation buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Confirmation result = new qaul.net.messaging.MessagingOuterClass.Confirmation(this);
-        result.signature_ = signature_;
-        result.receivedAt_ = receivedAt_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Confirmation result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.signature_ = signature_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.receivedAt_ = receivedAt_;
+        }
       }
 
       @java.lang.Override
@@ -6902,12 +6926,12 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 signature_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 receivedAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -6925,6 +6949,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -6949,11 +6974,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         signature_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6966,7 +6989,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSignature() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
@@ -6995,8 +7018,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setReceivedAt(long value) {
-        
+
         receivedAt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -7009,7 +7033,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearReceivedAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         receivedAt_ = 0L;
         onChanged();
         return this;
@@ -7081,10 +7105,21 @@ public final class MessagingOuterClass {
   public interface CryptoServiceOrBuilder extends
       // @@protoc_insertion_point(interface_extends:qaul.net.messaging.CryptoService)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * message data
+     * </pre>
+     *
+     * <code>bytes content = 1;</code>
+     * @return The content.
+     */
+    com.google.protobuf.ByteString getContent();
   }
   /**
    * <pre>
    * Crypto Service Message
+   *
    * This message is for crypto specific tasks,
    * such as completing a handshake.
    * </pre>
@@ -7101,6 +7136,7 @@ public final class MessagingOuterClass {
       super(builder);
     }
     private CryptoService() {
+      content_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -7110,11 +7146,6 @@ public final class MessagingOuterClass {
       return new CryptoService();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_CryptoService_descriptor;
@@ -7126,6 +7157,21 @@ public final class MessagingOuterClass {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_CryptoService_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               qaul.net.messaging.MessagingOuterClass.CryptoService.class, qaul.net.messaging.MessagingOuterClass.CryptoService.Builder.class);
+    }
+
+    public static final int CONTENT_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <pre>
+     * message data
+     * </pre>
+     *
+     * <code>bytes content = 1;</code>
+     * @return The content.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getContent() {
+      return content_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -7142,6 +7188,9 @@ public final class MessagingOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (!content_.isEmpty()) {
+        output.writeBytes(1, content_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -7151,6 +7200,10 @@ public final class MessagingOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (!content_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, content_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -7166,6 +7219,8 @@ public final class MessagingOuterClass {
       }
       qaul.net.messaging.MessagingOuterClass.CryptoService other = (qaul.net.messaging.MessagingOuterClass.CryptoService) obj;
 
+      if (!getContent()
+          .equals(other.getContent())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -7177,6 +7232,8 @@ public final class MessagingOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+      hash = (53 * hash) + getContent().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7226,11 +7283,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.CryptoService parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.CryptoService parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7275,6 +7334,7 @@ public final class MessagingOuterClass {
     /**
      * <pre>
      * Crypto Service Message
+     *
      * This message is for crypto specific tasks,
      * such as completing a handshake.
      * </pre>
@@ -7311,6 +7371,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
+        content_ = com.google.protobuf.ByteString.EMPTY;
         return this;
       }
 
@@ -7337,8 +7399,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.CryptoService buildPartial() {
         qaul.net.messaging.MessagingOuterClass.CryptoService result = new qaul.net.messaging.MessagingOuterClass.CryptoService(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.CryptoService result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -7385,6 +7455,9 @@ public final class MessagingOuterClass {
 
       public Builder mergeFrom(qaul.net.messaging.MessagingOuterClass.CryptoService other) {
         if (other == qaul.net.messaging.MessagingOuterClass.CryptoService.getDefaultInstance()) return this;
+        if (other.getContent() != com.google.protobuf.ByteString.EMPTY) {
+          setContent(other.getContent());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -7411,6 +7484,11 @@ public final class MessagingOuterClass {
               case 0:
                 done = true;
                 break;
+              case 10: {
+                content_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -7424,6 +7502,51 @@ public final class MessagingOuterClass {
         } finally {
           onChanged();
         } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * message data
+       * </pre>
+       *
+       * <code>bytes content = 1;</code>
+       * @return The content.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getContent() {
+        return content_;
+      }
+      /**
+       * <pre>
+       * message data
+       * </pre>
+       *
+       * <code>bytes content = 1;</code>
+       * @param value The content to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContent(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        content_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * message data
+       * </pre>
+       *
+       * <code>bytes content = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContent() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        content_ = getDefaultInstance().getContent();
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -7527,11 +7650,6 @@ public final class MessagingOuterClass {
       return new RtcStreamMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcStreamMessage_descriptor;
@@ -7546,7 +7664,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes content = 1;</code>
      * @return The content.
@@ -7665,11 +7783,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.RtcStreamMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.RtcStreamMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7748,8 +7868,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -7776,9 +7896,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.RtcStreamMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.RtcStreamMessage result = new qaul.net.messaging.MessagingOuterClass.RtcStreamMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.RtcStreamMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -7856,7 +7983,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -7874,6 +8001,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -7890,11 +8018,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7903,7 +8029,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -8009,11 +8135,6 @@ public final class MessagingOuterClass {
       return new GroupInviteMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_GroupInviteMessage_descriptor;
@@ -8028,7 +8149,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes content = 1;</code>
      * @return The content.
@@ -8147,11 +8268,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.GroupInviteMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.GroupInviteMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8230,8 +8353,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -8258,9 +8381,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.GroupInviteMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.GroupInviteMessage result = new qaul.net.messaging.MessagingOuterClass.GroupInviteMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.GroupInviteMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -8338,7 +8468,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -8356,6 +8486,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -8372,11 +8503,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8385,7 +8514,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -8596,7 +8725,7 @@ public final class MessagingOuterClass {
      */
     qaul.net.messaging.MessagingOuterClass.RtcMessageOrBuilder getRtcMessageOrBuilder();
 
-    public qaul.net.messaging.MessagingOuterClass.CommonMessage.PayloadCase getPayloadCase();
+    qaul.net.messaging.MessagingOuterClass.CommonMessage.PayloadCase getPayloadCase();
   }
   /**
    * <pre>
@@ -8626,11 +8755,6 @@ public final class MessagingOuterClass {
       return new CommonMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_CommonMessage_descriptor;
@@ -8645,6 +8769,7 @@ public final class MessagingOuterClass {
     }
 
     private int payloadCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object payload_;
     public enum PayloadCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -8690,7 +8815,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int MESSAGE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString messageId_;
+    private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message ID
@@ -8705,7 +8830,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -8720,7 +8845,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int SENT_AT_FIELD_NUMBER = 3;
-    private long sentAt_;
+    private long sentAt_ = 0L;
     /**
      * <pre>
      * sent at timestamp
@@ -9107,11 +9232,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.CommonMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.CommonMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -9190,12 +9317,10 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         messageId_ = com.google.protobuf.ByteString.EMPTY;
-
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         sentAt_ = 0L;
-
         if (chatMessageBuilder_ != null) {
           chatMessageBuilder_.clear();
         }
@@ -9236,40 +9361,44 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.CommonMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.CommonMessage result = new qaul.net.messaging.MessagingOuterClass.CommonMessage(this);
-        result.messageId_ = messageId_;
-        result.groupId_ = groupId_;
-        result.sentAt_ = sentAt_;
-        if (payloadCase_ == 4) {
-          if (chatMessageBuilder_ == null) {
-            result.payload_ = payload_;
-          } else {
-            result.payload_ = chatMessageBuilder_.build();
-          }
-        }
-        if (payloadCase_ == 5) {
-          if (fileMessageBuilder_ == null) {
-            result.payload_ = payload_;
-          } else {
-            result.payload_ = fileMessageBuilder_.build();
-          }
-        }
-        if (payloadCase_ == 6) {
-          if (groupMessageBuilder_ == null) {
-            result.payload_ = payload_;
-          } else {
-            result.payload_ = groupMessageBuilder_.build();
-          }
-        }
-        if (payloadCase_ == 7) {
-          if (rtcMessageBuilder_ == null) {
-            result.payload_ = payload_;
-          } else {
-            result.payload_ = rtcMessageBuilder_.build();
-          }
-        }
-        result.payloadCase_ = payloadCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.CommonMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.messageId_ = messageId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.sentAt_ = sentAt_;
+        }
+      }
+
+      private void buildPartialOneofs(qaul.net.messaging.MessagingOuterClass.CommonMessage result) {
+        result.payloadCase_ = payloadCase_;
+        result.payload_ = this.payload_;
+        if (payloadCase_ == 4 &&
+            chatMessageBuilder_ != null) {
+          result.payload_ = chatMessageBuilder_.build();
+        }
+        if (payloadCase_ == 5 &&
+            fileMessageBuilder_ != null) {
+          result.payload_ = fileMessageBuilder_.build();
+        }
+        if (payloadCase_ == 6 &&
+            groupMessageBuilder_ != null) {
+          result.payload_ = groupMessageBuilder_.build();
+        }
+        if (payloadCase_ == 7 &&
+            rtcMessageBuilder_ != null) {
+          result.payload_ = rtcMessageBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -9374,17 +9503,17 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 messageId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
                 sentAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 34: {
@@ -9445,6 +9574,7 @@ public final class MessagingOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -9469,11 +9599,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setMessageId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         messageId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9486,7 +9614,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearMessageId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         messageId_ = getDefaultInstance().getMessageId();
         onChanged();
         return this;
@@ -9515,11 +9643,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9532,7 +9658,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -9561,8 +9687,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSentAt(long value) {
-        
+
         sentAt_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9575,7 +9702,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSentAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         sentAt_ = 0L;
         onChanged();
         return this;
@@ -9755,7 +9882,7 @@ public final class MessagingOuterClass {
           payload_ = null;
         }
         payloadCase_ = 4;
-        onChanged();;
+        onChanged();
         return chatMessageBuilder_;
       }
 
@@ -9933,7 +10060,7 @@ public final class MessagingOuterClass {
           payload_ = null;
         }
         payloadCase_ = 5;
-        onChanged();;
+        onChanged();
         return fileMessageBuilder_;
       }
 
@@ -10111,7 +10238,7 @@ public final class MessagingOuterClass {
           payload_ = null;
         }
         payloadCase_ = 6;
-        onChanged();;
+        onChanged();
         return groupMessageBuilder_;
       }
 
@@ -10289,7 +10416,7 @@ public final class MessagingOuterClass {
           payload_ = null;
         }
         payloadCase_ = 7;
-        onChanged();;
+        onChanged();
         return rtcMessageBuilder_;
       }
       @java.lang.Override
@@ -10407,11 +10534,6 @@ public final class MessagingOuterClass {
       return new ChatMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_ChatMessage_descriptor;
@@ -10426,7 +10548,8 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private volatile java.lang.Object content_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object content_ = "";
     /**
      * <pre>
      * content
@@ -10579,11 +10702,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.ChatMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.ChatMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10662,8 +10787,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = "";
-
         return this;
       }
 
@@ -10690,9 +10815,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.ChatMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.ChatMessage result = new qaul.net.messaging.MessagingOuterClass.ChatMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.ChatMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -10741,6 +10873,7 @@ public final class MessagingOuterClass {
         if (other == qaul.net.messaging.MessagingOuterClass.ChatMessage.getDefaultInstance()) return this;
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -10771,7 +10904,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -10789,6 +10922,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object content_ = "";
       /**
@@ -10843,11 +10977,9 @@ public final class MessagingOuterClass {
        */
       public Builder setContent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10860,8 +10992,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
         content_ = getDefaultInstance().getContent();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -10876,12 +11008,10 @@ public final class MessagingOuterClass {
        */
       public Builder setContentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10986,11 +11116,6 @@ public final class MessagingOuterClass {
       return new FileMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_FileMessage_descriptor;
@@ -11005,7 +11130,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes content = 1;</code>
      * @return The content.
@@ -11124,11 +11249,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.FileMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.FileMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -11207,8 +11334,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -11235,9 +11362,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.FileMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.FileMessage result = new qaul.net.messaging.MessagingOuterClass.FileMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.FileMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -11315,7 +11449,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -11333,6 +11467,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11349,11 +11484,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11362,7 +11495,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -11468,11 +11601,6 @@ public final class MessagingOuterClass {
       return new GroupMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_GroupMessage_descriptor;
@@ -11487,7 +11615,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes content = 1;</code>
      * @return The content.
@@ -11606,11 +11734,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.GroupMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.GroupMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -11689,8 +11819,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -11717,9 +11847,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.GroupMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.GroupMessage result = new qaul.net.messaging.MessagingOuterClass.GroupMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.GroupMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -11797,7 +11934,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -11815,6 +11952,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11831,11 +11969,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11844,7 +11980,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -11950,11 +12086,6 @@ public final class MessagingOuterClass {
       return new RtcMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_RtcMessage_descriptor;
@@ -11969,7 +12100,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes content = 1;</code>
      * @return The content.
@@ -12088,11 +12219,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.RtcMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12171,8 +12304,8 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -12199,9 +12332,16 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.RtcMessage buildPartial() {
         qaul.net.messaging.MessagingOuterClass.RtcMessage result = new qaul.net.messaging.MessagingOuterClass.RtcMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.RtcMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -12279,7 +12419,7 @@ public final class MessagingOuterClass {
                 break;
               case 10: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -12297,6 +12437,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -12313,11 +12454,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12326,7 +12465,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -12445,7 +12584,7 @@ public final class MessagingOuterClass {
      */
     qaul.net.messaging.MessagingOuterClass.DtnResponseOrBuilder getResponseOrBuilder();
 
-    public qaul.net.messaging.MessagingOuterClass.Dtn.MessageCase getMessageCase();
+    qaul.net.messaging.MessagingOuterClass.Dtn.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -12473,11 +12612,6 @@ public final class MessagingOuterClass {
       return new Dtn();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_Dtn_descriptor;
@@ -12492,6 +12626,7 @@ public final class MessagingOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -12743,11 +12878,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Dtn parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.Dtn parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12826,6 +12963,7 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (responseBuilder_ != null) {
           responseBuilder_.clear();
         }
@@ -12857,19 +12995,23 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.Dtn buildPartial() {
         qaul.net.messaging.MessagingOuterClass.Dtn result = new qaul.net.messaging.MessagingOuterClass.Dtn(this);
-        if (messageCase_ == 1) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 2) {
-          if (responseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = responseBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.Dtn result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.net.messaging.MessagingOuterClass.Dtn result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 2 &&
+            responseBuilder_ != null) {
+          result.message_ = responseBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -12997,6 +13139,7 @@ public final class MessagingOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       /**
        * <pre>
@@ -13033,10 +13176,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setContainer(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  messageCase_ = 1;
+        if (value == null) { throw new NullPointerException(); }
+        messageCase_ = 1;
         message_ = value;
         onChanged();
         return this;
@@ -13232,7 +13373,7 @@ public final class MessagingOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return responseBuilder_;
       }
       @java.lang.Override
@@ -13380,11 +13521,6 @@ public final class MessagingOuterClass {
       return new DtnResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.messaging.MessagingOuterClass.internal_static_qaul_net_messaging_DtnResponse_descriptor;
@@ -13689,7 +13825,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int RESPONSE_TYPE_FIELD_NUMBER = 1;
-    private int responseType_;
+    private int responseType_ = 0;
     /**
      * <pre>
      * the type of the message
@@ -13710,13 +13846,12 @@ public final class MessagingOuterClass {
      * @return The responseType.
      */
     @java.lang.Override public qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType getResponseType() {
-      @SuppressWarnings("deprecation")
-      qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType result = qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.valueOf(responseType_);
+      qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType result = qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.forNumber(responseType_);
       return result == null ? qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.UNRECOGNIZED : result;
     }
 
     public static final int SIGNATURE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString signature_;
+    private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message signature reference
@@ -13731,7 +13866,7 @@ public final class MessagingOuterClass {
     }
 
     public static final int REASON_FIELD_NUMBER = 3;
-    private int reason_;
+    private int reason_ = 0;
     /**
      * <pre>
      * reason of rejection
@@ -13752,8 +13887,7 @@ public final class MessagingOuterClass {
      * @return The reason.
      */
     @java.lang.Override public qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason getReason() {
-      @SuppressWarnings("deprecation")
-      qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason result = qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.valueOf(reason_);
+      qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason result = qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.forNumber(reason_);
       return result == null ? qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.UNRECOGNIZED : result;
     }
 
@@ -13886,11 +14020,13 @@ public final class MessagingOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.DtnResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.messaging.MessagingOuterClass.DtnResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -13969,12 +14105,10 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         responseType_ = 0;
-
         signature_ = com.google.protobuf.ByteString.EMPTY;
-
         reason_ = 0;
-
         return this;
       }
 
@@ -14001,11 +14135,22 @@ public final class MessagingOuterClass {
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.DtnResponse buildPartial() {
         qaul.net.messaging.MessagingOuterClass.DtnResponse result = new qaul.net.messaging.MessagingOuterClass.DtnResponse(this);
-        result.responseType_ = responseType_;
-        result.signature_ = signature_;
-        result.reason_ = reason_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.messaging.MessagingOuterClass.DtnResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.responseType_ = responseType_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.signature_ = signature_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.reason_ = reason_;
+        }
       }
 
       @java.lang.Override
@@ -14089,17 +14234,17 @@ public final class MessagingOuterClass {
                 break;
               case 8: {
                 responseType_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 signature_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
                 reason_ = input.readEnum();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               default: {
@@ -14117,6 +14262,7 @@ public final class MessagingOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int responseType_ = 0;
       /**
@@ -14140,8 +14286,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setResponseTypeValue(int value) {
-        
         responseType_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -14155,8 +14301,7 @@ public final class MessagingOuterClass {
        */
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType getResponseType() {
-        @SuppressWarnings("deprecation")
-        qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType result = qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.valueOf(responseType_);
+        qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType result = qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.forNumber(responseType_);
         return result == null ? qaul.net.messaging.MessagingOuterClass.DtnResponse.ResponseType.UNRECOGNIZED : result;
       }
       /**
@@ -14172,7 +14317,7 @@ public final class MessagingOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         responseType_ = value.getNumber();
         onChanged();
         return this;
@@ -14186,7 +14331,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearResponseType() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         responseType_ = 0;
         onChanged();
         return this;
@@ -14215,11 +14360,9 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         signature_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -14232,7 +14375,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSignature() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
@@ -14260,8 +14403,8 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder setReasonValue(int value) {
-        
         reason_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -14275,8 +14418,7 @@ public final class MessagingOuterClass {
        */
       @java.lang.Override
       public qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason getReason() {
-        @SuppressWarnings("deprecation")
-        qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason result = qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.valueOf(reason_);
+        qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason result = qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.forNumber(reason_);
         return result == null ? qaul.net.messaging.MessagingOuterClass.DtnResponse.Reason.UNRECOGNIZED : result;
       }
       /**
@@ -14292,7 +14434,7 @@ public final class MessagingOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000004;
         reason_ = value.getNumber();
         onChanged();
         return this;
@@ -14306,7 +14448,7 @@ public final class MessagingOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearReason() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         reason_ = 0;
         onChanged();
         return this;
@@ -14492,31 +14634,31 @@ public final class MessagingOuterClass {
       "\016common_message\030\006 \001(\0132!.qaul.net.messagi" +
       "ng.CommonMessageH\000B\t\n\007message\"6\n\014Confirm" +
       "ation\022\021\n\tsignature\030\001 \001(\014\022\023\n\013received_at\030" +
-      "\002 \001(\004\"\017\n\rCryptoService\"#\n\020RtcStreamMessa" +
-      "ge\022\017\n\007content\030\001 \001(\014\"%\n\022GroupInviteMessag" +
-      "e\022\017\n\007content\030\001 \001(\014\"\265\002\n\rCommonMessage\022\022\n\n" +
-      "message_id\030\001 \001(\014\022\020\n\010group_id\030\002 \001(\014\022\017\n\007se" +
-      "nt_at\030\003 \001(\004\0227\n\014chat_message\030\004 \001(\0132\037.qaul" +
-      ".net.messaging.ChatMessageH\000\0227\n\014file_mes" +
-      "sage\030\005 \001(\0132\037.qaul.net.messaging.FileMess" +
-      "ageH\000\0229\n\rgroup_message\030\006 \001(\0132 .qaul.net." +
-      "messaging.GroupMessageH\000\0225\n\013rtc_message\030" +
-      "\007 \001(\0132\036.qaul.net.messaging.RtcMessageH\000B" +
-      "\t\n\007payload\"\036\n\013ChatMessage\022\017\n\007content\030\001 \001" +
-      "(\t\"\036\n\013FileMessage\022\017\n\007content\030\001 \001(\014\"\037\n\014Gr" +
-      "oupMessage\022\017\n\007content\030\001 \001(\014\"\035\n\nRtcMessag" +
-      "e\022\017\n\007content\030\001 \001(\014\"Z\n\003Dtn\022\023\n\tcontainer\030\001" +
-      " \001(\014H\000\0223\n\010response\030\002 \001(\0132\037.qaul.net.mess" +
-      "aging.DtnResponseH\000B\t\n\007message\"\227\002\n\013DtnRe" +
-      "sponse\022C\n\rresponse_type\030\001 \001(\0162,.qaul.net" +
-      ".messaging.DtnResponse.ResponseType\022\021\n\ts" +
-      "ignature\030\002 \001(\014\0226\n\006reason\030\003 \001(\0162&.qaul.ne" +
-      "t.messaging.DtnResponse.Reason\"*\n\014Respon" +
-      "seType\022\014\n\010ACCEPTED\020\000\022\014\n\010REJECTED\020\001\"L\n\006Re" +
-      "ason\022\010\n\004NONE\020\000\022\025\n\021USER_NOT_ACCEPTED\020\001\022\021\n" +
-      "\rOVERALL_QUOTA\020\002\022\016\n\nUSER_QUOTA\020\003*5\n\013Cryp" +
-      "toState\022\010\n\004NONE\020\000\022\r\n\tHANDSHAKE\020\001\022\r\n\tTRAN" +
-      "SPORT\020\002b\006proto3"
+      "\002 \001(\004\" \n\rCryptoService\022\017\n\007content\030\001 \001(\014\"" +
+      "#\n\020RtcStreamMessage\022\017\n\007content\030\001 \001(\014\"%\n\022" +
+      "GroupInviteMessage\022\017\n\007content\030\001 \001(\014\"\265\002\n\r" +
+      "CommonMessage\022\022\n\nmessage_id\030\001 \001(\014\022\020\n\010gro" +
+      "up_id\030\002 \001(\014\022\017\n\007sent_at\030\003 \001(\004\0227\n\014chat_mes" +
+      "sage\030\004 \001(\0132\037.qaul.net.messaging.ChatMess" +
+      "ageH\000\0227\n\014file_message\030\005 \001(\0132\037.qaul.net.m" +
+      "essaging.FileMessageH\000\0229\n\rgroup_message\030" +
+      "\006 \001(\0132 .qaul.net.messaging.GroupMessageH" +
+      "\000\0225\n\013rtc_message\030\007 \001(\0132\036.qaul.net.messag" +
+      "ing.RtcMessageH\000B\t\n\007payload\"\036\n\013ChatMessa" +
+      "ge\022\017\n\007content\030\001 \001(\t\"\036\n\013FileMessage\022\017\n\007co" +
+      "ntent\030\001 \001(\014\"\037\n\014GroupMessage\022\017\n\007content\030\001" +
+      " \001(\014\"\035\n\nRtcMessage\022\017\n\007content\030\001 \001(\014\"Z\n\003D" +
+      "tn\022\023\n\tcontainer\030\001 \001(\014H\000\0223\n\010response\030\002 \001(" +
+      "\0132\037.qaul.net.messaging.DtnResponseH\000B\t\n\007" +
+      "message\"\227\002\n\013DtnResponse\022C\n\rresponse_type" +
+      "\030\001 \001(\0162,.qaul.net.messaging.DtnResponse." +
+      "ResponseType\022\021\n\tsignature\030\002 \001(\014\0226\n\006reaso" +
+      "n\030\003 \001(\0162&.qaul.net.messaging.DtnResponse" +
+      ".Reason\"*\n\014ResponseType\022\014\n\010ACCEPTED\020\000\022\014\n" +
+      "\010REJECTED\020\001\"L\n\006Reason\022\010\n\004NONE\020\000\022\025\n\021USER_" +
+      "NOT_ACCEPTED\020\001\022\021\n\rOVERALL_QUOTA\020\002\022\016\n\nUSE" +
+      "R_QUOTA\020\003*5\n\013CryptoState\022\010\n\004NONE\020\000\022\r\n\tHA" +
+      "NDSHAKE\020\001\022\r\n\tTRANSPORT\020\002b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -14569,7 +14711,7 @@ public final class MessagingOuterClass {
     internal_static_qaul_net_messaging_CryptoService_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_qaul_net_messaging_CryptoService_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "Content", });
     internal_static_qaul_net_messaging_RtcStreamMessage_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_qaul_net_messaging_RtcStreamMessage_fieldAccessorTable = new

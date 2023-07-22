@@ -245,11 +245,6 @@ public final class RouterNetInfo {
       return new RouterInfoContainer();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_RouterInfoContainer_descriptor;
@@ -264,7 +259,7 @@ public final class RouterNetInfo {
     }
 
     public static final int SIGNATURE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString signature_;
+    private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * signature
@@ -279,7 +274,7 @@ public final class RouterNetInfo {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString message_;
+    private com.google.protobuf.ByteString message_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message content
@@ -413,11 +408,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -496,10 +493,9 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         signature_ = com.google.protobuf.ByteString.EMPTY;
-
         message_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -526,10 +522,19 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer result = new qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer(this);
-        result.signature_ = signature_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.RouterInfoContainer result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.signature_ = signature_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -610,12 +615,12 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 signature_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 message_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -633,6 +638,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -657,11 +663,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         signature_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -674,7 +678,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearSignature() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
@@ -703,11 +707,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setMessage(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -720,7 +722,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         message_ = getDefaultInstance().getMessage();
         onChanged();
         return this;
@@ -871,11 +873,6 @@ public final class RouterNetInfo {
       return new RouterInfoContent();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_RouterInfoContent_descriptor;
@@ -890,7 +887,7 @@ public final class RouterNetInfo {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * node id
@@ -905,7 +902,7 @@ public final class RouterNetInfo {
     }
 
     public static final int ROUTERINFOMODULE_FIELD_NUMBER = 2;
-    private int routerInfoModule_;
+    private int routerInfoModule_ = 0;
     /**
      * <pre>
      * RouterInfo Module
@@ -926,13 +923,12 @@ public final class RouterNetInfo {
      * @return The routerInfoModule.
      */
     @java.lang.Override public qaul.net.router_net_info.RouterNetInfo.RouterInfoModule getRouterInfoModule() {
-      @SuppressWarnings("deprecation")
-      qaul.net.router_net_info.RouterNetInfo.RouterInfoModule result = qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.valueOf(routerInfoModule_);
+      qaul.net.router_net_info.RouterNetInfo.RouterInfoModule result = qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.forNumber(routerInfoModule_);
       return result == null ? qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.UNRECOGNIZED : result;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString content_;
+    private com.google.protobuf.ByteString content_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message content
@@ -947,7 +943,7 @@ public final class RouterNetInfo {
     }
 
     public static final int TIME_FIELD_NUMBER = 4;
-    private long time_;
+    private long time_ = 0L;
     /**
      * <pre>
      * timestamp in milli seconds
@@ -1103,11 +1099,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoContent parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoContent parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1186,14 +1184,11 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         routerInfoModule_ = 0;
-
         content_ = com.google.protobuf.ByteString.EMPTY;
-
         time_ = 0L;
-
         return this;
       }
 
@@ -1220,12 +1215,25 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RouterInfoContent buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.RouterInfoContent result = new qaul.net.router_net_info.RouterNetInfo.RouterInfoContent(this);
-        result.id_ = id_;
-        result.routerInfoModule_ = routerInfoModule_;
-        result.content_ = content_;
-        result.time_ = time_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.RouterInfoContent result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.routerInfoModule_ = routerInfoModule_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.content_ = content_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.time_ = time_;
+        }
       }
 
       @java.lang.Override
@@ -1312,22 +1320,22 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 routerInfoModule_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 content_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 time_ = input.readUInt64();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               default: {
@@ -1345,6 +1353,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -1369,11 +1378,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1386,7 +1393,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -1414,8 +1421,8 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setRouterInfoModuleValue(int value) {
-        
         routerInfoModule_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1429,8 +1436,7 @@ public final class RouterNetInfo {
        */
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RouterInfoModule getRouterInfoModule() {
-        @SuppressWarnings("deprecation")
-        qaul.net.router_net_info.RouterNetInfo.RouterInfoModule result = qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.valueOf(routerInfoModule_);
+        qaul.net.router_net_info.RouterNetInfo.RouterInfoModule result = qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.forNumber(routerInfoModule_);
         return result == null ? qaul.net.router_net_info.RouterNetInfo.RouterInfoModule.UNRECOGNIZED : result;
       }
       /**
@@ -1446,7 +1452,7 @@ public final class RouterNetInfo {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         routerInfoModule_ = value.getNumber();
         onChanged();
         return this;
@@ -1460,7 +1466,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearRouterInfoModule() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         routerInfoModule_ = 0;
         onChanged();
         return this;
@@ -1489,11 +1495,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setContent(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -1506,7 +1510,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         content_ = getDefaultInstance().getContent();
         onChanged();
         return this;
@@ -1535,8 +1539,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setTime(long value) {
-        
+
         time_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -1549,7 +1554,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearTime() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         time_ = 0L;
         onChanged();
         return this;
@@ -1723,11 +1728,6 @@ public final class RouterNetInfo {
       return new RouterInfoMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_RouterInfoMessage_descriptor;
@@ -1742,7 +1742,7 @@ public final class RouterNetInfo {
     }
 
     public static final int NODE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString node_;
+    private com.google.protobuf.ByteString node_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * node id
@@ -1791,7 +1791,7 @@ public final class RouterNetInfo {
      */
     @java.lang.Override
     public qaul.net.router_net_info.RouterNetInfo.RoutingInfoTableOrBuilder getRoutesOrBuilder() {
-      return getRoutes();
+      return routes_ == null ? qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.getDefaultInstance() : routes_;
     }
 
     public static final int FEEDS_FIELD_NUMBER = 4;
@@ -1829,11 +1829,11 @@ public final class RouterNetInfo {
      */
     @java.lang.Override
     public qaul.net.router_net_info.RouterNetInfo.FeedIdsTableOrBuilder getFeedsOrBuilder() {
-      return getFeeds();
+      return feeds_ == null ? qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.getDefaultInstance() : feeds_;
     }
 
     public static final int TIMESTAMP_FIELD_NUMBER = 5;
-    private long timestamp_;
+    private long timestamp_ = 0L;
     /**
      * <pre>
      * timestamp
@@ -2000,11 +2000,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2083,22 +2085,19 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         node_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (routesBuilder_ == null) {
-          routes_ = null;
-        } else {
-          routes_ = null;
+        routes_ = null;
+        if (routesBuilder_ != null) {
+          routesBuilder_.dispose();
           routesBuilder_ = null;
         }
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-        } else {
-          feeds_ = null;
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
         timestamp_ = 0L;
-
         return this;
       }
 
@@ -2125,20 +2124,29 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage result = new qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage(this);
-        result.node_ = node_;
-        if (routesBuilder_ == null) {
-          result.routes_ = routes_;
-        } else {
-          result.routes_ = routesBuilder_.build();
-        }
-        if (feedsBuilder_ == null) {
-          result.feeds_ = feeds_;
-        } else {
-          result.feeds_ = feedsBuilder_.build();
-        }
-        result.timestamp_ = timestamp_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.RouterInfoMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.node_ = node_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.routes_ = routesBuilder_ == null
+              ? routes_
+              : routesBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.feeds_ = feedsBuilder_ == null
+              ? feeds_
+              : feedsBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.timestamp_ = timestamp_;
+        }
       }
 
       @java.lang.Override
@@ -2225,26 +2233,26 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 node_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 input.readMessage(
                     getRoutesFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 34: {
                 input.readMessage(
                     getFeedsFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 34
               case 40: {
                 timestamp_ = input.readUInt64();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 40
               default: {
@@ -2262,6 +2270,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString node_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -2286,11 +2295,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setNode(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         node_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2303,7 +2310,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearNode() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         node_ = getDefaultInstance().getNode();
         onChanged();
         return this;
@@ -2321,7 +2328,7 @@ public final class RouterNetInfo {
        * @return Whether the routes field is set.
        */
       public boolean hasRoutes() {
-        return routesBuilder_ != null || routes_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <pre>
@@ -2351,11 +2358,11 @@ public final class RouterNetInfo {
             throw new NullPointerException();
           }
           routes_ = value;
-          onChanged();
         } else {
           routesBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -2369,11 +2376,11 @@ public final class RouterNetInfo {
           qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.Builder builderForValue) {
         if (routesBuilder_ == null) {
           routes_ = builderForValue.build();
-          onChanged();
         } else {
           routesBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -2385,17 +2392,18 @@ public final class RouterNetInfo {
        */
       public Builder mergeRoutes(qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable value) {
         if (routesBuilder_ == null) {
-          if (routes_ != null) {
-            routes_ =
-              qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.newBuilder(routes_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            routes_ != null &&
+            routes_ != qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.getDefaultInstance()) {
+            getRoutesBuilder().mergeFrom(value);
           } else {
             routes_ = value;
           }
-          onChanged();
         } else {
           routesBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -2406,14 +2414,13 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.RoutingInfoTable routes = 2;</code>
        */
       public Builder clearRoutes() {
-        if (routesBuilder_ == null) {
-          routes_ = null;
-          onChanged();
-        } else {
-          routes_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        routes_ = null;
+        if (routesBuilder_ != null) {
+          routesBuilder_.dispose();
           routesBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -2424,7 +2431,7 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.RoutingInfoTable routes = 2;</code>
        */
       public qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable.Builder getRoutesBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getRoutesFieldBuilder().getBuilder();
       }
@@ -2476,7 +2483,7 @@ public final class RouterNetInfo {
        * @return Whether the feeds field is set.
        */
       public boolean hasFeeds() {
-        return feedsBuilder_ != null || feeds_ != null;
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <pre>
@@ -2506,11 +2513,11 @@ public final class RouterNetInfo {
             throw new NullPointerException();
           }
           feeds_ = value;
-          onChanged();
         } else {
           feedsBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -2524,11 +2531,11 @@ public final class RouterNetInfo {
           qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.Builder builderForValue) {
         if (feedsBuilder_ == null) {
           feeds_ = builderForValue.build();
-          onChanged();
         } else {
           feedsBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -2540,17 +2547,18 @@ public final class RouterNetInfo {
        */
       public Builder mergeFeeds(qaul.net.router_net_info.RouterNetInfo.FeedIdsTable value) {
         if (feedsBuilder_ == null) {
-          if (feeds_ != null) {
-            feeds_ =
-              qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.newBuilder(feeds_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000004) != 0) &&
+            feeds_ != null &&
+            feeds_ != qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.getDefaultInstance()) {
+            getFeedsBuilder().mergeFrom(value);
           } else {
             feeds_ = value;
           }
-          onChanged();
         } else {
           feedsBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -2561,14 +2569,13 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
        */
       public Builder clearFeeds() {
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-          onChanged();
-        } else {
-          feeds_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -2579,7 +2586,7 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 4;</code>
        */
       public qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.Builder getFeedsBuilder() {
-        
+        bitField0_ |= 0x00000004;
         onChanged();
         return getFeedsFieldBuilder().getBuilder();
       }
@@ -2642,8 +2649,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
-        
+
         timestamp_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -2656,7 +2664,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         timestamp_ = 0L;
         onChanged();
         return this;
@@ -2780,11 +2788,6 @@ public final class RouterNetInfo {
       return new RoutingInfoTable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_RoutingInfoTable_descriptor;
@@ -2799,6 +2802,7 @@ public final class RouterNetInfo {
     }
 
     public static final int ENTRY_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry> entry_;
     /**
      * <code>repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;</code>
@@ -2949,11 +2953,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3032,6 +3038,7 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (entryBuilder_ == null) {
           entry_ = java.util.Collections.emptyList();
         } else {
@@ -3065,7 +3072,13 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable result = new qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable result) {
         if (entryBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             entry_ = java.util.Collections.unmodifiableList(entry_);
@@ -3075,8 +3088,10 @@ public final class RouterNetInfo {
         } else {
           result.entry_ = entryBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.RoutingInfoTable result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -3580,11 +3595,6 @@ public final class RouterNetInfo {
       return new RoutingInfoEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_RoutingInfoEntry_descriptor;
@@ -3599,7 +3609,7 @@ public final class RouterNetInfo {
     }
 
     public static final int USER_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString user_;
+    private com.google.protobuf.ByteString user_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -3614,7 +3624,7 @@ public final class RouterNetInfo {
     }
 
     public static final int RTT_FIELD_NUMBER = 2;
-    private int rtt_;
+    private int rtt_ = 0;
     /**
      * <pre>
      * round trip time
@@ -3629,7 +3639,7 @@ public final class RouterNetInfo {
     }
 
     public static final int HC_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString hc_;
+    private com.google.protobuf.ByteString hc_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * hop count
@@ -3644,7 +3654,7 @@ public final class RouterNetInfo {
     }
 
     public static final int PGID_FIELD_NUMBER = 5;
-    private int pgid_;
+    private int pgid_ = 0;
     /**
      * <pre>
      * propagation id
@@ -3800,11 +3810,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3883,14 +3895,11 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         user_ = com.google.protobuf.ByteString.EMPTY;
-
         rtt_ = 0;
-
         hc_ = com.google.protobuf.ByteString.EMPTY;
-
         pgid_ = 0;
-
         return this;
       }
 
@@ -3917,12 +3926,25 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry result = new qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry(this);
-        result.user_ = user_;
-        result.rtt_ = rtt_;
-        result.hc_ = hc_;
-        result.pgid_ = pgid_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.RoutingInfoEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.user_ = user_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.rtt_ = rtt_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.hc_ = hc_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.pgid_ = pgid_;
+        }
       }
 
       @java.lang.Override
@@ -4009,22 +4031,22 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 user_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 rtt_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 hc_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 40: {
                 pgid_ = input.readUInt32();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 40
               default: {
@@ -4042,6 +4064,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString user_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -4066,11 +4089,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setUser(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         user_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4083,7 +4104,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearUser() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         user_ = getDefaultInstance().getUser();
         onChanged();
         return this;
@@ -4112,8 +4133,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setRtt(int value) {
-        
+
         rtt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4126,7 +4148,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearRtt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         rtt_ = 0;
         onChanged();
         return this;
@@ -4155,11 +4177,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setHc(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         hc_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -4172,7 +4192,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearHc() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         hc_ = getDefaultInstance().getHc();
         onChanged();
         return this;
@@ -4201,8 +4221,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setPgid(int value) {
-        
+
         pgid_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -4215,7 +4236,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearPgid() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         pgid_ = 0;
         onChanged();
         return this;
@@ -4344,11 +4365,6 @@ public final class RouterNetInfo {
       return new UserIdTable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserIdTable_descriptor;
@@ -4363,6 +4379,7 @@ public final class RouterNetInfo {
     }
 
     public static final int IDS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<com.google.protobuf.ByteString> ids_;
     /**
      * <pre>
@@ -4517,11 +4534,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserIdTable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4600,8 +4619,8 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         ids_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -4628,14 +4647,22 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.UserIdTable buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.UserIdTable result = new qaul.net.router_net_info.RouterNetInfo.UserIdTable(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.router_net_info.RouterNetInfo.UserIdTable result) {
         if (((bitField0_ & 0x00000001) != 0)) {
           ids_ = java.util.Collections.unmodifiableList(ids_);
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.ids_ = ids_;
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.UserIdTable result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -4746,7 +4773,7 @@ public final class RouterNetInfo {
         if (!((bitField0_ & 0x00000001) != 0)) {
           ids_ = new java.util.ArrayList<com.google.protobuf.ByteString>(ids_);
           bitField0_ |= 0x00000001;
-         }
+        }
       }
       /**
        * <pre>
@@ -4796,10 +4823,8 @@ public final class RouterNetInfo {
        */
       public Builder setIds(
           int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdsIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureIdsIsMutable();
         ids_.set(index, value);
         onChanged();
         return this;
@@ -4814,10 +4839,8 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder addIds(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdsIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureIdsIsMutable();
         ids_.add(value);
         onChanged();
         return this;
@@ -4992,11 +5015,6 @@ public final class RouterNetInfo {
       return new UserInfoTable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserInfoTable_descriptor;
@@ -5011,6 +5029,7 @@ public final class RouterNetInfo {
     }
 
     public static final int INFO_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.net.router_net_info.RouterNetInfo.UserInfo> info_;
     /**
      * <pre>
@@ -5181,11 +5200,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserInfoTable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserInfoTable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5264,6 +5285,7 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (infoBuilder_ == null) {
           info_ = java.util.Collections.emptyList();
         } else {
@@ -5297,7 +5319,13 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.UserInfoTable buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.UserInfoTable result = new qaul.net.router_net_info.RouterNetInfo.UserInfoTable(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.router_net_info.RouterNetInfo.UserInfoTable result) {
         if (infoBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             info_ = java.util.Collections.unmodifiableList(info_);
@@ -5307,8 +5335,10 @@ public final class RouterNetInfo {
         } else {
           result.info_ = infoBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.UserInfoTable result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -5885,11 +5915,6 @@ public final class RouterNetInfo {
       return new UserInfo();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_UserInfo_descriptor;
@@ -5904,7 +5929,7 @@ public final class RouterNetInfo {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -5919,7 +5944,7 @@ public final class RouterNetInfo {
     }
 
     public static final int KEY_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString key_;
+    private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * public key of the user
@@ -5934,7 +5959,8 @@ public final class RouterNetInfo {
     }
 
     public static final int NAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <pre>
      * user name
@@ -6109,11 +6135,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.UserInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6192,12 +6220,10 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         key_ = com.google.protobuf.ByteString.EMPTY;
-
         name_ = "";
-
         return this;
       }
 
@@ -6224,11 +6250,22 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.UserInfo buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.UserInfo result = new qaul.net.router_net_info.RouterNetInfo.UserInfo(this);
-        result.id_ = id_;
-        result.key_ = key_;
-        result.name_ = name_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.UserInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.key_ = key_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.name_ = name_;
+        }
       }
 
       @java.lang.Override
@@ -6283,6 +6320,7 @@ public final class RouterNetInfo {
         }
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -6313,17 +6351,17 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 key_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -6341,6 +6379,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -6365,11 +6404,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6382,7 +6419,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -6411,11 +6448,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setKey(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         key_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6428,7 +6463,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         key_ = getDefaultInstance().getKey();
         onChanged();
         return this;
@@ -6487,11 +6522,9 @@ public final class RouterNetInfo {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6504,8 +6537,8 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -6520,12 +6553,10 @@ public final class RouterNetInfo {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6653,11 +6684,6 @@ public final class RouterNetInfo {
       return new FeedIdsTable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_FeedIdsTable_descriptor;
@@ -6672,6 +6698,7 @@ public final class RouterNetInfo {
     }
 
     public static final int IDS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<com.google.protobuf.ByteString> ids_;
     /**
      * <pre>
@@ -6826,11 +6853,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedIdsTable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedIdsTable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6909,8 +6938,8 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         ids_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -6937,14 +6966,22 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.FeedIdsTable buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.FeedIdsTable result = new qaul.net.router_net_info.RouterNetInfo.FeedIdsTable(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.router_net_info.RouterNetInfo.FeedIdsTable result) {
         if (((bitField0_ & 0x00000001) != 0)) {
           ids_ = java.util.Collections.unmodifiableList(ids_);
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.ids_ = ids_;
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.FeedIdsTable result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -7055,7 +7092,7 @@ public final class RouterNetInfo {
         if (!((bitField0_ & 0x00000001) != 0)) {
           ids_ = new java.util.ArrayList<com.google.protobuf.ByteString>(ids_);
           bitField0_ |= 0x00000001;
-         }
+        }
       }
       /**
        * <pre>
@@ -7105,10 +7142,8 @@ public final class RouterNetInfo {
        */
       public Builder setIds(
           int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdsIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureIdsIsMutable();
         ids_.set(index, value);
         onChanged();
         return this;
@@ -7123,10 +7158,8 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder addIds(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureIdsIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureIdsIsMutable();
         ids_.add(value);
         onChanged();
         return this;
@@ -7283,11 +7316,6 @@ public final class RouterNetInfo {
       return new FeedRequestMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_FeedRequestMessage_descriptor;
@@ -7336,7 +7364,7 @@ public final class RouterNetInfo {
      */
     @java.lang.Override
     public qaul.net.router_net_info.RouterNetInfo.FeedIdsTableOrBuilder getFeedsOrBuilder() {
-      return getFeeds();
+      return feeds_ == null ? qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.getDefaultInstance() : feeds_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -7453,11 +7481,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7536,10 +7566,10 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-        } else {
-          feeds_ = null;
+        bitField0_ = 0;
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
         return this;
@@ -7568,13 +7598,18 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage result = new qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage(this);
-        if (feedsBuilder_ == null) {
-          result.feeds_ = feeds_;
-        } else {
-          result.feeds_ = feedsBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.FeedRequestMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.feeds_ = feedsBuilder_ == null
+              ? feeds_
+              : feedsBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -7654,7 +7689,7 @@ public final class RouterNetInfo {
                 input.readMessage(
                     getFeedsFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -7672,6 +7707,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private qaul.net.router_net_info.RouterNetInfo.FeedIdsTable feeds_;
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -7685,7 +7721,7 @@ public final class RouterNetInfo {
        * @return Whether the feeds field is set.
        */
       public boolean hasFeeds() {
-        return feedsBuilder_ != null || feeds_ != null;
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <pre>
@@ -7715,11 +7751,11 @@ public final class RouterNetInfo {
             throw new NullPointerException();
           }
           feeds_ = value;
-          onChanged();
         } else {
           feedsBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -7733,11 +7769,11 @@ public final class RouterNetInfo {
           qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.Builder builderForValue) {
         if (feedsBuilder_ == null) {
           feeds_ = builderForValue.build();
-          onChanged();
         } else {
           feedsBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -7749,17 +7785,18 @@ public final class RouterNetInfo {
        */
       public Builder mergeFeeds(qaul.net.router_net_info.RouterNetInfo.FeedIdsTable value) {
         if (feedsBuilder_ == null) {
-          if (feeds_ != null) {
-            feeds_ =
-              qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.newBuilder(feeds_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000001) != 0) &&
+            feeds_ != null &&
+            feeds_ != qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.getDefaultInstance()) {
+            getFeedsBuilder().mergeFrom(value);
           } else {
             feeds_ = value;
           }
-          onChanged();
         } else {
           feedsBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -7770,14 +7807,13 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 1;</code>
        */
       public Builder clearFeeds() {
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-          onChanged();
-        } else {
-          feeds_ = null;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -7788,7 +7824,7 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedIdsTable feeds = 1;</code>
        */
       public qaul.net.router_net_info.RouterNetInfo.FeedIdsTable.Builder getFeedsBuilder() {
-        
+        bitField0_ |= 0x00000001;
         onChanged();
         return getFeedsFieldBuilder().getBuilder();
       }
@@ -7948,11 +7984,6 @@ public final class RouterNetInfo {
       return new FeedResponseMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_FeedResponseMessage_descriptor;
@@ -8001,7 +8032,7 @@ public final class RouterNetInfo {
      */
     @java.lang.Override
     public qaul.net.router_net_info.RouterNetInfo.FeedResponseTableOrBuilder getFeedsOrBuilder() {
-      return getFeeds();
+      return feeds_ == null ? qaul.net.router_net_info.RouterNetInfo.FeedResponseTable.getDefaultInstance() : feeds_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -8118,11 +8149,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8201,10 +8234,10 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-        } else {
-          feeds_ = null;
+        bitField0_ = 0;
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
         return this;
@@ -8233,13 +8266,18 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage result = new qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage(this);
-        if (feedsBuilder_ == null) {
-          result.feeds_ = feeds_;
-        } else {
-          result.feeds_ = feedsBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.FeedResponseMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.feeds_ = feedsBuilder_ == null
+              ? feeds_
+              : feedsBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -8319,7 +8357,7 @@ public final class RouterNetInfo {
                 input.readMessage(
                     getFeedsFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -8337,6 +8375,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private qaul.net.router_net_info.RouterNetInfo.FeedResponseTable feeds_;
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -8350,7 +8389,7 @@ public final class RouterNetInfo {
        * @return Whether the feeds field is set.
        */
       public boolean hasFeeds() {
-        return feedsBuilder_ != null || feeds_ != null;
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <pre>
@@ -8380,11 +8419,11 @@ public final class RouterNetInfo {
             throw new NullPointerException();
           }
           feeds_ = value;
-          onChanged();
         } else {
           feedsBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -8398,11 +8437,11 @@ public final class RouterNetInfo {
           qaul.net.router_net_info.RouterNetInfo.FeedResponseTable.Builder builderForValue) {
         if (feedsBuilder_ == null) {
           feeds_ = builderForValue.build();
-          onChanged();
         } else {
           feedsBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -8414,17 +8453,18 @@ public final class RouterNetInfo {
        */
       public Builder mergeFeeds(qaul.net.router_net_info.RouterNetInfo.FeedResponseTable value) {
         if (feedsBuilder_ == null) {
-          if (feeds_ != null) {
-            feeds_ =
-              qaul.net.router_net_info.RouterNetInfo.FeedResponseTable.newBuilder(feeds_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000001) != 0) &&
+            feeds_ != null &&
+            feeds_ != qaul.net.router_net_info.RouterNetInfo.FeedResponseTable.getDefaultInstance()) {
+            getFeedsBuilder().mergeFrom(value);
           } else {
             feeds_ = value;
           }
-          onChanged();
         } else {
           feedsBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -8435,14 +8475,13 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedResponseTable feeds = 1;</code>
        */
       public Builder clearFeeds() {
-        if (feedsBuilder_ == null) {
-          feeds_ = null;
-          onChanged();
-        } else {
-          feeds_ = null;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        feeds_ = null;
+        if (feedsBuilder_ != null) {
+          feedsBuilder_.dispose();
           feedsBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -8453,7 +8492,7 @@ public final class RouterNetInfo {
        * <code>.qaul.net.router_net_info.FeedResponseTable feeds = 1;</code>
        */
       public qaul.net.router_net_info.RouterNetInfo.FeedResponseTable.Builder getFeedsBuilder() {
-        
+        bitField0_ |= 0x00000001;
         onChanged();
         return getFeedsFieldBuilder().getBuilder();
       }
@@ -8632,11 +8671,6 @@ public final class RouterNetInfo {
       return new FeedResponseTable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_FeedResponseTable_descriptor;
@@ -8651,6 +8685,7 @@ public final class RouterNetInfo {
     }
 
     public static final int MESSAGES_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.net.router_net_info.RouterNetInfo.FeedMessage> messages_;
     /**
      * <pre>
@@ -8821,11 +8856,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedResponseTable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedResponseTable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8905,6 +8942,7 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (messagesBuilder_ == null) {
           messages_ = java.util.Collections.emptyList();
         } else {
@@ -8938,7 +8976,13 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.FeedResponseTable buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.FeedResponseTable result = new qaul.net.router_net_info.RouterNetInfo.FeedResponseTable(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.net.router_net_info.RouterNetInfo.FeedResponseTable result) {
         if (messagesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             messages_ = java.util.Collections.unmodifiableList(messages_);
@@ -8948,8 +8992,10 @@ public final class RouterNetInfo {
         } else {
           result.messages_ = messagesBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.FeedResponseTable result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -9536,11 +9582,6 @@ public final class RouterNetInfo {
       return new FeedMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.router_net_info.RouterNetInfo.internal_static_qaul_net_router_net_info_FeedMessage_descriptor;
@@ -9555,7 +9596,7 @@ public final class RouterNetInfo {
     }
 
     public static final int MESSAGE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString messageId_;
+    private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message id
@@ -9570,7 +9611,7 @@ public final class RouterNetInfo {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString senderId_;
+    private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * sender id
@@ -9585,7 +9626,8 @@ public final class RouterNetInfo {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 3;
-    private volatile java.lang.Object content_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object content_ = "";
     /**
      * <pre>
      * message content
@@ -9631,7 +9673,7 @@ public final class RouterNetInfo {
     }
 
     public static final int TIME_FIELD_NUMBER = 4;
-    private long time_;
+    private long time_ = 0L;
     /**
      * <pre>
      * timestamp in milli seconds
@@ -9787,11 +9829,13 @@ public final class RouterNetInfo {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.router_net_info.RouterNetInfo.FeedMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -9870,14 +9914,11 @@ public final class RouterNetInfo {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         messageId_ = com.google.protobuf.ByteString.EMPTY;
-
         senderId_ = com.google.protobuf.ByteString.EMPTY;
-
         content_ = "";
-
         time_ = 0L;
-
         return this;
       }
 
@@ -9904,12 +9945,25 @@ public final class RouterNetInfo {
       @java.lang.Override
       public qaul.net.router_net_info.RouterNetInfo.FeedMessage buildPartial() {
         qaul.net.router_net_info.RouterNetInfo.FeedMessage result = new qaul.net.router_net_info.RouterNetInfo.FeedMessage(this);
-        result.messageId_ = messageId_;
-        result.senderId_ = senderId_;
-        result.content_ = content_;
-        result.time_ = time_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.router_net_info.RouterNetInfo.FeedMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.messageId_ = messageId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.content_ = content_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.time_ = time_;
+        }
       }
 
       @java.lang.Override
@@ -9964,6 +10018,7 @@ public final class RouterNetInfo {
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getTime() != 0L) {
@@ -9997,22 +10052,22 @@ public final class RouterNetInfo {
                 break;
               case 10: {
                 messageId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 senderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 content_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 time_ = input.readUInt64();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               default: {
@@ -10030,6 +10085,7 @@ public final class RouterNetInfo {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -10054,11 +10110,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setMessageId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         messageId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10071,7 +10125,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearMessageId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         messageId_ = getDefaultInstance().getMessageId();
         onChanged();
         return this;
@@ -10100,11 +10154,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -10117,7 +10169,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
@@ -10176,11 +10228,9 @@ public final class RouterNetInfo {
        */
       public Builder setContent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -10193,8 +10243,8 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
         content_ = getDefaultInstance().getContent();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -10209,12 +10259,10 @@ public final class RouterNetInfo {
        */
       public Builder setContentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         content_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -10242,8 +10290,9 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder setTime(long value) {
-        
+
         time_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -10256,7 +10305,7 @@ public final class RouterNetInfo {
        * @return This builder for chaining.
        */
       public Builder clearTime() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         time_ = 0L;
         onChanged();
         return this;

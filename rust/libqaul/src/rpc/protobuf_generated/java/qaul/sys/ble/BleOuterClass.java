@@ -29,6 +29,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * use power saving option
+     *
      * this option will miss a lot of incoming messages,
      * as the processor is often sleeping
      * </pre>
@@ -48,6 +49,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * always listen
+     *
      * this option uses the most battery power
      * </pre>
      *
@@ -60,6 +62,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * use power saving option
+     *
      * this option will miss a lot of incoming messages,
      * as the processor is often sleeping
      * </pre>
@@ -79,6 +82,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * always listen
+     *
      * this option uses the most battery power
      * </pre>
      *
@@ -173,6 +177,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * BLE Error Reasons
+   *
    * TODO: this list needs to be completed
    *       if none of the reasons apply, use 
    *       UNKNOWN_ERROR
@@ -185,6 +190,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * undefined error
+     *
      * use this when no other reason applies
      * </pre>
      *
@@ -214,6 +220,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * undefined error
+     *
      * use this when no other reason applies
      * </pre>
      *
@@ -623,7 +630,7 @@ public final class BleOuterClass {
      */
     qaul.sys.ble.BleOuterClass.BleDirectReceivedOrBuilder getDirectReceivedOrBuilder();
 
-    public qaul.sys.ble.BleOuterClass.Ble.MessageCase getMessageCase();
+    qaul.sys.ble.BleOuterClass.Ble.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -651,11 +658,6 @@ public final class BleOuterClass {
       return new Ble();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_Ble_descriptor;
@@ -670,6 +672,7 @@ public final class BleOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1473,11 +1476,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.Ble parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.Ble parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1556,6 +1561,7 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (infoRequestBuilder_ != null) {
           infoRequestBuilder_.clear();
         }
@@ -1617,86 +1623,63 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.Ble buildPartial() {
         qaul.sys.ble.BleOuterClass.Ble result = new qaul.sys.ble.BleOuterClass.Ble(this);
-        if (messageCase_ == 1) {
-          if (infoRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = infoRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (infoResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = infoResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (startRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = startRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (startResultBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = startResultBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (stopRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = stopRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (stopResultBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = stopResultBuilder_.build();
-          }
-        }
-        if (messageCase_ == 7) {
-          if (deviceDiscoveredBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = deviceDiscoveredBuilder_.build();
-          }
-        }
-        if (messageCase_ == 8) {
-          if (deviceUnavailableBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = deviceUnavailableBuilder_.build();
-          }
-        }
-        if (messageCase_ == 9) {
-          if (directSendBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = directSendBuilder_.build();
-          }
-        }
-        if (messageCase_ == 10) {
-          if (directSendResultBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = directSendResultBuilder_.build();
-          }
-        }
-        if (messageCase_ == 11) {
-          if (directReceivedBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = directReceivedBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.Ble result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.sys.ble.BleOuterClass.Ble result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            infoRequestBuilder_ != null) {
+          result.message_ = infoRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            infoResponseBuilder_ != null) {
+          result.message_ = infoResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            startRequestBuilder_ != null) {
+          result.message_ = startRequestBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            startResultBuilder_ != null) {
+          result.message_ = startResultBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            stopRequestBuilder_ != null) {
+          result.message_ = stopRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            stopResultBuilder_ != null) {
+          result.message_ = stopResultBuilder_.build();
+        }
+        if (messageCase_ == 7 &&
+            deviceDiscoveredBuilder_ != null) {
+          result.message_ = deviceDiscoveredBuilder_.build();
+        }
+        if (messageCase_ == 8 &&
+            deviceUnavailableBuilder_ != null) {
+          result.message_ = deviceUnavailableBuilder_.build();
+        }
+        if (messageCase_ == 9 &&
+            directSendBuilder_ != null) {
+          result.message_ = directSendBuilder_.build();
+        }
+        if (messageCase_ == 10 &&
+            directSendResultBuilder_ != null) {
+          result.message_ = directSendResultBuilder_.build();
+        }
+        if (messageCase_ == 11 &&
+            directReceivedBuilder_ != null) {
+          result.message_ = directReceivedBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1925,6 +1908,7 @@ public final class BleOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.sys.ble.BleOuterClass.BleInfoRequest, qaul.sys.ble.BleOuterClass.BleInfoRequest.Builder, qaul.sys.ble.BleOuterClass.BleInfoRequestOrBuilder> infoRequestBuilder_;
@@ -2100,7 +2084,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return infoRequestBuilder_;
       }
 
@@ -2278,7 +2262,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return infoResponseBuilder_;
       }
 
@@ -2456,7 +2440,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return startRequestBuilder_;
       }
 
@@ -2634,7 +2618,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return startResultBuilder_;
       }
 
@@ -2812,7 +2796,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return stopRequestBuilder_;
       }
 
@@ -2990,7 +2974,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return stopResultBuilder_;
       }
 
@@ -3168,7 +3152,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 7;
-        onChanged();;
+        onChanged();
         return deviceDiscoveredBuilder_;
       }
 
@@ -3346,7 +3330,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 8;
-        onChanged();;
+        onChanged();
         return deviceUnavailableBuilder_;
       }
 
@@ -3524,7 +3508,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 9;
-        onChanged();;
+        onChanged();
         return directSendBuilder_;
       }
 
@@ -3702,7 +3686,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 10;
-        onChanged();;
+        onChanged();
         return directSendResultBuilder_;
       }
 
@@ -3880,7 +3864,7 @@ public final class BleOuterClass {
           message_ = null;
         }
         messageCase_ = 11;
-        onChanged();;
+        onChanged();
         return directReceivedBuilder_;
       }
       @java.lang.Override
@@ -3977,11 +3961,6 @@ public final class BleOuterClass {
       return new BleInfoRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleInfoRequest_descriptor;
@@ -4093,11 +4072,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleInfoRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleInfoRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4412,11 +4393,6 @@ public final class BleOuterClass {
       return new BleInfoResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleInfoResponse_descriptor;
@@ -4465,7 +4441,7 @@ public final class BleOuterClass {
      */
     @java.lang.Override
     public qaul.sys.ble.BleOuterClass.BleDeviceInfoOrBuilder getDeviceOrBuilder() {
-      return getDevice();
+      return device_ == null ? qaul.sys.ble.BleOuterClass.BleDeviceInfo.getDefaultInstance() : device_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4582,11 +4558,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleInfoResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleInfoResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4665,10 +4643,10 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (deviceBuilder_ == null) {
-          device_ = null;
-        } else {
-          device_ = null;
+        bitField0_ = 0;
+        device_ = null;
+        if (deviceBuilder_ != null) {
+          deviceBuilder_.dispose();
           deviceBuilder_ = null;
         }
         return this;
@@ -4697,13 +4675,18 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleInfoResponse buildPartial() {
         qaul.sys.ble.BleOuterClass.BleInfoResponse result = new qaul.sys.ble.BleOuterClass.BleInfoResponse(this);
-        if (deviceBuilder_ == null) {
-          result.device_ = device_;
-        } else {
-          result.device_ = deviceBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleInfoResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.device_ = deviceBuilder_ == null
+              ? device_
+              : deviceBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -4783,7 +4766,7 @@ public final class BleOuterClass {
                 input.readMessage(
                     getDeviceFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -4801,6 +4784,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private qaul.sys.ble.BleOuterClass.BleDeviceInfo device_;
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -4814,7 +4798,7 @@ public final class BleOuterClass {
        * @return Whether the device field is set.
        */
       public boolean hasDevice() {
-        return deviceBuilder_ != null || device_ != null;
+        return ((bitField0_ & 0x00000001) != 0);
       }
       /**
        * <pre>
@@ -4844,11 +4828,11 @@ public final class BleOuterClass {
             throw new NullPointerException();
           }
           device_ = value;
-          onChanged();
         } else {
           deviceBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -4862,11 +4846,11 @@ public final class BleOuterClass {
           qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder builderForValue) {
         if (deviceBuilder_ == null) {
           device_ = builderForValue.build();
-          onChanged();
         } else {
           deviceBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -4878,17 +4862,18 @@ public final class BleOuterClass {
        */
       public Builder mergeDevice(qaul.sys.ble.BleOuterClass.BleDeviceInfo value) {
         if (deviceBuilder_ == null) {
-          if (device_ != null) {
-            device_ =
-              qaul.sys.ble.BleOuterClass.BleDeviceInfo.newBuilder(device_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000001) != 0) &&
+            device_ != null &&
+            device_ != qaul.sys.ble.BleOuterClass.BleDeviceInfo.getDefaultInstance()) {
+            getDeviceBuilder().mergeFrom(value);
           } else {
             device_ = value;
           }
-          onChanged();
         } else {
           deviceBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000001;
+        onChanged();
         return this;
       }
       /**
@@ -4899,14 +4884,13 @@ public final class BleOuterClass {
        * <code>.qaul.sys.ble.BleDeviceInfo device = 1;</code>
        */
       public Builder clearDevice() {
-        if (deviceBuilder_ == null) {
-          device_ = null;
-          onChanged();
-        } else {
-          device_ = null;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        device_ = null;
+        if (deviceBuilder_ != null) {
+          deviceBuilder_.dispose();
           deviceBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -4917,7 +4901,7 @@ public final class BleOuterClass {
        * <code>.qaul.sys.ble.BleDeviceInfo device = 1;</code>
        */
       public qaul.sys.ble.BleOuterClass.BleDeviceInfo.Builder getDeviceBuilder() {
-        
+        bitField0_ |= 0x00000001;
         onChanged();
         return getDeviceFieldBuilder().getBuilder();
       }
@@ -5027,6 +5011,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Check if Bluetooth / Bluetooth Low Energy is supported 
+     *
      * Android: check if a bluetooth adapter is found
      * </pre>
      *
@@ -5069,6 +5054,7 @@ public final class BleOuterClass {
      * <pre>
      * Get Bluetooth Name
      * this is field is purely informative
+     *
      * Android: BluetoothAdapter getName()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
      * </pre>
@@ -5081,6 +5067,7 @@ public final class BleOuterClass {
      * <pre>
      * Get Bluetooth Name
      * this is field is purely informative
+     *
      * Android: BluetoothAdapter getName()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
      * </pre>
@@ -5094,6 +5081,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Bluetooth is enable / powered on
+     *
      * Android: BluetoothAdapter isEnabled()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
      * </pre>
@@ -5106,6 +5094,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Is extended advertisement supported?
+     *
      * Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
      * </pre>
@@ -5118,6 +5107,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * what is the maximal amount of bytes sendable via advertising?
+     *
      * Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
      * </pre>
@@ -5130,6 +5120,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Is 2M phy supported?
+     *
      * Android: BluetoothAdapter isLe2MPhySupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
      * </pre>
@@ -5143,6 +5134,7 @@ public final class BleOuterClass {
      * <pre>
      * is extended advertising supported in coded
      * mode? (For long distance connections)
+     *
      * Android: BluetoothAdapter isLeCodedPhySupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
      * </pre>
@@ -5155,12 +5147,15 @@ public final class BleOuterClass {
     /**
      * <pre>
      * is LE audio supported?
+     *
      * This is the most recent BLE feature, supported on:
+     *
      * * android 12 and above
      * * linux ?
      * * ios ?
      * * macos ?
      * * windows ?
+     *
      * Android: AndroidAdapter isLeAudioSupported()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
      * </pre>
@@ -5173,6 +5168,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * is periodic advertisment supported?
+     *
      * Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
      * </pre>
@@ -5185,6 +5181,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Is multi advertisement supported?
+     *
      * When multi advertisement is supported one can have different
      * advertisement types parallely. Each advertisement has a 
      * different device address.
@@ -5192,6 +5189,7 @@ public final class BleOuterClass {
      * would advertise themselves.
      * This is helpful to support several incompatible advertisement
      * modes at the same time.
+     *
      * Android: BluetoothAdapter isMultipleAdvertisementSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
      * </pre>
@@ -5204,6 +5202,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Android Specific: is Offloaded Filtering Supported?
+     *
      * Android: BluetoothAdapter isOffloadedFilteringSupported()
      * 
      * </pre>
@@ -5216,6 +5215,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Android Specific: is Offloaded Scan Batching Supported?
+     *
      * Android: BluetoothAdapter isOffloadedScanBatchingSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
      * </pre>
@@ -5253,11 +5253,6 @@ public final class BleOuterClass {
       return new BleDeviceInfo();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDeviceInfo_descriptor;
@@ -5272,10 +5267,11 @@ public final class BleOuterClass {
     }
 
     public static final int BLE_SUPPORT_FIELD_NUMBER = 1;
-    private boolean bleSupport_;
+    private boolean bleSupport_ = false;
     /**
      * <pre>
      * Check if Bluetooth / Bluetooth Low Energy is supported 
+     *
      * Android: check if a bluetooth adapter is found
      * </pre>
      *
@@ -5288,7 +5284,8 @@ public final class BleOuterClass {
     }
 
     public static final int ID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object id_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object id_ = "";
     /**
      * <pre>
      * Bluetooth device address
@@ -5344,11 +5341,13 @@ public final class BleOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <pre>
      * Get Bluetooth Name
      * this is field is purely informative
+     *
      * Android: BluetoothAdapter getName()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
      * </pre>
@@ -5373,6 +5372,7 @@ public final class BleOuterClass {
      * <pre>
      * Get Bluetooth Name
      * this is field is purely informative
+     *
      * Android: BluetoothAdapter getName()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
      * </pre>
@@ -5396,10 +5396,11 @@ public final class BleOuterClass {
     }
 
     public static final int BLUETOOTH_ON_FIELD_NUMBER = 4;
-    private boolean bluetoothOn_;
+    private boolean bluetoothOn_ = false;
     /**
      * <pre>
      * Bluetooth is enable / powered on
+     *
      * Android: BluetoothAdapter isEnabled()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
      * </pre>
@@ -5413,10 +5414,11 @@ public final class BleOuterClass {
     }
 
     public static final int ADV_EXTENDED_FIELD_NUMBER = 5;
-    private boolean advExtended_;
+    private boolean advExtended_ = false;
     /**
      * <pre>
      * Is extended advertisement supported?
+     *
      * Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
      * </pre>
@@ -5430,10 +5432,11 @@ public final class BleOuterClass {
     }
 
     public static final int ADV_EXTENDED_BYTES_FIELD_NUMBER = 6;
-    private int advExtendedBytes_;
+    private int advExtendedBytes_ = 0;
     /**
      * <pre>
      * what is the maximal amount of bytes sendable via advertising?
+     *
      * Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
      * </pre>
@@ -5447,10 +5450,11 @@ public final class BleOuterClass {
     }
 
     public static final int LE_2M_FIELD_NUMBER = 7;
-    private boolean le2M_;
+    private boolean le2M_ = false;
     /**
      * <pre>
      * Is 2M phy supported?
+     *
      * Android: BluetoothAdapter isLe2MPhySupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
      * </pre>
@@ -5464,11 +5468,12 @@ public final class BleOuterClass {
     }
 
     public static final int LE_CODED_FIELD_NUMBER = 8;
-    private boolean leCoded_;
+    private boolean leCoded_ = false;
     /**
      * <pre>
      * is extended advertising supported in coded
      * mode? (For long distance connections)
+     *
      * Android: BluetoothAdapter isLeCodedPhySupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
      * </pre>
@@ -5482,16 +5487,19 @@ public final class BleOuterClass {
     }
 
     public static final int LE_AUDIO_FIELD_NUMBER = 9;
-    private boolean leAudio_;
+    private boolean leAudio_ = false;
     /**
      * <pre>
      * is LE audio supported?
+     *
      * This is the most recent BLE feature, supported on:
+     *
      * * android 12 and above
      * * linux ?
      * * ios ?
      * * macos ?
      * * windows ?
+     *
      * Android: AndroidAdapter isLeAudioSupported()
      * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
      * </pre>
@@ -5505,10 +5513,11 @@ public final class BleOuterClass {
     }
 
     public static final int LE_PERIODIC_ADV_SUPPORT_FIELD_NUMBER = 14;
-    private boolean lePeriodicAdvSupport_;
+    private boolean lePeriodicAdvSupport_ = false;
     /**
      * <pre>
      * is periodic advertisment supported?
+     *
      * Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
      * </pre>
@@ -5522,10 +5531,11 @@ public final class BleOuterClass {
     }
 
     public static final int LE_MULTIPLE_ADV_SUPPORT_FIELD_NUMBER = 15;
-    private boolean leMultipleAdvSupport_;
+    private boolean leMultipleAdvSupport_ = false;
     /**
      * <pre>
      * Is multi advertisement supported?
+     *
      * When multi advertisement is supported one can have different
      * advertisement types parallely. Each advertisement has a 
      * different device address.
@@ -5533,6 +5543,7 @@ public final class BleOuterClass {
      * would advertise themselves.
      * This is helpful to support several incompatible advertisement
      * modes at the same time.
+     *
      * Android: BluetoothAdapter isMultipleAdvertisementSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
      * </pre>
@@ -5546,10 +5557,11 @@ public final class BleOuterClass {
     }
 
     public static final int OFFLOAD_FILTER_SUPPORT_FIELD_NUMBER = 16;
-    private boolean offloadFilterSupport_;
+    private boolean offloadFilterSupport_ = false;
     /**
      * <pre>
      * Android Specific: is Offloaded Filtering Supported?
+     *
      * Android: BluetoothAdapter isOffloadedFilteringSupported()
      * 
      * </pre>
@@ -5563,10 +5575,11 @@ public final class BleOuterClass {
     }
 
     public static final int OFFLOAD_SCAN_BATCHING_SUPPORT_FIELD_NUMBER = 17;
-    private boolean offloadScanBatchingSupport_;
+    private boolean offloadScanBatchingSupport_ = false;
     /**
      * <pre>
      * Android Specific: is Offloaded Scan Batching Supported?
+     *
      * Android: BluetoothAdapter isOffloadedScanBatchingSupported()
      * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
      * </pre>
@@ -5828,11 +5841,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5911,32 +5926,20 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         bleSupport_ = false;
-
         id_ = "";
-
         name_ = "";
-
         bluetoothOn_ = false;
-
         advExtended_ = false;
-
         advExtendedBytes_ = 0;
-
         le2M_ = false;
-
         leCoded_ = false;
-
         leAudio_ = false;
-
         lePeriodicAdvSupport_ = false;
-
         leMultipleAdvSupport_ = false;
-
         offloadFilterSupport_ = false;
-
         offloadScanBatchingSupport_ = false;
-
         return this;
       }
 
@@ -5963,21 +5966,52 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDeviceInfo buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDeviceInfo result = new qaul.sys.ble.BleOuterClass.BleDeviceInfo(this);
-        result.bleSupport_ = bleSupport_;
-        result.id_ = id_;
-        result.name_ = name_;
-        result.bluetoothOn_ = bluetoothOn_;
-        result.advExtended_ = advExtended_;
-        result.advExtendedBytes_ = advExtendedBytes_;
-        result.le2M_ = le2M_;
-        result.leCoded_ = leCoded_;
-        result.leAudio_ = leAudio_;
-        result.lePeriodicAdvSupport_ = lePeriodicAdvSupport_;
-        result.leMultipleAdvSupport_ = leMultipleAdvSupport_;
-        result.offloadFilterSupport_ = offloadFilterSupport_;
-        result.offloadScanBatchingSupport_ = offloadScanBatchingSupport_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDeviceInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.bleSupport_ = bleSupport_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.bluetoothOn_ = bluetoothOn_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.advExtended_ = advExtended_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.advExtendedBytes_ = advExtendedBytes_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.le2M_ = le2M_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.leCoded_ = leCoded_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.leAudio_ = leAudio_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.lePeriodicAdvSupport_ = lePeriodicAdvSupport_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.leMultipleAdvSupport_ = leMultipleAdvSupport_;
+        }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.offloadFilterSupport_ = offloadFilterSupport_;
+        }
+        if (((from_bitField0_ & 0x00001000) != 0)) {
+          result.offloadScanBatchingSupport_ = offloadScanBatchingSupport_;
+        }
       }
 
       @java.lang.Override
@@ -6029,10 +6063,12 @@ public final class BleOuterClass {
         }
         if (!other.getId().isEmpty()) {
           id_ = other.id_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getBluetoothOn() != false) {
@@ -6093,67 +6129,67 @@ public final class BleOuterClass {
                 break;
               case 8: {
                 bleSupport_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 id_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 bluetoothOn_ = input.readBool();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 40: {
                 advExtended_ = input.readBool();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 40
               case 48: {
                 advExtendedBytes_ = input.readUInt32();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 48
               case 56: {
                 le2M_ = input.readBool();
-
+                bitField0_ |= 0x00000040;
                 break;
               } // case 56
               case 64: {
                 leCoded_ = input.readBool();
-
+                bitField0_ |= 0x00000080;
                 break;
               } // case 64
               case 72: {
                 leAudio_ = input.readBool();
-
+                bitField0_ |= 0x00000100;
                 break;
               } // case 72
               case 112: {
                 lePeriodicAdvSupport_ = input.readBool();
-
+                bitField0_ |= 0x00000200;
                 break;
               } // case 112
               case 120: {
                 leMultipleAdvSupport_ = input.readBool();
-
+                bitField0_ |= 0x00000400;
                 break;
               } // case 120
               case 128: {
                 offloadFilterSupport_ = input.readBool();
-
+                bitField0_ |= 0x00000800;
                 break;
               } // case 128
               case 136: {
                 offloadScanBatchingSupport_ = input.readBool();
-
+                bitField0_ |= 0x00001000;
                 break;
               } // case 136
               default: {
@@ -6171,11 +6207,13 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean bleSupport_ ;
       /**
        * <pre>
        * Check if Bluetooth / Bluetooth Low Energy is supported 
+       *
        * Android: check if a bluetooth adapter is found
        * </pre>
        *
@@ -6189,6 +6227,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Check if Bluetooth / Bluetooth Low Energy is supported 
+       *
        * Android: check if a bluetooth adapter is found
        * </pre>
        *
@@ -6197,14 +6236,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setBleSupport(boolean value) {
-        
+
         bleSupport_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Check if Bluetooth / Bluetooth Low Energy is supported 
+       *
        * Android: check if a bluetooth adapter is found
        * </pre>
        *
@@ -6212,7 +6253,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearBleSupport() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         bleSupport_ = false;
         onChanged();
         return this;
@@ -6286,11 +6327,9 @@ public final class BleOuterClass {
        */
       public Builder setId(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6308,8 +6347,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
         id_ = getDefaultInstance().getId();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -6329,12 +6368,10 @@ public final class BleOuterClass {
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         id_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6344,6 +6381,7 @@ public final class BleOuterClass {
        * <pre>
        * Get Bluetooth Name
        * this is field is purely informative
+       *
        * Android: BluetoothAdapter getName()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
        * </pre>
@@ -6367,6 +6405,7 @@ public final class BleOuterClass {
        * <pre>
        * Get Bluetooth Name
        * this is field is purely informative
+       *
        * Android: BluetoothAdapter getName()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
        * </pre>
@@ -6391,6 +6430,7 @@ public final class BleOuterClass {
        * <pre>
        * Get Bluetooth Name
        * this is field is purely informative
+       *
        * Android: BluetoothAdapter getName()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
        * </pre>
@@ -6401,11 +6441,9 @@ public final class BleOuterClass {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6413,6 +6451,7 @@ public final class BleOuterClass {
        * <pre>
        * Get Bluetooth Name
        * this is field is purely informative
+       *
        * Android: BluetoothAdapter getName()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
        * </pre>
@@ -6421,8 +6460,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -6430,6 +6469,7 @@ public final class BleOuterClass {
        * <pre>
        * Get Bluetooth Name
        * this is field is purely informative
+       *
        * Android: BluetoothAdapter getName()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
        * </pre>
@@ -6440,12 +6480,10 @@ public final class BleOuterClass {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6454,6 +6492,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Bluetooth is enable / powered on
+       *
        * Android: BluetoothAdapter isEnabled()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
        * </pre>
@@ -6468,6 +6507,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Bluetooth is enable / powered on
+       *
        * Android: BluetoothAdapter isEnabled()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
        * </pre>
@@ -6477,14 +6517,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setBluetoothOn(boolean value) {
-        
+
         bluetoothOn_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Bluetooth is enable / powered on
+       *
        * Android: BluetoothAdapter isEnabled()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
        * </pre>
@@ -6493,7 +6535,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearBluetoothOn() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         bluetoothOn_ = false;
         onChanged();
         return this;
@@ -6503,6 +6545,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is extended advertisement supported?
+       *
        * Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
        * </pre>
@@ -6517,6 +6560,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is extended advertisement supported?
+       *
        * Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
        * </pre>
@@ -6526,14 +6570,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setAdvExtended(boolean value) {
-        
+
         advExtended_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Is extended advertisement supported?
+       *
        * Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
        * </pre>
@@ -6542,7 +6588,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearAdvExtended() {
-        
+        bitField0_ = (bitField0_ & ~0x00000010);
         advExtended_ = false;
         onChanged();
         return this;
@@ -6552,6 +6598,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * what is the maximal amount of bytes sendable via advertising?
+       *
        * Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
        * </pre>
@@ -6566,6 +6613,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * what is the maximal amount of bytes sendable via advertising?
+       *
        * Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
        * </pre>
@@ -6575,14 +6623,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setAdvExtendedBytes(int value) {
-        
+
         advExtendedBytes_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * what is the maximal amount of bytes sendable via advertising?
+       *
        * Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
        * </pre>
@@ -6591,7 +6641,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearAdvExtendedBytes() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         advExtendedBytes_ = 0;
         onChanged();
         return this;
@@ -6601,6 +6651,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is 2M phy supported?
+       *
        * Android: BluetoothAdapter isLe2MPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
        * </pre>
@@ -6615,6 +6666,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is 2M phy supported?
+       *
        * Android: BluetoothAdapter isLe2MPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
        * </pre>
@@ -6624,14 +6676,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLe2M(boolean value) {
-        
+
         le2M_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Is 2M phy supported?
+       *
        * Android: BluetoothAdapter isLe2MPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
        * </pre>
@@ -6640,7 +6694,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLe2M() {
-        
+        bitField0_ = (bitField0_ & ~0x00000040);
         le2M_ = false;
         onChanged();
         return this;
@@ -6651,6 +6705,7 @@ public final class BleOuterClass {
        * <pre>
        * is extended advertising supported in coded
        * mode? (For long distance connections)
+       *
        * Android: BluetoothAdapter isLeCodedPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
        * </pre>
@@ -6666,6 +6721,7 @@ public final class BleOuterClass {
        * <pre>
        * is extended advertising supported in coded
        * mode? (For long distance connections)
+       *
        * Android: BluetoothAdapter isLeCodedPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
        * </pre>
@@ -6675,8 +6731,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLeCoded(boolean value) {
-        
+
         leCoded_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -6684,6 +6741,7 @@ public final class BleOuterClass {
        * <pre>
        * is extended advertising supported in coded
        * mode? (For long distance connections)
+       *
        * Android: BluetoothAdapter isLeCodedPhySupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
        * </pre>
@@ -6692,7 +6750,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLeCoded() {
-        
+        bitField0_ = (bitField0_ & ~0x00000080);
         leCoded_ = false;
         onChanged();
         return this;
@@ -6702,12 +6760,15 @@ public final class BleOuterClass {
       /**
        * <pre>
        * is LE audio supported?
+       *
        * This is the most recent BLE feature, supported on:
+       *
        * * android 12 and above
        * * linux ?
        * * ios ?
        * * macos ?
        * * windows ?
+       *
        * Android: AndroidAdapter isLeAudioSupported()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
        * </pre>
@@ -6722,12 +6783,15 @@ public final class BleOuterClass {
       /**
        * <pre>
        * is LE audio supported?
+       *
        * This is the most recent BLE feature, supported on:
+       *
        * * android 12 and above
        * * linux ?
        * * ios ?
        * * macos ?
        * * windows ?
+       *
        * Android: AndroidAdapter isLeAudioSupported()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
        * </pre>
@@ -6737,20 +6801,24 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLeAudio(boolean value) {
-        
+
         leAudio_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * is LE audio supported?
+       *
        * This is the most recent BLE feature, supported on:
+       *
        * * android 12 and above
        * * linux ?
        * * ios ?
        * * macos ?
        * * windows ?
+       *
        * Android: AndroidAdapter isLeAudioSupported()
        * https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
        * </pre>
@@ -6759,7 +6827,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLeAudio() {
-        
+        bitField0_ = (bitField0_ & ~0x00000100);
         leAudio_ = false;
         onChanged();
         return this;
@@ -6769,6 +6837,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * is periodic advertisment supported?
+       *
        * Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
        * </pre>
@@ -6783,6 +6852,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * is periodic advertisment supported?
+       *
        * Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
        * </pre>
@@ -6792,14 +6862,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLePeriodicAdvSupport(boolean value) {
-        
+
         lePeriodicAdvSupport_ = value;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * is periodic advertisment supported?
+       *
        * Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
        * </pre>
@@ -6808,7 +6880,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLePeriodicAdvSupport() {
-        
+        bitField0_ = (bitField0_ & ~0x00000200);
         lePeriodicAdvSupport_ = false;
         onChanged();
         return this;
@@ -6818,6 +6890,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is multi advertisement supported?
+       *
        * When multi advertisement is supported one can have different
        * advertisement types parallely. Each advertisement has a 
        * different device address.
@@ -6825,6 +6898,7 @@ public final class BleOuterClass {
        * would advertise themselves.
        * This is helpful to support several incompatible advertisement
        * modes at the same time.
+       *
        * Android: BluetoothAdapter isMultipleAdvertisementSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
        * </pre>
@@ -6839,6 +6913,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Is multi advertisement supported?
+       *
        * When multi advertisement is supported one can have different
        * advertisement types parallely. Each advertisement has a 
        * different device address.
@@ -6846,6 +6921,7 @@ public final class BleOuterClass {
        * would advertise themselves.
        * This is helpful to support several incompatible advertisement
        * modes at the same time.
+       *
        * Android: BluetoothAdapter isMultipleAdvertisementSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
        * </pre>
@@ -6855,14 +6931,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLeMultipleAdvSupport(boolean value) {
-        
+
         leMultipleAdvSupport_ = value;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Is multi advertisement supported?
+       *
        * When multi advertisement is supported one can have different
        * advertisement types parallely. Each advertisement has a 
        * different device address.
@@ -6870,6 +6948,7 @@ public final class BleOuterClass {
        * would advertise themselves.
        * This is helpful to support several incompatible advertisement
        * modes at the same time.
+       *
        * Android: BluetoothAdapter isMultipleAdvertisementSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
        * </pre>
@@ -6878,7 +6957,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLeMultipleAdvSupport() {
-        
+        bitField0_ = (bitField0_ & ~0x00000400);
         leMultipleAdvSupport_ = false;
         onChanged();
         return this;
@@ -6888,6 +6967,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Android Specific: is Offloaded Filtering Supported?
+       *
        * Android: BluetoothAdapter isOffloadedFilteringSupported()
        * 
        * </pre>
@@ -6902,6 +6982,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Android Specific: is Offloaded Filtering Supported?
+       *
        * Android: BluetoothAdapter isOffloadedFilteringSupported()
        * 
        * </pre>
@@ -6911,14 +6992,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setOffloadFilterSupport(boolean value) {
-        
+
         offloadFilterSupport_ = value;
+        bitField0_ |= 0x00000800;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Android Specific: is Offloaded Filtering Supported?
+       *
        * Android: BluetoothAdapter isOffloadedFilteringSupported()
        * 
        * </pre>
@@ -6927,7 +7010,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearOffloadFilterSupport() {
-        
+        bitField0_ = (bitField0_ & ~0x00000800);
         offloadFilterSupport_ = false;
         onChanged();
         return this;
@@ -6937,6 +7020,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Android Specific: is Offloaded Scan Batching Supported?
+       *
        * Android: BluetoothAdapter isOffloadedScanBatchingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
        * </pre>
@@ -6951,6 +7035,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * Android Specific: is Offloaded Scan Batching Supported?
+       *
        * Android: BluetoothAdapter isOffloadedScanBatchingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
        * </pre>
@@ -6960,14 +7045,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setOffloadScanBatchingSupport(boolean value) {
-        
+
         offloadScanBatchingSupport_ = value;
+        bitField0_ |= 0x00001000;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Android Specific: is Offloaded Scan Batching Supported?
+       *
        * Android: BluetoothAdapter isOffloadedScanBatchingSupported()
        * https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
        * </pre>
@@ -6976,7 +7063,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearOffloadScanBatchingSupport() {
-        
+        bitField0_ = (bitField0_ & ~0x00001000);
         offloadScanBatchingSupport_ = false;
         onChanged();
         return this;
@@ -7052,6 +7139,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * qaul ID
+     *
      * The small 16 byte qaul id
      * to be used to identify this node
      * </pre>
@@ -7083,6 +7171,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * Start Device
+   *
    * the module will try to start the device, power it up,
    * get all rights, configure it for qaul, and
    * send &amp; receive advertising messages
@@ -7111,11 +7200,6 @@ public final class BleOuterClass {
       return new BleStartRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleStartRequest_descriptor;
@@ -7130,10 +7214,11 @@ public final class BleOuterClass {
     }
 
     public static final int QAUL_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString qaulId_;
+    private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul ID
+     *
      * The small 16 byte qaul id
      * to be used to identify this node
      * </pre>
@@ -7147,7 +7232,7 @@ public final class BleOuterClass {
     }
 
     public static final int POWER_SETTING_FIELD_NUMBER = 2;
-    private int powerSetting_;
+    private int powerSetting_ = 0;
     /**
      * <pre>
      * power settings 
@@ -7168,8 +7253,7 @@ public final class BleOuterClass {
      * @return The powerSetting.
      */
     @java.lang.Override public qaul.sys.ble.BleOuterClass.BlePowerSetting getPowerSetting() {
-      @SuppressWarnings("deprecation")
-      qaul.sys.ble.BleOuterClass.BlePowerSetting result = qaul.sys.ble.BleOuterClass.BlePowerSetting.valueOf(powerSetting_);
+      qaul.sys.ble.BleOuterClass.BlePowerSetting result = qaul.sys.ble.BleOuterClass.BlePowerSetting.forNumber(powerSetting_);
       return result == null ? qaul.sys.ble.BleOuterClass.BlePowerSetting.UNRECOGNIZED : result;
     }
 
@@ -7292,11 +7376,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStartRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStartRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7341,6 +7427,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Start Device
+     *
      * the module will try to start the device, power it up,
      * get all rights, configure it for qaul, and
      * send &amp; receive advertising messages
@@ -7378,10 +7465,9 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         qaulId_ = com.google.protobuf.ByteString.EMPTY;
-
         powerSetting_ = 0;
-
         return this;
       }
 
@@ -7408,10 +7494,19 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleStartRequest buildPartial() {
         qaul.sys.ble.BleOuterClass.BleStartRequest result = new qaul.sys.ble.BleOuterClass.BleStartRequest(this);
-        result.qaulId_ = qaulId_;
-        result.powerSetting_ = powerSetting_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleStartRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.qaulId_ = qaulId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.powerSetting_ = powerSetting_;
+        }
       }
 
       @java.lang.Override
@@ -7492,12 +7587,12 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 qaulId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 powerSetting_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -7515,11 +7610,13 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <pre>
        * qaul ID
+       *
        * The small 16 byte qaul id
        * to be used to identify this node
        * </pre>
@@ -7534,6 +7631,7 @@ public final class BleOuterClass {
       /**
        * <pre>
        * qaul ID
+       *
        * The small 16 byte qaul id
        * to be used to identify this node
        * </pre>
@@ -7543,17 +7641,16 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setQaulId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         qaulId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * qaul ID
+       *
        * The small 16 byte qaul id
        * to be used to identify this node
        * </pre>
@@ -7562,7 +7659,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearQaulId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         qaulId_ = getDefaultInstance().getQaulId();
         onChanged();
         return this;
@@ -7590,8 +7687,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setPowerSettingValue(int value) {
-        
         powerSetting_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -7605,8 +7702,7 @@ public final class BleOuterClass {
        */
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BlePowerSetting getPowerSetting() {
-        @SuppressWarnings("deprecation")
-        qaul.sys.ble.BleOuterClass.BlePowerSetting result = qaul.sys.ble.BleOuterClass.BlePowerSetting.valueOf(powerSetting_);
+        qaul.sys.ble.BleOuterClass.BlePowerSetting result = qaul.sys.ble.BleOuterClass.BlePowerSetting.forNumber(powerSetting_);
         return result == null ? qaul.sys.ble.BleOuterClass.BlePowerSetting.UNRECOGNIZED : result;
       }
       /**
@@ -7622,7 +7718,7 @@ public final class BleOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         powerSetting_ = value.getNumber();
         onChanged();
         return this;
@@ -7636,7 +7732,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearPowerSetting() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         powerSetting_ = 0;
         onChanged();
         return this;
@@ -7761,6 +7857,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * Start device result message
+   *
    * Feedback from the 
    * </pre>
    *
@@ -7787,11 +7884,6 @@ public final class BleOuterClass {
       return new BleStartResult();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleStartResult_descriptor;
@@ -7806,7 +7898,7 @@ public final class BleOuterClass {
     }
 
     public static final int SUCCESS_FIELD_NUMBER = 1;
-    private boolean success_;
+    private boolean success_ = false;
     /**
      * <pre>
      * whether the device was successfully started
@@ -7821,7 +7913,7 @@ public final class BleOuterClass {
     }
 
     public static final int ERROR_REASON_FIELD_NUMBER = 2;
-    private int errorReason_;
+    private int errorReason_ = 0;
     /**
      * <pre>
      * error reason
@@ -7842,13 +7934,13 @@ public final class BleOuterClass {
      * @return The errorReason.
      */
     @java.lang.Override public qaul.sys.ble.BleOuterClass.BleError getErrorReason() {
-      @SuppressWarnings("deprecation")
-      qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.valueOf(errorReason_);
+      qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.forNumber(errorReason_);
       return result == null ? qaul.sys.ble.BleOuterClass.BleError.UNRECOGNIZED : result;
     }
 
     public static final int ERROR_MESSAGE_FIELD_NUMBER = 3;
-    private volatile java.lang.Object errorMessage_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object errorMessage_ = "";
     /**
      * <pre>
      * error message
@@ -8023,11 +8115,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStartResult parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStartResult parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8072,6 +8166,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Start device result message
+     *
      * Feedback from the 
      * </pre>
      *
@@ -8107,12 +8202,10 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         success_ = false;
-
         errorReason_ = 0;
-
         errorMessage_ = "";
-
         return this;
       }
 
@@ -8139,11 +8232,22 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleStartResult buildPartial() {
         qaul.sys.ble.BleOuterClass.BleStartResult result = new qaul.sys.ble.BleOuterClass.BleStartResult(this);
-        result.success_ = success_;
-        result.errorReason_ = errorReason_;
-        result.errorMessage_ = errorMessage_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleStartResult result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.success_ = success_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.errorReason_ = errorReason_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.errorMessage_ = errorMessage_;
+        }
       }
 
       @java.lang.Override
@@ -8198,6 +8302,7 @@ public final class BleOuterClass {
         }
         if (!other.getErrorMessage().isEmpty()) {
           errorMessage_ = other.errorMessage_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -8228,17 +8333,17 @@ public final class BleOuterClass {
                 break;
               case 8: {
                 success_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 errorReason_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 errorMessage_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -8256,6 +8361,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean success_ ;
       /**
@@ -8280,8 +8386,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSuccess(boolean value) {
-        
+
         success_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8294,7 +8401,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSuccess() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         success_ = false;
         onChanged();
         return this;
@@ -8322,8 +8429,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setErrorReasonValue(int value) {
-        
         errorReason_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8337,8 +8444,7 @@ public final class BleOuterClass {
        */
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleError getErrorReason() {
-        @SuppressWarnings("deprecation")
-        qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.valueOf(errorReason_);
+        qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.forNumber(errorReason_);
         return result == null ? qaul.sys.ble.BleOuterClass.BleError.UNRECOGNIZED : result;
       }
       /**
@@ -8354,7 +8460,7 @@ public final class BleOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         errorReason_ = value.getNumber();
         onChanged();
         return this;
@@ -8368,7 +8474,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearErrorReason() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         errorReason_ = 0;
         onChanged();
         return this;
@@ -8427,11 +8533,9 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -8444,8 +8548,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearErrorMessage() {
-        
         errorMessage_ = getDefaultInstance().getErrorMessage();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -8460,12 +8564,10 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -8563,11 +8665,6 @@ public final class BleOuterClass {
       return new BleStopRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleStopRequest_descriptor;
@@ -8679,11 +8776,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStopRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStopRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8997,6 +9096,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * Stop Result
+   *
    * Feedback of the stop request
    * </pre>
    *
@@ -9023,11 +9123,6 @@ public final class BleOuterClass {
       return new BleStopResult();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleStopResult_descriptor;
@@ -9042,7 +9137,7 @@ public final class BleOuterClass {
     }
 
     public static final int SUCCESS_FIELD_NUMBER = 1;
-    private boolean success_;
+    private boolean success_ = false;
     /**
      * <pre>
      * whether the device was successfully stopped
@@ -9057,7 +9152,7 @@ public final class BleOuterClass {
     }
 
     public static final int ERROR_REASON_FIELD_NUMBER = 2;
-    private int errorReason_;
+    private int errorReason_ = 0;
     /**
      * <pre>
      * error reason
@@ -9078,13 +9173,13 @@ public final class BleOuterClass {
      * @return The errorReason.
      */
     @java.lang.Override public qaul.sys.ble.BleOuterClass.BleError getErrorReason() {
-      @SuppressWarnings("deprecation")
-      qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.valueOf(errorReason_);
+      qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.forNumber(errorReason_);
       return result == null ? qaul.sys.ble.BleOuterClass.BleError.UNRECOGNIZED : result;
     }
 
     public static final int ERROR_MESSAGE_FIELD_NUMBER = 3;
-    private volatile java.lang.Object errorMessage_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object errorMessage_ = "";
     /**
      * <pre>
      * error message
@@ -9259,11 +9354,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStopResult parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleStopResult parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -9308,6 +9405,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Stop Result
+     *
      * Feedback of the stop request
      * </pre>
      *
@@ -9343,12 +9441,10 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         success_ = false;
-
         errorReason_ = 0;
-
         errorMessage_ = "";
-
         return this;
       }
 
@@ -9375,11 +9471,22 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleStopResult buildPartial() {
         qaul.sys.ble.BleOuterClass.BleStopResult result = new qaul.sys.ble.BleOuterClass.BleStopResult(this);
-        result.success_ = success_;
-        result.errorReason_ = errorReason_;
-        result.errorMessage_ = errorMessage_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleStopResult result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.success_ = success_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.errorReason_ = errorReason_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.errorMessage_ = errorMessage_;
+        }
       }
 
       @java.lang.Override
@@ -9434,6 +9541,7 @@ public final class BleOuterClass {
         }
         if (!other.getErrorMessage().isEmpty()) {
           errorMessage_ = other.errorMessage_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -9464,17 +9572,17 @@ public final class BleOuterClass {
                 break;
               case 8: {
                 success_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 errorReason_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 errorMessage_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -9492,6 +9600,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean success_ ;
       /**
@@ -9516,8 +9625,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSuccess(boolean value) {
-        
+
         success_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9530,7 +9640,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSuccess() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         success_ = false;
         onChanged();
         return this;
@@ -9558,8 +9668,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setErrorReasonValue(int value) {
-        
         errorReason_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9573,8 +9683,7 @@ public final class BleOuterClass {
        */
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleError getErrorReason() {
-        @SuppressWarnings("deprecation")
-        qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.valueOf(errorReason_);
+        qaul.sys.ble.BleOuterClass.BleError result = qaul.sys.ble.BleOuterClass.BleError.forNumber(errorReason_);
         return result == null ? qaul.sys.ble.BleOuterClass.BleError.UNRECOGNIZED : result;
       }
       /**
@@ -9590,7 +9699,7 @@ public final class BleOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         errorReason_ = value.getNumber();
         onChanged();
         return this;
@@ -9604,7 +9713,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearErrorReason() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         errorReason_ = 0;
         onChanged();
         return this;
@@ -9663,11 +9772,9 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9680,8 +9787,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearErrorMessage() {
-        
         errorMessage_ = getDefaultInstance().getErrorMessage();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -9696,12 +9803,10 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9796,6 +9901,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * Device Discovered
+   *
    * A new device has been discovered.
    * </pre>
    *
@@ -9821,11 +9927,6 @@ public final class BleOuterClass {
       return new BleDeviceDiscovered();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDeviceDiscovered_descriptor;
@@ -9840,7 +9941,7 @@ public final class BleOuterClass {
     }
 
     public static final int QAUL_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString qaulId_;
+    private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul id of the device
@@ -9855,7 +9956,7 @@ public final class BleOuterClass {
     }
 
     public static final int RSSI_FIELD_NUMBER = 2;
-    private int rssi_;
+    private int rssi_ = 0;
     /**
      * <pre>
      * the received signal strength of this device
@@ -9989,11 +10090,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceDiscovered parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceDiscovered parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10038,6 +10141,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Device Discovered
+     *
      * A new device has been discovered.
      * </pre>
      *
@@ -10073,10 +10177,9 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         qaulId_ = com.google.protobuf.ByteString.EMPTY;
-
         rssi_ = 0;
-
         return this;
       }
 
@@ -10103,10 +10206,19 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDeviceDiscovered buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDeviceDiscovered result = new qaul.sys.ble.BleOuterClass.BleDeviceDiscovered(this);
-        result.qaulId_ = qaulId_;
-        result.rssi_ = rssi_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDeviceDiscovered result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.qaulId_ = qaulId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.rssi_ = rssi_;
+        }
       }
 
       @java.lang.Override
@@ -10187,12 +10299,12 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 qaulId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 rssi_ = input.readInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -10210,6 +10322,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -10234,11 +10347,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setQaulId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         qaulId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10251,7 +10362,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearQaulId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         qaulId_ = getDefaultInstance().getQaulId();
         onChanged();
         return this;
@@ -10280,8 +10391,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setRssi(int value) {
-        
+
         rssi_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -10294,7 +10406,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRssi() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         rssi_ = 0;
         onChanged();
         return this;
@@ -10381,6 +10493,7 @@ public final class BleOuterClass {
   /**
    * <pre>
    * Device Unavailable
+   *
    * A formerly discovered device has become 
    * unavailable. No messages can be sent to it.
    * </pre>
@@ -10407,11 +10520,6 @@ public final class BleOuterClass {
       return new BleDeviceUnavailable();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDeviceUnavailable_descriptor;
@@ -10426,7 +10534,7 @@ public final class BleOuterClass {
     }
 
     public static final int QAUL_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString qaulId_;
+    private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul id of the device that
@@ -10550,11 +10658,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceUnavailable parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDeviceUnavailable parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10599,6 +10709,7 @@ public final class BleOuterClass {
     /**
      * <pre>
      * Device Unavailable
+     *
      * A formerly discovered device has become 
      * unavailable. No messages can be sent to it.
      * </pre>
@@ -10635,8 +10746,8 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         qaulId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -10663,9 +10774,16 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDeviceUnavailable buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDeviceUnavailable result = new qaul.sys.ble.BleOuterClass.BleDeviceUnavailable(this);
-        result.qaulId_ = qaulId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDeviceUnavailable result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.qaulId_ = qaulId_;
+        }
       }
 
       @java.lang.Override
@@ -10743,7 +10861,7 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 qaulId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -10761,6 +10879,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString qaulId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -10787,11 +10906,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setQaulId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         qaulId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10805,7 +10922,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearQaulId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         qaulId_ = getDefaultInstance().getQaulId();
         onChanged();
         return this;
@@ -10948,11 +11065,6 @@ public final class BleOuterClass {
       return new BleDirectSend();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDirectSend_descriptor;
@@ -10967,7 +11079,7 @@ public final class BleOuterClass {
     }
 
     public static final int MESSAGE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString messageId_;
+    private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message id (as a reference for the result message)
@@ -10982,7 +11094,7 @@ public final class BleOuterClass {
     }
 
     public static final int RECEIVER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString receiverId_;
+    private com.google.protobuf.ByteString receiverId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul id of the device to send it to
@@ -10997,7 +11109,7 @@ public final class BleOuterClass {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString senderId_;
+    private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul id of the sending device
@@ -11012,7 +11124,7 @@ public final class BleOuterClass {
     }
 
     public static final int DATA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString data_;
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * data to be sent
@@ -11168,11 +11280,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectSend parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectSend parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -11251,14 +11365,11 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         messageId_ = com.google.protobuf.ByteString.EMPTY;
-
         receiverId_ = com.google.protobuf.ByteString.EMPTY;
-
         senderId_ = com.google.protobuf.ByteString.EMPTY;
-
         data_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -11285,12 +11396,25 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDirectSend buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDirectSend result = new qaul.sys.ble.BleOuterClass.BleDirectSend(this);
-        result.messageId_ = messageId_;
-        result.receiverId_ = receiverId_;
-        result.senderId_ = senderId_;
-        result.data_ = data_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDirectSend result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.messageId_ = messageId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.receiverId_ = receiverId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.data_ = data_;
+        }
       }
 
       @java.lang.Override
@@ -11377,22 +11501,22 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 messageId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 receiverId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 senderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 34: {
                 data_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               default: {
@@ -11410,6 +11534,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11434,11 +11559,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setMessageId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         messageId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11451,7 +11574,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearMessageId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         messageId_ = getDefaultInstance().getMessageId();
         onChanged();
         return this;
@@ -11480,11 +11603,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setReceiverId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         receiverId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -11497,7 +11618,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearReceiverId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         receiverId_ = getDefaultInstance().getReceiverId();
         onChanged();
         return this;
@@ -11526,11 +11647,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -11543,7 +11662,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
@@ -11572,11 +11691,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         data_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -11589,7 +11706,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearData() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;
@@ -11730,11 +11847,6 @@ public final class BleOuterClass {
       return new BleDirectSendResult();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDirectSendResult_descriptor;
@@ -11749,7 +11861,7 @@ public final class BleOuterClass {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message id
@@ -11764,7 +11876,7 @@ public final class BleOuterClass {
     }
 
     public static final int SUCCESS_FIELD_NUMBER = 2;
-    private boolean success_;
+    private boolean success_ = false;
     /**
      * <pre>
      * result after sending the message
@@ -11779,7 +11891,8 @@ public final class BleOuterClass {
     }
 
     public static final int ERROR_MESSAGE_FIELD_NUMBER = 3;
-    private volatile java.lang.Object errorMessage_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object errorMessage_ = "";
     /**
      * <pre>
      * error messages
@@ -11955,11 +12068,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectSendResult parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectSendResult parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12038,12 +12153,10 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         success_ = false;
-
         errorMessage_ = "";
-
         return this;
       }
 
@@ -12070,11 +12183,22 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDirectSendResult buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDirectSendResult result = new qaul.sys.ble.BleOuterClass.BleDirectSendResult(this);
-        result.id_ = id_;
-        result.success_ = success_;
-        result.errorMessage_ = errorMessage_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDirectSendResult result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.success_ = success_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.errorMessage_ = errorMessage_;
+        }
       }
 
       @java.lang.Override
@@ -12129,6 +12253,7 @@ public final class BleOuterClass {
         }
         if (!other.getErrorMessage().isEmpty()) {
           errorMessage_ = other.errorMessage_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -12159,17 +12284,17 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 success_ = input.readBool();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 errorMessage_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -12187,6 +12312,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -12211,11 +12337,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12228,7 +12352,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -12257,8 +12381,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSuccess(boolean value) {
-        
+
         success_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -12271,7 +12396,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSuccess() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         success_ = false;
         onChanged();
         return this;
@@ -12330,11 +12455,9 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -12347,8 +12470,8 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearErrorMessage() {
-        
         errorMessage_ = getDefaultInstance().getErrorMessage();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -12363,12 +12486,10 @@ public final class BleOuterClass {
        */
       public Builder setErrorMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         errorMessage_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -12488,11 +12609,6 @@ public final class BleOuterClass {
       return new BleDirectReceived();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.sys.ble.BleOuterClass.internal_static_qaul_sys_ble_BleDirectReceived_descriptor;
@@ -12507,7 +12623,7 @@ public final class BleOuterClass {
     }
 
     public static final int FROM_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString from_;
+    private com.google.protobuf.ByteString from_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * qaul id of the sending device
@@ -12522,7 +12638,7 @@ public final class BleOuterClass {
     }
 
     public static final int DATA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString data_;
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the data received
@@ -12656,11 +12772,13 @@ public final class BleOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectReceived parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.sys.ble.BleOuterClass.BleDirectReceived parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12739,10 +12857,9 @@ public final class BleOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         from_ = com.google.protobuf.ByteString.EMPTY;
-
         data_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -12769,10 +12886,19 @@ public final class BleOuterClass {
       @java.lang.Override
       public qaul.sys.ble.BleOuterClass.BleDirectReceived buildPartial() {
         qaul.sys.ble.BleOuterClass.BleDirectReceived result = new qaul.sys.ble.BleOuterClass.BleDirectReceived(this);
-        result.from_ = from_;
-        result.data_ = data_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.sys.ble.BleOuterClass.BleDirectReceived result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.from_ = from_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.data_ = data_;
+        }
       }
 
       @java.lang.Override
@@ -12853,12 +12979,12 @@ public final class BleOuterClass {
                 break;
               case 10: {
                 from_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 34: {
                 data_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 34
               default: {
@@ -12876,6 +13002,7 @@ public final class BleOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString from_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -12900,11 +13027,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setFrom(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         from_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12917,7 +13042,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearFrom() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         from_ = getDefaultInstance().getFrom();
         onChanged();
         return this;
@@ -12946,11 +13071,9 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         data_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -12963,7 +13086,7 @@ public final class BleOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearData() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;

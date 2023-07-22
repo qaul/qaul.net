@@ -1,30 +1,34 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: rpc/qaul_rpc.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-// ignore_for_file: UNDEFINED_SHOWN_NAME
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+
 import 'dart:core' as $core;
+
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Modules extends $pb.ProtobufEnum {
-  static const Modules NONE = Modules._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
-  static const Modules RPC = Modules._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RPC');
-  static const Modules NODE = Modules._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NODE');
-  static const Modules USERACCOUNTS = Modules._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USERACCOUNTS');
-  static const Modules USERS = Modules._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USERS');
-  static const Modules ROUTER = Modules._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ROUTER');
-  static const Modules FEED = Modules._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FEED');
-  static const Modules CONNECTIONS = Modules._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTIONS');
-  static const Modules DEBUG = Modules._(8, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DEBUG');
-  static const Modules GROUP = Modules._(9, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GROUP');
-  static const Modules CHAT = Modules._(10, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHAT');
-  static const Modules CHATFILE = Modules._(11, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CHATFILE');
-  static const Modules BLE = Modules._(12, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BLE');
-  static const Modules RTC = Modules._(13, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RTC');
-  static const Modules DTN = Modules._(14, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DTN');
+  static const Modules NONE = Modules._(0, _omitEnumNames ? '' : 'NONE');
+  static const Modules RPC = Modules._(1, _omitEnumNames ? '' : 'RPC');
+  static const Modules NODE = Modules._(2, _omitEnumNames ? '' : 'NODE');
+  static const Modules USERACCOUNTS = Modules._(3, _omitEnumNames ? '' : 'USERACCOUNTS');
+  static const Modules USERS = Modules._(4, _omitEnumNames ? '' : 'USERS');
+  static const Modules ROUTER = Modules._(5, _omitEnumNames ? '' : 'ROUTER');
+  static const Modules FEED = Modules._(6, _omitEnumNames ? '' : 'FEED');
+  static const Modules CONNECTIONS = Modules._(7, _omitEnumNames ? '' : 'CONNECTIONS');
+  static const Modules DEBUG = Modules._(8, _omitEnumNames ? '' : 'DEBUG');
+  static const Modules GROUP = Modules._(9, _omitEnumNames ? '' : 'GROUP');
+  static const Modules CHAT = Modules._(10, _omitEnumNames ? '' : 'CHAT');
+  static const Modules CHATFILE = Modules._(11, _omitEnumNames ? '' : 'CHATFILE');
+  static const Modules BLE = Modules._(12, _omitEnumNames ? '' : 'BLE');
+  static const Modules RTC = Modules._(13, _omitEnumNames ? '' : 'RTC');
+  static const Modules DTN = Modules._(14, _omitEnumNames ? '' : 'DTN');
 
   static const $core.List<Modules> values = <Modules> [
     NONE,
@@ -50,3 +54,5 @@ class Modules extends $pb.ProtobufEnum {
   const Modules._($core.int v, $core.String n) : super(v, n);
 }
 
+
+const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

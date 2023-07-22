@@ -1,18 +1,22 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: services/messaging/messaging.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-// ignore_for_file: UNDEFINED_SHOWN_NAME
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+
 import 'dart:core' as $core;
+
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class CryptoState extends $pb.ProtobufEnum {
-  static const CryptoState NONE = CryptoState._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
-  static const CryptoState HANDSHAKE = CryptoState._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'HANDSHAKE');
-  static const CryptoState TRANSPORT = CryptoState._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSPORT');
+  static const CryptoState NONE = CryptoState._(0, _omitEnumNames ? '' : 'NONE');
+  static const CryptoState HANDSHAKE = CryptoState._(1, _omitEnumNames ? '' : 'HANDSHAKE');
+  static const CryptoState TRANSPORT = CryptoState._(2, _omitEnumNames ? '' : 'TRANSPORT');
 
   static const $core.List<CryptoState> values = <CryptoState> [
     NONE,
@@ -27,8 +31,8 @@ class CryptoState extends $pb.ProtobufEnum {
 }
 
 class DtnResponse_ResponseType extends $pb.ProtobufEnum {
-  static const DtnResponse_ResponseType ACCEPTED = DtnResponse_ResponseType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ACCEPTED');
-  static const DtnResponse_ResponseType REJECTED = DtnResponse_ResponseType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'REJECTED');
+  static const DtnResponse_ResponseType ACCEPTED = DtnResponse_ResponseType._(0, _omitEnumNames ? '' : 'ACCEPTED');
+  static const DtnResponse_ResponseType REJECTED = DtnResponse_ResponseType._(1, _omitEnumNames ? '' : 'REJECTED');
 
   static const $core.List<DtnResponse_ResponseType> values = <DtnResponse_ResponseType> [
     ACCEPTED,
@@ -42,10 +46,10 @@ class DtnResponse_ResponseType extends $pb.ProtobufEnum {
 }
 
 class DtnResponse_Reason extends $pb.ProtobufEnum {
-  static const DtnResponse_Reason NONE = DtnResponse_Reason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
-  static const DtnResponse_Reason USER_NOT_ACCEPTED = DtnResponse_Reason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_NOT_ACCEPTED');
-  static const DtnResponse_Reason OVERALL_QUOTA = DtnResponse_Reason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'OVERALL_QUOTA');
-  static const DtnResponse_Reason USER_QUOTA = DtnResponse_Reason._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_QUOTA');
+  static const DtnResponse_Reason NONE = DtnResponse_Reason._(0, _omitEnumNames ? '' : 'NONE');
+  static const DtnResponse_Reason USER_NOT_ACCEPTED = DtnResponse_Reason._(1, _omitEnumNames ? '' : 'USER_NOT_ACCEPTED');
+  static const DtnResponse_Reason OVERALL_QUOTA = DtnResponse_Reason._(2, _omitEnumNames ? '' : 'OVERALL_QUOTA');
+  static const DtnResponse_Reason USER_QUOTA = DtnResponse_Reason._(3, _omitEnumNames ? '' : 'USER_QUOTA');
 
   static const $core.List<DtnResponse_Reason> values = <DtnResponse_Reason> [
     NONE,
@@ -60,3 +64,5 @@ class DtnResponse_Reason extends $pb.ProtobufEnum {
   const DtnResponse_Reason._($core.int v, $core.String n) : super(v, n);
 }
 
+
+const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

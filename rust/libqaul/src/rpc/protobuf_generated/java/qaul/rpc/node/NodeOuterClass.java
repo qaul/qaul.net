@@ -64,7 +64,7 @@ public final class NodeOuterClass {
      */
     qaul.rpc.node.NodeOuterClass.NodeInformationOrBuilder getInfoOrBuilder();
 
-    public qaul.rpc.node.NodeOuterClass.Node.MessageCase getMessageCase();
+    qaul.rpc.node.NodeOuterClass.Node.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -92,11 +92,6 @@ public final class NodeOuterClass {
       return new Node();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.node.NodeOuterClass.internal_static_qaul_rpc_node_Node_descriptor;
@@ -111,6 +106,7 @@ public final class NodeOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -363,11 +359,13 @@ public final class NodeOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.node.NodeOuterClass.Node parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.node.NodeOuterClass.Node parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -446,6 +444,7 @@ public final class NodeOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (infoBuilder_ != null) {
           infoBuilder_.clear();
         }
@@ -477,19 +476,23 @@ public final class NodeOuterClass {
       @java.lang.Override
       public qaul.rpc.node.NodeOuterClass.Node buildPartial() {
         qaul.rpc.node.NodeOuterClass.Node result = new qaul.rpc.node.NodeOuterClass.Node(this);
-        if (messageCase_ == 1) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 2) {
-          if (infoBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = infoBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.node.NodeOuterClass.Node result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.node.NodeOuterClass.Node result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 2 &&
+            infoBuilder_ != null) {
+          result.message_ = infoBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -617,6 +620,7 @@ public final class NodeOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       /**
        * <pre>
@@ -653,6 +657,7 @@ public final class NodeOuterClass {
        * @return This builder for chaining.
        */
       public Builder setGetNodeInfo(boolean value) {
+
         messageCase_ = 1;
         message_ = value;
         onChanged();
@@ -849,7 +854,7 @@ public final class NodeOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return infoBuilder_;
       }
       @java.lang.Override
@@ -1003,7 +1008,8 @@ public final class NodeOuterClass {
     }
     private NodeInformation() {
       idBase58_ = "";
-      addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      addresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
     }
 
     @java.lang.Override
@@ -1013,11 +1019,6 @@ public final class NodeOuterClass {
       return new NodeInformation();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.node.NodeOuterClass.internal_static_qaul_rpc_node_NodeInformation_descriptor;
@@ -1032,7 +1033,8 @@ public final class NodeOuterClass {
     }
 
     public static final int ID_BASE58_FIELD_NUMBER = 1;
-    private volatile java.lang.Object idBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object idBase58_ = "";
     /**
      * <pre>
      * the node ID in base 58 encoding
@@ -1078,7 +1080,9 @@ public final class NodeOuterClass {
     }
 
     public static final int ADDRESSES_FIELD_NUMBER = 2;
-    private com.google.protobuf.LazyStringList addresses_;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.LazyStringArrayList addresses_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
     /**
      * <pre>
      * all known multi addresses under which 
@@ -1257,11 +1261,13 @@ public final class NodeOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.node.NodeOuterClass.NodeInformation parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.node.NodeOuterClass.NodeInformation parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1340,10 +1346,10 @@ public final class NodeOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         idBase58_ = "";
-
-        addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        addresses_ =
+            com.google.protobuf.LazyStringArrayList.emptyList();
         return this;
       }
 
@@ -1370,15 +1376,20 @@ public final class NodeOuterClass {
       @java.lang.Override
       public qaul.rpc.node.NodeOuterClass.NodeInformation buildPartial() {
         qaul.rpc.node.NodeOuterClass.NodeInformation result = new qaul.rpc.node.NodeOuterClass.NodeInformation(this);
-        int from_bitField0_ = bitField0_;
-        result.idBase58_ = idBase58_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          addresses_ = addresses_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.addresses_ = addresses_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.node.NodeOuterClass.NodeInformation result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.idBase58_ = idBase58_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          addresses_.makeImmutable();
+          result.addresses_ = addresses_;
+        }
       }
 
       @java.lang.Override
@@ -1427,12 +1438,13 @@ public final class NodeOuterClass {
         if (other == qaul.rpc.node.NodeOuterClass.NodeInformation.getDefaultInstance()) return this;
         if (!other.getIdBase58().isEmpty()) {
           idBase58_ = other.idBase58_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (!other.addresses_.isEmpty()) {
           if (addresses_.isEmpty()) {
             addresses_ = other.addresses_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ |= 0x00000002;
           } else {
             ensureAddressesIsMutable();
             addresses_.addAll(other.addresses_);
@@ -1467,7 +1479,7 @@ public final class NodeOuterClass {
                 break;
               case 10: {
                 idBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
@@ -1546,11 +1558,9 @@ public final class NodeOuterClass {
        */
       public Builder setIdBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         idBase58_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1563,8 +1573,8 @@ public final class NodeOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearIdBase58() {
-        
         idBase58_ = getDefaultInstance().getIdBase58();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -1579,22 +1589,21 @@ public final class NodeOuterClass {
        */
       public Builder setIdBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         idBase58_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
 
-      private com.google.protobuf.LazyStringList addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private com.google.protobuf.LazyStringArrayList addresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
       private void ensureAddressesIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!addresses_.isModifiable()) {
           addresses_ = new com.google.protobuf.LazyStringArrayList(addresses_);
-          bitField0_ |= 0x00000001;
-         }
+        }
+        bitField0_ |= 0x00000002;
       }
       /**
        * <pre>
@@ -1607,7 +1616,8 @@ public final class NodeOuterClass {
        */
       public com.google.protobuf.ProtocolStringList
           getAddressesList() {
-        return addresses_.getUnmodifiableView();
+        addresses_.makeImmutable();
+        return addresses_;
       }
       /**
        * <pre>
@@ -1661,11 +1671,10 @@ public final class NodeOuterClass {
        */
       public Builder setAddresses(
           int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAddressesIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureAddressesIsMutable();
         addresses_.set(index, value);
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1681,11 +1690,10 @@ public final class NodeOuterClass {
        */
       public Builder addAddresses(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureAddressesIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureAddressesIsMutable();
         addresses_.add(value);
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1704,6 +1712,7 @@ public final class NodeOuterClass {
         ensureAddressesIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
             values, addresses_);
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1717,8 +1726,9 @@ public final class NodeOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearAddresses() {
-        addresses_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        addresses_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);;
         onChanged();
         return this;
       }
@@ -1734,12 +1744,11 @@ public final class NodeOuterClass {
        */
       public Builder addAddressesBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         ensureAddressesIsMutable();
         addresses_.add(value);
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }

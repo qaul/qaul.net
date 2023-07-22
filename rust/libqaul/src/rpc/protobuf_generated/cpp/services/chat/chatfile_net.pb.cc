@@ -4,167 +4,222 @@
 #include "services/chat/chatfile_net.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace net {
 namespace chatfile {
+template <typename>
 PROTOBUF_CONSTEXPR ChatFileContainer::ChatFileContainer(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct ChatFileContainerDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ChatFileContainerDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatFileContainerDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatFileContainerDefaultTypeInternal() {}
   union {
     ChatFileContainer _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileContainerDefaultTypeInternal _ChatFileContainer_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileContainerDefaultTypeInternal _ChatFileContainer_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ChatFileInfo::ChatFileInfo(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.file_name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_extension_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_description_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_.file_size_)*/0u
-  , /*decltype(_impl_.start_index_)*/0u
-  , /*decltype(_impl_.message_count_)*/0u
-  , /*decltype(_impl_.data_chunk_size_)*/0u
+    /*decltype(_impl_.file_name_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.file_extension_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.file_description_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.file_id_)*/ ::uint64_t{0u}
+
+  , /*decltype(_impl_.file_size_)*/ 0u
+
+  , /*decltype(_impl_.start_index_)*/ 0u
+
+  , /*decltype(_impl_.message_count_)*/ 0u
+
+  , /*decltype(_impl_.data_chunk_size_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ChatFileInfoDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ChatFileInfoDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatFileInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatFileInfoDefaultTypeInternal() {}
   union {
     ChatFileInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileInfoDefaultTypeInternal _ChatFileInfo_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileInfoDefaultTypeInternal _ChatFileInfo_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ChatFileData::ChatFileData(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.file_id_)*/uint64_t{0u}
-  , /*decltype(_impl_.start_index_)*/0u
-  , /*decltype(_impl_.message_count_)*/0u
+    /*decltype(_impl_.data_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.file_id_)*/ ::uint64_t{0u}
+
+  , /*decltype(_impl_.start_index_)*/ 0u
+
+  , /*decltype(_impl_.message_count_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ChatFileDataDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ChatFileDataDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ChatFileDataDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ChatFileDataDefaultTypeInternal() {}
   union {
     ChatFileData _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileDataDefaultTypeInternal _ChatFileData_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChatFileDataDefaultTypeInternal _ChatFileData_default_instance_;
 }  // namespace chatfile
 }  // namespace net
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto[3];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2fchat_2fchatfile_5fnet_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fchat_2fchatfile_5fnet_2eproto = nullptr;
-
-const uint32_t TableStruct_services_2fchat_2fchatfile_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_name_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_extension_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_size_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_description_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.start_index_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.message_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.data_chunk_size_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.file_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.start_index_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.message_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.data_),
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_services_2fchat_2fchatfile_5fnet_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_services_2fchat_2fchatfile_5fnet_2eproto = nullptr;
+const ::uint32_t TableStruct_services_2fchat_2fchatfile_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_name_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_extension_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_size_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.file_description_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.start_index_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.message_count_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileInfo, _impl_.data_chunk_size_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.file_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.start_index_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.message_count_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileData, _impl_.data_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::net::chatfile::ChatFileContainer)},
-  { 9, -1, -1, sizeof(::qaul::net::chatfile::ChatFileInfo)},
-  { 23, -1, -1, sizeof(::qaul::net::chatfile::ChatFileData)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::net::chatfile::ChatFileContainer)},
+        { 11, -1, -1, sizeof(::qaul::net::chatfile::ChatFileInfo)},
+        { 27, -1, -1, sizeof(::qaul::net::chatfile::ChatFileData)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::net::chatfile::_ChatFileContainer_default_instance_._instance,
-  &::qaul::net::chatfile::_ChatFileInfo_default_instance_._instance,
-  &::qaul::net::chatfile::_ChatFileData_default_instance_._instance,
+    &::qaul::net::chatfile::_ChatFileContainer_default_instance_._instance,
+    &::qaul::net::chatfile::_ChatFileInfo_default_instance_._instance,
+    &::qaul::net::chatfile::_ChatFileData_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_services_2fchat_2fchatfile_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n services/chat/chatfile_net.proto\022\021qaul"
-  ".net.chatfile\"\212\001\n\021ChatFileContainer\0224\n\tf"
-  "ile_info\030\001 \001(\0132\037.qaul.net.chatfile.ChatF"
-  "ileInfoH\000\0224\n\tfile_data\030\002 \001(\0132\037.qaul.net."
-  "chatfile.ChatFileDataH\000B\t\n\007message\"\274\001\n\014C"
-  "hatFileInfo\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_nam"
-  "e\030\002 \001(\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile_"
-  "size\030\004 \001(\r\022\030\n\020file_description\030\005 \001(\t\022\023\n\013"
-  "start_index\030\006 \001(\r\022\025\n\rmessage_count\030\007 \001(\r"
-  "\022\027\n\017data_chunk_size\030\010 \001(\r\"Y\n\014ChatFileDat"
-  "a\022\017\n\007file_id\030\001 \001(\004\022\023\n\013start_index\030\002 \001(\r\022"
-  "\025\n\rmessage_count\030\003 \001(\r\022\014\n\004data\030\004 \001(\014b\006pr"
-  "oto3"
-  ;
-static ::_pbi::once_flag descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once;
+const char descriptor_table_protodef_services_2fchat_2fchatfile_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n services/chat/chatfile_net.proto\022\021qaul"
+    ".net.chatfile\"\212\001\n\021ChatFileContainer\0224\n\tf"
+    "ile_info\030\001 \001(\0132\037.qaul.net.chatfile.ChatF"
+    "ileInfoH\000\0224\n\tfile_data\030\002 \001(\0132\037.qaul.net."
+    "chatfile.ChatFileDataH\000B\t\n\007message\"\274\001\n\014C"
+    "hatFileInfo\022\017\n\007file_id\030\001 \001(\004\022\021\n\tfile_nam"
+    "e\030\002 \001(\t\022\026\n\016file_extension\030\003 \001(\t\022\021\n\tfile_"
+    "size\030\004 \001(\r\022\030\n\020file_description\030\005 \001(\t\022\023\n\013"
+    "start_index\030\006 \001(\r\022\025\n\rmessage_count\030\007 \001(\r"
+    "\022\027\n\017data_chunk_size\030\010 \001(\r\"Y\n\014ChatFileDat"
+    "a\022\017\n\007file_id\030\001 \001(\004\022\023\n\013start_index\030\002 \001(\r\022"
+    "\025\n\rmessage_count\030\003 \001(\r\022\014\n\004data\030\004 \001(\014b\006pr"
+    "oto3"
+};
+static ::absl::once_flag descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto = {
-    false, false, 484, descriptor_table_protodef_services_2fchat_2fchatfile_5fnet_2eproto,
+    false,
+    false,
+    484,
+    descriptor_table_protodef_services_2fchat_2fchatfile_5fnet_2eproto,
     "services/chat/chatfile_net.proto",
-    &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once, nullptr, 0, 3,
-    schemas, file_default_instances, TableStruct_services_2fchat_2fchatfile_5fnet_2eproto::offsets,
-    file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto, file_level_enum_descriptors_services_2fchat_2fchatfile_5fnet_2eproto,
+    &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once,
+    nullptr,
+    0,
+    3,
+    schemas,
+    file_default_instances,
+    TableStruct_services_2fchat_2fchatfile_5fnet_2eproto::offsets,
+    file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto,
+    file_level_enum_descriptors_services_2fchat_2fchatfile_5fnet_2eproto,
     file_level_service_descriptors_services_2fchat_2fchatfile_5fnet_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_getter() {
   return &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2fchat_2fchatfile_5fnet_2eproto(&descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2fchat_2fchatfile_5fnet_2eproto(&descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto);
 namespace qaul {
 namespace net {
 namespace chatfile {
-
 // ===================================================================
 
 class ChatFileContainer::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::qaul::net::chatfile::ChatFileContainer, _impl_._oneof_case_);
   static const ::qaul::net::chatfile::ChatFileInfo& file_info(const ChatFileContainer* msg);
   static const ::qaul::net::chatfile::ChatFileData& file_data(const ChatFileContainer* msg);
 };
@@ -207,10 +262,9 @@ void ChatFileContainer::set_allocated_file_data(::qaul::net::chatfile::ChatFileD
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.net.chatfile.ChatFileContainer.file_data)
 }
-ChatFileContainer::ChatFileContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ChatFileContainer::ChatFileContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.chatfile.ChatFileContainer)
 }
 ChatFileContainer::ChatFileContainer(const ChatFileContainer& from)
@@ -241,10 +295,8 @@ ChatFileContainer::ChatFileContainer(const ChatFileContainer& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.chatfile.ChatFileContainer)
 }
 
-inline void ChatFileContainer::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ChatFileContainer::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -263,7 +315,7 @@ ChatFileContainer::~ChatFileContainer() {
 }
 
 inline void ChatFileContainer::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (has_message()) {
     clear_message();
   }
@@ -298,7 +350,7 @@ void ChatFileContainer::clear_message() {
 
 void ChatFileContainer::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.chatfile.ChatFileContainer)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -309,24 +361,26 @@ void ChatFileContainer::Clear() {
 const char* ChatFileContainer::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.net.chatfile.ChatFileInfo file_info = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_file_info(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.chatfile.ChatFileData file_data = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_file_data(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -351,26 +405,27 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ChatFileContainer::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ChatFileContainer::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.chatfile.ChatFileContainer)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .qaul.net.chatfile.ChatFileInfo file_info = 1;
-  if (_internal_has_file_info()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, _Internal::file_info(this),
-        _Internal::file_info(this).GetCachedSize(), target, stream);
+  switch (message_case()) {
+    case kFileInfo: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(1, _Internal::file_info(this),
+          _Internal::file_info(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kFileData: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(2, _Internal::file_data(this),
+          _Internal::file_data(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default: ;
   }
-
-  // .qaul.net.chatfile.ChatFileData file_data = 2;
-  if (_internal_has_file_data()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::file_data(this),
-        _Internal::file_data(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -379,11 +434,11 @@ uint8_t* ChatFileContainer::_InternalSerialize(
   return target;
 }
 
-size_t ChatFileContainer::ByteSizeLong() const {
+::size_t ChatFileContainer::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.chatfile.ChatFileContainer)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -420,8 +475,8 @@ void ChatFileContainer::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<ChatFileContainer*>(&to_msg);
   auto& from = static_cast<const ChatFileContainer&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.chatfile.ChatFileContainer)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
@@ -465,91 +520,100 @@ void ChatFileContainer::InternalSwap(ChatFileContainer* other) {
       &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_getter, &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once,
       file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto[0]);
 }
-
 // ===================================================================
 
 class ChatFileInfo::_Internal {
  public:
 };
 
-ChatFileInfo::ChatFileInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ChatFileInfo::ChatFileInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.chatfile.ChatFileInfo)
 }
 ChatFileInfo::ChatFileInfo(const ChatFileInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   ChatFileInfo* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.file_name_){}
-    , decltype(_impl_.file_extension_){}
-    , decltype(_impl_.file_description_){}
-    , decltype(_impl_.file_id_){}
-    , decltype(_impl_.file_size_){}
-    , decltype(_impl_.start_index_){}
-    , decltype(_impl_.message_count_){}
-    , decltype(_impl_.data_chunk_size_){}
+      decltype(_impl_.file_name_) {}
+
+    , decltype(_impl_.file_extension_) {}
+
+    , decltype(_impl_.file_description_) {}
+
+    , decltype(_impl_.file_id_) {}
+
+    , decltype(_impl_.file_size_) {}
+
+    , decltype(_impl_.start_index_) {}
+
+    , decltype(_impl_.message_count_) {}
+
+    , decltype(_impl_.data_chunk_size_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.file_name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_name_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_file_name().empty()) {
-    _this->_impl_.file_name_.Set(from._internal_file_name(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.file_name_.Set(from._internal_file_name(), _this->GetArenaForAllocation());
   }
   _impl_.file_extension_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_extension_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_extension_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_file_extension().empty()) {
-    _this->_impl_.file_extension_.Set(from._internal_file_extension(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.file_extension_.Set(from._internal_file_extension(), _this->GetArenaForAllocation());
   }
   _impl_.file_description_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_description_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_description_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_file_description().empty()) {
-    _this->_impl_.file_description_.Set(from._internal_file_description(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.file_description_.Set(from._internal_file_description(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.data_chunk_size_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.data_chunk_size_) -
     reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.data_chunk_size_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.chatfile.ChatFileInfo)
 }
 
-inline void ChatFileInfo::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ChatFileInfo::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.file_name_){}
-    , decltype(_impl_.file_extension_){}
-    , decltype(_impl_.file_description_){}
-    , decltype(_impl_.file_id_){uint64_t{0u}}
-    , decltype(_impl_.file_size_){0u}
-    , decltype(_impl_.start_index_){0u}
-    , decltype(_impl_.message_count_){0u}
-    , decltype(_impl_.data_chunk_size_){0u}
+      decltype(_impl_.file_name_) {}
+
+    , decltype(_impl_.file_extension_) {}
+
+    , decltype(_impl_.file_description_) {}
+
+    , decltype(_impl_.file_id_) { ::uint64_t{0u} }
+
+    , decltype(_impl_.file_size_) { 0u }
+
+    , decltype(_impl_.start_index_) { 0u }
+
+    , decltype(_impl_.message_count_) { 0u }
+
+    , decltype(_impl_.data_chunk_size_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.file_name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_name_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.file_extension_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_extension_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_extension_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.file_description_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.file_description_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.file_description_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ChatFileInfo::~ChatFileInfo() {
@@ -562,7 +626,7 @@ ChatFileInfo::~ChatFileInfo() {
 }
 
 inline void ChatFileInfo::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.file_name_.Destroy();
   _impl_.file_extension_.Destroy();
   _impl_.file_description_.Destroy();
@@ -574,14 +638,14 @@ void ChatFileInfo::SetCachedSize(int size) const {
 
 void ChatFileInfo::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.chatfile.ChatFileInfo)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.file_name_.ClearToEmpty();
   _impl_.file_extension_.ClearToEmpty();
   _impl_.file_description_.ClearToEmpty();
-  ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
+  ::memset(&_impl_.file_id_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.data_chunk_size_) -
       reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.data_chunk_size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -590,78 +654,86 @@ void ChatFileInfo::Clear() {
 const char* ChatFileInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 file_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string file_name = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_file_name();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.net.chatfile.ChatFileInfo.file_name"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string file_extension = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_file_extension();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.net.chatfile.ChatFileInfo.file_extension"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 file_size = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 32)) {
           _impl_.file_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string file_description = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_file_description();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.net.chatfile.ChatFileInfo.file_description"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 start_index = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 48)) {
           _impl_.start_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 message_count = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 56)) {
           _impl_.message_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 data_chunk_size = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 64)) {
           _impl_.data_chunk_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -686,70 +758,69 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ChatFileInfo::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ChatFileInfo::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.chatfile.ChatFileInfo)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 file_id = 1;
   if (this->_internal_file_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        1, this->_internal_file_id(), target);
   }
 
   // string file_name = 2;
   if (!this->_internal_file_name().empty()) {
+    const std::string& _s = this->_internal_file_name();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_file_name().data(), static_cast<int>(this->_internal_file_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.chatfile.ChatFileInfo.file_name");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_file_name(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.net.chatfile.ChatFileInfo.file_name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   // string file_extension = 3;
   if (!this->_internal_file_extension().empty()) {
+    const std::string& _s = this->_internal_file_extension();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_file_extension().data(), static_cast<int>(this->_internal_file_extension().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.chatfile.ChatFileInfo.file_extension");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_file_extension(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.net.chatfile.ChatFileInfo.file_extension");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
   // uint32 file_size = 4;
   if (this->_internal_file_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_file_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        4, this->_internal_file_size(), target);
   }
 
   // string file_description = 5;
   if (!this->_internal_file_description().empty()) {
+    const std::string& _s = this->_internal_file_description();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_file_description().data(), static_cast<int>(this->_internal_file_description().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.chatfile.ChatFileInfo.file_description");
-    target = stream->WriteStringMaybeAliased(
-        5, this->_internal_file_description(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.net.chatfile.ChatFileInfo.file_description");
+    target = stream->WriteStringMaybeAliased(5, _s, target);
   }
 
   // uint32 start_index = 6;
   if (this->_internal_start_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(6, this->_internal_start_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        6, this->_internal_start_index(), target);
   }
 
   // uint32 message_count = 7;
   if (this->_internal_message_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(7, this->_internal_message_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        7, this->_internal_message_count(), target);
   }
 
   // uint32 data_chunk_size = 8;
   if (this->_internal_data_chunk_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(8, this->_internal_data_chunk_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        8, this->_internal_data_chunk_size(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -760,58 +831,60 @@ uint8_t* ChatFileInfo::_InternalSerialize(
   return target;
 }
 
-size_t ChatFileInfo::ByteSizeLong() const {
+::size_t ChatFileInfo::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.chatfile.ChatFileInfo)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string file_name = 2;
   if (!this->_internal_file_name().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_file_name());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_file_name());
   }
 
   // string file_extension = 3;
   if (!this->_internal_file_extension().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_file_extension());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_file_extension());
   }
 
   // string file_description = 5;
   if (!this->_internal_file_description().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_file_description());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_file_description());
   }
 
   // uint64 file_id = 1;
   if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_file_id());
   }
 
   // uint32 file_size = 4;
   if (this->_internal_file_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_file_size());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_file_size());
   }
 
   // uint32 start_index = 6;
   if (this->_internal_start_index() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_start_index());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_start_index());
   }
 
   // uint32 message_count = 7;
   if (this->_internal_message_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_message_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_message_count());
   }
 
   // uint32 data_chunk_size = 8;
   if (this->_internal_data_chunk_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_data_chunk_size());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_data_chunk_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -828,8 +901,8 @@ void ChatFileInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
   auto* const _this = static_cast<ChatFileInfo*>(&to_msg);
   auto& from = static_cast<const ChatFileInfo&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.chatfile.ChatFileInfo)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_file_name().empty()) {
@@ -875,18 +948,12 @@ void ChatFileInfo::InternalSwap(ChatFileInfo* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.file_name_, lhs_arena,
-      &other->_impl_.file_name_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.file_extension_, lhs_arena,
-      &other->_impl_.file_extension_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.file_description_, lhs_arena,
-      &other->_impl_.file_description_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.file_name_, lhs_arena,
+                                       &other->_impl_.file_name_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.file_extension_, lhs_arena,
+                                       &other->_impl_.file_extension_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.file_description_, lhs_arena,
+                                       &other->_impl_.file_description_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ChatFileInfo, _impl_.data_chunk_size_)
       + sizeof(ChatFileInfo::_impl_.data_chunk_size_)
@@ -900,59 +967,62 @@ void ChatFileInfo::InternalSwap(ChatFileInfo* other) {
       &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_getter, &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once,
       file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto[1]);
 }
-
 // ===================================================================
 
 class ChatFileData::_Internal {
  public:
 };
 
-ChatFileData::ChatFileData(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ChatFileData::ChatFileData(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.chatfile.ChatFileData)
 }
 ChatFileData::ChatFileData(const ChatFileData& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   ChatFileData* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.data_){}
-    , decltype(_impl_.file_id_){}
-    , decltype(_impl_.start_index_){}
-    , decltype(_impl_.message_count_){}
+      decltype(_impl_.data_) {}
+
+    , decltype(_impl_.file_id_) {}
+
+    , decltype(_impl_.start_index_) {}
+
+    , decltype(_impl_.message_count_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.data_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.data_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_data().empty()) {
-    _this->_impl_.data_.Set(from._internal_data(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.data_.Set(from._internal_data(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.file_id_, &from._impl_.file_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.message_count_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.message_count_) -
     reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.message_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.chatfile.ChatFileData)
 }
 
-inline void ChatFileData::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ChatFileData::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.data_){}
-    , decltype(_impl_.file_id_){uint64_t{0u}}
-    , decltype(_impl_.start_index_){0u}
-    , decltype(_impl_.message_count_){0u}
+      decltype(_impl_.data_) {}
+
+    , decltype(_impl_.file_id_) { ::uint64_t{0u} }
+
+    , decltype(_impl_.start_index_) { 0u }
+
+    , decltype(_impl_.message_count_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.data_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.data_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ChatFileData::~ChatFileData() {
@@ -965,7 +1035,7 @@ ChatFileData::~ChatFileData() {
 }
 
 inline void ChatFileData::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.data_.Destroy();
 }
 
@@ -975,12 +1045,12 @@ void ChatFileData::SetCachedSize(int size) const {
 
 void ChatFileData::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.chatfile.ChatFileData)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.data_.ClearToEmpty();
-  ::memset(&_impl_.file_id_, 0, static_cast<size_t>(
+  ::memset(&_impl_.file_id_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.message_count_) -
       reinterpret_cast<char*>(&_impl_.file_id_)) + sizeof(_impl_.message_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -989,41 +1059,45 @@ void ChatFileData::Clear() {
 const char* ChatFileData::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 file_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.file_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 start_index = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
           _impl_.start_index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 message_count = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 24)) {
           _impl_.message_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes data = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_data();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1048,34 +1122,37 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ChatFileData::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ChatFileData::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.chatfile.ChatFileData)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 file_id = 1;
   if (this->_internal_file_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_file_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        1, this->_internal_file_id(), target);
   }
 
   // uint32 start_index = 2;
   if (this->_internal_start_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_start_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        2, this->_internal_start_index(), target);
   }
 
   // uint32 message_count = 3;
   if (this->_internal_message_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_message_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        3, this->_internal_message_count(), target);
   }
 
   // bytes data = 4;
   if (!this->_internal_data().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_data(), target);
+    const std::string& _s = this->_internal_data();
+    target = stream->WriteBytesMaybeAliased(4, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1086,34 +1163,36 @@ uint8_t* ChatFileData::_InternalSerialize(
   return target;
 }
 
-size_t ChatFileData::ByteSizeLong() const {
+::size_t ChatFileData::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.chatfile.ChatFileData)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes data = 4;
   if (!this->_internal_data().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_data());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_data());
   }
 
   // uint64 file_id = 1;
   if (this->_internal_file_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_file_id());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_file_id());
   }
 
   // uint32 start_index = 2;
   if (this->_internal_start_index() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_start_index());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_start_index());
   }
 
   // uint32 message_count = 3;
   if (this->_internal_message_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_message_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_message_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1130,8 +1209,8 @@ void ChatFileData::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
   auto* const _this = static_cast<ChatFileData*>(&to_msg);
   auto& from = static_cast<const ChatFileData&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.chatfile.ChatFileData)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_data().empty()) {
@@ -1165,10 +1244,8 @@ void ChatFileData::InternalSwap(ChatFileData* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.data_, lhs_arena,
-      &other->_impl_.data_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.data_, lhs_arena,
+                                       &other->_impl_.data_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ChatFileData, _impl_.message_count_)
       + sizeof(ChatFileData::_impl_.message_count_)
@@ -1182,7 +1259,6 @@ void ChatFileData::InternalSwap(ChatFileData* other) {
       &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_getter, &descriptor_table_services_2fchat_2fchatfile_5fnet_2eproto_once,
       file_level_metadata_services_2fchat_2fchatfile_5fnet_2eproto[2]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace chatfile
 }  // namespace net
@@ -1201,6 +1277,5 @@ Arena::CreateMaybeMessage< ::qaul::net::chatfile::ChatFileData >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::net::chatfile::ChatFileData >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

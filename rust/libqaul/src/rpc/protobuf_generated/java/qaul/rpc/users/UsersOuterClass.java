@@ -380,6 +380,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -391,6 +392,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -402,6 +404,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -413,6 +416,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -425,6 +429,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -437,6 +442,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -449,6 +455,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -460,6 +467,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -471,6 +479,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -482,11 +491,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -499,11 +511,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -516,11 +531,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -530,7 +548,7 @@ public final class UsersOuterClass {
      */
     qaul.rpc.users.UsersOuterClass.SecurityNumberResponseOrBuilder getSecurityNumberResponseOrBuilder();
 
-    public qaul.rpc.users.UsersOuterClass.Users.MessageCase getMessageCase();
+    qaul.rpc.users.UsersOuterClass.Users.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -558,11 +576,6 @@ public final class UsersOuterClass {
       return new Users();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_Users_descriptor;
@@ -577,6 +590,7 @@ public final class UsersOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -730,6 +744,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -744,6 +759,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -761,6 +777,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User List
+     *
      * Libqaul's return message for  'UserRequest' and
      * 'UserOnlineRequest', containing a list of UserEntry's
      * </pre>
@@ -779,6 +796,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -794,6 +812,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -812,6 +831,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * User Update
+     *
      * Sent to libqaul to update the verification &amp; blocked fields
      * of a user.
      * All other fields will be ignored.
@@ -831,6 +851,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -845,6 +866,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -862,6 +884,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Request
+     *
      * Requests the specific security number for
      * for the connection with this user.
      * </pre>
@@ -880,11 +903,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -900,11 +926,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -923,11 +952,14 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * Security Number Response
+     *
      * Libqaul's response containing the security number.
+     *
      * The security number contains 8 blocks of 5 digit numbers.
      * They shall be rendered in two rows. If a number is
      * smaller then five-digits, the missing digits shall be filled
      * with leading zeros.
+     *
      * example rendering of security number:
      * 13246 42369 46193 12484
      * 12142 31101 09874 34545
@@ -1140,11 +1172,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.Users parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.Users parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1223,6 +1257,7 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (userRequestBuilder_ != null) {
           userRequestBuilder_.clear();
         }
@@ -1269,51 +1304,43 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.Users buildPartial() {
         qaul.rpc.users.UsersOuterClass.Users result = new qaul.rpc.users.UsersOuterClass.Users(this);
-        if (messageCase_ == 1) {
-          if (userRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = userRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (userOnlineRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = userOnlineRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (userListBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = userListBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (userUpdateBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = userUpdateBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (securityNumberRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = securityNumberRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (securityNumberResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = securityNumberResponseBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.Users result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.users.UsersOuterClass.Users result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            userRequestBuilder_ != null) {
+          result.message_ = userRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            userOnlineRequestBuilder_ != null) {
+          result.message_ = userOnlineRequestBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            userListBuilder_ != null) {
+          result.message_ = userListBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            userUpdateBuilder_ != null) {
+          result.message_ = userUpdateBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            securityNumberRequestBuilder_ != null) {
+          result.message_ = securityNumberRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            securityNumberResponseBuilder_ != null) {
+          result.message_ = securityNumberResponseBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1487,6 +1514,7 @@ public final class UsersOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.users.UsersOuterClass.UserRequest, qaul.rpc.users.UsersOuterClass.UserRequest.Builder, qaul.rpc.users.UsersOuterClass.UserRequestOrBuilder> userRequestBuilder_;
@@ -1689,7 +1717,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return userRequestBuilder_;
       }
 
@@ -1885,7 +1913,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return userOnlineRequestBuilder_;
       }
 
@@ -1894,6 +1922,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -1908,6 +1937,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -1932,6 +1962,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -1954,6 +1985,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -1974,6 +2006,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -2003,6 +2036,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -2028,6 +2062,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -2040,6 +2075,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -2060,6 +2096,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User List
+       *
        * Libqaul's return message for  'UserRequest' and
        * 'UserOnlineRequest', containing a list of UserEntry's
        * </pre>
@@ -2081,7 +2118,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return userListBuilder_;
       }
 
@@ -2090,6 +2127,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2105,6 +2143,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2130,6 +2169,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2153,6 +2193,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2174,6 +2215,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2204,6 +2246,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2230,6 +2273,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2243,6 +2287,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2264,6 +2309,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * User Update
+       *
        * Sent to libqaul to update the verification &amp; blocked fields
        * of a user.
        * All other fields will be ignored.
@@ -2286,7 +2332,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return userUpdateBuilder_;
       }
 
@@ -2295,6 +2341,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2309,6 +2356,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2333,6 +2381,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2355,6 +2404,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2375,6 +2425,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2404,6 +2455,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2429,6 +2481,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2441,6 +2494,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2461,6 +2515,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Request
+       *
        * Requests the specific security number for
        * for the connection with this user.
        * </pre>
@@ -2482,7 +2537,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return securityNumberRequestBuilder_;
       }
 
@@ -2491,11 +2546,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2511,11 +2569,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2541,11 +2602,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2569,11 +2633,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2595,11 +2662,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2630,11 +2700,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2661,11 +2734,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2679,11 +2755,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2705,11 +2784,14 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * Security Number Response
+       *
        * Libqaul's response containing the security number.
+       *
        * The security number contains 8 blocks of 5 digit numbers.
        * They shall be rendered in two rows. If a number is
        * smaller then five-digits, the missing digits shall be filled
        * with leading zeros.
+       *
        * example rendering of security number:
        * 13246 42369 46193 12484
        * 12142 31101 09874 34545
@@ -2732,7 +2814,7 @@ public final class UsersOuterClass {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return securityNumberResponseBuilder_;
       }
       @java.lang.Override
@@ -2829,11 +2911,6 @@ public final class UsersOuterClass {
       return new UserRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserRequest_descriptor;
@@ -2945,11 +3022,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3237,11 +3316,6 @@ public final class UsersOuterClass {
       return new UserOnlineRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserOnlineRequest_descriptor;
@@ -3353,11 +3427,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserOnlineRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3670,11 +3746,6 @@ public final class UsersOuterClass {
       return new UserList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserList_descriptor;
@@ -3689,6 +3760,7 @@ public final class UsersOuterClass {
     }
 
     public static final int USER_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.users.UsersOuterClass.UserEntry> user_;
     /**
      * <code>repeated .qaul.rpc.users.UserEntry user = 1;</code>
@@ -3839,11 +3911,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3922,6 +3996,7 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (userBuilder_ == null) {
           user_ = java.util.Collections.emptyList();
         } else {
@@ -3955,7 +4030,13 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserList buildPartial() {
         qaul.rpc.users.UsersOuterClass.UserList result = new qaul.rpc.users.UsersOuterClass.UserList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.users.UsersOuterClass.UserList result) {
         if (userBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             user_ = java.util.Collections.unmodifiableList(user_);
@@ -3965,8 +4046,10 @@ public final class UsersOuterClass {
         } else {
           result.user_ = userBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.UserList result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -4435,6 +4518,7 @@ public final class UsersOuterClass {
     /**
      * <pre>
      * direct chat group id
+     *
      * this is a predictable 16 bytes UUID
      * </pre>
      *
@@ -4583,11 +4667,6 @@ public final class UsersOuterClass {
       return new UserEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_UserEntry_descriptor;
@@ -4602,7 +4681,8 @@ public final class UsersOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <pre>
      * user name
@@ -4648,7 +4728,7 @@ public final class UsersOuterClass {
     }
 
     public static final int ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user ID (38 Byte PeerID)
@@ -4663,10 +4743,11 @@ public final class UsersOuterClass {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * direct chat group id
+     *
      * this is a predictable 16 bytes UUID
      * </pre>
      *
@@ -4679,7 +4760,8 @@ public final class UsersOuterClass {
     }
 
     public static final int KEY_BASE58_FIELD_NUMBER = 7;
-    private volatile java.lang.Object keyBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object keyBase58_ = "";
     /**
      * <pre>
      * base58 string of public key
@@ -4725,7 +4807,7 @@ public final class UsersOuterClass {
     }
 
     public static final int CONNECTIVITY_FIELD_NUMBER = 8;
-    private int connectivity_;
+    private int connectivity_ = 0;
     /**
      * <pre>
      * reachability of the user: online | reachable | offline
@@ -4746,13 +4828,12 @@ public final class UsersOuterClass {
      * @return The connectivity.
      */
     @java.lang.Override public qaul.rpc.users.UsersOuterClass.Connectivity getConnectivity() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.users.UsersOuterClass.Connectivity result = qaul.rpc.users.UsersOuterClass.Connectivity.valueOf(connectivity_);
+      qaul.rpc.users.UsersOuterClass.Connectivity result = qaul.rpc.users.UsersOuterClass.Connectivity.forNumber(connectivity_);
       return result == null ? qaul.rpc.users.UsersOuterClass.Connectivity.UNRECOGNIZED : result;
     }
 
     public static final int VERIFIED_FIELD_NUMBER = 9;
-    private boolean verified_;
+    private boolean verified_ = false;
     /**
      * <pre>
      * user has been verified
@@ -4767,7 +4848,7 @@ public final class UsersOuterClass {
     }
 
     public static final int BLOCKED_FIELD_NUMBER = 10;
-    private boolean blocked_;
+    private boolean blocked_ = false;
     /**
      * <pre>
      * user is blocked
@@ -4782,6 +4863,7 @@ public final class UsersOuterClass {
     }
 
     public static final int CONNECTIONS_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> connections_;
     /**
      * <pre>
@@ -5033,11 +5115,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.UserEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5116,27 +5200,21 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         name_ = "";
-
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         keyBase58_ = "";
-
         connectivity_ = 0;
-
         verified_ = false;
-
         blocked_ = false;
-
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
         } else {
           connections_ = null;
           connectionsBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -5163,25 +5241,47 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.UserEntry buildPartial() {
         qaul.rpc.users.UsersOuterClass.UserEntry result = new qaul.rpc.users.UsersOuterClass.UserEntry(this);
-        int from_bitField0_ = bitField0_;
-        result.name_ = name_;
-        result.id_ = id_;
-        result.groupId_ = groupId_;
-        result.keyBase58_ = keyBase58_;
-        result.connectivity_ = connectivity_;
-        result.verified_ = verified_;
-        result.blocked_ = blocked_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.users.UsersOuterClass.UserEntry result) {
         if (connectionsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000080) != 0)) {
             connections_ = java.util.Collections.unmodifiableList(connections_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000080);
           }
           result.connections_ = connections_;
         } else {
           result.connections_ = connectionsBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.UserEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.keyBase58_ = keyBase58_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.connectivity_ = connectivity_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.verified_ = verified_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.blocked_ = blocked_;
+        }
       }
 
       @java.lang.Override
@@ -5230,6 +5330,7 @@ public final class UsersOuterClass {
         if (other == qaul.rpc.users.UsersOuterClass.UserEntry.getDefaultInstance()) return this;
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.getId() != com.google.protobuf.ByteString.EMPTY) {
@@ -5240,6 +5341,7 @@ public final class UsersOuterClass {
         }
         if (!other.getKeyBase58().isEmpty()) {
           keyBase58_ = other.keyBase58_;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (other.connectivity_ != 0) {
@@ -5255,7 +5357,7 @@ public final class UsersOuterClass {
           if (!other.connections_.isEmpty()) {
             if (connections_.isEmpty()) {
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000080);
             } else {
               ensureConnectionsIsMutable();
               connections_.addAll(other.connections_);
@@ -5268,7 +5370,7 @@ public final class UsersOuterClass {
               connectionsBuilder_.dispose();
               connectionsBuilder_ = null;
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000080);
               connectionsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getConnectionsFieldBuilder() : null;
@@ -5305,37 +5407,37 @@ public final class UsersOuterClass {
                 break;
               case 10: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 58: {
                 keyBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 58
               case 64: {
                 connectivity_ = input.readEnum();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 64
               case 72: {
                 verified_ = input.readBool();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 72
               case 80: {
                 blocked_ = input.readBool();
-
+                bitField0_ |= 0x00000040;
                 break;
               } // case 80
               case 90: {
@@ -5421,11 +5523,9 @@ public final class UsersOuterClass {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5438,8 +5538,8 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -5454,12 +5554,10 @@ public final class UsersOuterClass {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5487,11 +5585,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5504,7 +5600,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;
@@ -5514,6 +5610,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * direct chat group id
+       *
        * this is a predictable 16 bytes UUID
        * </pre>
        *
@@ -5527,6 +5624,7 @@ public final class UsersOuterClass {
       /**
        * <pre>
        * direct chat group id
+       *
        * this is a predictable 16 bytes UUID
        * </pre>
        *
@@ -5535,17 +5633,16 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * direct chat group id
+       *
        * this is a predictable 16 bytes UUID
        * </pre>
        *
@@ -5553,7 +5650,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -5612,11 +5709,9 @@ public final class UsersOuterClass {
        */
       public Builder setKeyBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         keyBase58_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -5629,8 +5724,8 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearKeyBase58() {
-        
         keyBase58_ = getDefaultInstance().getKeyBase58();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -5645,12 +5740,10 @@ public final class UsersOuterClass {
        */
       public Builder setKeyBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         keyBase58_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -5677,8 +5770,8 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setConnectivityValue(int value) {
-        
         connectivity_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -5692,8 +5785,7 @@ public final class UsersOuterClass {
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.Connectivity getConnectivity() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.users.UsersOuterClass.Connectivity result = qaul.rpc.users.UsersOuterClass.Connectivity.valueOf(connectivity_);
+        qaul.rpc.users.UsersOuterClass.Connectivity result = qaul.rpc.users.UsersOuterClass.Connectivity.forNumber(connectivity_);
         return result == null ? qaul.rpc.users.UsersOuterClass.Connectivity.UNRECOGNIZED : result;
       }
       /**
@@ -5709,7 +5801,7 @@ public final class UsersOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000010;
         connectivity_ = value.getNumber();
         onChanged();
         return this;
@@ -5723,7 +5815,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearConnectivity() {
-        
+        bitField0_ = (bitField0_ & ~0x00000010);
         connectivity_ = 0;
         onChanged();
         return this;
@@ -5752,8 +5844,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVerified(boolean value) {
-        
+
         verified_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -5766,7 +5859,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVerified() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         verified_ = false;
         onChanged();
         return this;
@@ -5795,8 +5888,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setBlocked(boolean value) {
-        
+
         blocked_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -5809,7 +5903,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearBlocked() {
-        
+        bitField0_ = (bitField0_ & ~0x00000040);
         blocked_ = false;
         onChanged();
         return this;
@@ -5818,9 +5912,9 @@ public final class UsersOuterClass {
       private java.util.List<qaul.rpc.users.UsersOuterClass.RoutingTableConnection> connections_ =
         java.util.Collections.emptyList();
       private void ensureConnectionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000080) != 0)) {
           connections_ = new java.util.ArrayList<qaul.rpc.users.UsersOuterClass.RoutingTableConnection>(connections_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000080;
          }
       }
 
@@ -6025,7 +6119,7 @@ public final class UsersOuterClass {
       public Builder clearConnections() {
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000080);
           onChanged();
         } else {
           connectionsBuilder_.clear();
@@ -6137,7 +6231,7 @@ public final class UsersOuterClass {
           connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.rpc.users.UsersOuterClass.RoutingTableConnection, qaul.rpc.users.UsersOuterClass.RoutingTableConnection.Builder, qaul.rpc.users.UsersOuterClass.RoutingTableConnectionOrBuilder>(
                   connections_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000080) != 0),
                   getParentForChildren(),
                   isClean());
           connections_ = null;
@@ -6290,11 +6384,6 @@ public final class UsersOuterClass {
       return new RoutingTableConnection();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_RoutingTableConnection_descriptor;
@@ -6309,7 +6398,7 @@ public final class UsersOuterClass {
     }
 
     public static final int MODULE_FIELD_NUMBER = 2;
-    private int module_;
+    private int module_ = 0;
     /**
      * <pre>
      * the connection module (LAN, Internet, BLE, etc.)
@@ -6330,13 +6419,12 @@ public final class UsersOuterClass {
      * @return The module.
      */
     @java.lang.Override public qaul.rpc.users.UsersOuterClass.ConnectionModule getModule() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.valueOf(module_);
+      qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.forNumber(module_);
       return result == null ? qaul.rpc.users.UsersOuterClass.ConnectionModule.UNRECOGNIZED : result;
     }
 
     public static final int RTT_FIELD_NUMBER = 3;
-    private int rtt_;
+    private int rtt_ = 0;
     /**
      * <pre>
      * the round trip time for this connection
@@ -6351,7 +6439,7 @@ public final class UsersOuterClass {
     }
 
     public static final int HOP_COUNT_FIELD_NUMBER = 5;
-    private int hopCount_;
+    private int hopCount_ = 0;
     /**
      * <pre>
      * hop count
@@ -6366,7 +6454,7 @@ public final class UsersOuterClass {
     }
 
     public static final int VIA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString via_;
+    private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * node id via which this connection is routed
@@ -6521,11 +6609,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.RoutingTableConnection parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6605,14 +6695,11 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         module_ = 0;
-
         rtt_ = 0;
-
         hopCount_ = 0;
-
         via_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -6639,12 +6726,25 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.RoutingTableConnection buildPartial() {
         qaul.rpc.users.UsersOuterClass.RoutingTableConnection result = new qaul.rpc.users.UsersOuterClass.RoutingTableConnection(this);
-        result.module_ = module_;
-        result.rtt_ = rtt_;
-        result.hopCount_ = hopCount_;
-        result.via_ = via_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.RoutingTableConnection result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.module_ = module_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.rtt_ = rtt_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.hopCount_ = hopCount_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.via_ = via_;
+        }
       }
 
       @java.lang.Override
@@ -6731,22 +6831,22 @@ public final class UsersOuterClass {
                 break;
               case 16: {
                 module_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 16
               case 24: {
                 rtt_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 24
               case 34: {
                 via_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 40: {
                 hopCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 40
               default: {
@@ -6764,6 +6864,7 @@ public final class UsersOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int module_ = 0;
       /**
@@ -6787,8 +6888,8 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setModuleValue(int value) {
-        
         module_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6802,8 +6903,7 @@ public final class UsersOuterClass {
        */
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.ConnectionModule getModule() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.valueOf(module_);
+        qaul.rpc.users.UsersOuterClass.ConnectionModule result = qaul.rpc.users.UsersOuterClass.ConnectionModule.forNumber(module_);
         return result == null ? qaul.rpc.users.UsersOuterClass.ConnectionModule.UNRECOGNIZED : result;
       }
       /**
@@ -6819,7 +6919,7 @@ public final class UsersOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         module_ = value.getNumber();
         onChanged();
         return this;
@@ -6833,7 +6933,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearModule() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         module_ = 0;
         onChanged();
         return this;
@@ -6862,8 +6962,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setRtt(int value) {
-        
+
         rtt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6876,7 +6977,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRtt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         rtt_ = 0;
         onChanged();
         return this;
@@ -6905,8 +7006,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setHopCount(int value) {
-        
+
         hopCount_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6919,7 +7021,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearHopCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         hopCount_ = 0;
         onChanged();
         return this;
@@ -6948,11 +7050,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVia(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         via_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -6965,7 +7065,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVia() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         via_ = getDefaultInstance().getVia();
         onChanged();
         return this;
@@ -7075,11 +7175,6 @@ public final class UsersOuterClass {
       return new SecurityNumberRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberRequest_descriptor;
@@ -7094,7 +7189,7 @@ public final class UsersOuterClass {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -7217,11 +7312,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.SecurityNumberRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7300,8 +7397,8 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -7328,9 +7425,16 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.SecurityNumberRequest buildPartial() {
         qaul.rpc.users.UsersOuterClass.SecurityNumberRequest result = new qaul.rpc.users.UsersOuterClass.SecurityNumberRequest(this);
-        result.userId_ = userId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.SecurityNumberRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -7408,7 +7512,7 @@ public final class UsersOuterClass {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -7426,6 +7530,7 @@ public final class UsersOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -7450,11 +7555,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7467,7 +7570,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -7624,11 +7727,6 @@ public final class UsersOuterClass {
       return new SecurityNumberResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.users.UsersOuterClass.internal_static_qaul_rpc_users_SecurityNumberResponse_descriptor;
@@ -7643,7 +7741,7 @@ public final class UsersOuterClass {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the user id of the remote user
@@ -7658,7 +7756,7 @@ public final class UsersOuterClass {
     }
 
     public static final int SECURITY_HASH_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString securityHash_;
+    private com.google.protobuf.ByteString securityHash_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * deliver the full bytes of the hash
@@ -7673,6 +7771,7 @@ public final class UsersOuterClass {
     }
 
     public static final int SECURITY_NUMBER_BLOCKS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private com.google.protobuf.Internal.IntList securityNumberBlocks_;
     /**
      * <pre>
@@ -7866,11 +7965,13 @@ public final class UsersOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.users.UsersOuterClass.SecurityNumberResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7949,12 +8050,10 @@ public final class UsersOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         securityHash_ = com.google.protobuf.ByteString.EMPTY;
-
         securityNumberBlocks_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -7981,16 +8080,28 @@ public final class UsersOuterClass {
       @java.lang.Override
       public qaul.rpc.users.UsersOuterClass.SecurityNumberResponse buildPartial() {
         qaul.rpc.users.UsersOuterClass.SecurityNumberResponse result = new qaul.rpc.users.UsersOuterClass.SecurityNumberResponse(this);
-        int from_bitField0_ = bitField0_;
-        result.userId_ = userId_;
-        result.securityHash_ = securityHash_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          securityNumberBlocks_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.securityNumberBlocks_ = securityNumberBlocks_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse result) {
+        if (((bitField0_ & 0x00000004) != 0)) {
+          securityNumberBlocks_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.securityNumberBlocks_ = securityNumberBlocks_;
+      }
+
+      private void buildPartial0(qaul.rpc.users.UsersOuterClass.SecurityNumberResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.securityHash_ = securityHash_;
+        }
       }
 
       @java.lang.Override
@@ -8046,7 +8157,7 @@ public final class UsersOuterClass {
         if (!other.securityNumberBlocks_.isEmpty()) {
           if (securityNumberBlocks_.isEmpty()) {
             securityNumberBlocks_ = other.securityNumberBlocks_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000004);
           } else {
             ensureSecurityNumberBlocksIsMutable();
             securityNumberBlocks_.addAll(other.securityNumberBlocks_);
@@ -8081,12 +8192,12 @@ public final class UsersOuterClass {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 securityHash_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
@@ -8145,11 +8256,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8162,7 +8271,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -8191,11 +8300,9 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSecurityHash(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         securityHash_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8208,7 +8315,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSecurityHash() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         securityHash_ = getDefaultInstance().getSecurityHash();
         onChanged();
         return this;
@@ -8216,10 +8323,10 @@ public final class UsersOuterClass {
 
       private com.google.protobuf.Internal.IntList securityNumberBlocks_ = emptyIntList();
       private void ensureSecurityNumberBlocksIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           securityNumberBlocks_ = mutableCopy(securityNumberBlocks_);
-          bitField0_ |= 0x00000001;
-         }
+          bitField0_ |= 0x00000004;
+        }
       }
       /**
        * <pre>
@@ -8233,7 +8340,7 @@ public final class UsersOuterClass {
        */
       public java.util.List<java.lang.Integer>
           getSecurityNumberBlocksList() {
-        return ((bitField0_ & 0x00000001) != 0) ?
+        return ((bitField0_ & 0x00000004) != 0) ?
                  java.util.Collections.unmodifiableList(securityNumberBlocks_) : securityNumberBlocks_;
       }
       /**
@@ -8277,6 +8384,7 @@ public final class UsersOuterClass {
        */
       public Builder setSecurityNumberBlocks(
           int index, int value) {
+
         ensureSecurityNumberBlocksIsMutable();
         securityNumberBlocks_.setInt(index, value);
         onChanged();
@@ -8294,6 +8402,7 @@ public final class UsersOuterClass {
        * @return This builder for chaining.
        */
       public Builder addSecurityNumberBlocks(int value) {
+
         ensureSecurityNumberBlocksIsMutable();
         securityNumberBlocks_.addInt(value);
         onChanged();
@@ -8330,7 +8439,7 @@ public final class UsersOuterClass {
        */
       public Builder clearSecurityNumberBlocks() {
         securityNumberBlocks_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }

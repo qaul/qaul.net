@@ -288,7 +288,7 @@ public final class DtnRpc {
      */
     qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponseOrBuilder getDtnSetTotalSizeResponseOrBuilder();
 
-    public qaul.rpc.dtn.DtnRpc.DTN.MessageCase getMessageCase();
+    qaul.rpc.dtn.DtnRpc.DTN.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -316,11 +316,6 @@ public final class DtnRpc {
       return new DTN();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DTN_descriptor;
@@ -335,6 +330,7 @@ public final class DtnRpc {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1078,11 +1074,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DTN parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DTN parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1161,6 +1159,7 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (dtnStateRequestBuilder_ != null) {
           dtnStateRequestBuilder_.clear();
         }
@@ -1219,79 +1218,59 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DTN buildPartial() {
         qaul.rpc.dtn.DtnRpc.DTN result = new qaul.rpc.dtn.DtnRpc.DTN(this);
-        if (messageCase_ == 1) {
-          if (dtnStateRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnStateRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (dtnStateResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnStateResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (dtnConfigRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnConfigRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (dtnConfigResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnConfigResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (dtnAddUserRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnAddUserRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (dtnAddUserResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnAddUserResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 7) {
-          if (dtnRemoveUserRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnRemoveUserRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 8) {
-          if (dtnRemoveUserResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnRemoveUserResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 9) {
-          if (dtnSetTotalSizeRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnSetTotalSizeRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 10) {
-          if (dtnSetTotalSizeResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = dtnSetTotalSizeResponseBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DTN result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.dtn.DtnRpc.DTN result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            dtnStateRequestBuilder_ != null) {
+          result.message_ = dtnStateRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            dtnStateResponseBuilder_ != null) {
+          result.message_ = dtnStateResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            dtnConfigRequestBuilder_ != null) {
+          result.message_ = dtnConfigRequestBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            dtnConfigResponseBuilder_ != null) {
+          result.message_ = dtnConfigResponseBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            dtnAddUserRequestBuilder_ != null) {
+          result.message_ = dtnAddUserRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            dtnAddUserResponseBuilder_ != null) {
+          result.message_ = dtnAddUserResponseBuilder_.build();
+        }
+        if (messageCase_ == 7 &&
+            dtnRemoveUserRequestBuilder_ != null) {
+          result.message_ = dtnRemoveUserRequestBuilder_.build();
+        }
+        if (messageCase_ == 8 &&
+            dtnRemoveUserResponseBuilder_ != null) {
+          result.message_ = dtnRemoveUserResponseBuilder_.build();
+        }
+        if (messageCase_ == 9 &&
+            dtnSetTotalSizeRequestBuilder_ != null) {
+          result.message_ = dtnSetTotalSizeRequestBuilder_.build();
+        }
+        if (messageCase_ == 10 &&
+            dtnSetTotalSizeResponseBuilder_ != null) {
+          result.message_ = dtnSetTotalSizeResponseBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1509,6 +1488,7 @@ public final class DtnRpc {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.dtn.DtnRpc.DtnStateRequest, qaul.rpc.dtn.DtnRpc.DtnStateRequest.Builder, qaul.rpc.dtn.DtnRpc.DtnStateRequestOrBuilder> dtnStateRequestBuilder_;
@@ -1684,7 +1664,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return dtnStateRequestBuilder_;
       }
 
@@ -1862,7 +1842,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return dtnStateResponseBuilder_;
       }
 
@@ -2040,7 +2020,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return dtnConfigRequestBuilder_;
       }
 
@@ -2218,7 +2198,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return dtnConfigResponseBuilder_;
       }
 
@@ -2396,7 +2376,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return dtnAddUserRequestBuilder_;
       }
 
@@ -2574,7 +2554,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return dtnAddUserResponseBuilder_;
       }
 
@@ -2752,7 +2732,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 7;
-        onChanged();;
+        onChanged();
         return dtnRemoveUserRequestBuilder_;
       }
 
@@ -2930,7 +2910,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 8;
-        onChanged();;
+        onChanged();
         return dtnRemoveUserResponseBuilder_;
       }
 
@@ -3108,7 +3088,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 9;
-        onChanged();;
+        onChanged();
         return dtnSetTotalSizeRequestBuilder_;
       }
 
@@ -3286,7 +3266,7 @@ public final class DtnRpc {
           message_ = null;
         }
         messageCase_ = 10;
-        onChanged();;
+        onChanged();
         return dtnSetTotalSizeResponseBuilder_;
       }
       @java.lang.Override
@@ -3383,11 +3363,6 @@ public final class DtnRpc {
       return new DtnStateRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnStateRequest_descriptor;
@@ -3499,11 +3474,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnStateRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnStateRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3821,11 +3798,6 @@ public final class DtnRpc {
       return new DtnStateResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnStateResponse_descriptor;
@@ -3840,7 +3812,7 @@ public final class DtnRpc {
     }
 
     public static final int USED_SIZE_FIELD_NUMBER = 1;
-    private long usedSize_;
+    private long usedSize_ = 0L;
     /**
      * <pre>
      * used size
@@ -3855,7 +3827,7 @@ public final class DtnRpc {
     }
 
     public static final int DTN_MESSAGE_COUNT_FIELD_NUMBER = 2;
-    private int dtnMessageCount_;
+    private int dtnMessageCount_ = 0;
     /**
      * <pre>
      * dtn message count
@@ -3870,7 +3842,7 @@ public final class DtnRpc {
     }
 
     public static final int UNCONFIRMED_COUNT_FIELD_NUMBER = 3;
-    private int unconfirmedCount_;
+    private int unconfirmedCount_ = 0;
     /**
      * <pre>
      * unconfirmed count
@@ -4016,11 +3988,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnStateResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnStateResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4099,12 +4073,10 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         usedSize_ = 0L;
-
         dtnMessageCount_ = 0;
-
         unconfirmedCount_ = 0;
-
         return this;
       }
 
@@ -4131,11 +4103,22 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnStateResponse buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnStateResponse result = new qaul.rpc.dtn.DtnRpc.DtnStateResponse(this);
-        result.usedSize_ = usedSize_;
-        result.dtnMessageCount_ = dtnMessageCount_;
-        result.unconfirmedCount_ = unconfirmedCount_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnStateResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.usedSize_ = usedSize_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.dtnMessageCount_ = dtnMessageCount_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.unconfirmedCount_ = unconfirmedCount_;
+        }
       }
 
       @java.lang.Override
@@ -4219,17 +4202,17 @@ public final class DtnRpc {
                 break;
               case 8: {
                 usedSize_ = input.readUInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 dtnMessageCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
                 unconfirmedCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               default: {
@@ -4247,6 +4230,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long usedSize_ ;
       /**
@@ -4271,8 +4255,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setUsedSize(long value) {
-        
+
         usedSize_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4285,7 +4270,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearUsedSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         usedSize_ = 0L;
         onChanged();
         return this;
@@ -4314,8 +4299,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setDtnMessageCount(int value) {
-        
+
         dtnMessageCount_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4328,7 +4314,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearDtnMessageCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         dtnMessageCount_ = 0;
         onChanged();
         return this;
@@ -4357,8 +4343,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setUnconfirmedCount(int value) {
-        
+
         unconfirmedCount_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -4371,7 +4358,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearUnconfirmedCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         unconfirmedCount_ = 0;
         onChanged();
         return this;
@@ -4470,11 +4457,6 @@ public final class DtnRpc {
       return new DtnConfigRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnConfigRequest_descriptor;
@@ -4586,11 +4568,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnConfigRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnConfigRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4918,11 +4902,6 @@ public final class DtnRpc {
       return new DtnConfigResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnConfigResponse_descriptor;
@@ -4937,7 +4916,7 @@ public final class DtnRpc {
     }
 
     public static final int TOTAL_SIZE_FIELD_NUMBER = 1;
-    private int totalSize_;
+    private int totalSize_ = 0;
     /**
      * <pre>
      * total_size
@@ -4952,6 +4931,7 @@ public final class DtnRpc {
     }
 
     public static final int USERS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<com.google.protobuf.ByteString> users_;
     /**
      * <pre>
@@ -5117,11 +5097,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnConfigResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnConfigResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5200,10 +5182,9 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         totalSize_ = 0;
-
         users_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -5230,15 +5211,25 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnConfigResponse buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnConfigResponse result = new qaul.rpc.dtn.DtnRpc.DtnConfigResponse(this);
-        int from_bitField0_ = bitField0_;
-        result.totalSize_ = totalSize_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          users_ = java.util.Collections.unmodifiableList(users_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.users_ = users_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.dtn.DtnRpc.DtnConfigResponse result) {
+        if (((bitField0_ & 0x00000002) != 0)) {
+          users_ = java.util.Collections.unmodifiableList(users_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.users_ = users_;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnConfigResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.totalSize_ = totalSize_;
+        }
       }
 
       @java.lang.Override
@@ -5291,7 +5282,7 @@ public final class DtnRpc {
         if (!other.users_.isEmpty()) {
           if (users_.isEmpty()) {
             users_ = other.users_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureUsersIsMutable();
             users_.addAll(other.users_);
@@ -5326,7 +5317,7 @@ public final class DtnRpc {
                 break;
               case 8: {
                 totalSize_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
@@ -5375,8 +5366,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setTotalSize(int value) {
-        
+
         totalSize_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5389,7 +5381,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearTotalSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         totalSize_ = 0;
         onChanged();
         return this;
@@ -5397,10 +5389,10 @@ public final class DtnRpc {
 
       private java.util.List<com.google.protobuf.ByteString> users_ = java.util.Collections.emptyList();
       private void ensureUsersIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           users_ = new java.util.ArrayList<com.google.protobuf.ByteString>(users_);
-          bitField0_ |= 0x00000001;
-         }
+          bitField0_ |= 0x00000002;
+        }
       }
       /**
        * <pre>
@@ -5412,7 +5404,7 @@ public final class DtnRpc {
        */
       public java.util.List<com.google.protobuf.ByteString>
           getUsersList() {
-        return ((bitField0_ & 0x00000001) != 0) ?
+        return ((bitField0_ & 0x00000002) != 0) ?
                  java.util.Collections.unmodifiableList(users_) : users_;
       }
       /**
@@ -5450,10 +5442,8 @@ public final class DtnRpc {
        */
       public Builder setUsers(
           int index, com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureUsersIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureUsersIsMutable();
         users_.set(index, value);
         onChanged();
         return this;
@@ -5468,10 +5458,8 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder addUsers(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureUsersIsMutable();
+        if (value == null) { throw new NullPointerException(); }
+        ensureUsersIsMutable();
         users_.add(value);
         onChanged();
         return this;
@@ -5503,7 +5491,7 @@ public final class DtnRpc {
        */
       public Builder clearUsers() {
         users_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -5612,11 +5600,6 @@ public final class DtnRpc {
       return new DtnAddUserRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnAddUserRequest_descriptor;
@@ -5631,7 +5614,7 @@ public final class DtnRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -5754,11 +5737,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnAddUserRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnAddUserRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5837,8 +5822,8 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -5865,9 +5850,16 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnAddUserRequest buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnAddUserRequest result = new qaul.rpc.dtn.DtnRpc.DtnAddUserRequest(this);
-        result.userId_ = userId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnAddUserRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -5945,7 +5937,7 @@ public final class DtnRpc {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -5963,6 +5955,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -5987,11 +5980,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6004,7 +5995,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -6134,11 +6125,6 @@ public final class DtnRpc {
       return new DtnAddUserResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnAddUserResponse_descriptor;
@@ -6153,7 +6139,7 @@ public final class DtnRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 1;
-    private boolean status_;
+    private boolean status_ = false;
     /**
      * <pre>
      * total_size
@@ -6168,7 +6154,8 @@ public final class DtnRpc {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private volatile java.lang.Object message_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object message_ = "";
     /**
      * <pre>
      * users
@@ -6333,11 +6320,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnAddUserResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnAddUserResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6416,10 +6405,9 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         status_ = false;
-
         message_ = "";
-
         return this;
       }
 
@@ -6446,10 +6434,19 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnAddUserResponse buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnAddUserResponse result = new qaul.rpc.dtn.DtnRpc.DtnAddUserResponse(this);
-        result.status_ = status_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnAddUserResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -6501,6 +6498,7 @@ public final class DtnRpc {
         }
         if (!other.getMessage().isEmpty()) {
           message_ = other.message_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -6531,12 +6529,12 @@ public final class DtnRpc {
                 break;
               case 8: {
                 status_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 message_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -6554,6 +6552,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean status_ ;
       /**
@@ -6578,8 +6577,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setStatus(boolean value) {
-        
+
         status_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6592,7 +6592,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         status_ = false;
         onChanged();
         return this;
@@ -6651,11 +6651,9 @@ public final class DtnRpc {
        */
       public Builder setMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6668,8 +6666,8 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
         message_ = getDefaultInstance().getMessage();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -6684,12 +6682,10 @@ public final class DtnRpc {
        */
       public Builder setMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6798,11 +6794,6 @@ public final class DtnRpc {
       return new DtnRemoveUserRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnRemoveUserRequest_descriptor;
@@ -6817,7 +6808,7 @@ public final class DtnRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -6940,11 +6931,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7023,8 +7016,8 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -7051,9 +7044,16 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest result = new qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest(this);
-        result.userId_ = userId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnRemoveUserRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -7131,7 +7131,7 @@ public final class DtnRpc {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -7149,6 +7149,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -7173,11 +7174,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7190,7 +7189,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -7320,11 +7319,6 @@ public final class DtnRpc {
       return new DtnRemoveUserResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnRemoveUserResponse_descriptor;
@@ -7339,7 +7333,7 @@ public final class DtnRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 1;
-    private boolean status_;
+    private boolean status_ = false;
     /**
      * <pre>
      * total_size
@@ -7354,7 +7348,8 @@ public final class DtnRpc {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private volatile java.lang.Object message_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object message_ = "";
     /**
      * <pre>
      * users
@@ -7519,11 +7514,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7602,10 +7599,9 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         status_ = false;
-
         message_ = "";
-
         return this;
       }
 
@@ -7632,10 +7628,19 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse result = new qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse(this);
-        result.status_ = status_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnRemoveUserResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -7687,6 +7692,7 @@ public final class DtnRpc {
         }
         if (!other.getMessage().isEmpty()) {
           message_ = other.message_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -7717,12 +7723,12 @@ public final class DtnRpc {
                 break;
               case 8: {
                 status_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 message_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -7740,6 +7746,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean status_ ;
       /**
@@ -7764,8 +7771,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setStatus(boolean value) {
-        
+
         status_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7778,7 +7786,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         status_ = false;
         onChanged();
         return this;
@@ -7837,11 +7845,9 @@ public final class DtnRpc {
        */
       public Builder setMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -7854,8 +7860,8 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
         message_ = getDefaultInstance().getMessage();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -7870,12 +7876,10 @@ public final class DtnRpc {
        */
       public Builder setMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -7983,11 +7987,6 @@ public final class DtnRpc {
       return new DtnSetTotalSizeRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnSetTotalSizeRequest_descriptor;
@@ -8002,7 +8001,7 @@ public final class DtnRpc {
     }
 
     public static final int TOTAL_SIZE_FIELD_NUMBER = 1;
-    private int totalSize_;
+    private int totalSize_ = 0;
     /**
      * <pre>
      * total_size
@@ -8125,11 +8124,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8208,8 +8209,8 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         totalSize_ = 0;
-
         return this;
       }
 
@@ -8236,9 +8237,16 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest result = new qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest(this);
-        result.totalSize_ = totalSize_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.totalSize_ = totalSize_;
+        }
       }
 
       @java.lang.Override
@@ -8316,7 +8324,7 @@ public final class DtnRpc {
                 break;
               case 8: {
                 totalSize_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               default: {
@@ -8334,6 +8342,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int totalSize_ ;
       /**
@@ -8358,8 +8367,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setTotalSize(int value) {
-        
+
         totalSize_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8372,7 +8382,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearTotalSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         totalSize_ = 0;
         onChanged();
         return this;
@@ -8502,11 +8512,6 @@ public final class DtnRpc {
       return new DtnSetTotalSizeResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.dtn.DtnRpc.internal_static_qaul_rpc_dtn_DtnSetTotalSizeResponse_descriptor;
@@ -8521,7 +8526,7 @@ public final class DtnRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 1;
-    private boolean status_;
+    private boolean status_ = false;
     /**
      * <pre>
      * total_size
@@ -8536,7 +8541,8 @@ public final class DtnRpc {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private volatile java.lang.Object message_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object message_ = "";
     /**
      * <pre>
      * users
@@ -8701,11 +8707,13 @@ public final class DtnRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8784,10 +8792,9 @@ public final class DtnRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         status_ = false;
-
         message_ = "";
-
         return this;
       }
 
@@ -8814,10 +8821,19 @@ public final class DtnRpc {
       @java.lang.Override
       public qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse buildPartial() {
         qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse result = new qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse(this);
-        result.status_ = status_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.dtn.DtnRpc.DtnSetTotalSizeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -8869,6 +8885,7 @@ public final class DtnRpc {
         }
         if (!other.getMessage().isEmpty()) {
           message_ = other.message_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -8899,12 +8916,12 @@ public final class DtnRpc {
                 break;
               case 8: {
                 status_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 message_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -8922,6 +8939,7 @@ public final class DtnRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean status_ ;
       /**
@@ -8946,8 +8964,9 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder setStatus(boolean value) {
-        
+
         status_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8960,7 +8979,7 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         status_ = false;
         onChanged();
         return this;
@@ -9019,11 +9038,9 @@ public final class DtnRpc {
        */
       public Builder setMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9036,8 +9053,8 @@ public final class DtnRpc {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
         message_ = getDefaultInstance().getMessage();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -9052,12 +9069,10 @@ public final class DtnRpc {
        */
       public Builder setMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }

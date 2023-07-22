@@ -21,6 +21,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -31,6 +32,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -41,6 +43,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -51,6 +54,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -62,6 +66,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -73,6 +78,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -84,6 +90,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -94,6 +101,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -104,6 +112,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -114,6 +123,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -124,6 +134,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -134,6 +145,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -141,7 +153,7 @@ public final class ChatfileRpc {
      */
     qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponseOrBuilder getFileHistoryResponseOrBuilder();
 
-    public qaul.rpc.chatfile.ChatfileRpc.ChatFile.MessageCase getMessageCase();
+    qaul.rpc.chatfile.ChatfileRpc.ChatFile.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -169,11 +181,6 @@ public final class ChatfileRpc {
       return new ChatFile();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_ChatFile_descriptor;
@@ -188,6 +195,7 @@ public final class ChatfileRpc {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -236,6 +244,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -249,6 +258,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -265,6 +275,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file request
+     *
      * this messages sends a file from UI to libqaul
      * </pre>
      *
@@ -282,6 +293,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -296,6 +308,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -313,6 +326,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * send file response
+     *
      * response message from libqaul to the UI about
      * the result of the send file request
      * </pre>
@@ -331,6 +345,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -344,6 +359,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -360,6 +376,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history request
+     *
      * request a paginated list of
      * </pre>
      *
@@ -377,6 +394,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -390,6 +408,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -406,6 +425,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * file history response
+     *
      * delivers the requested list of
      * </pre>
      *
@@ -586,11 +606,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.ChatFile parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.ChatFile parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -669,6 +691,7 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (sendFileRequestBuilder_ != null) {
           sendFileRequestBuilder_.clear();
         }
@@ -709,37 +732,35 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.ChatFile buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.ChatFile result = new qaul.rpc.chatfile.ChatfileRpc.ChatFile(this);
-        if (messageCase_ == 1) {
-          if (sendFileRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = sendFileRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (sendFileResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = sendFileResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (fileHistoryBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = fileHistoryBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (fileHistoryResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = fileHistoryResponseBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.ChatFile result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.chatfile.ChatfileRpc.ChatFile result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            sendFileRequestBuilder_ != null) {
+          result.message_ = sendFileRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            sendFileResponseBuilder_ != null) {
+          result.message_ = sendFileResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            fileHistoryBuilder_ != null) {
+          result.message_ = fileHistoryBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            fileHistoryResponseBuilder_ != null) {
+          result.message_ = fileHistoryResponseBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -891,12 +912,14 @@ public final class ChatfileRpc {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.chatfile.ChatfileRpc.SendFileRequest, qaul.rpc.chatfile.ChatfileRpc.SendFileRequest.Builder, qaul.rpc.chatfile.ChatfileRpc.SendFileRequestOrBuilder> sendFileRequestBuilder_;
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -910,6 +933,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -933,6 +957,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -954,6 +979,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -973,6 +999,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -1001,6 +1028,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -1025,6 +1053,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -1036,6 +1065,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -1055,6 +1085,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file request
+       *
        * this messages sends a file from UI to libqaul
        * </pre>
        *
@@ -1075,7 +1106,7 @@ public final class ChatfileRpc {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return sendFileRequestBuilder_;
       }
 
@@ -1084,6 +1115,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1098,6 +1130,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1122,6 +1155,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1144,6 +1178,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1164,6 +1199,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1193,6 +1229,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1218,6 +1255,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1230,6 +1268,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1250,6 +1289,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * send file response
+       *
        * response message from libqaul to the UI about
        * the result of the send file request
        * </pre>
@@ -1271,7 +1311,7 @@ public final class ChatfileRpc {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return sendFileResponseBuilder_;
       }
 
@@ -1280,6 +1320,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1293,6 +1334,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1316,6 +1358,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1337,6 +1380,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1356,6 +1400,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1384,6 +1429,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1408,6 +1454,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1419,6 +1466,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1438,6 +1486,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history request
+       *
        * request a paginated list of
        * </pre>
        *
@@ -1458,7 +1507,7 @@ public final class ChatfileRpc {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return fileHistoryBuilder_;
       }
 
@@ -1467,6 +1516,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1480,6 +1530,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1503,6 +1554,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1524,6 +1576,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1543,6 +1596,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1571,6 +1625,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1595,6 +1650,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1606,6 +1662,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1625,6 +1682,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * file history response
+       *
        * delivers the requested list of
        * </pre>
        *
@@ -1645,7 +1703,7 @@ public final class ChatfileRpc {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return fileHistoryResponseBuilder_;
       }
       @java.lang.Override
@@ -1769,6 +1827,7 @@ public final class ChatfileRpc {
   /**
    * <pre>
    * Send File Request
+   *
    * UI requests libqaul to send a file
    * </pre>
    *
@@ -1796,11 +1855,6 @@ public final class ChatfileRpc {
       return new SendFileRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_SendFileRequest_descriptor;
@@ -1815,7 +1869,8 @@ public final class ChatfileRpc {
     }
 
     public static final int PATH_NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object pathName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pathName_ = "";
     /**
      * <pre>
      * file path with file name to send
@@ -1861,7 +1916,7 @@ public final class ChatfileRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id to receive file
@@ -1876,7 +1931,8 @@ public final class ChatfileRpc {
     }
 
     public static final int DESCRIPTION_FIELD_NUMBER = 3;
-    private volatile java.lang.Object description_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object description_ = "";
     /**
      * <pre>
      * file description text to be sent in the message
@@ -2050,11 +2106,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.SendFileRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.SendFileRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2099,6 +2157,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * Send File Request
+     *
      * UI requests libqaul to send a file
      * </pre>
      *
@@ -2134,12 +2193,10 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         pathName_ = "";
-
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         description_ = "";
-
         return this;
       }
 
@@ -2166,11 +2223,22 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.SendFileRequest buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.SendFileRequest result = new qaul.rpc.chatfile.ChatfileRpc.SendFileRequest(this);
-        result.pathName_ = pathName_;
-        result.groupId_ = groupId_;
-        result.description_ = description_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.SendFileRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pathName_ = pathName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.description_ = description_;
+        }
       }
 
       @java.lang.Override
@@ -2219,6 +2287,7 @@ public final class ChatfileRpc {
         if (other == qaul.rpc.chatfile.ChatfileRpc.SendFileRequest.getDefaultInstance()) return this;
         if (!other.getPathName().isEmpty()) {
           pathName_ = other.pathName_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.getGroupId() != com.google.protobuf.ByteString.EMPTY) {
@@ -2226,6 +2295,7 @@ public final class ChatfileRpc {
         }
         if (!other.getDescription().isEmpty()) {
           description_ = other.description_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -2256,17 +2326,17 @@ public final class ChatfileRpc {
                 break;
               case 10: {
                 pathName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 description_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -2284,6 +2354,7 @@ public final class ChatfileRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object pathName_ = "";
       /**
@@ -2338,11 +2409,9 @@ public final class ChatfileRpc {
        */
       public Builder setPathName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         pathName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2355,8 +2424,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearPathName() {
-        
         pathName_ = getDefaultInstance().getPathName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -2371,12 +2440,10 @@ public final class ChatfileRpc {
        */
       public Builder setPathNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         pathName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2404,11 +2471,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -2421,7 +2486,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -2480,11 +2545,9 @@ public final class ChatfileRpc {
        */
       public Builder setDescription(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         description_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -2497,8 +2560,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearDescription() {
-        
         description_ = getDefaultInstance().getDescription();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -2513,12 +2576,10 @@ public final class ChatfileRpc {
        */
       public Builder setDescriptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         description_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -2593,6 +2654,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * was the file processing successful
+     *
      * a success does not mean the file has been sent,
      * but that it was successfully scheduled for sending.
      * </pre>
@@ -2635,6 +2697,7 @@ public final class ChatfileRpc {
   /**
    * <pre>
    * Send File Response
+   *
    * sends the result of the file send request to the UI
    * </pre>
    *
@@ -2660,11 +2723,6 @@ public final class ChatfileRpc {
       return new SendFileResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_SendFileResponse_descriptor;
@@ -2679,10 +2737,11 @@ public final class ChatfileRpc {
     }
 
     public static final int SUCCESS_FIELD_NUMBER = 1;
-    private boolean success_;
+    private boolean success_ = false;
     /**
      * <pre>
      * was the file processing successful
+     *
      * a success does not mean the file has been sent,
      * but that it was successfully scheduled for sending.
      * </pre>
@@ -2696,7 +2755,8 @@ public final class ChatfileRpc {
     }
 
     public static final int ERROR_FIELD_NUMBER = 2;
-    private volatile java.lang.Object error_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object error_ = "";
     /**
      * <pre>
      * error reason
@@ -2742,7 +2802,7 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_ID_FIELD_NUMBER = 3;
-    private long fileId_;
+    private long fileId_ = 0L;
     /**
      * <pre>
      * file ID (only present if the sending was a success)
@@ -2888,11 +2948,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.SendFileResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.SendFileResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2937,6 +2999,7 @@ public final class ChatfileRpc {
     /**
      * <pre>
      * Send File Response
+     *
      * sends the result of the file send request to the UI
      * </pre>
      *
@@ -2972,12 +3035,10 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         success_ = false;
-
         error_ = "";
-
         fileId_ = 0L;
-
         return this;
       }
 
@@ -3004,11 +3065,22 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.SendFileResponse buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.SendFileResponse result = new qaul.rpc.chatfile.ChatfileRpc.SendFileResponse(this);
-        result.success_ = success_;
-        result.error_ = error_;
-        result.fileId_ = fileId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.SendFileResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.success_ = success_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.error_ = error_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.fileId_ = fileId_;
+        }
       }
 
       @java.lang.Override
@@ -3060,6 +3132,7 @@ public final class ChatfileRpc {
         }
         if (!other.getError().isEmpty()) {
           error_ = other.error_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getFileId() != 0L) {
@@ -3093,17 +3166,17 @@ public final class ChatfileRpc {
                 break;
               case 8: {
                 success_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 error_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
                 fileId_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               default: {
@@ -3121,11 +3194,13 @@ public final class ChatfileRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean success_ ;
       /**
        * <pre>
        * was the file processing successful
+       *
        * a success does not mean the file has been sent,
        * but that it was successfully scheduled for sending.
        * </pre>
@@ -3140,6 +3215,7 @@ public final class ChatfileRpc {
       /**
        * <pre>
        * was the file processing successful
+       *
        * a success does not mean the file has been sent,
        * but that it was successfully scheduled for sending.
        * </pre>
@@ -3149,14 +3225,16 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setSuccess(boolean value) {
-        
+
         success_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * was the file processing successful
+       *
        * a success does not mean the file has been sent,
        * but that it was successfully scheduled for sending.
        * </pre>
@@ -3165,7 +3243,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearSuccess() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         success_ = false;
         onChanged();
         return this;
@@ -3224,11 +3302,9 @@ public final class ChatfileRpc {
        */
       public Builder setError(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         error_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3241,8 +3317,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearError() {
-        
         error_ = getDefaultInstance().getError();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -3257,12 +3333,10 @@ public final class ChatfileRpc {
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         error_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3290,8 +3364,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setFileId(long value) {
-        
+
         fileId_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3304,7 +3379,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         fileId_ = 0L;
         onChanged();
         return this;
@@ -3423,11 +3498,6 @@ public final class ChatfileRpc {
       return new FileHistoryRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_FileHistoryRequest_descriptor;
@@ -3442,7 +3512,7 @@ public final class ChatfileRpc {
     }
 
     public static final int OFFSET_FIELD_NUMBER = 1;
-    private int offset_;
+    private int offset_ = 0;
     /**
      * <pre>
      * offset
@@ -3457,7 +3527,7 @@ public final class ChatfileRpc {
     }
 
     public static final int LIMIT_FIELD_NUMBER = 2;
-    private int limit_;
+    private int limit_ = 0;
     /**
      * <pre>
      * limit
@@ -3591,11 +3661,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3674,10 +3746,9 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         offset_ = 0;
-
         limit_ = 0;
-
         return this;
       }
 
@@ -3704,10 +3775,19 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest result = new qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest(this);
-        result.offset_ = offset_;
-        result.limit_ = limit_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.FileHistoryRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.offset_ = offset_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.limit_ = limit_;
+        }
       }
 
       @java.lang.Override
@@ -3788,12 +3868,12 @@ public final class ChatfileRpc {
                 break;
               case 8: {
                 offset_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 limit_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -3811,6 +3891,7 @@ public final class ChatfileRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int offset_ ;
       /**
@@ -3835,8 +3916,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setOffset(int value) {
-        
+
         offset_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3849,7 +3931,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearOffset() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         offset_ = 0;
         onChanged();
         return this;
@@ -3878,8 +3960,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setLimit(int value) {
-        
+
         limit_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3892,7 +3975,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearLimit() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         limit_ = 0;
         onChanged();
         return this;
@@ -4126,11 +4209,6 @@ public final class ChatfileRpc {
       return new FileHistoryEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_FileHistoryEntry_descriptor;
@@ -4145,7 +4223,7 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_ID_FIELD_NUMBER = 1;
-    private long fileId_;
+    private long fileId_ = 0L;
     /**
      * <pre>
      * file id
@@ -4160,7 +4238,8 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object fileName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileName_ = "";
     /**
      * <pre>
      * file name (without extension)
@@ -4206,7 +4285,8 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_EXTENSION_FIELD_NUMBER = 3;
-    private volatile java.lang.Object fileExtension_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileExtension_ = "";
     /**
      * <pre>
      * file extension
@@ -4252,7 +4332,7 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_SIZE_FIELD_NUMBER = 4;
-    private int fileSize_;
+    private int fileSize_ = 0;
     /**
      * <pre>
      * file size
@@ -4267,7 +4347,8 @@ public final class ChatfileRpc {
     }
 
     public static final int FILE_DESCRIPTION_FIELD_NUMBER = 5;
-    private volatile java.lang.Object fileDescription_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileDescription_ = "";
     /**
      * <pre>
      * file description
@@ -4313,7 +4394,7 @@ public final class ChatfileRpc {
     }
 
     public static final int TIME_FIELD_NUMBER = 6;
-    private long time_;
+    private long time_ = 0L;
     /**
      * <pre>
      * time
@@ -4328,7 +4409,8 @@ public final class ChatfileRpc {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 7;
-    private volatile java.lang.Object senderId_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object senderId_ = "";
     /**
      * <pre>
      * sender id
@@ -4374,7 +4456,8 @@ public final class ChatfileRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 8;
-    private volatile java.lang.Object groupId_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object groupId_ = "";
     /**
      * <pre>
      * group id
@@ -4602,11 +4685,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4685,22 +4770,15 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         fileId_ = 0L;
-
         fileName_ = "";
-
         fileExtension_ = "";
-
         fileSize_ = 0;
-
         fileDescription_ = "";
-
         time_ = 0L;
-
         senderId_ = "";
-
         groupId_ = "";
-
         return this;
       }
 
@@ -4727,16 +4805,37 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry result = new qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry(this);
-        result.fileId_ = fileId_;
-        result.fileName_ = fileName_;
-        result.fileExtension_ = fileExtension_;
-        result.fileSize_ = fileSize_;
-        result.fileDescription_ = fileDescription_;
-        result.time_ = time_;
-        result.senderId_ = senderId_;
-        result.groupId_ = groupId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.fileId_ = fileId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.fileName_ = fileName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.fileExtension_ = fileExtension_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.fileSize_ = fileSize_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.fileDescription_ = fileDescription_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.time_ = time_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.groupId_ = groupId_;
+        }
       }
 
       @java.lang.Override
@@ -4788,10 +4887,12 @@ public final class ChatfileRpc {
         }
         if (!other.getFileName().isEmpty()) {
           fileName_ = other.fileName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (!other.getFileExtension().isEmpty()) {
           fileExtension_ = other.fileExtension_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getFileSize() != 0) {
@@ -4799,6 +4900,7 @@ public final class ChatfileRpc {
         }
         if (!other.getFileDescription().isEmpty()) {
           fileDescription_ = other.fileDescription_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (other.getTime() != 0L) {
@@ -4806,10 +4908,12 @@ public final class ChatfileRpc {
         }
         if (!other.getSenderId().isEmpty()) {
           senderId_ = other.senderId_;
+          bitField0_ |= 0x00000040;
           onChanged();
         }
         if (!other.getGroupId().isEmpty()) {
           groupId_ = other.groupId_;
+          bitField0_ |= 0x00000080;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -4840,42 +4944,42 @@ public final class ChatfileRpc {
                 break;
               case 8: {
                 fileId_ = input.readUInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 fileName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 fileExtension_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 fileSize_ = input.readUInt32();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 42: {
                 fileDescription_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 48: {
                 time_ = input.readUInt64();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 48
               case 58: {
                 senderId_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000040;
                 break;
               } // case 58
               case 66: {
                 groupId_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000080;
                 break;
               } // case 66
               default: {
@@ -4893,6 +4997,7 @@ public final class ChatfileRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long fileId_ ;
       /**
@@ -4917,8 +5022,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setFileId(long value) {
-        
+
         fileId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4931,7 +5037,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         fileId_ = 0L;
         onChanged();
         return this;
@@ -4990,11 +5096,9 @@ public final class ChatfileRpc {
        */
       public Builder setFileName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5007,8 +5111,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileName() {
-        
         fileName_ = getDefaultInstance().getFileName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -5023,12 +5127,10 @@ public final class ChatfileRpc {
        */
       public Builder setFileNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5086,11 +5188,9 @@ public final class ChatfileRpc {
        */
       public Builder setFileExtension(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileExtension_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -5103,8 +5203,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileExtension() {
-        
         fileExtension_ = getDefaultInstance().getFileExtension();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -5119,12 +5219,10 @@ public final class ChatfileRpc {
        */
       public Builder setFileExtensionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileExtension_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -5152,8 +5250,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setFileSize(int value) {
-        
+
         fileSize_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -5166,7 +5265,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         fileSize_ = 0;
         onChanged();
         return this;
@@ -5225,11 +5324,9 @@ public final class ChatfileRpc {
        */
       public Builder setFileDescription(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileDescription_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -5242,8 +5339,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearFileDescription() {
-        
         fileDescription_ = getDefaultInstance().getFileDescription();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -5258,12 +5355,10 @@ public final class ChatfileRpc {
        */
       public Builder setFileDescriptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileDescription_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -5291,8 +5386,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setTime(long value) {
-        
+
         time_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -5305,7 +5401,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearTime() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         time_ = 0L;
         onChanged();
         return this;
@@ -5364,11 +5460,9 @@ public final class ChatfileRpc {
        */
       public Builder setSenderId(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -5381,8 +5475,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
         senderId_ = getDefaultInstance().getSenderId();
+        bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
         return this;
       }
@@ -5397,12 +5491,10 @@ public final class ChatfileRpc {
        */
       public Builder setSenderIdBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         senderId_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -5460,11 +5552,9 @@ public final class ChatfileRpc {
        */
       public Builder setGroupId(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -5477,8 +5567,8 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
         groupId_ = getDefaultInstance().getGroupId();
+        bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
@@ -5493,12 +5583,10 @@ public final class ChatfileRpc {
        */
       public Builder setGroupIdBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         groupId_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -5671,11 +5759,6 @@ public final class ChatfileRpc {
       return new FileHistoryResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.chatfile.ChatfileRpc.internal_static_qaul_rpc_chatfile_FileHistoryResponse_descriptor;
@@ -5690,7 +5773,7 @@ public final class ChatfileRpc {
     }
 
     public static final int OFFSET_FIELD_NUMBER = 1;
-    private int offset_;
+    private int offset_ = 0;
     /**
      * <pre>
      * offset
@@ -5705,7 +5788,7 @@ public final class ChatfileRpc {
     }
 
     public static final int LIMIT_FIELD_NUMBER = 2;
-    private int limit_;
+    private int limit_ = 0;
     /**
      * <pre>
      * limit
@@ -5720,7 +5803,7 @@ public final class ChatfileRpc {
     }
 
     public static final int TOTAL_FIELD_NUMBER = 3;
-    private long total_;
+    private long total_ = 0L;
     /**
      * <pre>
      * limit
@@ -5735,6 +5818,7 @@ public final class ChatfileRpc {
     }
 
     public static final int HISTORIES_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry> histories_;
     /**
      * <pre>
@@ -5939,11 +6023,13 @@ public final class ChatfileRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6022,19 +6108,17 @@ public final class ChatfileRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         offset_ = 0;
-
         limit_ = 0;
-
         total_ = 0L;
-
         if (historiesBuilder_ == null) {
           histories_ = java.util.Collections.emptyList();
         } else {
           histories_ = null;
           historiesBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -6061,21 +6145,35 @@ public final class ChatfileRpc {
       @java.lang.Override
       public qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse buildPartial() {
         qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse result = new qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse(this);
-        int from_bitField0_ = bitField0_;
-        result.offset_ = offset_;
-        result.limit_ = limit_;
-        result.total_ = total_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse result) {
         if (historiesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000008) != 0)) {
             histories_ = java.util.Collections.unmodifiableList(histories_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.histories_ = histories_;
         } else {
           result.histories_ = historiesBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.chatfile.ChatfileRpc.FileHistoryResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.offset_ = offset_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.limit_ = limit_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.total_ = total_;
+        }
       }
 
       @java.lang.Override
@@ -6135,7 +6233,7 @@ public final class ChatfileRpc {
           if (!other.histories_.isEmpty()) {
             if (histories_.isEmpty()) {
               histories_ = other.histories_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureHistoriesIsMutable();
               histories_.addAll(other.histories_);
@@ -6148,7 +6246,7 @@ public final class ChatfileRpc {
               historiesBuilder_.dispose();
               historiesBuilder_ = null;
               histories_ = other.histories_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000008);
               historiesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getHistoriesFieldBuilder() : null;
@@ -6185,17 +6283,17 @@ public final class ChatfileRpc {
                 break;
               case 8: {
                 offset_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 limit_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
                 total_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 34: {
@@ -6251,8 +6349,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setOffset(int value) {
-        
+
         offset_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6265,7 +6364,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearOffset() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         offset_ = 0;
         onChanged();
         return this;
@@ -6294,8 +6393,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setLimit(int value) {
-        
+
         limit_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6308,7 +6408,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearLimit() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         limit_ = 0;
         onChanged();
         return this;
@@ -6337,8 +6437,9 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder setTotal(long value) {
-        
+
         total_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -6351,7 +6452,7 @@ public final class ChatfileRpc {
        * @return This builder for chaining.
        */
       public Builder clearTotal() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         total_ = 0L;
         onChanged();
         return this;
@@ -6360,9 +6461,9 @@ public final class ChatfileRpc {
       private java.util.List<qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry> histories_ =
         java.util.Collections.emptyList();
       private void ensureHistoriesIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000008) != 0)) {
           histories_ = new java.util.ArrayList<qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry>(histories_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -6556,7 +6657,7 @@ public final class ChatfileRpc {
       public Builder clearHistories() {
         if (historiesBuilder_ == null) {
           histories_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           historiesBuilder_.clear();
@@ -6661,7 +6762,7 @@ public final class ChatfileRpc {
           historiesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry, qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntry.Builder, qaul.rpc.chatfile.ChatfileRpc.FileHistoryEntryOrBuilder>(
                   histories_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000008) != 0),
                   getParentForChildren(),
                   isClean());
           histories_ = null;

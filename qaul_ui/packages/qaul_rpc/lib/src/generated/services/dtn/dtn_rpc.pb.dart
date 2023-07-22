@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: services/dtn/dtn_rpc.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -25,6 +29,11 @@ enum DTN_Message {
 }
 
 class DTN extends $pb.GeneratedMessage {
+  factory DTN() => create();
+  DTN._() : super();
+  factory DTN.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DTN.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, DTN_Message> _DTN_MessageByTag = {
     1 : DTN_Message.dtnStateRequest,
     2 : DTN_Message.dtnStateResponse,
@@ -38,69 +47,21 @@ class DTN extends $pb.GeneratedMessage {
     10 : DTN_Message.dtnSetTotalSizeResponse,
     0 : DTN_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DTN', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DTN', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-    ..aOM<DtnStateRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnStateRequest', subBuilder: DtnStateRequest.create)
-    ..aOM<DtnStateResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnStateResponse', subBuilder: DtnStateResponse.create)
-    ..aOM<DtnConfigRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnConfigRequest', subBuilder: DtnConfigRequest.create)
-    ..aOM<DtnConfigResponse>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnConfigResponse', subBuilder: DtnConfigResponse.create)
-    ..aOM<DtnAddUserRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnAddUserRequest', subBuilder: DtnAddUserRequest.create)
-    ..aOM<DtnAddUserResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnAddUserResponse', subBuilder: DtnAddUserResponse.create)
-    ..aOM<DtnRemoveUserRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnRemoveUserRequest', subBuilder: DtnRemoveUserRequest.create)
-    ..aOM<DtnRemoveUserResponse>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnRemoveUserResponse', subBuilder: DtnRemoveUserResponse.create)
-    ..aOM<DtnSetTotalSizeRequest>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnSetTotalSizeRequest', subBuilder: DtnSetTotalSizeRequest.create)
-    ..aOM<DtnSetTotalSizeResponse>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnSetTotalSizeResponse', subBuilder: DtnSetTotalSizeResponse.create)
+    ..aOM<DtnStateRequest>(1, _omitFieldNames ? '' : 'dtnStateRequest', subBuilder: DtnStateRequest.create)
+    ..aOM<DtnStateResponse>(2, _omitFieldNames ? '' : 'dtnStateResponse', subBuilder: DtnStateResponse.create)
+    ..aOM<DtnConfigRequest>(3, _omitFieldNames ? '' : 'dtnConfigRequest', subBuilder: DtnConfigRequest.create)
+    ..aOM<DtnConfigResponse>(4, _omitFieldNames ? '' : 'dtnConfigResponse', subBuilder: DtnConfigResponse.create)
+    ..aOM<DtnAddUserRequest>(5, _omitFieldNames ? '' : 'dtnAddUserRequest', subBuilder: DtnAddUserRequest.create)
+    ..aOM<DtnAddUserResponse>(6, _omitFieldNames ? '' : 'dtnAddUserResponse', subBuilder: DtnAddUserResponse.create)
+    ..aOM<DtnRemoveUserRequest>(7, _omitFieldNames ? '' : 'dtnRemoveUserRequest', subBuilder: DtnRemoveUserRequest.create)
+    ..aOM<DtnRemoveUserResponse>(8, _omitFieldNames ? '' : 'dtnRemoveUserResponse', subBuilder: DtnRemoveUserResponse.create)
+    ..aOM<DtnSetTotalSizeRequest>(9, _omitFieldNames ? '' : 'dtnSetTotalSizeRequest', subBuilder: DtnSetTotalSizeRequest.create)
+    ..aOM<DtnSetTotalSizeResponse>(10, _omitFieldNames ? '' : 'dtnSetTotalSizeResponse', subBuilder: DtnSetTotalSizeResponse.create)
     ..hasRequiredFields = false
   ;
 
-  DTN._() : super();
-  factory DTN({
-    DtnStateRequest? dtnStateRequest,
-    DtnStateResponse? dtnStateResponse,
-    DtnConfigRequest? dtnConfigRequest,
-    DtnConfigResponse? dtnConfigResponse,
-    DtnAddUserRequest? dtnAddUserRequest,
-    DtnAddUserResponse? dtnAddUserResponse,
-    DtnRemoveUserRequest? dtnRemoveUserRequest,
-    DtnRemoveUserResponse? dtnRemoveUserResponse,
-    DtnSetTotalSizeRequest? dtnSetTotalSizeRequest,
-    DtnSetTotalSizeResponse? dtnSetTotalSizeResponse,
-  }) {
-    final _result = create();
-    if (dtnStateRequest != null) {
-      _result.dtnStateRequest = dtnStateRequest;
-    }
-    if (dtnStateResponse != null) {
-      _result.dtnStateResponse = dtnStateResponse;
-    }
-    if (dtnConfigRequest != null) {
-      _result.dtnConfigRequest = dtnConfigRequest;
-    }
-    if (dtnConfigResponse != null) {
-      _result.dtnConfigResponse = dtnConfigResponse;
-    }
-    if (dtnAddUserRequest != null) {
-      _result.dtnAddUserRequest = dtnAddUserRequest;
-    }
-    if (dtnAddUserResponse != null) {
-      _result.dtnAddUserResponse = dtnAddUserResponse;
-    }
-    if (dtnRemoveUserRequest != null) {
-      _result.dtnRemoveUserRequest = dtnRemoveUserRequest;
-    }
-    if (dtnRemoveUserResponse != null) {
-      _result.dtnRemoveUserResponse = dtnRemoveUserResponse;
-    }
-    if (dtnSetTotalSizeRequest != null) {
-      _result.dtnSetTotalSizeRequest = dtnSetTotalSizeRequest;
-    }
-    if (dtnSetTotalSizeResponse != null) {
-      _result.dtnSetTotalSizeResponse = dtnSetTotalSizeResponse;
-    }
-    return _result;
-  }
-  factory DTN.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DTN.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -110,8 +71,10 @@ class DTN extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DTN copyWith(void Function(DTN) updates) => super.copyWith((message) => updates(message as DTN)) as DTN; // ignore: deprecated_member_use
+  DTN copyWith(void Function(DTN) updates) => super.copyWith((message) => updates(message as DTN)) as DTN;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DTN create() => DTN._();
   DTN createEmptyInstance() => create();
@@ -235,14 +198,15 @@ class DTN extends $pb.GeneratedMessage {
 }
 
 class DtnStateRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnStateRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+  factory DtnStateRequest() => create();
+  DtnStateRequest._() : super();
+  factory DtnStateRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnStateRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnStateRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  DtnStateRequest._() : super();
-  factory DtnStateRequest() => create();
-  factory DtnStateRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnStateRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -252,8 +216,10 @@ class DtnStateRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnStateRequest copyWith(void Function(DtnStateRequest) updates) => super.copyWith((message) => updates(message as DtnStateRequest)) as DtnStateRequest; // ignore: deprecated_member_use
+  DtnStateRequest copyWith(void Function(DtnStateRequest) updates) => super.copyWith((message) => updates(message as DtnStateRequest)) as DtnStateRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnStateRequest create() => DtnStateRequest._();
   DtnStateRequest createEmptyInstance() => create();
@@ -264,33 +230,18 @@ class DtnStateRequest extends $pb.GeneratedMessage {
 }
 
 class DtnStateResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnStateResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'usedSize', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtnMessageCount', $pb.PbFieldType.OU3)
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'unconfirmedCount', $pb.PbFieldType.OU3)
+  factory DtnStateResponse() => create();
+  DtnStateResponse._() : super();
+  factory DtnStateResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnStateResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnStateResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'usedSize', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'dtnMessageCount', $pb.PbFieldType.OU3)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'unconfirmedCount', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
-  DtnStateResponse._() : super();
-  factory DtnStateResponse({
-    $fixnum.Int64? usedSize,
-    $core.int? dtnMessageCount,
-    $core.int? unconfirmedCount,
-  }) {
-    final _result = create();
-    if (usedSize != null) {
-      _result.usedSize = usedSize;
-    }
-    if (dtnMessageCount != null) {
-      _result.dtnMessageCount = dtnMessageCount;
-    }
-    if (unconfirmedCount != null) {
-      _result.unconfirmedCount = unconfirmedCount;
-    }
-    return _result;
-  }
-  factory DtnStateResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnStateResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -300,8 +251,10 @@ class DtnStateResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnStateResponse copyWith(void Function(DtnStateResponse) updates) => super.copyWith((message) => updates(message as DtnStateResponse)) as DtnStateResponse; // ignore: deprecated_member_use
+  DtnStateResponse copyWith(void Function(DtnStateResponse) updates) => super.copyWith((message) => updates(message as DtnStateResponse)) as DtnStateResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnStateResponse create() => DtnStateResponse._();
   DtnStateResponse createEmptyInstance() => create();
@@ -339,14 +292,15 @@ class DtnStateResponse extends $pb.GeneratedMessage {
 }
 
 class DtnConfigRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnConfigRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+  factory DtnConfigRequest() => create();
+  DtnConfigRequest._() : super();
+  factory DtnConfigRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnConfigRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnConfigRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  DtnConfigRequest._() : super();
-  factory DtnConfigRequest() => create();
-  factory DtnConfigRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnConfigRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -356,8 +310,10 @@ class DtnConfigRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnConfigRequest copyWith(void Function(DtnConfigRequest) updates) => super.copyWith((message) => updates(message as DtnConfigRequest)) as DtnConfigRequest; // ignore: deprecated_member_use
+  DtnConfigRequest copyWith(void Function(DtnConfigRequest) updates) => super.copyWith((message) => updates(message as DtnConfigRequest)) as DtnConfigRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnConfigRequest create() => DtnConfigRequest._();
   DtnConfigRequest createEmptyInstance() => create();
@@ -368,28 +324,17 @@ class DtnConfigRequest extends $pb.GeneratedMessage {
 }
 
 class DtnConfigResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnConfigResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'totalSize', $pb.PbFieldType.OU3)
-    ..p<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', $pb.PbFieldType.PY)
+  factory DtnConfigResponse() => create();
+  DtnConfigResponse._() : super();
+  factory DtnConfigResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnConfigResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnConfigResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'totalSize', $pb.PbFieldType.OU3)
+    ..p<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'users', $pb.PbFieldType.PY)
     ..hasRequiredFields = false
   ;
 
-  DtnConfigResponse._() : super();
-  factory DtnConfigResponse({
-    $core.int? totalSize,
-    $core.Iterable<$core.List<$core.int>>? users,
-  }) {
-    final _result = create();
-    if (totalSize != null) {
-      _result.totalSize = totalSize;
-    }
-    if (users != null) {
-      _result.users.addAll(users);
-    }
-    return _result;
-  }
-  factory DtnConfigResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnConfigResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -399,8 +344,10 @@ class DtnConfigResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnConfigResponse copyWith(void Function(DtnConfigResponse) updates) => super.copyWith((message) => updates(message as DtnConfigResponse)) as DtnConfigResponse; // ignore: deprecated_member_use
+  DtnConfigResponse copyWith(void Function(DtnConfigResponse) updates) => super.copyWith((message) => updates(message as DtnConfigResponse)) as DtnConfigResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnConfigResponse create() => DtnConfigResponse._();
   DtnConfigResponse createEmptyInstance() => create();
@@ -423,23 +370,16 @@ class DtnConfigResponse extends $pb.GeneratedMessage {
 }
 
 class DtnAddUserRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnAddUserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+  factory DtnAddUserRequest() => create();
+  DtnAddUserRequest._() : super();
+  factory DtnAddUserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnAddUserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnAddUserRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
-  DtnAddUserRequest._() : super();
-  factory DtnAddUserRequest({
-    $core.List<$core.int>? userId,
-  }) {
-    final _result = create();
-    if (userId != null) {
-      _result.userId = userId;
-    }
-    return _result;
-  }
-  factory DtnAddUserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnAddUserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -449,8 +389,10 @@ class DtnAddUserRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnAddUserRequest copyWith(void Function(DtnAddUserRequest) updates) => super.copyWith((message) => updates(message as DtnAddUserRequest)) as DtnAddUserRequest; // ignore: deprecated_member_use
+  DtnAddUserRequest copyWith(void Function(DtnAddUserRequest) updates) => super.copyWith((message) => updates(message as DtnAddUserRequest)) as DtnAddUserRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnAddUserRequest create() => DtnAddUserRequest._();
   DtnAddUserRequest createEmptyInstance() => create();
@@ -470,28 +412,17 @@ class DtnAddUserRequest extends $pb.GeneratedMessage {
 }
 
 class DtnAddUserResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnAddUserResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+  factory DtnAddUserResponse() => create();
+  DtnAddUserResponse._() : super();
+  factory DtnAddUserResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnAddUserResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnAddUserResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'status')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
     ..hasRequiredFields = false
   ;
 
-  DtnAddUserResponse._() : super();
-  factory DtnAddUserResponse({
-    $core.bool? status,
-    $core.String? message,
-  }) {
-    final _result = create();
-    if (status != null) {
-      _result.status = status;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
-  }
-  factory DtnAddUserResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnAddUserResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -501,8 +432,10 @@ class DtnAddUserResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnAddUserResponse copyWith(void Function(DtnAddUserResponse) updates) => super.copyWith((message) => updates(message as DtnAddUserResponse)) as DtnAddUserResponse; // ignore: deprecated_member_use
+  DtnAddUserResponse copyWith(void Function(DtnAddUserResponse) updates) => super.copyWith((message) => updates(message as DtnAddUserResponse)) as DtnAddUserResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnAddUserResponse create() => DtnAddUserResponse._();
   DtnAddUserResponse createEmptyInstance() => create();
@@ -531,23 +464,16 @@ class DtnAddUserResponse extends $pb.GeneratedMessage {
 }
 
 class DtnRemoveUserRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnRemoveUserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+  factory DtnRemoveUserRequest() => create();
+  DtnRemoveUserRequest._() : super();
+  factory DtnRemoveUserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnRemoveUserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnRemoveUserRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
-  DtnRemoveUserRequest._() : super();
-  factory DtnRemoveUserRequest({
-    $core.List<$core.int>? userId,
-  }) {
-    final _result = create();
-    if (userId != null) {
-      _result.userId = userId;
-    }
-    return _result;
-  }
-  factory DtnRemoveUserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnRemoveUserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -557,8 +483,10 @@ class DtnRemoveUserRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnRemoveUserRequest copyWith(void Function(DtnRemoveUserRequest) updates) => super.copyWith((message) => updates(message as DtnRemoveUserRequest)) as DtnRemoveUserRequest; // ignore: deprecated_member_use
+  DtnRemoveUserRequest copyWith(void Function(DtnRemoveUserRequest) updates) => super.copyWith((message) => updates(message as DtnRemoveUserRequest)) as DtnRemoveUserRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnRemoveUserRequest create() => DtnRemoveUserRequest._();
   DtnRemoveUserRequest createEmptyInstance() => create();
@@ -578,28 +506,17 @@ class DtnRemoveUserRequest extends $pb.GeneratedMessage {
 }
 
 class DtnRemoveUserResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnRemoveUserResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+  factory DtnRemoveUserResponse() => create();
+  DtnRemoveUserResponse._() : super();
+  factory DtnRemoveUserResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnRemoveUserResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnRemoveUserResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'status')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
     ..hasRequiredFields = false
   ;
 
-  DtnRemoveUserResponse._() : super();
-  factory DtnRemoveUserResponse({
-    $core.bool? status,
-    $core.String? message,
-  }) {
-    final _result = create();
-    if (status != null) {
-      _result.status = status;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
-  }
-  factory DtnRemoveUserResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnRemoveUserResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -609,8 +526,10 @@ class DtnRemoveUserResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnRemoveUserResponse copyWith(void Function(DtnRemoveUserResponse) updates) => super.copyWith((message) => updates(message as DtnRemoveUserResponse)) as DtnRemoveUserResponse; // ignore: deprecated_member_use
+  DtnRemoveUserResponse copyWith(void Function(DtnRemoveUserResponse) updates) => super.copyWith((message) => updates(message as DtnRemoveUserResponse)) as DtnRemoveUserResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnRemoveUserResponse create() => DtnRemoveUserResponse._();
   DtnRemoveUserResponse createEmptyInstance() => create();
@@ -639,23 +558,16 @@ class DtnRemoveUserResponse extends $pb.GeneratedMessage {
 }
 
 class DtnSetTotalSizeRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnSetTotalSizeRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'totalSize', $pb.PbFieldType.OU3)
+  factory DtnSetTotalSizeRequest() => create();
+  DtnSetTotalSizeRequest._() : super();
+  factory DtnSetTotalSizeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnSetTotalSizeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnSetTotalSizeRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'totalSize', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
-  DtnSetTotalSizeRequest._() : super();
-  factory DtnSetTotalSizeRequest({
-    $core.int? totalSize,
-  }) {
-    final _result = create();
-    if (totalSize != null) {
-      _result.totalSize = totalSize;
-    }
-    return _result;
-  }
-  factory DtnSetTotalSizeRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnSetTotalSizeRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -665,8 +577,10 @@ class DtnSetTotalSizeRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnSetTotalSizeRequest copyWith(void Function(DtnSetTotalSizeRequest) updates) => super.copyWith((message) => updates(message as DtnSetTotalSizeRequest)) as DtnSetTotalSizeRequest; // ignore: deprecated_member_use
+  DtnSetTotalSizeRequest copyWith(void Function(DtnSetTotalSizeRequest) updates) => super.copyWith((message) => updates(message as DtnSetTotalSizeRequest)) as DtnSetTotalSizeRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnSetTotalSizeRequest create() => DtnSetTotalSizeRequest._();
   DtnSetTotalSizeRequest createEmptyInstance() => create();
@@ -686,28 +600,17 @@ class DtnSetTotalSizeRequest extends $pb.GeneratedMessage {
 }
 
 class DtnSetTotalSizeResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DtnSetTotalSizeResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+  factory DtnSetTotalSizeResponse() => create();
+  DtnSetTotalSizeResponse._() : super();
+  factory DtnSetTotalSizeResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DtnSetTotalSizeResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DtnSetTotalSizeResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.dtn'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'status')
+    ..aOS(2, _omitFieldNames ? '' : 'message')
     ..hasRequiredFields = false
   ;
 
-  DtnSetTotalSizeResponse._() : super();
-  factory DtnSetTotalSizeResponse({
-    $core.bool? status,
-    $core.String? message,
-  }) {
-    final _result = create();
-    if (status != null) {
-      _result.status = status;
-    }
-    if (message != null) {
-      _result.message = message;
-    }
-    return _result;
-  }
-  factory DtnSetTotalSizeResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DtnSetTotalSizeResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -717,8 +620,10 @@ class DtnSetTotalSizeResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DtnSetTotalSizeResponse copyWith(void Function(DtnSetTotalSizeResponse) updates) => super.copyWith((message) => updates(message as DtnSetTotalSizeResponse)) as DtnSetTotalSizeResponse; // ignore: deprecated_member_use
+  DtnSetTotalSizeResponse copyWith(void Function(DtnSetTotalSizeResponse) updates) => super.copyWith((message) => updates(message as DtnSetTotalSizeResponse)) as DtnSetTotalSizeResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DtnSetTotalSizeResponse create() => DtnSetTotalSizeResponse._();
   DtnSetTotalSizeResponse createEmptyInstance() => create();
@@ -746,3 +651,6 @@ class DtnSetTotalSizeResponse extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

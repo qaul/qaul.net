@@ -102,7 +102,7 @@ public final class BleNet {
      */
     qaul.net.ble.BleNet.IdentificationOrBuilder getIdentificationOrBuilder();
 
-    public qaul.net.ble.BleNet.BleMessage.MessageCase getMessageCase();
+    qaul.net.ble.BleNet.BleMessage.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -130,11 +130,6 @@ public final class BleNet {
       return new BleMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.ble.BleNet.internal_static_qaul_net_ble_BleMessage_descriptor;
@@ -149,6 +144,7 @@ public final class BleNet {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -496,11 +492,13 @@ public final class BleNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.ble.BleNet.BleMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.ble.BleNet.BleMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -579,6 +577,7 @@ public final class BleNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (identificationBuilder_ != null) {
           identificationBuilder_.clear();
         }
@@ -610,25 +609,23 @@ public final class BleNet {
       @java.lang.Override
       public qaul.net.ble.BleNet.BleMessage buildPartial() {
         qaul.net.ble.BleNet.BleMessage result = new qaul.net.ble.BleNet.BleMessage(this);
-        if (messageCase_ == 1) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 2) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 3) {
-          result.message_ = message_;
-        }
-        if (messageCase_ == 4) {
-          if (identificationBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = identificationBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.ble.BleNet.BleMessage result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.net.ble.BleNet.BleMessage result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 4 &&
+            identificationBuilder_ != null) {
+          result.message_ = identificationBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -774,6 +771,7 @@ public final class BleNet {
         return this;
       }
 
+      private int bitField0_;
 
       /**
        * <pre>
@@ -810,10 +808,8 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder setInfo(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  messageCase_ = 1;
+        if (value == null) { throw new NullPointerException(); }
+        messageCase_ = 1;
         message_ = value;
         onChanged();
         return this;
@@ -870,10 +866,8 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder setFeed(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  messageCase_ = 2;
+        if (value == null) { throw new NullPointerException(); }
+        messageCase_ = 2;
         message_ = value;
         onChanged();
         return this;
@@ -930,10 +924,8 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder setMessaging(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  messageCase_ = 3;
+        if (value == null) { throw new NullPointerException(); }
+        messageCase_ = 3;
         message_ = value;
         onChanged();
         return this;
@@ -1129,7 +1121,7 @@ public final class BleNet {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return identificationBuilder_;
       }
       @java.lang.Override
@@ -1247,11 +1239,6 @@ public final class BleNet {
       return new Identification();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.ble.BleNet.internal_static_qaul_net_ble_Identification_descriptor;
@@ -1266,7 +1253,7 @@ public final class BleNet {
     }
 
     public static final int REQUEST_FIELD_NUMBER = 1;
-    private boolean request_;
+    private boolean request_ = false;
     /**
      * <code>bool request = 1;</code>
      * @return The request.
@@ -1299,7 +1286,7 @@ public final class BleNet {
      */
     @java.lang.Override
     public qaul.net.ble.BleNet.NodeIdentificationOrBuilder getNodeOrBuilder() {
-      return getNode();
+      return node_ == null ? qaul.net.ble.BleNet.NodeIdentification.getDefaultInstance() : node_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1428,11 +1415,13 @@ public final class BleNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.ble.BleNet.Identification parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.ble.BleNet.Identification parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1511,12 +1500,11 @@ public final class BleNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         request_ = false;
-
-        if (nodeBuilder_ == null) {
-          node_ = null;
-        } else {
-          node_ = null;
+        node_ = null;
+        if (nodeBuilder_ != null) {
+          nodeBuilder_.dispose();
           nodeBuilder_ = null;
         }
         return this;
@@ -1545,14 +1533,21 @@ public final class BleNet {
       @java.lang.Override
       public qaul.net.ble.BleNet.Identification buildPartial() {
         qaul.net.ble.BleNet.Identification result = new qaul.net.ble.BleNet.Identification(this);
-        result.request_ = request_;
-        if (nodeBuilder_ == null) {
-          result.node_ = node_;
-        } else {
-          result.node_ = nodeBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.ble.BleNet.Identification result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.request_ = request_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.node_ = nodeBuilder_ == null
+              ? node_
+              : nodeBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1633,14 +1628,14 @@ public final class BleNet {
                 break;
               case 8: {
                 request_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 input.readMessage(
                     getNodeFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -1658,6 +1653,7 @@ public final class BleNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean request_ ;
       /**
@@ -1674,8 +1670,9 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder setRequest(boolean value) {
-        
+
         request_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1684,7 +1681,7 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder clearRequest() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         request_ = false;
         onChanged();
         return this;
@@ -1698,7 +1695,7 @@ public final class BleNet {
        * @return Whether the node field is set.
        */
       public boolean hasNode() {
-        return nodeBuilder_ != null || node_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
@@ -1720,11 +1717,11 @@ public final class BleNet {
             throw new NullPointerException();
           }
           node_ = value;
-          onChanged();
         } else {
           nodeBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -1734,11 +1731,11 @@ public final class BleNet {
           qaul.net.ble.BleNet.NodeIdentification.Builder builderForValue) {
         if (nodeBuilder_ == null) {
           node_ = builderForValue.build();
-          onChanged();
         } else {
           nodeBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -1746,38 +1743,38 @@ public final class BleNet {
        */
       public Builder mergeNode(qaul.net.ble.BleNet.NodeIdentification value) {
         if (nodeBuilder_ == null) {
-          if (node_ != null) {
-            node_ =
-              qaul.net.ble.BleNet.NodeIdentification.newBuilder(node_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            node_ != null &&
+            node_ != qaul.net.ble.BleNet.NodeIdentification.getDefaultInstance()) {
+            getNodeBuilder().mergeFrom(value);
           } else {
             node_ = value;
           }
-          onChanged();
         } else {
           nodeBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
        * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
        */
       public Builder clearNode() {
-        if (nodeBuilder_ == null) {
-          node_ = null;
-          onChanged();
-        } else {
-          node_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        node_ = null;
+        if (nodeBuilder_ != null) {
+          nodeBuilder_.dispose();
           nodeBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
        * <code>.qaul.net.ble.NodeIdentification node = 2;</code>
        */
       public qaul.net.ble.BleNet.NodeIdentification.Builder getNodeBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getNodeFieldBuilder().getBuilder();
       }
@@ -1913,11 +1910,6 @@ public final class BleNet {
       return new NodeIdentification();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.ble.BleNet.internal_static_qaul_net_ble_NodeIdentification_descriptor;
@@ -1932,7 +1924,7 @@ public final class BleNet {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString id_;
+    private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * Node ID
@@ -2055,11 +2047,13 @@ public final class BleNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.ble.BleNet.NodeIdentification parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.ble.BleNet.NodeIdentification parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2138,8 +2132,8 @@ public final class BleNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         id_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -2166,9 +2160,16 @@ public final class BleNet {
       @java.lang.Override
       public qaul.net.ble.BleNet.NodeIdentification buildPartial() {
         qaul.net.ble.BleNet.NodeIdentification result = new qaul.net.ble.BleNet.NodeIdentification(this);
-        result.id_ = id_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.ble.BleNet.NodeIdentification result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
       }
 
       @java.lang.Override
@@ -2246,7 +2247,7 @@ public final class BleNet {
                 break;
               case 10: {
                 id_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -2264,6 +2265,7 @@ public final class BleNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -2288,11 +2290,9 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder setId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         id_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -2305,7 +2305,7 @@ public final class BleNet {
        * @return This builder for chaining.
        */
       public Builder clearId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         id_ = getDefaultInstance().getId();
         onChanged();
         return this;

@@ -138,11 +138,12 @@ public final class BleRpc {
      */
     qaul.rpc.ble.BleRpc.RightsResultOrBuilder getRightsResultOrBuilder();
 
-    public qaul.rpc.ble.BleRpc.Ble.MessageCase getMessageCase();
+    qaul.rpc.ble.BleRpc.Ble.MessageCase getMessageCase();
   }
   /**
    * <pre>
    * BLE RPC Message Container
+   *
    * Union of all messages that can be sent or received
    * via RPC between the UI and libqaul
    * </pre>
@@ -168,11 +169,6 @@ public final class BleRpc {
       return new Ble();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_Ble_descriptor;
@@ -187,6 +183,7 @@ public final class BleRpc {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -714,11 +711,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.Ble parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.Ble parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -763,6 +762,7 @@ public final class BleRpc {
     /**
      * <pre>
      * BLE RPC Message Container
+     *
      * Union of all messages that can be sent or received
      * via RPC between the UI and libqaul
      * </pre>
@@ -799,6 +799,7 @@ public final class BleRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (infoRequestBuilder_ != null) {
           infoRequestBuilder_.clear();
         }
@@ -851,65 +852,51 @@ public final class BleRpc {
       @java.lang.Override
       public qaul.rpc.ble.BleRpc.Ble buildPartial() {
         qaul.rpc.ble.BleRpc.Ble result = new qaul.rpc.ble.BleRpc.Ble(this);
-        if (messageCase_ == 1) {
-          if (infoRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = infoRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (infoResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = infoResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (startRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = startRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (stopRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = stopRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (discoveredRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = discoveredRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (discoveredResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = discoveredResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 7) {
-          if (rightsRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = rightsRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 8) {
-          if (rightsResultBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = rightsResultBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.ble.BleRpc.Ble result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.ble.BleRpc.Ble result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            infoRequestBuilder_ != null) {
+          result.message_ = infoRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            infoResponseBuilder_ != null) {
+          result.message_ = infoResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            startRequestBuilder_ != null) {
+          result.message_ = startRequestBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            stopRequestBuilder_ != null) {
+          result.message_ = stopRequestBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            discoveredRequestBuilder_ != null) {
+          result.message_ = discoveredRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            discoveredResponseBuilder_ != null) {
+          result.message_ = discoveredResponseBuilder_.build();
+        }
+        if (messageCase_ == 7 &&
+            rightsRequestBuilder_ != null) {
+          result.message_ = rightsRequestBuilder_.build();
+        }
+        if (messageCase_ == 8 &&
+            rightsResultBuilder_ != null) {
+          result.message_ = rightsResultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1105,6 +1092,7 @@ public final class BleRpc {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.ble.BleRpc.InfoRequest, qaul.rpc.ble.BleRpc.InfoRequest.Builder, qaul.rpc.ble.BleRpc.InfoRequestOrBuilder> infoRequestBuilder_;
@@ -1244,7 +1232,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return infoRequestBuilder_;
       }
 
@@ -1386,7 +1374,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return infoResponseBuilder_;
       }
 
@@ -1528,7 +1516,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return startRequestBuilder_;
       }
 
@@ -1670,7 +1658,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return stopRequestBuilder_;
       }
 
@@ -1812,7 +1800,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return discoveredRequestBuilder_;
       }
 
@@ -1954,7 +1942,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return discoveredResponseBuilder_;
       }
 
@@ -2096,7 +2084,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 7;
-        onChanged();;
+        onChanged();
         return rightsRequestBuilder_;
       }
 
@@ -2238,7 +2226,7 @@ public final class BleRpc {
           message_ = null;
         }
         messageCase_ = 8;
-        onChanged();;
+        onChanged();
         return rightsResultBuilder_;
       }
       @java.lang.Override
@@ -2335,11 +2323,6 @@ public final class BleRpc {
       return new InfoRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_InfoRequest_descriptor;
@@ -2451,11 +2434,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.InfoRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.InfoRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2760,6 +2745,7 @@ public final class BleRpc {
   /**
    * <pre>
    * BLE Info Response Message
+   *
    * Contains information on the status of the module,
    * as well as all available BLE devices 
    * </pre>
@@ -2788,11 +2774,6 @@ public final class BleRpc {
       return new InfoResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_InfoResponse_descriptor;
@@ -2807,7 +2788,7 @@ public final class BleRpc {
     }
 
     public static final int SMALL_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString smallId_;
+    private com.google.protobuf.ByteString smallId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the small 16 byte BLE id
@@ -2822,7 +2803,8 @@ public final class BleRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 2;
-    private volatile java.lang.Object status_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object status_ = "";
     /**
      * <pre>
      * status of the module
@@ -2868,7 +2850,7 @@ public final class BleRpc {
     }
 
     public static final int DEVICE_INFO_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString deviceInfo_;
+    private com.google.protobuf.ByteString deviceInfo_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * devices
@@ -3012,11 +2994,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.InfoResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.InfoResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3061,6 +3045,7 @@ public final class BleRpc {
     /**
      * <pre>
      * BLE Info Response Message
+     *
      * Contains information on the status of the module,
      * as well as all available BLE devices 
      * </pre>
@@ -3097,12 +3082,10 @@ public final class BleRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         smallId_ = com.google.protobuf.ByteString.EMPTY;
-
         status_ = "";
-
         deviceInfo_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -3129,11 +3112,22 @@ public final class BleRpc {
       @java.lang.Override
       public qaul.rpc.ble.BleRpc.InfoResponse buildPartial() {
         qaul.rpc.ble.BleRpc.InfoResponse result = new qaul.rpc.ble.BleRpc.InfoResponse(this);
-        result.smallId_ = smallId_;
-        result.status_ = status_;
-        result.deviceInfo_ = deviceInfo_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.ble.BleRpc.InfoResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.smallId_ = smallId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.deviceInfo_ = deviceInfo_;
+        }
       }
 
       @java.lang.Override
@@ -3185,6 +3179,7 @@ public final class BleRpc {
         }
         if (!other.getStatus().isEmpty()) {
           status_ = other.status_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getDeviceInfo() != com.google.protobuf.ByteString.EMPTY) {
@@ -3218,17 +3213,17 @@ public final class BleRpc {
                 break;
               case 10: {
                 smallId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 status_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 deviceInfo_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -3246,6 +3241,7 @@ public final class BleRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString smallId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -3270,11 +3266,9 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder setSmallId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         smallId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3287,7 +3281,7 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearSmallId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         smallId_ = getDefaultInstance().getSmallId();
         onChanged();
         return this;
@@ -3346,11 +3340,9 @@ public final class BleRpc {
        */
       public Builder setStatus(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         status_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3363,8 +3355,8 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
         status_ = getDefaultInstance().getStatus();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -3379,12 +3371,10 @@ public final class BleRpc {
        */
       public Builder setStatusBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         status_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3412,11 +3402,9 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder setDeviceInfo(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         deviceInfo_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3429,7 +3417,7 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearDeviceInfo() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         deviceInfo_ = getDefaultInstance().getDeviceInfo();
         onChanged();
         return this;
@@ -3505,7 +3493,9 @@ public final class BleRpc {
   /**
    * <pre>
    * Request BLE module to start
+   *
    * Start message sent from UI to libqaul.
+   *
    * This message only has an effect if the module
    * has not already started.
    * </pre>
@@ -3531,11 +3521,6 @@ public final class BleRpc {
       return new StartRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_StartRequest_descriptor;
@@ -3647,11 +3632,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.StartRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.StartRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3696,7 +3683,9 @@ public final class BleRpc {
     /**
      * <pre>
      * Request BLE module to start
+     *
      * Start message sent from UI to libqaul.
+     *
      * This message only has an effect if the module
      * has not already started.
      * </pre>
@@ -3919,7 +3908,9 @@ public final class BleRpc {
   /**
    * <pre>
    * Request BLE module to stop
+   *
    * Stop message sent from UI to libqaul.
+   *
    * This message only has an effect if the module
    * was started earlier and is running.
    * </pre>
@@ -3945,11 +3936,6 @@ public final class BleRpc {
       return new StopRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_StopRequest_descriptor;
@@ -4061,11 +4047,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.StopRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.StopRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4110,7 +4098,9 @@ public final class BleRpc {
     /**
      * <pre>
      * Request BLE module to stop
+     *
      * Stop message sent from UI to libqaul.
+     *
      * This message only has an effect if the module
      * was started earlier and is running.
      * </pre>
@@ -4333,6 +4323,7 @@ public final class BleRpc {
   /**
    * <pre>
    * Request Discovered Nodes on BLE
+   *
    * Message sent from UI to libqaul.
    * </pre>
    *
@@ -4357,11 +4348,6 @@ public final class BleRpc {
       return new DiscoveredRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_DiscoveredRequest_descriptor;
@@ -4473,11 +4459,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.DiscoveredRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.DiscoveredRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4522,6 +4510,7 @@ public final class BleRpc {
     /**
      * <pre>
      * Request Discovered Nodes on BLE
+     *
      * Message sent from UI to libqaul.
      * </pre>
      *
@@ -4763,6 +4752,7 @@ public final class BleRpc {
   /**
    * <pre>
    * All Discovered Nodes
+   *
    * Answer from libqaul to UI on DiscoveredRequest
    * </pre>
    *
@@ -4787,11 +4777,6 @@ public final class BleRpc {
       return new DiscoveredResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_DiscoveredResponse_descriptor;
@@ -4806,7 +4791,7 @@ public final class BleRpc {
     }
 
     public static final int NODES_COUNT_FIELD_NUMBER = 1;
-    private int nodesCount_;
+    private int nodesCount_ = 0;
     /**
      * <pre>
      * number of nodes in discovery table
@@ -4821,7 +4806,7 @@ public final class BleRpc {
     }
 
     public static final int TO_CONFIRM_COUNT_FIELD_NUMBER = 2;
-    private int toConfirmCount_;
+    private int toConfirmCount_ = 0;
     /**
      * <pre>
      * number of nodes in to_confirm table
@@ -4955,11 +4940,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.DiscoveredResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.DiscoveredResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5004,6 +4991,7 @@ public final class BleRpc {
     /**
      * <pre>
      * All Discovered Nodes
+     *
      * Answer from libqaul to UI on DiscoveredRequest
      * </pre>
      *
@@ -5039,10 +5027,9 @@ public final class BleRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         nodesCount_ = 0;
-
         toConfirmCount_ = 0;
-
         return this;
       }
 
@@ -5069,10 +5056,19 @@ public final class BleRpc {
       @java.lang.Override
       public qaul.rpc.ble.BleRpc.DiscoveredResponse buildPartial() {
         qaul.rpc.ble.BleRpc.DiscoveredResponse result = new qaul.rpc.ble.BleRpc.DiscoveredResponse(this);
-        result.nodesCount_ = nodesCount_;
-        result.toConfirmCount_ = toConfirmCount_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.ble.BleRpc.DiscoveredResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.nodesCount_ = nodesCount_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.toConfirmCount_ = toConfirmCount_;
+        }
       }
 
       @java.lang.Override
@@ -5153,12 +5149,12 @@ public final class BleRpc {
                 break;
               case 8: {
                 nodesCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 toConfirmCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -5176,6 +5172,7 @@ public final class BleRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int nodesCount_ ;
       /**
@@ -5200,8 +5197,9 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder setNodesCount(int value) {
-        
+
         nodesCount_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5214,7 +5212,7 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearNodesCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         nodesCount_ = 0;
         onChanged();
         return this;
@@ -5243,8 +5241,9 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder setToConfirmCount(int value) {
-        
+
         toConfirmCount_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5257,7 +5256,7 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearToConfirmCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         toConfirmCount_ = 0;
         onChanged();
         return this;
@@ -5356,11 +5355,6 @@ public final class BleRpc {
       return new RightsRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsRequest_descriptor;
@@ -5472,11 +5466,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.RightsRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.RightsRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5770,11 +5766,6 @@ public final class BleRpc {
       return new RightsResult();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.ble.BleRpc.internal_static_qaul_rpc_ble_RightsResult_descriptor;
@@ -5789,7 +5780,7 @@ public final class BleRpc {
     }
 
     public static final int RIGHTS_GRANTED_FIELD_NUMBER = 1;
-    private boolean rightsGranted_;
+    private boolean rightsGranted_ = false;
     /**
      * <code>bool rights_granted = 1;</code>
      * @return The rightsGranted.
@@ -5909,11 +5900,13 @@ public final class BleRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.ble.BleRpc.RightsResult parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.ble.BleRpc.RightsResult parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5992,8 +5985,8 @@ public final class BleRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         rightsGranted_ = false;
-
         return this;
       }
 
@@ -6020,9 +6013,16 @@ public final class BleRpc {
       @java.lang.Override
       public qaul.rpc.ble.BleRpc.RightsResult buildPartial() {
         qaul.rpc.ble.BleRpc.RightsResult result = new qaul.rpc.ble.BleRpc.RightsResult(this);
-        result.rightsGranted_ = rightsGranted_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.ble.BleRpc.RightsResult result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.rightsGranted_ = rightsGranted_;
+        }
       }
 
       @java.lang.Override
@@ -6100,7 +6100,7 @@ public final class BleRpc {
                 break;
               case 8: {
                 rightsGranted_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               default: {
@@ -6118,6 +6118,7 @@ public final class BleRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean rightsGranted_ ;
       /**
@@ -6134,8 +6135,9 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder setRightsGranted(boolean value) {
-        
+
         rightsGranted_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6144,7 +6146,7 @@ public final class BleRpc {
        * @return This builder for chaining.
        */
       public Builder clearRightsGranted() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         rightsGranted_ = false;
         onChanged();
         return this;

@@ -72,7 +72,7 @@ public final class ChatfileNet {
      */
     qaul.net.chatfile.ChatfileNet.ChatFileDataOrBuilder getFileDataOrBuilder();
 
-    public qaul.net.chatfile.ChatfileNet.ChatFileContainer.MessageCase getMessageCase();
+    qaul.net.chatfile.ChatfileNet.ChatFileContainer.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -100,11 +100,6 @@ public final class ChatfileNet {
       return new ChatFileContainer();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.chatfile.ChatfileNet.internal_static_qaul_net_chatfile_ChatFileContainer_descriptor;
@@ -119,6 +114,7 @@ public final class ChatfileNet {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -382,11 +378,13 @@ public final class ChatfileNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileContainer parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileContainer parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -465,6 +463,7 @@ public final class ChatfileNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (fileInfoBuilder_ != null) {
           fileInfoBuilder_.clear();
         }
@@ -499,23 +498,27 @@ public final class ChatfileNet {
       @java.lang.Override
       public qaul.net.chatfile.ChatfileNet.ChatFileContainer buildPartial() {
         qaul.net.chatfile.ChatfileNet.ChatFileContainer result = new qaul.net.chatfile.ChatfileNet.ChatFileContainer(this);
-        if (messageCase_ == 1) {
-          if (fileInfoBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = fileInfoBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (fileDataBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = fileDataBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.chatfile.ChatfileNet.ChatFileContainer result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.net.chatfile.ChatfileNet.ChatFileContainer result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            fileInfoBuilder_ != null) {
+          result.message_ = fileInfoBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            fileDataBuilder_ != null) {
+          result.message_ = fileDataBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -645,6 +648,7 @@ public final class ChatfileNet {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.net.chatfile.ChatfileNet.ChatFileInfo, qaul.net.chatfile.ChatfileNet.ChatFileInfo.Builder, qaul.net.chatfile.ChatfileNet.ChatFileInfoOrBuilder> fileInfoBuilder_;
@@ -820,7 +824,7 @@ public final class ChatfileNet {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return fileInfoBuilder_;
       }
 
@@ -998,7 +1002,7 @@ public final class ChatfileNet {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return fileDataBuilder_;
       }
       @java.lang.Override
@@ -1209,11 +1213,6 @@ public final class ChatfileNet {
       return new ChatFileInfo();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.chatfile.ChatfileNet.internal_static_qaul_net_chatfile_ChatFileInfo_descriptor;
@@ -1228,7 +1227,7 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_ID_FIELD_NUMBER = 1;
-    private long fileId_;
+    private long fileId_ = 0L;
     /**
      * <pre>
      * file id
@@ -1243,7 +1242,8 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object fileName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileName_ = "";
     /**
      * <pre>
      * file name
@@ -1289,7 +1289,8 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_EXTENSION_FIELD_NUMBER = 3;
-    private volatile java.lang.Object fileExtension_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileExtension_ = "";
     /**
      * <pre>
      * file extension
@@ -1335,7 +1336,7 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_SIZE_FIELD_NUMBER = 4;
-    private int fileSize_;
+    private int fileSize_ = 0;
     /**
      * <pre>
      * file size
@@ -1350,7 +1351,8 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_DESCRIPTION_FIELD_NUMBER = 5;
-    private volatile java.lang.Object fileDescription_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object fileDescription_ = "";
     /**
      * <pre>
      * file description
@@ -1396,7 +1398,7 @@ public final class ChatfileNet {
     }
 
     public static final int START_INDEX_FIELD_NUMBER = 6;
-    private int startIndex_;
+    private int startIndex_ = 0;
     /**
      * <pre>
      * DEPRECATED: What is this used for?
@@ -1412,7 +1414,7 @@ public final class ChatfileNet {
     }
 
     public static final int MESSAGE_COUNT_FIELD_NUMBER = 7;
-    private int messageCount_;
+    private int messageCount_ = 0;
     /**
      * <pre>
      * message count
@@ -1427,7 +1429,7 @@ public final class ChatfileNet {
     }
 
     public static final int DATA_CHUNK_SIZE_FIELD_NUMBER = 8;
-    private int dataChunkSize_;
+    private int dataChunkSize_ = 0;
     /**
      * <pre>
      * file data chunk size
@@ -1625,11 +1627,13 @@ public final class ChatfileNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1708,22 +1712,15 @@ public final class ChatfileNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         fileId_ = 0L;
-
         fileName_ = "";
-
         fileExtension_ = "";
-
         fileSize_ = 0;
-
         fileDescription_ = "";
-
         startIndex_ = 0;
-
         messageCount_ = 0;
-
         dataChunkSize_ = 0;
-
         return this;
       }
 
@@ -1750,16 +1747,37 @@ public final class ChatfileNet {
       @java.lang.Override
       public qaul.net.chatfile.ChatfileNet.ChatFileInfo buildPartial() {
         qaul.net.chatfile.ChatfileNet.ChatFileInfo result = new qaul.net.chatfile.ChatfileNet.ChatFileInfo(this);
-        result.fileId_ = fileId_;
-        result.fileName_ = fileName_;
-        result.fileExtension_ = fileExtension_;
-        result.fileSize_ = fileSize_;
-        result.fileDescription_ = fileDescription_;
-        result.startIndex_ = startIndex_;
-        result.messageCount_ = messageCount_;
-        result.dataChunkSize_ = dataChunkSize_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.chatfile.ChatfileNet.ChatFileInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.fileId_ = fileId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.fileName_ = fileName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.fileExtension_ = fileExtension_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.fileSize_ = fileSize_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.fileDescription_ = fileDescription_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.startIndex_ = startIndex_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.messageCount_ = messageCount_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.dataChunkSize_ = dataChunkSize_;
+        }
       }
 
       @java.lang.Override
@@ -1811,10 +1829,12 @@ public final class ChatfileNet {
         }
         if (!other.getFileName().isEmpty()) {
           fileName_ = other.fileName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (!other.getFileExtension().isEmpty()) {
           fileExtension_ = other.fileExtension_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getFileSize() != 0) {
@@ -1822,6 +1842,7 @@ public final class ChatfileNet {
         }
         if (!other.getFileDescription().isEmpty()) {
           fileDescription_ = other.fileDescription_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (other.getStartIndex() != 0) {
@@ -1861,42 +1882,42 @@ public final class ChatfileNet {
                 break;
               case 8: {
                 fileId_ = input.readUInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 fileName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 fileExtension_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 fileSize_ = input.readUInt32();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 42: {
                 fileDescription_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 48: {
                 startIndex_ = input.readUInt32();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 48
               case 56: {
                 messageCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000040;
                 break;
               } // case 56
               case 64: {
                 dataChunkSize_ = input.readUInt32();
-
+                bitField0_ |= 0x00000080;
                 break;
               } // case 64
               default: {
@@ -1914,6 +1935,7 @@ public final class ChatfileNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long fileId_ ;
       /**
@@ -1938,8 +1960,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setFileId(long value) {
-        
+
         fileId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1952,7 +1975,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         fileId_ = 0L;
         onChanged();
         return this;
@@ -2011,11 +2034,9 @@ public final class ChatfileNet {
        */
       public Builder setFileName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -2028,8 +2049,8 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileName() {
-        
         fileName_ = getDefaultInstance().getFileName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -2044,12 +2065,10 @@ public final class ChatfileNet {
        */
       public Builder setFileNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -2107,11 +2126,9 @@ public final class ChatfileNet {
        */
       public Builder setFileExtension(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileExtension_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -2124,8 +2141,8 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileExtension() {
-        
         fileExtension_ = getDefaultInstance().getFileExtension();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -2140,12 +2157,10 @@ public final class ChatfileNet {
        */
       public Builder setFileExtensionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileExtension_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -2173,8 +2188,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setFileSize(int value) {
-        
+
         fileSize_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -2187,7 +2203,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         fileSize_ = 0;
         onChanged();
         return this;
@@ -2246,11 +2262,9 @@ public final class ChatfileNet {
        */
       public Builder setFileDescription(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         fileDescription_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -2263,8 +2277,8 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileDescription() {
-        
         fileDescription_ = getDefaultInstance().getFileDescription();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -2279,12 +2293,10 @@ public final class ChatfileNet {
        */
       public Builder setFileDescriptionBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         fileDescription_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -2314,8 +2326,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setStartIndex(int value) {
-        
+
         startIndex_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -2329,7 +2342,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearStartIndex() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         startIndex_ = 0;
         onChanged();
         return this;
@@ -2358,8 +2371,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setMessageCount(int value) {
-        
+
         messageCount_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -2372,7 +2386,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearMessageCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000040);
         messageCount_ = 0;
         onChanged();
         return this;
@@ -2401,8 +2415,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setDataChunkSize(int value) {
-        
+
         dataChunkSize_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -2415,7 +2430,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearDataChunkSize() {
-        
+        bitField0_ = (bitField0_ & ~0x00000080);
         dataChunkSize_ = 0;
         onChanged();
         return this;
@@ -2555,11 +2570,6 @@ public final class ChatfileNet {
       return new ChatFileData();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.chatfile.ChatfileNet.internal_static_qaul_net_chatfile_ChatFileData_descriptor;
@@ -2574,7 +2584,7 @@ public final class ChatfileNet {
     }
 
     public static final int FILE_ID_FIELD_NUMBER = 1;
-    private long fileId_;
+    private long fileId_ = 0L;
     /**
      * <pre>
      * file id
@@ -2589,7 +2599,7 @@ public final class ChatfileNet {
     }
 
     public static final int START_INDEX_FIELD_NUMBER = 2;
-    private int startIndex_;
+    private int startIndex_ = 0;
     /**
      * <pre>
      * start index
@@ -2604,7 +2614,7 @@ public final class ChatfileNet {
     }
 
     public static final int MESSAGE_COUNT_FIELD_NUMBER = 3;
-    private int messageCount_;
+    private int messageCount_ = 0;
     /**
      * <pre>
      * message count
@@ -2619,7 +2629,7 @@ public final class ChatfileNet {
     }
 
     public static final int DATA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString data_;
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * package data
@@ -2776,11 +2786,13 @@ public final class ChatfileNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileData parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.chatfile.ChatfileNet.ChatFileData parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2859,14 +2871,11 @@ public final class ChatfileNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         fileId_ = 0L;
-
         startIndex_ = 0;
-
         messageCount_ = 0;
-
         data_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -2893,12 +2902,25 @@ public final class ChatfileNet {
       @java.lang.Override
       public qaul.net.chatfile.ChatfileNet.ChatFileData buildPartial() {
         qaul.net.chatfile.ChatfileNet.ChatFileData result = new qaul.net.chatfile.ChatfileNet.ChatFileData(this);
-        result.fileId_ = fileId_;
-        result.startIndex_ = startIndex_;
-        result.messageCount_ = messageCount_;
-        result.data_ = data_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.chatfile.ChatfileNet.ChatFileData result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.fileId_ = fileId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.startIndex_ = startIndex_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.messageCount_ = messageCount_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.data_ = data_;
+        }
       }
 
       @java.lang.Override
@@ -2985,22 +3007,22 @@ public final class ChatfileNet {
                 break;
               case 8: {
                 fileId_ = input.readUInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 startIndex_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
                 messageCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 34: {
                 data_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               default: {
@@ -3018,6 +3040,7 @@ public final class ChatfileNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long fileId_ ;
       /**
@@ -3042,8 +3065,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setFileId(long value) {
-        
+
         fileId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3056,7 +3080,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearFileId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         fileId_ = 0L;
         onChanged();
         return this;
@@ -3085,8 +3109,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setStartIndex(int value) {
-        
+
         startIndex_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3099,7 +3124,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearStartIndex() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         startIndex_ = 0;
         onChanged();
         return this;
@@ -3128,8 +3153,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setMessageCount(int value) {
-        
+
         messageCount_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3142,7 +3168,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearMessageCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         messageCount_ = 0;
         onChanged();
         return this;
@@ -3171,11 +3197,9 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         data_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -3188,7 +3212,7 @@ public final class ChatfileNet {
        * @return This builder for chaining.
        */
       public Builder clearData() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;

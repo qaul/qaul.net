@@ -247,7 +247,7 @@ public final class RouterOuterClass {
      */
     qaul.rpc.router.RouterOuterClass.NeighboursListOrBuilder getNeighboursListOrBuilder();
 
-    public qaul.rpc.router.RouterOuterClass.Router.MessageCase getMessageCase();
+    qaul.rpc.router.RouterOuterClass.Router.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -275,11 +275,6 @@ public final class RouterOuterClass {
       return new Router();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_Router_descriptor;
@@ -294,6 +289,7 @@ public final class RouterOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -725,11 +721,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.Router parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.Router parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -808,6 +806,7 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (routingTableRequestBuilder_ != null) {
           routingTableRequestBuilder_.clear();
         }
@@ -854,51 +853,43 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.Router buildPartial() {
         qaul.rpc.router.RouterOuterClass.Router result = new qaul.rpc.router.RouterOuterClass.Router(this);
-        if (messageCase_ == 1) {
-          if (routingTableRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = routingTableRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (routingTableBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = routingTableBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (connectionsRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = connectionsRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (connectionsListBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = connectionsListBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (neighboursRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = neighboursRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (neighboursListBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = neighboursListBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.Router result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.router.RouterOuterClass.Router result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            routingTableRequestBuilder_ != null) {
+          result.message_ = routingTableRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            routingTableBuilder_ != null) {
+          result.message_ = routingTableBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            connectionsRequestBuilder_ != null) {
+          result.message_ = connectionsRequestBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            connectionsListBuilder_ != null) {
+          result.message_ = connectionsListBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            neighboursRequestBuilder_ != null) {
+          result.message_ = neighboursRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            neighboursListBuilder_ != null) {
+          result.message_ = neighboursListBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1072,6 +1063,7 @@ public final class RouterOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.router.RouterOuterClass.RoutingTableRequest, qaul.rpc.router.RouterOuterClass.RoutingTableRequest.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableRequestOrBuilder> routingTableRequestBuilder_;
@@ -1211,7 +1203,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return routingTableRequestBuilder_;
       }
 
@@ -1353,7 +1345,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return routingTableBuilder_;
       }
 
@@ -1495,7 +1487,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return connectionsRequestBuilder_;
       }
 
@@ -1637,7 +1629,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return connectionsListBuilder_;
       }
 
@@ -1779,7 +1771,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return neighboursRequestBuilder_;
       }
 
@@ -1921,7 +1913,7 @@ public final class RouterOuterClass {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return neighboursListBuilder_;
       }
       @java.lang.Override
@@ -2018,11 +2010,6 @@ public final class RouterOuterClass {
       return new RoutingTableRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableRequest_descriptor;
@@ -2134,11 +2121,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2454,11 +2443,6 @@ public final class RouterOuterClass {
       return new RoutingTableList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableList_descriptor;
@@ -2473,6 +2457,7 @@ public final class RouterOuterClass {
     }
 
     public static final int ROUTING_TABLE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableEntry> routingTable_;
     /**
      * <code>repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;</code>
@@ -2623,11 +2608,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2709,6 +2696,7 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (routingTableBuilder_ == null) {
           routingTable_ = java.util.Collections.emptyList();
         } else {
@@ -2742,7 +2730,13 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.RoutingTableList buildPartial() {
         qaul.rpc.router.RouterOuterClass.RoutingTableList result = new qaul.rpc.router.RouterOuterClass.RoutingTableList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.router.RouterOuterClass.RoutingTableList result) {
         if (routingTableBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             routingTable_ = java.util.Collections.unmodifiableList(routingTable_);
@@ -2752,8 +2746,10 @@ public final class RouterOuterClass {
         } else {
           result.routingTable_ = routingTableBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.RoutingTableList result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -3249,11 +3245,6 @@ public final class RouterOuterClass {
       return new RoutingTableEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableEntry_descriptor;
@@ -3268,7 +3259,7 @@ public final class RouterOuterClass {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes user_id = 1;</code>
      * @return The userId.
@@ -3279,6 +3270,7 @@ public final class RouterOuterClass {
     }
 
     public static final int CONNECTIONS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> connections_;
     /**
      * <code>repeated .qaul.rpc.router.RoutingTableConnection connections = 2;</code>
@@ -3440,11 +3432,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3525,15 +3519,15 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
         } else {
           connections_ = null;
           connectionsBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -3560,19 +3554,29 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.RoutingTableEntry buildPartial() {
         qaul.rpc.router.RouterOuterClass.RoutingTableEntry result = new qaul.rpc.router.RouterOuterClass.RoutingTableEntry(this);
-        int from_bitField0_ = bitField0_;
-        result.userId_ = userId_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.router.RouterOuterClass.RoutingTableEntry result) {
         if (connectionsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             connections_ = java.util.Collections.unmodifiableList(connections_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.connections_ = connections_;
         } else {
           result.connections_ = connectionsBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.RoutingTableEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -3626,7 +3630,7 @@ public final class RouterOuterClass {
           if (!other.connections_.isEmpty()) {
             if (connections_.isEmpty()) {
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureConnectionsIsMutable();
               connections_.addAll(other.connections_);
@@ -3639,7 +3643,7 @@ public final class RouterOuterClass {
               connectionsBuilder_.dispose();
               connectionsBuilder_ = null;
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
               connectionsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getConnectionsFieldBuilder() : null;
@@ -3676,7 +3680,7 @@ public final class RouterOuterClass {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
@@ -3724,11 +3728,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3737,7 +3739,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -3746,9 +3748,9 @@ public final class RouterOuterClass {
       private java.util.List<qaul.rpc.router.RouterOuterClass.RoutingTableConnection> connections_ =
         java.util.Collections.emptyList();
       private void ensureConnectionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.RoutingTableConnection>(connections_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -3898,7 +3900,7 @@ public final class RouterOuterClass {
       public Builder clearConnections() {
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           connectionsBuilder_.clear();
@@ -3975,7 +3977,7 @@ public final class RouterOuterClass {
           connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.rpc.router.RouterOuterClass.RoutingTableConnection, qaul.rpc.router.RouterOuterClass.RoutingTableConnection.Builder, qaul.rpc.router.RouterOuterClass.RoutingTableConnectionOrBuilder>(
                   connections_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           connections_ = null;
@@ -4128,11 +4130,6 @@ public final class RouterOuterClass {
       return new RoutingTableConnection();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_RoutingTableConnection_descriptor;
@@ -4147,7 +4144,7 @@ public final class RouterOuterClass {
     }
 
     public static final int MODULE_FIELD_NUMBER = 2;
-    private int module_;
+    private int module_ = 0;
     /**
      * <pre>
      * the connection module (LAN, Internet, BLE, etc.)
@@ -4168,13 +4165,12 @@ public final class RouterOuterClass {
      * @return The module.
      */
     @java.lang.Override public qaul.rpc.router.RouterOuterClass.ConnectionModule getModule() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.valueOf(module_);
+      qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.forNumber(module_);
       return result == null ? qaul.rpc.router.RouterOuterClass.ConnectionModule.UNRECOGNIZED : result;
     }
 
     public static final int RTT_FIELD_NUMBER = 3;
-    private int rtt_;
+    private int rtt_ = 0;
     /**
      * <pre>
      * the round trip time for this connection
@@ -4189,7 +4185,7 @@ public final class RouterOuterClass {
     }
 
     public static final int HOP_COUNT_FIELD_NUMBER = 5;
-    private int hopCount_;
+    private int hopCount_ = 0;
     /**
      * <pre>
      * hop count
@@ -4204,7 +4200,7 @@ public final class RouterOuterClass {
     }
 
     public static final int VIA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString via_;
+    private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * node id via which this connection is routed
@@ -4359,11 +4355,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.RoutingTableConnection parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4443,14 +4441,11 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         module_ = 0;
-
         rtt_ = 0;
-
         hopCount_ = 0;
-
         via_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -4477,12 +4472,25 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.RoutingTableConnection buildPartial() {
         qaul.rpc.router.RouterOuterClass.RoutingTableConnection result = new qaul.rpc.router.RouterOuterClass.RoutingTableConnection(this);
-        result.module_ = module_;
-        result.rtt_ = rtt_;
-        result.hopCount_ = hopCount_;
-        result.via_ = via_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.RoutingTableConnection result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.module_ = module_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.rtt_ = rtt_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.hopCount_ = hopCount_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.via_ = via_;
+        }
       }
 
       @java.lang.Override
@@ -4569,22 +4577,22 @@ public final class RouterOuterClass {
                 break;
               case 16: {
                 module_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 16
               case 24: {
                 rtt_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 24
               case 34: {
                 via_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 40: {
                 hopCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 40
               default: {
@@ -4602,6 +4610,7 @@ public final class RouterOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int module_ = 0;
       /**
@@ -4625,8 +4634,8 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setModuleValue(int value) {
-        
         module_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4640,8 +4649,7 @@ public final class RouterOuterClass {
        */
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.ConnectionModule getModule() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.valueOf(module_);
+        qaul.rpc.router.RouterOuterClass.ConnectionModule result = qaul.rpc.router.RouterOuterClass.ConnectionModule.forNumber(module_);
         return result == null ? qaul.rpc.router.RouterOuterClass.ConnectionModule.UNRECOGNIZED : result;
       }
       /**
@@ -4657,7 +4665,7 @@ public final class RouterOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         module_ = value.getNumber();
         onChanged();
         return this;
@@ -4671,7 +4679,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearModule() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         module_ = 0;
         onChanged();
         return this;
@@ -4700,8 +4708,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setRtt(int value) {
-        
+
         rtt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4714,7 +4723,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRtt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         rtt_ = 0;
         onChanged();
         return this;
@@ -4743,8 +4752,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setHopCount(int value) {
-        
+
         hopCount_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -4757,7 +4767,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearHopCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         hopCount_ = 0;
         onChanged();
         return this;
@@ -4786,11 +4796,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVia(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         via_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -4803,7 +4811,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVia() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         via_ = getDefaultInstance().getVia();
         onChanged();
         return this;
@@ -4902,11 +4910,6 @@ public final class RouterOuterClass {
       return new ConnectionsRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsRequest_descriptor;
@@ -5018,11 +5021,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5491,11 +5496,6 @@ public final class RouterOuterClass {
       return new ConnectionsList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsList_descriptor;
@@ -5510,6 +5510,7 @@ public final class RouterOuterClass {
     }
 
     public static final int LAN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> lan_;
     /**
      * <pre>
@@ -5570,6 +5571,7 @@ public final class RouterOuterClass {
     }
 
     public static final int INTERNET_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> internet_;
     /**
      * <pre>
@@ -5630,6 +5632,7 @@ public final class RouterOuterClass {
     }
 
     public static final int BLE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> ble_;
     /**
      * <pre>
@@ -5690,6 +5693,7 @@ public final class RouterOuterClass {
     }
 
     public static final int LOCAL_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry> local_;
     /**
      * <pre>
@@ -5899,11 +5903,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5983,6 +5989,7 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (lanBuilder_ == null) {
           lan_ = java.util.Collections.emptyList();
         } else {
@@ -6037,7 +6044,13 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.ConnectionsList buildPartial() {
         qaul.rpc.router.RouterOuterClass.ConnectionsList result = new qaul.rpc.router.RouterOuterClass.ConnectionsList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.router.RouterOuterClass.ConnectionsList result) {
         if (lanBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             lan_ = java.util.Collections.unmodifiableList(lan_);
@@ -6074,8 +6087,10 @@ public final class RouterOuterClass {
         } else {
           result.local_ = localBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.ConnectionsList result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -7718,11 +7733,6 @@ public final class RouterOuterClass {
       return new ConnectionsUserEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionsUserEntry_descriptor;
@@ -7737,7 +7747,7 @@ public final class RouterOuterClass {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the id of the user
@@ -7752,6 +7762,7 @@ public final class RouterOuterClass {
     }
 
     public static final int CONNECTIONS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> connections_;
     /**
      * <pre>
@@ -7933,11 +7944,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8016,15 +8029,15 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
         } else {
           connections_ = null;
           connectionsBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -8051,19 +8064,29 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry buildPartial() {
         qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry result = new qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry(this);
-        int from_bitField0_ = bitField0_;
-        result.userId_ = userId_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry result) {
         if (connectionsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             connections_ = java.util.Collections.unmodifiableList(connections_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.connections_ = connections_;
         } else {
           result.connections_ = connectionsBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.ConnectionsUserEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -8117,7 +8140,7 @@ public final class RouterOuterClass {
           if (!other.connections_.isEmpty()) {
             if (connections_.isEmpty()) {
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureConnectionsIsMutable();
               connections_.addAll(other.connections_);
@@ -8130,7 +8153,7 @@ public final class RouterOuterClass {
               connectionsBuilder_.dispose();
               connectionsBuilder_ = null;
               connections_ = other.connections_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
               connectionsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getConnectionsFieldBuilder() : null;
@@ -8167,7 +8190,7 @@ public final class RouterOuterClass {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
@@ -8223,11 +8246,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8240,7 +8261,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -8249,9 +8270,9 @@ public final class RouterOuterClass {
       private java.util.List<qaul.rpc.router.RouterOuterClass.ConnectionEntry> connections_ =
         java.util.Collections.emptyList();
       private void ensureConnectionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           connections_ = new java.util.ArrayList<qaul.rpc.router.RouterOuterClass.ConnectionEntry>(connections_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -8445,7 +8466,7 @@ public final class RouterOuterClass {
       public Builder clearConnections() {
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           connectionsBuilder_.clear();
@@ -8550,7 +8571,7 @@ public final class RouterOuterClass {
           connectionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.rpc.router.RouterOuterClass.ConnectionEntry, qaul.rpc.router.RouterOuterClass.ConnectionEntry.Builder, qaul.rpc.router.RouterOuterClass.ConnectionEntryOrBuilder>(
                   connections_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           connections_ = null;
@@ -8683,11 +8704,6 @@ public final class RouterOuterClass {
       return new ConnectionEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_ConnectionEntry_descriptor;
@@ -8702,7 +8718,7 @@ public final class RouterOuterClass {
     }
 
     public static final int RTT_FIELD_NUMBER = 1;
-    private int rtt_;
+    private int rtt_ = 0;
     /**
      * <pre>
      * round trip time in milli seconds
@@ -8717,7 +8733,7 @@ public final class RouterOuterClass {
     }
 
     public static final int HOP_COUNT_FIELD_NUMBER = 2;
-    private int hopCount_;
+    private int hopCount_ = 0;
     /**
      * <pre>
      * hop count to the user.
@@ -8733,7 +8749,7 @@ public final class RouterOuterClass {
     }
 
     public static final int VIA_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString via_;
+    private com.google.protobuf.ByteString via_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * connection can be established via the node with the following id
@@ -8878,11 +8894,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.ConnectionEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8961,12 +8979,10 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         rtt_ = 0;
-
         hopCount_ = 0;
-
         via_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -8993,11 +9009,22 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.ConnectionEntry buildPartial() {
         qaul.rpc.router.RouterOuterClass.ConnectionEntry result = new qaul.rpc.router.RouterOuterClass.ConnectionEntry(this);
-        result.rtt_ = rtt_;
-        result.hopCount_ = hopCount_;
-        result.via_ = via_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.ConnectionEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.rtt_ = rtt_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.hopCount_ = hopCount_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.via_ = via_;
+        }
       }
 
       @java.lang.Override
@@ -9081,17 +9108,17 @@ public final class RouterOuterClass {
                 break;
               case 8: {
                 rtt_ = input.readUInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 hopCount_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 via_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -9109,6 +9136,7 @@ public final class RouterOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int rtt_ ;
       /**
@@ -9133,8 +9161,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setRtt(int value) {
-        
+
         rtt_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9147,7 +9176,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRtt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         rtt_ = 0;
         onChanged();
         return this;
@@ -9178,8 +9207,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setHopCount(int value) {
-        
+
         hopCount_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9193,7 +9223,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearHopCount() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         hopCount_ = 0;
         onChanged();
         return this;
@@ -9222,11 +9252,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVia(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         via_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -9239,7 +9267,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVia() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         via_ = getDefaultInstance().getVia();
         onChanged();
         return this;
@@ -9338,11 +9366,6 @@ public final class RouterOuterClass {
       return new NeighboursRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursRequest_descriptor;
@@ -9454,11 +9477,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -9821,11 +9846,6 @@ public final class RouterOuterClass {
       return new NeighboursList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursList_descriptor;
@@ -9840,6 +9860,7 @@ public final class RouterOuterClass {
     }
 
     public static final int LAN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> lan_;
     /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry lan = 1;</code>
@@ -9880,6 +9901,7 @@ public final class RouterOuterClass {
     }
 
     public static final int INTERNET_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> internet_;
     /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry internet = 2;</code>
@@ -9920,6 +9942,7 @@ public final class RouterOuterClass {
     }
 
     public static final int BLE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.router.RouterOuterClass.NeighboursEntry> ble_;
     /**
      * <code>repeated .qaul.rpc.router.NeighboursEntry ble = 3;</code>
@@ -10096,11 +10119,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10179,6 +10204,7 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (lanBuilder_ == null) {
           lan_ = java.util.Collections.emptyList();
         } else {
@@ -10226,7 +10252,13 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.NeighboursList buildPartial() {
         qaul.rpc.router.RouterOuterClass.NeighboursList result = new qaul.rpc.router.RouterOuterClass.NeighboursList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.router.RouterOuterClass.NeighboursList result) {
         if (lanBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             lan_ = java.util.Collections.unmodifiableList(lan_);
@@ -10254,8 +10286,10 @@ public final class RouterOuterClass {
         } else {
           result.ble_ = bleBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.NeighboursList result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -11296,11 +11330,6 @@ public final class RouterOuterClass {
       return new NeighboursEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.router.RouterOuterClass.internal_static_qaul_rpc_router_NeighboursEntry_descriptor;
@@ -11315,7 +11344,7 @@ public final class RouterOuterClass {
     }
 
     public static final int NODE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString nodeId_;
+    private com.google.protobuf.ByteString nodeId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the ID of the neighbour node
@@ -11330,7 +11359,7 @@ public final class RouterOuterClass {
     }
 
     public static final int RTT_FIELD_NUMBER = 2;
-    private int rtt_;
+    private int rtt_ = 0;
     /**
      * <pre>
      * rtt to this neighbour
@@ -11464,11 +11493,13 @@ public final class RouterOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.router.RouterOuterClass.NeighboursEntry parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -11547,10 +11578,9 @@ public final class RouterOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         nodeId_ = com.google.protobuf.ByteString.EMPTY;
-
         rtt_ = 0;
-
         return this;
       }
 
@@ -11577,10 +11607,19 @@ public final class RouterOuterClass {
       @java.lang.Override
       public qaul.rpc.router.RouterOuterClass.NeighboursEntry buildPartial() {
         qaul.rpc.router.RouterOuterClass.NeighboursEntry result = new qaul.rpc.router.RouterOuterClass.NeighboursEntry(this);
-        result.nodeId_ = nodeId_;
-        result.rtt_ = rtt_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.router.RouterOuterClass.NeighboursEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.nodeId_ = nodeId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.rtt_ = rtt_;
+        }
       }
 
       @java.lang.Override
@@ -11661,12 +11700,12 @@ public final class RouterOuterClass {
                 break;
               case 10: {
                 nodeId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 rtt_ = input.readUInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -11684,6 +11723,7 @@ public final class RouterOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString nodeId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11708,11 +11748,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setNodeId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         nodeId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11725,7 +11763,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearNodeId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         nodeId_ = getDefaultInstance().getNodeId();
         onChanged();
         return this;
@@ -11754,8 +11792,9 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder setRtt(int value) {
-        
+
         rtt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -11768,7 +11807,7 @@ public final class RouterOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRtt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         rtt_ = 0;
         onChanged();
         return this;

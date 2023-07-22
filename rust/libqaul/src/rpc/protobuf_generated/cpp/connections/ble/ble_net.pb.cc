@@ -4,146 +4,188 @@
 #include "connections/ble/ble_net.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace net {
 namespace ble {
+template <typename>
 PROTOBUF_CONSTEXPR BleMessage::BleMessage(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct BleMessageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR BleMessageDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR BleMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~BleMessageDefaultTypeInternal() {}
   union {
     BleMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleMessageDefaultTypeInternal _BleMessage_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BleMessageDefaultTypeInternal _BleMessage_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR Identification::Identification(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.node_)*/nullptr
-  , /*decltype(_impl_.request_)*/false
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.node_)*/nullptr
+  , /*decltype(_impl_.request_)*/ false
+} {}
 struct IdentificationDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR IdentificationDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR IdentificationDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~IdentificationDefaultTypeInternal() {}
   union {
     Identification _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdentificationDefaultTypeInternal _Identification_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdentificationDefaultTypeInternal _Identification_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR NodeIdentification::NodeIdentification(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NodeIdentificationDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NodeIdentificationDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeIdentificationDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeIdentificationDefaultTypeInternal() {}
   union {
     NodeIdentification _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeIdentificationDefaultTypeInternal _NodeIdentification_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeIdentificationDefaultTypeInternal _NodeIdentification_default_instance_;
 }  // namespace ble
 }  // namespace net
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_connections_2fble_2fble_5fnet_2eproto[3];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
-
-const uint32_t TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _impl_.request_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _impl_.node_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::NodeIdentification, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::ble::NodeIdentification, _impl_.id_),
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto = nullptr;
+const ::uint32_t TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _impl_.message_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _impl_.request_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::Identification, _impl_.node_),
+    ~0u,
+    0,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::NodeIdentification, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::NodeIdentification, _impl_.id_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::net::ble::BleMessage)},
-  { 11, -1, -1, sizeof(::qaul::net::ble::Identification)},
-  { 19, -1, -1, sizeof(::qaul::net::ble::NodeIdentification)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::net::ble::BleMessage)},
+        { 13, 23, -1, sizeof(::qaul::net::ble::Identification)},
+        { 25, -1, -1, sizeof(::qaul::net::ble::NodeIdentification)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::net::ble::_BleMessage_default_instance_._instance,
-  &::qaul::net::ble::_Identification_default_instance_._instance,
-  &::qaul::net::ble::_NodeIdentification_default_instance_._instance,
+    &::qaul::net::ble::_BleMessage_default_instance_._instance,
+    &::qaul::net::ble::_Identification_default_instance_._instance,
+    &::qaul::net::ble::_NodeIdentification_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\035connections/ble/ble_net.proto\022\014qaul.ne"
-  "t.ble\"\204\001\n\nBleMessage\022\016\n\004info\030\001 \001(\014H\000\022\016\n\004"
-  "feed\030\002 \001(\014H\000\022\023\n\tmessaging\030\003 \001(\014H\000\0226\n\016ide"
-  "ntification\030\004 \001(\0132\034.qaul.net.ble.Identif"
-  "icationH\000B\t\n\007message\"Q\n\016Identification\022\017"
-  "\n\007request\030\001 \001(\010\022.\n\004node\030\002 \001(\0132 .qaul.net"
-  ".ble.NodeIdentification\" \n\022NodeIdentific"
-  "ation\022\n\n\002id\030\001 \001(\014b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_connections_2fble_2fble_5fnet_2eproto_once;
+const char descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\035connections/ble/ble_net.proto\022\014qaul.ne"
+    "t.ble\"\204\001\n\nBleMessage\022\016\n\004info\030\001 \001(\014H\000\022\016\n\004"
+    "feed\030\002 \001(\014H\000\022\023\n\tmessaging\030\003 \001(\014H\000\0226\n\016ide"
+    "ntification\030\004 \001(\0132\034.qaul.net.ble.Identif"
+    "icationH\000B\t\n\007message\"Q\n\016Identification\022\017"
+    "\n\007request\030\001 \001(\010\022.\n\004node\030\002 \001(\0132 .qaul.net"
+    ".ble.NodeIdentification\" \n\022NodeIdentific"
+    "ation\022\n\n\002id\030\001 \001(\014b\006proto3"
+};
+static ::absl::once_flag descriptor_table_connections_2fble_2fble_5fnet_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_connections_2fble_2fble_5fnet_2eproto = {
-    false, false, 305, descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto,
+    false,
+    false,
+    305,
+    descriptor_table_protodef_connections_2fble_2fble_5fnet_2eproto,
     "connections/ble/ble_net.proto",
-    &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once, nullptr, 0, 3,
-    schemas, file_default_instances, TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets,
-    file_level_metadata_connections_2fble_2fble_5fnet_2eproto, file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto,
+    &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
+    nullptr,
+    0,
+    3,
+    schemas,
+    file_default_instances,
+    TableStruct_connections_2fble_2fble_5fnet_2eproto::offsets,
+    file_level_metadata_connections_2fble_2fble_5fnet_2eproto,
+    file_level_enum_descriptors_connections_2fble_2fble_5fnet_2eproto,
     file_level_service_descriptors_connections_2fble_2fble_5fnet_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter() {
   return &descriptor_table_connections_2fble_2fble_5fnet_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_connections_2fble_2fble_5fnet_2eproto(&descriptor_table_connections_2fble_2fble_5fnet_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_connections_2fble_2fble_5fnet_2eproto(&descriptor_table_connections_2fble_2fble_5fnet_2eproto);
 namespace qaul {
 namespace net {
 namespace ble {
-
 // ===================================================================
 
 class BleMessage::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::qaul::net::ble::BleMessage, _impl_._oneof_case_);
   static const ::qaul::net::ble::Identification& identification(const BleMessage* msg);
 };
 
@@ -166,10 +208,9 @@ void BleMessage::set_allocated_identification(::qaul::net::ble::Identification* 
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.net.ble.BleMessage.identification)
 }
-BleMessage::BleMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+BleMessage::BleMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.BleMessage)
 }
 BleMessage::BleMessage(const BleMessage& from)
@@ -207,10 +248,8 @@ BleMessage::BleMessage(const BleMessage& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.ble.BleMessage)
 }
 
-inline void BleMessage::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void BleMessage::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -229,7 +268,7 @@ BleMessage::~BleMessage() {
 }
 
 inline void BleMessage::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (has_message()) {
     clear_message();
   }
@@ -270,7 +309,7 @@ void BleMessage::clear_message() {
 
 void BleMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.ble.BleMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -281,43 +320,47 @@ void BleMessage::Clear() {
 const char* BleMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes info = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_info();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes feed = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_feed();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes messaging = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_messaging();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.ble.Identification identification = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_identification(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -342,37 +385,36 @@ failure:
 #undef CHK_
 }
 
-uint8_t* BleMessage::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* BleMessage::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.ble.BleMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bytes info = 1;
-  if (_internal_has_info()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_info(), target);
+  switch (message_case()) {
+    case kInfo: {
+      const std::string& _s = this->_internal_info();
+      target = stream->WriteBytesMaybeAliased(1, _s, target);
+      break;
+    }
+    case kFeed: {
+      const std::string& _s = this->_internal_feed();
+      target = stream->WriteBytesMaybeAliased(2, _s, target);
+      break;
+    }
+    case kMessaging: {
+      const std::string& _s = this->_internal_messaging();
+      target = stream->WriteBytesMaybeAliased(3, _s, target);
+      break;
+    }
+    case kIdentification: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(4, _Internal::identification(this),
+          _Internal::identification(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default: ;
   }
-
-  // bytes feed = 2;
-  if (_internal_has_feed()) {
-    target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_feed(), target);
-  }
-
-  // bytes messaging = 3;
-  if (_internal_has_messaging()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_messaging(), target);
-  }
-
-  // .qaul.net.ble.Identification identification = 4;
-  if (_internal_has_identification()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::identification(this),
-        _Internal::identification(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -381,34 +423,31 @@ uint8_t* BleMessage::_InternalSerialize(
   return target;
 }
 
-size_t BleMessage::ByteSizeLong() const {
+::size_t BleMessage::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.ble.BleMessage)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   switch (message_case()) {
     // bytes info = 1;
     case kInfo: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-          this->_internal_info());
+      total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                      this->_internal_info());
       break;
     }
     // bytes feed = 2;
     case kFeed: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-          this->_internal_feed());
+      total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                      this->_internal_feed());
       break;
     }
     // bytes messaging = 3;
     case kMessaging: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-          this->_internal_messaging());
+      total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                      this->_internal_messaging());
       break;
     }
     // .qaul.net.ble.Identification identification = 4;
@@ -436,8 +475,8 @@ void BleMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PRO
   auto* const _this = static_cast<BleMessage*>(&to_msg);
   auto& from = static_cast<const BleMessage&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.ble.BleMessage)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
@@ -488,48 +527,54 @@ void BleMessage::InternalSwap(BleMessage* other) {
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[0]);
 }
-
 // ===================================================================
 
 class Identification::_Internal {
  public:
+  using HasBits = decltype(std::declval<Identification>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(Identification, _impl_._has_bits_);
   static const ::qaul::net::ble::NodeIdentification& node(const Identification* msg);
+  static void set_has_node(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 const ::qaul::net::ble::NodeIdentification&
 Identification::_Internal::node(const Identification* msg) {
   return *msg->_impl_.node_;
 }
-Identification::Identification(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Identification::Identification(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.Identification)
 }
 Identification::Identification(const Identification& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   Identification* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_){nullptr}
-    , decltype(_impl_.request_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.node_){nullptr}
+    , decltype(_impl_.request_) {}
+  };
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  if (from._internal_has_node()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_impl_.node_ = new ::qaul::net::ble::NodeIdentification(*from._impl_.node_);
   }
   _this->_impl_.request_ = from._impl_.request_;
   // @@protoc_insertion_point(copy_constructor:qaul.net.ble.Identification)
 }
 
-inline void Identification::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void Identification::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_){nullptr}
-    , decltype(_impl_.request_){false}
+      decltype(_impl_._has_bits_){}
     , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.node_){nullptr}
+    , decltype(_impl_.request_) { false }
+
   };
 }
 
@@ -543,7 +588,7 @@ Identification::~Identification() {
 }
 
 inline void Identification::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (this != internal_default_instance()) delete _impl_.node_;
 }
 
@@ -553,39 +598,44 @@ void Identification::SetCachedSize(int size) const {
 
 void Identification::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.ble.Identification)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArenaForAllocation() == nullptr && _impl_.node_ != nullptr) {
-    delete _impl_.node_;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.node_ != nullptr);
+    _impl_.node_->Clear();
   }
-  _impl_.node_ = nullptr;
   _impl_.request_ = false;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* Identification::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool request = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.request_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.ble.NodeIdentification node = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_node(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -603,6 +653,7 @@ const char* Identification::_InternalParse(const char* ptr, ::_pbi::ParseContext
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -610,20 +661,22 @@ failure:
 #undef CHK_
 }
 
-uint8_t* Identification::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* Identification::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.ble.Identification)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bool request = 1;
   if (this->_internal_request() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_request(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        1, this->_internal_request(), target);
   }
 
+  cached_has_bits = _impl_._has_bits_[0];
   // .qaul.net.ble.NodeIdentification node = 2;
-  if (this->_internal_has_node()) {
+  if (cached_has_bits & 0x00000001u) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(2, _Internal::node(this),
         _Internal::node(this).GetCachedSize(), target, stream);
@@ -637,16 +690,17 @@ uint8_t* Identification::_InternalSerialize(
   return target;
 }
 
-size_t Identification::ByteSizeLong() const {
+::size_t Identification::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.ble.Identification)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .qaul.net.ble.NodeIdentification node = 2;
-  if (this->_internal_has_node()) {
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.node_);
@@ -654,7 +708,7 @@ size_t Identification::ByteSizeLong() const {
 
   // bool request = 1;
   if (this->_internal_request() != 0) {
-    total_size += 1 + 1;
+    total_size += 2;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -671,11 +725,11 @@ void Identification::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const :
   auto* const _this = static_cast<Identification*>(&to_msg);
   auto& from = static_cast<const Identification&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.ble.Identification)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_has_node()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_internal_mutable_node()->::qaul::net::ble::NodeIdentification::MergeFrom(
         from._internal_node());
   }
@@ -699,6 +753,7 @@ bool Identification::IsInitialized() const {
 void Identification::InternalSwap(Identification* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(Identification, _impl_.request_)
       + sizeof(Identification::_impl_.request_)
@@ -712,50 +767,47 @@ void Identification::InternalSwap(Identification* other) {
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[1]);
 }
-
 // ===================================================================
 
 class NodeIdentification::_Internal {
  public:
 };
 
-NodeIdentification::NodeIdentification(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+NodeIdentification::NodeIdentification(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.ble.NodeIdentification)
 }
 NodeIdentification::NodeIdentification(const NodeIdentification& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   NodeIdentification* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
+      decltype(_impl_.id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    _this->_impl_.id_.Set(from._internal_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.ble.NodeIdentification)
 }
 
-inline void NodeIdentification::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void NodeIdentification::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
+      decltype(_impl_.id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NodeIdentification::~NodeIdentification() {
@@ -768,7 +820,7 @@ NodeIdentification::~NodeIdentification() {
 }
 
 inline void NodeIdentification::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.id_.Destroy();
 }
 
@@ -778,7 +830,7 @@ void NodeIdentification::SetCachedSize(int size) const {
 
 void NodeIdentification::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.ble.NodeIdentification)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -789,17 +841,18 @@ void NodeIdentification::Clear() {
 const char* NodeIdentification::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -824,16 +877,16 @@ failure:
 #undef CHK_
 }
 
-uint8_t* NodeIdentification::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* NodeIdentification::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.ble.NodeIdentification)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_id(), target);
+    const std::string& _s = this->_internal_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -844,19 +897,18 @@ uint8_t* NodeIdentification::_InternalSerialize(
   return target;
 }
 
-size_t NodeIdentification::ByteSizeLong() const {
+::size_t NodeIdentification::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.ble.NodeIdentification)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -873,8 +925,8 @@ void NodeIdentification::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, con
   auto* const _this = static_cast<NodeIdentification*>(&to_msg);
   auto& from = static_cast<const NodeIdentification&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.ble.NodeIdentification)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_id().empty()) {
@@ -899,10 +951,8 @@ void NodeIdentification::InternalSwap(NodeIdentification* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.id_, lhs_arena,
-      &other->_impl_.id_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, lhs_arena,
+                                       &other->_impl_.id_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NodeIdentification::GetMetadata() const {
@@ -910,7 +960,6 @@ void NodeIdentification::InternalSwap(NodeIdentification* other) {
       &descriptor_table_connections_2fble_2fble_5fnet_2eproto_getter, &descriptor_table_connections_2fble_2fble_5fnet_2eproto_once,
       file_level_metadata_connections_2fble_2fble_5fnet_2eproto[2]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace ble
 }  // namespace net
@@ -929,6 +978,5 @@ Arena::CreateMaybeMessage< ::qaul::net::ble::NodeIdentification >(Arena* arena) 
   return Arena::CreateMessageInternal< ::qaul::net::ble::NodeIdentification >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"
