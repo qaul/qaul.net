@@ -23,7 +23,7 @@
     <!-- Android 12 and higher -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
     <!-- Android 13 and higher -->
     <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
@@ -33,11 +33,11 @@
     <uses-permission android:name="ANDROID.PERMISSION.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- Required to run qaul constantly in the background -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
     <application
             tools:replace="android:label"
@@ -46,10 +46,10 @@
             android:icon="@mipmap/ic_launcher">
 
         <service
-            android:name=".FlutterBackgroundService"
-            android:exported="false" />
+                android:name=".FlutterBackgroundService"
+                android:exported="false"/>
 
-	    <service
+        <service
                 android:enabled="true"
                 android:name="net.qaul.ble.service.BleService"
                 android:label="BleService">
@@ -64,8 +64,7 @@
                 android:hardwareAccelerated="true"
                 android:windowSoftInputMode="adjustResize"
                 android:showWhenLocked="true"
-                android:turnScreenOn="true"
-                android:excludeFromRecents="true">
+                android:turnScreenOn="true">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -80,11 +79,11 @@
             </intent-filter>
 
             <!-- Deep linking -->
-            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
             <intent-filter android:autoVerify="false">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
 
                 <!-- Accepts URIs that begin with "qaul://<HOST>” -->
                 <data android:scheme="qaul" android:host="public"/>

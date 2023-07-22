@@ -149,6 +149,5 @@
   "inviteUser": "Invite user",
   "notifications": "Notifications",
   "fileHistory": "File history",
-  "emptyNodeName": "No name",
-  "exit": "Exit"
+  "emptyNodeName": "No name"
 }

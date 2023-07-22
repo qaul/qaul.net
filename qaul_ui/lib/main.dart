@@ -20,22 +20,6 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     Logger.root.level = kDebugMode ? Level.CONFIG : Level.FINE;
 
-    // if (Platform.isAndroid) {
-    //   const androidConfig = FlutterBackgroundAndroidConfig(
-    //     notificationTitle: "qaul.net",
-    //     notificationText: "The app is running in the Background",
-    //     notificationImportance: AndroidNotificationImportance.Max,
-    //     notificationIcon: AndroidResource(name: 'ic_notification'),
-    //     showBadge: true,
-    //     enableWifiLock: true,
-    //   );
-    //   bool success = await FlutterBackground.initialize(
-    //     androidConfig: androidConfig,
-    //   );
-    //
-    //   if (success) FlutterBackground.enableBackgroundExecution();
-    // }
-
     await Initializer.initialize(_container.read);
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
