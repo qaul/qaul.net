@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: connections/connections.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -24,6 +28,11 @@ enum Connections_Message {
 }
 
 class Connections extends $pb.GeneratedMessage {
+  factory Connections() => create();
+  Connections._() : super();
+  factory Connections.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Connections.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Connections_Message> _Connections_MessageByTag = {
     1 : Connections_Message.internetNodesRequest,
     2 : Connections_Message.internetNodesList,
@@ -33,49 +42,17 @@ class Connections extends $pb.GeneratedMessage {
     6 : Connections_Message.internetNodesRename,
     0 : Connections_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Connections', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Connections', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6])
-    ..aOM<InternetNodesRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRequest', subBuilder: InternetNodesRequest.create)
-    ..aOM<InternetNodesList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesList', subBuilder: InternetNodesList.create)
-    ..aOM<InternetNodesEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesAdd', subBuilder: InternetNodesEntry.create)
-    ..aOM<InternetNodesEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRemove', subBuilder: InternetNodesEntry.create)
-    ..aOM<InternetNodesEntry>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesState', subBuilder: InternetNodesEntry.create)
-    ..aOM<InternetNodesEntry>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internetNodesRename', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesRequest>(1, _omitFieldNames ? '' : 'internetNodesRequest', subBuilder: InternetNodesRequest.create)
+    ..aOM<InternetNodesList>(2, _omitFieldNames ? '' : 'internetNodesList', subBuilder: InternetNodesList.create)
+    ..aOM<InternetNodesEntry>(3, _omitFieldNames ? '' : 'internetNodesAdd', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesEntry>(4, _omitFieldNames ? '' : 'internetNodesRemove', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesEntry>(5, _omitFieldNames ? '' : 'internetNodesState', subBuilder: InternetNodesEntry.create)
+    ..aOM<InternetNodesEntry>(6, _omitFieldNames ? '' : 'internetNodesRename', subBuilder: InternetNodesEntry.create)
     ..hasRequiredFields = false
   ;
 
-  Connections._() : super();
-  factory Connections({
-    InternetNodesRequest? internetNodesRequest,
-    InternetNodesList? internetNodesList,
-    InternetNodesEntry? internetNodesAdd,
-    InternetNodesEntry? internetNodesRemove,
-    InternetNodesEntry? internetNodesState,
-    InternetNodesEntry? internetNodesRename,
-  }) {
-    final _result = create();
-    if (internetNodesRequest != null) {
-      _result.internetNodesRequest = internetNodesRequest;
-    }
-    if (internetNodesList != null) {
-      _result.internetNodesList = internetNodesList;
-    }
-    if (internetNodesAdd != null) {
-      _result.internetNodesAdd = internetNodesAdd;
-    }
-    if (internetNodesRemove != null) {
-      _result.internetNodesRemove = internetNodesRemove;
-    }
-    if (internetNodesState != null) {
-      _result.internetNodesState = internetNodesState;
-    }
-    if (internetNodesRename != null) {
-      _result.internetNodesRename = internetNodesRename;
-    }
-    return _result;
-  }
-  factory Connections.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Connections.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -85,8 +62,10 @@ class Connections extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Connections copyWith(void Function(Connections) updates) => super.copyWith((message) => updates(message as Connections)) as Connections; // ignore: deprecated_member_use
+  Connections copyWith(void Function(Connections) updates) => super.copyWith((message) => updates(message as Connections)) as Connections;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Connections create() => Connections._();
   Connections createEmptyInstance() => create();
@@ -166,14 +145,15 @@ class Connections extends $pb.GeneratedMessage {
 }
 
 class InternetNodesRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
+  factory InternetNodesRequest() => create();
+  InternetNodesRequest._() : super();
+  factory InternetNodesRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory InternetNodesRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternetNodesRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  InternetNodesRequest._() : super();
-  factory InternetNodesRequest() => create();
-  factory InternetNodesRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory InternetNodesRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -183,8 +163,10 @@ class InternetNodesRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  InternetNodesRequest copyWith(void Function(InternetNodesRequest) updates) => super.copyWith((message) => updates(message as InternetNodesRequest)) as InternetNodesRequest; // ignore: deprecated_member_use
+  InternetNodesRequest copyWith(void Function(InternetNodesRequest) updates) => super.copyWith((message) => updates(message as InternetNodesRequest)) as InternetNodesRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static InternetNodesRequest create() => InternetNodesRequest._();
   InternetNodesRequest createEmptyInstance() => create();
@@ -195,28 +177,17 @@ class InternetNodesRequest extends $pb.GeneratedMessage {
 }
 
 class InternetNodesList extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
-    ..e<Info>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', $pb.PbFieldType.OE, defaultOrMaker: Info.REQUEST, valueOf: Info.valueOf, enumValues: Info.values)
-    ..pc<InternetNodesEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: InternetNodesEntry.create)
+  factory InternetNodesList() => create();
+  InternetNodesList._() : super();
+  factory InternetNodesList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory InternetNodesList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternetNodesList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
+    ..e<Info>(1, _omitFieldNames ? '' : 'info', $pb.PbFieldType.OE, defaultOrMaker: Info.REQUEST, valueOf: Info.valueOf, enumValues: Info.values)
+    ..pc<InternetNodesEntry>(2, _omitFieldNames ? '' : 'nodes', $pb.PbFieldType.PM, subBuilder: InternetNodesEntry.create)
     ..hasRequiredFields = false
   ;
 
-  InternetNodesList._() : super();
-  factory InternetNodesList({
-    Info? info,
-    $core.Iterable<InternetNodesEntry>? nodes,
-  }) {
-    final _result = create();
-    if (info != null) {
-      _result.info = info;
-    }
-    if (nodes != null) {
-      _result.nodes.addAll(nodes);
-    }
-    return _result;
-  }
-  factory InternetNodesList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory InternetNodesList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -226,8 +197,10 @@ class InternetNodesList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  InternetNodesList copyWith(void Function(InternetNodesList) updates) => super.copyWith((message) => updates(message as InternetNodesList)) as InternetNodesList; // ignore: deprecated_member_use
+  InternetNodesList copyWith(void Function(InternetNodesList) updates) => super.copyWith((message) => updates(message as InternetNodesList)) as InternetNodesList;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static InternetNodesList create() => InternetNodesList._();
   InternetNodesList createEmptyInstance() => create();
@@ -250,33 +223,18 @@ class InternetNodesList extends $pb.GeneratedMessage {
 }
 
 class InternetNodesEntry extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InternetNodesEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enabled')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+  factory InternetNodesEntry() => create();
+  InternetNodesEntry._() : super();
+  factory InternetNodesEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory InternetNodesEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InternetNodesEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.connections'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'address')
+    ..aOB(2, _omitFieldNames ? '' : 'enabled')
+    ..aOS(3, _omitFieldNames ? '' : 'name')
     ..hasRequiredFields = false
   ;
 
-  InternetNodesEntry._() : super();
-  factory InternetNodesEntry({
-    $core.String? address,
-    $core.bool? enabled,
-    $core.String? name,
-  }) {
-    final _result = create();
-    if (address != null) {
-      _result.address = address;
-    }
-    if (enabled != null) {
-      _result.enabled = enabled;
-    }
-    if (name != null) {
-      _result.name = name;
-    }
-    return _result;
-  }
-  factory InternetNodesEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory InternetNodesEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -286,8 +244,10 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  InternetNodesEntry copyWith(void Function(InternetNodesEntry) updates) => super.copyWith((message) => updates(message as InternetNodesEntry)) as InternetNodesEntry; // ignore: deprecated_member_use
+  InternetNodesEntry copyWith(void Function(InternetNodesEntry) updates) => super.copyWith((message) => updates(message as InternetNodesEntry)) as InternetNodesEntry;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static InternetNodesEntry create() => InternetNodesEntry._();
   InternetNodesEntry createEmptyInstance() => create();
@@ -324,3 +284,6 @@ class InternetNodesEntry extends $pb.GeneratedMessage {
   void clearName() => clearField(3);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

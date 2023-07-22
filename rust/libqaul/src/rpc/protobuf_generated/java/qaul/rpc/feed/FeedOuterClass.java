@@ -99,7 +99,7 @@ public final class FeedOuterClass {
      */
     qaul.rpc.feed.FeedOuterClass.FeedMessageRequestOrBuilder getRequestOrBuilder();
 
-    public qaul.rpc.feed.FeedOuterClass.Feed.MessageCase getMessageCase();
+    qaul.rpc.feed.FeedOuterClass.Feed.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -127,11 +127,6 @@ public final class FeedOuterClass {
       return new Feed();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.feed.FeedOuterClass.internal_static_qaul_rpc_feed_Feed_descriptor;
@@ -146,6 +141,7 @@ public final class FeedOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -469,11 +465,13 @@ public final class FeedOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.Feed parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.Feed parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -552,6 +550,7 @@ public final class FeedOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (receivedBuilder_ != null) {
           receivedBuilder_.clear();
         }
@@ -589,30 +588,31 @@ public final class FeedOuterClass {
       @java.lang.Override
       public qaul.rpc.feed.FeedOuterClass.Feed buildPartial() {
         qaul.rpc.feed.FeedOuterClass.Feed result = new qaul.rpc.feed.FeedOuterClass.Feed(this);
-        if (messageCase_ == 1) {
-          if (receivedBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = receivedBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (sendBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = sendBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (requestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = requestBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.feed.FeedOuterClass.Feed result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.feed.FeedOuterClass.Feed result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            receivedBuilder_ != null) {
+          result.message_ = receivedBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            sendBuilder_ != null) {
+          result.message_ = sendBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            requestBuilder_ != null) {
+          result.message_ = requestBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -753,6 +753,7 @@ public final class FeedOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.feed.FeedOuterClass.FeedMessageList, qaul.rpc.feed.FeedOuterClass.FeedMessageList.Builder, qaul.rpc.feed.FeedOuterClass.FeedMessageListOrBuilder> receivedBuilder_;
@@ -928,7 +929,7 @@ public final class FeedOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return receivedBuilder_;
       }
 
@@ -1106,7 +1107,7 @@ public final class FeedOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return sendBuilder_;
       }
 
@@ -1284,7 +1285,7 @@ public final class FeedOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return requestBuilder_;
       }
       @java.lang.Override
@@ -1368,8 +1369,10 @@ public final class FeedOuterClass {
     /**
      * <pre>
      * Index of the last message received
+     *
      * The message index is a continues numbering
      * of incoming messages in the database of the node.
+     *
      * When this variable is set, only 
      * newer messages will be sent.
      * Default value is 0, when the value
@@ -1408,11 +1411,6 @@ public final class FeedOuterClass {
       return new FeedMessageRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.feed.FeedOuterClass.internal_static_qaul_rpc_feed_FeedMessageRequest_descriptor;
@@ -1427,7 +1425,7 @@ public final class FeedOuterClass {
     }
 
     public static final int LAST_RECEIVED_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString lastReceived_;
+    private com.google.protobuf.ByteString lastReceived_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * DEPRECATED
@@ -1442,12 +1440,14 @@ public final class FeedOuterClass {
     }
 
     public static final int LAST_INDEX_FIELD_NUMBER = 2;
-    private long lastIndex_;
+    private long lastIndex_ = 0L;
     /**
      * <pre>
      * Index of the last message received
+     *
      * The message index is a continues numbering
      * of incoming messages in the database of the node.
+     *
      * When this variable is set, only 
      * newer messages will be sent.
      * Default value is 0, when the value
@@ -1583,11 +1583,13 @@ public final class FeedOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessageRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessageRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1666,10 +1668,9 @@ public final class FeedOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         lastReceived_ = com.google.protobuf.ByteString.EMPTY;
-
         lastIndex_ = 0L;
-
         return this;
       }
 
@@ -1696,10 +1697,19 @@ public final class FeedOuterClass {
       @java.lang.Override
       public qaul.rpc.feed.FeedOuterClass.FeedMessageRequest buildPartial() {
         qaul.rpc.feed.FeedOuterClass.FeedMessageRequest result = new qaul.rpc.feed.FeedOuterClass.FeedMessageRequest(this);
-        result.lastReceived_ = lastReceived_;
-        result.lastIndex_ = lastIndex_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.feed.FeedOuterClass.FeedMessageRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.lastReceived_ = lastReceived_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.lastIndex_ = lastIndex_;
+        }
       }
 
       @java.lang.Override
@@ -1780,12 +1790,12 @@ public final class FeedOuterClass {
                 break;
               case 10: {
                 lastReceived_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 lastIndex_ = input.readUInt64();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -1803,6 +1813,7 @@ public final class FeedOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString lastReceived_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -1827,11 +1838,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLastReceived(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         lastReceived_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1844,7 +1853,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLastReceived() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         lastReceived_ = getDefaultInstance().getLastReceived();
         onChanged();
         return this;
@@ -1854,8 +1863,10 @@ public final class FeedOuterClass {
       /**
        * <pre>
        * Index of the last message received
+       *
        * The message index is a continues numbering
        * of incoming messages in the database of the node.
+       *
        * When this variable is set, only 
        * newer messages will be sent.
        * Default value is 0, when the value
@@ -1872,8 +1883,10 @@ public final class FeedOuterClass {
       /**
        * <pre>
        * Index of the last message received
+       *
        * The message index is a continues numbering
        * of incoming messages in the database of the node.
+       *
        * When this variable is set, only 
        * newer messages will be sent.
        * Default value is 0, when the value
@@ -1885,16 +1898,19 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setLastIndex(long value) {
-        
+
         lastIndex_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * Index of the last message received
+       *
        * The message index is a continues numbering
        * of incoming messages in the database of the node.
+       *
        * When this variable is set, only 
        * newer messages will be sent.
        * Default value is 0, when the value
@@ -1905,7 +1921,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearLastIndex() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         lastIndex_ = 0L;
         onChanged();
         return this;
@@ -2029,11 +2045,6 @@ public final class FeedOuterClass {
       return new FeedMessageList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.feed.FeedOuterClass.internal_static_qaul_rpc_feed_FeedMessageList_descriptor;
@@ -2048,6 +2059,7 @@ public final class FeedOuterClass {
     }
 
     public static final int FEED_MESSAGE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.feed.FeedOuterClass.FeedMessage> feedMessage_;
     /**
      * <code>repeated .qaul.rpc.feed.FeedMessage feed_message = 1;</code>
@@ -2198,11 +2210,13 @@ public final class FeedOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessageList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessageList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2281,6 +2295,7 @@ public final class FeedOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (feedMessageBuilder_ == null) {
           feedMessage_ = java.util.Collections.emptyList();
         } else {
@@ -2314,7 +2329,13 @@ public final class FeedOuterClass {
       @java.lang.Override
       public qaul.rpc.feed.FeedOuterClass.FeedMessageList buildPartial() {
         qaul.rpc.feed.FeedOuterClass.FeedMessageList result = new qaul.rpc.feed.FeedOuterClass.FeedMessageList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.feed.FeedOuterClass.FeedMessageList result) {
         if (feedMessageBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             feedMessage_ = java.util.Collections.unmodifiableList(feedMessage_);
@@ -2324,8 +2345,10 @@ public final class FeedOuterClass {
         } else {
           result.feedMessage_ = feedMessageBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.feed.FeedOuterClass.FeedMessageList result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -2916,11 +2939,6 @@ public final class FeedOuterClass {
       return new FeedMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.feed.FeedOuterClass.internal_static_qaul_rpc_feed_FeedMessage_descriptor;
@@ -2935,7 +2953,7 @@ public final class FeedOuterClass {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString senderId_;
+    private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes sender_id = 1;</code>
      * @return The senderId.
@@ -2946,7 +2964,8 @@ public final class FeedOuterClass {
     }
 
     public static final int SENDER_ID_BASE58_FIELD_NUMBER = 2;
-    private volatile java.lang.Object senderIdBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object senderIdBase58_ = "";
     /**
      * <pre>
      * DEPRECATED
@@ -2992,7 +3011,7 @@ public final class FeedOuterClass {
     }
 
     public static final int MESSAGE_ID_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString messageId_;
+    private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>bytes message_id = 3;</code>
      * @return The messageId.
@@ -3003,7 +3022,8 @@ public final class FeedOuterClass {
     }
 
     public static final int MESSAGE_ID_BASE58_FIELD_NUMBER = 4;
-    private volatile java.lang.Object messageIdBase58_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object messageIdBase58_ = "";
     /**
      * <pre>
      * DEPRECATED
@@ -3049,7 +3069,8 @@ public final class FeedOuterClass {
     }
 
     public static final int TIME_SENT_FIELD_NUMBER = 5;
-    private volatile java.lang.Object timeSent_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object timeSent_ = "";
     /**
      * <pre>
      * DEPRECATED
@@ -3095,7 +3116,7 @@ public final class FeedOuterClass {
     }
 
     public static final int TIMESTAMP_SENT_FIELD_NUMBER = 9;
-    private long timestampSent_;
+    private long timestampSent_ = 0L;
     /**
      * <code>uint64 timestamp_sent = 9;</code>
      * @return The timestampSent.
@@ -3106,7 +3127,8 @@ public final class FeedOuterClass {
     }
 
     public static final int TIME_RECEIVED_FIELD_NUMBER = 6;
-    private volatile java.lang.Object timeReceived_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object timeReceived_ = "";
     /**
      * <pre>
      * DEPRECATED
@@ -3152,7 +3174,7 @@ public final class FeedOuterClass {
     }
 
     public static final int TIMESTAMP_RECEIVED_FIELD_NUMBER = 10;
-    private long timestampReceived_;
+    private long timestampReceived_ = 0L;
     /**
      * <code>uint64 timestamp_received = 10;</code>
      * @return The timestampReceived.
@@ -3163,7 +3185,8 @@ public final class FeedOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 7;
-    private volatile java.lang.Object content_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object content_ = "";
     /**
      * <code>string content = 7;</code>
      * @return The content.
@@ -3201,7 +3224,7 @@ public final class FeedOuterClass {
     }
 
     public static final int INDEX_FIELD_NUMBER = 8;
-    private long index_;
+    private long index_ = 0L;
     /**
      * <code>uint64 index = 8;</code>
      * @return The index.
@@ -3417,11 +3440,13 @@ public final class FeedOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.FeedMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3500,26 +3525,17 @@ public final class FeedOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         senderId_ = com.google.protobuf.ByteString.EMPTY;
-
         senderIdBase58_ = "";
-
         messageId_ = com.google.protobuf.ByteString.EMPTY;
-
         messageIdBase58_ = "";
-
         timeSent_ = "";
-
         timestampSent_ = 0L;
-
         timeReceived_ = "";
-
         timestampReceived_ = 0L;
-
         content_ = "";
-
         index_ = 0L;
-
         return this;
       }
 
@@ -3546,18 +3562,43 @@ public final class FeedOuterClass {
       @java.lang.Override
       public qaul.rpc.feed.FeedOuterClass.FeedMessage buildPartial() {
         qaul.rpc.feed.FeedOuterClass.FeedMessage result = new qaul.rpc.feed.FeedOuterClass.FeedMessage(this);
-        result.senderId_ = senderId_;
-        result.senderIdBase58_ = senderIdBase58_;
-        result.messageId_ = messageId_;
-        result.messageIdBase58_ = messageIdBase58_;
-        result.timeSent_ = timeSent_;
-        result.timestampSent_ = timestampSent_;
-        result.timeReceived_ = timeReceived_;
-        result.timestampReceived_ = timestampReceived_;
-        result.content_ = content_;
-        result.index_ = index_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.feed.FeedOuterClass.FeedMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.senderIdBase58_ = senderIdBase58_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.messageId_ = messageId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.messageIdBase58_ = messageIdBase58_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.timeSent_ = timeSent_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.timestampSent_ = timestampSent_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.timeReceived_ = timeReceived_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.timestampReceived_ = timestampReceived_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.content_ = content_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.index_ = index_;
+        }
       }
 
       @java.lang.Override
@@ -3609,6 +3650,7 @@ public final class FeedOuterClass {
         }
         if (!other.getSenderIdBase58().isEmpty()) {
           senderIdBase58_ = other.senderIdBase58_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getMessageId() != com.google.protobuf.ByteString.EMPTY) {
@@ -3616,10 +3658,12 @@ public final class FeedOuterClass {
         }
         if (!other.getMessageIdBase58().isEmpty()) {
           messageIdBase58_ = other.messageIdBase58_;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (!other.getTimeSent().isEmpty()) {
           timeSent_ = other.timeSent_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (other.getTimestampSent() != 0L) {
@@ -3627,6 +3671,7 @@ public final class FeedOuterClass {
         }
         if (!other.getTimeReceived().isEmpty()) {
           timeReceived_ = other.timeReceived_;
+          bitField0_ |= 0x00000040;
           onChanged();
         }
         if (other.getTimestampReceived() != 0L) {
@@ -3634,6 +3679,7 @@ public final class FeedOuterClass {
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
+          bitField0_ |= 0x00000100;
           onChanged();
         }
         if (other.getIndex() != 0L) {
@@ -3667,52 +3713,52 @@ public final class FeedOuterClass {
                 break;
               case 10: {
                 senderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 senderIdBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 messageId_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 34: {
                 messageIdBase58_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
                 timeSent_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 50: {
                 timeReceived_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000040;
                 break;
               } // case 50
               case 58: {
                 content_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000100;
                 break;
               } // case 58
               case 64: {
                 index_ = input.readUInt64();
-
+                bitField0_ |= 0x00000200;
                 break;
               } // case 64
               case 72: {
                 timestampSent_ = input.readUInt64();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 72
               case 80: {
                 timestampReceived_ = input.readUInt64();
-
+                bitField0_ |= 0x00000080;
                 break;
               } // case 80
               default: {
@@ -3730,6 +3776,7 @@ public final class FeedOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -3746,11 +3793,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3759,7 +3804,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
@@ -3818,11 +3863,9 @@ public final class FeedOuterClass {
        */
       public Builder setSenderIdBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderIdBase58_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3835,8 +3878,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearSenderIdBase58() {
-        
         senderIdBase58_ = getDefaultInstance().getSenderIdBase58();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -3851,12 +3894,10 @@ public final class FeedOuterClass {
        */
       public Builder setSenderIdBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         senderIdBase58_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3876,11 +3917,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setMessageId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         messageId_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3889,7 +3928,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearMessageId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         messageId_ = getDefaultInstance().getMessageId();
         onChanged();
         return this;
@@ -3948,11 +3987,9 @@ public final class FeedOuterClass {
        */
       public Builder setMessageIdBase58(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         messageIdBase58_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -3965,8 +4002,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearMessageIdBase58() {
-        
         messageIdBase58_ = getDefaultInstance().getMessageIdBase58();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -3981,12 +4018,10 @@ public final class FeedOuterClass {
        */
       public Builder setMessageIdBase58Bytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         messageIdBase58_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -4044,11 +4079,9 @@ public final class FeedOuterClass {
        */
       public Builder setTimeSent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         timeSent_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -4061,8 +4094,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearTimeSent() {
-        
         timeSent_ = getDefaultInstance().getTimeSent();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -4077,12 +4110,10 @@ public final class FeedOuterClass {
        */
       public Builder setTimeSentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         timeSent_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -4102,8 +4133,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setTimestampSent(long value) {
-        
+
         timestampSent_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -4112,7 +4144,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearTimestampSent() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         timestampSent_ = 0L;
         onChanged();
         return this;
@@ -4171,11 +4203,9 @@ public final class FeedOuterClass {
        */
       public Builder setTimeReceived(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         timeReceived_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -4188,8 +4218,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearTimeReceived() {
-        
         timeReceived_ = getDefaultInstance().getTimeReceived();
+        bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
         return this;
       }
@@ -4204,12 +4234,10 @@ public final class FeedOuterClass {
        */
       public Builder setTimeReceivedBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         timeReceived_ = value;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -4229,8 +4257,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setTimestampReceived(long value) {
-        
+
         timestampReceived_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -4239,7 +4268,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearTimestampReceived() {
-        
+        bitField0_ = (bitField0_ & ~0x00000080);
         timestampReceived_ = 0L;
         onChanged();
         return this;
@@ -4286,11 +4315,9 @@ public final class FeedOuterClass {
        */
       public Builder setContent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -4299,8 +4326,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
         content_ = getDefaultInstance().getContent();
+        bitField0_ = (bitField0_ & ~0x00000100);
         onChanged();
         return this;
       }
@@ -4311,12 +4338,10 @@ public final class FeedOuterClass {
        */
       public Builder setContentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         content_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -4336,8 +4361,9 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder setIndex(long value) {
-        
+
         index_ = value;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -4346,7 +4372,7 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearIndex() {
-        
+        bitField0_ = (bitField0_ & ~0x00000200);
         index_ = 0L;
         onChanged();
         return this;
@@ -4458,11 +4484,6 @@ public final class FeedOuterClass {
       return new SendMessage();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.feed.FeedOuterClass.internal_static_qaul_rpc_feed_SendMessage_descriptor;
@@ -4477,7 +4498,8 @@ public final class FeedOuterClass {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 1;
-    private volatile java.lang.Object content_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object content_ = "";
     /**
      * <code>string content = 1;</code>
      * @return The content.
@@ -4622,11 +4644,13 @@ public final class FeedOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.SendMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.feed.FeedOuterClass.SendMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4705,8 +4729,8 @@ public final class FeedOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         content_ = "";
-
         return this;
       }
 
@@ -4733,9 +4757,16 @@ public final class FeedOuterClass {
       @java.lang.Override
       public qaul.rpc.feed.FeedOuterClass.SendMessage buildPartial() {
         qaul.rpc.feed.FeedOuterClass.SendMessage result = new qaul.rpc.feed.FeedOuterClass.SendMessage(this);
-        result.content_ = content_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.feed.FeedOuterClass.SendMessage result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.content_ = content_;
+        }
       }
 
       @java.lang.Override
@@ -4784,6 +4815,7 @@ public final class FeedOuterClass {
         if (other == qaul.rpc.feed.FeedOuterClass.SendMessage.getDefaultInstance()) return this;
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -4814,7 +4846,7 @@ public final class FeedOuterClass {
                 break;
               case 10: {
                 content_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -4832,6 +4864,7 @@ public final class FeedOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object content_ = "";
       /**
@@ -4874,11 +4907,9 @@ public final class FeedOuterClass {
        */
       public Builder setContent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4887,8 +4918,8 @@ public final class FeedOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
         content_ = getDefaultInstance().getContent();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -4899,12 +4930,10 @@ public final class FeedOuterClass {
        */
       public Builder setContentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         content_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }

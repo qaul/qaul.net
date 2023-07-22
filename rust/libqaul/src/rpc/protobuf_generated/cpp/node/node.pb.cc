@@ -4,119 +4,153 @@
 #include "node/node.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace rpc {
 namespace node {
+template <typename>
 PROTOBUF_CONSTEXPR Node::Node(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct NodeDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NodeDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeDefaultTypeInternal() {}
   union {
     Node _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeDefaultTypeInternal _Node_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR NodeInformation::NodeInformation(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.addresses_)*/{}
-  , /*decltype(_impl_.id_base58_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.id_base58_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NodeInformationDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NodeInformationDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NodeInformationDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NodeInformationDefaultTypeInternal() {}
   union {
     NodeInformation _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeInformationDefaultTypeInternal _NodeInformation_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeInformationDefaultTypeInternal _NodeInformation_default_instance_;
 }  // namespace node
 }  // namespace rpc
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_node_2fnode_2eproto[2];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_node_2fnode_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_node_2fnode_2eproto = nullptr;
-
-const uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.id_base58_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.addresses_),
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_node_2fnode_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_node_2fnode_2eproto = nullptr;
+const ::uint32_t TableStruct_node_2fnode_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.id_base58_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::NodeInformation, _impl_.addresses_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::rpc::node::Node)},
-  { 9, -1, -1, sizeof(::qaul::rpc::node::NodeInformation)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::rpc::node::Node)},
+        { 11, -1, -1, sizeof(::qaul::rpc::node::NodeInformation)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::rpc::node::_Node_default_instance_._instance,
-  &::qaul::rpc::node::_NodeInformation_default_instance_._instance,
+    &::qaul::rpc::node::_Node_default_instance_._instance,
+    &::qaul::rpc::node::_NodeInformation_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_node_2fnode_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\017node/node.proto\022\rqaul.rpc.node\"Z\n\004Node"
-  "\022\027\n\rget_node_info\030\001 \001(\010H\000\022.\n\004info\030\002 \001(\0132"
-  "\036.qaul.rpc.node.NodeInformationH\000B\t\n\007mes"
-  "sage\"7\n\017NodeInformation\022\021\n\tid_base58\030\001 \001"
-  "(\t\022\021\n\taddresses\030\002 \003(\tb\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_node_2fnode_2eproto_once;
+const char descriptor_table_protodef_node_2fnode_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\017node/node.proto\022\rqaul.rpc.node\"Z\n\004Node"
+    "\022\027\n\rget_node_info\030\001 \001(\010H\000\022.\n\004info\030\002 \001(\0132"
+    "\036.qaul.rpc.node.NodeInformationH\000B\t\n\007mes"
+    "sage\"7\n\017NodeInformation\022\021\n\tid_base58\030\001 \001"
+    "(\t\022\021\n\taddresses\030\002 \003(\tb\006proto3"
+};
+static ::absl::once_flag descriptor_table_node_2fnode_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_node_2fnode_2eproto = {
-    false, false, 189, descriptor_table_protodef_node_2fnode_2eproto,
+    false,
+    false,
+    189,
+    descriptor_table_protodef_node_2fnode_2eproto,
     "node/node.proto",
-    &descriptor_table_node_2fnode_2eproto_once, nullptr, 0, 2,
-    schemas, file_default_instances, TableStruct_node_2fnode_2eproto::offsets,
-    file_level_metadata_node_2fnode_2eproto, file_level_enum_descriptors_node_2fnode_2eproto,
+    &descriptor_table_node_2fnode_2eproto_once,
+    nullptr,
+    0,
+    2,
+    schemas,
+    file_default_instances,
+    TableStruct_node_2fnode_2eproto::offsets,
+    file_level_metadata_node_2fnode_2eproto,
+    file_level_enum_descriptors_node_2fnode_2eproto,
     file_level_service_descriptors_node_2fnode_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_node_2fnode_2eproto_getter() {
   return &descriptor_table_node_2fnode_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_node_2fnode_2eproto(&descriptor_table_node_2fnode_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_node_2fnode_2eproto(&descriptor_table_node_2fnode_2eproto);
 namespace qaul {
 namespace rpc {
 namespace node {
-
 // ===================================================================
 
 class Node::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::node::Node, _impl_._oneof_case_);
   static const ::qaul::rpc::node::NodeInformation& info(const Node* msg);
 };
 
@@ -139,10 +173,9 @@ void Node::set_allocated_info(::qaul::rpc::node::NodeInformation* info) {
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.node.Node.info)
 }
-Node::Node(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Node::Node(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.Node)
 }
 Node::Node(const Node& from)
@@ -172,10 +205,8 @@ Node::Node(const Node& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.node.Node)
 }
 
-inline void Node::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void Node::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -194,7 +225,7 @@ Node::~Node() {
 }
 
 inline void Node::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (has_message()) {
     clear_message();
   }
@@ -227,7 +258,7 @@ void Node::clear_message() {
 
 void Node::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.node.Node)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -238,24 +269,26 @@ void Node::Clear() {
 const char* Node::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool get_node_info = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _internal_set_get_node_info(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.node.NodeInformation info = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_info(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -280,25 +313,27 @@ failure:
 #undef CHK_
 }
 
-uint8_t* Node::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* Node::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.node.Node)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bool get_node_info = 1;
-  if (_internal_has_get_node_info()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_get_node_info(), target);
+  switch (message_case()) {
+    case kGetNodeInfo: {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteBoolToArray(
+          1, this->_internal_get_node_info(), target);
+      break;
+    }
+    case kInfo: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(2, _Internal::info(this),
+          _Internal::info(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default: ;
   }
-
-  // .qaul.rpc.node.NodeInformation info = 2;
-  if (_internal_has_info()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::info(this),
-        _Internal::info(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -307,18 +342,18 @@ uint8_t* Node::_InternalSerialize(
   return target;
 }
 
-size_t Node::ByteSizeLong() const {
+::size_t Node::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.node.Node)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   switch (message_case()) {
     // bool get_node_info = 1;
     case kGetNodeInfo: {
-      total_size += 1 + 1;
+      total_size += 2;
       break;
     }
     // .qaul.rpc.node.NodeInformation info = 2;
@@ -346,8 +381,8 @@ void Node::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_
   auto* const _this = static_cast<Node*>(&to_msg);
   auto& from = static_cast<const Node&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.Node)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
@@ -390,17 +425,15 @@ void Node::InternalSwap(Node* other) {
       &descriptor_table_node_2fnode_2eproto_getter, &descriptor_table_node_2fnode_2eproto_once,
       file_level_metadata_node_2fnode_2eproto[0]);
 }
-
 // ===================================================================
 
 class NodeInformation::_Internal {
  public:
 };
 
-NodeInformation::NodeInformation(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+NodeInformation::NodeInformation(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.node.NodeInformation)
 }
 NodeInformation::NodeInformation(const NodeInformation& from)
@@ -408,34 +441,33 @@ NodeInformation::NodeInformation(const NodeInformation& from)
   NodeInformation* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.addresses_){from._impl_.addresses_}
-    , decltype(_impl_.id_base58_){}
+    , decltype(_impl_.id_base58_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_base58_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_base58_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id_base58().empty()) {
-    _this->_impl_.id_base58_.Set(from._internal_id_base58(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.id_base58_.Set(from._internal_id_base58(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.node.NodeInformation)
 }
 
-inline void NodeInformation::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void NodeInformation::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.addresses_){arena}
-    , decltype(_impl_.id_base58_){}
+    , decltype(_impl_.id_base58_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.id_base58_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_base58_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_base58_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NodeInformation::~NodeInformation() {
@@ -448,8 +480,8 @@ NodeInformation::~NodeInformation() {
 }
 
 inline void NodeInformation::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.addresses_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_addresses()->~RepeatedPtrField();
   _impl_.id_base58_.Destroy();
 }
 
@@ -459,11 +491,11 @@ void NodeInformation::SetCachedSize(int size) const {
 
 void NodeInformation::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.node.NodeInformation)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.addresses_.Clear();
+  _internal_mutable_addresses()->Clear();
   _impl_.id_base58_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -471,22 +503,23 @@ void NodeInformation::Clear() {
 const char* NodeInformation::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string id_base58 = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id_base58();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.id_base58"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated string addresses = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -496,8 +529,9 @@ const char* NodeInformation::_InternalParse(const char* ptr, ::_pbi::ParseContex
             CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.node.NodeInformation.addresses"));
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -522,29 +556,25 @@ failure:
 #undef CHK_
 }
 
-uint8_t* NodeInformation::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* NodeInformation::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.node.NodeInformation)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // string id_base58 = 1;
   if (!this->_internal_id_base58().empty()) {
+    const std::string& _s = this->_internal_id_base58();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_id_base58().data(), static_cast<int>(this->_internal_id_base58().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.node.NodeInformation.id_base58");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_id_base58(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.node.NodeInformation.id_base58");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
   // repeated string addresses = 2;
-  for (int i = 0, n = this->_internal_addresses_size(); i < n; i++) {
+  for (int i = 0, n = this->_internal_addresses_size(); i < n; ++i) {
     const auto& s = this->_internal_addresses(i);
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      s.data(), static_cast<int>(s.length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.node.NodeInformation.addresses");
+        s.data(), static_cast<int>(s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.node.NodeInformation.addresses");
     target = stream->WriteString(2, s, target);
   }
 
@@ -556,27 +586,25 @@ uint8_t* NodeInformation::_InternalSerialize(
   return target;
 }
 
-size_t NodeInformation::ByteSizeLong() const {
+::size_t NodeInformation::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.node.NodeInformation)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated string addresses = 2;
-  total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_impl_.addresses_.size());
-  for (int i = 0, n = _impl_.addresses_.size(); i < n; i++) {
+  total_size += 1 * ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_internal_addresses().size());
+  for (int i = 0, n = _internal_addresses().size(); i < n; ++i) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-      _impl_.addresses_.Get(i));
+        _internal_addresses().Get(i));
   }
 
   // string id_base58 = 1;
   if (!this->_internal_id_base58().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_id_base58());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_id_base58());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -593,11 +621,11 @@ void NodeInformation::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   auto* const _this = static_cast<NodeInformation*>(&to_msg);
   auto& from = static_cast<const NodeInformation&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.node.NodeInformation)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.addresses_.MergeFrom(from._impl_.addresses_);
+  _this->_internal_mutable_addresses()->MergeFrom(from._internal_addresses());
   if (!from._internal_id_base58().empty()) {
     _this->_internal_set_id_base58(from._internal_id_base58());
   }
@@ -620,11 +648,10 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.addresses_.InternalSwap(&other->_impl_.addresses_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.id_base58_, lhs_arena,
-      &other->_impl_.id_base58_, rhs_arena
-  );
+  _internal_mutable_addresses()->InternalSwap(
+      other->_internal_mutable_addresses());
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_base58_, lhs_arena,
+                                       &other->_impl_.id_base58_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NodeInformation::GetMetadata() const {
@@ -632,7 +659,6 @@ void NodeInformation::InternalSwap(NodeInformation* other) {
       &descriptor_table_node_2fnode_2eproto_getter, &descriptor_table_node_2fnode_2eproto_once,
       file_level_metadata_node_2fnode_2eproto[1]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace node
 }  // namespace rpc
@@ -647,6 +673,5 @@ Arena::CreateMaybeMessage< ::qaul::rpc::node::NodeInformation >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::node::NodeInformation >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

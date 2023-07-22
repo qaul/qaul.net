@@ -77,6 +77,7 @@ public final class QaulRpcOuterClass {
     /**
      * <pre>
      * feed module handling
+     *
      * send and retrieve feed messages
      * </pre>
      *
@@ -102,6 +103,7 @@ public final class QaulRpcOuterClass {
     /**
      * <pre>
      * chat group handling
+     *
      * manage chat groups and group invites
      * </pre>
      *
@@ -208,6 +210,7 @@ public final class QaulRpcOuterClass {
     /**
      * <pre>
      * feed module handling
+     *
      * send and retrieve feed messages
      * </pre>
      *
@@ -233,6 +236,7 @@ public final class QaulRpcOuterClass {
     /**
      * <pre>
      * chat group handling
+     *
      * manage chat groups and group invites
      * </pre>
      *
@@ -477,11 +481,6 @@ public final class QaulRpcOuterClass {
       return new QaulRpc();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.QaulRpcOuterClass.internal_static_qaul_rpc_QaulRpc_descriptor;
@@ -496,7 +495,7 @@ public final class QaulRpcOuterClass {
     }
 
     public static final int MODULE_FIELD_NUMBER = 1;
-    private int module_;
+    private int module_ = 0;
     /**
      * <pre>
      * which module to approach
@@ -517,13 +516,13 @@ public final class QaulRpcOuterClass {
      * @return The module.
      */
     @java.lang.Override public qaul.rpc.QaulRpcOuterClass.Modules getModule() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.QaulRpcOuterClass.Modules result = qaul.rpc.QaulRpcOuterClass.Modules.valueOf(module_);
+      qaul.rpc.QaulRpcOuterClass.Modules result = qaul.rpc.QaulRpcOuterClass.Modules.forNumber(module_);
       return result == null ? qaul.rpc.QaulRpcOuterClass.Modules.UNRECOGNIZED : result;
     }
 
     public static final int REQUEST_ID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object requestId_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object requestId_ = "";
     /**
      * <pre>
      * can be used to identify responses
@@ -569,7 +568,7 @@ public final class QaulRpcOuterClass {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * authorisation
@@ -585,7 +584,7 @@ public final class QaulRpcOuterClass {
     }
 
     public static final int DATA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString data_;
+    private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * the protobuf encoded binary message data
@@ -740,11 +739,13 @@ public final class QaulRpcOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.QaulRpcOuterClass.QaulRpc parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.QaulRpcOuterClass.QaulRpc parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -825,14 +826,11 @@ public final class QaulRpcOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         module_ = 0;
-
         requestId_ = "";
-
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         data_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -859,12 +857,25 @@ public final class QaulRpcOuterClass {
       @java.lang.Override
       public qaul.rpc.QaulRpcOuterClass.QaulRpc buildPartial() {
         qaul.rpc.QaulRpcOuterClass.QaulRpc result = new qaul.rpc.QaulRpcOuterClass.QaulRpc(this);
-        result.module_ = module_;
-        result.requestId_ = requestId_;
-        result.userId_ = userId_;
-        result.data_ = data_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.QaulRpcOuterClass.QaulRpc result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.module_ = module_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.requestId_ = requestId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.userId_ = userId_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.data_ = data_;
+        }
       }
 
       @java.lang.Override
@@ -916,6 +927,7 @@ public final class QaulRpcOuterClass {
         }
         if (!other.getRequestId().isEmpty()) {
           requestId_ = other.requestId_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getUserId() != com.google.protobuf.ByteString.EMPTY) {
@@ -952,22 +964,22 @@ public final class QaulRpcOuterClass {
                 break;
               case 8: {
                 module_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 requestId_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 34: {
                 data_ = input.readBytes();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               default: {
@@ -985,6 +997,7 @@ public final class QaulRpcOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int module_ = 0;
       /**
@@ -1008,8 +1021,8 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder setModuleValue(int value) {
-        
         module_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1023,8 +1036,7 @@ public final class QaulRpcOuterClass {
        */
       @java.lang.Override
       public qaul.rpc.QaulRpcOuterClass.Modules getModule() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.QaulRpcOuterClass.Modules result = qaul.rpc.QaulRpcOuterClass.Modules.valueOf(module_);
+        qaul.rpc.QaulRpcOuterClass.Modules result = qaul.rpc.QaulRpcOuterClass.Modules.forNumber(module_);
         return result == null ? qaul.rpc.QaulRpcOuterClass.Modules.UNRECOGNIZED : result;
       }
       /**
@@ -1040,7 +1052,7 @@ public final class QaulRpcOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         module_ = value.getNumber();
         onChanged();
         return this;
@@ -1054,7 +1066,7 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearModule() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         module_ = 0;
         onChanged();
         return this;
@@ -1113,11 +1125,9 @@ public final class QaulRpcOuterClass {
        */
       public Builder setRequestId(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         requestId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1130,8 +1140,8 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearRequestId() {
-        
         requestId_ = getDefaultInstance().getRequestId();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -1146,12 +1156,10 @@ public final class QaulRpcOuterClass {
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         requestId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1181,11 +1189,9 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -1199,7 +1205,7 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -1230,11 +1236,9 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         data_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -1248,7 +1252,7 @@ public final class QaulRpcOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearData() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;

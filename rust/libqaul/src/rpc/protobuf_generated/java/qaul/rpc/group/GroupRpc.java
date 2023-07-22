@@ -273,6 +273,7 @@ public final class GroupRpc {
   /**
    * <pre>
    * Group Status
+   *
    * Indicates the working status of a group.
    * </pre>
    *
@@ -283,6 +284,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * Group is Active
+     *
      * The group is in active state and we can post
      * messages to this group.
      * </pre>
@@ -293,6 +295,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * Invite Accepted
+     *
      * We accepted the invitation to this group
      * but we haven't received the updated group
      * info from the group administrator yet.
@@ -306,6 +309,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * The group was deactivated
+     *
      * We either left the group or have been removed from the group
      * by the group administrator.
      * We therefore can't post messages into this group anymore.
@@ -320,6 +324,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * Group is Active
+     *
      * The group is in active state and we can post
      * messages to this group.
      * </pre>
@@ -330,6 +335,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * Invite Accepted
+     *
      * We accepted the invitation to this group
      * but we haven't received the updated group
      * info from the group administrator yet.
@@ -343,6 +349,7 @@ public final class GroupRpc {
     /**
      * <pre>
      * The group was deactivated
+     *
      * We either left the group or have been removed from the group
      * by the group administrator.
      * We therefore can't post messages into this group anymore.
@@ -872,7 +879,7 @@ public final class GroupRpc {
      */
     qaul.rpc.group.GroupRpc.GroupInvitedResponseOrBuilder getGroupInvitedResponseOrBuilder();
 
-    public qaul.rpc.group.GroupRpc.Group.MessageCase getMessageCase();
+    qaul.rpc.group.GroupRpc.Group.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -900,11 +907,6 @@ public final class GroupRpc {
       return new Group();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_Group_descriptor;
@@ -919,6 +921,7 @@ public final class GroupRpc {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -2022,11 +2025,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.Group parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.Group parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2105,6 +2110,7 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (groupCreateRequestBuilder_ != null) {
           groupCreateRequestBuilder_.clear();
         }
@@ -2181,121 +2187,83 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.Group buildPartial() {
         qaul.rpc.group.GroupRpc.Group result = new qaul.rpc.group.GroupRpc.Group(this);
-        if (messageCase_ == 1) {
-          if (groupCreateRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupCreateRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (groupCreateResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupCreateResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (groupRenameRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupRenameRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (groupRenameResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupRenameResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (groupInviteMemberRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInviteMemberRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (groupInviteMemberResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInviteMemberResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 7) {
-          if (groupRemoveMemberRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupRemoveMemberRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 8) {
-          if (groupRemoveMemberResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupRemoveMemberResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 9) {
-          if (groupInfoRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInfoRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 10) {
-          if (groupInfoResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInfoResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 11) {
-          if (groupReplyInviteRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupReplyInviteRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 12) {
-          if (groupReplyInviteResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupReplyInviteResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 13) {
-          if (groupListRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupListRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 14) {
-          if (groupListResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupListResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 15) {
-          if (groupInvitedRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInvitedRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 16) {
-          if (groupInvitedResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = groupInvitedResponseBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.Group result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.group.GroupRpc.Group result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            groupCreateRequestBuilder_ != null) {
+          result.message_ = groupCreateRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            groupCreateResponseBuilder_ != null) {
+          result.message_ = groupCreateResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            groupRenameRequestBuilder_ != null) {
+          result.message_ = groupRenameRequestBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            groupRenameResponseBuilder_ != null) {
+          result.message_ = groupRenameResponseBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            groupInviteMemberRequestBuilder_ != null) {
+          result.message_ = groupInviteMemberRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            groupInviteMemberResponseBuilder_ != null) {
+          result.message_ = groupInviteMemberResponseBuilder_.build();
+        }
+        if (messageCase_ == 7 &&
+            groupRemoveMemberRequestBuilder_ != null) {
+          result.message_ = groupRemoveMemberRequestBuilder_.build();
+        }
+        if (messageCase_ == 8 &&
+            groupRemoveMemberResponseBuilder_ != null) {
+          result.message_ = groupRemoveMemberResponseBuilder_.build();
+        }
+        if (messageCase_ == 9 &&
+            groupInfoRequestBuilder_ != null) {
+          result.message_ = groupInfoRequestBuilder_.build();
+        }
+        if (messageCase_ == 10 &&
+            groupInfoResponseBuilder_ != null) {
+          result.message_ = groupInfoResponseBuilder_.build();
+        }
+        if (messageCase_ == 11 &&
+            groupReplyInviteRequestBuilder_ != null) {
+          result.message_ = groupReplyInviteRequestBuilder_.build();
+        }
+        if (messageCase_ == 12 &&
+            groupReplyInviteResponseBuilder_ != null) {
+          result.message_ = groupReplyInviteResponseBuilder_.build();
+        }
+        if (messageCase_ == 13 &&
+            groupListRequestBuilder_ != null) {
+          result.message_ = groupListRequestBuilder_.build();
+        }
+        if (messageCase_ == 14 &&
+            groupListResponseBuilder_ != null) {
+          result.message_ = groupListResponseBuilder_.build();
+        }
+        if (messageCase_ == 15 &&
+            groupInvitedRequestBuilder_ != null) {
+          result.message_ = groupInvitedRequestBuilder_.build();
+        }
+        if (messageCase_ == 16 &&
+            groupInvitedResponseBuilder_ != null) {
+          result.message_ = groupInvitedResponseBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -2579,6 +2547,7 @@ public final class GroupRpc {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.group.GroupRpc.GroupCreateRequest, qaul.rpc.group.GroupRpc.GroupCreateRequest.Builder, qaul.rpc.group.GroupRpc.GroupCreateRequestOrBuilder> groupCreateRequestBuilder_;
@@ -2754,7 +2723,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return groupCreateRequestBuilder_;
       }
 
@@ -2932,7 +2901,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return groupCreateResponseBuilder_;
       }
 
@@ -3110,7 +3079,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return groupRenameRequestBuilder_;
       }
 
@@ -3288,7 +3257,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return groupRenameResponseBuilder_;
       }
 
@@ -3466,7 +3435,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return groupInviteMemberRequestBuilder_;
       }
 
@@ -3644,7 +3613,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return groupInviteMemberResponseBuilder_;
       }
 
@@ -3822,7 +3791,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 7;
-        onChanged();;
+        onChanged();
         return groupRemoveMemberRequestBuilder_;
       }
 
@@ -4000,7 +3969,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 8;
-        onChanged();;
+        onChanged();
         return groupRemoveMemberResponseBuilder_;
       }
 
@@ -4178,7 +4147,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 9;
-        onChanged();;
+        onChanged();
         return groupInfoRequestBuilder_;
       }
 
@@ -4356,7 +4325,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 10;
-        onChanged();;
+        onChanged();
         return groupInfoResponseBuilder_;
       }
 
@@ -4534,7 +4503,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 11;
-        onChanged();;
+        onChanged();
         return groupReplyInviteRequestBuilder_;
       }
 
@@ -4712,7 +4681,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 12;
-        onChanged();;
+        onChanged();
         return groupReplyInviteResponseBuilder_;
       }
 
@@ -4890,7 +4859,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 13;
-        onChanged();;
+        onChanged();
         return groupListRequestBuilder_;
       }
 
@@ -5068,7 +5037,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 14;
-        onChanged();;
+        onChanged();
         return groupListResponseBuilder_;
       }
 
@@ -5246,7 +5215,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 15;
-        onChanged();;
+        onChanged();
         return groupInvitedRequestBuilder_;
       }
 
@@ -5424,7 +5393,7 @@ public final class GroupRpc {
           message_ = null;
         }
         messageCase_ = 16;
-        onChanged();;
+        onChanged();
         return groupInvitedResponseBuilder_;
       }
       @java.lang.Override
@@ -5498,8 +5467,10 @@ public final class GroupRpc {
     /**
      * <pre>
      * status
+     *
      * true = success
      * false = an error happened
+     *
      * if the result is false, the message will
      * contain the error message.
      * </pre>
@@ -5556,11 +5527,6 @@ public final class GroupRpc {
       return new GroupResult();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupResult_descriptor;
@@ -5575,12 +5541,14 @@ public final class GroupRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 1;
-    private boolean status_;
+    private boolean status_ = false;
     /**
      * <pre>
      * status
+     *
      * true = success
      * false = an error happened
+     *
      * if the result is false, the message will
      * contain the error message.
      * </pre>
@@ -5594,7 +5562,8 @@ public final class GroupRpc {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private volatile java.lang.Object message_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object message_ = "";
     /**
      * <pre>
      * message
@@ -5759,11 +5728,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupResult parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupResult parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5842,10 +5813,9 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         status_ = false;
-
         message_ = "";
-
         return this;
       }
 
@@ -5872,10 +5842,19 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupResult buildPartial() {
         qaul.rpc.group.GroupRpc.GroupResult result = new qaul.rpc.group.GroupRpc.GroupResult(this);
-        result.status_ = status_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupResult result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -5927,6 +5906,7 @@ public final class GroupRpc {
         }
         if (!other.getMessage().isEmpty()) {
           message_ = other.message_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -5957,12 +5937,12 @@ public final class GroupRpc {
                 break;
               case 8: {
                 status_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 message_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -5980,13 +5960,16 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean status_ ;
       /**
        * <pre>
        * status
+       *
        * true = success
        * false = an error happened
+       *
        * if the result is false, the message will
        * contain the error message.
        * </pre>
@@ -6001,8 +5984,10 @@ public final class GroupRpc {
       /**
        * <pre>
        * status
+       *
        * true = success
        * false = an error happened
+       *
        * if the result is false, the message will
        * contain the error message.
        * </pre>
@@ -6012,16 +5997,19 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setStatus(boolean value) {
-        
+
         status_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
       /**
        * <pre>
        * status
+       *
        * true = success
        * false = an error happened
+       *
        * if the result is false, the message will
        * contain the error message.
        * </pre>
@@ -6030,7 +6018,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         status_ = false;
         onChanged();
         return this;
@@ -6089,11 +6077,9 @@ public final class GroupRpc {
        */
       public Builder setMessage(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6106,8 +6092,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
         message_ = getDefaultInstance().getMessage();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -6122,12 +6108,10 @@ public final class GroupRpc {
        */
       public Builder setMessageBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6246,11 +6230,6 @@ public final class GroupRpc {
       return new GroupCreateRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupCreateRequest_descriptor;
@@ -6265,7 +6244,8 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object groupName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object groupName_ = "";
     /**
      * <pre>
      * group name
@@ -6418,11 +6398,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupCreateRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupCreateRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -6501,8 +6483,8 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupName_ = "";
-
         return this;
       }
 
@@ -6529,9 +6511,16 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupCreateRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupCreateRequest result = new qaul.rpc.group.GroupRpc.GroupCreateRequest(this);
-        result.groupName_ = groupName_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupCreateRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupName_ = groupName_;
+        }
       }
 
       @java.lang.Override
@@ -6580,6 +6569,7 @@ public final class GroupRpc {
         if (other == qaul.rpc.group.GroupRpc.GroupCreateRequest.getDefaultInstance()) return this;
         if (!other.getGroupName().isEmpty()) {
           groupName_ = other.groupName_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -6610,7 +6600,7 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -6628,6 +6618,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object groupName_ = "";
       /**
@@ -6682,11 +6673,9 @@ public final class GroupRpc {
        */
       public Builder setGroupName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6699,8 +6688,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupName() {
-        
         groupName_ = getDefaultInstance().getGroupName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -6715,12 +6704,10 @@ public final class GroupRpc {
        */
       public Builder setGroupNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         groupName_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6856,11 +6843,6 @@ public final class GroupRpc {
       return new GroupCreateResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupCreateResponse_descriptor;
@@ -6875,7 +6857,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -6924,7 +6906,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupResultOrBuilder getResultOrBuilder() {
-      return getResult();
+      return result_ == null ? qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance() : result_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -7052,11 +7034,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupCreateResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupCreateResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7135,12 +7119,11 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (resultBuilder_ == null) {
-          result_ = null;
-        } else {
-          result_ = null;
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
         return this;
@@ -7169,14 +7152,21 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupCreateResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupCreateResponse result = new qaul.rpc.group.GroupRpc.GroupCreateResponse(this);
-        result.groupId_ = groupId_;
-        if (resultBuilder_ == null) {
-          result.result_ = result_;
-        } else {
-          result.result_ = resultBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupCreateResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.result_ = resultBuilder_ == null
+              ? result_
+              : resultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -7257,14 +7247,14 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 input.readMessage(
                     getResultFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -7282,6 +7272,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -7306,11 +7297,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7323,7 +7312,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -7341,7 +7330,7 @@ public final class GroupRpc {
        * @return Whether the result field is set.
        */
       public boolean hasResult() {
-        return resultBuilder_ != null || result_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <pre>
@@ -7371,11 +7360,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           result_ = value;
-          onChanged();
         } else {
           resultBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -7389,11 +7378,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult.Builder builderForValue) {
         if (resultBuilder_ == null) {
           result_ = builderForValue.build();
-          onChanged();
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -7405,17 +7394,18 @@ public final class GroupRpc {
        */
       public Builder mergeResult(qaul.rpc.group.GroupRpc.GroupResult value) {
         if (resultBuilder_ == null) {
-          if (result_ != null) {
-            result_ =
-              qaul.rpc.group.GroupRpc.GroupResult.newBuilder(result_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            result_ != null &&
+            result_ != qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance()) {
+            getResultBuilder().mergeFrom(value);
           } else {
             result_ = value;
           }
-          onChanged();
         } else {
           resultBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -7426,14 +7416,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
        */
       public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = null;
-          onChanged();
-        } else {
-          result_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -7444,7 +7433,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 2;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupResult.Builder getResultBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
@@ -7609,11 +7598,6 @@ public final class GroupRpc {
       return new GroupRenameRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupRenameRequest_descriptor;
@@ -7628,7 +7612,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -7643,7 +7627,8 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object groupName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object groupName_ = "";
     /**
      * <pre>
      * group name
@@ -7807,11 +7792,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRenameRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRenameRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -7890,10 +7877,9 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         groupName_ = "";
-
         return this;
       }
 
@@ -7920,10 +7906,19 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupRenameRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupRenameRequest result = new qaul.rpc.group.GroupRpc.GroupRenameRequest(this);
-        result.groupId_ = groupId_;
-        result.groupName_ = groupName_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupRenameRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.groupName_ = groupName_;
+        }
       }
 
       @java.lang.Override
@@ -7975,6 +7970,7 @@ public final class GroupRpc {
         }
         if (!other.getGroupName().isEmpty()) {
           groupName_ = other.groupName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -8005,12 +8001,12 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 groupName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -8028,6 +8024,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -8052,11 +8049,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8069,7 +8064,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -8128,11 +8123,9 @@ public final class GroupRpc {
        */
       public Builder setGroupName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8145,8 +8138,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupName() {
-        
         groupName_ = getDefaultInstance().getGroupName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -8161,12 +8154,10 @@ public final class GroupRpc {
        */
       public Builder setGroupNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8323,11 +8314,6 @@ public final class GroupRpc {
       return new GroupRenameResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupRenameResponse_descriptor;
@@ -8342,7 +8328,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -8357,7 +8343,8 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object groupName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object groupName_ = "";
     /**
      * <pre>
      * group name
@@ -8437,7 +8424,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupResultOrBuilder getResultOrBuilder() {
-      return getResult();
+      return result_ == null ? qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance() : result_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -8575,11 +8562,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRenameResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRenameResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -8658,14 +8647,12 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         groupName_ = "";
-
-        if (resultBuilder_ == null) {
-          result_ = null;
-        } else {
-          result_ = null;
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
         return this;
@@ -8694,15 +8681,24 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupRenameResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupRenameResponse result = new qaul.rpc.group.GroupRpc.GroupRenameResponse(this);
-        result.groupId_ = groupId_;
-        result.groupName_ = groupName_;
-        if (resultBuilder_ == null) {
-          result.result_ = result_;
-        } else {
-          result.result_ = resultBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupRenameResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.groupName_ = groupName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.result_ = resultBuilder_ == null
+              ? result_
+              : resultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -8754,6 +8750,7 @@ public final class GroupRpc {
         }
         if (!other.getGroupName().isEmpty()) {
           groupName_ = other.groupName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.hasResult()) {
@@ -8787,19 +8784,19 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 groupName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 input.readMessage(
                     getResultFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -8817,6 +8814,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -8841,11 +8839,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -8858,7 +8854,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -8917,11 +8913,9 @@ public final class GroupRpc {
        */
       public Builder setGroupName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8934,8 +8928,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupName() {
-        
         groupName_ = getDefaultInstance().getGroupName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -8950,12 +8944,10 @@ public final class GroupRpc {
        */
       public Builder setGroupNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -8972,7 +8964,7 @@ public final class GroupRpc {
        * @return Whether the result field is set.
        */
       public boolean hasResult() {
-        return resultBuilder_ != null || result_ != null;
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <pre>
@@ -9002,11 +8994,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           result_ = value;
-          onChanged();
         } else {
           resultBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -9020,11 +9012,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult.Builder builderForValue) {
         if (resultBuilder_ == null) {
           result_ = builderForValue.build();
-          onChanged();
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -9036,17 +9028,18 @@ public final class GroupRpc {
        */
       public Builder mergeResult(qaul.rpc.group.GroupRpc.GroupResult value) {
         if (resultBuilder_ == null) {
-          if (result_ != null) {
-            result_ =
-              qaul.rpc.group.GroupRpc.GroupResult.newBuilder(result_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000004) != 0) &&
+            result_ != null &&
+            result_ != qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance()) {
+            getResultBuilder().mergeFrom(value);
           } else {
             result_ = value;
           }
-          onChanged();
         } else {
           resultBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -9057,14 +9050,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = null;
-          onChanged();
-        } else {
-          result_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -9075,7 +9067,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupResult.Builder getResultBuilder() {
-        
+        bitField0_ |= 0x00000004;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
@@ -9230,11 +9222,6 @@ public final class GroupRpc {
       return new GroupInviteMemberRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInviteMemberRequest_descriptor;
@@ -9249,7 +9236,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -9264,7 +9251,7 @@ public final class GroupRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -9398,11 +9385,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInviteMemberRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInviteMemberRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -9481,10 +9470,9 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -9511,10 +9499,19 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInviteMemberRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInviteMemberRequest result = new qaul.rpc.group.GroupRpc.GroupInviteMemberRequest(this);
-        result.groupId_ = groupId_;
-        result.userId_ = userId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInviteMemberRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -9595,12 +9592,12 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -9618,6 +9615,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -9642,11 +9640,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -9659,7 +9655,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -9688,11 +9684,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -9705,7 +9699,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -9853,11 +9847,6 @@ public final class GroupRpc {
       return new GroupInviteMemberResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInviteMemberResponse_descriptor;
@@ -9872,7 +9861,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -9887,7 +9876,7 @@ public final class GroupRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -9936,7 +9925,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupResultOrBuilder getResultOrBuilder() {
-      return getResult();
+      return result_ == null ? qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance() : result_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -10075,11 +10064,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInviteMemberResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInviteMemberResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10158,14 +10149,12 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (resultBuilder_ == null) {
-          result_ = null;
-        } else {
-          result_ = null;
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
         return this;
@@ -10194,15 +10183,24 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInviteMemberResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInviteMemberResponse result = new qaul.rpc.group.GroupRpc.GroupInviteMemberResponse(this);
-        result.groupId_ = groupId_;
-        result.userId_ = userId_;
-        if (resultBuilder_ == null) {
-          result.result_ = result_;
-        } else {
-          result.result_ = resultBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInviteMemberResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.userId_ = userId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.result_ = resultBuilder_ == null
+              ? result_
+              : resultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -10286,19 +10284,19 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 input.readMessage(
                     getResultFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -10316,6 +10314,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -10340,11 +10339,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -10357,7 +10354,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -10386,11 +10383,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -10403,7 +10398,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -10421,7 +10416,7 @@ public final class GroupRpc {
        * @return Whether the result field is set.
        */
       public boolean hasResult() {
-        return resultBuilder_ != null || result_ != null;
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <pre>
@@ -10451,11 +10446,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           result_ = value;
-          onChanged();
         } else {
           resultBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -10469,11 +10464,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult.Builder builderForValue) {
         if (resultBuilder_ == null) {
           result_ = builderForValue.build();
-          onChanged();
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -10485,17 +10480,18 @@ public final class GroupRpc {
        */
       public Builder mergeResult(qaul.rpc.group.GroupRpc.GroupResult value) {
         if (resultBuilder_ == null) {
-          if (result_ != null) {
-            result_ =
-              qaul.rpc.group.GroupRpc.GroupResult.newBuilder(result_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000004) != 0) &&
+            result_ != null &&
+            result_ != qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance()) {
+            getResultBuilder().mergeFrom(value);
           } else {
             result_ = value;
           }
-          onChanged();
         } else {
           resultBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -10506,14 +10502,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = null;
-          onChanged();
-        } else {
-          result_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -10524,7 +10519,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupResult.Builder getResultBuilder() {
-        
+        bitField0_ |= 0x00000004;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
@@ -10678,11 +10673,6 @@ public final class GroupRpc {
       return new GroupReplyInviteRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupReplyInviteRequest_descriptor;
@@ -10697,7 +10687,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -10712,7 +10702,7 @@ public final class GroupRpc {
     }
 
     public static final int ACCEPT_FIELD_NUMBER = 3;
-    private boolean accept_;
+    private boolean accept_ = false;
     /**
      * <pre>
      * accept
@@ -10847,11 +10837,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupReplyInviteRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupReplyInviteRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -10930,10 +10922,9 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         accept_ = false;
-
         return this;
       }
 
@@ -10960,10 +10951,19 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupReplyInviteRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupReplyInviteRequest result = new qaul.rpc.group.GroupRpc.GroupReplyInviteRequest(this);
-        result.groupId_ = groupId_;
-        result.accept_ = accept_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupReplyInviteRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.accept_ = accept_;
+        }
       }
 
       @java.lang.Override
@@ -11044,12 +11044,12 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 24: {
                 accept_ = input.readBool();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 24
               default: {
@@ -11067,6 +11067,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11091,11 +11092,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11108,7 +11107,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -11137,8 +11136,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setAccept(boolean value) {
-        
+
         accept_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -11151,7 +11151,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearAccept() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         accept_ = false;
         onChanged();
         return this;
@@ -11288,11 +11288,6 @@ public final class GroupRpc {
       return new GroupReplyInviteResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupReplyInviteResponse_descriptor;
@@ -11307,7 +11302,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -11356,7 +11351,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupResultOrBuilder getResultOrBuilder() {
-      return getResult();
+      return result_ == null ? qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance() : result_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -11484,11 +11479,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupReplyInviteResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupReplyInviteResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -11567,12 +11564,11 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (resultBuilder_ == null) {
-          result_ = null;
-        } else {
-          result_ = null;
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
         return this;
@@ -11601,14 +11597,21 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupReplyInviteResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupReplyInviteResponse result = new qaul.rpc.group.GroupRpc.GroupReplyInviteResponse(this);
-        result.groupId_ = groupId_;
-        if (resultBuilder_ == null) {
-          result.result_ = result_;
-        } else {
-          result.result_ = resultBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupReplyInviteResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.result_ = resultBuilder_ == null
+              ? result_
+              : resultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -11689,14 +11692,14 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 26: {
                 input.readMessage(
                     getResultFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 26
               default: {
@@ -11714,6 +11717,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -11738,11 +11742,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -11755,7 +11757,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -11773,7 +11775,7 @@ public final class GroupRpc {
        * @return Whether the result field is set.
        */
       public boolean hasResult() {
-        return resultBuilder_ != null || result_ != null;
+        return ((bitField0_ & 0x00000002) != 0);
       }
       /**
        * <pre>
@@ -11803,11 +11805,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           result_ = value;
-          onChanged();
         } else {
           resultBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -11821,11 +11823,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult.Builder builderForValue) {
         if (resultBuilder_ == null) {
           result_ = builderForValue.build();
-          onChanged();
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -11837,17 +11839,18 @@ public final class GroupRpc {
        */
       public Builder mergeResult(qaul.rpc.group.GroupRpc.GroupResult value) {
         if (resultBuilder_ == null) {
-          if (result_ != null) {
-            result_ =
-              qaul.rpc.group.GroupRpc.GroupResult.newBuilder(result_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000002) != 0) &&
+            result_ != null &&
+            result_ != qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance()) {
+            getResultBuilder().mergeFrom(value);
           } else {
             result_ = value;
           }
-          onChanged();
         } else {
           resultBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -11858,14 +11861,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = null;
-          onChanged();
-        } else {
-          result_ = null;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -11876,7 +11878,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupResult.Builder getResultBuilder() {
-        
+        bitField0_ |= 0x00000002;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
@@ -12031,11 +12033,6 @@ public final class GroupRpc {
       return new GroupRemoveMemberRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupRemoveMemberRequest_descriptor;
@@ -12050,7 +12047,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -12065,7 +12062,7 @@ public final class GroupRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -12199,11 +12196,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12282,10 +12281,9 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -12312,10 +12310,19 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest result = new qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest(this);
-        result.groupId_ = groupId_;
-        result.userId_ = userId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupRemoveMemberRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.userId_ = userId_;
+        }
       }
 
       @java.lang.Override
@@ -12396,12 +12403,12 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -12419,6 +12426,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -12443,11 +12451,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -12460,7 +12466,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -12489,11 +12495,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -12506,7 +12510,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -12654,11 +12658,6 @@ public final class GroupRpc {
       return new GroupRemoveMemberResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupRemoveMemberResponse_descriptor;
@@ -12673,7 +12672,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -12688,7 +12687,7 @@ public final class GroupRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -12737,7 +12736,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupResultOrBuilder getResultOrBuilder() {
-      return getResult();
+      return result_ == null ? qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance() : result_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -12876,11 +12875,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -12959,14 +12960,12 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
-        if (resultBuilder_ == null) {
-          result_ = null;
-        } else {
-          result_ = null;
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
         return this;
@@ -12995,15 +12994,24 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse result = new qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse(this);
-        result.groupId_ = groupId_;
-        result.userId_ = userId_;
-        if (resultBuilder_ == null) {
-          result.result_ = result_;
-        } else {
-          result.result_ = resultBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupRemoveMemberResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.userId_ = userId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.result_ = resultBuilder_ == null
+              ? result_
+              : resultBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -13087,19 +13095,19 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 input.readMessage(
                     getResultFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -13117,6 +13125,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -13141,11 +13150,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -13158,7 +13165,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -13187,11 +13194,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -13204,7 +13209,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -13222,7 +13227,7 @@ public final class GroupRpc {
        * @return Whether the result field is set.
        */
       public boolean hasResult() {
-        return resultBuilder_ != null || result_ != null;
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <pre>
@@ -13252,11 +13257,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           result_ = value;
-          onChanged();
         } else {
           resultBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -13270,11 +13275,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupResult.Builder builderForValue) {
         if (resultBuilder_ == null) {
           result_ = builderForValue.build();
-          onChanged();
         } else {
           resultBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -13286,17 +13291,18 @@ public final class GroupRpc {
        */
       public Builder mergeResult(qaul.rpc.group.GroupRpc.GroupResult value) {
         if (resultBuilder_ == null) {
-          if (result_ != null) {
-            result_ =
-              qaul.rpc.group.GroupRpc.GroupResult.newBuilder(result_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000004) != 0) &&
+            result_ != null &&
+            result_ != qaul.rpc.group.GroupRpc.GroupResult.getDefaultInstance()) {
+            getResultBuilder().mergeFrom(value);
           } else {
             result_ = value;
           }
-          onChanged();
         } else {
           resultBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -13307,14 +13313,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public Builder clearResult() {
-        if (resultBuilder_ == null) {
-          result_ = null;
-          onChanged();
-        } else {
-          result_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        result_ = null;
+        if (resultBuilder_ != null) {
+          resultBuilder_.dispose();
           resultBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -13325,7 +13330,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupResult result = 3;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupResult.Builder getResultBuilder() {
-        
+        bitField0_ |= 0x00000004;
         onChanged();
         return getResultFieldBuilder().getBuilder();
       }
@@ -13469,11 +13474,6 @@ public final class GroupRpc {
       return new GroupInfoRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfoRequest_descriptor;
@@ -13488,7 +13488,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -13611,11 +13611,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInfoRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInfoRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -13694,8 +13696,8 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -13722,9 +13724,16 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInfoRequest buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInfoRequest result = new qaul.rpc.group.GroupRpc.GroupInfoRequest(this);
-        result.groupId_ = groupId_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInfoRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
       }
 
       @java.lang.Override
@@ -13802,7 +13811,7 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -13820,6 +13829,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -13844,11 +13854,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -13861,7 +13869,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -14031,11 +14039,6 @@ public final class GroupRpc {
       return new GroupMember();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupMember_descriptor;
@@ -14050,7 +14053,7 @@ public final class GroupRpc {
     }
 
     public static final int USER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString userId_;
+    private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * user id
@@ -14065,7 +14068,7 @@ public final class GroupRpc {
     }
 
     public static final int ROLE_FIELD_NUMBER = 2;
-    private int role_;
+    private int role_ = 0;
     /**
      * <pre>
      * role
@@ -14086,13 +14089,12 @@ public final class GroupRpc {
      * @return The role.
      */
     @java.lang.Override public qaul.rpc.group.GroupRpc.GroupMemberRole getRole() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.group.GroupRpc.GroupMemberRole result = qaul.rpc.group.GroupRpc.GroupMemberRole.valueOf(role_);
+      qaul.rpc.group.GroupRpc.GroupMemberRole result = qaul.rpc.group.GroupRpc.GroupMemberRole.forNumber(role_);
       return result == null ? qaul.rpc.group.GroupRpc.GroupMemberRole.UNRECOGNIZED : result;
     }
 
     public static final int JOINED_AT_FIELD_NUMBER = 3;
-    private long joinedAt_;
+    private long joinedAt_ = 0L;
     /**
      * <pre>
      * joined at
@@ -14107,7 +14109,7 @@ public final class GroupRpc {
     }
 
     public static final int STATE_FIELD_NUMBER = 4;
-    private int state_;
+    private int state_ = 0;
     /**
      * <pre>
      * state
@@ -14128,13 +14130,12 @@ public final class GroupRpc {
      * @return The state.
      */
     @java.lang.Override public qaul.rpc.group.GroupRpc.GroupMemberState getState() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.group.GroupRpc.GroupMemberState result = qaul.rpc.group.GroupRpc.GroupMemberState.valueOf(state_);
+      qaul.rpc.group.GroupRpc.GroupMemberState result = qaul.rpc.group.GroupRpc.GroupMemberState.forNumber(state_);
       return result == null ? qaul.rpc.group.GroupRpc.GroupMemberState.UNRECOGNIZED : result;
     }
 
     public static final int LAST_MESSAGE_INDEX_FIELD_NUMBER = 5;
-    private int lastMessageIndex_;
+    private int lastMessageIndex_ = 0;
     /**
      * <pre>
      * last message index
@@ -14300,11 +14301,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupMember parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupMember parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -14383,16 +14386,12 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         userId_ = com.google.protobuf.ByteString.EMPTY;
-
         role_ = 0;
-
         joinedAt_ = 0L;
-
         state_ = 0;
-
         lastMessageIndex_ = 0;
-
         return this;
       }
 
@@ -14419,13 +14418,28 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupMember buildPartial() {
         qaul.rpc.group.GroupRpc.GroupMember result = new qaul.rpc.group.GroupRpc.GroupMember(this);
-        result.userId_ = userId_;
-        result.role_ = role_;
-        result.joinedAt_ = joinedAt_;
-        result.state_ = state_;
-        result.lastMessageIndex_ = lastMessageIndex_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupMember result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.userId_ = userId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.role_ = role_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.joinedAt_ = joinedAt_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.state_ = state_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.lastMessageIndex_ = lastMessageIndex_;
+        }
       }
 
       @java.lang.Override
@@ -14515,27 +14529,27 @@ public final class GroupRpc {
                 break;
               case 10: {
                 userId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 role_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
                 joinedAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 32: {
                 state_ = input.readEnum();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 40: {
                 lastMessageIndex_ = input.readUInt32();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 40
               default: {
@@ -14553,6 +14567,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -14577,11 +14592,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUserId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         userId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -14594,7 +14607,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUserId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         userId_ = getDefaultInstance().getUserId();
         onChanged();
         return this;
@@ -14622,8 +14635,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setRoleValue(int value) {
-        
         role_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -14637,8 +14650,7 @@ public final class GroupRpc {
        */
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupMemberRole getRole() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.group.GroupRpc.GroupMemberRole result = qaul.rpc.group.GroupRpc.GroupMemberRole.valueOf(role_);
+        qaul.rpc.group.GroupRpc.GroupMemberRole result = qaul.rpc.group.GroupRpc.GroupMemberRole.forNumber(role_);
         return result == null ? qaul.rpc.group.GroupRpc.GroupMemberRole.UNRECOGNIZED : result;
       }
       /**
@@ -14654,7 +14666,7 @@ public final class GroupRpc {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         role_ = value.getNumber();
         onChanged();
         return this;
@@ -14668,7 +14680,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearRole() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         role_ = 0;
         onChanged();
         return this;
@@ -14697,8 +14709,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setJoinedAt(long value) {
-        
+
         joinedAt_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -14711,7 +14724,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearJoinedAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         joinedAt_ = 0L;
         onChanged();
         return this;
@@ -14739,8 +14752,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setStateValue(int value) {
-        
         state_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -14754,8 +14767,7 @@ public final class GroupRpc {
        */
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupMemberState getState() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.group.GroupRpc.GroupMemberState result = qaul.rpc.group.GroupRpc.GroupMemberState.valueOf(state_);
+        qaul.rpc.group.GroupRpc.GroupMemberState result = qaul.rpc.group.GroupRpc.GroupMemberState.forNumber(state_);
         return result == null ? qaul.rpc.group.GroupRpc.GroupMemberState.UNRECOGNIZED : result;
       }
       /**
@@ -14771,7 +14783,7 @@ public final class GroupRpc {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000008;
         state_ = value.getNumber();
         onChanged();
         return this;
@@ -14785,7 +14797,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearState() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         state_ = 0;
         onChanged();
         return this;
@@ -14814,8 +14826,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setLastMessageIndex(int value) {
-        
+
         lastMessageIndex_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -14828,7 +14841,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearLastMessageIndex() {
-        
+        bitField0_ = (bitField0_ & ~0x00000010);
         lastMessageIndex_ = 0;
         onChanged();
         return this;
@@ -15096,11 +15109,6 @@ public final class GroupRpc {
       return new GroupInfo();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInfo_descriptor;
@@ -15115,7 +15123,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString groupId_;
+    private com.google.protobuf.ByteString groupId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * group id
@@ -15130,7 +15138,8 @@ public final class GroupRpc {
     }
 
     public static final int GROUP_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object groupName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object groupName_ = "";
     /**
      * <pre>
      * group name
@@ -15176,7 +15185,7 @@ public final class GroupRpc {
     }
 
     public static final int CREATED_AT_FIELD_NUMBER = 3;
-    private long createdAt_;
+    private long createdAt_ = 0L;
     /**
      * <pre>
      * created at
@@ -15191,7 +15200,7 @@ public final class GroupRpc {
     }
 
     public static final int STATUS_FIELD_NUMBER = 4;
-    private int status_;
+    private int status_ = 0;
     /**
      * <pre>
      * group status
@@ -15212,13 +15221,12 @@ public final class GroupRpc {
      * @return The status.
      */
     @java.lang.Override public qaul.rpc.group.GroupRpc.GroupStatus getStatus() {
-      @SuppressWarnings("deprecation")
-      qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.valueOf(status_);
+      qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.forNumber(status_);
       return result == null ? qaul.rpc.group.GroupRpc.GroupStatus.UNRECOGNIZED : result;
     }
 
     public static final int REVISION_FIELD_NUMBER = 5;
-    private int revision_;
+    private int revision_ = 0;
     /**
      * <pre>
      * group revision number
@@ -15233,7 +15241,7 @@ public final class GroupRpc {
     }
 
     public static final int IS_DIRECT_CHAT_FIELD_NUMBER = 6;
-    private boolean isDirectChat_;
+    private boolean isDirectChat_ = false;
     /**
      * <pre>
      * is direct chat
@@ -15248,6 +15256,7 @@ public final class GroupRpc {
     }
 
     public static final int MEMBERS_FIELD_NUMBER = 7;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.group.GroupRpc.GroupMember> members_;
     /**
      * <pre>
@@ -15308,7 +15317,7 @@ public final class GroupRpc {
     }
 
     public static final int UNREAD_MESSAGES_FIELD_NUMBER = 8;
-    private int unreadMessages_;
+    private int unreadMessages_ = 0;
     /**
      * <pre>
      * unread messages
@@ -15323,7 +15332,7 @@ public final class GroupRpc {
     }
 
     public static final int LAST_MESSAGE_AT_FIELD_NUMBER = 9;
-    private long lastMessageAt_;
+    private long lastMessageAt_ = 0L;
     /**
      * <pre>
      * time when last message was sent
@@ -15338,7 +15347,7 @@ public final class GroupRpc {
     }
 
     public static final int LAST_MESSAGE_FIELD_NUMBER = 10;
-    private com.google.protobuf.ByteString lastMessage_;
+    private com.google.protobuf.ByteString lastMessage_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * content type
@@ -15353,7 +15362,7 @@ public final class GroupRpc {
     }
 
     public static final int LAST_MESSAGE_SENDER_ID_FIELD_NUMBER = 11;
-    private com.google.protobuf.ByteString lastMessageSenderId_;
+    private com.google.protobuf.ByteString lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * sender of the last message
@@ -15589,11 +15598,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -15672,33 +15683,24 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         groupId_ = com.google.protobuf.ByteString.EMPTY;
-
         groupName_ = "";
-
         createdAt_ = 0L;
-
         status_ = 0;
-
         revision_ = 0;
-
         isDirectChat_ = false;
-
         if (membersBuilder_ == null) {
           members_ = java.util.Collections.emptyList();
         } else {
           members_ = null;
           membersBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000040);
         unreadMessages_ = 0;
-
         lastMessageAt_ = 0L;
-
         lastMessage_ = com.google.protobuf.ByteString.EMPTY;
-
         lastMessageSenderId_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -15725,28 +15727,56 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInfo buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInfo result = new qaul.rpc.group.GroupRpc.GroupInfo(this);
-        int from_bitField0_ = bitField0_;
-        result.groupId_ = groupId_;
-        result.groupName_ = groupName_;
-        result.createdAt_ = createdAt_;
-        result.status_ = status_;
-        result.revision_ = revision_;
-        result.isDirectChat_ = isDirectChat_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.group.GroupRpc.GroupInfo result) {
         if (membersBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000040) != 0)) {
             members_ = java.util.Collections.unmodifiableList(members_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000040);
           }
           result.members_ = members_;
         } else {
           result.members_ = membersBuilder_.build();
         }
-        result.unreadMessages_ = unreadMessages_;
-        result.lastMessageAt_ = lastMessageAt_;
-        result.lastMessage_ = lastMessage_;
-        result.lastMessageSenderId_ = lastMessageSenderId_;
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.groupId_ = groupId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.groupName_ = groupName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.createdAt_ = createdAt_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.revision_ = revision_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.isDirectChat_ = isDirectChat_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.unreadMessages_ = unreadMessages_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.lastMessageAt_ = lastMessageAt_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.lastMessage_ = lastMessage_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.lastMessageSenderId_ = lastMessageSenderId_;
+        }
       }
 
       @java.lang.Override
@@ -15798,6 +15828,7 @@ public final class GroupRpc {
         }
         if (!other.getGroupName().isEmpty()) {
           groupName_ = other.groupName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getCreatedAt() != 0L) {
@@ -15816,7 +15847,7 @@ public final class GroupRpc {
           if (!other.members_.isEmpty()) {
             if (members_.isEmpty()) {
               members_ = other.members_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000040);
             } else {
               ensureMembersIsMutable();
               members_.addAll(other.members_);
@@ -15829,7 +15860,7 @@ public final class GroupRpc {
               membersBuilder_.dispose();
               membersBuilder_ = null;
               members_ = other.members_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000040);
               membersBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getMembersFieldBuilder() : null;
@@ -15878,32 +15909,32 @@ public final class GroupRpc {
                 break;
               case 10: {
                 groupId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 groupName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
                 createdAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 32: {
                 status_ = input.readEnum();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 40: {
                 revision_ = input.readUInt32();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 40
               case 48: {
                 isDirectChat_ = input.readBool();
-
+                bitField0_ |= 0x00000020;
                 break;
               } // case 48
               case 58: {
@@ -15921,22 +15952,22 @@ public final class GroupRpc {
               } // case 58
               case 64: {
                 unreadMessages_ = input.readUInt32();
-
+                bitField0_ |= 0x00000080;
                 break;
               } // case 64
               case 72: {
                 lastMessageAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000100;
                 break;
               } // case 72
               case 82: {
                 lastMessage_ = input.readBytes();
-
+                bitField0_ |= 0x00000200;
                 break;
               } // case 82
               case 90: {
                 lastMessageSenderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000400;
                 break;
               } // case 90
               default: {
@@ -15979,11 +16010,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setGroupId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -15996,7 +16025,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         groupId_ = getDefaultInstance().getGroupId();
         onChanged();
         return this;
@@ -16055,11 +16084,9 @@ public final class GroupRpc {
        */
       public Builder setGroupName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -16072,8 +16099,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearGroupName() {
-        
         groupName_ = getDefaultInstance().getGroupName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -16088,12 +16115,10 @@ public final class GroupRpc {
        */
       public Builder setGroupNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         groupName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -16121,8 +16146,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setCreatedAt(long value) {
-        
+
         createdAt_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -16135,7 +16161,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearCreatedAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         createdAt_ = 0L;
         onChanged();
         return this;
@@ -16163,8 +16189,8 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
-        
         status_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -16178,8 +16204,7 @@ public final class GroupRpc {
        */
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupStatus getStatus() {
-        @SuppressWarnings("deprecation")
-        qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.valueOf(status_);
+        qaul.rpc.group.GroupRpc.GroupStatus result = qaul.rpc.group.GroupRpc.GroupStatus.forNumber(status_);
         return result == null ? qaul.rpc.group.GroupRpc.GroupStatus.UNRECOGNIZED : result;
       }
       /**
@@ -16195,7 +16220,7 @@ public final class GroupRpc {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000008;
         status_ = value.getNumber();
         onChanged();
         return this;
@@ -16209,7 +16234,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         status_ = 0;
         onChanged();
         return this;
@@ -16238,8 +16263,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setRevision(int value) {
-        
+
         revision_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -16252,7 +16278,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearRevision() {
-        
+        bitField0_ = (bitField0_ & ~0x00000010);
         revision_ = 0;
         onChanged();
         return this;
@@ -16281,8 +16307,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setIsDirectChat(boolean value) {
-        
+
         isDirectChat_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -16295,7 +16322,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearIsDirectChat() {
-        
+        bitField0_ = (bitField0_ & ~0x00000020);
         isDirectChat_ = false;
         onChanged();
         return this;
@@ -16304,9 +16331,9 @@ public final class GroupRpc {
       private java.util.List<qaul.rpc.group.GroupRpc.GroupMember> members_ =
         java.util.Collections.emptyList();
       private void ensureMembersIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000040) != 0)) {
           members_ = new java.util.ArrayList<qaul.rpc.group.GroupRpc.GroupMember>(members_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000040;
          }
       }
 
@@ -16500,7 +16527,7 @@ public final class GroupRpc {
       public Builder clearMembers() {
         if (membersBuilder_ == null) {
           members_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000040);
           onChanged();
         } else {
           membersBuilder_.clear();
@@ -16605,7 +16632,7 @@ public final class GroupRpc {
           membersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               qaul.rpc.group.GroupRpc.GroupMember, qaul.rpc.group.GroupRpc.GroupMember.Builder, qaul.rpc.group.GroupRpc.GroupMemberOrBuilder>(
                   members_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000040) != 0),
                   getParentForChildren(),
                   isClean());
           members_ = null;
@@ -16636,8 +16663,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setUnreadMessages(int value) {
-        
+
         unreadMessages_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -16650,7 +16678,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearUnreadMessages() {
-        
+        bitField0_ = (bitField0_ & ~0x00000080);
         unreadMessages_ = 0;
         onChanged();
         return this;
@@ -16679,8 +16707,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setLastMessageAt(long value) {
-        
+
         lastMessageAt_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -16693,7 +16722,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearLastMessageAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000100);
         lastMessageAt_ = 0L;
         onChanged();
         return this;
@@ -16722,11 +16751,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setLastMessage(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         lastMessage_ = value;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -16739,7 +16766,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearLastMessage() {
-        
+        bitField0_ = (bitField0_ & ~0x00000200);
         lastMessage_ = getDefaultInstance().getLastMessage();
         onChanged();
         return this;
@@ -16768,11 +16795,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setLastMessageSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         lastMessageSenderId_ = value;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
@@ -16785,7 +16810,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearLastMessageSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000400);
         lastMessageSenderId_ = getDefaultInstance().getLastMessageSenderId();
         onChanged();
         return this;
@@ -16884,11 +16909,6 @@ public final class GroupRpc {
       return new GroupListRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupListRequest_descriptor;
@@ -17000,11 +17020,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupListRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupListRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -17337,11 +17359,6 @@ public final class GroupRpc {
       return new GroupListResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupListResponse_descriptor;
@@ -17356,6 +17373,7 @@ public final class GroupRpc {
     }
 
     public static final int GROUPS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.group.GroupRpc.GroupInfo> groups_;
     /**
      * <pre>
@@ -17526,11 +17544,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupListResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupListResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -17609,6 +17629,7 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (groupsBuilder_ == null) {
           groups_ = java.util.Collections.emptyList();
         } else {
@@ -17642,7 +17663,13 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupListResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupListResponse result = new qaul.rpc.group.GroupRpc.GroupListResponse(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.group.GroupRpc.GroupListResponse result) {
         if (groupsBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             groups_ = java.util.Collections.unmodifiableList(groups_);
@@ -17652,8 +17679,10 @@ public final class GroupRpc {
         } else {
           result.groups_ = groupsBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupListResponse result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
@@ -18231,11 +18260,6 @@ public final class GroupRpc {
       return new GroupInvited();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInvited_descriptor;
@@ -18250,7 +18274,7 @@ public final class GroupRpc {
     }
 
     public static final int SENDER_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString senderId_;
+    private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * sender id
@@ -18265,7 +18289,7 @@ public final class GroupRpc {
     }
 
     public static final int RECEIVED_AT_FIELD_NUMBER = 2;
-    private long receivedAt_;
+    private long receivedAt_ = 0L;
     /**
      * <pre>
      * received at
@@ -18314,7 +18338,7 @@ public final class GroupRpc {
      */
     @java.lang.Override
     public qaul.rpc.group.GroupRpc.GroupInfoOrBuilder getGroupOrBuilder() {
-      return getGroup();
+      return group_ == null ? qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance() : group_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -18454,11 +18478,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvited parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvited parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -18533,14 +18559,12 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         senderId_ = com.google.protobuf.ByteString.EMPTY;
-
         receivedAt_ = 0L;
-
-        if (groupBuilder_ == null) {
-          group_ = null;
-        } else {
-          group_ = null;
+        group_ = null;
+        if (groupBuilder_ != null) {
+          groupBuilder_.dispose();
           groupBuilder_ = null;
         }
         return this;
@@ -18569,15 +18593,24 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInvited buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInvited result = new qaul.rpc.group.GroupRpc.GroupInvited(this);
-        result.senderId_ = senderId_;
-        result.receivedAt_ = receivedAt_;
-        if (groupBuilder_ == null) {
-          result.group_ = group_;
-        } else {
-          result.group_ = groupBuilder_.build();
-        }
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInvited result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.senderId_ = senderId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.receivedAt_ = receivedAt_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.group_ = groupBuilder_ == null
+              ? group_
+              : groupBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -18661,19 +18694,19 @@ public final class GroupRpc {
                 break;
               case 10: {
                 senderId_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 receivedAt_ = input.readUInt64();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 input.readMessage(
                     getGroupFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -18691,6 +18724,7 @@ public final class GroupRpc {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString senderId_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -18715,11 +18749,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setSenderId(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         senderId_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -18732,7 +18764,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearSenderId() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         senderId_ = getDefaultInstance().getSenderId();
         onChanged();
         return this;
@@ -18761,8 +18793,9 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder setReceivedAt(long value) {
-        
+
         receivedAt_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -18775,7 +18808,7 @@ public final class GroupRpc {
        * @return This builder for chaining.
        */
       public Builder clearReceivedAt() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         receivedAt_ = 0L;
         onChanged();
         return this;
@@ -18793,7 +18826,7 @@ public final class GroupRpc {
        * @return Whether the group field is set.
        */
       public boolean hasGroup() {
-        return groupBuilder_ != null || group_ != null;
+        return ((bitField0_ & 0x00000004) != 0);
       }
       /**
        * <pre>
@@ -18823,11 +18856,11 @@ public final class GroupRpc {
             throw new NullPointerException();
           }
           group_ = value;
-          onChanged();
         } else {
           groupBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -18841,11 +18874,11 @@ public final class GroupRpc {
           qaul.rpc.group.GroupRpc.GroupInfo.Builder builderForValue) {
         if (groupBuilder_ == null) {
           group_ = builderForValue.build();
-          onChanged();
         } else {
           groupBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -18857,17 +18890,18 @@ public final class GroupRpc {
        */
       public Builder mergeGroup(qaul.rpc.group.GroupRpc.GroupInfo value) {
         if (groupBuilder_ == null) {
-          if (group_ != null) {
-            group_ =
-              qaul.rpc.group.GroupRpc.GroupInfo.newBuilder(group_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000004) != 0) &&
+            group_ != null &&
+            group_ != qaul.rpc.group.GroupRpc.GroupInfo.getDefaultInstance()) {
+            getGroupBuilder().mergeFrom(value);
           } else {
             group_ = value;
           }
-          onChanged();
         } else {
           groupBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000004;
+        onChanged();
         return this;
       }
       /**
@@ -18878,14 +18912,13 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
        */
       public Builder clearGroup() {
-        if (groupBuilder_ == null) {
-          group_ = null;
-          onChanged();
-        } else {
-          group_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        group_ = null;
+        if (groupBuilder_ != null) {
+          groupBuilder_.dispose();
           groupBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -18896,7 +18929,7 @@ public final class GroupRpc {
        * <code>.qaul.rpc.group.GroupInfo group = 3;</code>
        */
       public qaul.rpc.group.GroupRpc.GroupInfo.Builder getGroupBuilder() {
-        
+        bitField0_ |= 0x00000004;
         onChanged();
         return getGroupFieldBuilder().getBuilder();
       }
@@ -19029,11 +19062,6 @@ public final class GroupRpc {
       return new GroupInvitedRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInvitedRequest_descriptor;
@@ -19145,11 +19173,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvitedRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvitedRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -19482,11 +19512,6 @@ public final class GroupRpc {
       return new GroupInvitedResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.group.GroupRpc.internal_static_qaul_rpc_group_GroupInvitedResponse_descriptor;
@@ -19501,6 +19526,7 @@ public final class GroupRpc {
     }
 
     public static final int INVITED_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<qaul.rpc.group.GroupRpc.GroupInvited> invited_;
     /**
      * <pre>
@@ -19671,11 +19697,13 @@ public final class GroupRpc {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvitedResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.group.GroupRpc.GroupInvitedResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -19754,6 +19782,7 @@ public final class GroupRpc {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (invitedBuilder_ == null) {
           invited_ = java.util.Collections.emptyList();
         } else {
@@ -19787,7 +19816,13 @@ public final class GroupRpc {
       @java.lang.Override
       public qaul.rpc.group.GroupRpc.GroupInvitedResponse buildPartial() {
         qaul.rpc.group.GroupRpc.GroupInvitedResponse result = new qaul.rpc.group.GroupRpc.GroupInvitedResponse(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(qaul.rpc.group.GroupRpc.GroupInvitedResponse result) {
         if (invitedBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             invited_ = java.util.Collections.unmodifiableList(invited_);
@@ -19797,8 +19832,10 @@ public final class GroupRpc {
         } else {
           result.invited_ = invitedBuilder_.build();
         }
-        onBuilt();
-        return result;
+      }
+
+      private void buildPartial0(qaul.rpc.group.GroupRpc.GroupInvitedResponse result) {
+        int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override

@@ -4,355 +4,445 @@
 #include "services/dtn/dtn_rpc.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace rpc {
 namespace dtn {
+template <typename>
 PROTOBUF_CONSTEXPR DTN::DTN(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct DTNDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DTNDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DTNDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DTNDefaultTypeInternal() {}
   union {
     DTN _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DTNDefaultTypeInternal _DTN_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DTNDefaultTypeInternal _DTN_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnStateRequest::DtnStateRequest(
     ::_pbi::ConstantInitialized) {}
 struct DtnStateRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnStateRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnStateRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnStateRequestDefaultTypeInternal() {}
   union {
     DtnStateRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnStateRequestDefaultTypeInternal _DtnStateRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnStateRequestDefaultTypeInternal _DtnStateRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnStateResponse::DtnStateResponse(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.used_size_)*/uint64_t{0u}
-  , /*decltype(_impl_.dtn_message_count_)*/0u
-  , /*decltype(_impl_.unconfirmed_count_)*/0u
+    /*decltype(_impl_.used_size_)*/ ::uint64_t{0u}
+
+  , /*decltype(_impl_.dtn_message_count_)*/ 0u
+
+  , /*decltype(_impl_.unconfirmed_count_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnStateResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnStateResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnStateResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnStateResponseDefaultTypeInternal() {}
   union {
     DtnStateResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnStateResponseDefaultTypeInternal _DtnStateResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnStateResponseDefaultTypeInternal _DtnStateResponse_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnConfigRequest::DtnConfigRequest(
     ::_pbi::ConstantInitialized) {}
 struct DtnConfigRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnConfigRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnConfigRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnConfigRequestDefaultTypeInternal() {}
   union {
     DtnConfigRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnConfigRequestDefaultTypeInternal _DtnConfigRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnConfigRequestDefaultTypeInternal _DtnConfigRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnConfigResponse::DtnConfigResponse(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.users_)*/{}
-  , /*decltype(_impl_.total_size_)*/0u
+  , /*decltype(_impl_.total_size_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnConfigResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnConfigResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnConfigResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnConfigResponseDefaultTypeInternal() {}
   union {
     DtnConfigResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnConfigResponseDefaultTypeInternal _DtnConfigResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnConfigResponseDefaultTypeInternal _DtnConfigResponse_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnAddUserRequest::DtnAddUserRequest(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.user_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnAddUserRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnAddUserRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnAddUserRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnAddUserRequestDefaultTypeInternal() {}
   union {
     DtnAddUserRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnAddUserRequestDefaultTypeInternal _DtnAddUserRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnAddUserRequestDefaultTypeInternal _DtnAddUserRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnAddUserResponse::DtnAddUserResponse(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.status_)*/false
+    /*decltype(_impl_.message_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.status_)*/ false
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnAddUserResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnAddUserResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnAddUserResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnAddUserResponseDefaultTypeInternal() {}
   union {
     DtnAddUserResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnAddUserResponseDefaultTypeInternal _DtnAddUserResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnAddUserResponseDefaultTypeInternal _DtnAddUserResponse_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnRemoveUserRequest::DtnRemoveUserRequest(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.user_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnRemoveUserRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnRemoveUserRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnRemoveUserRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnRemoveUserRequestDefaultTypeInternal() {}
   union {
     DtnRemoveUserRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnRemoveUserRequestDefaultTypeInternal _DtnRemoveUserRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnRemoveUserRequestDefaultTypeInternal _DtnRemoveUserRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnRemoveUserResponse::DtnRemoveUserResponse(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.status_)*/false
+    /*decltype(_impl_.message_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.status_)*/ false
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnRemoveUserResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnRemoveUserResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnRemoveUserResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnRemoveUserResponseDefaultTypeInternal() {}
   union {
     DtnRemoveUserResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnRemoveUserResponseDefaultTypeInternal _DtnRemoveUserResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnRemoveUserResponseDefaultTypeInternal _DtnRemoveUserResponse_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnSetTotalSizeRequest::DtnSetTotalSizeRequest(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.total_size_)*/0u
+    /*decltype(_impl_.total_size_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnSetTotalSizeRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnSetTotalSizeRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnSetTotalSizeRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnSetTotalSizeRequestDefaultTypeInternal() {}
   union {
     DtnSetTotalSizeRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnSetTotalSizeRequestDefaultTypeInternal _DtnSetTotalSizeRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnSetTotalSizeRequestDefaultTypeInternal _DtnSetTotalSizeRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR DtnSetTotalSizeResponse::DtnSetTotalSizeResponse(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.status_)*/false
+    /*decltype(_impl_.message_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.status_)*/ false
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DtnSetTotalSizeResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR DtnSetTotalSizeResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR DtnSetTotalSizeResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~DtnSetTotalSizeResponseDefaultTypeInternal() {}
   union {
     DtnSetTotalSizeResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnSetTotalSizeResponseDefaultTypeInternal _DtnSetTotalSizeResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DtnSetTotalSizeResponseDefaultTypeInternal _DtnSetTotalSizeResponse_default_instance_;
 }  // namespace dtn
 }  // namespace rpc
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[11];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_services_2fdtn_2fdtn_5frpc_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_services_2fdtn_2fdtn_5frpc_2eproto = nullptr;
-
-const uint32_t TableStruct_services_2fdtn_2fdtn_5frpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.used_size_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.dtn_message_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.unconfirmed_count_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _impl_.total_size_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _impl_.users_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserRequest, _impl_.user_id_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _impl_.status_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserRequest, _impl_.user_id_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _impl_.status_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeRequest, _impl_.total_size_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _impl_.status_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _impl_.message_),
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_services_2fdtn_2fdtn_5frpc_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_services_2fdtn_2fdtn_5frpc_2eproto = nullptr;
+const ::uint32_t TableStruct_services_2fdtn_2fdtn_5frpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.used_size_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.dtn_message_count_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnStateResponse, _impl_.unconfirmed_count_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _impl_.total_size_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnConfigResponse, _impl_.users_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserRequest, _impl_.user_id_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _impl_.status_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnAddUserResponse, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserRequest, _impl_.user_id_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _impl_.status_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnRemoveUserResponse, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeRequest, _impl_.total_size_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _impl_.status_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DtnSetTotalSizeResponse, _impl_.message_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::rpc::dtn::DTN)},
-  { 17, -1, -1, sizeof(::qaul::rpc::dtn::DtnStateRequest)},
-  { 23, -1, -1, sizeof(::qaul::rpc::dtn::DtnStateResponse)},
-  { 32, -1, -1, sizeof(::qaul::rpc::dtn::DtnConfigRequest)},
-  { 38, -1, -1, sizeof(::qaul::rpc::dtn::DtnConfigResponse)},
-  { 46, -1, -1, sizeof(::qaul::rpc::dtn::DtnAddUserRequest)},
-  { 53, -1, -1, sizeof(::qaul::rpc::dtn::DtnAddUserResponse)},
-  { 61, -1, -1, sizeof(::qaul::rpc::dtn::DtnRemoveUserRequest)},
-  { 68, -1, -1, sizeof(::qaul::rpc::dtn::DtnRemoveUserResponse)},
-  { 76, -1, -1, sizeof(::qaul::rpc::dtn::DtnSetTotalSizeRequest)},
-  { 83, -1, -1, sizeof(::qaul::rpc::dtn::DtnSetTotalSizeResponse)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::rpc::dtn::DTN)},
+        { 19, -1, -1, sizeof(::qaul::rpc::dtn::DtnStateRequest)},
+        { 27, -1, -1, sizeof(::qaul::rpc::dtn::DtnStateResponse)},
+        { 38, -1, -1, sizeof(::qaul::rpc::dtn::DtnConfigRequest)},
+        { 46, -1, -1, sizeof(::qaul::rpc::dtn::DtnConfigResponse)},
+        { 56, -1, -1, sizeof(::qaul::rpc::dtn::DtnAddUserRequest)},
+        { 65, -1, -1, sizeof(::qaul::rpc::dtn::DtnAddUserResponse)},
+        { 75, -1, -1, sizeof(::qaul::rpc::dtn::DtnRemoveUserRequest)},
+        { 84, -1, -1, sizeof(::qaul::rpc::dtn::DtnRemoveUserResponse)},
+        { 94, -1, -1, sizeof(::qaul::rpc::dtn::DtnSetTotalSizeRequest)},
+        { 103, -1, -1, sizeof(::qaul::rpc::dtn::DtnSetTotalSizeResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::rpc::dtn::_DTN_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnStateRequest_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnStateResponse_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnConfigRequest_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnConfigResponse_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnAddUserRequest_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnAddUserResponse_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnRemoveUserRequest_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnRemoveUserResponse_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnSetTotalSizeRequest_default_instance_._instance,
-  &::qaul::rpc::dtn::_DtnSetTotalSizeResponse_default_instance_._instance,
+    &::qaul::rpc::dtn::_DTN_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnStateRequest_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnStateResponse_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnConfigRequest_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnConfigResponse_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnAddUserRequest_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnAddUserResponse_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnRemoveUserRequest_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnRemoveUserResponse_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnSetTotalSizeRequest_default_instance_._instance,
+    &::qaul::rpc::dtn::_DtnSetTotalSizeResponse_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_services_2fdtn_2fdtn_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\032services/dtn/dtn_rpc.proto\022\014qaul.rpc.d"
-  "tn\"\266\005\n\003DTN\022:\n\021dtn_state_request\030\001 \001(\0132\035."
-  "qaul.rpc.dtn.DtnStateRequestH\000\022<\n\022dtn_st"
-  "ate_response\030\002 \001(\0132\036.qaul.rpc.dtn.DtnSta"
-  "teResponseH\000\022<\n\022dtn_config_request\030\003 \001(\013"
-  "2\036.qaul.rpc.dtn.DtnConfigRequestH\000\022>\n\023dt"
-  "n_config_response\030\004 \001(\0132\037.qaul.rpc.dtn.D"
-  "tnConfigResponseH\000\022\?\n\024dtn_add_user_reque"
-  "st\030\005 \001(\0132\037.qaul.rpc.dtn.DtnAddUserReques"
-  "tH\000\022A\n\025dtn_add_user_response\030\006 \001(\0132 .qau"
-  "l.rpc.dtn.DtnAddUserResponseH\000\022E\n\027dtn_re"
-  "move_user_request\030\007 \001(\0132\".qaul.rpc.dtn.D"
-  "tnRemoveUserRequestH\000\022G\n\030dtn_remove_user"
-  "_response\030\010 \001(\0132#.qaul.rpc.dtn.DtnRemove"
-  "UserResponseH\000\022J\n\032dtn_set_total_size_req"
-  "uest\030\t \001(\0132$.qaul.rpc.dtn.DtnSetTotalSiz"
-  "eRequestH\000\022L\n\033dtn_set_total_size_respons"
-  "e\030\n \001(\0132%.qaul.rpc.dtn.DtnSetTotalSizeRe"
-  "sponseH\000B\t\n\007message\"\021\n\017DtnStateRequest\"["
-  "\n\020DtnStateResponse\022\021\n\tused_size\030\001 \001(\004\022\031\n"
-  "\021dtn_message_count\030\002 \001(\r\022\031\n\021unconfirmed_"
-  "count\030\003 \001(\r\"\022\n\020DtnConfigRequest\"6\n\021DtnCo"
-  "nfigResponse\022\022\n\ntotal_size\030\001 \001(\r\022\r\n\005user"
-  "s\030\002 \003(\014\"$\n\021DtnAddUserRequest\022\017\n\007user_id\030"
-  "\001 \001(\014\"5\n\022DtnAddUserResponse\022\016\n\006status\030\001 "
-  "\001(\010\022\017\n\007message\030\002 \001(\t\"\'\n\024DtnRemoveUserReq"
-  "uest\022\017\n\007user_id\030\001 \001(\014\"8\n\025DtnRemoveUserRe"
-  "sponse\022\016\n\006status\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\""
-  ",\n\026DtnSetTotalSizeRequest\022\022\n\ntotal_size\030"
-  "\001 \001(\r\":\n\027DtnSetTotalSizeResponse\022\016\n\006stat"
-  "us\030\001 \001(\010\022\017\n\007message\030\002 \001(\tb\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once;
+const char descriptor_table_protodef_services_2fdtn_2fdtn_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\032services/dtn/dtn_rpc.proto\022\014qaul.rpc.d"
+    "tn\"\266\005\n\003DTN\022:\n\021dtn_state_request\030\001 \001(\0132\035."
+    "qaul.rpc.dtn.DtnStateRequestH\000\022<\n\022dtn_st"
+    "ate_response\030\002 \001(\0132\036.qaul.rpc.dtn.DtnSta"
+    "teResponseH\000\022<\n\022dtn_config_request\030\003 \001(\013"
+    "2\036.qaul.rpc.dtn.DtnConfigRequestH\000\022>\n\023dt"
+    "n_config_response\030\004 \001(\0132\037.qaul.rpc.dtn.D"
+    "tnConfigResponseH\000\022\?\n\024dtn_add_user_reque"
+    "st\030\005 \001(\0132\037.qaul.rpc.dtn.DtnAddUserReques"
+    "tH\000\022A\n\025dtn_add_user_response\030\006 \001(\0132 .qau"
+    "l.rpc.dtn.DtnAddUserResponseH\000\022E\n\027dtn_re"
+    "move_user_request\030\007 \001(\0132\".qaul.rpc.dtn.D"
+    "tnRemoveUserRequestH\000\022G\n\030dtn_remove_user"
+    "_response\030\010 \001(\0132#.qaul.rpc.dtn.DtnRemove"
+    "UserResponseH\000\022J\n\032dtn_set_total_size_req"
+    "uest\030\t \001(\0132$.qaul.rpc.dtn.DtnSetTotalSiz"
+    "eRequestH\000\022L\n\033dtn_set_total_size_respons"
+    "e\030\n \001(\0132%.qaul.rpc.dtn.DtnSetTotalSizeRe"
+    "sponseH\000B\t\n\007message\"\021\n\017DtnStateRequest\"["
+    "\n\020DtnStateResponse\022\021\n\tused_size\030\001 \001(\004\022\031\n"
+    "\021dtn_message_count\030\002 \001(\r\022\031\n\021unconfirmed_"
+    "count\030\003 \001(\r\"\022\n\020DtnConfigRequest\"6\n\021DtnCo"
+    "nfigResponse\022\022\n\ntotal_size\030\001 \001(\r\022\r\n\005user"
+    "s\030\002 \003(\014\"$\n\021DtnAddUserRequest\022\017\n\007user_id\030"
+    "\001 \001(\014\"5\n\022DtnAddUserResponse\022\016\n\006status\030\001 "
+    "\001(\010\022\017\n\007message\030\002 \001(\t\"\'\n\024DtnRemoveUserReq"
+    "uest\022\017\n\007user_id\030\001 \001(\014\"8\n\025DtnRemoveUserRe"
+    "sponse\022\016\n\006status\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\""
+    ",\n\026DtnSetTotalSizeRequest\022\022\n\ntotal_size\030"
+    "\001 \001(\r\":\n\027DtnSetTotalSizeResponse\022\016\n\006stat"
+    "us\030\001 \001(\010\022\017\n\007message\030\002 \001(\tb\006proto3"
+};
+static ::absl::once_flag descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto = {
-    false, false, 1233, descriptor_table_protodef_services_2fdtn_2fdtn_5frpc_2eproto,
+    false,
+    false,
+    1233,
+    descriptor_table_protodef_services_2fdtn_2fdtn_5frpc_2eproto,
     "services/dtn/dtn_rpc.proto",
-    &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once, nullptr, 0, 11,
-    schemas, file_default_instances, TableStruct_services_2fdtn_2fdtn_5frpc_2eproto::offsets,
-    file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto, file_level_enum_descriptors_services_2fdtn_2fdtn_5frpc_2eproto,
+    &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
+    nullptr,
+    0,
+    11,
+    schemas,
+    file_default_instances,
+    TableStruct_services_2fdtn_2fdtn_5frpc_2eproto::offsets,
+    file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto,
+    file_level_enum_descriptors_services_2fdtn_2fdtn_5frpc_2eproto,
     file_level_service_descriptors_services_2fdtn_2fdtn_5frpc_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter() {
   return &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2fdtn_2fdtn_5frpc_2eproto(&descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_services_2fdtn_2fdtn_5frpc_2eproto(&descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto);
 namespace qaul {
 namespace rpc {
 namespace dtn {
-
 // ===================================================================
 
 class DTN::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::dtn::DTN, _impl_._oneof_case_);
   static const ::qaul::rpc::dtn::DtnStateRequest& dtn_state_request(const DTN* msg);
   static const ::qaul::rpc::dtn::DtnStateResponse& dtn_state_response(const DTN* msg);
   static const ::qaul::rpc::dtn::DtnConfigRequest& dtn_config_request(const DTN* msg);
@@ -555,10 +645,9 @@ void DTN::set_allocated_dtn_set_total_size_response(::qaul::rpc::dtn::DtnSetTota
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.dtn.DTN.dtn_set_total_size_response)
 }
-DTN::DTN(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DTN::DTN(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DTN)
 }
 DTN::DTN(const DTN& from)
@@ -629,10 +718,8 @@ DTN::DTN(const DTN& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DTN)
 }
 
-inline void DTN::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DTN::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -651,7 +738,7 @@ DTN::~DTN() {
 }
 
 inline void DTN::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (has_message()) {
     clear_message();
   }
@@ -734,7 +821,7 @@ void DTN::clear_message() {
 
 void DTN::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DTN)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -745,88 +832,98 @@ void DTN::Clear() {
 const char* DTN::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.dtn.DtnStateRequest dtn_state_request = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_state_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnStateResponse dtn_state_response = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_state_response(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnConfigRequest dtn_config_request = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_config_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnConfigResponse dtn_config_response = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_config_response(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnAddUserRequest dtn_add_user_request = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_add_user_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnAddUserResponse dtn_add_user_response = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_add_user_response(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnRemoveUserRequest dtn_remove_user_request = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 58)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_remove_user_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnRemoveUserResponse dtn_remove_user_response = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 66)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_remove_user_response(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnSetTotalSizeRequest dtn_set_total_size_request = 9;
       case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 74)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_set_total_size_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.dtn.DtnSetTotalSizeResponse dtn_set_total_size_response = 10;
       case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_dtn_set_total_size_response(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -851,82 +948,75 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DTN::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DTN::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DTN)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .qaul.rpc.dtn.DtnStateRequest dtn_state_request = 1;
-  if (_internal_has_dtn_state_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, _Internal::dtn_state_request(this),
-        _Internal::dtn_state_request(this).GetCachedSize(), target, stream);
+  switch (message_case()) {
+    case kDtnStateRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(1, _Internal::dtn_state_request(this),
+          _Internal::dtn_state_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnStateResponse: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(2, _Internal::dtn_state_response(this),
+          _Internal::dtn_state_response(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnConfigRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(3, _Internal::dtn_config_request(this),
+          _Internal::dtn_config_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnConfigResponse: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(4, _Internal::dtn_config_response(this),
+          _Internal::dtn_config_response(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnAddUserRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(5, _Internal::dtn_add_user_request(this),
+          _Internal::dtn_add_user_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnAddUserResponse: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(6, _Internal::dtn_add_user_response(this),
+          _Internal::dtn_add_user_response(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnRemoveUserRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(7, _Internal::dtn_remove_user_request(this),
+          _Internal::dtn_remove_user_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnRemoveUserResponse: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(8, _Internal::dtn_remove_user_response(this),
+          _Internal::dtn_remove_user_response(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnSetTotalSizeRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(9, _Internal::dtn_set_total_size_request(this),
+          _Internal::dtn_set_total_size_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kDtnSetTotalSizeResponse: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(10, _Internal::dtn_set_total_size_response(this),
+          _Internal::dtn_set_total_size_response(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default: ;
   }
-
-  // .qaul.rpc.dtn.DtnStateResponse dtn_state_response = 2;
-  if (_internal_has_dtn_state_response()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::dtn_state_response(this),
-        _Internal::dtn_state_response(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnConfigRequest dtn_config_request = 3;
-  if (_internal_has_dtn_config_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::dtn_config_request(this),
-        _Internal::dtn_config_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnConfigResponse dtn_config_response = 4;
-  if (_internal_has_dtn_config_response()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::dtn_config_response(this),
-        _Internal::dtn_config_response(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnAddUserRequest dtn_add_user_request = 5;
-  if (_internal_has_dtn_add_user_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::dtn_add_user_request(this),
-        _Internal::dtn_add_user_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnAddUserResponse dtn_add_user_response = 6;
-  if (_internal_has_dtn_add_user_response()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, _Internal::dtn_add_user_response(this),
-        _Internal::dtn_add_user_response(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnRemoveUserRequest dtn_remove_user_request = 7;
-  if (_internal_has_dtn_remove_user_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(7, _Internal::dtn_remove_user_request(this),
-        _Internal::dtn_remove_user_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnRemoveUserResponse dtn_remove_user_response = 8;
-  if (_internal_has_dtn_remove_user_response()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(8, _Internal::dtn_remove_user_response(this),
-        _Internal::dtn_remove_user_response(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnSetTotalSizeRequest dtn_set_total_size_request = 9;
-  if (_internal_has_dtn_set_total_size_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(9, _Internal::dtn_set_total_size_request(this),
-        _Internal::dtn_set_total_size_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.dtn.DtnSetTotalSizeResponse dtn_set_total_size_response = 10;
-  if (_internal_has_dtn_set_total_size_response()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(10, _Internal::dtn_set_total_size_response(this),
-        _Internal::dtn_set_total_size_response(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -935,11 +1025,11 @@ uint8_t* DTN::_InternalSerialize(
   return target;
 }
 
-size_t DTN::ByteSizeLong() const {
+::size_t DTN::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DTN)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -1032,8 +1122,8 @@ void DTN::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_N
   auto* const _this = static_cast<DTN*>(&to_msg);
   auto& from = static_cast<const DTN&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DTN)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
@@ -1117,16 +1207,14 @@ void DTN::InternalSwap(DTN* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[0]);
 }
-
 // ===================================================================
 
 class DtnStateRequest::_Internal {
  public:
 };
 
-DtnStateRequest::DtnStateRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+DtnStateRequest::DtnStateRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena) {
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnStateRequest)
 }
 DtnStateRequest::DtnStateRequest(const DtnStateRequest& from)
@@ -1157,43 +1245,33 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DtnStateRequest::GetClassData(
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[1]);
 }
-
 // ===================================================================
 
 class DtnStateResponse::_Internal {
  public:
 };
 
-DtnStateResponse::DtnStateResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnStateResponse::DtnStateResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnStateResponse)
 }
 DtnStateResponse::DtnStateResponse(const DtnStateResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  DtnStateResponse* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.used_size_){}
-    , decltype(_impl_.dtn_message_count_){}
-    , decltype(_impl_.unconfirmed_count_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&_impl_.used_size_, &from._impl_.used_size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.unconfirmed_count_) -
-    reinterpret_cast<char*>(&_impl_.used_size_)) + sizeof(_impl_.unconfirmed_count_));
+  : ::PROTOBUF_NAMESPACE_ID::Message(), _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(
+      from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnStateResponse)
 }
 
-inline void DtnStateResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnStateResponse::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.used_size_){uint64_t{0u}}
-    , decltype(_impl_.dtn_message_count_){0u}
-    , decltype(_impl_.unconfirmed_count_){0u}
+      decltype(_impl_.used_size_) { ::uint64_t{0u} }
+
+    , decltype(_impl_.dtn_message_count_) { 0u }
+
+    , decltype(_impl_.unconfirmed_count_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -1208,7 +1286,7 @@ DtnStateResponse::~DtnStateResponse() {
 }
 
 inline void DtnStateResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
 void DtnStateResponse::SetCachedSize(int size) const {
@@ -1217,11 +1295,11 @@ void DtnStateResponse::SetCachedSize(int size) const {
 
 void DtnStateResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnStateResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&_impl_.used_size_, 0, static_cast<size_t>(
+  ::memset(&_impl_.used_size_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.unconfirmed_count_) -
       reinterpret_cast<char*>(&_impl_.used_size_)) + sizeof(_impl_.unconfirmed_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -1230,32 +1308,35 @@ void DtnStateResponse::Clear() {
 const char* DtnStateResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 used_size = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.used_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 dtn_message_count = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
           _impl_.dtn_message_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 unconfirmed_count = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 24)) {
           _impl_.unconfirmed_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1280,28 +1361,31 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnStateResponse::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnStateResponse::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnStateResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 used_size = 1;
   if (this->_internal_used_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_used_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        1, this->_internal_used_size(), target);
   }
 
   // uint32 dtn_message_count = 2;
   if (this->_internal_dtn_message_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_dtn_message_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        2, this->_internal_dtn_message_count(), target);
   }
 
   // uint32 unconfirmed_count = 3;
   if (this->_internal_unconfirmed_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_unconfirmed_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        3, this->_internal_unconfirmed_count(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1312,27 +1396,30 @@ uint8_t* DtnStateResponse::_InternalSerialize(
   return target;
 }
 
-size_t DtnStateResponse::ByteSizeLong() const {
+::size_t DtnStateResponse::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnStateResponse)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 used_size = 1;
   if (this->_internal_used_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_used_size());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_used_size());
   }
 
   // uint32 dtn_message_count = 2;
   if (this->_internal_dtn_message_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_dtn_message_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_dtn_message_count());
   }
 
   // uint32 unconfirmed_count = 3;
   if (this->_internal_unconfirmed_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_unconfirmed_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_unconfirmed_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1349,8 +1436,8 @@ void DtnStateResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const
   auto* const _this = static_cast<DtnStateResponse*>(&to_msg);
   auto& from = static_cast<const DtnStateResponse&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnStateResponse)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (from._internal_used_size() != 0) {
@@ -1392,16 +1479,14 @@ void DtnStateResponse::InternalSwap(DtnStateResponse* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[2]);
 }
-
 // ===================================================================
 
 class DtnConfigRequest::_Internal {
  public:
 };
 
-DtnConfigRequest::DtnConfigRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+DtnConfigRequest::DtnConfigRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena) {
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnConfigRequest)
 }
 DtnConfigRequest::DtnConfigRequest(const DtnConfigRequest& from)
@@ -1432,17 +1517,15 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DtnConfigRequest::GetClassData
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[3]);
 }
-
 // ===================================================================
 
 class DtnConfigResponse::_Internal {
  public:
 };
 
-DtnConfigResponse::DtnConfigResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnConfigResponse::DtnConfigResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnConfigResponse)
 }
 DtnConfigResponse::DtnConfigResponse(const DtnConfigResponse& from)
@@ -1450,7 +1533,8 @@ DtnConfigResponse::DtnConfigResponse(const DtnConfigResponse& from)
   DtnConfigResponse* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.users_){from._impl_.users_}
-    , decltype(_impl_.total_size_){}
+    , decltype(_impl_.total_size_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -1458,13 +1542,12 @@ DtnConfigResponse::DtnConfigResponse(const DtnConfigResponse& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnConfigResponse)
 }
 
-inline void DtnConfigResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnConfigResponse::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.users_){arena}
-    , decltype(_impl_.total_size_){0u}
+    , decltype(_impl_.total_size_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -1479,8 +1562,8 @@ DtnConfigResponse::~DtnConfigResponse() {
 }
 
 inline void DtnConfigResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.users_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_users()->~RepeatedPtrField();
 }
 
 void DtnConfigResponse::SetCachedSize(int size) const {
@@ -1489,11 +1572,11 @@ void DtnConfigResponse::SetCachedSize(int size) const {
 
 void DtnConfigResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnConfigResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.users_.Clear();
+  _internal_mutable_users()->Clear();
   _impl_.total_size_ = 0u;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -1501,20 +1584,21 @@ void DtnConfigResponse::Clear() {
 const char* DtnConfigResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint32 total_size = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.total_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated bytes users = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1523,8 +1607,9 @@ const char* DtnConfigResponse::_InternalParse(const char* ptr, ::_pbi::ParseCont
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1549,20 +1634,21 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnConfigResponse::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnConfigResponse::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnConfigResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint32 total_size = 1;
   if (this->_internal_total_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_total_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        1, this->_internal_total_size(), target);
   }
 
   // repeated bytes users = 2;
-  for (int i = 0, n = this->_internal_users_size(); i < n; i++) {
+  for (int i = 0, n = this->_internal_users_size(); i < n; ++i) {
     const auto& s = this->_internal_users(i);
     target = stream->WriteBytes(2, s, target);
   }
@@ -1575,25 +1661,25 @@ uint8_t* DtnConfigResponse::_InternalSerialize(
   return target;
 }
 
-size_t DtnConfigResponse::ByteSizeLong() const {
+::size_t DtnConfigResponse::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnConfigResponse)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated bytes users = 2;
-  total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_impl_.users_.size());
-  for (int i = 0, n = _impl_.users_.size(); i < n; i++) {
+  total_size += 1 * ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_internal_users().size());
+  for (int i = 0, n = _internal_users().size(); i < n; ++i) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-      _impl_.users_.Get(i));
+        _internal_users().Get(i));
   }
 
   // uint32 total_size = 1;
   if (this->_internal_total_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_total_size());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_total_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1610,11 +1696,11 @@ void DtnConfigResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<DtnConfigResponse*>(&to_msg);
   auto& from = static_cast<const DtnConfigResponse&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnConfigResponse)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.users_.MergeFrom(from._impl_.users_);
+  _this->_internal_mutable_users()->MergeFrom(from._internal_users());
   if (from._internal_total_size() != 0) {
     _this->_internal_set_total_size(from._internal_total_size());
   }
@@ -1635,7 +1721,9 @@ bool DtnConfigResponse::IsInitialized() const {
 void DtnConfigResponse::InternalSwap(DtnConfigResponse* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.users_.InternalSwap(&other->_impl_.users_);
+  _internal_mutable_users()->InternalSwap(
+      other->_internal_mutable_users());
+
   swap(_impl_.total_size_, other->_impl_.total_size_);
 }
 
@@ -1644,50 +1732,47 @@ void DtnConfigResponse::InternalSwap(DtnConfigResponse* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[4]);
 }
-
 // ===================================================================
 
 class DtnAddUserRequest::_Internal {
  public:
 };
 
-DtnAddUserRequest::DtnAddUserRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnAddUserRequest::DtnAddUserRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnAddUserRequest)
 }
 DtnAddUserRequest::DtnAddUserRequest(const DtnAddUserRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DtnAddUserRequest* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_id_){}
+      decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    _this->_impl_.user_id_.Set(from._internal_user_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnAddUserRequest)
 }
 
-inline void DtnAddUserRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnAddUserRequest::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_id_){}
+      decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DtnAddUserRequest::~DtnAddUserRequest() {
@@ -1700,7 +1785,7 @@ DtnAddUserRequest::~DtnAddUserRequest() {
 }
 
 inline void DtnAddUserRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.user_id_.Destroy();
 }
 
@@ -1710,7 +1795,7 @@ void DtnAddUserRequest::SetCachedSize(int size) const {
 
 void DtnAddUserRequest::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnAddUserRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -1721,17 +1806,18 @@ void DtnAddUserRequest::Clear() {
 const char* DtnAddUserRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes user_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_user_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1756,16 +1842,16 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnAddUserRequest::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnAddUserRequest::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnAddUserRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_user_id(), target);
+    const std::string& _s = this->_internal_user_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1776,19 +1862,18 @@ uint8_t* DtnAddUserRequest::_InternalSerialize(
   return target;
 }
 
-size_t DtnAddUserRequest::ByteSizeLong() const {
+::size_t DtnAddUserRequest::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnAddUserRequest)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1805,8 +1890,8 @@ void DtnAddUserRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<DtnAddUserRequest*>(&to_msg);
   auto& from = static_cast<const DtnAddUserRequest&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnAddUserRequest)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_user_id().empty()) {
@@ -1831,10 +1916,8 @@ void DtnAddUserRequest::InternalSwap(DtnAddUserRequest* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_id_, lhs_arena,
-      &other->_impl_.user_id_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_id_, lhs_arena,
+                                       &other->_impl_.user_id_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DtnAddUserRequest::GetMetadata() const {
@@ -1842,53 +1925,52 @@ void DtnAddUserRequest::InternalSwap(DtnAddUserRequest* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[5]);
 }
-
 // ===================================================================
 
 class DtnAddUserResponse::_Internal {
  public:
 };
 
-DtnAddUserResponse::DtnAddUserResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnAddUserResponse::DtnAddUserResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnAddUserResponse)
 }
 DtnAddUserResponse::DtnAddUserResponse(const DtnAddUserResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DtnAddUserResponse* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message().empty()) {
-    _this->_impl_.message_.Set(from._internal_message(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.message_.Set(from._internal_message(), _this->GetArenaForAllocation());
   }
   _this->_impl_.status_ = from._impl_.status_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnAddUserResponse)
 }
 
-inline void DtnAddUserResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnAddUserResponse::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){false}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) { false }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DtnAddUserResponse::~DtnAddUserResponse() {
@@ -1901,7 +1983,7 @@ DtnAddUserResponse::~DtnAddUserResponse() {
 }
 
 inline void DtnAddUserResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.message_.Destroy();
 }
 
@@ -1911,7 +1993,7 @@ void DtnAddUserResponse::SetCachedSize(int size) const {
 
 void DtnAddUserResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnAddUserResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -1923,26 +2005,28 @@ void DtnAddUserResponse::Clear() {
 const char* DtnAddUserResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool status = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.status_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string message = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_message();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.dtn.DtnAddUserResponse.message"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1967,26 +2051,25 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnAddUserResponse::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnAddUserResponse::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnAddUserResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_status(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        1, this->_internal_status(), target);
   }
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
+    const std::string& _s = this->_internal_message();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.dtn.DtnAddUserResponse.message");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_message(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.dtn.DtnAddUserResponse.message");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1997,24 +2080,23 @@ uint8_t* DtnAddUserResponse::_InternalSerialize(
   return target;
 }
 
-size_t DtnAddUserResponse::ByteSizeLong() const {
+::size_t DtnAddUserResponse::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnAddUserResponse)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_message());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_message());
   }
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
-    total_size += 1 + 1;
+    total_size += 2;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2031,8 +2113,8 @@ void DtnAddUserResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, con
   auto* const _this = static_cast<DtnAddUserResponse*>(&to_msg);
   auto& from = static_cast<const DtnAddUserResponse&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnAddUserResponse)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_message().empty()) {
@@ -2060,10 +2142,9 @@ void DtnAddUserResponse::InternalSwap(DtnAddUserResponse* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.message_, lhs_arena,
-      &other->_impl_.message_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, lhs_arena,
+                                       &other->_impl_.message_, rhs_arena);
+
   swap(_impl_.status_, other->_impl_.status_);
 }
 
@@ -2072,50 +2153,47 @@ void DtnAddUserResponse::InternalSwap(DtnAddUserResponse* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[6]);
 }
-
 // ===================================================================
 
 class DtnRemoveUserRequest::_Internal {
  public:
 };
 
-DtnRemoveUserRequest::DtnRemoveUserRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnRemoveUserRequest::DtnRemoveUserRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnRemoveUserRequest)
 }
 DtnRemoveUserRequest::DtnRemoveUserRequest(const DtnRemoveUserRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DtnRemoveUserRequest* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_id_){}
+      decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    _this->_impl_.user_id_.Set(from._internal_user_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnRemoveUserRequest)
 }
 
-inline void DtnRemoveUserRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnRemoveUserRequest::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_id_){}
+      decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DtnRemoveUserRequest::~DtnRemoveUserRequest() {
@@ -2128,7 +2206,7 @@ DtnRemoveUserRequest::~DtnRemoveUserRequest() {
 }
 
 inline void DtnRemoveUserRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.user_id_.Destroy();
 }
 
@@ -2138,7 +2216,7 @@ void DtnRemoveUserRequest::SetCachedSize(int size) const {
 
 void DtnRemoveUserRequest::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnRemoveUserRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2149,17 +2227,18 @@ void DtnRemoveUserRequest::Clear() {
 const char* DtnRemoveUserRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes user_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_user_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2184,16 +2263,16 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnRemoveUserRequest::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnRemoveUserRequest::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnRemoveUserRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_user_id(), target);
+    const std::string& _s = this->_internal_user_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2204,19 +2283,18 @@ uint8_t* DtnRemoveUserRequest::_InternalSerialize(
   return target;
 }
 
-size_t DtnRemoveUserRequest::ByteSizeLong() const {
+::size_t DtnRemoveUserRequest::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnRemoveUserRequest)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2233,8 +2311,8 @@ void DtnRemoveUserRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, c
   auto* const _this = static_cast<DtnRemoveUserRequest*>(&to_msg);
   auto& from = static_cast<const DtnRemoveUserRequest&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnRemoveUserRequest)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_user_id().empty()) {
@@ -2259,10 +2337,8 @@ void DtnRemoveUserRequest::InternalSwap(DtnRemoveUserRequest* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_id_, lhs_arena,
-      &other->_impl_.user_id_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_id_, lhs_arena,
+                                       &other->_impl_.user_id_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DtnRemoveUserRequest::GetMetadata() const {
@@ -2270,53 +2346,52 @@ void DtnRemoveUserRequest::InternalSwap(DtnRemoveUserRequest* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[7]);
 }
-
 // ===================================================================
 
 class DtnRemoveUserResponse::_Internal {
  public:
 };
 
-DtnRemoveUserResponse::DtnRemoveUserResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnRemoveUserResponse::DtnRemoveUserResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnRemoveUserResponse)
 }
 DtnRemoveUserResponse::DtnRemoveUserResponse(const DtnRemoveUserResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DtnRemoveUserResponse* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message().empty()) {
-    _this->_impl_.message_.Set(from._internal_message(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.message_.Set(from._internal_message(), _this->GetArenaForAllocation());
   }
   _this->_impl_.status_ = from._impl_.status_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnRemoveUserResponse)
 }
 
-inline void DtnRemoveUserResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnRemoveUserResponse::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){false}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) { false }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DtnRemoveUserResponse::~DtnRemoveUserResponse() {
@@ -2329,7 +2404,7 @@ DtnRemoveUserResponse::~DtnRemoveUserResponse() {
 }
 
 inline void DtnRemoveUserResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.message_.Destroy();
 }
 
@@ -2339,7 +2414,7 @@ void DtnRemoveUserResponse::SetCachedSize(int size) const {
 
 void DtnRemoveUserResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnRemoveUserResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2351,26 +2426,28 @@ void DtnRemoveUserResponse::Clear() {
 const char* DtnRemoveUserResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool status = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.status_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string message = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_message();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.dtn.DtnRemoveUserResponse.message"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2395,26 +2472,25 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnRemoveUserResponse::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnRemoveUserResponse::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnRemoveUserResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_status(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        1, this->_internal_status(), target);
   }
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
+    const std::string& _s = this->_internal_message();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.dtn.DtnRemoveUserResponse.message");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_message(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.dtn.DtnRemoveUserResponse.message");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2425,24 +2501,23 @@ uint8_t* DtnRemoveUserResponse::_InternalSerialize(
   return target;
 }
 
-size_t DtnRemoveUserResponse::ByteSizeLong() const {
+::size_t DtnRemoveUserResponse::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnRemoveUserResponse)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_message());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_message());
   }
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
-    total_size += 1 + 1;
+    total_size += 2;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2459,8 +2534,8 @@ void DtnRemoveUserResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, 
   auto* const _this = static_cast<DtnRemoveUserResponse*>(&to_msg);
   auto& from = static_cast<const DtnRemoveUserResponse&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnRemoveUserResponse)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_message().empty()) {
@@ -2488,10 +2563,9 @@ void DtnRemoveUserResponse::InternalSwap(DtnRemoveUserResponse* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.message_, lhs_arena,
-      &other->_impl_.message_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, lhs_arena,
+                                       &other->_impl_.message_, rhs_arena);
+
   swap(_impl_.status_, other->_impl_.status_);
 }
 
@@ -2500,37 +2574,29 @@ void DtnRemoveUserResponse::InternalSwap(DtnRemoveUserResponse* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[8]);
 }
-
 // ===================================================================
 
 class DtnSetTotalSizeRequest::_Internal {
  public:
 };
 
-DtnSetTotalSizeRequest::DtnSetTotalSizeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnSetTotalSizeRequest::DtnSetTotalSizeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnSetTotalSizeRequest)
 }
 DtnSetTotalSizeRequest::DtnSetTotalSizeRequest(const DtnSetTotalSizeRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  DtnSetTotalSizeRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.total_size_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _this->_impl_.total_size_ = from._impl_.total_size_;
+  : ::PROTOBUF_NAMESPACE_ID::Message(), _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(
+      from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnSetTotalSizeRequest)
 }
 
-inline void DtnSetTotalSizeRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnSetTotalSizeRequest::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.total_size_){0u}
+      decltype(_impl_.total_size_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -2545,7 +2611,7 @@ DtnSetTotalSizeRequest::~DtnSetTotalSizeRequest() {
 }
 
 inline void DtnSetTotalSizeRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
 void DtnSetTotalSizeRequest::SetCachedSize(int size) const {
@@ -2554,7 +2620,7 @@ void DtnSetTotalSizeRequest::SetCachedSize(int size) const {
 
 void DtnSetTotalSizeRequest::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnSetTotalSizeRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2565,16 +2631,17 @@ void DtnSetTotalSizeRequest::Clear() {
 const char* DtnSetTotalSizeRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint32 total_size = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.total_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2599,16 +2666,17 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnSetTotalSizeRequest::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnSetTotalSizeRequest::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnSetTotalSizeRequest)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint32 total_size = 1;
   if (this->_internal_total_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_total_size(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        1, this->_internal_total_size(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2619,17 +2687,18 @@ uint8_t* DtnSetTotalSizeRequest::_InternalSerialize(
   return target;
 }
 
-size_t DtnSetTotalSizeRequest::ByteSizeLong() const {
+::size_t DtnSetTotalSizeRequest::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnSetTotalSizeRequest)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint32 total_size = 1;
   if (this->_internal_total_size() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_total_size());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_total_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2646,8 +2715,8 @@ void DtnSetTotalSizeRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg,
   auto* const _this = static_cast<DtnSetTotalSizeRequest*>(&to_msg);
   auto& from = static_cast<const DtnSetTotalSizeRequest&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnSetTotalSizeRequest)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (from._internal_total_size() != 0) {
@@ -2670,6 +2739,7 @@ bool DtnSetTotalSizeRequest::IsInitialized() const {
 void DtnSetTotalSizeRequest::InternalSwap(DtnSetTotalSizeRequest* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+
   swap(_impl_.total_size_, other->_impl_.total_size_);
 }
 
@@ -2678,53 +2748,52 @@ void DtnSetTotalSizeRequest::InternalSwap(DtnSetTotalSizeRequest* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[9]);
 }
-
 // ===================================================================
 
 class DtnSetTotalSizeResponse::_Internal {
  public:
 };
 
-DtnSetTotalSizeResponse::DtnSetTotalSizeResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+DtnSetTotalSizeResponse::DtnSetTotalSizeResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.dtn.DtnSetTotalSizeResponse)
 }
 DtnSetTotalSizeResponse::DtnSetTotalSizeResponse(const DtnSetTotalSizeResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DtnSetTotalSizeResponse* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message().empty()) {
-    _this->_impl_.message_.Set(from._internal_message(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.message_.Set(from._internal_message(), _this->GetArenaForAllocation());
   }
   _this->_impl_.status_ = from._impl_.status_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.dtn.DtnSetTotalSizeResponse)
 }
 
-inline void DtnSetTotalSizeResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void DtnSetTotalSizeResponse::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_){}
-    , decltype(_impl_.status_){false}
+      decltype(_impl_.message_) {}
+
+    , decltype(_impl_.status_) { false }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DtnSetTotalSizeResponse::~DtnSetTotalSizeResponse() {
@@ -2737,7 +2806,7 @@ DtnSetTotalSizeResponse::~DtnSetTotalSizeResponse() {
 }
 
 inline void DtnSetTotalSizeResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.message_.Destroy();
 }
 
@@ -2747,7 +2816,7 @@ void DtnSetTotalSizeResponse::SetCachedSize(int size) const {
 
 void DtnSetTotalSizeResponse::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.dtn.DtnSetTotalSizeResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2759,26 +2828,28 @@ void DtnSetTotalSizeResponse::Clear() {
 const char* DtnSetTotalSizeResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bool status = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.status_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string message = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_message();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.dtn.DtnSetTotalSizeResponse.message"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2803,26 +2874,25 @@ failure:
 #undef CHK_
 }
 
-uint8_t* DtnSetTotalSizeResponse::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* DtnSetTotalSizeResponse::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.dtn.DtnSetTotalSizeResponse)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_status(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        1, this->_internal_status(), target);
   }
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
+    const std::string& _s = this->_internal_message();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.dtn.DtnSetTotalSizeResponse.message");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_message(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.dtn.DtnSetTotalSizeResponse.message");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2833,24 +2903,23 @@ uint8_t* DtnSetTotalSizeResponse::_InternalSerialize(
   return target;
 }
 
-size_t DtnSetTotalSizeResponse::ByteSizeLong() const {
+::size_t DtnSetTotalSizeResponse::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.dtn.DtnSetTotalSizeResponse)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string message = 2;
   if (!this->_internal_message().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_message());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_message());
   }
 
   // bool status = 1;
   if (this->_internal_status() != 0) {
-    total_size += 1 + 1;
+    total_size += 2;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2867,8 +2936,8 @@ void DtnSetTotalSizeResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg
   auto* const _this = static_cast<DtnSetTotalSizeResponse*>(&to_msg);
   auto& from = static_cast<const DtnSetTotalSizeResponse&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.dtn.DtnSetTotalSizeResponse)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_message().empty()) {
@@ -2896,10 +2965,9 @@ void DtnSetTotalSizeResponse::InternalSwap(DtnSetTotalSizeResponse* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.message_, lhs_arena,
-      &other->_impl_.message_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, lhs_arena,
+                                       &other->_impl_.message_, rhs_arena);
+
   swap(_impl_.status_, other->_impl_.status_);
 }
 
@@ -2908,7 +2976,6 @@ void DtnSetTotalSizeResponse::InternalSwap(DtnSetTotalSizeResponse* other) {
       &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_getter, &descriptor_table_services_2fdtn_2fdtn_5frpc_2eproto_once,
       file_level_metadata_services_2fdtn_2fdtn_5frpc_2eproto[10]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace dtn
 }  // namespace rpc
@@ -2959,6 +3026,5 @@ Arena::CreateMaybeMessage< ::qaul::rpc::dtn::DtnSetTotalSizeResponse >(Arena* ar
   return Arena::CreateMessageInternal< ::qaul::rpc::dtn::DtnSetTotalSizeResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

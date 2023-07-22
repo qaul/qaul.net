@@ -207,7 +207,7 @@ public final class DebugOuterClass {
      */
     qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequestOrBuilder getDeleteLibqaulLogsRequestOrBuilder();
 
-    public qaul.rpc.debug.DebugOuterClass.Debug.MessageCase getMessageCase();
+    qaul.rpc.debug.DebugOuterClass.Debug.MessageCase getMessageCase();
   }
   /**
    * <pre>
@@ -235,11 +235,6 @@ public final class DebugOuterClass {
       return new Debug();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_Debug_descriptor;
@@ -254,6 +249,7 @@ public final class DebugOuterClass {
     }
 
     private int messageCase_ = 0;
+    @SuppressWarnings("serial")
     private java.lang.Object message_;
     public enum MessageCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -817,11 +813,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.Debug parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.Debug parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -900,6 +898,7 @@ public final class DebugOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (heartbeatRequestBuilder_ != null) {
           heartbeatRequestBuilder_.clear();
         }
@@ -949,58 +948,47 @@ public final class DebugOuterClass {
       @java.lang.Override
       public qaul.rpc.debug.DebugOuterClass.Debug buildPartial() {
         qaul.rpc.debug.DebugOuterClass.Debug result = new qaul.rpc.debug.DebugOuterClass.Debug(this);
-        if (messageCase_ == 1) {
-          if (heartbeatRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = heartbeatRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 2) {
-          if (heartbeatResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = heartbeatResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 3) {
-          if (panicBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = panicBuilder_.build();
-          }
-        }
-        if (messageCase_ == 4) {
-          if (logToFileBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = logToFileBuilder_.build();
-          }
-        }
-        if (messageCase_ == 5) {
-          if (storagePathRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = storagePathRequestBuilder_.build();
-          }
-        }
-        if (messageCase_ == 6) {
-          if (storagePathResponseBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = storagePathResponseBuilder_.build();
-          }
-        }
-        if (messageCase_ == 7) {
-          if (deleteLibqaulLogsRequestBuilder_ == null) {
-            result.message_ = message_;
-          } else {
-            result.message_ = deleteLibqaulLogsRequestBuilder_.build();
-          }
-        }
-        result.messageCase_ = messageCase_;
+        if (bitField0_ != 0) { buildPartial0(result); }
+        buildPartialOneofs(result);
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.debug.DebugOuterClass.Debug result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      private void buildPartialOneofs(qaul.rpc.debug.DebugOuterClass.Debug result) {
+        result.messageCase_ = messageCase_;
+        result.message_ = this.message_;
+        if (messageCase_ == 1 &&
+            heartbeatRequestBuilder_ != null) {
+          result.message_ = heartbeatRequestBuilder_.build();
+        }
+        if (messageCase_ == 2 &&
+            heartbeatResponseBuilder_ != null) {
+          result.message_ = heartbeatResponseBuilder_.build();
+        }
+        if (messageCase_ == 3 &&
+            panicBuilder_ != null) {
+          result.message_ = panicBuilder_.build();
+        }
+        if (messageCase_ == 4 &&
+            logToFileBuilder_ != null) {
+          result.message_ = logToFileBuilder_.build();
+        }
+        if (messageCase_ == 5 &&
+            storagePathRequestBuilder_ != null) {
+          result.message_ = storagePathRequestBuilder_.build();
+        }
+        if (messageCase_ == 6 &&
+            storagePathResponseBuilder_ != null) {
+          result.message_ = storagePathResponseBuilder_.build();
+        }
+        if (messageCase_ == 7 &&
+            deleteLibqaulLogsRequestBuilder_ != null) {
+          result.message_ = deleteLibqaulLogsRequestBuilder_.build();
+        }
       }
 
       @java.lang.Override
@@ -1185,6 +1173,7 @@ public final class DebugOuterClass {
         return this;
       }
 
+      private int bitField0_;
 
       private com.google.protobuf.SingleFieldBuilderV3<
           qaul.rpc.debug.DebugOuterClass.HeartbeatRequest, qaul.rpc.debug.DebugOuterClass.HeartbeatRequest.Builder, qaul.rpc.debug.DebugOuterClass.HeartbeatRequestOrBuilder> heartbeatRequestBuilder_;
@@ -1360,7 +1349,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 1;
-        onChanged();;
+        onChanged();
         return heartbeatRequestBuilder_;
       }
 
@@ -1538,7 +1527,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 2;
-        onChanged();;
+        onChanged();
         return heartbeatResponseBuilder_;
       }
 
@@ -1716,7 +1705,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 3;
-        onChanged();;
+        onChanged();
         return panicBuilder_;
       }
 
@@ -1894,7 +1883,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 4;
-        onChanged();;
+        onChanged();
         return logToFileBuilder_;
       }
 
@@ -2072,7 +2061,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 5;
-        onChanged();;
+        onChanged();
         return storagePathRequestBuilder_;
       }
 
@@ -2250,7 +2239,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 6;
-        onChanged();;
+        onChanged();
         return storagePathResponseBuilder_;
       }
 
@@ -2428,7 +2417,7 @@ public final class DebugOuterClass {
           message_ = null;
         }
         messageCase_ = 7;
-        onChanged();;
+        onChanged();
         return deleteLibqaulLogsRequestBuilder_;
       }
       @java.lang.Override
@@ -2502,6 +2491,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * Request a Heartbeat from Libqaul
+   *
    * The UI requests regular heartbeats from libqaul,
    * to check if libqaul is still alive
    * </pre>
@@ -2527,11 +2517,6 @@ public final class DebugOuterClass {
       return new HeartbeatRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_HeartbeatRequest_descriptor;
@@ -2643,11 +2628,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.HeartbeatRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.HeartbeatRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2692,6 +2679,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * Request a Heartbeat from Libqaul
+     *
      * The UI requests regular heartbeats from libqaul,
      * to check if libqaul is still alive
      * </pre>
@@ -2914,6 +2902,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * Heartbeat Reply
+   *
    * Libqaul answers to the heartbeat request
    * with the heartbeat reply answer
    * </pre>
@@ -2939,11 +2928,6 @@ public final class DebugOuterClass {
       return new HeartbeatResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_HeartbeatResponse_descriptor;
@@ -3055,11 +3039,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.HeartbeatResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.HeartbeatResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3104,6 +3090,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * Heartbeat Reply
+     *
      * Libqaul answers to the heartbeat request
      * with the heartbeat reply answer
      * </pre>
@@ -3326,8 +3313,10 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * Panic
+   *
    * If libqaul receives this panic message, it
    * throws an error and panics immediatly.
+   *
    * This message is for debugging only.
    * </pre>
    *
@@ -3352,11 +3341,6 @@ public final class DebugOuterClass {
       return new Panic();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_Panic_descriptor;
@@ -3468,11 +3452,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.Panic parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.Panic parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3517,8 +3503,10 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * Panic
+     *
      * If libqaul receives this panic message, it
      * throws an error and panics immediatly.
+     *
      * This message is for debugging only.
      * </pre>
      *
@@ -3746,6 +3734,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * LogToFile
+   *
    * If libqaul receives this enable message, it
    * start or stop to log error contents into error_xxx.log file.
    * </pre>
@@ -3771,11 +3760,6 @@ public final class DebugOuterClass {
       return new LogToFile();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_LogToFile_descriptor;
@@ -3790,7 +3774,7 @@ public final class DebugOuterClass {
     }
 
     public static final int ENABLE_FIELD_NUMBER = 1;
-    private boolean enable_;
+    private boolean enable_ = false;
     /**
      * <code>bool enable = 1;</code>
      * @return The enable.
@@ -3910,11 +3894,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.LogToFile parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.LogToFile parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3959,6 +3945,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * LogToFile
+     *
      * If libqaul receives this enable message, it
      * start or stop to log error contents into error_xxx.log file.
      * </pre>
@@ -3995,8 +3982,8 @@ public final class DebugOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         enable_ = false;
-
         return this;
       }
 
@@ -4023,9 +4010,16 @@ public final class DebugOuterClass {
       @java.lang.Override
       public qaul.rpc.debug.DebugOuterClass.LogToFile buildPartial() {
         qaul.rpc.debug.DebugOuterClass.LogToFile result = new qaul.rpc.debug.DebugOuterClass.LogToFile(this);
-        result.enable_ = enable_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.debug.DebugOuterClass.LogToFile result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.enable_ = enable_;
+        }
       }
 
       @java.lang.Override
@@ -4103,7 +4097,7 @@ public final class DebugOuterClass {
                 break;
               case 8: {
                 enable_ = input.readBool();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               default: {
@@ -4121,6 +4115,7 @@ public final class DebugOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private boolean enable_ ;
       /**
@@ -4137,8 +4132,9 @@ public final class DebugOuterClass {
        * @return This builder for chaining.
        */
       public Builder setEnable(boolean value) {
-        
+
         enable_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -4147,7 +4143,7 @@ public final class DebugOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearEnable() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         enable_ = false;
         onChanged();
         return this;
@@ -4223,6 +4219,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * StoragePathRequest
+   *
    * Return storage path
    * </pre>
    *
@@ -4247,11 +4244,6 @@ public final class DebugOuterClass {
       return new StoragePathRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathRequest_descriptor;
@@ -4363,11 +4355,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.StoragePathRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4412,6 +4406,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * StoragePathRequest
+     *
      * Return storage path
      * </pre>
      *
@@ -4645,6 +4640,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * StoragePathResponse
+   *
    * Contains Storage Path
    * </pre>
    *
@@ -4670,11 +4666,6 @@ public final class DebugOuterClass {
       return new StoragePathResponse();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_StoragePathResponse_descriptor;
@@ -4689,7 +4680,8 @@ public final class DebugOuterClass {
     }
 
     public static final int STORAGE_PATH_FIELD_NUMBER = 1;
-    private volatile java.lang.Object storagePath_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object storagePath_ = "";
     /**
      * <code>string storage_path = 1;</code>
      * @return The storagePath.
@@ -4834,11 +4826,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.StoragePathResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4883,6 +4877,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * StoragePathResponse
+     *
      * Contains Storage Path
      * </pre>
      *
@@ -4918,8 +4913,8 @@ public final class DebugOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         storagePath_ = "";
-
         return this;
       }
 
@@ -4946,9 +4941,16 @@ public final class DebugOuterClass {
       @java.lang.Override
       public qaul.rpc.debug.DebugOuterClass.StoragePathResponse buildPartial() {
         qaul.rpc.debug.DebugOuterClass.StoragePathResponse result = new qaul.rpc.debug.DebugOuterClass.StoragePathResponse(this);
-        result.storagePath_ = storagePath_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.rpc.debug.DebugOuterClass.StoragePathResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.storagePath_ = storagePath_;
+        }
       }
 
       @java.lang.Override
@@ -4997,6 +4999,7 @@ public final class DebugOuterClass {
         if (other == qaul.rpc.debug.DebugOuterClass.StoragePathResponse.getDefaultInstance()) return this;
         if (!other.getStoragePath().isEmpty()) {
           storagePath_ = other.storagePath_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -5027,7 +5030,7 @@ public final class DebugOuterClass {
                 break;
               case 10: {
                 storagePath_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -5045,6 +5048,7 @@ public final class DebugOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object storagePath_ = "";
       /**
@@ -5087,11 +5091,9 @@ public final class DebugOuterClass {
        */
       public Builder setStoragePath(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         storagePath_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5100,8 +5102,8 @@ public final class DebugOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearStoragePath() {
-        
         storagePath_ = getDefaultInstance().getStoragePath();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -5112,12 +5114,10 @@ public final class DebugOuterClass {
        */
       public Builder setStoragePathBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         storagePath_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5192,6 +5192,7 @@ public final class DebugOuterClass {
   /**
    * <pre>
    * DeleteLibqaulLogsRequest
+   *
    * Requests for the log folder to be wiped clean
    * </pre>
    *
@@ -5216,11 +5217,6 @@ public final class DebugOuterClass {
       return new DeleteLibqaulLogsRequest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.rpc.debug.DebugOuterClass.internal_static_qaul_rpc_debug_DeleteLibqaulLogsRequest_descriptor;
@@ -5332,11 +5328,13 @@ public final class DebugOuterClass {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.rpc.debug.DebugOuterClass.DeleteLibqaulLogsRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5381,6 +5379,7 @@ public final class DebugOuterClass {
     /**
      * <pre>
      * DeleteLibqaulLogsRequest
+     *
      * Requests for the log folder to be wiped clean
      * </pre>
      *

@@ -4,403 +4,530 @@
 #include "router/router_net_info.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace net {
 namespace router_net_info {
+template <typename>
 PROTOBUF_CONSTEXPR RouterInfoContainer::RouterInfoContainer(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.signature_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.signature_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.message_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RouterInfoContainerDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouterInfoContainerDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RouterInfoContainerDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RouterInfoContainerDefaultTypeInternal() {}
   union {
     RouterInfoContainer _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoContainerDefaultTypeInternal _RouterInfoContainer_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoContainerDefaultTypeInternal _RouterInfoContainer_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RouterInfoContent::RouterInfoContent(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.content_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.time_)*/uint64_t{0u}
-  , /*decltype(_impl_.routerinfomodule_)*/0
+    /*decltype(_impl_.id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.content_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.time_)*/ ::uint64_t{0u}
+
+  , /*decltype(_impl_.routerinfomodule_)*/ 0
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RouterInfoContentDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouterInfoContentDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RouterInfoContentDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RouterInfoContentDefaultTypeInternal() {}
   union {
     RouterInfoContent _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoContentDefaultTypeInternal _RouterInfoContent_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoContentDefaultTypeInternal _RouterInfoContent_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RouterInfoMessage::RouterInfoMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.node_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.node_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_.routes_)*/nullptr
   , /*decltype(_impl_.feeds_)*/nullptr
-  , /*decltype(_impl_.timestamp_)*/uint64_t{0u}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+  , /*decltype(_impl_.timestamp_)*/ ::uint64_t{0u}
+} {}
 struct RouterInfoMessageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouterInfoMessageDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RouterInfoMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RouterInfoMessageDefaultTypeInternal() {}
   union {
     RouterInfoMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoMessageDefaultTypeInternal _RouterInfoMessage_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterInfoMessageDefaultTypeInternal _RouterInfoMessage_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingInfoTable::RoutingInfoTable(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.entry_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingInfoTableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingInfoTableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingInfoTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingInfoTableDefaultTypeInternal() {}
   union {
     RoutingInfoTable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingInfoTableDefaultTypeInternal _RoutingInfoTable_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingInfoTableDefaultTypeInternal _RoutingInfoTable_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingInfoEntry::RoutingInfoEntry(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.user_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.hc_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.rtt_)*/0u
-  , /*decltype(_impl_.pgid_)*/0u
+    /*decltype(_impl_.user_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.hc_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.rtt_)*/ 0u
+
+  , /*decltype(_impl_.pgid_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingInfoEntryDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingInfoEntryDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingInfoEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingInfoEntryDefaultTypeInternal() {}
   union {
     RoutingInfoEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingInfoEntryDefaultTypeInternal _RoutingInfoEntry_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingInfoEntryDefaultTypeInternal _RoutingInfoEntry_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR UserIdTable::UserIdTable(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.ids_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct UserIdTableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR UserIdTableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR UserIdTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~UserIdTableDefaultTypeInternal() {}
   union {
     UserIdTable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserIdTableDefaultTypeInternal _UserIdTable_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserIdTableDefaultTypeInternal _UserIdTable_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR UserInfoTable::UserInfoTable(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.info_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct UserInfoTableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR UserInfoTableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR UserInfoTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~UserInfoTableDefaultTypeInternal() {}
   union {
     UserInfoTable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserInfoTableDefaultTypeInternal _UserInfoTable_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserInfoTableDefaultTypeInternal _UserInfoTable_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR UserInfo::UserInfo(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.key_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_.id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.key_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.name_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct UserInfoDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR UserInfoDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR UserInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~UserInfoDefaultTypeInternal() {}
   union {
     UserInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserInfoDefaultTypeInternal _UserInfo_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UserInfoDefaultTypeInternal _UserInfo_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR FeedIdsTable::FeedIdsTable(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.ids_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedIdsTableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FeedIdsTableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedIdsTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedIdsTableDefaultTypeInternal() {}
   union {
     FeedIdsTable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedIdsTableDefaultTypeInternal _FeedIdsTable_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedIdsTableDefaultTypeInternal _FeedIdsTable_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR FeedRequestMessage::FeedRequestMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.feeds_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.feeds_)*/nullptr} {}
 struct FeedRequestMessageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FeedRequestMessageDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedRequestMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedRequestMessageDefaultTypeInternal() {}
   union {
     FeedRequestMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedRequestMessageDefaultTypeInternal _FeedRequestMessage_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedRequestMessageDefaultTypeInternal _FeedRequestMessage_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR FeedResponseMessage::FeedResponseMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.feeds_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.feeds_)*/nullptr} {}
 struct FeedResponseMessageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FeedResponseMessageDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedResponseMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedResponseMessageDefaultTypeInternal() {}
   union {
     FeedResponseMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedResponseMessageDefaultTypeInternal _FeedResponseMessage_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedResponseMessageDefaultTypeInternal _FeedResponseMessage_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR FeedResponseTable::FeedResponseTable(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.messages_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedResponseTableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FeedResponseTableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedResponseTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedResponseTableDefaultTypeInternal() {}
   union {
     FeedResponseTable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedResponseTableDefaultTypeInternal _FeedResponseTable_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedResponseTableDefaultTypeInternal _FeedResponseTable_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR FeedMessage::FeedMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.message_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.sender_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.content_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.time_)*/uint64_t{0u}
+    /*decltype(_impl_.message_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.sender_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.content_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.time_)*/ ::uint64_t{0u}
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct FeedMessageDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FeedMessageDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR FeedMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~FeedMessageDefaultTypeInternal() {}
   union {
     FeedMessage _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageDefaultTypeInternal _FeedMessage_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FeedMessageDefaultTypeInternal _FeedMessage_default_instance_;
 }  // namespace router_net_info
 }  // namespace net
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[13];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2frouter_5fnet_5finfo_2eproto[1];
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_router_2frouter_5fnet_5finfo_2eproto = nullptr;
-
-const uint32_t TableStruct_router_2frouter_5fnet_5finfo_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _impl_.signature_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.routerinfomodule_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.content_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.time_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.node_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.routes_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.feeds_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.timestamp_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoTable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoTable, _impl_.entry_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.user_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.rtt_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.hc_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.pgid_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserIdTable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserIdTable, _impl_.ids_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfoTable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfoTable, _impl_.info_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.key_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.name_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedIdsTable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedIdsTable, _impl_.ids_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedRequestMessage, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedRequestMessage, _impl_.feeds_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseMessage, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseMessage, _impl_.feeds_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseTable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseTable, _impl_.messages_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.message_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.sender_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.content_),
-  PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.time_),
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_router_2frouter_5fnet_5finfo_2eproto = nullptr;
+const ::uint32_t TableStruct_router_2frouter_5fnet_5finfo_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _impl_.signature_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContainer, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.routerinfomodule_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.content_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoContent, _impl_.time_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.node_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.routes_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.feeds_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RouterInfoMessage, _impl_.timestamp_),
+    ~0u,
+    0,
+    1,
+    ~0u,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoTable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoTable, _impl_.entry_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.user_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.rtt_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.hc_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::RoutingInfoEntry, _impl_.pgid_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserIdTable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserIdTable, _impl_.ids_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfoTable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfoTable, _impl_.info_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.key_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::UserInfo, _impl_.name_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedIdsTable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedIdsTable, _impl_.ids_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedRequestMessage, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedRequestMessage, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedRequestMessage, _impl_.feeds_),
+    0,
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseMessage, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseMessage, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseMessage, _impl_.feeds_),
+    0,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseTable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedResponseTable, _impl_.messages_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.message_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.sender_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.content_),
+    PROTOBUF_FIELD_OFFSET(::qaul::net::router_net_info::FeedMessage, _impl_.time_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::net::router_net_info::RouterInfoContainer)},
-  { 8, -1, -1, sizeof(::qaul::net::router_net_info::RouterInfoContent)},
-  { 18, -1, -1, sizeof(::qaul::net::router_net_info::RouterInfoMessage)},
-  { 28, -1, -1, sizeof(::qaul::net::router_net_info::RoutingInfoTable)},
-  { 35, -1, -1, sizeof(::qaul::net::router_net_info::RoutingInfoEntry)},
-  { 45, -1, -1, sizeof(::qaul::net::router_net_info::UserIdTable)},
-  { 52, -1, -1, sizeof(::qaul::net::router_net_info::UserInfoTable)},
-  { 59, -1, -1, sizeof(::qaul::net::router_net_info::UserInfo)},
-  { 68, -1, -1, sizeof(::qaul::net::router_net_info::FeedIdsTable)},
-  { 75, -1, -1, sizeof(::qaul::net::router_net_info::FeedRequestMessage)},
-  { 82, -1, -1, sizeof(::qaul::net::router_net_info::FeedResponseMessage)},
-  { 89, -1, -1, sizeof(::qaul::net::router_net_info::FeedResponseTable)},
-  { 96, -1, -1, sizeof(::qaul::net::router_net_info::FeedMessage)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::net::router_net_info::RouterInfoContainer)},
+        { 10, -1, -1, sizeof(::qaul::net::router_net_info::RouterInfoContent)},
+        { 22, 34, -1, sizeof(::qaul::net::router_net_info::RouterInfoMessage)},
+        { 38, -1, -1, sizeof(::qaul::net::router_net_info::RoutingInfoTable)},
+        { 47, -1, -1, sizeof(::qaul::net::router_net_info::RoutingInfoEntry)},
+        { 59, -1, -1, sizeof(::qaul::net::router_net_info::UserIdTable)},
+        { 68, -1, -1, sizeof(::qaul::net::router_net_info::UserInfoTable)},
+        { 77, -1, -1, sizeof(::qaul::net::router_net_info::UserInfo)},
+        { 88, -1, -1, sizeof(::qaul::net::router_net_info::FeedIdsTable)},
+        { 97, 106, -1, sizeof(::qaul::net::router_net_info::FeedRequestMessage)},
+        { 107, 116, -1, sizeof(::qaul::net::router_net_info::FeedResponseMessage)},
+        { 117, -1, -1, sizeof(::qaul::net::router_net_info::FeedResponseTable)},
+        { 126, -1, -1, sizeof(::qaul::net::router_net_info::FeedMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::net::router_net_info::_RouterInfoContainer_default_instance_._instance,
-  &::qaul::net::router_net_info::_RouterInfoContent_default_instance_._instance,
-  &::qaul::net::router_net_info::_RouterInfoMessage_default_instance_._instance,
-  &::qaul::net::router_net_info::_RoutingInfoTable_default_instance_._instance,
-  &::qaul::net::router_net_info::_RoutingInfoEntry_default_instance_._instance,
-  &::qaul::net::router_net_info::_UserIdTable_default_instance_._instance,
-  &::qaul::net::router_net_info::_UserInfoTable_default_instance_._instance,
-  &::qaul::net::router_net_info::_UserInfo_default_instance_._instance,
-  &::qaul::net::router_net_info::_FeedIdsTable_default_instance_._instance,
-  &::qaul::net::router_net_info::_FeedRequestMessage_default_instance_._instance,
-  &::qaul::net::router_net_info::_FeedResponseMessage_default_instance_._instance,
-  &::qaul::net::router_net_info::_FeedResponseTable_default_instance_._instance,
-  &::qaul::net::router_net_info::_FeedMessage_default_instance_._instance,
+    &::qaul::net::router_net_info::_RouterInfoContainer_default_instance_._instance,
+    &::qaul::net::router_net_info::_RouterInfoContent_default_instance_._instance,
+    &::qaul::net::router_net_info::_RouterInfoMessage_default_instance_._instance,
+    &::qaul::net::router_net_info::_RoutingInfoTable_default_instance_._instance,
+    &::qaul::net::router_net_info::_RoutingInfoEntry_default_instance_._instance,
+    &::qaul::net::router_net_info::_UserIdTable_default_instance_._instance,
+    &::qaul::net::router_net_info::_UserInfoTable_default_instance_._instance,
+    &::qaul::net::router_net_info::_UserInfo_default_instance_._instance,
+    &::qaul::net::router_net_info::_FeedIdsTable_default_instance_._instance,
+    &::qaul::net::router_net_info::_FeedRequestMessage_default_instance_._instance,
+    &::qaul::net::router_net_info::_FeedResponseMessage_default_instance_._instance,
+    &::qaul::net::router_net_info::_FeedResponseTable_default_instance_._instance,
+    &::qaul::net::router_net_info::_FeedMessage_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_router_2frouter_5fnet_5finfo_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\034router/router_net_info.proto\022\030qaul.net"
-  ".router_net_info\"9\n\023RouterInfoContainer\022"
-  "\021\n\tsignature\030\001 \001(\014\022\017\n\007message\030\002 \001(\014\"\204\001\n\021"
-  "RouterInfoContent\022\n\n\002id\030\001 \001(\014\022D\n\020routerI"
-  "nfoModule\030\002 \001(\0162*.qaul.net.router_net_in"
-  "fo.RouterInfoModule\022\017\n\007content\030\003 \001(\014\022\014\n\004"
-  "time\030\004 \001(\004\"\247\001\n\021RouterInfoMessage\022\014\n\004node"
-  "\030\001 \001(\014\022:\n\006routes\030\002 \001(\0132*.qaul.net.router"
-  "_net_info.RoutingInfoTable\0225\n\005feeds\030\004 \001("
-  "\0132&.qaul.net.router_net_info.FeedIdsTabl"
-  "e\022\021\n\ttimestamp\030\005 \001(\004\"M\n\020RoutingInfoTable"
-  "\0229\n\005entry\030\001 \003(\0132*.qaul.net.router_net_in"
-  "fo.RoutingInfoEntry\"G\n\020RoutingInfoEntry\022"
-  "\014\n\004user\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r\022\n\n\002hc\030\003 \001(\014\022\014"
-  "\n\004pgid\030\005 \001(\r\"\032\n\013UserIdTable\022\013\n\003ids\030\001 \003(\014"
-  "\"A\n\rUserInfoTable\0220\n\004info\030\001 \003(\0132\".qaul.n"
-  "et.router_net_info.UserInfo\"1\n\010UserInfo\022"
-  "\n\n\002id\030\001 \001(\014\022\013\n\003key\030\002 \001(\014\022\014\n\004name\030\003 \001(\t\"\033"
-  "\n\014FeedIdsTable\022\013\n\003ids\030\001 \003(\014\"K\n\022FeedReque"
-  "stMessage\0225\n\005feeds\030\001 \001(\0132&.qaul.net.rout"
-  "er_net_info.FeedIdsTable\"Q\n\023FeedResponse"
-  "Message\022:\n\005feeds\030\001 \001(\0132+.qaul.net.router"
-  "_net_info.FeedResponseTable\"L\n\021FeedRespo"
-  "nseTable\0227\n\010messages\030\001 \003(\0132%.qaul.net.ro"
-  "uter_net_info.FeedMessage\"S\n\013FeedMessage"
-  "\022\022\n\nmessage_id\030\001 \001(\014\022\021\n\tsender_id\030\002 \001(\014\022"
-  "\017\n\007content\030\003 \001(\t\022\014\n\004time\030\004 \001(\004*m\n\020Router"
-  "InfoModule\022\017\n\013ROUTER_INFO\020\000\022\020\n\014FEED_REQU"
-  "EST\020\001\022\021\n\rFEED_RESPONSE\020\002\022\020\n\014USER_REQUEST"
-  "\020\003\022\021\n\rUSER_RESPONSE\020\004b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once;
+const char descriptor_table_protodef_router_2frouter_5fnet_5finfo_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\034router/router_net_info.proto\022\030qaul.net"
+    ".router_net_info\"9\n\023RouterInfoContainer\022"
+    "\021\n\tsignature\030\001 \001(\014\022\017\n\007message\030\002 \001(\014\"\204\001\n\021"
+    "RouterInfoContent\022\n\n\002id\030\001 \001(\014\022D\n\020routerI"
+    "nfoModule\030\002 \001(\0162*.qaul.net.router_net_in"
+    "fo.RouterInfoModule\022\017\n\007content\030\003 \001(\014\022\014\n\004"
+    "time\030\004 \001(\004\"\247\001\n\021RouterInfoMessage\022\014\n\004node"
+    "\030\001 \001(\014\022:\n\006routes\030\002 \001(\0132*.qaul.net.router"
+    "_net_info.RoutingInfoTable\0225\n\005feeds\030\004 \001("
+    "\0132&.qaul.net.router_net_info.FeedIdsTabl"
+    "e\022\021\n\ttimestamp\030\005 \001(\004\"M\n\020RoutingInfoTable"
+    "\0229\n\005entry\030\001 \003(\0132*.qaul.net.router_net_in"
+    "fo.RoutingInfoEntry\"G\n\020RoutingInfoEntry\022"
+    "\014\n\004user\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r\022\n\n\002hc\030\003 \001(\014\022\014"
+    "\n\004pgid\030\005 \001(\r\"\032\n\013UserIdTable\022\013\n\003ids\030\001 \003(\014"
+    "\"A\n\rUserInfoTable\0220\n\004info\030\001 \003(\0132\".qaul.n"
+    "et.router_net_info.UserInfo\"1\n\010UserInfo\022"
+    "\n\n\002id\030\001 \001(\014\022\013\n\003key\030\002 \001(\014\022\014\n\004name\030\003 \001(\t\"\033"
+    "\n\014FeedIdsTable\022\013\n\003ids\030\001 \003(\014\"K\n\022FeedReque"
+    "stMessage\0225\n\005feeds\030\001 \001(\0132&.qaul.net.rout"
+    "er_net_info.FeedIdsTable\"Q\n\023FeedResponse"
+    "Message\022:\n\005feeds\030\001 \001(\0132+.qaul.net.router"
+    "_net_info.FeedResponseTable\"L\n\021FeedRespo"
+    "nseTable\0227\n\010messages\030\001 \003(\0132%.qaul.net.ro"
+    "uter_net_info.FeedMessage\"S\n\013FeedMessage"
+    "\022\022\n\nmessage_id\030\001 \001(\014\022\021\n\tsender_id\030\002 \001(\014\022"
+    "\017\n\007content\030\003 \001(\t\022\014\n\004time\030\004 \001(\004*m\n\020Router"
+    "InfoModule\022\017\n\013ROUTER_INFO\020\000\022\020\n\014FEED_REQU"
+    "EST\020\001\022\021\n\rFEED_RESPONSE\020\002\022\020\n\014USER_REQUEST"
+    "\020\003\022\021\n\rUSER_RESPONSE\020\004b\006proto3"
+};
+static ::absl::once_flag descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2frouter_5fnet_5finfo_2eproto = {
-    false, false, 1189, descriptor_table_protodef_router_2frouter_5fnet_5finfo_2eproto,
+    false,
+    false,
+    1189,
+    descriptor_table_protodef_router_2frouter_5fnet_5finfo_2eproto,
     "router/router_net_info.proto",
-    &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once, nullptr, 0, 13,
-    schemas, file_default_instances, TableStruct_router_2frouter_5fnet_5finfo_2eproto::offsets,
-    file_level_metadata_router_2frouter_5fnet_5finfo_2eproto, file_level_enum_descriptors_router_2frouter_5fnet_5finfo_2eproto,
+    &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
+    nullptr,
+    0,
+    13,
+    schemas,
+    file_default_instances,
+    TableStruct_router_2frouter_5fnet_5finfo_2eproto::offsets,
+    file_level_metadata_router_2frouter_5fnet_5finfo_2eproto,
+    file_level_enum_descriptors_router_2frouter_5fnet_5finfo_2eproto,
     file_level_service_descriptors_router_2frouter_5fnet_5finfo_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter() {
   return &descriptor_table_router_2frouter_5fnet_5finfo_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_router_2frouter_5fnet_5finfo_2eproto(&descriptor_table_router_2frouter_5fnet_5finfo_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_router_2frouter_5fnet_5finfo_2eproto(&descriptor_table_router_2frouter_5fnet_5finfo_2eproto);
 namespace qaul {
 namespace net {
 namespace router_net_info {
@@ -420,65 +547,62 @@ bool RouterInfoModule_IsValid(int value) {
       return false;
   }
 }
-
-
 // ===================================================================
 
 class RouterInfoContainer::_Internal {
  public:
 };
 
-RouterInfoContainer::RouterInfoContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RouterInfoContainer::RouterInfoContainer(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.RouterInfoContainer)
 }
 RouterInfoContainer::RouterInfoContainer(const RouterInfoContainer& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RouterInfoContainer* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.signature_){}
-    , decltype(_impl_.message_){}
+      decltype(_impl_.signature_) {}
+
+    , decltype(_impl_.message_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.signature_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.signature_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.signature_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_signature().empty()) {
-    _this->_impl_.signature_.Set(from._internal_signature(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.signature_.Set(from._internal_signature(), _this->GetArenaForAllocation());
   }
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message().empty()) {
-    _this->_impl_.message_.Set(from._internal_message(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.message_.Set(from._internal_message(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.RouterInfoContainer)
 }
 
-inline void RouterInfoContainer::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RouterInfoContainer::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.signature_){}
-    , decltype(_impl_.message_){}
+      decltype(_impl_.signature_) {}
+
+    , decltype(_impl_.message_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.signature_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.signature_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.signature_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.message_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RouterInfoContainer::~RouterInfoContainer() {
@@ -491,7 +615,7 @@ RouterInfoContainer::~RouterInfoContainer() {
 }
 
 inline void RouterInfoContainer::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.signature_.Destroy();
   _impl_.message_.Destroy();
 }
@@ -502,7 +626,7 @@ void RouterInfoContainer::SetCachedSize(int size) const {
 
 void RouterInfoContainer::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.RouterInfoContainer)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -514,26 +638,28 @@ void RouterInfoContainer::Clear() {
 const char* RouterInfoContainer::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes signature = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_signature();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes message = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_message();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -558,22 +684,22 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RouterInfoContainer::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RouterInfoContainer::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.RouterInfoContainer)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes signature = 1;
   if (!this->_internal_signature().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_signature(), target);
+    const std::string& _s = this->_internal_signature();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // bytes message = 2;
   if (!this->_internal_message().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_message(), target);
+    const std::string& _s = this->_internal_message();
+    target = stream->WriteBytesMaybeAliased(2, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -584,26 +710,24 @@ uint8_t* RouterInfoContainer::_InternalSerialize(
   return target;
 }
 
-size_t RouterInfoContainer::ByteSizeLong() const {
+::size_t RouterInfoContainer::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.RouterInfoContainer)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes signature = 1;
   if (!this->_internal_signature().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_signature());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_signature());
   }
 
   // bytes message = 2;
   if (!this->_internal_message().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_message());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_message());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -620,8 +744,8 @@ void RouterInfoContainer::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
   auto* const _this = static_cast<RouterInfoContainer*>(&to_msg);
   auto& from = static_cast<const RouterInfoContainer&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.RouterInfoContainer)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_signature().empty()) {
@@ -649,14 +773,10 @@ void RouterInfoContainer::InternalSwap(RouterInfoContainer* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.signature_, lhs_arena,
-      &other->_impl_.signature_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.message_, lhs_arena,
-      &other->_impl_.message_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.signature_, lhs_arena,
+                                       &other->_impl_.signature_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_, lhs_arena,
+                                       &other->_impl_.message_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RouterInfoContainer::GetMetadata() const {
@@ -664,71 +784,73 @@ void RouterInfoContainer::InternalSwap(RouterInfoContainer* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[0]);
 }
-
 // ===================================================================
 
 class RouterInfoContent::_Internal {
  public:
 };
 
-RouterInfoContent::RouterInfoContent(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RouterInfoContent::RouterInfoContent(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.RouterInfoContent)
 }
 RouterInfoContent::RouterInfoContent(const RouterInfoContent& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RouterInfoContent* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
-    , decltype(_impl_.content_){}
-    , decltype(_impl_.time_){}
-    , decltype(_impl_.routerinfomodule_){}
+      decltype(_impl_.id_) {}
+
+    , decltype(_impl_.content_) {}
+
+    , decltype(_impl_.time_) {}
+
+    , decltype(_impl_.routerinfomodule_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    _this->_impl_.id_.Set(from._internal_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), _this->GetArenaForAllocation());
   }
   _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.content_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.content_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    _this->_impl_.content_.Set(from._internal_content(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.content_.Set(from._internal_content(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.time_, &from._impl_.time_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.routerinfomodule_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.routerinfomodule_) -
     reinterpret_cast<char*>(&_impl_.time_)) + sizeof(_impl_.routerinfomodule_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.RouterInfoContent)
 }
 
-inline void RouterInfoContent::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RouterInfoContent::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
-    , decltype(_impl_.content_){}
-    , decltype(_impl_.time_){uint64_t{0u}}
-    , decltype(_impl_.routerinfomodule_){0}
+      decltype(_impl_.id_) {}
+
+    , decltype(_impl_.content_) {}
+
+    , decltype(_impl_.time_) { ::uint64_t{0u} }
+
+    , decltype(_impl_.routerinfomodule_) { 0 }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.content_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.content_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RouterInfoContent::~RouterInfoContent() {
@@ -741,7 +863,7 @@ RouterInfoContent::~RouterInfoContent() {
 }
 
 inline void RouterInfoContent::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.id_.Destroy();
   _impl_.content_.Destroy();
 }
@@ -752,13 +874,13 @@ void RouterInfoContent::SetCachedSize(int size) const {
 
 void RouterInfoContent::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.RouterInfoContent)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.id_.ClearToEmpty();
   _impl_.content_.ClearToEmpty();
-  ::memset(&_impl_.time_, 0, static_cast<size_t>(
+  ::memset(&_impl_.time_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.routerinfomodule_) -
       reinterpret_cast<char*>(&_impl_.time_)) + sizeof(_impl_.routerinfomodule_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -767,43 +889,47 @@ void RouterInfoContent::Clear() {
 const char* RouterInfoContent::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.router_net_info.RouterInfoModule routerInfoModule = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
+          ::int32_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
           _internal_set_routerinfomodule(static_cast<::qaul::net::router_net_info::RouterInfoModule>(val));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes content = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_content();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint64 time = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 32)) {
           _impl_.time_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -828,35 +954,36 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RouterInfoContent::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RouterInfoContent::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.RouterInfoContent)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_id(), target);
+    const std::string& _s = this->_internal_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // .qaul.net.router_net_info.RouterInfoModule routerInfoModule = 2;
   if (this->_internal_routerinfomodule() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-      2, this->_internal_routerinfomodule(), target);
+        2, this->_internal_routerinfomodule(), target);
   }
 
   // bytes content = 3;
   if (!this->_internal_content().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_content(), target);
+    const std::string& _s = this->_internal_content();
+    target = stream->WriteBytesMaybeAliased(3, _s, target);
   }
 
   // uint64 time = 4;
   if (this->_internal_time() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(4, this->_internal_time(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        4, this->_internal_time(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -867,37 +994,36 @@ uint8_t* RouterInfoContent::_InternalSerialize(
   return target;
 }
 
-size_t RouterInfoContent::ByteSizeLong() const {
+::size_t RouterInfoContent::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.RouterInfoContent)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_id());
   }
 
   // bytes content = 3;
   if (!this->_internal_content().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_content());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_content());
   }
 
   // uint64 time = 4;
   if (this->_internal_time() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_time());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_time());
   }
 
   // .qaul.net.router_net_info.RouterInfoModule routerInfoModule = 2;
   if (this->_internal_routerinfomodule() != 0) {
     total_size += 1 +
-      ::_pbi::WireFormatLite::EnumSize(this->_internal_routerinfomodule());
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_routerinfomodule());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -914,8 +1040,8 @@ void RouterInfoContent::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<RouterInfoContent*>(&to_msg);
   auto& from = static_cast<const RouterInfoContent&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.RouterInfoContent)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_id().empty()) {
@@ -949,14 +1075,10 @@ void RouterInfoContent::InternalSwap(RouterInfoContent* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.id_, lhs_arena,
-      &other->_impl_.id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.content_, lhs_arena,
-      &other->_impl_.content_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, lhs_arena,
+                                       &other->_impl_.id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.content_, lhs_arena,
+                                       &other->_impl_.content_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(RouterInfoContent, _impl_.routerinfomodule_)
       + sizeof(RouterInfoContent::_impl_.routerinfomodule_)
@@ -970,13 +1092,21 @@ void RouterInfoContent::InternalSwap(RouterInfoContent* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[1]);
 }
-
 // ===================================================================
 
 class RouterInfoMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<RouterInfoMessage>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(RouterInfoMessage, _impl_._has_bits_);
   static const ::qaul::net::router_net_info::RoutingInfoTable& routes(const RouterInfoMessage* msg);
+  static void set_has_routes(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
   static const ::qaul::net::router_net_info::FeedIdsTable& feeds(const RouterInfoMessage* msg);
+  static void set_has_feeds(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
 };
 
 const ::qaul::net::router_net_info::RoutingInfoTable&
@@ -987,56 +1117,58 @@ const ::qaul::net::router_net_info::FeedIdsTable&
 RouterInfoMessage::_Internal::feeds(const RouterInfoMessage* msg) {
   return *msg->_impl_.feeds_;
 }
-RouterInfoMessage::RouterInfoMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RouterInfoMessage::RouterInfoMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.RouterInfoMessage)
 }
 RouterInfoMessage::RouterInfoMessage(const RouterInfoMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RouterInfoMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_){}
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.node_) {}
+
     , decltype(_impl_.routes_){nullptr}
     , decltype(_impl_.feeds_){nullptr}
-    , decltype(_impl_.timestamp_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+    , decltype(_impl_.timestamp_) {}
+  };
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.node_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.node_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.node_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_node().empty()) {
-    _this->_impl_.node_.Set(from._internal_node(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.node_.Set(from._internal_node(), _this->GetArenaForAllocation());
   }
-  if (from._internal_has_routes()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_impl_.routes_ = new ::qaul::net::router_net_info::RoutingInfoTable(*from._impl_.routes_);
   }
-  if (from._internal_has_feeds()) {
+  if ((from._impl_._has_bits_[0] & 0x00000002u) != 0) {
     _this->_impl_.feeds_ = new ::qaul::net::router_net_info::FeedIdsTable(*from._impl_.feeds_);
   }
   _this->_impl_.timestamp_ = from._impl_.timestamp_;
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.RouterInfoMessage)
 }
 
-inline void RouterInfoMessage::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RouterInfoMessage::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_){}
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.node_) {}
+
     , decltype(_impl_.routes_){nullptr}
     , decltype(_impl_.feeds_){nullptr}
-    , decltype(_impl_.timestamp_){uint64_t{0u}}
-    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.timestamp_) { ::uint64_t{0u} }
+
   };
   _impl_.node_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.node_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.node_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RouterInfoMessage::~RouterInfoMessage() {
@@ -1049,7 +1181,7 @@ RouterInfoMessage::~RouterInfoMessage() {
 }
 
 inline void RouterInfoMessage::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.node_.Destroy();
   if (this != internal_default_instance()) delete _impl_.routes_;
   if (this != internal_default_instance()) delete _impl_.feeds_;
@@ -1061,61 +1193,70 @@ void RouterInfoMessage::SetCachedSize(int size) const {
 
 void RouterInfoMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.RouterInfoMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.node_.ClearToEmpty();
-  if (GetArenaForAllocation() == nullptr && _impl_.routes_ != nullptr) {
-    delete _impl_.routes_;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      ABSL_DCHECK(_impl_.routes_ != nullptr);
+      _impl_.routes_->Clear();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      ABSL_DCHECK(_impl_.feeds_ != nullptr);
+      _impl_.feeds_->Clear();
+    }
   }
-  _impl_.routes_ = nullptr;
-  if (GetArenaForAllocation() == nullptr && _impl_.feeds_ != nullptr) {
-    delete _impl_.feeds_;
-  }
-  _impl_.feeds_ = nullptr;
-  _impl_.timestamp_ = uint64_t{0u};
+  _impl_.timestamp_ = ::uint64_t{0u};
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* RouterInfoMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes node = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_node();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.router_net_info.RoutingInfoTable routes = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_routes(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.net.router_net_info.FeedIdsTable feeds = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_feeds(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint64 timestamp = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 40)) {
           _impl_.timestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1133,6 +1274,7 @@ const char* RouterInfoMessage::_InternalParse(const char* ptr, ::_pbi::ParseCont
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -1140,27 +1282,28 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RouterInfoMessage::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RouterInfoMessage::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.RouterInfoMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes node = 1;
   if (!this->_internal_node().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_node(), target);
+    const std::string& _s = this->_internal_node();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
+  cached_has_bits = _impl_._has_bits_[0];
   // .qaul.net.router_net_info.RoutingInfoTable routes = 2;
-  if (this->_internal_has_routes()) {
+  if (cached_has_bits & 0x00000001u) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(2, _Internal::routes(this),
         _Internal::routes(this).GetCachedSize(), target, stream);
   }
 
   // .qaul.net.router_net_info.FeedIdsTable feeds = 4;
-  if (this->_internal_has_feeds()) {
+  if (cached_has_bits & 0x00000002u) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(4, _Internal::feeds(this),
         _Internal::feeds(this).GetCachedSize(), target, stream);
@@ -1169,7 +1312,8 @@ uint8_t* RouterInfoMessage::_InternalSerialize(
   // uint64 timestamp = 5;
   if (this->_internal_timestamp() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(5, this->_internal_timestamp(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        5, this->_internal_timestamp(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1180,38 +1324,41 @@ uint8_t* RouterInfoMessage::_InternalSerialize(
   return target;
 }
 
-size_t RouterInfoMessage::ByteSizeLong() const {
+::size_t RouterInfoMessage::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.RouterInfoMessage)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes node = 1;
   if (!this->_internal_node().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_node());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_node());
   }
 
-  // .qaul.net.router_net_info.RoutingInfoTable routes = 2;
-  if (this->_internal_has_routes()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *_impl_.routes_);
-  }
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // .qaul.net.router_net_info.RoutingInfoTable routes = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.routes_);
+    }
 
-  // .qaul.net.router_net_info.FeedIdsTable feeds = 4;
-  if (this->_internal_has_feeds()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *_impl_.feeds_);
-  }
+    // .qaul.net.router_net_info.FeedIdsTable feeds = 4;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.feeds_);
+    }
 
+  }
   // uint64 timestamp = 5;
   if (this->_internal_timestamp() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_timestamp());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_timestamp());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1228,20 +1375,23 @@ void RouterInfoMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<RouterInfoMessage*>(&to_msg);
   auto& from = static_cast<const RouterInfoMessage&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.RouterInfoMessage)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_node().empty()) {
     _this->_internal_set_node(from._internal_node());
   }
-  if (from._internal_has_routes()) {
-    _this->_internal_mutable_routes()->::qaul::net::router_net_info::RoutingInfoTable::MergeFrom(
-        from._internal_routes());
-  }
-  if (from._internal_has_feeds()) {
-    _this->_internal_mutable_feeds()->::qaul::net::router_net_info::FeedIdsTable::MergeFrom(
-        from._internal_feeds());
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_mutable_routes()->::qaul::net::router_net_info::RoutingInfoTable::MergeFrom(
+          from._internal_routes());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_feeds()->::qaul::net::router_net_info::FeedIdsTable::MergeFrom(
+          from._internal_feeds());
+    }
   }
   if (from._internal_timestamp() != 0) {
     _this->_internal_set_timestamp(from._internal_timestamp());
@@ -1265,10 +1415,9 @@ void RouterInfoMessage::InternalSwap(RouterInfoMessage* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.node_, lhs_arena,
-      &other->_impl_.node_, rhs_arena
-  );
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.node_, lhs_arena,
+                                       &other->_impl_.node_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(RouterInfoMessage, _impl_.timestamp_)
       + sizeof(RouterInfoMessage::_impl_.timestamp_)
@@ -1282,17 +1431,15 @@ void RouterInfoMessage::InternalSwap(RouterInfoMessage* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[2]);
 }
-
 // ===================================================================
 
 class RoutingInfoTable::_Internal {
  public:
 };
 
-RoutingInfoTable::RoutingInfoTable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RoutingInfoTable::RoutingInfoTable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.RoutingInfoTable)
 }
 RoutingInfoTable::RoutingInfoTable(const RoutingInfoTable& from)
@@ -1306,10 +1453,8 @@ RoutingInfoTable::RoutingInfoTable(const RoutingInfoTable& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.RoutingInfoTable)
 }
 
-inline void RoutingInfoTable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RoutingInfoTable::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.entry_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -1326,8 +1471,8 @@ RoutingInfoTable::~RoutingInfoTable() {
 }
 
 inline void RoutingInfoTable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.entry_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_entry()->~RepeatedPtrField();
 }
 
 void RoutingInfoTable::SetCachedSize(int size) const {
@@ -1336,23 +1481,23 @@ void RoutingInfoTable::SetCachedSize(int size) const {
 
 void RoutingInfoTable::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.RoutingInfoTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.entry_.Clear();
+  _internal_mutable_entry()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* RoutingInfoTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1360,8 +1505,9 @@ const char* RoutingInfoTable::_InternalParse(const char* ptr, ::_pbi::ParseConte
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1386,10 +1532,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RoutingInfoTable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RoutingInfoTable::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.RoutingInfoTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;
@@ -1408,17 +1554,17 @@ uint8_t* RoutingInfoTable::_InternalSerialize(
   return target;
 }
 
-size_t RoutingInfoTable::ByteSizeLong() const {
+::size_t RoutingInfoTable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.RoutingInfoTable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.RoutingInfoEntry entry = 1;
   total_size += 1UL * this->_internal_entry_size();
-  for (const auto& msg : this->_impl_.entry_) {
+  for (const auto& msg : this->_internal_entry()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -1437,11 +1583,11 @@ void RoutingInfoTable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const
   auto* const _this = static_cast<RoutingInfoTable*>(&to_msg);
   auto& from = static_cast<const RoutingInfoTable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.RoutingInfoTable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.entry_.MergeFrom(from._impl_.entry_);
+  _this->_internal_mutable_entry()->MergeFrom(from._internal_entry());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1459,7 +1605,7 @@ bool RoutingInfoTable::IsInitialized() const {
 void RoutingInfoTable::InternalSwap(RoutingInfoTable* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.entry_.InternalSwap(&other->_impl_.entry_);
+  _internal_mutable_entry()->InternalSwap(other->_internal_mutable_entry());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RoutingInfoTable::GetMetadata() const {
@@ -1467,71 +1613,73 @@ void RoutingInfoTable::InternalSwap(RoutingInfoTable* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[3]);
 }
-
 // ===================================================================
 
 class RoutingInfoEntry::_Internal {
  public:
 };
 
-RoutingInfoEntry::RoutingInfoEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RoutingInfoEntry::RoutingInfoEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.RoutingInfoEntry)
 }
 RoutingInfoEntry::RoutingInfoEntry(const RoutingInfoEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RoutingInfoEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_){}
-    , decltype(_impl_.hc_){}
-    , decltype(_impl_.rtt_){}
-    , decltype(_impl_.pgid_){}
+      decltype(_impl_.user_) {}
+
+    , decltype(_impl_.hc_) {}
+
+    , decltype(_impl_.rtt_) {}
+
+    , decltype(_impl_.pgid_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.user_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user().empty()) {
-    _this->_impl_.user_.Set(from._internal_user(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_.Set(from._internal_user(), _this->GetArenaForAllocation());
   }
   _impl_.hc_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.hc_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.hc_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_hc().empty()) {
-    _this->_impl_.hc_.Set(from._internal_hc(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.hc_.Set(from._internal_hc(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.rtt_, &from._impl_.rtt_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.pgid_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.pgid_) -
     reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.pgid_));
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.RoutingInfoEntry)
 }
 
-inline void RoutingInfoEntry::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RoutingInfoEntry::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.user_){}
-    , decltype(_impl_.hc_){}
-    , decltype(_impl_.rtt_){0u}
-    , decltype(_impl_.pgid_){0u}
+      decltype(_impl_.user_) {}
+
+    , decltype(_impl_.hc_) {}
+
+    , decltype(_impl_.rtt_) { 0u }
+
+    , decltype(_impl_.pgid_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.user_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.hc_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.hc_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.hc_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RoutingInfoEntry::~RoutingInfoEntry() {
@@ -1544,7 +1692,7 @@ RoutingInfoEntry::~RoutingInfoEntry() {
 }
 
 inline void RoutingInfoEntry::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.user_.Destroy();
   _impl_.hc_.Destroy();
 }
@@ -1555,13 +1703,13 @@ void RoutingInfoEntry::SetCachedSize(int size) const {
 
 void RoutingInfoEntry::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.RoutingInfoEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.user_.ClearToEmpty();
   _impl_.hc_.ClearToEmpty();
-  ::memset(&_impl_.rtt_, 0, static_cast<size_t>(
+  ::memset(&_impl_.rtt_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.pgid_) -
       reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.pgid_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -1570,42 +1718,46 @@ void RoutingInfoEntry::Clear() {
 const char* RoutingInfoEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes user = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_user();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 rtt = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
           _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes hc = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_hc();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 pgid = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 40)) {
           _impl_.pgid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1630,34 +1782,36 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RoutingInfoEntry::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RoutingInfoEntry::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.RoutingInfoEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes user = 1;
   if (!this->_internal_user().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_user(), target);
+    const std::string& _s = this->_internal_user();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // uint32 rtt = 2;
   if (this->_internal_rtt() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_rtt(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        2, this->_internal_rtt(), target);
   }
 
   // bytes hc = 3;
   if (!this->_internal_hc().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_hc(), target);
+    const std::string& _s = this->_internal_hc();
+    target = stream->WriteBytesMaybeAliased(3, _s, target);
   }
 
   // uint32 pgid = 5;
   if (this->_internal_pgid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_pgid(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        5, this->_internal_pgid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1668,36 +1822,36 @@ uint8_t* RoutingInfoEntry::_InternalSerialize(
   return target;
 }
 
-size_t RoutingInfoEntry::ByteSizeLong() const {
+::size_t RoutingInfoEntry::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.RoutingInfoEntry)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes user = 1;
   if (!this->_internal_user().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user());
   }
 
   // bytes hc = 3;
   if (!this->_internal_hc().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_hc());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_hc());
   }
 
   // uint32 rtt = 2;
   if (this->_internal_rtt() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_rtt());
   }
 
   // uint32 pgid = 5;
   if (this->_internal_pgid() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_pgid());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_pgid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1714,8 +1868,8 @@ void RoutingInfoEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const
   auto* const _this = static_cast<RoutingInfoEntry*>(&to_msg);
   auto& from = static_cast<const RoutingInfoEntry&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.RoutingInfoEntry)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_user().empty()) {
@@ -1749,14 +1903,10 @@ void RoutingInfoEntry::InternalSwap(RoutingInfoEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_, lhs_arena,
-      &other->_impl_.user_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.hc_, lhs_arena,
-      &other->_impl_.hc_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_, lhs_arena,
+                                       &other->_impl_.user_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.hc_, lhs_arena,
+                                       &other->_impl_.hc_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(RoutingInfoEntry, _impl_.pgid_)
       + sizeof(RoutingInfoEntry::_impl_.pgid_)
@@ -1770,17 +1920,15 @@ void RoutingInfoEntry::InternalSwap(RoutingInfoEntry* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[4]);
 }
-
 // ===================================================================
 
 class UserIdTable::_Internal {
  public:
 };
 
-UserIdTable::UserIdTable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+UserIdTable::UserIdTable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.UserIdTable)
 }
 UserIdTable::UserIdTable(const UserIdTable& from)
@@ -1794,10 +1942,8 @@ UserIdTable::UserIdTable(const UserIdTable& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.UserIdTable)
 }
 
-inline void UserIdTable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void UserIdTable::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.ids_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -1814,8 +1960,8 @@ UserIdTable::~UserIdTable() {
 }
 
 inline void UserIdTable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.ids_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_ids()->~RepeatedPtrField();
 }
 
 void UserIdTable::SetCachedSize(int size) const {
@@ -1824,23 +1970,23 @@ void UserIdTable::SetCachedSize(int size) const {
 
 void UserIdTable::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.UserIdTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.ids_.Clear();
+  _internal_mutable_ids()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* UserIdTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated bytes ids = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1849,8 +1995,9 @@ const char* UserIdTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* c
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1875,14 +2022,14 @@ failure:
 #undef CHK_
 }
 
-uint8_t* UserIdTable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* UserIdTable::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.UserIdTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated bytes ids = 1;
-  for (int i = 0, n = this->_internal_ids_size(); i < n; i++) {
+  for (int i = 0, n = this->_internal_ids_size(); i < n; ++i) {
     const auto& s = this->_internal_ids(i);
     target = stream->WriteBytes(1, s, target);
   }
@@ -1895,20 +2042,19 @@ uint8_t* UserIdTable::_InternalSerialize(
   return target;
 }
 
-size_t UserIdTable::ByteSizeLong() const {
+::size_t UserIdTable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.UserIdTable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated bytes ids = 1;
-  total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_impl_.ids_.size());
-  for (int i = 0, n = _impl_.ids_.size(); i < n; i++) {
+  total_size += 1 * ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_internal_ids().size());
+  for (int i = 0, n = _internal_ids().size(); i < n; ++i) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-      _impl_.ids_.Get(i));
+        _internal_ids().Get(i));
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1925,11 +2071,11 @@ void UserIdTable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PR
   auto* const _this = static_cast<UserIdTable*>(&to_msg);
   auto& from = static_cast<const UserIdTable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.UserIdTable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.ids_.MergeFrom(from._impl_.ids_);
+  _this->_internal_mutable_ids()->MergeFrom(from._internal_ids());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1947,7 +2093,8 @@ bool UserIdTable::IsInitialized() const {
 void UserIdTable::InternalSwap(UserIdTable* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.ids_.InternalSwap(&other->_impl_.ids_);
+  _internal_mutable_ids()->InternalSwap(
+      other->_internal_mutable_ids());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserIdTable::GetMetadata() const {
@@ -1955,17 +2102,15 @@ void UserIdTable::InternalSwap(UserIdTable* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[5]);
 }
-
 // ===================================================================
 
 class UserInfoTable::_Internal {
  public:
 };
 
-UserInfoTable::UserInfoTable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+UserInfoTable::UserInfoTable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.UserInfoTable)
 }
 UserInfoTable::UserInfoTable(const UserInfoTable& from)
@@ -1979,10 +2124,8 @@ UserInfoTable::UserInfoTable(const UserInfoTable& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.UserInfoTable)
 }
 
-inline void UserInfoTable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void UserInfoTable::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.info_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -1999,8 +2142,8 @@ UserInfoTable::~UserInfoTable() {
 }
 
 inline void UserInfoTable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.info_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_info()->~RepeatedPtrField();
 }
 
 void UserInfoTable::SetCachedSize(int size) const {
@@ -2009,23 +2152,23 @@ void UserInfoTable::SetCachedSize(int size) const {
 
 void UserInfoTable::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.UserInfoTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.info_.Clear();
+  _internal_mutable_info()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* UserInfoTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.net.router_net_info.UserInfo info = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2033,8 +2176,9 @@ const char* UserInfoTable::_InternalParse(const char* ptr, ::_pbi::ParseContext*
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2059,10 +2203,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* UserInfoTable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* UserInfoTable::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.UserInfoTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.UserInfo info = 1;
@@ -2081,17 +2225,17 @@ uint8_t* UserInfoTable::_InternalSerialize(
   return target;
 }
 
-size_t UserInfoTable::ByteSizeLong() const {
+::size_t UserInfoTable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.UserInfoTable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.UserInfo info = 1;
   total_size += 1UL * this->_internal_info_size();
-  for (const auto& msg : this->_impl_.info_) {
+  for (const auto& msg : this->_internal_info()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -2110,11 +2254,11 @@ void UserInfoTable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::
   auto* const _this = static_cast<UserInfoTable*>(&to_msg);
   auto& from = static_cast<const UserInfoTable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.UserInfoTable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.info_.MergeFrom(from._impl_.info_);
+  _this->_internal_mutable_info()->MergeFrom(from._internal_info());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2132,7 +2276,7 @@ bool UserInfoTable::IsInitialized() const {
 void UserInfoTable::InternalSwap(UserInfoTable* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.info_.InternalSwap(&other->_impl_.info_);
+  _internal_mutable_info()->InternalSwap(other->_internal_mutable_info());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserInfoTable::GetMetadata() const {
@@ -2140,78 +2284,77 @@ void UserInfoTable::InternalSwap(UserInfoTable* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[6]);
 }
-
 // ===================================================================
 
 class UserInfo::_Internal {
  public:
 };
 
-UserInfo::UserInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+UserInfo::UserInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.UserInfo)
 }
 UserInfo::UserInfo(const UserInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   UserInfo* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
-    , decltype(_impl_.key_){}
-    , decltype(_impl_.name_){}
+      decltype(_impl_.id_) {}
+
+    , decltype(_impl_.key_) {}
+
+    , decltype(_impl_.name_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_id().empty()) {
-    _this->_impl_.id_.Set(from._internal_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.id_.Set(from._internal_id(), _this->GetArenaForAllocation());
   }
   _impl_.key_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.key_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_key().empty()) {
-    _this->_impl_.key_.Set(from._internal_key(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.key_.Set(from._internal_key(), _this->GetArenaForAllocation());
   }
   _impl_.name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.name_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_name().empty()) {
-    _this->_impl_.name_.Set(from._internal_name(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.name_.Set(from._internal_name(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.UserInfo)
 }
 
-inline void UserInfo::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void UserInfo::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.id_){}
-    , decltype(_impl_.key_){}
-    , decltype(_impl_.name_){}
+      decltype(_impl_.id_) {}
+
+    , decltype(_impl_.key_) {}
+
+    , decltype(_impl_.name_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.key_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.key_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.key_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.name_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.name_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 UserInfo::~UserInfo() {
@@ -2224,7 +2367,7 @@ UserInfo::~UserInfo() {
 }
 
 inline void UserInfo::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.id_.Destroy();
   _impl_.key_.Destroy();
   _impl_.name_.Destroy();
@@ -2236,7 +2379,7 @@ void UserInfo::SetCachedSize(int size) const {
 
 void UserInfo::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.UserInfo)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2249,36 +2392,39 @@ void UserInfo::Clear() {
 const char* UserInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes key = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_key();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string name = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_name();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.net.router_net_info.UserInfo.name"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2303,32 +2449,30 @@ failure:
 #undef CHK_
 }
 
-uint8_t* UserInfo::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* UserInfo::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.UserInfo)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_id(), target);
+    const std::string& _s = this->_internal_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // bytes key = 2;
   if (!this->_internal_key().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_key(), target);
+    const std::string& _s = this->_internal_key();
+    target = stream->WriteBytesMaybeAliased(2, _s, target);
   }
 
   // string name = 3;
   if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.router_net_info.UserInfo.name");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_name(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.net.router_net_info.UserInfo.name");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2339,33 +2483,30 @@ uint8_t* UserInfo::_InternalSerialize(
   return target;
 }
 
-size_t UserInfo::ByteSizeLong() const {
+::size_t UserInfo::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.UserInfo)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes id = 1;
   if (!this->_internal_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_id());
   }
 
   // bytes key = 2;
   if (!this->_internal_key().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_key());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_key());
   }
 
   // string name = 3;
   if (!this->_internal_name().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_name());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2382,8 +2523,8 @@ void UserInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTO
   auto* const _this = static_cast<UserInfo*>(&to_msg);
   auto& from = static_cast<const UserInfo&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.UserInfo)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_id().empty()) {
@@ -2414,18 +2555,12 @@ void UserInfo::InternalSwap(UserInfo* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.id_, lhs_arena,
-      &other->_impl_.id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.key_, lhs_arena,
-      &other->_impl_.key_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.name_, lhs_arena,
-      &other->_impl_.name_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, lhs_arena,
+                                       &other->_impl_.id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.key_, lhs_arena,
+                                       &other->_impl_.key_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, lhs_arena,
+                                       &other->_impl_.name_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UserInfo::GetMetadata() const {
@@ -2433,17 +2568,15 @@ void UserInfo::InternalSwap(UserInfo* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[7]);
 }
-
 // ===================================================================
 
 class FeedIdsTable::_Internal {
  public:
 };
 
-FeedIdsTable::FeedIdsTable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+FeedIdsTable::FeedIdsTable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.FeedIdsTable)
 }
 FeedIdsTable::FeedIdsTable(const FeedIdsTable& from)
@@ -2457,10 +2590,8 @@ FeedIdsTable::FeedIdsTable(const FeedIdsTable& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.FeedIdsTable)
 }
 
-inline void FeedIdsTable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void FeedIdsTable::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.ids_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -2477,8 +2608,8 @@ FeedIdsTable::~FeedIdsTable() {
 }
 
 inline void FeedIdsTable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.ids_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_ids()->~RepeatedPtrField();
 }
 
 void FeedIdsTable::SetCachedSize(int size) const {
@@ -2487,23 +2618,23 @@ void FeedIdsTable::SetCachedSize(int size) const {
 
 void FeedIdsTable::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.FeedIdsTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.ids_.Clear();
+  _internal_mutable_ids()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* FeedIdsTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated bytes ids = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2512,8 +2643,9 @@ const char* FeedIdsTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* 
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2538,14 +2670,14 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FeedIdsTable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* FeedIdsTable::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.FeedIdsTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated bytes ids = 1;
-  for (int i = 0, n = this->_internal_ids_size(); i < n; i++) {
+  for (int i = 0, n = this->_internal_ids_size(); i < n; ++i) {
     const auto& s = this->_internal_ids(i);
     target = stream->WriteBytes(1, s, target);
   }
@@ -2558,20 +2690,19 @@ uint8_t* FeedIdsTable::_InternalSerialize(
   return target;
 }
 
-size_t FeedIdsTable::ByteSizeLong() const {
+::size_t FeedIdsTable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.FeedIdsTable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated bytes ids = 1;
-  total_size += 1 *
-      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_impl_.ids_.size());
-  for (int i = 0, n = _impl_.ids_.size(); i < n; i++) {
+  total_size += 1 * ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(_internal_ids().size());
+  for (int i = 0, n = _internal_ids().size(); i < n; ++i) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-      _impl_.ids_.Get(i));
+        _internal_ids().Get(i));
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2588,11 +2719,11 @@ void FeedIdsTable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
   auto* const _this = static_cast<FeedIdsTable*>(&to_msg);
   auto& from = static_cast<const FeedIdsTable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.FeedIdsTable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.ids_.MergeFrom(from._impl_.ids_);
+  _this->_internal_mutable_ids()->MergeFrom(from._internal_ids());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2610,7 +2741,8 @@ bool FeedIdsTable::IsInitialized() const {
 void FeedIdsTable::InternalSwap(FeedIdsTable* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.ids_.InternalSwap(&other->_impl_.ids_);
+  _internal_mutable_ids()->InternalSwap(
+      other->_internal_mutable_ids());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedIdsTable::GetMetadata() const {
@@ -2618,45 +2750,49 @@ void FeedIdsTable::InternalSwap(FeedIdsTable* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[8]);
 }
-
 // ===================================================================
 
 class FeedRequestMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<FeedRequestMessage>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(FeedRequestMessage, _impl_._has_bits_);
   static const ::qaul::net::router_net_info::FeedIdsTable& feeds(const FeedRequestMessage* msg);
+  static void set_has_feeds(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 const ::qaul::net::router_net_info::FeedIdsTable&
 FeedRequestMessage::_Internal::feeds(const FeedRequestMessage* msg) {
   return *msg->_impl_.feeds_;
 }
-FeedRequestMessage::FeedRequestMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+FeedRequestMessage::FeedRequestMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.FeedRequestMessage)
 }
 FeedRequestMessage::FeedRequestMessage(const FeedRequestMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   FeedRequestMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.feeds_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.feeds_){nullptr}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  if (from._internal_has_feeds()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_impl_.feeds_ = new ::qaul::net::router_net_info::FeedIdsTable(*from._impl_.feeds_);
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.FeedRequestMessage)
 }
 
-inline void FeedRequestMessage::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void FeedRequestMessage::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.feeds_){nullptr}
+      decltype(_impl_._has_bits_){}
     , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.feeds_){nullptr}
   };
 }
 
@@ -2670,7 +2806,7 @@ FeedRequestMessage::~FeedRequestMessage() {
 }
 
 inline void FeedRequestMessage::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (this != internal_default_instance()) delete _impl_.feeds_;
 }
 
@@ -2680,30 +2816,34 @@ void FeedRequestMessage::SetCachedSize(int size) const {
 
 void FeedRequestMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.FeedRequestMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArenaForAllocation() == nullptr && _impl_.feeds_ != nullptr) {
-    delete _impl_.feeds_;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.feeds_ != nullptr);
+    _impl_.feeds_->Clear();
   }
-  _impl_.feeds_ = nullptr;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* FeedRequestMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.net.router_net_info.FeedIdsTable feeds = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_feeds(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2721,6 +2861,7 @@ const char* FeedRequestMessage::_InternalParse(const char* ptr, ::_pbi::ParseCon
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -2728,14 +2869,15 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FeedRequestMessage::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* FeedRequestMessage::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.FeedRequestMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  cached_has_bits = _impl_._has_bits_[0];
   // .qaul.net.router_net_info.FeedIdsTable feeds = 1;
-  if (this->_internal_has_feeds()) {
+  if (cached_has_bits & 0x00000001u) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(1, _Internal::feeds(this),
         _Internal::feeds(this).GetCachedSize(), target, stream);
@@ -2749,16 +2891,17 @@ uint8_t* FeedRequestMessage::_InternalSerialize(
   return target;
 }
 
-size_t FeedRequestMessage::ByteSizeLong() const {
+::size_t FeedRequestMessage::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.FeedRequestMessage)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .qaul.net.router_net_info.FeedIdsTable feeds = 1;
-  if (this->_internal_has_feeds()) {
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.feeds_);
@@ -2778,11 +2921,11 @@ void FeedRequestMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, con
   auto* const _this = static_cast<FeedRequestMessage*>(&to_msg);
   auto& from = static_cast<const FeedRequestMessage&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.FeedRequestMessage)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_has_feeds()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_internal_mutable_feeds()->::qaul::net::router_net_info::FeedIdsTable::MergeFrom(
         from._internal_feeds());
   }
@@ -2803,6 +2946,7 @@ bool FeedRequestMessage::IsInitialized() const {
 void FeedRequestMessage::InternalSwap(FeedRequestMessage* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   swap(_impl_.feeds_, other->_impl_.feeds_);
 }
 
@@ -2811,45 +2955,49 @@ void FeedRequestMessage::InternalSwap(FeedRequestMessage* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[9]);
 }
-
 // ===================================================================
 
 class FeedResponseMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<FeedResponseMessage>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(FeedResponseMessage, _impl_._has_bits_);
   static const ::qaul::net::router_net_info::FeedResponseTable& feeds(const FeedResponseMessage* msg);
+  static void set_has_feeds(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 const ::qaul::net::router_net_info::FeedResponseTable&
 FeedResponseMessage::_Internal::feeds(const FeedResponseMessage* msg) {
   return *msg->_impl_.feeds_;
 }
-FeedResponseMessage::FeedResponseMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+FeedResponseMessage::FeedResponseMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.FeedResponseMessage)
 }
 FeedResponseMessage::FeedResponseMessage(const FeedResponseMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   FeedResponseMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.feeds_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.feeds_){nullptr}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  if (from._internal_has_feeds()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_impl_.feeds_ = new ::qaul::net::router_net_info::FeedResponseTable(*from._impl_.feeds_);
   }
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.FeedResponseMessage)
 }
 
-inline void FeedResponseMessage::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void FeedResponseMessage::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.feeds_){nullptr}
+      decltype(_impl_._has_bits_){}
     , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.feeds_){nullptr}
   };
 }
 
@@ -2863,7 +3011,7 @@ FeedResponseMessage::~FeedResponseMessage() {
 }
 
 inline void FeedResponseMessage::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (this != internal_default_instance()) delete _impl_.feeds_;
 }
 
@@ -2873,30 +3021,34 @@ void FeedResponseMessage::SetCachedSize(int size) const {
 
 void FeedResponseMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.FeedResponseMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArenaForAllocation() == nullptr && _impl_.feeds_ != nullptr) {
-    delete _impl_.feeds_;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.feeds_ != nullptr);
+    _impl_.feeds_->Clear();
   }
-  _impl_.feeds_ = nullptr;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* FeedResponseMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.net.router_net_info.FeedResponseTable feeds = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_feeds(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2914,6 +3066,7 @@ const char* FeedResponseMessage::_InternalParse(const char* ptr, ::_pbi::ParseCo
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -2921,14 +3074,15 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FeedResponseMessage::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* FeedResponseMessage::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.FeedResponseMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  cached_has_bits = _impl_._has_bits_[0];
   // .qaul.net.router_net_info.FeedResponseTable feeds = 1;
-  if (this->_internal_has_feeds()) {
+  if (cached_has_bits & 0x00000001u) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(1, _Internal::feeds(this),
         _Internal::feeds(this).GetCachedSize(), target, stream);
@@ -2942,16 +3096,17 @@ uint8_t* FeedResponseMessage::_InternalSerialize(
   return target;
 }
 
-size_t FeedResponseMessage::ByteSizeLong() const {
+::size_t FeedResponseMessage::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.FeedResponseMessage)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .qaul.net.router_net_info.FeedResponseTable feeds = 1;
-  if (this->_internal_has_feeds()) {
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.feeds_);
@@ -2971,11 +3126,11 @@ void FeedResponseMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
   auto* const _this = static_cast<FeedResponseMessage*>(&to_msg);
   auto& from = static_cast<const FeedResponseMessage&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.FeedResponseMessage)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_has_feeds()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_internal_mutable_feeds()->::qaul::net::router_net_info::FeedResponseTable::MergeFrom(
         from._internal_feeds());
   }
@@ -2996,6 +3151,7 @@ bool FeedResponseMessage::IsInitialized() const {
 void FeedResponseMessage::InternalSwap(FeedResponseMessage* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   swap(_impl_.feeds_, other->_impl_.feeds_);
 }
 
@@ -3004,17 +3160,15 @@ void FeedResponseMessage::InternalSwap(FeedResponseMessage* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[10]);
 }
-
 // ===================================================================
 
 class FeedResponseTable::_Internal {
  public:
 };
 
-FeedResponseTable::FeedResponseTable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+FeedResponseTable::FeedResponseTable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.FeedResponseTable)
 }
 FeedResponseTable::FeedResponseTable(const FeedResponseTable& from)
@@ -3028,10 +3182,8 @@ FeedResponseTable::FeedResponseTable(const FeedResponseTable& from)
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.FeedResponseTable)
 }
 
-inline void FeedResponseTable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void FeedResponseTable::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.messages_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -3048,8 +3200,8 @@ FeedResponseTable::~FeedResponseTable() {
 }
 
 inline void FeedResponseTable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.messages_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_messages()->~RepeatedPtrField();
 }
 
 void FeedResponseTable::SetCachedSize(int size) const {
@@ -3058,23 +3210,23 @@ void FeedResponseTable::SetCachedSize(int size) const {
 
 void FeedResponseTable::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.FeedResponseTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.messages_.Clear();
+  _internal_mutable_messages()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* FeedResponseTable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.net.router_net_info.FeedMessage messages = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -3082,8 +3234,9 @@ const char* FeedResponseTable::_InternalParse(const char* ptr, ::_pbi::ParseCont
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -3108,10 +3261,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FeedResponseTable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* FeedResponseTable::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.FeedResponseTable)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.FeedMessage messages = 1;
@@ -3130,17 +3283,17 @@ uint8_t* FeedResponseTable::_InternalSerialize(
   return target;
 }
 
-size_t FeedResponseTable::ByteSizeLong() const {
+::size_t FeedResponseTable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.FeedResponseTable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.net.router_net_info.FeedMessage messages = 1;
   total_size += 1UL * this->_internal_messages_size();
-  for (const auto& msg : this->_impl_.messages_) {
+  for (const auto& msg : this->_internal_messages()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -3159,11 +3312,11 @@ void FeedResponseTable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<FeedResponseTable*>(&to_msg);
   auto& from = static_cast<const FeedResponseTable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.FeedResponseTable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.messages_.MergeFrom(from._impl_.messages_);
+  _this->_internal_mutable_messages()->MergeFrom(from._internal_messages());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -3181,7 +3334,7 @@ bool FeedResponseTable::IsInitialized() const {
 void FeedResponseTable::InternalSwap(FeedResponseTable* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.messages_.InternalSwap(&other->_impl_.messages_);
+  _internal_mutable_messages()->InternalSwap(other->_internal_mutable_messages());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FeedResponseTable::GetMetadata() const {
@@ -3189,81 +3342,82 @@ void FeedResponseTable::InternalSwap(FeedResponseTable* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[11]);
 }
-
 // ===================================================================
 
 class FeedMessage::_Internal {
  public:
 };
 
-FeedMessage::FeedMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+FeedMessage::FeedMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.net.router_net_info.FeedMessage)
 }
 FeedMessage::FeedMessage(const FeedMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   FeedMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_id_){}
-    , decltype(_impl_.sender_id_){}
-    , decltype(_impl_.content_){}
-    , decltype(_impl_.time_){}
+      decltype(_impl_.message_id_) {}
+
+    , decltype(_impl_.sender_id_) {}
+
+    , decltype(_impl_.content_) {}
+
+    , decltype(_impl_.time_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.message_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_message_id().empty()) {
-    _this->_impl_.message_id_.Set(from._internal_message_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.message_id_.Set(from._internal_message_id(), _this->GetArenaForAllocation());
   }
   _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.sender_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.sender_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_sender_id().empty()) {
-    _this->_impl_.sender_id_.Set(from._internal_sender_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.sender_id_.Set(from._internal_sender_id(), _this->GetArenaForAllocation());
   }
   _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.content_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.content_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_content().empty()) {
-    _this->_impl_.content_.Set(from._internal_content(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.content_.Set(from._internal_content(), _this->GetArenaForAllocation());
   }
   _this->_impl_.time_ = from._impl_.time_;
   // @@protoc_insertion_point(copy_constructor:qaul.net.router_net_info.FeedMessage)
 }
 
-inline void FeedMessage::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void FeedMessage::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.message_id_){}
-    , decltype(_impl_.sender_id_){}
-    , decltype(_impl_.content_){}
-    , decltype(_impl_.time_){uint64_t{0u}}
+      decltype(_impl_.message_id_) {}
+
+    , decltype(_impl_.sender_id_) {}
+
+    , decltype(_impl_.content_) {}
+
+    , decltype(_impl_.time_) { ::uint64_t{0u} }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.message_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.message_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.sender_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.sender_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.sender_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.content_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.content_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.content_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 FeedMessage::~FeedMessage() {
@@ -3276,7 +3430,7 @@ FeedMessage::~FeedMessage() {
 }
 
 inline void FeedMessage::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.message_id_.Destroy();
   _impl_.sender_id_.Destroy();
   _impl_.content_.Destroy();
@@ -3288,58 +3442,62 @@ void FeedMessage::SetCachedSize(int size) const {
 
 void FeedMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.net.router_net_info.FeedMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.message_id_.ClearToEmpty();
   _impl_.sender_id_.ClearToEmpty();
   _impl_.content_.ClearToEmpty();
-  _impl_.time_ = uint64_t{0u};
+  _impl_.time_ = ::uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* FeedMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes message_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_message_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes sender_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_sender_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string content = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_content();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.net.router_net_info.FeedMessage.content"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint64 time = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 32)) {
           _impl_.time_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -3364,38 +3522,37 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FeedMessage::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* FeedMessage::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.net.router_net_info.FeedMessage)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes message_id = 1;
   if (!this->_internal_message_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_message_id(), target);
+    const std::string& _s = this->_internal_message_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // bytes sender_id = 2;
   if (!this->_internal_sender_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_sender_id(), target);
+    const std::string& _s = this->_internal_sender_id();
+    target = stream->WriteBytesMaybeAliased(2, _s, target);
   }
 
   // string content = 3;
   if (!this->_internal_content().empty()) {
+    const std::string& _s = this->_internal_content();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_content().data(), static_cast<int>(this->_internal_content().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.net.router_net_info.FeedMessage.content");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_content(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.net.router_net_info.FeedMessage.content");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
   // uint64 time = 4;
   if (this->_internal_time() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(4, this->_internal_time(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(
+        4, this->_internal_time(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3406,38 +3563,36 @@ uint8_t* FeedMessage::_InternalSerialize(
   return target;
 }
 
-size_t FeedMessage::ByteSizeLong() const {
+::size_t FeedMessage::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.net.router_net_info.FeedMessage)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes message_id = 1;
   if (!this->_internal_message_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_message_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_message_id());
   }
 
   // bytes sender_id = 2;
   if (!this->_internal_sender_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_sender_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_sender_id());
   }
 
   // string content = 3;
   if (!this->_internal_content().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_content());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_content());
   }
 
   // uint64 time = 4;
   if (this->_internal_time() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_time());
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(
+        this->_internal_time());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -3454,8 +3609,8 @@ void FeedMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PR
   auto* const _this = static_cast<FeedMessage*>(&to_msg);
   auto& from = static_cast<const FeedMessage&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.net.router_net_info.FeedMessage)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_message_id().empty()) {
@@ -3489,18 +3644,13 @@ void FeedMessage::InternalSwap(FeedMessage* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.message_id_, lhs_arena,
-      &other->_impl_.message_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.sender_id_, lhs_arena,
-      &other->_impl_.sender_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.content_, lhs_arena,
-      &other->_impl_.content_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.message_id_, lhs_arena,
+                                       &other->_impl_.message_id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.sender_id_, lhs_arena,
+                                       &other->_impl_.sender_id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.content_, lhs_arena,
+                                       &other->_impl_.content_, rhs_arena);
+
   swap(_impl_.time_, other->_impl_.time_);
 }
 
@@ -3509,7 +3659,6 @@ void FeedMessage::InternalSwap(FeedMessage* other) {
       &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_getter, &descriptor_table_router_2frouter_5fnet_5finfo_2eproto_once,
       file_level_metadata_router_2frouter_5fnet_5finfo_2eproto[12]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace router_net_info
 }  // namespace net
@@ -3568,6 +3717,5 @@ Arena::CreateMaybeMessage< ::qaul::net::router_net_info::FeedMessage >(Arena* ar
   return Arena::CreateMessageInternal< ::qaul::net::router_net_info::FeedMessage >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

@@ -4,104 +4,124 @@
 #include "router/router.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace rpc {
 namespace router {
+template <typename>
 PROTOBUF_CONSTEXPR Router::Router(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.message_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_._oneof_case_)*/{}} {}
 struct RouterDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouterDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RouterDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RouterDefaultTypeInternal() {}
   union {
     Router _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterDefaultTypeInternal _Router_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouterDefaultTypeInternal _Router_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingTableRequest::RoutingTableRequest(
     ::_pbi::ConstantInitialized) {}
 struct RoutingTableRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingTableRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingTableRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingTableRequestDefaultTypeInternal() {}
   union {
     RoutingTableRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableRequestDefaultTypeInternal _RoutingTableRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableRequestDefaultTypeInternal _RoutingTableRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingTableList::RoutingTableList(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.routing_table_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableListDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingTableListDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingTableListDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingTableListDefaultTypeInternal() {}
   union {
     RoutingTableList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableListDefaultTypeInternal _RoutingTableList_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableListDefaultTypeInternal _RoutingTableList_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingTableEntry::RoutingTableEntry(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.connections_)*/{}
-  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.user_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableEntryDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingTableEntryDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingTableEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingTableEntryDefaultTypeInternal() {}
   union {
     RoutingTableEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableEntryDefaultTypeInternal _RoutingTableEntry_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableEntryDefaultTypeInternal _RoutingTableEntry_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR RoutingTableConnection::RoutingTableConnection(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.via_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.module_)*/0
-  , /*decltype(_impl_.rtt_)*/0u
-  , /*decltype(_impl_.hop_count_)*/0u
+    /*decltype(_impl_.via_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.module_)*/ 0
+
+  , /*decltype(_impl_.rtt_)*/ 0u
+
+  , /*decltype(_impl_.hop_count_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RoutingTableConnectionDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RoutingTableConnectionDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RoutingTableConnectionDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~RoutingTableConnectionDefaultTypeInternal() {}
   union {
     RoutingTableConnection _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableConnectionDefaultTypeInternal _RoutingTableConnection_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RoutingTableConnectionDefaultTypeInternal _RoutingTableConnection_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ConnectionsRequest::ConnectionsRequest(
     ::_pbi::ConstantInitialized) {}
 struct ConnectionsRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ConnectionsRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ConnectionsRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ConnectionsRequestDefaultTypeInternal() {}
   union {
     ConnectionsRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsRequestDefaultTypeInternal _ConnectionsRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsRequestDefaultTypeInternal _ConnectionsRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ConnectionsList::ConnectionsList(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.lan_)*/{}
@@ -110,54 +130,70 @@ PROTOBUF_CONSTEXPR ConnectionsList::ConnectionsList(
   , /*decltype(_impl_.local_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionsListDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ConnectionsListDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ConnectionsListDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ConnectionsListDefaultTypeInternal() {}
   union {
     ConnectionsList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsListDefaultTypeInternal _ConnectionsList_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsListDefaultTypeInternal _ConnectionsList_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ConnectionsUserEntry::ConnectionsUserEntry(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.connections_)*/{}
-  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.user_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionsUserEntryDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ConnectionsUserEntryDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ConnectionsUserEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ConnectionsUserEntryDefaultTypeInternal() {}
   union {
     ConnectionsUserEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsUserEntryDefaultTypeInternal _ConnectionsUserEntry_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionsUserEntryDefaultTypeInternal _ConnectionsUserEntry_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR ConnectionEntry::ConnectionEntry(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.via_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.rtt_)*/0u
-  , /*decltype(_impl_.hop_count_)*/0u
+    /*decltype(_impl_.via_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.rtt_)*/ 0u
+
+  , /*decltype(_impl_.hop_count_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ConnectionEntryDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ConnectionEntryDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ConnectionEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ConnectionEntryDefaultTypeInternal() {}
   union {
     ConnectionEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionEntryDefaultTypeInternal _ConnectionEntry_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectionEntryDefaultTypeInternal _ConnectionEntry_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR NeighboursRequest::NeighboursRequest(
     ::_pbi::ConstantInitialized) {}
 struct NeighboursRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NeighboursRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NeighboursRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NeighboursRequestDefaultTypeInternal() {}
   union {
     NeighboursRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursRequestDefaultTypeInternal _NeighboursRequest_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursRequestDefaultTypeInternal _NeighboursRequest_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR NeighboursList::NeighboursList(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.lan_)*/{}
@@ -165,222 +201,276 @@ PROTOBUF_CONSTEXPR NeighboursList::NeighboursList(
   , /*decltype(_impl_.ble_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NeighboursListDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NeighboursListDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NeighboursListDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NeighboursListDefaultTypeInternal() {}
   union {
     NeighboursList _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursListDefaultTypeInternal _NeighboursList_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursListDefaultTypeInternal _NeighboursList_default_instance_;
+template <typename>
 PROTOBUF_CONSTEXPR NeighboursEntry::NeighboursEntry(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.node_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.rtt_)*/0u
+    /*decltype(_impl_.node_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.rtt_)*/ 0u
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct NeighboursEntryDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR NeighboursEntryDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR NeighboursEntryDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~NeighboursEntryDefaultTypeInternal() {}
   union {
     NeighboursEntry _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursEntryDefaultTypeInternal _NeighboursEntry_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NeighboursEntryDefaultTypeInternal _NeighboursEntry_default_instance_;
 }  // namespace router
 }  // namespace rpc
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_router_2frouter_2eproto[12];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_router_2frouter_2eproto[1];
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_router_2frouter_2eproto = nullptr;
-
-const uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, _impl_.routing_table_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.connections_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.module_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.rtt_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.hop_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.via_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.lan_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.internet_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.ble_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.local_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.connections_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.rtt_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.hop_count_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.via_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.lan_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.internet_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.ble_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.node_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.rtt_),
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_router_2frouter_2eproto = nullptr;
+const ::uint32_t TableStruct_router_2frouter_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_.message_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableList, _impl_.routing_table_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.user_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableEntry, _impl_.connections_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.module_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.rtt_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.hop_count_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::RoutingTableConnection, _impl_.via_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.lan_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.internet_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.ble_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsList, _impl_.local_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.user_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionsUserEntry, _impl_.connections_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.rtt_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.hop_count_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::ConnectionEntry, _impl_.via_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.lan_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.internet_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursList, _impl_.ble_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.node_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::NeighboursEntry, _impl_.rtt_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::rpc::router::Router)},
-  { 13, -1, -1, sizeof(::qaul::rpc::router::RoutingTableRequest)},
-  { 19, -1, -1, sizeof(::qaul::rpc::router::RoutingTableList)},
-  { 26, -1, -1, sizeof(::qaul::rpc::router::RoutingTableEntry)},
-  { 34, -1, -1, sizeof(::qaul::rpc::router::RoutingTableConnection)},
-  { 44, -1, -1, sizeof(::qaul::rpc::router::ConnectionsRequest)},
-  { 50, -1, -1, sizeof(::qaul::rpc::router::ConnectionsList)},
-  { 60, -1, -1, sizeof(::qaul::rpc::router::ConnectionsUserEntry)},
-  { 68, -1, -1, sizeof(::qaul::rpc::router::ConnectionEntry)},
-  { 77, -1, -1, sizeof(::qaul::rpc::router::NeighboursRequest)},
-  { 83, -1, -1, sizeof(::qaul::rpc::router::NeighboursList)},
-  { 92, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::rpc::router::Router)},
+        { 15, -1, -1, sizeof(::qaul::rpc::router::RoutingTableRequest)},
+        { 23, -1, -1, sizeof(::qaul::rpc::router::RoutingTableList)},
+        { 32, -1, -1, sizeof(::qaul::rpc::router::RoutingTableEntry)},
+        { 42, -1, -1, sizeof(::qaul::rpc::router::RoutingTableConnection)},
+        { 54, -1, -1, sizeof(::qaul::rpc::router::ConnectionsRequest)},
+        { 62, -1, -1, sizeof(::qaul::rpc::router::ConnectionsList)},
+        { 74, -1, -1, sizeof(::qaul::rpc::router::ConnectionsUserEntry)},
+        { 84, -1, -1, sizeof(::qaul::rpc::router::ConnectionEntry)},
+        { 95, -1, -1, sizeof(::qaul::rpc::router::NeighboursRequest)},
+        { 103, -1, -1, sizeof(::qaul::rpc::router::NeighboursList)},
+        { 114, -1, -1, sizeof(::qaul::rpc::router::NeighboursEntry)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::rpc::router::_Router_default_instance_._instance,
-  &::qaul::rpc::router::_RoutingTableRequest_default_instance_._instance,
-  &::qaul::rpc::router::_RoutingTableList_default_instance_._instance,
-  &::qaul::rpc::router::_RoutingTableEntry_default_instance_._instance,
-  &::qaul::rpc::router::_RoutingTableConnection_default_instance_._instance,
-  &::qaul::rpc::router::_ConnectionsRequest_default_instance_._instance,
-  &::qaul::rpc::router::_ConnectionsList_default_instance_._instance,
-  &::qaul::rpc::router::_ConnectionsUserEntry_default_instance_._instance,
-  &::qaul::rpc::router::_ConnectionEntry_default_instance_._instance,
-  &::qaul::rpc::router::_NeighboursRequest_default_instance_._instance,
-  &::qaul::rpc::router::_NeighboursList_default_instance_._instance,
-  &::qaul::rpc::router::_NeighboursEntry_default_instance_._instance,
+    &::qaul::rpc::router::_Router_default_instance_._instance,
+    &::qaul::rpc::router::_RoutingTableRequest_default_instance_._instance,
+    &::qaul::rpc::router::_RoutingTableList_default_instance_._instance,
+    &::qaul::rpc::router::_RoutingTableEntry_default_instance_._instance,
+    &::qaul::rpc::router::_RoutingTableConnection_default_instance_._instance,
+    &::qaul::rpc::router::_ConnectionsRequest_default_instance_._instance,
+    &::qaul::rpc::router::_ConnectionsList_default_instance_._instance,
+    &::qaul::rpc::router::_ConnectionsUserEntry_default_instance_._instance,
+    &::qaul::rpc::router::_ConnectionEntry_default_instance_._instance,
+    &::qaul::rpc::router::_NeighboursRequest_default_instance_._instance,
+    &::qaul::rpc::router::_NeighboursList_default_instance_._instance,
+    &::qaul::rpc::router::_NeighboursEntry_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_router_2frouter_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\023router/router.proto\022\017qaul.rpc.router\"\226"
-  "\003\n\006Router\022E\n\025routing_table_request\030\001 \001(\013"
-  "2$.qaul.rpc.router.RoutingTableRequestH\000"
-  "\022:\n\rrouting_table\030\002 \001(\0132!.qaul.rpc.route"
-  "r.RoutingTableListH\000\022B\n\023connections_requ"
-  "est\030\003 \001(\0132#.qaul.rpc.router.ConnectionsR"
-  "equestH\000\022<\n\020connections_list\030\004 \001(\0132 .qau"
-  "l.rpc.router.ConnectionsListH\000\022@\n\022neighb"
-  "ours_request\030\005 \001(\0132\".qaul.rpc.router.Nei"
-  "ghboursRequestH\000\022:\n\017neighbours_list\030\006 \001("
-  "\0132\037.qaul.rpc.router.NeighboursListH\000B\t\n\007"
-  "message\"\025\n\023RoutingTableRequest\"M\n\020Routin"
-  "gTableList\0229\n\rrouting_table\030\001 \003(\0132\".qaul"
-  ".rpc.router.RoutingTableEntry\"b\n\021Routing"
-  "TableEntry\022\017\n\007user_id\030\001 \001(\014\022<\n\013connectio"
-  "ns\030\002 \003(\0132\'.qaul.rpc.router.RoutingTableC"
-  "onnection\"x\n\026RoutingTableConnection\0221\n\006m"
-  "odule\030\002 \001(\0162!.qaul.rpc.router.Connection"
-  "Module\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count\030\005 \001(\r\022\013"
-  "\n\003via\030\004 \001(\014\"\024\n\022ConnectionsRequest\"\350\001\n\017Co"
-  "nnectionsList\0222\n\003lan\030\001 \003(\0132%.qaul.rpc.ro"
-  "uter.ConnectionsUserEntry\0227\n\010internet\030\002 "
-  "\003(\0132%.qaul.rpc.router.ConnectionsUserEnt"
-  "ry\0222\n\003ble\030\003 \003(\0132%.qaul.rpc.router.Connec"
-  "tionsUserEntry\0224\n\005local\030\004 \003(\0132%.qaul.rpc"
-  ".router.ConnectionsUserEntry\"^\n\024Connecti"
-  "onsUserEntry\022\017\n\007user_id\030\001 \001(\014\0225\n\013connect"
-  "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE"
-  "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t"
-  "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou"
-  "rsRequest\"\242\001\n\016NeighboursList\022-\n\003lan\030\001 \003("
-  "\0132 .qaul.rpc.router.NeighboursEntry\0222\n\010i"
-  "nternet\030\002 \003(\0132 .qaul.rpc.router.Neighbou"
-  "rsEntry\022-\n\003ble\030\003 \003(\0132 .qaul.rpc.router.N"
-  "eighboursEntry\"/\n\017NeighboursEntry\022\017\n\007nod"
-  "e_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionMod"
-  "ule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003"
-  "BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_router_2frouter_2eproto_once;
+const char descriptor_table_protodef_router_2frouter_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\023router/router.proto\022\017qaul.rpc.router\"\226"
+    "\003\n\006Router\022E\n\025routing_table_request\030\001 \001(\013"
+    "2$.qaul.rpc.router.RoutingTableRequestH\000"
+    "\022:\n\rrouting_table\030\002 \001(\0132!.qaul.rpc.route"
+    "r.RoutingTableListH\000\022B\n\023connections_requ"
+    "est\030\003 \001(\0132#.qaul.rpc.router.ConnectionsR"
+    "equestH\000\022<\n\020connections_list\030\004 \001(\0132 .qau"
+    "l.rpc.router.ConnectionsListH\000\022@\n\022neighb"
+    "ours_request\030\005 \001(\0132\".qaul.rpc.router.Nei"
+    "ghboursRequestH\000\022:\n\017neighbours_list\030\006 \001("
+    "\0132\037.qaul.rpc.router.NeighboursListH\000B\t\n\007"
+    "message\"\025\n\023RoutingTableRequest\"M\n\020Routin"
+    "gTableList\0229\n\rrouting_table\030\001 \003(\0132\".qaul"
+    ".rpc.router.RoutingTableEntry\"b\n\021Routing"
+    "TableEntry\022\017\n\007user_id\030\001 \001(\014\022<\n\013connectio"
+    "ns\030\002 \003(\0132\'.qaul.rpc.router.RoutingTableC"
+    "onnection\"x\n\026RoutingTableConnection\0221\n\006m"
+    "odule\030\002 \001(\0162!.qaul.rpc.router.Connection"
+    "Module\022\013\n\003rtt\030\003 \001(\r\022\021\n\thop_count\030\005 \001(\r\022\013"
+    "\n\003via\030\004 \001(\014\"\024\n\022ConnectionsRequest\"\350\001\n\017Co"
+    "nnectionsList\0222\n\003lan\030\001 \003(\0132%.qaul.rpc.ro"
+    "uter.ConnectionsUserEntry\0227\n\010internet\030\002 "
+    "\003(\0132%.qaul.rpc.router.ConnectionsUserEnt"
+    "ry\0222\n\003ble\030\003 \003(\0132%.qaul.rpc.router.Connec"
+    "tionsUserEntry\0224\n\005local\030\004 \003(\0132%.qaul.rpc"
+    ".router.ConnectionsUserEntry\"^\n\024Connecti"
+    "onsUserEntry\022\017\n\007user_id\030\001 \001(\014\0225\n\013connect"
+    "ions\030\002 \003(\0132 .qaul.rpc.router.ConnectionE"
+    "ntry\">\n\017ConnectionEntry\022\013\n\003rtt\030\001 \001(\r\022\021\n\t"
+    "hop_count\030\002 \001(\r\022\013\n\003via\030\003 \001(\014\"\023\n\021Neighbou"
+    "rsRequest\"\242\001\n\016NeighboursList\022-\n\003lan\030\001 \003("
+    "\0132 .qaul.rpc.router.NeighboursEntry\0222\n\010i"
+    "nternet\030\002 \003(\0132 .qaul.rpc.router.Neighbou"
+    "rsEntry\022-\n\003ble\030\003 \003(\0132 .qaul.rpc.router.N"
+    "eighboursEntry\"/\n\017NeighboursEntry\022\017\n\007nod"
+    "e_id\030\001 \001(\014\022\013\n\003rtt\030\002 \001(\r*G\n\020ConnectionMod"
+    "ule\022\010\n\004NONE\020\000\022\007\n\003LAN\020\001\022\014\n\010INTERNET\020\002\022\007\n\003"
+    "BLE\020\003\022\t\n\005LOCAL\020\004b\006proto3"
+};
+static ::absl::once_flag descriptor_table_router_2frouter_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_router_2frouter_2eproto = {
-    false, false, 1504, descriptor_table_protodef_router_2frouter_2eproto,
+    false,
+    false,
+    1504,
+    descriptor_table_protodef_router_2frouter_2eproto,
     "router/router.proto",
-    &descriptor_table_router_2frouter_2eproto_once, nullptr, 0, 12,
-    schemas, file_default_instances, TableStruct_router_2frouter_2eproto::offsets,
-    file_level_metadata_router_2frouter_2eproto, file_level_enum_descriptors_router_2frouter_2eproto,
+    &descriptor_table_router_2frouter_2eproto_once,
+    nullptr,
+    0,
+    12,
+    schemas,
+    file_default_instances,
+    TableStruct_router_2frouter_2eproto::offsets,
+    file_level_metadata_router_2frouter_2eproto,
+    file_level_enum_descriptors_router_2frouter_2eproto,
     file_level_service_descriptors_router_2frouter_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_router_2frouter_2eproto_getter() {
   return &descriptor_table_router_2frouter_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_router_2frouter_2eproto(&descriptor_table_router_2frouter_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_router_2frouter_2eproto(&descriptor_table_router_2frouter_2eproto);
 namespace qaul {
 namespace rpc {
 namespace router {
@@ -400,12 +490,12 @@ bool ConnectionModule_IsValid(int value) {
       return false;
   }
 }
-
-
 // ===================================================================
 
 class Router::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::router::Router, _impl_._oneof_case_);
   static const ::qaul::rpc::router::RoutingTableRequest& routing_table_request(const Router* msg);
   static const ::qaul::rpc::router::RoutingTableList& routing_table(const Router* msg);
   static const ::qaul::rpc::router::ConnectionsRequest& connections_request(const Router* msg);
@@ -528,10 +618,9 @@ void Router::set_allocated_neighbours_list(::qaul::rpc::router::NeighboursList* 
   }
   // @@protoc_insertion_point(field_set_allocated:qaul.rpc.router.Router.neighbours_list)
 }
-Router::Router(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Router::Router(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.Router)
 }
 Router::Router(const Router& from)
@@ -582,10 +671,8 @@ Router::Router(const Router& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.Router)
 }
 
-inline void Router::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void Router::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.message_){}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -604,7 +691,7 @@ Router::~Router() {
 }
 
 inline void Router::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   if (has_message()) {
     clear_message();
   }
@@ -663,7 +750,7 @@ void Router::clear_message() {
 
 void Router::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.Router)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -674,56 +761,62 @@ void Router::Clear() {
 const char* Router::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.router.RoutingTableRequest routing_table_request = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_routing_table_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.router.RoutingTableList routing_table = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_routing_table(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.router.ConnectionsRequest connections_request = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_connections_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.router.ConnectionsList connections_list = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_connections_list(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.router.NeighboursRequest neighbours_request = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_neighbours_request(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // .qaul.rpc.router.NeighboursList neighbours_list = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_neighbours_list(), ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -748,54 +841,51 @@ failure:
 #undef CHK_
 }
 
-uint8_t* Router::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* Router::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.Router)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .qaul.rpc.router.RoutingTableRequest routing_table_request = 1;
-  if (_internal_has_routing_table_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, _Internal::routing_table_request(this),
-        _Internal::routing_table_request(this).GetCachedSize(), target, stream);
+  switch (message_case()) {
+    case kRoutingTableRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(1, _Internal::routing_table_request(this),
+          _Internal::routing_table_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kRoutingTable: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(2, _Internal::routing_table(this),
+          _Internal::routing_table(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kConnectionsRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(3, _Internal::connections_request(this),
+          _Internal::connections_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kConnectionsList: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(4, _Internal::connections_list(this),
+          _Internal::connections_list(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kNeighboursRequest: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(5, _Internal::neighbours_request(this),
+          _Internal::neighbours_request(this).GetCachedSize(), target, stream);
+      break;
+    }
+    case kNeighboursList: {
+      target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(6, _Internal::neighbours_list(this),
+          _Internal::neighbours_list(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default: ;
   }
-
-  // .qaul.rpc.router.RoutingTableList routing_table = 2;
-  if (_internal_has_routing_table()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::routing_table(this),
-        _Internal::routing_table(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.router.ConnectionsRequest connections_request = 3;
-  if (_internal_has_connections_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::connections_request(this),
-        _Internal::connections_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.router.ConnectionsList connections_list = 4;
-  if (_internal_has_connections_list()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::connections_list(this),
-        _Internal::connections_list(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.router.NeighboursRequest neighbours_request = 5;
-  if (_internal_has_neighbours_request()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::neighbours_request(this),
-        _Internal::neighbours_request(this).GetCachedSize(), target, stream);
-  }
-
-  // .qaul.rpc.router.NeighboursList neighbours_list = 6;
-  if (_internal_has_neighbours_list()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, _Internal::neighbours_list(this),
-        _Internal::neighbours_list(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -804,11 +894,11 @@ uint8_t* Router::_InternalSerialize(
   return target;
 }
 
-size_t Router::ByteSizeLong() const {
+::size_t Router::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.Router)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -873,8 +963,8 @@ void Router::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBU
   auto* const _this = static_cast<Router*>(&to_msg);
   auto& from = static_cast<const Router&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.Router)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.message_case()) {
@@ -938,16 +1028,14 @@ void Router::InternalSwap(Router* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[0]);
 }
-
 // ===================================================================
 
 class RoutingTableRequest::_Internal {
  public:
 };
 
-RoutingTableRequest::RoutingTableRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+RoutingTableRequest::RoutingTableRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena) {
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableRequest)
 }
 RoutingTableRequest::RoutingTableRequest(const RoutingTableRequest& from)
@@ -978,17 +1066,15 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RoutingTableRequest::GetClassD
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[1]);
 }
-
 // ===================================================================
 
 class RoutingTableList::_Internal {
  public:
 };
 
-RoutingTableList::RoutingTableList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RoutingTableList::RoutingTableList(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableList)
 }
 RoutingTableList::RoutingTableList(const RoutingTableList& from)
@@ -1002,10 +1088,8 @@ RoutingTableList::RoutingTableList(const RoutingTableList& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableList)
 }
 
-inline void RoutingTableList::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RoutingTableList::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.routing_table_){arena}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -1022,8 +1106,8 @@ RoutingTableList::~RoutingTableList() {
 }
 
 inline void RoutingTableList::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.routing_table_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_routing_table()->~RepeatedPtrField();
 }
 
 void RoutingTableList::SetCachedSize(int size) const {
@@ -1032,23 +1116,23 @@ void RoutingTableList::SetCachedSize(int size) const {
 
 void RoutingTableList::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.RoutingTableList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.routing_table_.Clear();
+  _internal_mutable_routing_table()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* RoutingTableList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1056,8 +1140,9 @@ const char* RoutingTableList::_InternalParse(const char* ptr, ::_pbi::ParseConte
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1082,10 +1167,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RoutingTableList::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RoutingTableList::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.RoutingTableList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;
@@ -1104,17 +1189,17 @@ uint8_t* RoutingTableList::_InternalSerialize(
   return target;
 }
 
-size_t RoutingTableList::ByteSizeLong() const {
+::size_t RoutingTableList::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.RoutingTableList)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.RoutingTableEntry routing_table = 1;
   total_size += 1UL * this->_internal_routing_table_size();
-  for (const auto& msg : this->_impl_.routing_table_) {
+  for (const auto& msg : this->_internal_routing_table()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -1133,11 +1218,11 @@ void RoutingTableList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const
   auto* const _this = static_cast<RoutingTableList*>(&to_msg);
   auto& from = static_cast<const RoutingTableList&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableList)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.routing_table_.MergeFrom(from._impl_.routing_table_);
+  _this->_internal_mutable_routing_table()->MergeFrom(from._internal_routing_table());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1155,7 +1240,7 @@ bool RoutingTableList::IsInitialized() const {
 void RoutingTableList::InternalSwap(RoutingTableList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.routing_table_.InternalSwap(&other->_impl_.routing_table_);
+  _internal_mutable_routing_table()->InternalSwap(other->_internal_mutable_routing_table());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RoutingTableList::GetMetadata() const {
@@ -1163,17 +1248,15 @@ void RoutingTableList::InternalSwap(RoutingTableList* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[2]);
 }
-
 // ===================================================================
 
 class RoutingTableEntry::_Internal {
  public:
 };
 
-RoutingTableEntry::RoutingTableEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RoutingTableEntry::RoutingTableEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableEntry)
 }
 RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& from)
@@ -1181,34 +1264,33 @@ RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& from)
   RoutingTableEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.connections_){from._impl_.connections_}
-    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    _this->_impl_.user_id_.Set(from._internal_user_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableEntry)
 }
 
-inline void RoutingTableEntry::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RoutingTableEntry::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.connections_){arena}
-    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RoutingTableEntry::~RoutingTableEntry() {
@@ -1221,8 +1303,8 @@ RoutingTableEntry::~RoutingTableEntry() {
 }
 
 inline void RoutingTableEntry::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.connections_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_connections()->~RepeatedPtrField();
   _impl_.user_id_.Destroy();
 }
 
@@ -1232,11 +1314,11 @@ void RoutingTableEntry::SetCachedSize(int size) const {
 
 void RoutingTableEntry::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.RoutingTableEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.connections_.Clear();
+  _internal_mutable_connections()->Clear();
   _impl_.user_id_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -1244,21 +1326,22 @@ void RoutingTableEntry::Clear() {
 const char* RoutingTableEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes user_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_user_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.RoutingTableConnection connections = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1266,8 +1349,9 @@ const char* RoutingTableEntry::_InternalParse(const char* ptr, ::_pbi::ParseCont
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1292,16 +1376,16 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RoutingTableEntry::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RoutingTableEntry::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.RoutingTableEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_user_id(), target);
+    const std::string& _s = this->_internal_user_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // repeated .qaul.rpc.router.RoutingTableConnection connections = 2;
@@ -1320,26 +1404,25 @@ uint8_t* RoutingTableEntry::_InternalSerialize(
   return target;
 }
 
-size_t RoutingTableEntry::ByteSizeLong() const {
+::size_t RoutingTableEntry::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.RoutingTableEntry)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.RoutingTableConnection connections = 2;
   total_size += 1UL * this->_internal_connections_size();
-  for (const auto& msg : this->_impl_.connections_) {
+  for (const auto& msg : this->_internal_connections()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1356,11 +1439,11 @@ void RoutingTableEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
   auto* const _this = static_cast<RoutingTableEntry*>(&to_msg);
   auto& from = static_cast<const RoutingTableEntry&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableEntry)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.connections_.MergeFrom(from._impl_.connections_);
+  _this->_internal_mutable_connections()->MergeFrom(from._internal_connections());
   if (!from._internal_user_id().empty()) {
     _this->_internal_set_user_id(from._internal_user_id());
   }
@@ -1383,11 +1466,9 @@ void RoutingTableEntry::InternalSwap(RoutingTableEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.connections_.InternalSwap(&other->_impl_.connections_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_id_, lhs_arena,
-      &other->_impl_.user_id_, rhs_arena
-  );
+  _internal_mutable_connections()->InternalSwap(other->_internal_mutable_connections());
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_id_, lhs_arena,
+                                       &other->_impl_.user_id_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RoutingTableEntry::GetMetadata() const {
@@ -1395,59 +1476,62 @@ void RoutingTableEntry::InternalSwap(RoutingTableEntry* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[3]);
 }
-
 // ===================================================================
 
 class RoutingTableConnection::_Internal {
  public:
 };
 
-RoutingTableConnection::RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RoutingTableConnection::RoutingTableConnection(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.RoutingTableConnection)
 }
 RoutingTableConnection::RoutingTableConnection(const RoutingTableConnection& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   RoutingTableConnection* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.via_){}
-    , decltype(_impl_.module_){}
-    , decltype(_impl_.rtt_){}
-    , decltype(_impl_.hop_count_){}
+      decltype(_impl_.via_) {}
+
+    , decltype(_impl_.module_) {}
+
+    , decltype(_impl_.rtt_) {}
+
+    , decltype(_impl_.hop_count_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.via_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.via_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_via().empty()) {
-    _this->_impl_.via_.Set(from._internal_via(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.via_.Set(from._internal_via(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.module_, &from._impl_.module_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
     reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.RoutingTableConnection)
 }
 
-inline void RoutingTableConnection::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void RoutingTableConnection::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.via_){}
-    , decltype(_impl_.module_){0}
-    , decltype(_impl_.rtt_){0u}
-    , decltype(_impl_.hop_count_){0u}
+      decltype(_impl_.via_) {}
+
+    , decltype(_impl_.module_) { 0 }
+
+    , decltype(_impl_.rtt_) { 0u }
+
+    , decltype(_impl_.hop_count_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.via_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.via_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RoutingTableConnection::~RoutingTableConnection() {
@@ -1460,7 +1544,7 @@ RoutingTableConnection::~RoutingTableConnection() {
 }
 
 inline void RoutingTableConnection::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.via_.Destroy();
 }
 
@@ -1470,12 +1554,12 @@ void RoutingTableConnection::SetCachedSize(int size) const {
 
 void RoutingTableConnection::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.RoutingTableConnection)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.via_.ClearToEmpty();
-  ::memset(&_impl_.module_, 0, static_cast<size_t>(
+  ::memset(&_impl_.module_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.hop_count_) -
       reinterpret_cast<char*>(&_impl_.module_)) + sizeof(_impl_.hop_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -1484,42 +1568,46 @@ void RoutingTableConnection::Clear() {
 const char* RoutingTableConnection::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.router.ConnectionModule module = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
+          ::int32_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
           _internal_set_module(static_cast<::qaul::rpc::router::ConnectionModule>(val));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 rtt = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 24)) {
           _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes via = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_via();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 hop_count = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 40)) {
           _impl_.hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1544,35 +1632,37 @@ failure:
 #undef CHK_
 }
 
-uint8_t* RoutingTableConnection::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* RoutingTableConnection::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.RoutingTableConnection)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // .qaul.rpc.router.ConnectionModule module = 2;
   if (this->_internal_module() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-      2, this->_internal_module(), target);
+        2, this->_internal_module(), target);
   }
 
   // uint32 rtt = 3;
   if (this->_internal_rtt() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_rtt(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        3, this->_internal_rtt(), target);
   }
 
   // bytes via = 4;
   if (!this->_internal_via().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_via(), target);
+    const std::string& _s = this->_internal_via();
+    target = stream->WriteBytesMaybeAliased(4, _s, target);
   }
 
   // uint32 hop_count = 5;
   if (this->_internal_hop_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_hop_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        5, this->_internal_hop_count(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1583,35 +1673,36 @@ uint8_t* RoutingTableConnection::_InternalSerialize(
   return target;
 }
 
-size_t RoutingTableConnection::ByteSizeLong() const {
+::size_t RoutingTableConnection::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.RoutingTableConnection)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes via = 4;
   if (!this->_internal_via().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_via());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_via());
   }
 
   // .qaul.rpc.router.ConnectionModule module = 2;
   if (this->_internal_module() != 0) {
     total_size += 1 +
-      ::_pbi::WireFormatLite::EnumSize(this->_internal_module());
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_module());
   }
 
   // uint32 rtt = 3;
   if (this->_internal_rtt() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_rtt());
   }
 
   // uint32 hop_count = 5;
   if (this->_internal_hop_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_hop_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1628,8 +1719,8 @@ void RoutingTableConnection::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg,
   auto* const _this = static_cast<RoutingTableConnection*>(&to_msg);
   auto& from = static_cast<const RoutingTableConnection&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.RoutingTableConnection)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_via().empty()) {
@@ -1663,10 +1754,8 @@ void RoutingTableConnection::InternalSwap(RoutingTableConnection* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.via_, lhs_arena,
-      &other->_impl_.via_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.via_, lhs_arena,
+                                       &other->_impl_.via_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(RoutingTableConnection, _impl_.hop_count_)
       + sizeof(RoutingTableConnection::_impl_.hop_count_)
@@ -1680,16 +1769,14 @@ void RoutingTableConnection::InternalSwap(RoutingTableConnection* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[4]);
 }
-
 // ===================================================================
 
 class ConnectionsRequest::_Internal {
  public:
 };
 
-ConnectionsRequest::ConnectionsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+ConnectionsRequest::ConnectionsRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena) {
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionsRequest)
 }
 ConnectionsRequest::ConnectionsRequest(const ConnectionsRequest& from)
@@ -1720,17 +1807,15 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ConnectionsRequest::GetClassDa
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[5]);
 }
-
 // ===================================================================
 
 class ConnectionsList::_Internal {
  public:
 };
 
-ConnectionsList::ConnectionsList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ConnectionsList::ConnectionsList(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionsList)
 }
 ConnectionsList::ConnectionsList(const ConnectionsList& from)
@@ -1747,10 +1832,8 @@ ConnectionsList::ConnectionsList(const ConnectionsList& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionsList)
 }
 
-inline void ConnectionsList::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ConnectionsList::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.lan_){arena}
     , decltype(_impl_.internet_){arena}
@@ -1770,11 +1853,11 @@ ConnectionsList::~ConnectionsList() {
 }
 
 inline void ConnectionsList::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.lan_.~RepeatedPtrField();
-  _impl_.internet_.~RepeatedPtrField();
-  _impl_.ble_.~RepeatedPtrField();
-  _impl_.local_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_lan()->~RepeatedPtrField();
+  _internal_mutable_internet()->~RepeatedPtrField();
+  _internal_mutable_ble()->~RepeatedPtrField();
+  _internal_mutable_local()->~RepeatedPtrField();
 }
 
 void ConnectionsList::SetCachedSize(int size) const {
@@ -1783,26 +1866,26 @@ void ConnectionsList::SetCachedSize(int size) const {
 
 void ConnectionsList::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.ConnectionsList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.lan_.Clear();
-  _impl_.internet_.Clear();
-  _impl_.ble_.Clear();
-  _impl_.local_.Clear();
+  _internal_mutable_lan()->Clear();
+  _internal_mutable_internet()->Clear();
+  _internal_mutable_ble()->Clear();
+  _internal_mutable_local()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* ConnectionsList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1810,12 +1893,13 @@ const char* ConnectionsList::_InternalParse(const char* ptr, ::_pbi::ParseContex
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1823,12 +1907,13 @@ const char* ConnectionsList::_InternalParse(const char* ptr, ::_pbi::ParseContex
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1836,12 +1921,13 @@ const char* ConnectionsList::_InternalParse(const char* ptr, ::_pbi::ParseContex
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -1849,8 +1935,9 @@ const char* ConnectionsList::_InternalParse(const char* ptr, ::_pbi::ParseContex
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -1875,10 +1962,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ConnectionsList::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ConnectionsList::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.ConnectionsList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;
@@ -1921,38 +2008,38 @@ uint8_t* ConnectionsList::_InternalSerialize(
   return target;
 }
 
-size_t ConnectionsList::ByteSizeLong() const {
+::size_t ConnectionsList::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.ConnectionsList)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry lan = 1;
   total_size += 1UL * this->_internal_lan_size();
-  for (const auto& msg : this->_impl_.lan_) {
+  for (const auto& msg : this->_internal_lan()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry internet = 2;
   total_size += 1UL * this->_internal_internet_size();
-  for (const auto& msg : this->_impl_.internet_) {
+  for (const auto& msg : this->_internal_internet()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry ble = 3;
   total_size += 1UL * this->_internal_ble_size();
-  for (const auto& msg : this->_impl_.ble_) {
+  for (const auto& msg : this->_internal_ble()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.ConnectionsUserEntry local = 4;
   total_size += 1UL * this->_internal_local_size();
-  for (const auto& msg : this->_impl_.local_) {
+  for (const auto& msg : this->_internal_local()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -1971,14 +2058,14 @@ void ConnectionsList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   auto* const _this = static_cast<ConnectionsList*>(&to_msg);
   auto& from = static_cast<const ConnectionsList&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsList)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.lan_.MergeFrom(from._impl_.lan_);
-  _this->_impl_.internet_.MergeFrom(from._impl_.internet_);
-  _this->_impl_.ble_.MergeFrom(from._impl_.ble_);
-  _this->_impl_.local_.MergeFrom(from._impl_.local_);
+  _this->_internal_mutable_lan()->MergeFrom(from._internal_lan());
+  _this->_internal_mutable_internet()->MergeFrom(from._internal_internet());
+  _this->_internal_mutable_ble()->MergeFrom(from._internal_ble());
+  _this->_internal_mutable_local()->MergeFrom(from._internal_local());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1996,10 +2083,10 @@ bool ConnectionsList::IsInitialized() const {
 void ConnectionsList::InternalSwap(ConnectionsList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.lan_.InternalSwap(&other->_impl_.lan_);
-  _impl_.internet_.InternalSwap(&other->_impl_.internet_);
-  _impl_.ble_.InternalSwap(&other->_impl_.ble_);
-  _impl_.local_.InternalSwap(&other->_impl_.local_);
+  _internal_mutable_lan()->InternalSwap(other->_internal_mutable_lan());
+  _internal_mutable_internet()->InternalSwap(other->_internal_mutable_internet());
+  _internal_mutable_ble()->InternalSwap(other->_internal_mutable_ble());
+  _internal_mutable_local()->InternalSwap(other->_internal_mutable_local());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConnectionsList::GetMetadata() const {
@@ -2007,17 +2094,15 @@ void ConnectionsList::InternalSwap(ConnectionsList* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[6]);
 }
-
 // ===================================================================
 
 class ConnectionsUserEntry::_Internal {
  public:
 };
 
-ConnectionsUserEntry::ConnectionsUserEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ConnectionsUserEntry::ConnectionsUserEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionsUserEntry)
 }
 ConnectionsUserEntry::ConnectionsUserEntry(const ConnectionsUserEntry& from)
@@ -2025,34 +2110,33 @@ ConnectionsUserEntry::ConnectionsUserEntry(const ConnectionsUserEntry& from)
   ConnectionsUserEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.connections_){from._impl_.connections_}
-    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    _this->_impl_.user_id_.Set(from._internal_user_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionsUserEntry)
 }
 
-inline void ConnectionsUserEntry::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ConnectionsUserEntry::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.connections_){arena}
-    , decltype(_impl_.user_id_){}
+    , decltype(_impl_.user_id_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ConnectionsUserEntry::~ConnectionsUserEntry() {
@@ -2065,8 +2149,8 @@ ConnectionsUserEntry::~ConnectionsUserEntry() {
 }
 
 inline void ConnectionsUserEntry::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.connections_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_connections()->~RepeatedPtrField();
   _impl_.user_id_.Destroy();
 }
 
@@ -2076,11 +2160,11 @@ void ConnectionsUserEntry::SetCachedSize(int size) const {
 
 void ConnectionsUserEntry::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.ConnectionsUserEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.connections_.Clear();
+  _internal_mutable_connections()->Clear();
   _impl_.user_id_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -2088,21 +2172,22 @@ void ConnectionsUserEntry::Clear() {
 const char* ConnectionsUserEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes user_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_user_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.ConnectionEntry connections = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2110,8 +2195,9 @@ const char* ConnectionsUserEntry::_InternalParse(const char* ptr, ::_pbi::ParseC
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2136,16 +2222,16 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ConnectionsUserEntry::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ConnectionsUserEntry::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.ConnectionsUserEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_user_id(), target);
+    const std::string& _s = this->_internal_user_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // repeated .qaul.rpc.router.ConnectionEntry connections = 2;
@@ -2164,26 +2250,25 @@ uint8_t* ConnectionsUserEntry::_InternalSerialize(
   return target;
 }
 
-size_t ConnectionsUserEntry::ByteSizeLong() const {
+::size_t ConnectionsUserEntry::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.ConnectionsUserEntry)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.ConnectionEntry connections = 2;
   total_size += 1UL * this->_internal_connections_size();
-  for (const auto& msg : this->_impl_.connections_) {
+  for (const auto& msg : this->_internal_connections()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // bytes user_id = 1;
   if (!this->_internal_user_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2200,11 +2285,11 @@ void ConnectionsUserEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, c
   auto* const _this = static_cast<ConnectionsUserEntry*>(&to_msg);
   auto& from = static_cast<const ConnectionsUserEntry&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionsUserEntry)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.connections_.MergeFrom(from._impl_.connections_);
+  _this->_internal_mutable_connections()->MergeFrom(from._internal_connections());
   if (!from._internal_user_id().empty()) {
     _this->_internal_set_user_id(from._internal_user_id());
   }
@@ -2227,11 +2312,9 @@ void ConnectionsUserEntry::InternalSwap(ConnectionsUserEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.connections_.InternalSwap(&other->_impl_.connections_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_id_, lhs_arena,
-      &other->_impl_.user_id_, rhs_arena
-  );
+  _internal_mutable_connections()->InternalSwap(other->_internal_mutable_connections());
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_id_, lhs_arena,
+                                       &other->_impl_.user_id_, rhs_arena);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConnectionsUserEntry::GetMetadata() const {
@@ -2239,57 +2322,58 @@ void ConnectionsUserEntry::InternalSwap(ConnectionsUserEntry* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[7]);
 }
-
 // ===================================================================
 
 class ConnectionEntry::_Internal {
  public:
 };
 
-ConnectionEntry::ConnectionEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ConnectionEntry::ConnectionEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.ConnectionEntry)
 }
 ConnectionEntry::ConnectionEntry(const ConnectionEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   ConnectionEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.via_){}
-    , decltype(_impl_.rtt_){}
-    , decltype(_impl_.hop_count_){}
+      decltype(_impl_.via_) {}
+
+    , decltype(_impl_.rtt_) {}
+
+    , decltype(_impl_.hop_count_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.via_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.via_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_via().empty()) {
-    _this->_impl_.via_.Set(from._internal_via(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.via_.Set(from._internal_via(), _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.rtt_, &from._impl_.rtt_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
+    static_cast<::size_t>(reinterpret_cast<char*>(&_impl_.hop_count_) -
     reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.hop_count_));
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.ConnectionEntry)
 }
 
-inline void ConnectionEntry::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void ConnectionEntry::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.via_){}
-    , decltype(_impl_.rtt_){0u}
-    , decltype(_impl_.hop_count_){0u}
+      decltype(_impl_.via_) {}
+
+    , decltype(_impl_.rtt_) { 0u }
+
+    , decltype(_impl_.hop_count_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.via_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.via_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.via_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 ConnectionEntry::~ConnectionEntry() {
@@ -2302,7 +2386,7 @@ ConnectionEntry::~ConnectionEntry() {
 }
 
 inline void ConnectionEntry::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.via_.Destroy();
 }
 
@@ -2312,12 +2396,12 @@ void ConnectionEntry::SetCachedSize(int size) const {
 
 void ConnectionEntry::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.ConnectionEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.via_.ClearToEmpty();
-  ::memset(&_impl_.rtt_, 0, static_cast<size_t>(
+  ::memset(&_impl_.rtt_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.hop_count_) -
       reinterpret_cast<char*>(&_impl_.rtt_)) + sizeof(_impl_.hop_count_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -2326,33 +2410,36 @@ void ConnectionEntry::Clear() {
 const char* ConnectionEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint32 rtt = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
           _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 hop_count = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
           _impl_.hop_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes via = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_via();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2377,28 +2464,30 @@ failure:
 #undef CHK_
 }
 
-uint8_t* ConnectionEntry::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* ConnectionEntry::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.ConnectionEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint32 rtt = 1;
   if (this->_internal_rtt() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_rtt(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        1, this->_internal_rtt(), target);
   }
 
   // uint32 hop_count = 2;
   if (this->_internal_hop_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_hop_count(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        2, this->_internal_hop_count(), target);
   }
 
   // bytes via = 3;
   if (!this->_internal_via().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_via(), target);
+    const std::string& _s = this->_internal_via();
+    target = stream->WriteBytesMaybeAliased(3, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2409,29 +2498,30 @@ uint8_t* ConnectionEntry::_InternalSerialize(
   return target;
 }
 
-size_t ConnectionEntry::ByteSizeLong() const {
+::size_t ConnectionEntry::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.ConnectionEntry)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes via = 3;
   if (!this->_internal_via().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_via());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_via());
   }
 
   // uint32 rtt = 1;
   if (this->_internal_rtt() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_rtt());
   }
 
   // uint32 hop_count = 2;
   if (this->_internal_hop_count() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_hop_count());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_hop_count());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2448,8 +2538,8 @@ void ConnectionEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   auto* const _this = static_cast<ConnectionEntry*>(&to_msg);
   auto& from = static_cast<const ConnectionEntry&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.ConnectionEntry)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_via().empty()) {
@@ -2480,10 +2570,8 @@ void ConnectionEntry::InternalSwap(ConnectionEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.via_, lhs_arena,
-      &other->_impl_.via_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.via_, lhs_arena,
+                                       &other->_impl_.via_, rhs_arena);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ConnectionEntry, _impl_.hop_count_)
       + sizeof(ConnectionEntry::_impl_.hop_count_)
@@ -2497,16 +2585,14 @@ void ConnectionEntry::InternalSwap(ConnectionEntry* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[8]);
 }
-
 // ===================================================================
 
 class NeighboursRequest::_Internal {
  public:
 };
 
-NeighboursRequest::NeighboursRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+NeighboursRequest::NeighboursRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena) {
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.NeighboursRequest)
 }
 NeighboursRequest::NeighboursRequest(const NeighboursRequest& from)
@@ -2537,17 +2623,15 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*NeighboursRequest::GetClassDat
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[9]);
 }
-
 // ===================================================================
 
 class NeighboursList::_Internal {
  public:
 };
 
-NeighboursList::NeighboursList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+NeighboursList::NeighboursList(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.NeighboursList)
 }
 NeighboursList::NeighboursList(const NeighboursList& from)
@@ -2563,10 +2647,8 @@ NeighboursList::NeighboursList(const NeighboursList& from)
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursList)
 }
 
-inline void NeighboursList::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void NeighboursList::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.lan_){arena}
     , decltype(_impl_.internet_){arena}
@@ -2585,10 +2667,10 @@ NeighboursList::~NeighboursList() {
 }
 
 inline void NeighboursList::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.lan_.~RepeatedPtrField();
-  _impl_.internet_.~RepeatedPtrField();
-  _impl_.ble_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
+  _internal_mutable_lan()->~RepeatedPtrField();
+  _internal_mutable_internet()->~RepeatedPtrField();
+  _internal_mutable_ble()->~RepeatedPtrField();
 }
 
 void NeighboursList::SetCachedSize(int size) const {
@@ -2597,25 +2679,25 @@ void NeighboursList::SetCachedSize(int size) const {
 
 void NeighboursList::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.NeighboursList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.lan_.Clear();
-  _impl_.internet_.Clear();
-  _impl_.ble_.Clear();
+  _internal_mutable_lan()->Clear();
+  _internal_mutable_internet()->Clear();
+  _internal_mutable_ble()->Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* NeighboursList::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // repeated .qaul.rpc.router.NeighboursEntry lan = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2623,12 +2705,13 @@ const char* NeighboursList::_InternalParse(const char* ptr, ::_pbi::ParseContext
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.NeighboursEntry internet = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2636,12 +2719,13 @@ const char* NeighboursList::_InternalParse(const char* ptr, ::_pbi::ParseContext
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -2649,8 +2733,9 @@ const char* NeighboursList::_InternalParse(const char* ptr, ::_pbi::ParseContext
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2675,10 +2760,10 @@ failure:
 #undef CHK_
 }
 
-uint8_t* NeighboursList::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* NeighboursList::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.NeighboursList)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.NeighboursEntry lan = 1;
@@ -2713,31 +2798,31 @@ uint8_t* NeighboursList::_InternalSerialize(
   return target;
 }
 
-size_t NeighboursList::ByteSizeLong() const {
+::size_t NeighboursList::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.NeighboursList)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .qaul.rpc.router.NeighboursEntry lan = 1;
   total_size += 1UL * this->_internal_lan_size();
-  for (const auto& msg : this->_impl_.lan_) {
+  for (const auto& msg : this->_internal_lan()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.NeighboursEntry internet = 2;
   total_size += 1UL * this->_internal_internet_size();
-  for (const auto& msg : this->_impl_.internet_) {
+  for (const auto& msg : this->_internal_internet()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .qaul.rpc.router.NeighboursEntry ble = 3;
   total_size += 1UL * this->_internal_ble_size();
-  for (const auto& msg : this->_impl_.ble_) {
+  for (const auto& msg : this->_internal_ble()) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -2756,13 +2841,13 @@ void NeighboursList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const :
   auto* const _this = static_cast<NeighboursList*>(&to_msg);
   auto& from = static_cast<const NeighboursList&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursList)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.lan_.MergeFrom(from._impl_.lan_);
-  _this->_impl_.internet_.MergeFrom(from._impl_.internet_);
-  _this->_impl_.ble_.MergeFrom(from._impl_.ble_);
+  _this->_internal_mutable_lan()->MergeFrom(from._internal_lan());
+  _this->_internal_mutable_internet()->MergeFrom(from._internal_internet());
+  _this->_internal_mutable_ble()->MergeFrom(from._internal_ble());
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2780,9 +2865,9 @@ bool NeighboursList::IsInitialized() const {
 void NeighboursList::InternalSwap(NeighboursList* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.lan_.InternalSwap(&other->_impl_.lan_);
-  _impl_.internet_.InternalSwap(&other->_impl_.internet_);
-  _impl_.ble_.InternalSwap(&other->_impl_.ble_);
+  _internal_mutable_lan()->InternalSwap(other->_internal_mutable_lan());
+  _internal_mutable_internet()->InternalSwap(other->_internal_mutable_internet());
+  _internal_mutable_ble()->InternalSwap(other->_internal_mutable_ble());
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NeighboursList::GetMetadata() const {
@@ -2790,53 +2875,52 @@ void NeighboursList::InternalSwap(NeighboursList* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[10]);
 }
-
 // ===================================================================
 
 class NeighboursEntry::_Internal {
  public:
 };
 
-NeighboursEntry::NeighboursEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+NeighboursEntry::NeighboursEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.router.NeighboursEntry)
 }
 NeighboursEntry::NeighboursEntry(const NeighboursEntry& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   NeighboursEntry* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_id_){}
-    , decltype(_impl_.rtt_){}
+      decltype(_impl_.node_id_) {}
+
+    , decltype(_impl_.rtt_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.node_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.node_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.node_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_node_id().empty()) {
-    _this->_impl_.node_id_.Set(from._internal_node_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.node_id_.Set(from._internal_node_id(), _this->GetArenaForAllocation());
   }
   _this->_impl_.rtt_ = from._impl_.rtt_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.router.NeighboursEntry)
 }
 
-inline void NeighboursEntry::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void NeighboursEntry::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.node_id_){}
-    , decltype(_impl_.rtt_){0u}
+      decltype(_impl_.node_id_) {}
+
+    , decltype(_impl_.rtt_) { 0u }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.node_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.node_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.node_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 NeighboursEntry::~NeighboursEntry() {
@@ -2849,7 +2933,7 @@ NeighboursEntry::~NeighboursEntry() {
 }
 
 inline void NeighboursEntry::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.node_id_.Destroy();
 }
 
@@ -2859,7 +2943,7 @@ void NeighboursEntry::SetCachedSize(int size) const {
 
 void NeighboursEntry::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.router.NeighboursEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -2871,25 +2955,27 @@ void NeighboursEntry::Clear() {
 const char* NeighboursEntry::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // bytes node_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_node_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // uint32 rtt = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 16)) {
           _impl_.rtt_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -2914,22 +3000,23 @@ failure:
 #undef CHK_
 }
 
-uint8_t* NeighboursEntry::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* NeighboursEntry::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.router.NeighboursEntry)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // bytes node_id = 1;
   if (!this->_internal_node_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_node_id(), target);
+    const std::string& _s = this->_internal_node_id();
+    target = stream->WriteBytesMaybeAliased(1, _s, target);
   }
 
   // uint32 rtt = 2;
   if (this->_internal_rtt() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_rtt(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(
+        2, this->_internal_rtt(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2940,24 +3027,24 @@ uint8_t* NeighboursEntry::_InternalSerialize(
   return target;
 }
 
-size_t NeighboursEntry::ByteSizeLong() const {
+::size_t NeighboursEntry::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.router.NeighboursEntry)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // bytes node_id = 1;
   if (!this->_internal_node_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_node_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_node_id());
   }
 
   // uint32 rtt = 2;
   if (this->_internal_rtt() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_rtt());
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(
+        this->_internal_rtt());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2974,8 +3061,8 @@ void NeighboursEntry::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
   auto* const _this = static_cast<NeighboursEntry*>(&to_msg);
   auto& from = static_cast<const NeighboursEntry&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.router.NeighboursEntry)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_node_id().empty()) {
@@ -3003,10 +3090,9 @@ void NeighboursEntry::InternalSwap(NeighboursEntry* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.node_id_, lhs_arena,
-      &other->_impl_.node_id_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.node_id_, lhs_arena,
+                                       &other->_impl_.node_id_, rhs_arena);
+
   swap(_impl_.rtt_, other->_impl_.rtt_);
 }
 
@@ -3015,7 +3101,6 @@ void NeighboursEntry::InternalSwap(NeighboursEntry* other) {
       &descriptor_table_router_2frouter_2eproto_getter, &descriptor_table_router_2frouter_2eproto_once,
       file_level_metadata_router_2frouter_2eproto[11]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace router
 }  // namespace rpc
@@ -3070,6 +3155,5 @@ Arena::CreateMaybeMessage< ::qaul::rpc::router::NeighboursEntry >(Arena* arena) 
   return Arena::CreateMessageInternal< ::qaul::rpc::router::NeighboursEntry >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

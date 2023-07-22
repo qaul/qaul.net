@@ -66,11 +66,6 @@ public final class FeedNet {
       return new FeedContainer();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.feed.FeedNet.internal_static_qaul_net_feed_FeedContainer_descriptor;
@@ -85,7 +80,7 @@ public final class FeedNet {
     }
 
     public static final int SIGNATURE_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString signature_;
+    private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * signature
@@ -100,7 +95,7 @@ public final class FeedNet {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString message_;
+    private com.google.protobuf.ByteString message_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * message content
@@ -234,11 +229,13 @@ public final class FeedNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.feed.FeedNet.FeedContainer parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.feed.FeedNet.FeedContainer parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -317,10 +314,9 @@ public final class FeedNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         signature_ = com.google.protobuf.ByteString.EMPTY;
-
         message_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -347,10 +343,19 @@ public final class FeedNet {
       @java.lang.Override
       public qaul.net.feed.FeedNet.FeedContainer buildPartial() {
         qaul.net.feed.FeedNet.FeedContainer result = new qaul.net.feed.FeedNet.FeedContainer(this);
-        result.signature_ = signature_;
-        result.message_ = message_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.feed.FeedNet.FeedContainer result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.signature_ = signature_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.message_ = message_;
+        }
       }
 
       @java.lang.Override
@@ -431,12 +436,12 @@ public final class FeedNet {
                 break;
               case 10: {
                 signature_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 message_ = input.readBytes();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               default: {
@@ -454,6 +459,7 @@ public final class FeedNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -478,11 +484,9 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         signature_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -495,7 +499,7 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder clearSignature() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         signature_ = getDefaultInstance().getSignature();
         onChanged();
         return this;
@@ -524,11 +528,9 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder setMessage(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         message_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -541,7 +543,7 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder clearMessage() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         message_ = getDefaultInstance().getMessage();
         onChanged();
         return this;
@@ -682,11 +684,6 @@ public final class FeedNet {
       return new FeedMessageContent();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return qaul.net.feed.FeedNet.internal_static_qaul_net_feed_FeedMessageContent_descriptor;
@@ -701,7 +698,7 @@ public final class FeedNet {
     }
 
     public static final int SENDER_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString sender_;
+    private com.google.protobuf.ByteString sender_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * sender id
@@ -716,7 +713,8 @@ public final class FeedNet {
     }
 
     public static final int CONTENT_FIELD_NUMBER = 2;
-    private volatile java.lang.Object content_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object content_ = "";
     /**
      * <pre>
      * message content
@@ -762,7 +760,7 @@ public final class FeedNet {
     }
 
     public static final int TIME_FIELD_NUMBER = 3;
-    private long time_;
+    private long time_ = 0L;
     /**
      * <pre>
      * timestamp in milliseconds
@@ -907,11 +905,13 @@ public final class FeedNet {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static qaul.net.feed.FeedNet.FeedMessageContent parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static qaul.net.feed.FeedNet.FeedMessageContent parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -990,12 +990,10 @@ public final class FeedNet {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         sender_ = com.google.protobuf.ByteString.EMPTY;
-
         content_ = "";
-
         time_ = 0L;
-
         return this;
       }
 
@@ -1022,11 +1020,22 @@ public final class FeedNet {
       @java.lang.Override
       public qaul.net.feed.FeedNet.FeedMessageContent buildPartial() {
         qaul.net.feed.FeedNet.FeedMessageContent result = new qaul.net.feed.FeedNet.FeedMessageContent(this);
-        result.sender_ = sender_;
-        result.content_ = content_;
-        result.time_ = time_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartial0(qaul.net.feed.FeedNet.FeedMessageContent result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.sender_ = sender_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.content_ = content_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.time_ = time_;
+        }
       }
 
       @java.lang.Override
@@ -1078,6 +1087,7 @@ public final class FeedNet {
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.getTime() != 0L) {
@@ -1111,17 +1121,17 @@ public final class FeedNet {
                 break;
               case 10: {
                 sender_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 content_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
                 time_ = input.readUInt64();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               default: {
@@ -1139,6 +1149,7 @@ public final class FeedNet {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString sender_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -1163,11 +1174,9 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder setSender(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         sender_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1180,7 +1189,7 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder clearSender() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         sender_ = getDefaultInstance().getSender();
         onChanged();
         return this;
@@ -1239,11 +1248,9 @@ public final class FeedNet {
        */
       public Builder setContent(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         content_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1256,8 +1263,8 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder clearContent() {
-        
         content_ = getDefaultInstance().getContent();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -1272,12 +1279,10 @@ public final class FeedNet {
        */
       public Builder setContentBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         content_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1305,8 +1310,9 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder setTime(long value) {
-        
+
         time_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -1319,7 +1325,7 @@ public final class FeedNet {
        * @return This builder for chaining.
        */
       public Builder clearTime() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         time_ = 0L;
         onChanged();
         return this;

@@ -4,91 +4,126 @@
 #include "rpc/qaul_rpc.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pbi = ::PROTOBUF_NAMESPACE_ID::internal;
 namespace qaul {
 namespace rpc {
+template <typename>
 PROTOBUF_CONSTEXPR QaulRpc::QaulRpc(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.request_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.user_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.module_)*/0
+    /*decltype(_impl_.request_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.user_id_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.data_)*/ {
+    &::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized {}
+  }
+
+  , /*decltype(_impl_.module_)*/ 0
+
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct QaulRpcDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR QaulRpcDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR QaulRpcDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~QaulRpcDefaultTypeInternal() {}
   union {
     QaulRpc _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 QaulRpcDefaultTypeInternal _QaulRpc_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 QaulRpcDefaultTypeInternal _QaulRpc_default_instance_;
 }  // namespace rpc
 }  // namespace qaul
 static ::_pb::Metadata file_level_metadata_rpc_2fqaul_5frpc_2eproto[1];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_rpc_2fqaul_5frpc_2eproto[1];
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_rpc_2fqaul_5frpc_2eproto = nullptr;
-
-const uint32_t TableStruct_rpc_2fqaul_5frpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.module_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.request_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.user_id_),
-  PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.data_),
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_rpc_2fqaul_5frpc_2eproto = nullptr;
+const ::uint32_t TableStruct_rpc_2fqaul_5frpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.module_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.request_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.user_id_),
+    PROTOBUF_FIELD_OFFSET(::qaul::rpc::QaulRpc, _impl_.data_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::qaul::rpc::QaulRpc)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        { 0, -1, -1, sizeof(::qaul::rpc::QaulRpc)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::qaul::rpc::_QaulRpc_default_instance_._instance,
+    &::qaul::rpc::_QaulRpc_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp"
-  "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n"
-  "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat"
-  "a\030\004 \001(\014*\263\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010"
-  "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n"
-  "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005"
-  "DEBUG\020\010\022\t\n\005GROUP\020\t\022\010\n\004CHAT\020\n\022\014\n\010CHATFILE"
-  "\020\013\022\007\n\003BLE\020\014\022\007\n\003RTC\020\r\022\007\n\003DTN\020\016b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_rpc_2fqaul_5frpc_2eproto_once;
+const char descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\022rpc/qaul_rpc.proto\022\010qaul.rpc\"_\n\007QaulRp"
+    "c\022!\n\006module\030\001 \001(\0162\021.qaul.rpc.Modules\022\022\n\n"
+    "request_id\030\002 \001(\t\022\017\n\007user_id\030\003 \001(\014\022\014\n\004dat"
+    "a\030\004 \001(\014*\263\001\n\007Modules\022\010\n\004NONE\020\000\022\007\n\003RPC\020\001\022\010"
+    "\n\004NODE\020\002\022\020\n\014USERACCOUNTS\020\003\022\t\n\005USERS\020\004\022\n\n"
+    "\006ROUTER\020\005\022\010\n\004FEED\020\006\022\017\n\013CONNECTIONS\020\007\022\t\n\005"
+    "DEBUG\020\010\022\t\n\005GROUP\020\t\022\010\n\004CHAT\020\n\022\014\n\010CHATFILE"
+    "\020\013\022\007\n\003BLE\020\014\022\007\n\003RTC\020\r\022\007\n\003DTN\020\016b\006proto3"
+};
+static ::absl::once_flag descriptor_table_rpc_2fqaul_5frpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_rpc_2fqaul_5frpc_2eproto = {
-    false, false, 317, descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto,
+    false,
+    false,
+    317,
+    descriptor_table_protodef_rpc_2fqaul_5frpc_2eproto,
     "rpc/qaul_rpc.proto",
-    &descriptor_table_rpc_2fqaul_5frpc_2eproto_once, nullptr, 0, 1,
-    schemas, file_default_instances, TableStruct_rpc_2fqaul_5frpc_2eproto::offsets,
-    file_level_metadata_rpc_2fqaul_5frpc_2eproto, file_level_enum_descriptors_rpc_2fqaul_5frpc_2eproto,
+    &descriptor_table_rpc_2fqaul_5frpc_2eproto_once,
+    nullptr,
+    0,
+    1,
+    schemas,
+    file_default_instances,
+    TableStruct_rpc_2fqaul_5frpc_2eproto::offsets,
+    file_level_metadata_rpc_2fqaul_5frpc_2eproto,
+    file_level_enum_descriptors_rpc_2fqaul_5frpc_2eproto,
     file_level_service_descriptors_rpc_2fqaul_5frpc_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_rpc_2fqaul_5frpc_2eproto_getter() {
   return &descriptor_table_rpc_2fqaul_5frpc_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_rpc_2fqaul_5frpc_2eproto(&descriptor_table_rpc_2fqaul_5frpc_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_rpc_2fqaul_5frpc_2eproto(&descriptor_table_rpc_2fqaul_5frpc_2eproto);
 namespace qaul {
 namespace rpc {
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Modules_descriptor() {
@@ -117,82 +152,82 @@ bool Modules_IsValid(int value) {
       return false;
   }
 }
-
-
 // ===================================================================
 
 class QaulRpc::_Internal {
  public:
 };
 
-QaulRpc::QaulRpc(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+QaulRpc::QaulRpc(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:qaul.rpc.QaulRpc)
 }
 QaulRpc::QaulRpc(const QaulRpc& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   QaulRpc* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.request_id_){}
-    , decltype(_impl_.user_id_){}
-    , decltype(_impl_.data_){}
-    , decltype(_impl_.module_){}
+      decltype(_impl_.request_id_) {}
+
+    , decltype(_impl_.user_id_) {}
+
+    , decltype(_impl_.data_) {}
+
+    , decltype(_impl_.module_) {}
+
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.request_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.request_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.request_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_request_id().empty()) {
-    _this->_impl_.request_id_.Set(from._internal_request_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.request_id_.Set(from._internal_request_id(), _this->GetArenaForAllocation());
   }
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_user_id().empty()) {
-    _this->_impl_.user_id_.Set(from._internal_user_id(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.user_id_.Set(from._internal_user_id(), _this->GetArenaForAllocation());
   }
   _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.data_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.data_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_data().empty()) {
-    _this->_impl_.data_.Set(from._internal_data(), 
-      _this->GetArenaForAllocation());
+    _this->_impl_.data_.Set(from._internal_data(), _this->GetArenaForAllocation());
   }
   _this->_impl_.module_ = from._impl_.module_;
   // @@protoc_insertion_point(copy_constructor:qaul.rpc.QaulRpc)
 }
 
-inline void QaulRpc::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
+inline void QaulRpc::SharedCtor(::_pb::Arena* arena) {
   (void)arena;
-  (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.request_id_){}
-    , decltype(_impl_.user_id_){}
-    , decltype(_impl_.data_){}
-    , decltype(_impl_.module_){0}
+      decltype(_impl_.request_id_) {}
+
+    , decltype(_impl_.user_id_) {}
+
+    , decltype(_impl_.data_) {}
+
+    , decltype(_impl_.module_) { 0 }
+
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.request_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.request_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.request_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.user_id_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.user_id_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.user_id_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.data_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        _impl_.data_.Set("", GetArenaForAllocation());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 QaulRpc::~QaulRpc() {
@@ -205,7 +240,7 @@ QaulRpc::~QaulRpc() {
 }
 
 inline void QaulRpc::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.request_id_.Destroy();
   _impl_.user_id_.Destroy();
   _impl_.data_.Destroy();
@@ -217,7 +252,7 @@ void QaulRpc::SetCachedSize(int size) const {
 
 void QaulRpc::Clear() {
 // @@protoc_insertion_point(message_clear_start:qaul.rpc.QaulRpc)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
@@ -231,45 +266,49 @@ void QaulRpc::Clear() {
 const char* QaulRpc::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
-    uint32_t tag;
+    ::uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .qaul.rpc.Modules module = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 8)) {
+          ::int32_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
           _internal_set_module(static_cast<::qaul::rpc::Modules>(val));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // string request_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_request_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
           CHK_(::_pbi::VerifyUTF8(str, "qaul.rpc.QaulRpc.request_id"));
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes user_id = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_user_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       // bytes data = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_data();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else
+        } else {
           goto handle_unusual;
+        }
         continue;
       default:
         goto handle_unusual;
@@ -294,39 +333,37 @@ failure:
 #undef CHK_
 }
 
-uint8_t* QaulRpc::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+::uint8_t* QaulRpc::_InternalSerialize(
+    ::uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:qaul.rpc.QaulRpc)
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // .qaul.rpc.Modules module = 1;
   if (this->_internal_module() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-      1, this->_internal_module(), target);
+        1, this->_internal_module(), target);
   }
 
   // string request_id = 2;
   if (!this->_internal_request_id().empty()) {
+    const std::string& _s = this->_internal_request_id();
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_request_id().data(), static_cast<int>(this->_internal_request_id().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "qaul.rpc.QaulRpc.request_id");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_request_id(), target);
+        _s.data(), static_cast<int>(_s.length()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE, "qaul.rpc.QaulRpc.request_id");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   // bytes user_id = 3;
   if (!this->_internal_user_id().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        3, this->_internal_user_id(), target);
+    const std::string& _s = this->_internal_user_id();
+    target = stream->WriteBytesMaybeAliased(3, _s, target);
   }
 
   // bytes data = 4;
   if (!this->_internal_data().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        4, this->_internal_data(), target);
+    const std::string& _s = this->_internal_data();
+    target = stream->WriteBytesMaybeAliased(4, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -337,39 +374,36 @@ uint8_t* QaulRpc::_InternalSerialize(
   return target;
 }
 
-size_t QaulRpc::ByteSizeLong() const {
+::size_t QaulRpc::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:qaul.rpc.QaulRpc)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string request_id = 2;
   if (!this->_internal_request_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_request_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+                                    this->_internal_request_id());
   }
 
   // bytes user_id = 3;
   if (!this->_internal_user_id().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_user_id());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_user_id());
   }
 
   // bytes data = 4;
   if (!this->_internal_data().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_data());
+    total_size += 1 + ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+                                    this->_internal_data());
   }
 
   // .qaul.rpc.Modules module = 1;
   if (this->_internal_module() != 0) {
     total_size += 1 +
-      ::_pbi::WireFormatLite::EnumSize(this->_internal_module());
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_module());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -386,8 +420,8 @@ void QaulRpc::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOB
   auto* const _this = static_cast<QaulRpc*>(&to_msg);
   auto& from = static_cast<const QaulRpc&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:qaul.rpc.QaulRpc)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_request_id().empty()) {
@@ -421,18 +455,12 @@ void QaulRpc::InternalSwap(QaulRpc* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.request_id_, lhs_arena,
-      &other->_impl_.request_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.user_id_, lhs_arena,
-      &other->_impl_.user_id_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.data_, lhs_arena,
-      &other->_impl_.data_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.request_id_, lhs_arena,
+                                       &other->_impl_.request_id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.user_id_, lhs_arena,
+                                       &other->_impl_.user_id_, rhs_arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.data_, lhs_arena,
+                                       &other->_impl_.data_, rhs_arena);
   swap(_impl_.module_, other->_impl_.module_);
 }
 
@@ -441,7 +469,6 @@ void QaulRpc::InternalSwap(QaulRpc* other) {
       &descriptor_table_rpc_2fqaul_5frpc_2eproto_getter, &descriptor_table_rpc_2fqaul_5frpc_2eproto_once,
       file_level_metadata_rpc_2fqaul_5frpc_2eproto[0]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace rpc
 }  // namespace qaul
@@ -451,6 +478,5 @@ Arena::CreateMaybeMessage< ::qaul::rpc::QaulRpc >(Arena* arena) {
   return Arena::CreateMessageInternal< ::qaul::rpc::QaulRpc >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
-
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"
