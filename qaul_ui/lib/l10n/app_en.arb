@@ -149,5 +149,7 @@
   "inviteUser": "Invite user",
   "notifications": "Notifications",
   "fileHistory": "File history",
-  "emptyNodeName": "No name"
+  "emptyNodeName": "No name",
+  "androidOptions": "Android options",
+  "backgroundExecution": "Background execution"
 }
