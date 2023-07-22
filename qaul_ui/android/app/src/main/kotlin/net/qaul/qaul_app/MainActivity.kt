@@ -43,6 +43,10 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionHandler = PermissionHandler(this)
+        // Check if the background service is enabled in preferences, if so, start it
+        if (PreferenceManager.isBackgroundServiceEnabled(this)) {
+            startBackgroundService()
+        }
     }
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
@@ -55,18 +59,30 @@ class MainActivity : FlutterActivity() {
         //initialize BleModule initialize -- must be before startLibqaul()
         bleWrapperClass = BleWrapperClass(context = this)
 
-        // Start the FlutterBackgroundService
-        val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
-
         // setup message channel between flutter and android
         MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             when {
+                // utility methods
+                call.method == "isBackgroundExecutionEnabled" -> {
+                    result.success(PreferenceManager.isBackgroundServiceEnabled(this))
+                }
+                call.method == "enableBackgroundExecution" -> {
+                    if (!PreferenceManager.isBackgroundServiceEnabled(this)) {
+                        startBackgroundService()
+                        PreferenceManager.setBackgroundServiceEnabled(this, true)
+                    }
+                    result.success(true)
+                }
+                call.method == "disableBackgroundExecution" -> {
+                    if (PreferenceManager.isBackgroundServiceEnabled(this)) {
+                        stopBackgroundService()
+                        PreferenceManager.setBackgroundServiceEnabled(this, false)
+                    }
+                    result.success(true)
+                }
+
+                // libqaul adapter methods
                 call.method == "getPlatformVersion" -> {
                     val res = getSystemVersion()
                     result.success(res)
@@ -112,17 +128,18 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    /// Programatically closes the application.
-    /// Note: terminating the app in this way may not be the typical user experience, as it forcefully closes the app
-    private fun stopServiceAndFinish() {
+    private fun startBackgroundService() {
+        val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
+    private fun stopBackgroundService() {
         val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
         stopService(serviceIntent)
-        flutterEngine?.let { engine ->
-            engine.destroy()
-            flutterEngine = null
-        }
-        finishAffinity()
-        finish()
     }
 
     /// get android system version

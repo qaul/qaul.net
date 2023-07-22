@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,6 +46,14 @@ class SettingsScreen extends HookConsumerWidget {
               child: _InternetNodesList(),
             ),
           ),
+          if (Platform.isAndroid) ...[
+            const SizedBox(height: 20),
+            SettingsSection(
+              name: l10n.androidOptions,
+              icon: const FaIcon(FontAwesomeIcons.android),
+              content: const _AndroidOptions(),
+            ),
+          ]
         ],
       ),
     );
@@ -393,4 +403,70 @@ class _AddNodeDialog extends HookWidget {
         contentPadding: const EdgeInsets.all(12),
         floatingLabelBehavior: FloatingLabelBehavior.always,
       );
+}
+
+class _AndroidOptions extends StatefulWidget {
+  const _AndroidOptions({Key? key}) : super(key: key);
+
+  @override
+  State<_AndroidOptions> createState() => _AndroidOptionsState();
+}
+
+class _AndroidOptionsState extends State<_AndroidOptions> {
+  bool _isBgExecutionEnabled = true;
+
+  void _enableBackgroundExecution() {
+    const MethodChannel('libqaul').invokeMethod('enableBackgroundExecution');
+    setState(() => _isBgExecutionEnabled = true);
+  }
+
+  void _disableBackgroundExecution() {
+    const MethodChannel('libqaul').invokeMethod('disableBackgroundExecution');
+    setState(() => _isBgExecutionEnabled = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (!Platform.isAndroid) {
+      throw UnimplementedError('invalid platform making use of AndroidOptions');
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final isEnabled = await const MethodChannel('libqaul')
+          .invokeMethod('isBackgroundExecutionEnabled');
+      setState(() => _isBgExecutionEnabled = isEnabled);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DefaultTextStyle(
+      maxLines: 2,
+      style: Theme.of(context)
+          .textTheme
+          .labelLarge!
+          .copyWith(overflow: TextOverflow.ellipsis),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(child: Text(l10n.backgroundExecution)),
+              PlatformAwareSwitch(
+                value: _isBgExecutionEnabled,
+                onChanged: (val) {
+                  val
+                      ? _enableBackgroundExecution()
+                      : _disableBackgroundExecution();
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
