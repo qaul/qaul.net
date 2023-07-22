@@ -49,8 +49,16 @@ impl ChatMessage {
         group_id: &Vec<u8>,
         message: String,
     ) -> Result<bool, String> {
-        let groupid = GroupId::from_bytes(&group_id).unwrap();
+        let groupid: GroupId;
         let group;
+
+        match GroupId::from_bytes(&group_id) {
+            Ok(result) => groupid = result,
+            Err(e) => {
+                return Err(e);
+            }
+        }
+
         match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
             Some(v) => group = v,
             None => {

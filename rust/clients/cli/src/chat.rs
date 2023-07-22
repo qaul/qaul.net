@@ -51,6 +51,7 @@ impl Chat {
                             }
                             _ => {
                                 log::error!("invalid group id format");
+                                return;
                             }
                         },
                     }
