@@ -118,12 +118,15 @@ class FlutterBackgroundService : Service() {
     private fun createNotification(channelId: String): Notification {
         val imageId = resources.getIdentifier("ic_notification", "drawable", packageName)
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingIntent: PendingIntent
+        pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Introduced in Android 12; see: https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+            PendingIntent.getActivity(this,
+                    0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        } else {
+            PendingIntent.getActivity(this,
+                    0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(NOTIFICATION_TITLE)
             .setContentText(NOTIFICATION_DESCRIPTION)
