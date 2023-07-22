@@ -1,0 +1,18 @@
+syntax = "proto3";
+package qaul.net.crypto;
+
+// Cryptoservice sending container
+message CryptoserviceContainer {
+    oneof message {
+        // Second Handshake Message
+        SecondHandshake second_handshake = 1;
+    }
+}
+
+// Second Handshake Message
+message SecondHandshake {
+    // confirm message ID of first handshake message
+    bytes signature = 1;
+    // received at timestamp
+    uint64 received_at = 2;
+}

@@ -87,6 +87,7 @@ fn main() {
                 "connections/ble/ble_rpc.proto",
                 "services/messaging/messaging.proto",
                 "services/dtn/dtn_rpc.proto",
+                "services/crypto/crypto_net.proto",
             ],
             &["src"],
         )
@@ -210,6 +211,11 @@ fn main() {
         to.join("qaul.net.ble.rs"),
     )
     .unwrap();
+    fs::copy(
+        Path::new(&out_dir).join("qaul.net.crypto.rs"),
+        to.join("qaul.net.crypto.rs"),
+    )
+    .unwrap();
 
     // copy to modules
     // UI rpc
@@ -318,6 +324,11 @@ fn main() {
     fs::copy(
         &Path::new(&out_dir).join("qaul.net.rtc.rs"),
         Path::new("src/services/rtc/qaul.net.rtc.rs"),
+    )
+    .unwrap();
+    fs::copy(
+        &Path::new(&out_dir).join("qaul.net.crypto.rs"),
+        Path::new("src/services/crypto/qaul.net.crypto.rs"),
     )
     .unwrap();
     fs::copy(

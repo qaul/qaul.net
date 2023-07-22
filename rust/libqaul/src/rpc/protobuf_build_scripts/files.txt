@@ -15,6 +15,7 @@ services/dtn/dtn_rpc.proto
 services/group/group_net.proto
 services/group/group_rpc.proto
 services/messaging/messaging.proto
+services/crypto/crypto_net.proto
 connections/ble/ble.proto
 connections/ble/ble_net.proto
 connections/ble/ble_rpc.proto

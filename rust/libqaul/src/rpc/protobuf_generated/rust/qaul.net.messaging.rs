@@ -126,6 +126,9 @@ pub struct Confirmation {
 /// such as completing a handshake.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CryptoService {
+    /// message data
+    #[prost(bytes="vec", tag="1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc stream mesasge
 #[derive(Clone, PartialEq, ::prost::Message)]

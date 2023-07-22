@@ -196,13 +196,15 @@ impl CryptoNoise {
     /// Decrypt handshake message 1
     ///
     /// Decrypt an incoming message.
+    ///
+    /// Returns the decrypted message and the current crypto state
     pub fn decrypt_noise_kk_handshake_1<D, C, H, P>(
         data: Vec<u8>,
-        storage: CryptoAccount,
+        _storage: CryptoAccount,
         remote_id: PeerId,
         user_account: UserAccount,
         session_id: u32,
-    ) -> Option<Vec<u8>>
+    ) -> Option<(Vec<u8>, CryptoState)>
     where
         D: DH,
         C: Cipher,
@@ -210,9 +212,9 @@ impl CryptoNoise {
         P: AsRef<[u8]>,
     {
         let mut state: CryptoState;
-        let message: Option<Vec<u8>>;
+        let message: Vec<u8>;
 
-        log::trace!("Incoming handshake");
+        log::trace!("Decrypt Incoming handshake");
 
         // get receivers public key
         let remote_key: PublicKey;
@@ -247,7 +249,7 @@ impl CryptoNoise {
 
         // read and decrypt incoming handshake message
         match handshake.read_message_vec(data.as_slice()) {
-            Ok(encrypted) => message = Some(encrypted),
+            Ok(encrypted) => message = encrypted,
             Err(e) => {
                 log::error!("{}", e);
                 return None;
@@ -266,10 +268,7 @@ impl CryptoNoise {
             }
         }
 
-        // save state to data base
-        storage.save_state(remote_id, state.session_id, state);
-
-        message
+        Some((message, state))
     }
 
     /// Decrypt handshake message 2
@@ -338,7 +337,7 @@ impl CryptoNoise {
         let (key_in, nonce_in) = cipher_key_in.extract();
 
         log::trace!(
-            "handshake initiation finished: noce out: {}, in: {}",
+            "handshake initiation finished: nonce out: {}, in: {}",
             nonce_out,
             nonce_in
         );
