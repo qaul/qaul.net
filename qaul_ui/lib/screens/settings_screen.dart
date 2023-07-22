@@ -11,6 +11,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
 import '../decorators/cron_task_decorator.dart';
+import '../helpers/navigation_helper.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
@@ -454,7 +455,17 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: Text(l10n.backgroundExecution)),
+              Text(l10n.backgroundExecution),
+              IconButton(
+                iconSize: 18,
+                splashRadius: 9,
+                icon: const Icon(Icons.help_outline),
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  NavigationHelper.aboutAndroidBackground,
+                ),
+              ),
+              const Expanded(child: SizedBox.shrink()),
               PlatformAwareSwitch(
                 value: _isBgExecutionEnabled,
                 onChanged: (val) {
