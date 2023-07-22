@@ -67,11 +67,6 @@ class MainActivity : FlutterActivity() {
         MethodChannel(FlutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             when {
-                call.method == "exit_app" -> {
-                    stopServiceAndFinish()
-                    result.success(true)
-                }
-
                 call.method == "getPlatformVersion" -> {
                     val res = getSystemVersion()
                     result.success(res)
@@ -117,6 +112,8 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /// Programatically closes the application.
+    /// Note: terminating the app in this way may not be the typical user experience, as it forcefully closes the app
     private fun stopServiceAndFinish() {
         val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
         stopService(serviceIntent)
