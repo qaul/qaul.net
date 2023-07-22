@@ -47,6 +47,7 @@
 
         <service
                 android:name=".FlutterBackgroundService"
+                android:enabled="true"
                 android:exported="false"/>
 
         <service

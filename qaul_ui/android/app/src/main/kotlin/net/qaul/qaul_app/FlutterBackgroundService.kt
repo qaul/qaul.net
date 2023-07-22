@@ -31,7 +31,13 @@ class FlutterBackgroundService : Service() {
         val CHANNEL_ID = "qaul_background"
 
         @JvmStatic
+        val NOTIFICATION_ID = 5005
+
+        @JvmStatic
         val CHANNEL_NAME = "qaul.net Channel"
+
+        @JvmStatic
+        val CHANNEL_DESCRIPTION = "This channel is used for the qaul.net background service to inform the user that the app is still running in the background"
 
         @JvmStatic
         val NOTIFICATION_TITLE = "qaul.net"
@@ -83,7 +89,7 @@ class FlutterBackgroundService : Service() {
         acquireWakeLock()
         val channelId = createNotificationChannel(CHANNEL_ID, CHANNEL_NAME)
         val notification = createNotification(channelId)
-        startForeground(1, notification)
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun stopService() {
@@ -99,7 +105,9 @@ class FlutterBackgroundService : Service() {
                 channelId,
                 channelName,
                 NotificationManager.IMPORTANCE_DEFAULT
-            )
+            ).apply {
+                description = CHANNEL_DESCRIPTION
+            }
             serviceChannel.lightColor = Color.GREEN
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(serviceChannel)
@@ -109,7 +117,7 @@ class FlutterBackgroundService : Service() {
 
     private fun createNotification(channelId: String): Notification {
         val imageId = resources.getIdentifier("ic_notification", "drawable", packageName)
-        val notificationIntent = Intent(this, FlutterActivity::class.java)
+        val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -122,6 +130,7 @@ class FlutterBackgroundService : Service() {
             .setSmallIcon(imageId)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
+            .setAutoCancel(true)
             .build()
     }
 
