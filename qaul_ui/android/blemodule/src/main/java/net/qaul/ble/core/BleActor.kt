@@ -34,6 +34,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     private var isWriting = false
     private var sendQueue: Queue<String> = ConcurrentLinkedDeque<String>()
 
+
     /**
      * Disconnect current device.
      */
@@ -61,8 +62,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
 //        if (mBluetoothGatt != null && !isFromMessage) {
         bleDevice = device
         bluetoothDevice = device!!.bluetoothDevice
-
-
 
         Handler(Looper.getMainLooper()).postDelayed({
             connectDevice()
@@ -108,22 +107,19 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             }
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 AppLog.e(TAG, "onConnectionStateChange: STATE_CONNECTED")
-                listener!!.onConnected(bluetoothDevice!!.address)
+                listener!!.onConnected(bluetoothDevice!!.address, bluetoothDevice)
                 try {
                     cancelTimer()
                     if (mBluetoothGatt != null) {
                         mBluetoothGatt!!.discoverServices()
                     }
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 AppLog.e(TAG, "onConnectionStateChange: STATE_DISCONNECTED")
-                if (mBluetoothGatt != null) {
-                    refreshDeviceCache(mBluetoothGatt!!)
-                    mBluetoothGatt!!.close()
-                    mBluetoothGatt = null
-                }
+                closeGatt()
                 cancelTimer()
                 if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) descriptorWriteQueue.clear()
 //                listener!!.onDisconnected(bleDevice!!)
@@ -249,6 +245,14 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         }
     }
 
+    private fun closeGatt() {
+        if (mBluetoothGatt != null) {
+            refreshDeviceCache(mBluetoothGatt!!)
+            mBluetoothGatt!!.close()
+            mBluetoothGatt = null
+        }
+    }
+
     private fun cancelTimer() {
         if (failedTask != null && failTimer != null) {
             failTimer!!.cancel()
@@ -273,7 +277,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             AppLog.e("TAG", "_send(): EMPTY QUEUE")
             return false
         }
-        AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
+//        AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
         val tx = BLEUtils.hexToByteArray(sendQueue.poll())
 //        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
         isWriting = true // Set the write in progress flag
@@ -332,6 +336,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             writeGattDescriptor(descriptorWriteQueue.element())
         } else {
             if (listener != null) {
+                mBluetoothGatt
                 listener!!.onDescriptorWrite(this.bleDevice!!, this)
             }
         }
@@ -425,12 +430,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     ): Boolean {
         if (attempt < 3) {
             if (data != null) {
-                AppLog.e(
-                    TAG,
-                    "writeServiceData -----------> : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
-                        data
-                    )
-                )
+//                AppLog.e(
+//                    TAG,
+//                    "writeServiceData -----------> : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
+//                        data
+//                    )
+//                )
                 if (mBluetoothGatt != null) {
                     val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
                     if (service != null) {
@@ -476,7 +481,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * Interface To Send Callback of Connection Status & Read Data Result to service
      */
     interface BleConnectionListener {
-        fun onConnected(macAddress: String?)
+        fun onConnected(macAddress: String?, device: BluetoothDevice?)
         fun onDisconnected(bleScanDevice: BLEScanDevice)
         fun onServiceDiscovered(macAddress: String?)
         fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor)

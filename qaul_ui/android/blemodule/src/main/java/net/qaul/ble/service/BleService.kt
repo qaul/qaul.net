@@ -8,6 +8,7 @@ import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
@@ -54,9 +55,12 @@ class BleService : LifecycleService() {
 
     //
     private val hashMap: HashMap<String, Queue<Triple<String, ByteArray, ByteArray>>> = hashMapOf()
+    private val sharedPrefFile = "sharedpreference_qaul_ble"
+    private lateinit var sharedPreferences: SharedPreferences
 
+    companion
 
-    companion object {
+    object {
         var bleService: BleService? = null
         var isAdvertisementRunning = false
         var isScanningRunning = false
@@ -70,6 +74,8 @@ class BleService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         bleService = this
+        sharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
+
         AppLog.e(TAG, "$TAG created")
     }
 
@@ -287,10 +293,14 @@ class BleService : LifecycleService() {
                 bleDevice.isConnectable = result.isConnectable
                 bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
+
+                AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
+//                Handler(Looper.getMainLooper()).postDelayed({
                 if (result.isConnectable) {
-                    AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
                     connectDevice(bleDevice, isFromMessage = false)
                 }
+//                }, 1200)
+
             } else {
                 val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
                 if (selectItemIgnore != null) {
@@ -400,9 +410,9 @@ class BleService : LifecycleService() {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-                AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
+//                AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
-                AppLog.e(TAG, "Data in hex:: $s")
+//                AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
                 if (bleDevice == null) {
                     bleDevice = receiveList.find { it.macAddress == device.address }
@@ -662,8 +672,11 @@ class BleService : LifecycleService() {
      */
     private fun connectDevice(device: BLEScanDevice, isFromMessage: Boolean): BleActor {
         class BleConnectionListener : BleActor.BleConnectionListener {
-            override fun onConnected(macAddress: String?) {
+            override fun onConnected(macAddress: String?, device: BluetoothDevice?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
+                val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                editor.putString("BLE_GATT", Gson().toJson(device))
+                editor.apply()
             }
 
             override fun onDisconnected(bleScanDevice: BLEScanDevice) {
@@ -671,19 +684,27 @@ class BleService : LifecycleService() {
 //                bleScanDevice.isConnected = false
 //                device.isConnected = false
                 if (!blackList.contains(bleScanDevice)) {
-                    AppLog.e(
-                        TAG,
-                        " onDisconnected-  REMOVE HERE  devicesList.size -> ${devicesList.size} "
-                    )
                     devicesList.remove(bleScanDevice)
-                    AppLog.e(
-                        TAG,
-                        " onDisconnected-  REMOVE HERE devicesList.size -> ${devicesList.size}  "
-                    )
-//                    ignoreList.removeConcurrent(bleScanDevice)
+//                    ignoreList.remove(bleScanDevice)
                 }
                 if (System.currentTimeMillis() - 60000 > lastWriteTime) {
-                    bleCallback?.restartService()
+//                    bleCallback?.restartService()
+                    removeGatt()
+                }
+            }
+
+            private fun removeGatt() {
+                AppLog.e(TAG, "  REMOVE SAVED GATT")
+                val gatt = sharedPreferences.getString("BLE_GATT", "")
+                gatt?.let {
+                    if (it.isNotEmpty()) {
+                        var bleDevice = Gson().fromJson(it, BluetoothDevice::class.java)
+                        var connectGatt: BluetoothGatt? =
+                            bleDevice.connectGatt(this@BleService, false, mGattCallback)
+                        AppLog.e(TAG, "  REMOVE SAVED GATT")
+                        connectGatt?.close()
+                        connectGatt = null
+                    }
                 }
             }
 
@@ -771,14 +792,22 @@ class BleService : LifecycleService() {
         }
 
 //        device.isConnected = true
-        val baseBleActor = if (actorMap[device.macAddress] == null) {
-            BleActor(this, BleConnectionListener())
-        } else {
-            actorMap[device.macAddress]
+
+        val baseBleActor: BleActor? = when {
+            isFromMessage -> {
+                if (actorMap[device.macAddress] == null) {
+                    BleActor(this, BleConnectionListener())
+                } else {
+                    actorMap[device.macAddress]
+                }
+            }
+            else -> {
+                BleActor(this, BleConnectionListener())
+            }
         }
-//        val baseBleActor = BleActor(this, BleConnectionListener())
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor!!
+
     }
 
     /**
@@ -864,6 +893,58 @@ class BleService : LifecycleService() {
                     }
                 }
             }
+        }
+    }
+
+    private val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            super.onConnectionStateChange(gatt, status, newState)
+
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            super.onServicesDiscovered(gatt, status)
+
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
+        ) {
+            super.onCharacteristicRead(gatt, characteristic, status)
+
+        }
+
+
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
+        ) {
+            super.onCharacteristicWrite(gatt, characteristic, status)
+
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic)
+
+        }
+
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
+        ) {
+            super.onDescriptorRead(gatt, descriptor, status)
+        }
+
+        override fun onDescriptorWrite(
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
+        ) {
+            super.onDescriptorWrite(gatt, descriptor, status)
+
+        }
+
+        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+            super.onMtuChanged(gatt, mtu, status)
+            AppLog.e("MTU Size: ", "" + mtu)
         }
     }
 
