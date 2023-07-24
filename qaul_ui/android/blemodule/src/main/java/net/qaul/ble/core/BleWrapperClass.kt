@@ -124,7 +124,6 @@ open class BleWrapperClass(context: Activity) {
                     stopService()
                 }
 
-
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
                     AppLog.e("zzz", " DIRECT_SEND ")
 
@@ -349,12 +348,13 @@ open class BleWrapperClass(context: Activity) {
             }
 
             override fun restartService() {
-//                BleService.bleService?.stop()
-//                Handler(Looper.getMainLooper()).postDelayed({ startService(context) }, 500)
+                BleService.bleService?.stop()
+                Handler(Looper.getMainLooper()).postDelayed({ startService(context) }, 500)
             }
 
         })
     }
+
 
     /**
      * This Method Return Device Information Regarding BLE Functionality & Permissions
