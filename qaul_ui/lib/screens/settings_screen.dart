@@ -47,14 +47,15 @@ class SettingsScreen extends HookConsumerWidget {
               child: _InternetNodesList(),
             ),
           ),
-          if (Platform.isAndroid) ...[
-            const SizedBox(height: 20),
-            SettingsSection(
-              name: l10n.androidOptions,
-              icon: const FaIcon(FontAwesomeIcons.android),
-              content: const _AndroidOptions(),
-            ),
-          ]
+          // TODO(brenodt): temporarily removing Android's settings. Uncomment to reinstate.
+          // if (Platform.isAndroid) ...[
+          //   const SizedBox(height: 20),
+          //   SettingsSection(
+          //     name: l10n.androidOptions,
+          //     icon: const FaIcon(FontAwesomeIcons.android),
+          //     content: const _AndroidOptions(),
+          //   ),
+          // ]
         ],
       ),
     );
