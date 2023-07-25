@@ -1,22 +1,18 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: connections/ble/ble.proto
 //
 // @dart = 2.12
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
-
+// ignore_for_file: UNDEFINED_SHOWN_NAME
 import 'dart:core' as $core;
-
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class BlePowerSetting extends $pb.ProtobufEnum {
-  static const BlePowerSetting low_power = BlePowerSetting._(0, _omitEnumNames ? '' : 'low_power');
-  static const BlePowerSetting balanced = BlePowerSetting._(1, _omitEnumNames ? '' : 'balanced');
-  static const BlePowerSetting low_latency = BlePowerSetting._(2, _omitEnumNames ? '' : 'low_latency');
+  static const BlePowerSetting low_power = BlePowerSetting._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'low_power');
+  static const BlePowerSetting balanced = BlePowerSetting._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'balanced');
+  static const BlePowerSetting low_latency = BlePowerSetting._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'low_latency');
 
   static const $core.List<BlePowerSetting> values = <BlePowerSetting> [
     low_power,
@@ -31,9 +27,9 @@ class BlePowerSetting extends $pb.ProtobufEnum {
 }
 
 class BleError extends $pb.ProtobufEnum {
-  static const BleError UNKNOWN_ERROR = BleError._(0, _omitEnumNames ? '' : 'UNKNOWN_ERROR');
-  static const BleError RIGHTS_MISSING = BleError._(1, _omitEnumNames ? '' : 'RIGHTS_MISSING');
-  static const BleError TIMEOUT = BleError._(2, _omitEnumNames ? '' : 'TIMEOUT');
+  static const BleError UNKNOWN_ERROR = BleError._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'UNKNOWN_ERROR');
+  static const BleError RIGHTS_MISSING = BleError._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'RIGHTS_MISSING');
+  static const BleError TIMEOUT = BleError._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TIMEOUT');
 
   static const $core.List<BleError> values = <BleError> [
     UNKNOWN_ERROR,
@@ -47,5 +43,3 @@ class BleError extends $pb.ProtobufEnum {
   const BleError._($core.int v, $core.String n) : super(v, n);
 }
 
-
-const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

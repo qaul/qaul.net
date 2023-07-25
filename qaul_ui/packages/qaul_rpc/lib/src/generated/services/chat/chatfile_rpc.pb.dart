@@ -1,13 +1,9 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: services/chat/chatfile_rpc.proto
 //
 // @dart = 2.12
-
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -23,11 +19,6 @@ enum ChatFile_Message {
 }
 
 class ChatFile extends $pb.GeneratedMessage {
-  factory ChatFile() => create();
-  ChatFile._() : super();
-  factory ChatFile.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChatFile.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
   static const $core.Map<$core.int, ChatFile_Message> _ChatFile_MessageByTag = {
     1 : ChatFile_Message.sendFileRequest,
     2 : ChatFile_Message.sendFileResponse,
@@ -35,15 +26,39 @@ class ChatFile extends $pb.GeneratedMessage {
     4 : ChatFile_Message.fileHistoryResponse,
     0 : ChatFile_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChatFile', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatFile', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4])
-    ..aOM<SendFileRequest>(1, _omitFieldNames ? '' : 'sendFileRequest', subBuilder: SendFileRequest.create)
-    ..aOM<SendFileResponse>(2, _omitFieldNames ? '' : 'sendFileResponse', subBuilder: SendFileResponse.create)
-    ..aOM<FileHistoryRequest>(3, _omitFieldNames ? '' : 'fileHistory', subBuilder: FileHistoryRequest.create)
-    ..aOM<FileHistoryResponse>(4, _omitFieldNames ? '' : 'fileHistoryResponse', subBuilder: FileHistoryResponse.create)
+    ..aOM<SendFileRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sendFileRequest', subBuilder: SendFileRequest.create)
+    ..aOM<SendFileResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sendFileResponse', subBuilder: SendFileResponse.create)
+    ..aOM<FileHistoryRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileHistory', subBuilder: FileHistoryRequest.create)
+    ..aOM<FileHistoryResponse>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileHistoryResponse', subBuilder: FileHistoryResponse.create)
     ..hasRequiredFields = false
   ;
 
+  ChatFile._() : super();
+  factory ChatFile({
+    SendFileRequest? sendFileRequest,
+    SendFileResponse? sendFileResponse,
+    FileHistoryRequest? fileHistory,
+    FileHistoryResponse? fileHistoryResponse,
+  }) {
+    final _result = create();
+    if (sendFileRequest != null) {
+      _result.sendFileRequest = sendFileRequest;
+    }
+    if (sendFileResponse != null) {
+      _result.sendFileResponse = sendFileResponse;
+    }
+    if (fileHistory != null) {
+      _result.fileHistory = fileHistory;
+    }
+    if (fileHistoryResponse != null) {
+      _result.fileHistoryResponse = fileHistoryResponse;
+    }
+    return _result;
+  }
+  factory ChatFile.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatFile.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -53,10 +68,8 @@ class ChatFile extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChatFile copyWith(void Function(ChatFile) updates) => super.copyWith((message) => updates(message as ChatFile)) as ChatFile;
-
+  ChatFile copyWith(void Function(ChatFile) updates) => super.copyWith((message) => updates(message as ChatFile)) as ChatFile; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ChatFile create() => ChatFile._();
   ChatFile createEmptyInstance() => create();
@@ -114,18 +127,33 @@ class ChatFile extends $pb.GeneratedMessage {
 }
 
 class SendFileRequest extends $pb.GeneratedMessage {
-  factory SendFileRequest() => create();
-  SendFileRequest._() : super();
-  factory SendFileRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SendFileRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendFileRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'pathName')
-    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'groupId', $pb.PbFieldType.OY)
-    ..aOS(3, _omitFieldNames ? '' : 'description')
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendFileRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pathName')
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description')
     ..hasRequiredFields = false
   ;
 
+  SendFileRequest._() : super();
+  factory SendFileRequest({
+    $core.String? pathName,
+    $core.List<$core.int>? groupId,
+    $core.String? description,
+  }) {
+    final _result = create();
+    if (pathName != null) {
+      _result.pathName = pathName;
+    }
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    if (description != null) {
+      _result.description = description;
+    }
+    return _result;
+  }
+  factory SendFileRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendFileRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -135,10 +163,8 @@ class SendFileRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SendFileRequest copyWith(void Function(SendFileRequest) updates) => super.copyWith((message) => updates(message as SendFileRequest)) as SendFileRequest;
-
+  SendFileRequest copyWith(void Function(SendFileRequest) updates) => super.copyWith((message) => updates(message as SendFileRequest)) as SendFileRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static SendFileRequest create() => SendFileRequest._();
   SendFileRequest createEmptyInstance() => create();
@@ -176,18 +202,33 @@ class SendFileRequest extends $pb.GeneratedMessage {
 }
 
 class SendFileResponse extends $pb.GeneratedMessage {
-  factory SendFileResponse() => create();
-  SendFileResponse._() : super();
-  factory SendFileResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory SendFileResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendFileResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
-    ..aOB(1, _omitFieldNames ? '' : 'success')
-    ..aOS(2, _omitFieldNames ? '' : 'error')
-    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendFileResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error')
+    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
+  SendFileResponse._() : super();
+  factory SendFileResponse({
+    $core.bool? success,
+    $core.String? error,
+    $fixnum.Int64? fileId,
+  }) {
+    final _result = create();
+    if (success != null) {
+      _result.success = success;
+    }
+    if (error != null) {
+      _result.error = error;
+    }
+    if (fileId != null) {
+      _result.fileId = fileId;
+    }
+    return _result;
+  }
+  factory SendFileResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendFileResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -197,10 +238,8 @@ class SendFileResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SendFileResponse copyWith(void Function(SendFileResponse) updates) => super.copyWith((message) => updates(message as SendFileResponse)) as SendFileResponse;
-
+  SendFileResponse copyWith(void Function(SendFileResponse) updates) => super.copyWith((message) => updates(message as SendFileResponse)) as SendFileResponse; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static SendFileResponse create() => SendFileResponse._();
   SendFileResponse createEmptyInstance() => create();
@@ -238,17 +277,28 @@ class SendFileResponse extends $pb.GeneratedMessage {
 }
 
 class FileHistoryRequest extends $pb.GeneratedMessage {
-  factory FileHistoryRequest() => create();
-  FileHistoryRequest._() : super();
-  factory FileHistoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FileHistoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FileHistoryRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FileHistoryRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'limit', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
+  FileHistoryRequest._() : super();
+  factory FileHistoryRequest({
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final _result = create();
+    if (offset != null) {
+      _result.offset = offset;
+    }
+    if (limit != null) {
+      _result.limit = limit;
+    }
+    return _result;
+  }
+  factory FileHistoryRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FileHistoryRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -258,10 +308,8 @@ class FileHistoryRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FileHistoryRequest copyWith(void Function(FileHistoryRequest) updates) => super.copyWith((message) => updates(message as FileHistoryRequest)) as FileHistoryRequest;
-
+  FileHistoryRequest copyWith(void Function(FileHistoryRequest) updates) => super.copyWith((message) => updates(message as FileHistoryRequest)) as FileHistoryRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static FileHistoryRequest create() => FileHistoryRequest._();
   FileHistoryRequest createEmptyInstance() => create();
@@ -290,23 +338,58 @@ class FileHistoryRequest extends $pb.GeneratedMessage {
 }
 
 class FileHistoryEntry extends $pb.GeneratedMessage {
-  factory FileHistoryEntry() => create();
-  FileHistoryEntry._() : super();
-  factory FileHistoryEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FileHistoryEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FileHistoryEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'fileName')
-    ..aOS(3, _omitFieldNames ? '' : 'fileExtension')
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'fileSize', $pb.PbFieldType.OU3)
-    ..aOS(5, _omitFieldNames ? '' : 'fileDescription')
-    ..a<$fixnum.Int64>(6, _omitFieldNames ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(7, _omitFieldNames ? '' : 'senderId')
-    ..aOS(8, _omitFieldNames ? '' : 'groupId')
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FileHistoryEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileName')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileExtension')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileSize', $pb.PbFieldType.OU3)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileDescription')
+    ..a<$fixnum.Int64>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId')
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId')
     ..hasRequiredFields = false
   ;
 
+  FileHistoryEntry._() : super();
+  factory FileHistoryEntry({
+    $fixnum.Int64? fileId,
+    $core.String? fileName,
+    $core.String? fileExtension,
+    $core.int? fileSize,
+    $core.String? fileDescription,
+    $fixnum.Int64? time,
+    $core.String? senderId,
+    $core.String? groupId,
+  }) {
+    final _result = create();
+    if (fileId != null) {
+      _result.fileId = fileId;
+    }
+    if (fileName != null) {
+      _result.fileName = fileName;
+    }
+    if (fileExtension != null) {
+      _result.fileExtension = fileExtension;
+    }
+    if (fileSize != null) {
+      _result.fileSize = fileSize;
+    }
+    if (fileDescription != null) {
+      _result.fileDescription = fileDescription;
+    }
+    if (time != null) {
+      _result.time = time;
+    }
+    if (senderId != null) {
+      _result.senderId = senderId;
+    }
+    if (groupId != null) {
+      _result.groupId = groupId;
+    }
+    return _result;
+  }
+  factory FileHistoryEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FileHistoryEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -316,10 +399,8 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FileHistoryEntry copyWith(void Function(FileHistoryEntry) updates) => super.copyWith((message) => updates(message as FileHistoryEntry)) as FileHistoryEntry;
-
+  FileHistoryEntry copyWith(void Function(FileHistoryEntry) updates) => super.copyWith((message) => updates(message as FileHistoryEntry)) as FileHistoryEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static FileHistoryEntry create() => FileHistoryEntry._();
   FileHistoryEntry createEmptyInstance() => create();
@@ -402,19 +483,38 @@ class FileHistoryEntry extends $pb.GeneratedMessage {
 }
 
 class FileHistoryResponse extends $pb.GeneratedMessage {
-  factory FileHistoryResponse() => create();
-  FileHistoryResponse._() : super();
-  factory FileHistoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FileHistoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FileHistoryResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3)
-    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'total', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..pc<FileHistoryEntry>(4, _omitFieldNames ? '' : 'histories', $pb.PbFieldType.PM, subBuilder: FileHistoryEntry.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FileHistoryResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.chatfile'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offset', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'limit', $pb.PbFieldType.OU3)
+    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'total', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..pc<FileHistoryEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'histories', $pb.PbFieldType.PM, subBuilder: FileHistoryEntry.create)
     ..hasRequiredFields = false
   ;
 
+  FileHistoryResponse._() : super();
+  factory FileHistoryResponse({
+    $core.int? offset,
+    $core.int? limit,
+    $fixnum.Int64? total,
+    $core.Iterable<FileHistoryEntry>? histories,
+  }) {
+    final _result = create();
+    if (offset != null) {
+      _result.offset = offset;
+    }
+    if (limit != null) {
+      _result.limit = limit;
+    }
+    if (total != null) {
+      _result.total = total;
+    }
+    if (histories != null) {
+      _result.histories.addAll(histories);
+    }
+    return _result;
+  }
+  factory FileHistoryResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FileHistoryResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -424,10 +524,8 @@ class FileHistoryResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FileHistoryResponse copyWith(void Function(FileHistoryResponse) updates) => super.copyWith((message) => updates(message as FileHistoryResponse)) as FileHistoryResponse;
-
+  FileHistoryResponse copyWith(void Function(FileHistoryResponse) updates) => super.copyWith((message) => updates(message as FileHistoryResponse)) as FileHistoryResponse; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static FileHistoryResponse create() => FileHistoryResponse._();
   FileHistoryResponse createEmptyInstance() => create();
@@ -467,6 +565,3 @@ class FileHistoryResponse extends $pb.GeneratedMessage {
   $core.List<FileHistoryEntry> get histories => $_getList(3);
 }
 
-
-const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

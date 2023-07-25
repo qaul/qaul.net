@@ -1,24 +1,20 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: router/users.proto
 //
 // @dart = 2.12
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
-
+// ignore_for_file: UNDEFINED_SHOWN_NAME
 import 'dart:core' as $core;
-
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class ConnectionModule extends $pb.ProtobufEnum {
-  static const ConnectionModule NONE = ConnectionModule._(0, _omitEnumNames ? '' : 'NONE');
-  static const ConnectionModule LAN = ConnectionModule._(1, _omitEnumNames ? '' : 'LAN');
-  static const ConnectionModule INTERNET = ConnectionModule._(2, _omitEnumNames ? '' : 'INTERNET');
-  static const ConnectionModule BLE = ConnectionModule._(3, _omitEnumNames ? '' : 'BLE');
-  static const ConnectionModule LOCAL = ConnectionModule._(4, _omitEnumNames ? '' : 'LOCAL');
+  static const ConnectionModule NONE = ConnectionModule._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'NONE');
+  static const ConnectionModule LAN = ConnectionModule._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LAN');
+  static const ConnectionModule INTERNET = ConnectionModule._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INTERNET');
+  static const ConnectionModule BLE = ConnectionModule._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BLE');
+  static const ConnectionModule LOCAL = ConnectionModule._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LOCAL');
 
   static const $core.List<ConnectionModule> values = <ConnectionModule> [
     NONE,
@@ -35,9 +31,9 @@ class ConnectionModule extends $pb.ProtobufEnum {
 }
 
 class Connectivity extends $pb.ProtobufEnum {
-  static const Connectivity Online = Connectivity._(0, _omitEnumNames ? '' : 'Online');
-  static const Connectivity Reachable = Connectivity._(1, _omitEnumNames ? '' : 'Reachable');
-  static const Connectivity Offline = Connectivity._(2, _omitEnumNames ? '' : 'Offline');
+  static const Connectivity Online = Connectivity._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Online');
+  static const Connectivity Reachable = Connectivity._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Reachable');
+  static const Connectivity Offline = Connectivity._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Offline');
 
   static const $core.List<Connectivity> values = <Connectivity> [
     Online,
@@ -51,5 +47,3 @@ class Connectivity extends $pb.ProtobufEnum {
   const Connectivity._($core.int v, $core.String n) : super(v, n);
 }
 
-
-const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

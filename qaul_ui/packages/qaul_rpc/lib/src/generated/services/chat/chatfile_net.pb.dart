@@ -1,13 +1,9 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: services/chat/chatfile_net.proto
 //
 // @dart = 2.12
-
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -21,23 +17,34 @@ enum ChatFileContainer_Message {
 }
 
 class ChatFileContainer extends $pb.GeneratedMessage {
-  factory ChatFileContainer() => create();
-  ChatFileContainer._() : super();
-  factory ChatFileContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChatFileContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
   static const $core.Map<$core.int, ChatFileContainer_Message> _ChatFileContainer_MessageByTag = {
     1 : ChatFileContainer_Message.fileInfo,
     2 : ChatFileContainer_Message.fileData,
     0 : ChatFileContainer_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChatFileContainer', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatFileContainer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
     ..oo(0, [1, 2])
-    ..aOM<ChatFileInfo>(1, _omitFieldNames ? '' : 'fileInfo', subBuilder: ChatFileInfo.create)
-    ..aOM<ChatFileData>(2, _omitFieldNames ? '' : 'fileData', subBuilder: ChatFileData.create)
+    ..aOM<ChatFileInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileInfo', subBuilder: ChatFileInfo.create)
+    ..aOM<ChatFileData>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileData', subBuilder: ChatFileData.create)
     ..hasRequiredFields = false
   ;
 
+  ChatFileContainer._() : super();
+  factory ChatFileContainer({
+    ChatFileInfo? fileInfo,
+    ChatFileData? fileData,
+  }) {
+    final _result = create();
+    if (fileInfo != null) {
+      _result.fileInfo = fileInfo;
+    }
+    if (fileData != null) {
+      _result.fileData = fileData;
+    }
+    return _result;
+  }
+  factory ChatFileContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatFileContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -47,10 +54,8 @@ class ChatFileContainer extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChatFileContainer copyWith(void Function(ChatFileContainer) updates) => super.copyWith((message) => updates(message as ChatFileContainer)) as ChatFileContainer;
-
+  ChatFileContainer copyWith(void Function(ChatFileContainer) updates) => super.copyWith((message) => updates(message as ChatFileContainer)) as ChatFileContainer; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ChatFileContainer create() => ChatFileContainer._();
   ChatFileContainer createEmptyInstance() => create();
@@ -86,23 +91,58 @@ class ChatFileContainer extends $pb.GeneratedMessage {
 }
 
 class ChatFileInfo extends $pb.GeneratedMessage {
-  factory ChatFileInfo() => create();
-  ChatFileInfo._() : super();
-  factory ChatFileInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChatFileInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChatFileInfo', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'fileName')
-    ..aOS(3, _omitFieldNames ? '' : 'fileExtension')
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'fileSize', $pb.PbFieldType.OU3)
-    ..aOS(5, _omitFieldNames ? '' : 'fileDescription')
-    ..a<$core.int>(6, _omitFieldNames ? '' : 'startIndex', $pb.PbFieldType.OU3)
-    ..a<$core.int>(7, _omitFieldNames ? '' : 'messageCount', $pb.PbFieldType.OU3)
-    ..a<$core.int>(8, _omitFieldNames ? '' : 'dataChunkSize', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatFileInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileName')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileExtension')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileSize', $pb.PbFieldType.OU3)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileDescription')
+    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startIndex', $pb.PbFieldType.OU3)
+    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageCount', $pb.PbFieldType.OU3)
+    ..a<$core.int>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dataChunkSize', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
+  ChatFileInfo._() : super();
+  factory ChatFileInfo({
+    $fixnum.Int64? fileId,
+    $core.String? fileName,
+    $core.String? fileExtension,
+    $core.int? fileSize,
+    $core.String? fileDescription,
+    $core.int? startIndex,
+    $core.int? messageCount,
+    $core.int? dataChunkSize,
+  }) {
+    final _result = create();
+    if (fileId != null) {
+      _result.fileId = fileId;
+    }
+    if (fileName != null) {
+      _result.fileName = fileName;
+    }
+    if (fileExtension != null) {
+      _result.fileExtension = fileExtension;
+    }
+    if (fileSize != null) {
+      _result.fileSize = fileSize;
+    }
+    if (fileDescription != null) {
+      _result.fileDescription = fileDescription;
+    }
+    if (startIndex != null) {
+      _result.startIndex = startIndex;
+    }
+    if (messageCount != null) {
+      _result.messageCount = messageCount;
+    }
+    if (dataChunkSize != null) {
+      _result.dataChunkSize = dataChunkSize;
+    }
+    return _result;
+  }
+  factory ChatFileInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatFileInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -112,10 +152,8 @@ class ChatFileInfo extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChatFileInfo copyWith(void Function(ChatFileInfo) updates) => super.copyWith((message) => updates(message as ChatFileInfo)) as ChatFileInfo;
-
+  ChatFileInfo copyWith(void Function(ChatFileInfo) updates) => super.copyWith((message) => updates(message as ChatFileInfo)) as ChatFileInfo; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ChatFileInfo create() => ChatFileInfo._();
   ChatFileInfo createEmptyInstance() => create();
@@ -198,19 +236,38 @@ class ChatFileInfo extends $pb.GeneratedMessage {
 }
 
 class ChatFileData extends $pb.GeneratedMessage {
-  factory ChatFileData() => create();
-  ChatFileData._() : super();
-  factory ChatFileData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ChatFileData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ChatFileData', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'startIndex', $pb.PbFieldType.OU3)
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'messageCount', $pb.PbFieldType.OU3)
-    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatFileData', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.chatfile'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fileId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startIndex', $pb.PbFieldType.OU3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageCount', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
+  ChatFileData._() : super();
+  factory ChatFileData({
+    $fixnum.Int64? fileId,
+    $core.int? startIndex,
+    $core.int? messageCount,
+    $core.List<$core.int>? data,
+  }) {
+    final _result = create();
+    if (fileId != null) {
+      _result.fileId = fileId;
+    }
+    if (startIndex != null) {
+      _result.startIndex = startIndex;
+    }
+    if (messageCount != null) {
+      _result.messageCount = messageCount;
+    }
+    if (data != null) {
+      _result.data = data;
+    }
+    return _result;
+  }
+  factory ChatFileData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ChatFileData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -220,10 +277,8 @@ class ChatFileData extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ChatFileData copyWith(void Function(ChatFileData) updates) => super.copyWith((message) => updates(message as ChatFileData)) as ChatFileData;
-
+  ChatFileData copyWith(void Function(ChatFileData) updates) => super.copyWith((message) => updates(message as ChatFileData)) as ChatFileData; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ChatFileData create() => ChatFileData._();
   ChatFileData createEmptyInstance() => create();
@@ -269,6 +324,3 @@ class ChatFileData extends $pb.GeneratedMessage {
   void clearData() => clearField(4);
 }
 
-
-const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
