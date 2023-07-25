@@ -1,13 +1,9 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: router/router.proto
 //
 // @dart = 2.12
-
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -28,11 +24,6 @@ enum Router_Message {
 }
 
 class Router extends $pb.GeneratedMessage {
-  factory Router() => create();
-  Router._() : super();
-  factory Router.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Router.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
   static const $core.Map<$core.int, Router_Message> _Router_MessageByTag = {
     1 : Router_Message.routingTableRequest,
     2 : Router_Message.routingTable,
@@ -42,17 +33,49 @@ class Router extends $pb.GeneratedMessage {
     6 : Router_Message.neighboursList,
     0 : Router_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Router', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Router', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6])
-    ..aOM<RoutingTableRequest>(1, _omitFieldNames ? '' : 'routingTableRequest', subBuilder: RoutingTableRequest.create)
-    ..aOM<RoutingTableList>(2, _omitFieldNames ? '' : 'routingTable', subBuilder: RoutingTableList.create)
-    ..aOM<ConnectionsRequest>(3, _omitFieldNames ? '' : 'connectionsRequest', subBuilder: ConnectionsRequest.create)
-    ..aOM<ConnectionsList>(4, _omitFieldNames ? '' : 'connectionsList', subBuilder: ConnectionsList.create)
-    ..aOM<NeighboursRequest>(5, _omitFieldNames ? '' : 'neighboursRequest', subBuilder: NeighboursRequest.create)
-    ..aOM<NeighboursList>(6, _omitFieldNames ? '' : 'neighboursList', subBuilder: NeighboursList.create)
+    ..aOM<RoutingTableRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTableRequest', subBuilder: RoutingTableRequest.create)
+    ..aOM<RoutingTableList>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTable', subBuilder: RoutingTableList.create)
+    ..aOM<ConnectionsRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionsRequest', subBuilder: ConnectionsRequest.create)
+    ..aOM<ConnectionsList>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionsList', subBuilder: ConnectionsList.create)
+    ..aOM<NeighboursRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'neighboursRequest', subBuilder: NeighboursRequest.create)
+    ..aOM<NeighboursList>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'neighboursList', subBuilder: NeighboursList.create)
     ..hasRequiredFields = false
   ;
 
+  Router._() : super();
+  factory Router({
+    RoutingTableRequest? routingTableRequest,
+    RoutingTableList? routingTable,
+    ConnectionsRequest? connectionsRequest,
+    ConnectionsList? connectionsList,
+    NeighboursRequest? neighboursRequest,
+    NeighboursList? neighboursList,
+  }) {
+    final _result = create();
+    if (routingTableRequest != null) {
+      _result.routingTableRequest = routingTableRequest;
+    }
+    if (routingTable != null) {
+      _result.routingTable = routingTable;
+    }
+    if (connectionsRequest != null) {
+      _result.connectionsRequest = connectionsRequest;
+    }
+    if (connectionsList != null) {
+      _result.connectionsList = connectionsList;
+    }
+    if (neighboursRequest != null) {
+      _result.neighboursRequest = neighboursRequest;
+    }
+    if (neighboursList != null) {
+      _result.neighboursList = neighboursList;
+    }
+    return _result;
+  }
+  factory Router.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Router.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -62,10 +85,8 @@ class Router extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Router copyWith(void Function(Router) updates) => super.copyWith((message) => updates(message as Router)) as Router;
-
+  Router copyWith(void Function(Router) updates) => super.copyWith((message) => updates(message as Router)) as Router; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static Router create() => Router._();
   Router createEmptyInstance() => create();
@@ -145,15 +166,14 @@ class Router extends $pb.GeneratedMessage {
 }
 
 class RoutingTableRequest extends $pb.GeneratedMessage {
-  factory RoutingTableRequest() => create();
-  RoutingTableRequest._() : super();
-  factory RoutingTableRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RoutingTableRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RoutingTableRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
+  RoutingTableRequest._() : super();
+  factory RoutingTableRequest() => create();
+  factory RoutingTableRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -163,10 +183,8 @@ class RoutingTableRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RoutingTableRequest copyWith(void Function(RoutingTableRequest) updates) => super.copyWith((message) => updates(message as RoutingTableRequest)) as RoutingTableRequest;
-
+  RoutingTableRequest copyWith(void Function(RoutingTableRequest) updates) => super.copyWith((message) => updates(message as RoutingTableRequest)) as RoutingTableRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static RoutingTableRequest create() => RoutingTableRequest._();
   RoutingTableRequest createEmptyInstance() => create();
@@ -177,16 +195,23 @@ class RoutingTableRequest extends $pb.GeneratedMessage {
 }
 
 class RoutingTableList extends $pb.GeneratedMessage {
-  factory RoutingTableList() => create();
-  RoutingTableList._() : super();
-  factory RoutingTableList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RoutingTableList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RoutingTableList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..pc<RoutingTableEntry>(1, _omitFieldNames ? '' : 'routingTable', $pb.PbFieldType.PM, subBuilder: RoutingTableEntry.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<RoutingTableEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'routingTable', $pb.PbFieldType.PM, subBuilder: RoutingTableEntry.create)
     ..hasRequiredFields = false
   ;
 
+  RoutingTableList._() : super();
+  factory RoutingTableList({
+    $core.Iterable<RoutingTableEntry>? routingTable,
+  }) {
+    final _result = create();
+    if (routingTable != null) {
+      _result.routingTable.addAll(routingTable);
+    }
+    return _result;
+  }
+  factory RoutingTableList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -196,10 +221,8 @@ class RoutingTableList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RoutingTableList copyWith(void Function(RoutingTableList) updates) => super.copyWith((message) => updates(message as RoutingTableList)) as RoutingTableList;
-
+  RoutingTableList copyWith(void Function(RoutingTableList) updates) => super.copyWith((message) => updates(message as RoutingTableList)) as RoutingTableList; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static RoutingTableList create() => RoutingTableList._();
   RoutingTableList createEmptyInstance() => create();
@@ -213,17 +236,28 @@ class RoutingTableList extends $pb.GeneratedMessage {
 }
 
 class RoutingTableEntry extends $pb.GeneratedMessage {
-  factory RoutingTableEntry() => create();
-  RoutingTableEntry._() : super();
-  factory RoutingTableEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RoutingTableEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RoutingTableEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
-    ..pc<RoutingTableConnection>(2, _omitFieldNames ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..pc<RoutingTableConnection>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
     ..hasRequiredFields = false
   ;
 
+  RoutingTableEntry._() : super();
+  factory RoutingTableEntry({
+    $core.List<$core.int>? userId,
+    $core.Iterable<RoutingTableConnection>? connections,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (connections != null) {
+      _result.connections.addAll(connections);
+    }
+    return _result;
+  }
+  factory RoutingTableEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -233,10 +267,8 @@ class RoutingTableEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RoutingTableEntry copyWith(void Function(RoutingTableEntry) updates) => super.copyWith((message) => updates(message as RoutingTableEntry)) as RoutingTableEntry;
-
+  RoutingTableEntry copyWith(void Function(RoutingTableEntry) updates) => super.copyWith((message) => updates(message as RoutingTableEntry)) as RoutingTableEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static RoutingTableEntry create() => RoutingTableEntry._();
   RoutingTableEntry createEmptyInstance() => create();
@@ -259,19 +291,38 @@ class RoutingTableEntry extends $pb.GeneratedMessage {
 }
 
 class RoutingTableConnection extends $pb.GeneratedMessage {
-  factory RoutingTableConnection() => create();
-  RoutingTableConnection._() : super();
-  factory RoutingTableConnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RoutingTableConnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RoutingTableConnection', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..e<ConnectionModule>(2, _omitFieldNames ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'rtt', $pb.PbFieldType.OU3)
-    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'via', $pb.PbFieldType.OY)
-    ..a<$core.int>(5, _omitFieldNames ? '' : 'hopCount', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableConnection', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..e<ConnectionModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
+  RoutingTableConnection._() : super();
+  factory RoutingTableConnection({
+    ConnectionModule? module,
+    $core.int? rtt,
+    $core.List<$core.int>? via,
+    $core.int? hopCount,
+  }) {
+    final _result = create();
+    if (module != null) {
+      _result.module = module;
+    }
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    if (via != null) {
+      _result.via = via;
+    }
+    if (hopCount != null) {
+      _result.hopCount = hopCount;
+    }
+    return _result;
+  }
+  factory RoutingTableConnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RoutingTableConnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -281,10 +332,8 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection;
-
+  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static RoutingTableConnection create() => RoutingTableConnection._();
   RoutingTableConnection createEmptyInstance() => create();
@@ -331,15 +380,14 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
 }
 
 class ConnectionsRequest extends $pb.GeneratedMessage {
-  factory ConnectionsRequest() => create();
-  ConnectionsRequest._() : super();
-  factory ConnectionsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
+  ConnectionsRequest._() : super();
+  factory ConnectionsRequest() => create();
+  factory ConnectionsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -349,10 +397,8 @@ class ConnectionsRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionsRequest copyWith(void Function(ConnectionsRequest) updates) => super.copyWith((message) => updates(message as ConnectionsRequest)) as ConnectionsRequest;
-
+  ConnectionsRequest copyWith(void Function(ConnectionsRequest) updates) => super.copyWith((message) => updates(message as ConnectionsRequest)) as ConnectionsRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ConnectionsRequest create() => ConnectionsRequest._();
   ConnectionsRequest createEmptyInstance() => create();
@@ -363,19 +409,38 @@ class ConnectionsRequest extends $pb.GeneratedMessage {
 }
 
 class ConnectionsList extends $pb.GeneratedMessage {
-  factory ConnectionsList() => create();
-  ConnectionsList._() : super();
-  factory ConnectionsList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionsList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionsList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..pc<ConnectionsUserEntry>(1, _omitFieldNames ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
-    ..pc<ConnectionsUserEntry>(2, _omitFieldNames ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
-    ..pc<ConnectionsUserEntry>(3, _omitFieldNames ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
-    ..pc<ConnectionsUserEntry>(4, _omitFieldNames ? '' : 'local', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<ConnectionsUserEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
+    ..pc<ConnectionsUserEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'local', $pb.PbFieldType.PM, subBuilder: ConnectionsUserEntry.create)
     ..hasRequiredFields = false
   ;
 
+  ConnectionsList._() : super();
+  factory ConnectionsList({
+    $core.Iterable<ConnectionsUserEntry>? lan,
+    $core.Iterable<ConnectionsUserEntry>? internet,
+    $core.Iterable<ConnectionsUserEntry>? ble,
+    $core.Iterable<ConnectionsUserEntry>? local,
+  }) {
+    final _result = create();
+    if (lan != null) {
+      _result.lan.addAll(lan);
+    }
+    if (internet != null) {
+      _result.internet.addAll(internet);
+    }
+    if (ble != null) {
+      _result.ble.addAll(ble);
+    }
+    if (local != null) {
+      _result.local.addAll(local);
+    }
+    return _result;
+  }
+  factory ConnectionsList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -385,10 +450,8 @@ class ConnectionsList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionsList copyWith(void Function(ConnectionsList) updates) => super.copyWith((message) => updates(message as ConnectionsList)) as ConnectionsList;
-
+  ConnectionsList copyWith(void Function(ConnectionsList) updates) => super.copyWith((message) => updates(message as ConnectionsList)) as ConnectionsList; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ConnectionsList create() => ConnectionsList._();
   ConnectionsList createEmptyInstance() => create();
@@ -411,17 +474,28 @@ class ConnectionsList extends $pb.GeneratedMessage {
 }
 
 class ConnectionsUserEntry extends $pb.GeneratedMessage {
-  factory ConnectionsUserEntry() => create();
-  ConnectionsUserEntry._() : super();
-  factory ConnectionsUserEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionsUserEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionsUserEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
-    ..pc<ConnectionEntry>(2, _omitFieldNames ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: ConnectionEntry.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionsUserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
+    ..pc<ConnectionEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: ConnectionEntry.create)
     ..hasRequiredFields = false
   ;
 
+  ConnectionsUserEntry._() : super();
+  factory ConnectionsUserEntry({
+    $core.List<$core.int>? userId,
+    $core.Iterable<ConnectionEntry>? connections,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (connections != null) {
+      _result.connections.addAll(connections);
+    }
+    return _result;
+  }
+  factory ConnectionsUserEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionsUserEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -431,10 +505,8 @@ class ConnectionsUserEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionsUserEntry copyWith(void Function(ConnectionsUserEntry) updates) => super.copyWith((message) => updates(message as ConnectionsUserEntry)) as ConnectionsUserEntry;
-
+  ConnectionsUserEntry copyWith(void Function(ConnectionsUserEntry) updates) => super.copyWith((message) => updates(message as ConnectionsUserEntry)) as ConnectionsUserEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ConnectionsUserEntry create() => ConnectionsUserEntry._();
   ConnectionsUserEntry createEmptyInstance() => create();
@@ -457,18 +529,33 @@ class ConnectionsUserEntry extends $pb.GeneratedMessage {
 }
 
 class ConnectionEntry extends $pb.GeneratedMessage {
-  factory ConnectionEntry() => create();
-  ConnectionEntry._() : super();
-  factory ConnectionEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ConnectionEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConnectionEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'rtt', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'hopCount', $pb.PbFieldType.OU3)
-    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'via', $pb.PbFieldType.OY)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
+  ConnectionEntry._() : super();
+  factory ConnectionEntry({
+    $core.int? rtt,
+    $core.int? hopCount,
+    $core.List<$core.int>? via,
+  }) {
+    final _result = create();
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    if (hopCount != null) {
+      _result.hopCount = hopCount;
+    }
+    if (via != null) {
+      _result.via = via;
+    }
+    return _result;
+  }
+  factory ConnectionEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -478,10 +565,8 @@ class ConnectionEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ConnectionEntry copyWith(void Function(ConnectionEntry) updates) => super.copyWith((message) => updates(message as ConnectionEntry)) as ConnectionEntry;
-
+  ConnectionEntry copyWith(void Function(ConnectionEntry) updates) => super.copyWith((message) => updates(message as ConnectionEntry)) as ConnectionEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static ConnectionEntry create() => ConnectionEntry._();
   ConnectionEntry createEmptyInstance() => create();
@@ -519,15 +604,14 @@ class ConnectionEntry extends $pb.GeneratedMessage {
 }
 
 class NeighboursRequest extends $pb.GeneratedMessage {
-  factory NeighboursRequest() => create();
-  NeighboursRequest._() : super();
-  factory NeighboursRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory NeighboursRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'NeighboursRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
+  NeighboursRequest._() : super();
+  factory NeighboursRequest() => create();
+  factory NeighboursRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -537,10 +621,8 @@ class NeighboursRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NeighboursRequest copyWith(void Function(NeighboursRequest) updates) => super.copyWith((message) => updates(message as NeighboursRequest)) as NeighboursRequest;
-
+  NeighboursRequest copyWith(void Function(NeighboursRequest) updates) => super.copyWith((message) => updates(message as NeighboursRequest)) as NeighboursRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static NeighboursRequest create() => NeighboursRequest._();
   NeighboursRequest createEmptyInstance() => create();
@@ -551,18 +633,33 @@ class NeighboursRequest extends $pb.GeneratedMessage {
 }
 
 class NeighboursList extends $pb.GeneratedMessage {
-  factory NeighboursList() => create();
-  NeighboursList._() : super();
-  factory NeighboursList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory NeighboursList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'NeighboursList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..pc<NeighboursEntry>(1, _omitFieldNames ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
-    ..pc<NeighboursEntry>(2, _omitFieldNames ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
-    ..pc<NeighboursEntry>(3, _omitFieldNames ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..pc<NeighboursEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lan', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+    ..pc<NeighboursEntry>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'internet', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
+    ..pc<NeighboursEntry>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ble', $pb.PbFieldType.PM, subBuilder: NeighboursEntry.create)
     ..hasRequiredFields = false
   ;
 
+  NeighboursList._() : super();
+  factory NeighboursList({
+    $core.Iterable<NeighboursEntry>? lan,
+    $core.Iterable<NeighboursEntry>? internet,
+    $core.Iterable<NeighboursEntry>? ble,
+  }) {
+    final _result = create();
+    if (lan != null) {
+      _result.lan.addAll(lan);
+    }
+    if (internet != null) {
+      _result.internet.addAll(internet);
+    }
+    if (ble != null) {
+      _result.ble.addAll(ble);
+    }
+    return _result;
+  }
+  factory NeighboursList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -572,10 +669,8 @@ class NeighboursList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NeighboursList copyWith(void Function(NeighboursList) updates) => super.copyWith((message) => updates(message as NeighboursList)) as NeighboursList;
-
+  NeighboursList copyWith(void Function(NeighboursList) updates) => super.copyWith((message) => updates(message as NeighboursList)) as NeighboursList; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static NeighboursList create() => NeighboursList._();
   NeighboursList createEmptyInstance() => create();
@@ -595,17 +690,28 @@ class NeighboursList extends $pb.GeneratedMessage {
 }
 
 class NeighboursEntry extends $pb.GeneratedMessage {
-  factory NeighboursEntry() => create();
-  NeighboursEntry._() : super();
-  factory NeighboursEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory NeighboursEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'NeighboursEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'nodeId', $pb.PbFieldType.OY)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'rtt', $pb.PbFieldType.OU3)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NeighboursEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.router'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodeId', $pb.PbFieldType.OY)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
+  NeighboursEntry._() : super();
+  factory NeighboursEntry({
+    $core.List<$core.int>? nodeId,
+    $core.int? rtt,
+  }) {
+    final _result = create();
+    if (nodeId != null) {
+      _result.nodeId = nodeId;
+    }
+    if (rtt != null) {
+      _result.rtt = rtt;
+    }
+    return _result;
+  }
+  factory NeighboursEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory NeighboursEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -615,10 +721,8 @@ class NeighboursEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NeighboursEntry copyWith(void Function(NeighboursEntry) updates) => super.copyWith((message) => updates(message as NeighboursEntry)) as NeighboursEntry;
-
+  NeighboursEntry copyWith(void Function(NeighboursEntry) updates) => super.copyWith((message) => updates(message as NeighboursEntry)) as NeighboursEntry; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static NeighboursEntry create() => NeighboursEntry._();
   NeighboursEntry createEmptyInstance() => create();
@@ -646,6 +750,3 @@ class NeighboursEntry extends $pb.GeneratedMessage {
   void clearRtt() => clearField(2);
 }
 
-
-const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

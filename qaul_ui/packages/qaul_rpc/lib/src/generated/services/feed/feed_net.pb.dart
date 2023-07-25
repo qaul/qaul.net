@@ -1,13 +1,9 @@
-//
+///
 //  Generated code. Do not modify.
 //  source: services/feed/feed_net.proto
 //
 // @dart = 2.12
-
-// ignore_for_file: annotate_overrides, camel_case_types
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 
@@ -15,17 +11,28 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class FeedContainer extends $pb.GeneratedMessage {
-  factory FeedContainer() => create();
-  FeedContainer._() : super();
-  factory FeedContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FeedContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FeedContainer', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.feed'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'signature', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'message', $pb.PbFieldType.OY)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedContainer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.feed'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
+  FeedContainer._() : super();
+  factory FeedContainer({
+    $core.List<$core.int>? signature,
+    $core.List<$core.int>? message,
+  }) {
+    final _result = create();
+    if (signature != null) {
+      _result.signature = signature;
+    }
+    if (message != null) {
+      _result.message = message;
+    }
+    return _result;
+  }
+  factory FeedContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -35,10 +42,8 @@ class FeedContainer extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedContainer copyWith(void Function(FeedContainer) updates) => super.copyWith((message) => updates(message as FeedContainer)) as FeedContainer;
-
+  FeedContainer copyWith(void Function(FeedContainer) updates) => super.copyWith((message) => updates(message as FeedContainer)) as FeedContainer; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static FeedContainer create() => FeedContainer._();
   FeedContainer createEmptyInstance() => create();
@@ -67,18 +72,33 @@ class FeedContainer extends $pb.GeneratedMessage {
 }
 
 class FeedMessageContent extends $pb.GeneratedMessage {
-  factory FeedMessageContent() => create();
-  FeedMessageContent._() : super();
-  factory FeedMessageContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory FeedMessageContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FeedMessageContent', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.feed'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'sender', $pb.PbFieldType.OY)
-    ..aOS(2, _omitFieldNames ? '' : 'content')
-    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessageContent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.feed'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sender', $pb.PbFieldType.OY)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
+    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
+  FeedMessageContent._() : super();
+  factory FeedMessageContent({
+    $core.List<$core.int>? sender,
+    $core.String? content,
+    $fixnum.Int64? time,
+  }) {
+    final _result = create();
+    if (sender != null) {
+      _result.sender = sender;
+    }
+    if (content != null) {
+      _result.content = content;
+    }
+    if (time != null) {
+      _result.time = time;
+    }
+    return _result;
+  }
+  factory FeedMessageContent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FeedMessageContent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -88,10 +108,8 @@ class FeedMessageContent extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedMessageContent copyWith(void Function(FeedMessageContent) updates) => super.copyWith((message) => updates(message as FeedMessageContent)) as FeedMessageContent;
-
+  FeedMessageContent copyWith(void Function(FeedMessageContent) updates) => super.copyWith((message) => updates(message as FeedMessageContent)) as FeedMessageContent; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
-
   @$core.pragma('dart2js:noInline')
   static FeedMessageContent create() => FeedMessageContent._();
   FeedMessageContent createEmptyInstance() => create();
@@ -128,6 +146,3 @@ class FeedMessageContent extends $pb.GeneratedMessage {
   void clearTime() => clearField(3);
 }
 
-
-const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
