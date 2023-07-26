@@ -145,7 +145,6 @@ impl Feed {
         let matrix_client = MATRIX_CLIENT.get();
         let room_id = RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").unwrap();
         let room = matrix_client.get_room(&room_id).unwrap();
-        
         // Check if the room is already joined or not
         if let Room::Joined(room) = room {
             // Build the message content to send to matrix

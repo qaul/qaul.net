@@ -8,6 +8,7 @@
 
 use async_std::io;
 use futures_ticker::Ticker;
+use uuid::Uuid;
 //use async_std::stream;
 use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
@@ -82,19 +83,21 @@ async fn main() {
     //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
-    let mut feed_ticker = Ticker::new(Duration::from_secs(2));
+    let mut feed_ticker = Ticker::new(Duration::from_secs(3));
+    let mut group_ticker = Ticker::new(Duration::from_secs(3));
     // loop and poll CLI and RPC
     loop {
         let evt = {
             let line_fut = stdin.next().fuse();
             let rpc_fut = futures_ticker.next().fuse();
             let feed_fut = feed_ticker.next().fuse();
-
+            let group_fut = group_ticker.next().fuse();
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(line_fut);
             pin_mut!(rpc_fut);
             pin_mut!(feed_fut);
+            pin_mut!(group_fut);
             select! {
                 line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
                 _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
@@ -104,6 +107,19 @@ async fn main() {
                     // Check unread messages from Libqaul
                     feed::Feed::request_feed_list(*last_index);
                     None
+                }
+                _group_ticker = group_fut => {
+                    let config = MATRIX_CONFIG.get().read().unwrap();
+                    group::Group::group_list();
+                    let qaul_groups: Vec<Uuid> = config.room_map.keys().cloned().collect();
+
+                    // Check unread messages from Libqaul groups
+                    for group in qaul_groups {
+                        let matrix_room = config.room_map.get(&group).unwrap();
+                            let last_index_grp = matrix_room.last_index;
+                        let group_id = group.as_bytes().to_vec();
+                        chat::Chat::request_chat_conversation(group_id,last_index_grp);
+                    }None
                 }
             }
         };
