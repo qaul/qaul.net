@@ -27,7 +27,7 @@ use matrix_sdk::{
 use prost::Message;
 use tokio::time::{sleep, Duration};
 use url::Url;
-use uuid::{fmt, Uuid};
+use uuid::Uuid;
 // static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -36,10 +36,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
 }
-use crate::{chat, cli::Cli, configuration::MatrixRoom, group, users};
-enum EventType {
-    Cli(String),
-}
+use crate::{chat, configuration::MatrixRoom, group, users};
 
 // Setup a storage object for the Client to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
@@ -128,7 +125,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
             }
 
             // on receiving !users-list in matrix, Send it to command line
-            if msg_body.contains("!users-list") {
+            if msg_body.contains("!users") {
                 users::Users::request_user_list(room.room_id().to_string());
             }
         } else {
