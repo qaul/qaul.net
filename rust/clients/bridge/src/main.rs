@@ -85,6 +85,7 @@ async fn main() {
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
     let mut feed_ticker = Ticker::new(Duration::from_secs(3));
     let mut group_ticker = Ticker::new(Duration::from_secs(3));
+    let mut user_ticker = Ticker::new(Duration::from_millis(10));
     // loop and poll CLI and RPC
     loop {
         let evt = {
@@ -92,12 +93,14 @@ async fn main() {
             let rpc_fut = futures_ticker.next().fuse();
             let feed_fut = feed_ticker.next().fuse();
             let group_fut = group_ticker.next().fuse();
+            let users_fut = user_ticker.next().fuse();
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(line_fut);
             pin_mut!(rpc_fut);
             pin_mut!(feed_fut);
             pin_mut!(group_fut);
+            pin_mut!(users_fut);
             select! {
                 line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
                 _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
@@ -120,6 +123,10 @@ async fn main() {
                         let group_id = group.as_bytes().to_vec();
                         chat::Chat::request_chat_conversation(group_id,last_index_grp);
                     }None
+                }
+                _users_ticker = users_fut => {
+                    users::Users::request_user_list("".to_string());
+                    None
                 }
             }
         };
