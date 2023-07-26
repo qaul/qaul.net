@@ -80,7 +80,7 @@ impl Rpc {
                         super::user_accounts::UserAccounts::rpc(message.data);
                     }
                     Some(proto::Modules::Users) => {
-                        super::users::Users::rpc(message.data);
+                        super::users::Users::rpc(message.data, message.request_id);
                     }
                     Some(proto::Modules::Router) => {
                         super::router::Router::rpc(message.data);
@@ -104,7 +104,7 @@ impl Rpc {
                         super::chatfile::ChatFile::rpc(message.data);
                     }
                     Some(proto::Modules::Group) => {
-                        super::group::Group::rpc(message.data);
+                        super::group::Group::rpc(message.data,message.request_id);
                     }
                     Some(proto::Modules::Rtc) => {
                         super::rtc::Rtc::rpc(message.data);

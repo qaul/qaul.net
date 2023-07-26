@@ -3,9 +3,31 @@
 
 //! # Group module functions
 
+use core::panic;
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt,
+    sync::{RwLock, RwLockWriteGuard},
+};
+
 use super::rpc::Rpc;
+use crate::{
+    configuration::{MatrixConfiguration, MatrixRoom},
+    relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+    users,
+};
+use libp2p::PeerId;
+use matrix_sdk::ruma::{
+    api::client::r0::room::create_room::Request as CreateRoomRequest,
+    identifiers::{RoomName, RoomNameBox},
+    serde::urlencoded::from_bytes,
+    RoomId, UserId,
+};
 use prost::Message;
-use std::fmt;
+use tokio::runtime::Runtime;
+use uuid::Uuid;
+
+// pub static QAUL_GROUPS: state::Storage<RwLock<BTreeMap<Uuid, String>>> = state::Storage::new();
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -32,7 +54,8 @@ impl Group {
                 let group_name = command_string.trim().to_string();
 
                 if group_name.len() > 0 {
-                    Self::create_group(group_name.clone());
+                    // We pass empty room_id so that normal qaul groups do not get disturbed.
+                    Self::create_group(group_name.clone(), "".to_string());
                 } else {
                     log::error!("group create command incorrectly formatted");
                 }
@@ -226,7 +249,7 @@ impl Group {
     }
 
     /// create group
-    fn create_group(group_name: String) {
+    pub fn create_group(group_name: String, request_id: String) {
         // create group send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupCreateRequest(
@@ -243,11 +266,7 @@ impl Group {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(
-            buf,
-            super::rpc::proto::Modules::Group.into(),
-            "".to_string(),
-        );
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), request_id);
     }
 
     /// rename group
@@ -302,7 +321,7 @@ impl Group {
     }
 
     /// group list
-    fn group_list() {
+    pub fn group_list() {
         // group list send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupListRequest(
@@ -470,7 +489,7 @@ impl Group {
     ///
     /// Decodes received protobuf encoded binary RPC message
     /// of the group chat module.
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, request_id: String) {
         match proto::Group::decode(&data[..]) {
             Ok(group_chat) => {
                 match group_chat.message {
@@ -481,6 +500,26 @@ impl Group {
                             create_group_response.group_id.try_into().unwrap(),
                         );
                         println!("\tid: {}", group_id.to_string());
+                        if request_id.contains('#') {
+                            let mut iter = request_id.split('#');
+                            let room_id = iter.next().unwrap();
+                            let sender_id = iter.next().unwrap();
+                            let qaul_user_id = iter.next().unwrap();
+                            if let Ok(room_id) = RoomId::try_from(room_id) {
+                                let mut config = MATRIX_CONFIG.get().write().unwrap();
+                                let room_info = MatrixRoom {
+                                    matrix_room_id: room_id,
+                                    qaul_group_name: sender_id.to_owned(),
+                                    last_index: 0,
+                                };
+                                config.room_map.insert(group_id, room_info);
+                                Self::invite(
+                                    Self::uuid_string_to_bin(group_id.to_string()).unwrap(),
+                                    Self::id_string_to_bin(qaul_user_id.to_string()).unwrap(),
+                                );
+                                MatrixConfiguration::save(config.clone());
+                            }
+                        }
                     }
                     Some(proto::group::Message::GroupRenameResponse(rename_group_response)) => {
                         let result = rename_group_response.result.unwrap();
@@ -548,77 +587,140 @@ impl Group {
                     }
                     Some(proto::group::Message::GroupListResponse(group_list_response)) => {
                         // List groups
-                        println!("=============List Of Groups=================");
-                        for group in group_list_response.groups {
+                        // println!("=============List Of Groups=================");
+                        let all_groups = group_list_response.groups.clone();
+
+                        let mut config = MATRIX_CONFIG.get().write().unwrap();
+                        // Create a HashMap for mapping. OR Deserialize from existing config.
+                        // let mut qaul_groups = QAUL_GROUPS.get().write().unwrap();
+                        for group in all_groups {
+                            // If Mapping exist let it be. Else create new room.
                             let group_id =
                                 uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
-                            let group_type: String;
-                            match group.is_direct_chat {
-                                true => group_type = "Direct".to_string(),
-                                false => group_type = "Group".to_string(),
-                            }
-                            println!(
-                                "{} {} {}",
-                                group_type,
-                                group_id.to_string(),
-                                group.group_name.clone()
-                            );
-                            print!("\tstatus: ");
-                            match proto::GroupStatus::from_i32(group.status) {
-                                Some(proto::GroupStatus::Active) => println!("Active"),
-                                Some(proto::GroupStatus::InviteAccepted) => {
-                                    println!("Invite Accepted")
-                                }
-                                Some(proto::GroupStatus::Deactivated) => println!("Deactivated"),
-                                None => println!("NOT SET"),
-                            }
-
-                            println!(
-                                "\tcreated_at: {}, members: {}",
-                                group.created_at,
-                                group.members.len()
-                            );
+                            // qaul_groups.insert(group_id, group.group_name.clone());
+                            // Currently we have user_id and not user_name. Shall we do this ? Or If yes then how to get
+                            let mut qaul_room_admin = format!("@qaul://{}", "[username]");
                             for member in group.members {
-                                print!(
-                                    "\t\t id: {} , state: ",
-                                    bs58::encode(member.user_id.clone()).into_string()
-                                );
-                                match proto::GroupMemberState::from_i32(member.state).unwrap() {
-                                    proto::GroupMemberState::Invited => {
-                                        print!("invited , role: ");
-                                    }
-                                    proto::GroupMemberState::Activated => {
-                                        print!("activated , role: ");
-                                    }
-                                }
-
-                                match proto::GroupMemberRole::from_i32(member.role).unwrap() {
-                                    proto::GroupMemberRole::User => {
-                                        println!("user , sent: {}", member.last_message_index);
-                                    }
-                                    proto::GroupMemberRole::Admin => {
-                                        println!("admin , sent: {}", member.last_message_index);
-                                    }
+                                if member.role == 255 {
+                                    let user_id = PeerId::from_bytes(&member.user_id).unwrap();
+                                    qaul_room_admin.push_str(&user_id.to_string());
+                                    users::Users::peer_id_to_user_name();
                                 }
                             }
-                            println!("\trevision: {}", group.revision);
-                            println!("\tunread messages: {}", group.unread_messages);
-                            println!("\tlast message:");
-                            println!(
-                                "\t\tsent_at: {} from: {}",
-                                group.last_message_at,
-                                bs58::encode(group.last_message_sender_id).into_string()
-                            );
-                            Self::print_last_message(group.last_message);
+
+                            // If group mapping does not exist
+                            // If group_name contains matrix user name then only do this.
+                            if let Ok(user) = UserId::try_from(group.group_name.clone()) {
+                                if !config.room_map.contains_key(&group_id) {
+                                    let matrix_client = MATRIX_CLIENT.get();
+                                    let rt = Runtime::new().unwrap();
+                                    rt.block_on(async {
+                                        println!("{:#?}", group_id);
+                                        // Check if user exist on matrix
+                                        // Create a group on matrix with qaul user name.
+                                        let mut request = CreateRoomRequest::new();
+                                        let room_name =
+                                            RoomNameBox::try_from(qaul_room_admin).unwrap();
+                                        request.name = Some(&room_name);
+                                        let room_id = matrix_client
+                                            .create_room(request)
+                                            .await
+                                            .expect("Room creation failed")
+                                            .room_id;
+
+                                        // Check if the room is joined
+                                        if let Some(joined_room) =
+                                            matrix_client.get_joined_room(&room_id)
+                                        {
+                                            joined_room.invite_user_by_id(&user).await.unwrap();
+                                        } else {
+                                            println!("Wait till the bot joins the room");
+                                        }
+
+                                        // Save things to Config file
+                                        let room_info = MatrixRoom {
+                                            matrix_room_id: room_id,
+                                            qaul_group_name: group.group_name,
+                                            last_index: 0,
+                                        };
+                                        config.room_map.insert(group_id, room_info);
+                                        MatrixConfiguration::save(config.clone());
+                                    });
+                                }
+                            }
                         }
+                        // for group in group_list_response.groups {
+                        //     let group_id =
+                        //         uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
+                        //     // Mapping of groups with qaul Room;
+                        //     let group_type: String;
+                        //     match group.is_direct_chat {
+                        //         true => group_type = "Direct".to_string(),
+                        //         false => group_type = "Group".to_string(),
+                        //     }
+                        //     println!(
+                        //         "{} {} {}",
+                        //         group_type,
+                        //         group_id.to_string(),
+                        //         group.group_name.clone()
+                        //     );
+                        //     print!("\tstatus: ");
+                        //     match proto::GroupStatus::from_i32(group.status) {
+                        //         Some(proto::GroupStatus::Active) => println!("Active"),
+                        //         Some(proto::GroupStatus::InviteAccepted) => {
+                        //             println!("Invite Accepted")
+                        //         }
+                        //         Some(proto::GroupStatus::Deactivated) => println!("Deactivated"),
+                        //         None => println!("NOT SET"),
+                        //     }
+
+                        //     println!(
+                        //         "\tcreated_at: {}, members: {}",
+                        //         group.created_at,
+                        //         group.members.len()
+                        //     );
+                        //     for member in group.members {
+                        //         print!(
+                        //             "\t\t id: {} , state: ",
+                        //             bs58::encode(member.user_id.clone()).into_string()
+                        //         );
+                        //         match proto::GroupMemberState::from_i32(member.state).unwrap() {
+                        //             proto::GroupMemberState::Invited => {
+                        //                 print!("invited , role: ");
+                        //             }
+                        //             proto::GroupMemberState::Activated => {
+                        //                 print!("activated , role: ");
+                        //             }
+                        //         }
+
+                        //         match proto::GroupMemberRole::from_i32(member.role).unwrap() {
+                        //             proto::GroupMemberRole::User => {
+                        //                 println!("user , sent: {}", member.last_message_index);
+                        //             }
+                        //             proto::GroupMemberRole::Admin => {
+                        //                 println!("admin , sent: {}", member.last_message_index);
+                        //             }
+                        //         }
+                        //     }
+                        //     println!("\trevision: {}", group.revision);
+                        //     println!("\tunread messages: {}", group.unread_messages);
+                        //     println!("\tlast message:");
+                        //     println!(
+                        //         "\t\tsent_at: {} from: {}",
+                        //         group.last_message_at,
+                        //         bs58::encode(group.last_message_sender_id).into_string()
+                        //     );
+                        //     Self::print_last_message(group.last_message);
+                        // }
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
                         // List of pending invites
                         println!("=============List Of Invited=================");
                         for invite in group_invited_response.invited {
                             if let Some(group) = invite.group {
-                                let group_id =
-                                    uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
+                                let group_id = uuid::Uuid::from_bytes(
+                                    group.group_id.clone().try_into().unwrap(),
+                                );
                                 println!("id: {}", group_id.to_string());
                                 println!("\tname: {}", group.group_name.clone());
                                 println!(
@@ -631,6 +733,9 @@ impl Group {
                                     invite.received_at,
                                     group.members.len()
                                 );
+
+                                // Accept the group invite automatically
+                                Self::reply_invite(group.group_id, true);
                             }
                         }
                     }

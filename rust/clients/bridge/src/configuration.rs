@@ -7,13 +7,16 @@
 //! connects qaul with the matrix.
 
 use crate::libqaul::storage::Storage;
+use matrix_sdk::ruma::RoomId;
 use serde::{Deserialize, Serialize};
-use std::{fs, path::Path, sync::RwLockWriteGuard};
+use std::{collections::HashMap, fs, path::Path};
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct MatrixConfiguration {
     pub relay_bot: RelayBot,
     pub feed: Feed,
+    pub room_map: HashMap<Uuid, MatrixRoom>,
 }
 
 impl Default for MatrixConfiguration {
@@ -21,13 +24,13 @@ impl Default for MatrixConfiguration {
         MatrixConfiguration {
             relay_bot: RelayBot::default(),
             feed: Feed::default(),
+            room_map: HashMap::new(),
         }
     }
 }
 
 impl MatrixConfiguration {
     pub fn save(config: MatrixConfiguration) {
-        println!("{:#?}", config);
         let path_string = Storage::get_path();
         let path = Path::new(path_string.as_str());
         let config_path = path.join("matrix.yaml");
@@ -60,5 +63,28 @@ pub struct Feed {
 impl Default for Feed {
     fn default() -> Self {
         Feed { last_index: 0 }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct MatrixRoom {
+    pub matrix_room_id: RoomId,
+    pub qaul_group_name: String,
+    pub last_index: u64,
+}
+
+impl Default for MatrixRoom {
+    fn default() -> Self {
+        MatrixRoom {
+            matrix_room_id: RoomId::try_from("").expect("Please add a valid room ID"),
+            qaul_group_name: String::new(),
+            last_index: 0,
+        }
+    }
+}
+
+impl MatrixRoom {
+    pub fn update_last_index(&mut self, index: u64) {
+        self.last_index = index;
     }
 }

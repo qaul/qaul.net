@@ -149,7 +149,7 @@ impl Rpc {
                         UserAccounts::rpc(message.data);
                     }
                     Some(Modules::Users) => {
-                        Users::rpc(message.data, message.user_id);
+                        Users::rpc(message.data, message.user_id, message.request_id);
                     }
                     Some(Modules::Router) => {
                         Router::rpc(message.data);

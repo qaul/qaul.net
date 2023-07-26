@@ -5,9 +5,22 @@
 //!
 //! Request, display and send chat messages from CLI
 
+use crate::{
+    configuration::{MatrixConfiguration, MatrixRoom},
+    relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+};
+
 use super::rpc::Rpc;
+use matrix_sdk::{
+    room::Room,
+    ruma::{
+        events::{room::message::MessageEventContent, AnyMessageEventContent},
+        RoomId,
+    },
+};
 use prost::Message;
 use std::fmt;
+use tokio::runtime::Runtime;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -140,7 +153,7 @@ impl Chat {
     }
 
     /// Convert Group ID from String to Binary
-    fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
+    pub fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id) => Ok(id.as_bytes().to_vec()),
             _ => Err("invalid group id".to_string()),
@@ -171,7 +184,7 @@ impl Chat {
     ///
     /// This provides all chat messages of a specific conversation.
     /// The conversation is addressed via it's group id
-    fn request_chat_conversation(group_id: Vec<u8>, last_index: u64) {
+    pub fn request_chat_conversation(group_id: Vec<u8>, last_index: u64) {
         // create feed list request message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::ConversationRequest(
@@ -262,43 +275,87 @@ impl Chat {
                 match chat.message {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
-                        println!("");
                         let group_id =
                             uuid::Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
 
-                        println!("Conversation [ {} ]", group_id.to_string());
-                        println!("");
-                        println!("No. | Status | Sent At | Sender ID");
-                        println!("  [Message ID] Received At");
-                        println!("  Message Content");
-                        println!("");
+                        // println!("Conversation [ {} ]", group_id.to_string());
+                        // println!("");
+                        // println!("No. | Status | Sent At | Sender ID");
+                        // println!("  [Message ID] Received At");
+                        // println!("  Message Content");
+                        // println!("");
+                        let mut config = MATRIX_CONFIG.get().write().unwrap();
+                        if !config.room_map.contains_key(&group_id) {
+                            // print all messages in the group list
+                            for message in proto_conversation.message_list {
+                                if let Ok(ss) = Self::analyze_content(&message.content) {
+                                    print! {"{} | ", message.index};
+                                    match proto::MessageStatus::from_i32(message.status).unwrap() {
+                                        proto::MessageStatus::Sending => print!(".. | "),
+                                        proto::MessageStatus::Sent => print!("✓. | "),
+                                        proto::MessageStatus::Confirmed => print!("✓✓ | "),
+                                        proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
+                                        proto::MessageStatus::Receiving => print!("🚚 | "),
+                                        proto::MessageStatus::Received => print!("📨 | "),
+                                    }
 
-                        // print all messages in the feed list
-                        for message in proto_conversation.message_list {
-                            if let Ok(ss) = Self::analyze_content(&message.content) {
-                                print! {"{} | ", message.index};
-                                match proto::MessageStatus::from_i32(message.status).unwrap() {
-                                    proto::MessageStatus::Sending => print!(".. | "),
-                                    proto::MessageStatus::Sent => print!("✓. | "),
-                                    proto::MessageStatus::Confirmed => print!("✓✓ | "),
-                                    proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
-                                    proto::MessageStatus::Receiving => print!("🚚 | "),
-                                    proto::MessageStatus::Received => print!("📨 | "),
+                                    print!("{} | ", message.sent_at);
+                                    println!("{}", bs58::encode(message.sender_id).into_string());
+                                    println!(
+                                        " [{}] {}",
+                                        bs58::encode(message.message_id).into_string(),
+                                        message.received_at
+                                    );
+
+                                    for s in ss {
+                                        println!("\t{}", s);
+                                    }
+                                    println!("");
                                 }
-
-                                print!("{} | ", message.sent_at);
-                                println!("{}", bs58::encode(message.sender_id).into_string());
-                                println!(
-                                    " [{}] {}",
-                                    bs58::encode(message.message_id).into_string(),
-                                    message.received_at
-                                );
-
-                                for s in ss {
-                                    println!("\t{}", s);
-                                }
-                                println!("");
                             }
+                        } else {
+                            let matrix_room = config.room_map.get_mut(&group_id).unwrap();
+                            let last_index_grp = matrix_room.last_index;
+                            let room_id = matrix_room.clone().matrix_room_id;
+                            for message in proto_conversation.message_list {
+                                if let Ok(ss) = Self::analyze_content(&message.content) {
+                                    if message.index > last_index_grp {
+                                        print! {"{} | ", message.index};
+                                        match proto::MessageStatus::from_i32(message.status)
+                                            .unwrap()
+                                        {
+                                            proto::MessageStatus::Sending => print!(".. | "),
+                                            proto::MessageStatus::Sent => print!("✓. | "),
+                                            proto::MessageStatus::Confirmed => print!("✓✓ | "),
+                                            proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
+                                            proto::MessageStatus::Receiving => print!("🚚 | "),
+                                            proto::MessageStatus::Received => print!("📨 | "),
+                                        }
+
+                                        print!("{} | ", message.sent_at);
+                                        println!(
+                                            "{}",
+                                            bs58::encode(message.sender_id).into_string()
+                                        );
+                                        println!(
+                                            " [{}] {}",
+                                            bs58::encode(message.message_id).into_string(),
+                                            message.received_at
+                                        );
+
+                                        for s in ss {
+                                            Self::matrix_send(&s, &room_id);
+                                            // config.room_map.get(group_id).unwrap().last_index =
+                                            //     message.index;
+
+                                            println!("\t{}", s);
+                                        }
+                                        println!("");
+                                        matrix_room.update_last_index(message.index);
+                                    }
+                                }
+                            }
+                            MatrixConfiguration::save(config.clone());
                         }
                     }
 
@@ -310,6 +367,24 @@ impl Chat {
             Err(error) => {
                 log::error!("{:?}", error);
             }
+        }
+    }
+
+    fn matrix_send(message: &String, room_id: &RoomId) {
+        // Get the Room based on RoomID from the client information
+        let matrix_client = MATRIX_CLIENT.get();
+        let room = matrix_client.get_room(&room_id).unwrap();
+        // Check if the room is already joined or not
+        if let Room::Joined(room) = room {
+            // Build the message content to send to matrix
+            let content =
+                AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(message));
+
+            let rt = Runtime::new().unwrap();
+            rt.block_on(async {
+                // Sends messages into the matrix room
+                room.send(content, None).await.unwrap();
+            });
         }
     }
 }
