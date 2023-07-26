@@ -6,8 +6,9 @@
 //! Request, display and send chat messages from CLI
 
 use crate::{
-    configuration::{MatrixConfiguration},
+    configuration::MatrixConfiguration,
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+    users::QAUL_USERS,
 };
 
 use super::rpc::Rpc;
@@ -19,7 +20,7 @@ use matrix_sdk::{
     },
 };
 use prost::Message;
-use std::fmt;
+use std::{collections::HashMap, fmt};
 use tokio::runtime::Runtime;
 
 /// include generated protobuf RPC rust definition file
@@ -321,6 +322,7 @@ impl Chat {
                                 if let Ok(ss) = Self::analyze_content(&message.content) {
                                     if message.index > last_index_grp {
                                         print! {"{} | ", message.index};
+                                        // message.sender_id is same as user.id
                                         match proto::MessageStatus::from_i32(message.status)
                                             .unwrap()
                                         {
@@ -333,10 +335,14 @@ impl Chat {
                                         }
 
                                         print!("{} | ", message.sent_at);
-                                        println!(
-                                            "{}",
-                                            bs58::encode(message.sender_id).into_string()
-                                        );
+                                        let users = QAUL_USERS.get();
+                                        println!("{:#?}", users);
+                                        let sender_id =
+                                            bs58::encode(message.sender_id).into_string();
+                                        println!("{}", sender_id);
+                                        let user_name =
+                                            Self::find_user_for_given_id(users.clone(), sender_id)
+                                                .unwrap();
                                         println!(
                                             " [{}] {}",
                                             bs58::encode(message.message_id).into_string(),
@@ -344,10 +350,7 @@ impl Chat {
                                         );
 
                                         for s in ss {
-                                            Self::matrix_send(&s, &room_id);
-                                            // config.room_map.get(group_id).unwrap().last_index =
-                                            //     message.index;
-
+                                            Self::matrix_send(&s, &room_id, user_name.clone());
                                             println!("\t{}", s);
                                         }
                                         println!("");
@@ -370,15 +373,16 @@ impl Chat {
         }
     }
 
-    fn matrix_send(message: &String, room_id: &RoomId) {
+    fn matrix_send(message: &String, room_id: &RoomId, user: String) {
         // Get the Room based on RoomID from the client information
         let matrix_client = MATRIX_CLIENT.get();
         let room = matrix_client.get_room(&room_id).unwrap();
         // Check if the room is already joined or not
         if let Room::Joined(room) = room {
             // Build the message content to send to matrix
+            let final_msg = format!("{} : {}", user, message);
             let content =
-                AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(message));
+                AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(final_msg));
 
             let rt = Runtime::new().unwrap();
             rt.block_on(async {
@@ -386,5 +390,14 @@ impl Chat {
                 room.send(content, None).await.unwrap();
             });
         }
+    }
+
+    fn find_user_for_given_id(map: HashMap<String, String>, value: String) -> Option<String> {
+        for (key, val) in map {
+            if val == value {
+                return Some(key);
+            }
+        }
+        None
     }
 }

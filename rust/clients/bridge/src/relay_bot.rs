@@ -121,7 +121,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                 // Try to return an error if userID is wrong.
                 let qaul_user_id = iter.next().unwrap().to_string();
                 // creating new group with request_id as matrix room name.
-                // request ID = sender + room_name.
+                // request ID = sender + room_name + qaul_user_id
                 let room_id_string = room.room_id().to_string();
                 let sender_string = msg_sender.to_string();
                 let request_id = format!("{}#{}#{}", room_id_string, sender_string, qaul_user_id);
