@@ -5,6 +5,8 @@
 //!
 //! Request and get
 
+use std::collections::HashMap;
+
 use prost::Message;
 use tokio::runtime::Runtime;
 use uuid::Uuid;
@@ -25,6 +27,8 @@ use matrix_sdk::{
         RoomId,
     },
 };
+
+pub static QAUL_USERS: state::Storage<HashMap<String, String>> = state::Storage::new();
 
 /// users function handling
 pub struct Users {}
@@ -187,10 +191,10 @@ impl Users {
             Ok(users) => match users.message {
                 Some(proto::users::Message::UserList(proto_userlist)) => {
                     let mut line = 1;
-                    println!("");
-                    println!("All known Users");
-                    println!("No. | User Name | User Id | Veryfied | Blocked | Connectivity");
-                    println!("    | Group ID | Public Key");
+                    // println!("");
+                    // println!("All known Users");
+                    // println!("No. | User Name | User Id | Veryfied | Blocked | Connectivity");
+                    // println!("    | Group ID | Public Key");
 
                     if request_id != "" {
                         if let Ok(room_id) = RoomId::try_from(request_id) {
@@ -203,6 +207,9 @@ impl Users {
                             );
                         }
                     }
+
+                    let mut userMap: HashMap<String, String> = HashMap::new();
+
                     for user in proto_userlist.user {
                         let mut verified = "N";
                         let mut blocked = "N";
@@ -221,56 +228,58 @@ impl Users {
                             "{} | {} | {:?} | {} | {} | {}",
                             line,
                             user.name,
-                            bs58::encode(user.id).into_string(),
+                            bs58::encode(user.id.clone()).into_string(),
                             verified,
                             blocked,
                             onlined
                         );
-                        println!("{}", users_list);
-
+                        // println!("{}", users_list);
+                        userMap.insert(user.name, bs58::encode(user.id).into_string());
+                        // Get the mapping for user.id and user.name
+                        // Store this mapping globally and try to access it in chat.rs
                         let group_uuid;
                         match Uuid::from_slice(&user.group_id) {
                             Ok(uuid) => {
                                 group_uuid = uuid;
-                                println!(
-                                    "   | {} | {}",
-                                    group_uuid.hyphenated().to_string(),
-                                    user.key_base58
-                                );
+                                // println!(
+                                //     "   | {} | {}",
+                                //     group_uuid.hyphenated().to_string(),
+                                //     user.key_base58
+                                // );
                             }
                             Err(e) => log::error!("{}", e),
                         }
                         if user.connections.len() > 0 {
-                            println!("  Connections: module | hc | rtt | via");
+                            // println!("  Connections: module | hc | rtt | via");
                             for cnn in user.connections {
                                 let module = proto::ConnectionModule::from_i32(cnn.module)
                                     .unwrap()
                                     .as_str_name();
-                                println!(
-                                    "      {} | {} | {} | {}",
-                                    module,
-                                    cnn.hop_count,
-                                    cnn.rtt,
-                                    bs58::encode(cnn.via.clone()).into_string()
-                                );
+                                // println!(
+                                //     "      {} | {} | {} | {}",
+                                //     module,
+                                //     cnn.hop_count,
+                                //     cnn.rtt,
+                                //     bs58::encode(cnn.via.clone()).into_string()
+                                // );
                             }
                         }
                         line += 1;
                     }
-
-                    println!("");
+                    QAUL_USERS.set(userMap);
+                    // println!("");
                 }
                 Some(proto::users::Message::SecurityNumberResponse(resp)) => {
-                    println!("Security Number:");
+                    // println!("Security Number:");
                     let mut counter = 0;
                     for number in resp.security_number_blocks {
-                        print!("{:#05} ", number);
+                        // print!("{:#05} ", number);
                         if counter == 3 {
                             println!("");
                         }
                         counter = counter + 1;
                     }
-                    println!("");
+                    // println!("");
                 }
                 _ => {
                     log::error!("unprocessable RPC users message");
