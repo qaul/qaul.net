@@ -98,10 +98,18 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
             let msg_text = format!("{} : {}", msg_sender, msg_body);
             send_qaul(msg_text, room.room_id());
 
-            // on receiving !qaul in matrix, Send message
+            // on receiving !qaul from matrix, Send message
             if msg_body.contains("!qaul") {
                 let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
                     "I am a message sent from qaul network\n",
+                ));
+                room.send(content, None).await.unwrap();
+            }
+
+            // on receiving !help from matrix, Give brief of all possible commands.
+            if msg_body.contains("!help") {
+                let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
+                    "!qaul : Ping to check if the bot is active or not.\n!users! : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n",
                 ));
                 room.send(content, None).await.unwrap();
             }
