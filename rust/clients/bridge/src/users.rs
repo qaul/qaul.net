@@ -217,7 +217,6 @@ impl Users {
                         if user.connectivity == 1 {
                             onlined = "Online";
                         }
-                        let name = user.name.clone();
                         let users_list = format!(
                             "{} | {} | {:?} | {} | {} | {}",
                             line,
