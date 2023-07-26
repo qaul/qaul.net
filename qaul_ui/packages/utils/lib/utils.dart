@@ -56,10 +56,22 @@ String initials(String name) {
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
 ///
-/// Will throw if [date] is in the future (When [clock] is provided, *future* represents time after it).
-String describeFuzzyTimestamp(DateTime date,
-    {DateTime? clock, Locale? locale}) {
-  if (date.isAfter(clock ?? DateTime.now())) throw ArgumentError.value(date);
+/// Will throw if [date] is in the future and [allowFutureDate] is true.
+/// Otherwise, replaces date with `DateTime.now()` for convenience.
+///
+/// Defaults [allowFutureDate] to `false`.
+String describeFuzzyTimestamp(
+  DateTime date, {
+  DateTime? clock,
+  Locale? locale,
+  bool allowFutureDate = false,
+}) {
+  if (date.isAfter(clock ?? DateTime.now())) {
+    if (allowFutureDate) {
+      throw ArgumentError.value(date);
+    }
+    return timeago.format(DateTime.now(), clock: null);
+  }
   if ((clock ?? DateTime.now())
       .subtract(const Duration(days: 50))
       .isAfter(date)) {

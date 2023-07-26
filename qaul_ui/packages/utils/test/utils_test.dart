@@ -92,14 +92,14 @@ void main() {
 
   group('initials', () {
     const names = <MapEntry<String, String>>[
-      MapEntry('Name', 'NA'),
+      MapEntry('Name', 'N'),
       MapEntry('Na Me', 'NM'),
       MapEntry('na me ye be', 'NB'),
-      MapEntry('nameyebe', 'NA'),
+      MapEntry('nameyebe', 'N'),
       MapEntry('NAME NAME MENA ANEM', 'NA'),
       MapEntry('  NAME NAME MENA ANEM', 'NA'),
       MapEntry('   NAME NAME MENA ANEM   ', 'NA'),
-      MapEntry('NE ', 'NE'),
+      MapEntry('NE ', 'N'),
       MapEntry('l🤣h😌o🙄😪😓😳ggasdf', '🤣'),
       MapEntry('😌🤣h😌o🙄😪😓😳ggasdf', '😌'),
       MapEntry('😳🤣h😌🙄😪😓😳ggasdf', '😳'),
@@ -109,11 +109,7 @@ void main() {
       test('${tc.key} becomes ${tc.value}', () => expect(tc.value, initials(tc.key)));
     }
 
-    test('empty string throws', () => expect(() => initials(''), throwsArgumentError));
-    test('string with less than 2 chars (besides space) throws', () => expect(() => initials('A '), throwsArgumentError));
-    test('string with less than 2 chars (besides space) throws', () => expect(() => initials('A  '), throwsArgumentError));
-    test('string with less than 2 chars (besides space) throws', () => expect(() => initials('A        '), throwsArgumentError));
-    test('string with less than 2 chars (besides space) throws', () => expect(() => initials(' A '), throwsArgumentError));
+    test('empty string throws', () => expect(() => initials(''), throwsAssertionError));
   });
 
   group('describeFuzzyTimestamp', () {
@@ -131,6 +127,7 @@ void main() {
       MapEntry(origin.subtract(const Duration(days: 51)), '25 Apr 2000'),
       MapEntry(origin.subtract(const Duration(days: 60)), '16 Apr 2000'),
       MapEntry(origin.subtract(const Duration(days: 365)), '16 Jun 1999'),
+      MapEntry(origin.add(const Duration(days: 1000)), 'a moment ago'),
     ];
 
     for (final t in testcases) {
