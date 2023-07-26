@@ -6,7 +6,7 @@
 //! Request, display and send chat messages from CLI
 
 use crate::{
-    configuration::{MatrixConfiguration, MatrixRoom},
+    configuration::{MatrixConfiguration},
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
 };
 

@@ -3,11 +3,8 @@
 
 //! # Group module functions
 
-use core::panic;
 use std::{
-    collections::{BTreeMap, HashMap},
     fmt,
-    sync::{RwLock, RwLockWriteGuard},
 };
 
 use super::rpc::Rpc;
@@ -19,13 +16,11 @@ use crate::{
 use libp2p::PeerId;
 use matrix_sdk::ruma::{
     api::client::r0::room::create_room::Request as CreateRoomRequest,
-    identifiers::{RoomName, RoomNameBox},
-    serde::urlencoded::from_bytes,
+    identifiers::{RoomNameBox},
     RoomId, UserId,
 };
 use prost::Message;
 use tokio::runtime::Runtime;
-use uuid::Uuid;
 
 // pub static QAUL_GROUPS: state::Storage<RwLock<BTreeMap<Uuid, String>>> = state::Storage::new();
 
@@ -439,51 +434,51 @@ impl Group {
     }
 
     /// Process the last message & print it's content
-    fn print_last_message(data: Vec<u8>) {
-        if let Ok(content_message) = proto_chat::ChatContentMessage::decode(&data[..]) {
-            match content_message.message {
-                Some(proto_chat::chat_content_message::Message::ChatContent(chat_content)) => {
-                    println!("\t\t{}", chat_content.text);
-                }
-                Some(proto_chat::chat_content_message::Message::FileContent(file_content)) => {
-                    println!(
-                        "\t\tfile {} [{}] ID {}",
-                        file_content.file_name,
-                        file_content.file_size.to_string(),
-                        file_content.file_id.to_string()
-                    );
-                    println!("\t\t{}", file_content.file_description);
-                }
-                Some(proto_chat::chat_content_message::Message::GroupEvent(group_event)) => {
-                    match proto_chat::GroupEventType::from_i32(group_event.event_type).unwrap() {
-                        proto_chat::GroupEventType::Joined => {
-                            println!(
-                                "\t\tNew user joined group, user id: {}",
-                                bs58::encode(group_event.user_id).into_string()
-                            );
-                        }
-                        proto_chat::GroupEventType::Left => {
-                            println!(
-                                "\t\tUser left group, user id: {}",
-                                bs58::encode(group_event.user_id).into_string()
-                            );
-                        }
-                        proto_chat::GroupEventType::Removed => {
-                            println!("\t\tYou have been removed from this group.");
-                        }
-                        proto_chat::GroupEventType::Created => {
-                            println!("\t\tYou created this group");
-                        }
-                        proto_chat::GroupEventType::InviteAccepted => {
-                            println!("\t\tYou accepted the invitation");
-                        }
-                        _ => {}
-                    }
-                }
-                None => {}
-            }
-        }
-    }
+    // fn print_last_message(data: Vec<u8>) {
+    //     if let Ok(content_message) = proto_chat::ChatContentMessage::decode(&data[..]) {
+    //         match content_message.message {
+    //             Some(proto_chat::chat_content_message::Message::ChatContent(chat_content)) => {
+    //                 println!("\t\t{}", chat_content.text);
+    //             }
+    //             Some(proto_chat::chat_content_message::Message::FileContent(file_content)) => {
+    //                 println!(
+    //                     "\t\tfile {} [{}] ID {}",
+    //                     file_content.file_name,
+    //                     file_content.file_size.to_string(),
+    //                     file_content.file_id.to_string()
+    //                 );
+    //                 println!("\t\t{}", file_content.file_description);
+    //             }
+    //             Some(proto_chat::chat_content_message::Message::GroupEvent(group_event)) => {
+    //                 match proto_chat::GroupEventType::from_i32(group_event.event_type).unwrap() {
+    //                     proto_chat::GroupEventType::Joined => {
+    //                         println!(
+    //                             "\t\tNew user joined group, user id: {}",
+    //                             bs58::encode(group_event.user_id).into_string()
+    //                         );
+    //                     }
+    //                     proto_chat::GroupEventType::Left => {
+    //                         println!(
+    //                             "\t\tUser left group, user id: {}",
+    //                             bs58::encode(group_event.user_id).into_string()
+    //                         );
+    //                     }
+    //                     proto_chat::GroupEventType::Removed => {
+    //                         println!("\t\tYou have been removed from this group.");
+    //                     }
+    //                     proto_chat::GroupEventType::Created => {
+    //                         println!("\t\tYou created this group");
+    //                     }
+    //                     proto_chat::GroupEventType::InviteAccepted => {
+    //                         println!("\t\tYou accepted the invitation");
+    //                     }
+    //                     _ => {}
+    //                 }
+    //             }
+    //             None => {}
+    //         }
+    //     }
+    // }
 
     /// Process received RPC message
     ///
