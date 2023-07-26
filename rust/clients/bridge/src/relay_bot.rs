@@ -116,20 +116,31 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
 
             // on receiving !qaul in matrix, Send message
             if msg_body.contains("!invite") {
-                let mut iter = msg_body.split_whitespace();
-                let _command = iter.next().unwrap();
-                // Try to return an error if userID is wrong.
-                let qaul_user_id = iter.next().unwrap().to_string();
-                // creating new group with request_id as matrix room name.
-                // request ID = sender + room_name + qaul_user_id
-                let room_id_string = room.room_id().to_string();
-                let sender_string = msg_sender.to_string();
-                let request_id = format!("{}#{}#{}", room_id_string, sender_string, qaul_user_id);
-                println!("{}", request_id);
-                group::Group::create_group(
-                    format!("{}", msg_sender.to_owned()).to_owned(),
-                    request_id,
-                );
+                let matrix_user = room.get_member(&msg_sender).await.unwrap().unwrap();
+                // Admin Powers
+                if matrix_user.power_level() == 100 {
+                    let mut iter = msg_body.split_whitespace();
+                    let _command = iter.next().unwrap();
+                    // Try to return an error if userID is wrong.
+                    let qaul_user_id = iter.next().unwrap().to_string();
+                    // creating new group with request_id as matrix room name.
+                    // request ID = sender + room_name + qaul_user_id
+                    let room_id_string = room.room_id().to_string();
+                    let sender_string = msg_sender.to_string();
+                    let request_id =
+                        format!("{}#{}#{}", room_id_string, sender_string, qaul_user_id);
+                    println!("{}", request_id);
+                    group::Group::create_group(
+                        format!("{}", msg_sender.to_owned()).to_owned(),
+                        request_id,
+                    );
+                } else {
+                    // Not Admin
+                    let content = AnyMessageEventContent::RoomMessage(
+                        MessageEventContent::text_plain("Only Admins can perform this operation."),
+                    );
+                    room.send(content, None).await.unwrap();
+                }
             }
 
             // on receiving !users-list in matrix, Send it to command line
