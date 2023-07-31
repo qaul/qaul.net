@@ -93,7 +93,7 @@ class BleService : LifecycleService() {
      * This Method Will Set the necessary data and start the advertisement
      */
     fun startAdvertise(
-        qaul_id: ByteArray, mode: String, bleCallback: BleAdvertiseCallback
+        qaul_id: ByteArray, mode: String, bleCallback: BleAdvertiseCallback,
     ) {
         val name = getRandomString(5)
         bleService?.qaulId = qaul_id
@@ -150,12 +150,15 @@ class BleService : LifecycleService() {
                     "low_power" -> {
                         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
                     }
+
                     "balanced" -> {
                         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
                     }
+
                     "low_latency" -> {
                         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     }
+
                     "UNRECOGNIZED" -> {
                         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     }
@@ -180,7 +183,7 @@ class BleService : LifecycleService() {
      * This Method Will Start the Service
      */
     fun start(
-        context: Context
+        context: Context,
     ) {
         if (bleService == null) {
             val intent = Intent(context, BleService::class.java)
@@ -244,12 +247,15 @@ class BleService : LifecycleService() {
             1 -> {
                 errorText = "SCAN_FAILED_ALREADY_STARTED"
             }
+
             2 -> {
                 errorText = "SCAN_FAILED_APPLICATION_REGISTRATION_FAILED"
             }
+
             3 -> {
                 errorText = "SCAN_FAILED_INTERNAL_ERROR"
             }
+
             4 -> {
                 errorText = "SCAN_FAILED_FEATURE_UNSUPPORTED"
             }
@@ -365,7 +371,7 @@ class BleService : LifecycleService() {
     private var gattServerCallback: BluetoothGattServerCallback =
         object : BluetoothGattServerCallback() {
             override fun onConnectionStateChange(
-                device: BluetoothDevice, status: Int, newState: Int
+                device: BluetoothDevice, status: Int, newState: Int,
             ) {
                 super.onConnectionStateChange(device, status, newState)
             }
@@ -378,7 +384,7 @@ class BleService : LifecycleService() {
                 device: BluetoothDevice,
                 requestId: Int,
                 offset: Int,
-                characteristic: BluetoothGattCharacteristic
+                characteristic: BluetoothGattCharacteristic,
             ) {
                 super.onCharacteristicReadRequest(
                     device, requestId, offset, characteristic
@@ -405,7 +411,7 @@ class BleService : LifecycleService() {
                 preparedWrite: Boolean,
                 responseNeeded: Boolean,
                 offset: Int,
-                value: ByteArray
+                value: ByteArray,
             ) {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
@@ -477,7 +483,7 @@ class BleService : LifecycleService() {
                 device: BluetoothDevice,
                 requestId: Int,
                 offset: Int,
-                descriptor: BluetoothGattDescriptor
+                descriptor: BluetoothGattDescriptor,
             ) {
                 super.onDescriptorReadRequest(device, requestId, offset, descriptor)
                 AppLog.e(TAG, "onDescriptorReadRequest()")
@@ -490,7 +496,7 @@ class BleService : LifecycleService() {
                 preparedWrite: Boolean,
                 responseNeeded: Boolean,
                 offset: Int,
-                value: ByteArray
+                value: ByteArray,
             ) {
                 super.onDescriptorWriteRequest(
                     device, requestId, descriptor, preparedWrite, responseNeeded, offset, value
@@ -534,15 +540,19 @@ class BleService : LifecycleService() {
                 1 -> {
                     errorText = "ADVERTISE_FAILED_DATA_TOO_LARGE"
                 }
+
                 2 -> {
                     errorText = "ADVERTISE_FAILED_TOO_MANY_ADVERTISERS"
                 }
+
                 3 -> {
                     errorText = "ADVERTISE_FAILED_ALREADY_STARTED"
                 }
+
                 4 -> {
                     errorText = "ADVERTISE_FAILED_INTERNAL_ERROR"
                 }
+
                 5 -> {
                     errorText = "ADVERTISE_FAILED_FEATURE_UNSUPPORTED"
                 }
@@ -643,7 +653,7 @@ class BleService : LifecycleService() {
      * This Method Will Start Handler for Checking Device Out Of Range
      */
     private fun startOutRangeChecker() {
-        outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
+        //outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
     }
 
     /**
@@ -689,7 +699,7 @@ class BleService : LifecycleService() {
                 }
                 if (System.currentTimeMillis() - 60000 > lastWriteTime) {
 //                    bleCallback?.restartService()
-                    removeGatt()
+                    //removeGatt()
                 }
             }
 
@@ -735,7 +745,7 @@ class BleService : LifecycleService() {
             override fun onCharacteristicRead(
                 bleScanDevice: BLEScanDevice,
                 gatt: BluetoothGatt?,
-                characteristic: BluetoothGattCharacteristic?
+                characteristic: BluetoothGattCharacteristic?,
             ) {
                 if (characteristic!!.uuid.toString().lowercase() == READ_CHAR.lowercase()) {
                     val existingDevice =
@@ -749,14 +759,14 @@ class BleService : LifecycleService() {
             }
 
             override fun onCharacteristicWrite(
-                gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
+                gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?,
             ) {
                 lastWriteTime = System.currentTimeMillis()
                 AppLog.e("zzz lastWriteTime", "$lastWriteTime")
             }
 
             override fun onMessageSent(
-                gatt: BluetoothGatt?, value: ByteArray, id: String
+                gatt: BluetoothGatt?, value: ByteArray, id: String,
             ) {
                 val queue = hashMap[gatt?.device?.address]
                 if (queue?.isNotEmpty() == true) {
@@ -774,7 +784,7 @@ class BleService : LifecycleService() {
             override fun onCharacteristicChanged(
                 macAddress: String?,
                 gatt: BluetoothGatt?,
-                characteristic: BluetoothGattCharacteristic?
+                characteristic: BluetoothGattCharacteristic?,
             ) {
 
             }
@@ -801,6 +811,7 @@ class BleService : LifecycleService() {
                     actorMap[device.macAddress]
                 }
             }
+
             else -> {
                 BleActor(this, BleConnectionListener())
             }
@@ -825,8 +836,12 @@ class BleService : LifecycleService() {
         var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
         bleDevice?.let {
             if (hashMap.containsKey(it.macAddress)) {
-                val queue = hashMap[it.macAddress!!]
-                queue?.add(Triple(id, from, message))
+                var queue = hashMap[it.macAddress!!]
+                if(queue!!.size < 2) {
+                    queue?.add(Triple(id, from, message))
+                } else{
+                    queue = LinkedList()
+                }
                 hashMap[it.macAddress!!] = queue!!
                 mainQueue = queue
             } else {
@@ -843,11 +858,15 @@ class BleService : LifecycleService() {
 
 
     private fun sendMessageFromQueu(macAddress: String, isFromSendMessage: Boolean = false) {
-        Thread.sleep(10)
+        //Thread.sleep(10)
         executor.execute {
             if (hashMap.isNotEmpty()) {
                 val queue = hashMap[macAddress]
                 if (!queue.isNullOrEmpty()) {
+                    AppLog.e(
+                        TAG,
+                        "sendMessageFromQueu ${queue.size}"
+                    )
                     if (!isFromSendMessage || queue.size == 1) {
                         var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
                         if (bleDevice == null) {
@@ -908,7 +927,7 @@ class BleService : LifecycleService() {
         }
 
         override fun onCharacteristicRead(
-            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int,
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
 
@@ -916,27 +935,27 @@ class BleService : LifecycleService() {
 
 
         override fun onCharacteristicWrite(
-            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int,
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
 
         }
 
         override fun onCharacteristicChanged(
-            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic
+            gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic,
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
 
         }
 
         override fun onDescriptorRead(
-            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int,
         ) {
             super.onDescriptorRead(gatt, descriptor, status)
         }
 
         override fun onDescriptorWrite(
-            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
+            gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int,
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
 
