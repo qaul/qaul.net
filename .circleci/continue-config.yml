@@ -358,7 +358,7 @@ jobs:
                 root: ~/qaul-libp2p
     build-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.7.0
+            FLUTTER_VERSION: 3.10.5
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022
