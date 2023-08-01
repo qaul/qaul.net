@@ -297,10 +297,10 @@ class BleService : LifecycleService() {
                 bleDevice.deviceRSSI = rssi
                 bleDevice.macAddress = device.address
                 bleDevice.isConnectable = result.isConnectable
-                bleDevice.lastFoundTime = System.currentTimeMillis()
+                //bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
 
-                AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
+
 //                Handler(Looper.getMainLooper()).postDelayed({
                 if (result.isConnectable) {
                     connectDevice(bleDevice, isFromMessage = false)
@@ -308,21 +308,23 @@ class BleService : LifecycleService() {
 //                }, 1200)
 
             } else {
-                val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
-                if (selectItemIgnore != null) {
-                    selectItemIgnore.deviceRSSI = rssi
-                    selectItemIgnore.scanResult = result
-                    selectItemIgnore.name = device.name
-                    selectItemIgnore.isConnectable = result.isConnectable
-                    selectItemIgnore.lastFoundTime = System.currentTimeMillis()
-//                    if (!selectItemIgnore.isConnected) {
-//                        connectDevice(selectItemIgnore, isFromMessage = false)
-//                    }
-                } else {
-//                    selectItem.isConnected = false
-//                    devicesList.remove(selectItem)
-                    AppLog.e(TAG, "zzz device ignored: " + device.address)
-                }
+//                val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
+//                if (selectItemIgnore != null) {
+//                    selectItemIgnore.deviceRSSI = rssi
+//                    selectItemIgnore.scanResult = result
+//                    selectItemIgnore.name = device.name
+//                    selectItemIgnore.isConnectable = result.isConnectable
+//                    selectItemIgnore.lastFoundTime = System.currentTimeMillis()
+////                    if (!selectItemIgnore.isConnected) {
+////                        connectDevice(selectItemIgnore, isFromMessage = false)
+////                    }
+//                } else {
+////                    selectItem.isConnected = false
+////                    devicesList.remove(selectItem)
+//                    AppLog.e(TAG, "zzz device ignored: " + device.address)
+//                }
+                //AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
+                ignoreList.find { it.macAddress == device.address }?.lastFoundTime = System.currentTimeMillis()
             }
 //            }, 5000)
         } else {
@@ -653,7 +655,7 @@ class BleService : LifecycleService() {
      * This Method Will Start Handler for Checking Device Out Of Range
      */
     private fun startOutRangeChecker() {
-        //outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
+        outOfRangeChecker.postDelayed(outRangeRunnable, 2000)
     }
 
     /**
