@@ -40,7 +40,7 @@ impl Chat {
 
                 if let Some(group_id_str) = iter.next() {
                     // convert group id from string to binary version
-                    let mut group_id = vec![];
+                    let group_id;
                     match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(v) => {
                             group_id = v.clone();
