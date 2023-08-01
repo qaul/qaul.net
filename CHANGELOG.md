@@ -23,6 +23,8 @@ Fixed
 - Fixed many things related to the BLE-Module, BLE-Manager, BLE connection.
 - Fixed a layout issue on the support screen, to allow multiple lines for some text.
 - Fixed a GUI issue with public messages, having a sending timestamp in the future.
+- Fixed a libqaul group DB index issue, where the first entry sometimes did not start at 0.
+- libqaul RPC now returns the session ID for group requests.
 
 Changed
 
