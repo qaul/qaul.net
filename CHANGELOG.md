@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0 beta 16] 2023-07-09
+## [2.0.0 beta 16] 2023-08-01
 
-This release newly includes the android BLE-module.
+This release newly includes the android BLE-module. The Android BLE module is still experimental.
+The Android BLE module was tested on Android versions 13, 12, 11 & 10.
 
 Added
 
@@ -17,8 +18,16 @@ Added
 
 Fixed
 
+- Fixed a crypto session issue, when two users started the a session parallel in DTN mode.
+  This led to the users not being able to communicate with each other anymore.
 - Fixed many things related to the BLE-Module, BLE-Manager, BLE connection.
 - Fixed a layout issue on the support screen, to allow multiple lines for some text.
+- Fixed a GUI issue with public messages, having a sending timestamp in the future.
+
+Changed
+
+- Android: Changed to a new background execution mode, which fixed known issues with background execution
+- Upgraded to Flutter 3.10
 
 ## [2.0.0 beta 15] 2023-05-01
 
