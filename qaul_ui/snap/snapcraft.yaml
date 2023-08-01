@@ -25,12 +25,12 @@ apps:
       - process-control
       - system-observe
 
-      - appstream-metadata
-      - desktop
-      - desktop-launch
-      - desktop-legacy
-      - network-manager
-      - network-manager-observe
+      #- appstream-metadata
+      #- desktop
+      #- desktop-launch
+      #- desktop-legacy
+      #- network-manager
+      #- network-manager-observe
 
     slots:
       - dbus-qaul
