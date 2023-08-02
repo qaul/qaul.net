@@ -3,21 +3,24 @@
 
 //! # Group module functions
 
-use std::{
-    fmt,
-};
+use std::fmt;
 
 use super::rpc::Rpc;
 use crate::{
+    chat,
     configuration::{MatrixConfiguration, MatrixRoom},
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
     users,
 };
 use libp2p::PeerId;
-use matrix_sdk::ruma::{
-    api::client::r0::room::create_room::Request as CreateRoomRequest,
-    identifiers::{RoomNameBox},
-    RoomId, UserId,
+use matrix_sdk::{
+    room::Room,
+    ruma::{
+        api::client::r0::room::create_room::Request as CreateRoomRequest,
+        events::{room::message::MessageEventContent, AnyMessageEventContent},
+        identifiers::RoomNameBox,
+        RoomId, UserId,
+    },
 };
 use prost::Message;
 use tokio::runtime::Runtime;
@@ -93,7 +96,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::group_info(group_id);
+                            Self::group_info(group_id, "".to_owned());
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -236,7 +239,7 @@ impl Group {
     }
 
     /// Convert Group ID from String to Binary
-    fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
+    pub fn uuid_string_to_bin(id_str: String) -> Result<Vec<u8>, String> {
         match uuid::Uuid::parse_str(id_str.as_str()) {
             Ok(id) => Ok(id.as_bytes().to_vec()),
             _ => Err("invalid group id".to_string()),
@@ -291,7 +294,7 @@ impl Group {
     }
 
     /// group info
-    fn group_info(group_id: Vec<u8>) {
+    pub fn group_info(group_id: Vec<u8>, request_id: String) {
         // group info send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInfoRequest(
@@ -308,11 +311,7 @@ impl Group {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(
-            buf,
-            super::rpc::proto::Modules::Group.into(),
-            "".to_string(),
-        );
+        Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), request_id);
     }
 
     /// group list
@@ -497,6 +496,7 @@ impl Group {
                         println!("\tid: {}", group_id.to_string());
                         if request_id.contains('#') {
                             let mut iter = request_id.split('#');
+                            let _cmd = iter.next().unwrap();
                             let room_id = iter.next().unwrap();
                             let sender_id = iter.next().unwrap();
                             let qaul_user_id = iter.next().unwrap();
@@ -568,17 +568,85 @@ impl Group {
                             println!("\terror: {}", result.message);
                         }
                     }
+
                     Some(proto::group::Message::GroupInfoResponse(group_info_response)) => {
                         // group
-                        println!("====================================");
-                        println!("Group Information");
+                        // println!("====================================");
+                        // println!("Group Information");
                         let group_id = uuid::Uuid::from_bytes(
                             group_info_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
-                        println!("\tname: {}", group_info_response.group_name.clone());
-                        println!("\tcreated_at: {}", group_info_response.created_at);
-                        println!("\tmembers: {}", group_info_response.members.len());
+                        // println!("\tid: {}", group_id.to_string());
+                        // println!("\tname: {}", group_info_response.group_name.clone());
+                        // println!("\tcreated_at: {}", group_info_response.created_at);
+                        // println!("\tmembers: {:#?}", group_info_response.members);
+
+                        // TODO : Do code cleanup here reffering invite and remove.
+                        if request_id != "" {
+                            // reqeust_id = qaul_user_id#room_id
+                            let mut iter = request_id.split('#');
+                            let cmd = iter.next().unwrap();
+                            println!("cmd : {}", cmd);
+                            let room_id = iter.next().unwrap();
+                            println!("room : {}", room_id);
+                            let _sender = iter.next().unwrap();
+                            println!("sender : {}", _sender);
+                            let qaul_user_id = iter.next().unwrap();
+                            println!("qaul user : {}", qaul_user_id);
+                            if cmd == "invite" {
+                                let grp_members = group_info_response.members.clone();
+                                let user_id =
+                                    chat::Chat::id_string_to_bin(qaul_user_id.to_owned()).unwrap();
+                                let mut all_members = Vec::new();
+                                for member in grp_members {
+                                    all_members.push(member.user_id);
+                                }
+                                if all_members.contains(&user_id) {
+                                    matrix_rpc(
+                                        "User already exist in the qaul group".to_owned(),
+                                        RoomId::try_from(room_id).unwrap(),
+                                    );
+                                } else {
+                                    // Invite user into this group.
+                                    // I hav3 the group_id, user_id so inviting would not be an issue.
+                                    matrix_rpc("User has been invited. Please wait until user accepts the invitation.".to_owned(), RoomId::try_from(room_id).unwrap());
+                                    Self::invite(
+                                        chat::Chat::uuid_string_to_bin(group_id.to_string())
+                                            .unwrap(),
+                                        user_id,
+                                    );
+                                }
+                            }
+
+                            if cmd == "remove" {
+                                let grp_members = group_info_response.members;
+                                let user_id =
+                                    chat::Chat::id_string_to_bin(qaul_user_id.to_owned()).unwrap();
+                                let mut all_members = Vec::new();
+                                for member in grp_members {
+                                    all_members.push(member.user_id);
+                                }
+                                if all_members.contains(&user_id) {
+                                    // Remove
+                                    Self::remove_member(
+                                        chat::Chat::uuid_string_to_bin(group_id.to_string())
+                                            .unwrap(),
+                                        user_id,
+                                    );
+                                    // TODO : Change all the to_owned or to_string into any one.
+                                    matrix_rpc(
+                                        "User has been removed".to_owned(),
+                                        RoomId::try_from(room_id).unwrap(),
+                                    );
+                                } else {
+                                    // Member is not in grp.
+                                    matrix_rpc(
+                                        "User is not a member of this grp.".to_owned(),
+                                        RoomId::try_from(room_id).unwrap(),
+                                    );
+                                }
+                            }
+                        }
                     }
                     Some(proto::group::Message::GroupListResponse(group_list_response)) => {
                         // List groups
@@ -599,7 +667,6 @@ impl Group {
                                 if member.role == 255 {
                                     let user_id = PeerId::from_bytes(&member.user_id).unwrap();
                                     qaul_room_admin.push_str(&user_id.to_string());
-                                    users::Users::peer_id_to_user_name();
                                 }
                             }
 
@@ -744,4 +811,21 @@ impl Group {
             }
         }
     }
+}
+
+/// Connect RPC function call with the Matrix Room and send message
+fn matrix_rpc(msg: String, room_id: RoomId) {
+    // Get the Room based on RoomID from the client information
+    let matrix_client = MATRIX_CLIENT.get();
+    let room = matrix_client.get_room(&room_id).unwrap();
+    if let Room::Joined(room) = room {
+        // Build the message content to send to matrix
+        let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(msg));
+
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async {
+            // Sends messages into the matrix room
+            room.send(content, None).await.unwrap();
+        });
+    };
 }
