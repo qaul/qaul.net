@@ -1,19 +1,28 @@
 package net.qaul.qaul_app
 
-// import the libqaul AAR android library
-
+import android.Manifest
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.annotation.NonNull
+
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+
 import net.qaul.ble.AppLog
 import net.qaul.ble.core.BleWrapperClass
 import net.qaul.libqaul.*
 
 import android.os.Build
 import android.os.Bundle
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
+import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "libqaul"
@@ -36,6 +45,24 @@ class MainActivity : FlutterActivity() {
         if (PreferenceManager.isBackgroundServiceEnabled(this)) {
             startBackgroundService()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun showLocationPermissionDialog() {
+        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
+        builder.setTitle("About the background execution and location permission")
+        builder.setMessage("We need access to your location to provide better service.")
+        builder.setPositiveButton(
+                "OK"
+        ) { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+            //initialize BleModule initialize -- must be before startLibqaul()
+            bleWrapperClass = BleWrapperClass(context = this)
+            // load libqaul
+            libqaulLoad()
+        }
+        builder.setCancelable(false)
+        builder.show()
     }
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {

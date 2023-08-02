@@ -5,6 +5,7 @@ import android.content.Context
 object PreferenceManager {
     private const val PREFS_NAME = "qaulPrefs"
     private const val KEY_BACKGROUND_SERVICE_ENABLED = "backgroundServiceEnabled"
+    private const val KEY_LOCATION_PERMISSION_DIALOG_SHOWN = "locationPermissionDialogShown"
 
     fun isBackgroundServiceEnabled(context: Context): Boolean {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -16,6 +17,18 @@ object PreferenceManager {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putBoolean(KEY_BACKGROUND_SERVICE_ENABLED, enabled)
+        editor.apply()
+    }
+
+    fun hasShownLocationPermissionDialog(context: Context): Boolean {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean(KEY_LOCATION_PERMISSION_DIALOG_SHOWN, false)
+    }
+
+    fun markLocationPermissionDialogAsShown(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(KEY_LOCATION_PERMISSION_DIALOG_SHOWN, true)
         editor.apply()
     }
 }
