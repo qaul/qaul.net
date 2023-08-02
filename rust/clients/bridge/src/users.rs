@@ -302,13 +302,16 @@ impl Users {
         } else {
             let mut number = 1;
             for user in users_list {
-                result.push_str(&format!(
-                    "{} : {} | {}\n",
-                    number,
-                    user.name,
-                    bs58::encode(user.id).into_string()
-                ));
-                number += 1;
+                // User is online
+                if user.connectivity == 1 {
+                    result.push_str(&format!(
+                        "{} : {} | {}\n",
+                        number,
+                        user.name,
+                        bs58::encode(user.id).into_string()
+                    ));
+                    number += 1;
+                }
             }
         }
         // Check if the room is already joined or not

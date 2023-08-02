@@ -137,7 +137,7 @@ impl Chat {
     }
 
     /// Convert Group ID from String to Binary
-    fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
+    pub fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
         if id.len() < 52 {
             return Err("Group ID not long enough".to_string());

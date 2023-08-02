@@ -84,8 +84,8 @@ async fn main() {
     //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
     let mut feed_ticker = Ticker::new(Duration::from_secs(3));
-    let mut group_ticker = Ticker::new(Duration::from_secs(3));
-    let mut user_ticker = Ticker::new(Duration::from_millis(10));
+    let mut group_ticker = Ticker::new(Duration::from_secs(10));
+    let mut user_ticker = Ticker::new(Duration::from_millis(50));
     // loop and poll CLI and RPC
     loop {
         let evt = {
@@ -105,24 +105,31 @@ async fn main() {
                 line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
                 _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
                 _feed_ticker = feed_fut => {
-                    let config = MATRIX_CONFIG.get().read().unwrap();
-                    let last_index = &config.feed.last_index;
-                    // Check unread messages from Libqaul
-                    feed::Feed::request_feed_list(*last_index);
+                    if let Ok(config) = MATRIX_CONFIG.get().read() {
+                        let last_index = &config.feed.last_index;
+                        // Check unread messages from Libqaul
+                        feed::Feed::request_feed_list(*last_index);
+                    } else {
+                        println!("Waiting for the configuration to Sync")
+                    }
                     None
                 }
                 _group_ticker = group_fut => {
-                    let config = MATRIX_CONFIG.get().read().unwrap();
-                    group::Group::group_list();
-                    let qaul_groups: Vec<Uuid> = config.room_map.keys().cloned().collect();
+                    if let Ok(config) = MATRIX_CONFIG.get().read() {
+                        group::Group::group_list();
+                        let qaul_groups: Vec<Uuid> = config.room_map.keys().cloned().collect();
 
-                    // Check unread messages from Libqaul groups
-                    for group in qaul_groups {
-                        let matrix_room = config.room_map.get(&group).unwrap();
-                            let last_index_grp = matrix_room.last_index;
-                        let group_id = group.as_bytes().to_vec();
-                        chat::Chat::request_chat_conversation(group_id,last_index_grp);
-                    }None
+                        // Check unread messages from Libqaul groups
+                        for group in qaul_groups {
+                            let matrix_room = config.room_map.get(&group).unwrap();
+                                let last_index_grp = matrix_room.last_index;
+                            let group_id = group.as_bytes().to_vec();
+                            chat::Chat::request_chat_conversation(group_id,last_index_grp);
+                        }
+                    } else {
+                        println!("Waiting for the configuration to Sync")
+                    }
+                    None
                 }
                 _users_ticker = users_fut => {
                     users::Users::request_user_list("".to_string());
