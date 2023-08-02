@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 import '../decorators/deeplink_decorator.dart';
-import '../screens/about_android_background_execution_screen.dart';
 import '../screens/about_screen.dart';
 import '../screens/create_account_screen.dart';
 import '../screens/file_history_screen.dart';
@@ -18,7 +17,6 @@ class NavigationHelper {
   static const about = '/about';
   static const support = '/support';
   static const fileHistory = '/fileHistory';
-  static const aboutAndroidBackground = '/aboutAndroidBackgroundExecution';
 
   static Route<T> _buildRoute<T>(final RouteSettings settings, final WidgetBuilder page) =>
       CupertinoPageRoute(builder: page, settings: settings);
@@ -47,9 +45,6 @@ class NavigationHelper {
         break;
       case fileHistory:
         routeWidget = const FileHistoryScreen();
-        break;
-      case aboutAndroidBackground:
-        routeWidget = const AboutAndroidBackgroundExecutionScreen();
         break;
       default:
         throw ArgumentError.value(

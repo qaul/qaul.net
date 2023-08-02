@@ -151,5 +151,10 @@
   "fileHistory": "File history",
   "emptyNodeName": "No name",
   "androidOptions": "Android options",
-  "backgroundExecution": "Background execution"
+  "androidPrivacyPolicy": "Privacy Policy",
+  "aboutBackgroundExecution": "About the background execution",
+  "backgroundExecutionDialog1": "This app uses background execution to receive and send messages when the app is running in the background.",
+  "backgroundExecutionDialog2": "On older Android devices, we ask location permissions and background location permission in order to communicate via Bluetooth Low Energy. This is due to a missing separation between bluetooth permissions and location permissions. Only bluetooth is used, the location is not used by the app at all.",
+  "backgroundExecutionDialog3": "This is completely optional, and you can disable this behavior at any time through the Android settings.",
+  "backgroundExecutionDialogConfirmButton": "I understand"
 }

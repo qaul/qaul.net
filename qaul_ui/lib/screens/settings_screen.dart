@@ -8,10 +8,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:utils/utils.dart';
 
 import '../decorators/cron_task_decorator.dart';
-import '../helpers/navigation_helper.dart';
+import '../dialogs/android_background_execution_dialog.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
@@ -47,15 +49,14 @@ class SettingsScreen extends HookConsumerWidget {
               child: _InternetNodesList(),
             ),
           ),
-          // TODO(brenodt): temporarily removing Android's settings. Uncomment to reinstate.
-          // if (Platform.isAndroid) ...[
-          //   const SizedBox(height: 20),
-          //   SettingsSection(
-          //     name: l10n.androidOptions,
-          //     icon: const FaIcon(FontAwesomeIcons.android),
-          //     content: const _AndroidOptions(),
-          //   ),
-          // ]
+          if (Platform.isAndroid) ...[
+            const SizedBox(height: 20),
+            SettingsSection(
+              name: l10n.androidOptions,
+              icon: const FaIcon(FontAwesomeIcons.android),
+              content: const _AndroidOptions(),
+            ),
+          ]
         ],
       ),
     );
@@ -415,29 +416,19 @@ class _AndroidOptions extends StatefulWidget {
 }
 
 class _AndroidOptionsState extends State<_AndroidOptions> {
-  bool _isBgExecutionEnabled = true;
+  static const privacyPolicyURL =
+      "https://qaul.net/legal/privacy-policy-android/";
 
-  void _enableBackgroundExecution() {
-    const MethodChannel('libqaul').invokeMethod('enableBackgroundExecution');
-    setState(() => _isBgExecutionEnabled = true);
+  void _openPrivacyPolicy() async {
+    if (!(await canLaunchUrlString(privacyPolicyURL))) return;
+    launchUrl(Uri.parse(privacyPolicyURL));
   }
 
-  void _disableBackgroundExecution() {
-    const MethodChannel('libqaul').invokeMethod('disableBackgroundExecution');
-    setState(() => _isBgExecutionEnabled = false);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (!Platform.isAndroid) {
-      throw UnimplementedError('invalid platform making use of AndroidOptions');
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final isEnabled = await const MethodChannel('libqaul')
-          .invokeMethod('isBackgroundExecutionEnabled');
-      setState(() => _isBgExecutionEnabled = isEnabled);
-    });
+  void _showPrivacyDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => const AndroidBackgroundExecutionDialog(),
+    );
   }
 
   @override
@@ -452,31 +443,32 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
           .copyWith(overflow: TextOverflow.ellipsis),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.backgroundExecution),
-              IconButton(
-                iconSize: 18,
-                splashRadius: 9,
-                icon: const Icon(Icons.help_outline),
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  NavigationHelper.aboutAndroidBackground,
-                ),
-              ),
-              const Expanded(child: SizedBox.shrink()),
-              PlatformAwareSwitch(
-                value: _isBgExecutionEnabled,
-                onChanged: (val) {
-                  val
-                      ? _enableBackgroundExecution()
-                      : _disableBackgroundExecution();
-                },
-              ),
-            ],
+          InkWell(
+            onTap: _openPrivacyPolicy,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(Icons.policy),
+                const SizedBox(width: 8),
+                Text(l10n.androidPrivacyPolicy),
+              ],
+            ),
           ),
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: _showPrivacyDialog,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(Icons.info),
+                const SizedBox(width: 8),
+                Text(l10n.aboutBackgroundExecution),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
         ],
       ),
     );
