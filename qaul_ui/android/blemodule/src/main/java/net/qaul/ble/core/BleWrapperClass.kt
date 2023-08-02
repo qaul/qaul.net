@@ -33,6 +33,11 @@ import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 import java.nio.charset.Charset
 
+import android.content.DialogInterface
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 @SuppressLint("MissingPermission")
 open class BleWrapperClass(context: Activity) {
@@ -224,6 +229,31 @@ open class BleWrapperClass(context: Activity) {
         }
     }
 
+    /**
+     * Shows an explanation dialog before asking for location permission
+     * Note: this should not be the wrapper's responsibility. It's temporary as the
+     * permission logic is tightly coupled with the wrapper, when it shouldn't.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun showLocationPermissionDialog() {
+        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
+        builder.setTitle("Location Permission")
+        builder.setMessage("""
+            This app uses background execution to receive and send messages when the app is running in the background.
+            
+            On older Android devices, we ask location permissions and background location permission in order to communicate via Bluetooth Low Energy. This is due to a missing separation between bluetooth permissions and location permissions. Only bluetooth is used, the location is not used by the app at all.
+            
+            This is completely optional, and you can disable this behavior at any time through the Android settings.
+        """.trimIndent())
+        builder.setPositiveButton(
+                "OK"
+        ) { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+            enableLocationPermission(context, LOCATION_PERMISSION_REQ_CODE)
+        }
+        builder.setCancelable(false)
+        builder.show()
+    }
 
     /**
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
@@ -737,7 +767,9 @@ open class BleWrapperClass(context: Activity) {
                 )
                 RemoteLog[context]!!.addDebugLog("$TAG:isLocationPermissionGranted() : false")
                 isBleScanConditionSatisfy = false
-                enableLocationPermission(context, LOCATION_PERMISSION_REQ_CODE)
+
+                showLocationPermissionDialog()
+
                 // TODO Catch permission result & send startResult message
                 return false
             }
