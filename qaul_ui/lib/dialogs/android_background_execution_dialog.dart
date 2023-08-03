@@ -10,7 +10,7 @@ class AndroidBackgroundExecutionDialog extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Dialog(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -23,13 +23,14 @@ class AndroidBackgroundExecutionDialog extends StatelessWidget {
                     style: theme.titleMedium,
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                  splashRadius: 12,
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(Icons.close),
                 ),
               ],
             ),
+            const SizedBox(height: 20),
             Text(l10n.backgroundExecutionDialog1),
             const SizedBox(height: 8),
             Text(l10n.backgroundExecutionDialog2),

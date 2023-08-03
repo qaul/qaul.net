@@ -420,8 +420,9 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
       "https://qaul.net/legal/privacy-policy-android/";
 
   void _openPrivacyPolicy() async {
-    if (!(await canLaunchUrlString(privacyPolicyURL))) return;
-    launchUrl(Uri.parse(privacyPolicyURL));
+    final uri = Uri.parse(privacyPolicyURL);
+    if (!(await canLaunchUrl(uri))) return;
+    launchUrl(uri);
   }
 
   void _showPrivacyDialog() async {
@@ -445,27 +446,33 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
         children: [
           InkWell(
             onTap: _openPrivacyPolicy,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Icon(Icons.policy),
-                const SizedBox(width: 8),
-                Text(l10n.androidPrivacyPolicy),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(Icons.policy),
+                  const SizedBox(width: 8),
+                  Text(l10n.androidPrivacyPolicy),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
           InkWell(
             onTap: _showPrivacyDialog,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Icon(Icons.info),
-                const SizedBox(width: 8),
-                Text(l10n.aboutBackgroundExecution),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info),
+                  const SizedBox(width: 8),
+                  Text(l10n.aboutBackgroundExecution),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 40),
