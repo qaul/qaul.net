@@ -230,32 +230,6 @@ open class BleWrapperClass(context: Activity) {
     }
 
     /**
-     * Shows an explanation dialog before asking for location permission
-     * Note: this should not be the wrapper's responsibility. It's temporary as the
-     * permission logic is tightly coupled with the wrapper, when it shouldn't.
-     */
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun showLocationPermissionDialog() {
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
-        builder.setTitle("Location Permission")
-        builder.setMessage("""
-            This app uses background execution to receive and send messages when the app is running in the background.
-            
-            On older Android devices, we ask location permissions and background location permission in order to communicate via Bluetooth Low Energy. This is due to a missing separation between bluetooth permissions and location permissions. Only bluetooth is used, the location is not used by the app at all.
-            
-            This is completely optional, and you can disable this behavior at any time through the Android settings.
-        """.trimIndent())
-        builder.setPositiveButton(
-                "OK"
-        ) { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-            enableLocationPermission(context, LOCATION_PERMISSION_REQ_CODE)
-        }
-        builder.setCancelable(false)
-        builder.show()
-    }
-
-    /**
      * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
      */
     private fun startAdvertiseAndCallback() {
@@ -621,38 +595,6 @@ open class BleWrapperClass(context: Activity) {
     }
 
     /**
-     * Request User to Allow Location Permission
-     */
-    private fun enableLocationPermission(
-        activity: Activity?, requestCode: Int
-    ) {
-        Log.i(TAG, "enableLocationPermission()")
-
-        ActivityCompat.requestPermissions(
-            activity!!, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCode
-        )
-    }
-
-    /**
-     * Request User to Allow Bluetooth Permissions for Android 12 & Above
-     */
-    private fun enableBlePermission(
-        activity: Activity?, requestCode: Int
-    ) {
-        Log.i(TAG, "enableBlePermission()")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ActivityCompat.requestPermissions(
-                activity!!, arrayOf(
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.BLUETOOTH_ADVERTISE
-                ), requestCode
-            )
-        }
-    }
-
-    /**
      * Request User to Turn On Location
      */
 
@@ -746,31 +688,20 @@ open class BleWrapperClass(context: Activity) {
         if (!isBLeSupported()) {
             AppLog.e(TAG, "isBLeSupport : false")
             RemoteLog[context]!!.addDebugLog("$TAG:isBLeSupport : false")
-//            onScanfailed(BLEErrorType.BLE_NO_SUPPORTED)
             isBleScanConditionSatisfy = false
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!isBluetoothPermissionAllowed()) {
-                AppLog.e(
-                    TAG, "isBluetoothPermissionGranted() : false"
-                )
+                AppLog.e(TAG, "isBluetoothPermissionGranted() : false")
                 RemoteLog[context]!!.addDebugLog("$TAG:isBluetoothPermissionGranted() : false")
                 isBleScanConditionSatisfy = false
-                enableBlePermission(context, BLE_PERMISSION_REQ_CODE_12)
-                // TODO: Catch permission result, request location permission & send startResult message
                 return false
             }
         } else {
             if (!isLocationPermissionAllowed()) {
-                AppLog.e(
-                    TAG, "isLocationPermissionGranted() : false"
-                )
+                AppLog.e(TAG, "isLocationPermissionGranted() : false")
                 RemoteLog[context]!!.addDebugLog("$TAG:isLocationPermissionGranted() : false")
                 isBleScanConditionSatisfy = false
-
-                showLocationPermissionDialog()
-
-                // TODO Catch permission result & send startResult message
                 return false
             }
         }

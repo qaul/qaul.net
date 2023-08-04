@@ -45,24 +45,9 @@ class MainActivity : FlutterActivity() {
         if (PreferenceManager.isBackgroundServiceEnabled(this)) {
             startBackgroundService()
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun showLocationPermissionDialog() {
-        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(this)
-        builder.setTitle("About the background execution and location permission")
-        builder.setMessage("We need access to your location to provide better service.")
-        builder.setPositiveButton(
-                "OK"
-        ) { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-            //initialize BleModule initialize -- must be before startLibqaul()
-            bleWrapperClass = BleWrapperClass(context = this)
-            // load libqaul
-            libqaulLoad()
+        if (!PreferenceManager.hasShownLocationPermissionDialog(this)) {
+            showLocationPermissionDialog();
         }
-        builder.setCancelable(false)
-        builder.show()
     }
 
     override fun configureFlutterEngine(@NonNull FlutterEngine: FlutterEngine) {
@@ -77,13 +62,14 @@ class MainActivity : FlutterActivity() {
 
         // setup message channel between flutter and android
         MethodChannel(
-            FlutterEngine.dartExecutor.binaryMessenger, CHANNEL
+                FlutterEngine.dartExecutor.binaryMessenger, CHANNEL
         ).setMethodCallHandler { call, result ->
             when {
                 // utility methods
                 call.method == "isBackgroundExecutionEnabled" -> {
                     result.success(PreferenceManager.isBackgroundServiceEnabled(this))
                 }
+
                 call.method == "enableBackgroundExecution" -> {
                     if (!PreferenceManager.isBackgroundServiceEnabled(this)) {
                         startBackgroundService()
@@ -91,6 +77,7 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
+
                 call.method == "disableBackgroundExecution" -> {
                     if (PreferenceManager.isBackgroundServiceEnabled(this)) {
                         stopBackgroundService()
@@ -104,30 +91,37 @@ class MainActivity : FlutterActivity() {
                     val res = getSystemVersion()
                     result.success(res)
                 }
+
                 call.method == "loadlibrary" -> {
                     libqaulLoad()
                     result.success(true)
                 }
+
                 call.method == "hello" -> {
                     val res = getHello()
                     result.success(res)
                 }
+
                 call.method == "start" -> {
                     startLibqaul()
                     result.success(true)
                 }
+
                 call.method == "initialized" -> {
                     val res = initializedLibqaul()
                     result.success(res)
                 }
+
                 call.method == "sendcounter" -> {
                     val res = getSendCounter()
                     result.success(res)
                 }
+
                 call.method == "receivequeue" -> {
                     val res = getReceiveCounter()
                     result.success(res)
                 }
+
                 call.method == "sendRpcMessage" -> {
                     // get argument
                     val message = call.argument<ByteArray>("message")
@@ -136,10 +130,12 @@ class MainActivity : FlutterActivity() {
                     sendRpcMessage(bytes)
                     result.success(true)
                 }
+
                 call.method == "receiveRpcMessage" -> {
                     val res = receiveRpcMessage()
                     result.success(res)
                 }
+
                 else -> result.notImplemented()
             }
         }
@@ -211,17 +207,53 @@ class MainActivity : FlutterActivity() {
         return receive()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun showLocationPermissionDialog() {
+        val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
+        builder.setTitle("Location Permissions & Background Execution")
+        builder.setMessage("""
+            This app uses Bluetooth Low Energy to find and connect with nearby devices, even when the app is running in the background. The app requests the required permissions to so.
+
+            Up to Android 11, this app requires location permissions in order to use Bluetooth Low Energy. It also requires location permissions when running in the background, in order to communicate over Bluetooth Low Energy in the background.
+            
+            All those rights are only used to communicate via Bluetooth Low Energy, no location data is used by this app. However, other devices might use the Bluetooth Low Energy beacons to detect your location.
+            
+            You can administrate those permissions in the Android settings.
+        """.trimIndent())
+        builder.setPositiveButton(
+                "OK"
+        ) { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+            PreferenceManager.markLocationPermissionDialogAsShown(this)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissionHandler.requestBLEPermission()
+            } else {
+                permissionHandler.requestLocationPermission()
+            }
+        }
+        /*
+        builder.setNegativeButton(
+                "DENY"
+        ) { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+            PreferenceManager.markLocationPermissionDialogAsShown(this)
+        }
+        */
+        builder.setCancelable(false)
+        builder.show()
+    }
+
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionHandler.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
             AppLog.e(
-                "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+                    "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
             )
             if (grantResults.isNotEmpty()) {
                 for (grantResult in grantResults) {
@@ -235,7 +267,7 @@ class MainActivity : FlutterActivity() {
             }
         } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
             AppLog.e(
-                "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
+                    "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
             )
             if (grantResults.isNotEmpty()) {
                 for (grantResult in grantResults) {
@@ -258,7 +290,7 @@ class MainActivity : FlutterActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         AppLog.e(
-            "MainActivity", "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
+                "MainActivity", "onActivityResult requestCode=$requestCode | resultCode=$resultCode"
         )
         if (requestCode == LOCATION_ENABLE_REQ_CODE) {
             if (resultCode == RESULT_OK) {
