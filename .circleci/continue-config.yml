@@ -409,7 +409,7 @@ jobs:
             - setup-sccache
             - restore-sccache-cache
             - run:
-                command: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+                command: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
                 name: Install build targets for android in rust
             - run:
                 command: cd rust/libqaul && cargo install cargo-ndk
