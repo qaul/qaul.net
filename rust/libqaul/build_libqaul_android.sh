@@ -48,7 +48,6 @@ fi
 rustup target add \
   aarch64-linux-android \
   armv7-linux-androideabi \
-  i686-linux-android \
   x86_64-linux-android
 
 # 2. make sure cargo-ndk is installed
@@ -59,4 +58,4 @@ jniLibs=../../qaul_ui/android/libqaul/src/main/jniLibs
 rm -rf ${jniLibs}
 
 # 4. build libqaul for all targets
-cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 -o $jniLibs build ${buildTypeCargo}
+cargo ndk -t armeabi-v7a -t arm64-v8a -t x86_64 -o $jniLibs build ${buildTypeCargo}
