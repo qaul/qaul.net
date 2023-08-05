@@ -212,13 +212,13 @@ class MainActivity : FlutterActivity() {
         val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
         builder.setTitle("Location Permissions")
         builder.setMessage("""
-            This app uses Bluetooth Low Energy to find and connect with nearby devices. The app will request the required permissions to so.
+            This app uses Bluetooth Low Energy to find and connect with nearby devices. The app will request the required permissions to do so.
 
             Up to Android 11, this app requires location permissions in order to use Bluetooth Low Energy.
             
             These permissions are only used to communicate via Bluetooth Low Energy, no location data is used by this app. However, other devices might use the Bluetooth Low Energy beacons to detect your location.
             
-            You can administrate these permissions in the Android settings.
+            You can manage these permissions in the Android settings.
         """.trimIndent())
         builder.setPositiveButton(
                 "OK"
