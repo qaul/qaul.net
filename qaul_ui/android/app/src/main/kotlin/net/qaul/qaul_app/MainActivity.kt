@@ -210,15 +210,15 @@ class MainActivity : FlutterActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun showLocationPermissionDialog() {
         val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
-        builder.setTitle("Location Permissions & Background Execution")
+        builder.setTitle("Location Permissions")
         builder.setMessage("""
-            This app uses Bluetooth Low Energy to find and connect with nearby devices, even when the app is running in the background. The app requests the required permissions to so.
+            This app uses Bluetooth Low Energy to find and connect with nearby devices. The app will request the required permissions to so.
 
-            Up to Android 11, this app requires location permissions in order to use Bluetooth Low Energy. It also requires location permissions when running in the background, in order to communicate over Bluetooth Low Energy in the background.
+            Up to Android 11, this app requires location permissions in order to use Bluetooth Low Energy.
             
-            All those rights are only used to communicate via Bluetooth Low Energy, no location data is used by this app. However, other devices might use the Bluetooth Low Energy beacons to detect your location.
+            These permissions are only used to communicate via Bluetooth Low Energy, no location data is used by this app. However, other devices might use the Bluetooth Low Energy beacons to detect your location.
             
-            You can administrate those permissions in the Android settings.
+            You can administrate these permissions in the Android settings.
         """.trimIndent())
         builder.setPositiveButton(
                 "OK"
@@ -231,14 +231,6 @@ class MainActivity : FlutterActivity() {
                 permissionHandler.requestLocationPermission()
             }
         }
-        /*
-        builder.setNegativeButton(
-                "DENY"
-        ) { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-            PreferenceManager.markLocationPermissionDialogAsShown(this)
-        }
-        */
         builder.setCancelable(false)
         builder.show()
     }
