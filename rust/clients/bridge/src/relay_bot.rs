@@ -110,7 +110,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
             // on receiving !help from matrix, Give brief of all possible commands.
             if msg_body.contains("!help") {
                 let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
-                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n",
+                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n!group-info : Get details for the qaul group with which this matrix room is connected.",
                 ));
                 room.send(content, None).await.unwrap();
             }
@@ -196,41 +196,48 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     let room_id = room.room_id();
                     let qaul_group_id: Option<Uuid> =
                         find_key_for_value(config.room_map.clone(), room_id.clone());
-                    group::Group::group_info(
-                        chat::Chat::uuid_string_to_bin(qaul_group_id.unwrap().to_string()).unwrap(),
-                        request_id,
-                    );
-                    // 1. Check if the user exist in the room or not
-                    // YES : remove
-                    // NO : user is not in the room.
-                    // 2.
-
-                    // if qaul_group_id != None {
-                    //     group::Group::create_group(
-                    //         format!("{}", msg_sender.to_owned()).to_owned(),
-                    //         request_id,
-                    //     );
-                    //     // Acknowledge about sent invitation to qaul user.
-                    //     let content = AnyMessageEventContent::RoomMessage(
-                    //     MessageEventContent::text_plain("User has been invited. Please wait until user accepts the invitation."),
-                    // );
-                    //     room.send(content, None).await.unwrap();
-                    // } else {
-                    //     // Get the list of users who are members to the given room.
-                    //     let req_id = format!("{}#{}",qaul_user_id,room_id);
-                    //     group::Group::group_info(
-                    //         chat::Chat::uuid_string_to_bin(qaul_group_id.unwrap().to_string()).unwrap(),
-                    //         req_id,
-                    //     );
-                    //     println!("The Room Mapping already exist for this room");
-                    //     // Else Invite the given user in same mapping of the matrix room.
-                    // }
+                    if qaul_group_id == None {
+                        // No room mapping exist
+                        let content =
+                            AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
+                                "No qaul group is mapped to this Matrix room. Please invite qaul users to this room.",
+                            ));
+                        room.send(content, None).await.unwrap();
+                    } else {
+                        group::Group::group_info(
+                            chat::Chat::uuid_string_to_bin(qaul_group_id.unwrap().to_string())
+                                .unwrap(),
+                            request_id,
+                        );
+                    }
                 } else {
                     // Not Admin
                     let content = AnyMessageEventContent::RoomMessage(
                         MessageEventContent::text_plain("Only Admins can perform this operation."),
                     );
                     room.send(content, None).await.unwrap();
+                }
+            }
+
+            // on receiving !qaul-info in matrix, You get the details of the group information.
+            if msg_body.contains("!group-info") {
+                let mut config = MATRIX_CONFIG.get().write().unwrap().clone();
+                let room_id = room.room_id();
+                let qaul_group_id: Option<Uuid> =
+                    find_key_for_value(config.room_map.clone(), room_id.clone());
+                if qaul_group_id == None {
+                    // No room mapping exist
+                    let content =
+                   AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
+                       "No qaul group is mapped to this Matrix room. Please invite qaul users to this room.",
+                   ));
+                    room.send(content, None).await.unwrap();
+                } else {
+                    let request_id = format!("info#{}#_#_", room_id).to_string();
+                    group::Group::group_info(
+                        chat::Chat::uuid_string_to_bin(qaul_group_id.unwrap().to_string()).unwrap(),
+                        request_id,
+                    );
                 }
             }
         } else {
