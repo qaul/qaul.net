@@ -392,7 +392,7 @@ impl Chat {
         }
     }
 
-    fn find_user_for_given_id(map: HashMap<String, String>, value: String) -> Option<String> {
+    pub fn find_user_for_given_id(map: HashMap<String, String>, value: String) -> Option<String> {
         for (key, val) in map {
             if val == value {
                 return Some(key);

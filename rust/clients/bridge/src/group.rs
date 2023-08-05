@@ -10,7 +10,7 @@ use crate::{
     chat,
     configuration::{MatrixConfiguration, MatrixRoom},
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
-    users,
+    users::{self, QAUL_USERS},
 };
 use libp2p::PeerId;
 use matrix_sdk::{
@@ -593,6 +593,7 @@ impl Group {
                             println!("sender : {}", _sender);
                             let qaul_user_id = iter.next().unwrap();
                             println!("qaul user : {}", qaul_user_id);
+
                             if cmd == "invite" {
                                 let grp_members = group_info_response.members.clone();
                                 let user_id =
@@ -619,7 +620,7 @@ impl Group {
                             }
 
                             if cmd == "remove" {
-                                let grp_members = group_info_response.members;
+                                let grp_members = group_info_response.members.clone();
                                 let user_id =
                                     chat::Chat::id_string_to_bin(qaul_user_id.to_owned()).unwrap();
                                 let mut all_members = Vec::new();
@@ -645,6 +646,33 @@ impl Group {
                                         RoomId::try_from(room_id).unwrap(),
                                     );
                                 }
+                            }
+
+                            if cmd == "info" {
+                                let group_id = group_id.to_string();
+                                let group_name = group_info_response.group_name.clone();
+                                let creation_time = group_info_response.created_at;
+                                let members = group_info_response.members;
+                                let mut member_string = String::new();
+                                let users = QAUL_USERS.get();
+                                let i = 1;
+                                for member in members {
+                                    let user_name = chat::Chat::find_user_for_given_id(
+                                        users.clone(),
+                                        bs58::encode(member.user_id).into_string(),
+                                    )
+                                    .unwrap();
+                                    let mut isAdmin = String::new();
+                                    if member.role == 255 {
+                                        isAdmin.push_str("Admin");
+                                    } else {
+                                        isAdmin.push_str("Member");
+                                    }
+                                    member_string
+                                        .push_str(&format!("{} : {}({})\n", i, user_name, isAdmin));
+                                }
+                                let message_format = format!("# Group Information \n\nGroup ID : {}\nCreated at : {}\nList of Members : \n{}",group_id,creation_time,member_string);
+                                matrix_rpc(message_format, RoomId::try_from(room_id).unwrap());
                             }
                         }
                     }
