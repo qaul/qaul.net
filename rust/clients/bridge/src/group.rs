@@ -609,7 +609,16 @@ impl Group {
                                     );
                                 } else {
                                     // Invite user into this group.
-                                    // I hav3 the group_id, user_id so inviting would not be an issue.
+                                    let users = QAUL_USERS.get();
+                                    let user_name = chat::Chat::find_user_for_given_id(
+                                        users.clone(),
+                                        qaul_user_id.to_owned(),
+                                    )
+                                    .unwrap();
+                                    matrix_rpc(
+                                        format!("User {} has been invited. Please wait until user accepts the invitation.", 
+                                        user_name
+                                    ).to_owned(), RoomId::try_from(room_id).unwrap());
                                     matrix_rpc("User has been invited. Please wait until user accepts the invitation.".to_owned(), RoomId::try_from(room_id).unwrap());
                                     Self::invite(
                                         chat::Chat::uuid_string_to_bin(group_id.to_string())
