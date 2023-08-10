@@ -667,12 +667,8 @@ class BleService : LifecycleService() {
                 if (bLEDevice.lastFoundTime != null && (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000)) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     AppLog.e(TAG, " outRangeRunnable-  REMOVE HERE  -> ${bLEDevice.macAddress} ")
-//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
                     devicesList.remove(bLEDevice)
                     ignoreList.remove(bLEDevice)
-//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
-                } else {
-//                    AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
                 }
             }
         }
@@ -839,10 +835,11 @@ class BleService : LifecycleService() {
         bleDevice?.let {
             if (hashMap.containsKey(it.macAddress)) {
                 var queue = hashMap[it.macAddress!!]
-                if(queue!!.size < 2) {
+                if(queue!!.size == 0) {
                     queue?.add(Triple(id, from, message))
                 } else{
                     queue = LinkedList()
+                    queue?.add(Triple(id, from, message))
                 }
                 hashMap[it.macAddress!!] = queue!!
                 mainQueue = queue
@@ -885,8 +882,7 @@ class BleService : LifecycleService() {
                                     TAG,
                                     "-------------------> HERE FOR CONNECTION   sendMessageFromQueu "
                                 )
-                                val bleActor =
-                                    connectDevice(device = bleDevice, isFromMessage = true)
+                                val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
 //                                Handler(Looper.getMainLooper()).postDelayed({
                                 bleActor.messageId = mesTrip.first
                                 val btArray = Gson().toJson(msg).toByteArray()
