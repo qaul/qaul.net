@@ -100,12 +100,27 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     MessageType::Audio(_) => todo!(),
                     MessageType::Emote(_) => todo!(),
                     MessageType::File(FileMessageEventContent {
-                        body: msg_body,
+                        body: file_name,
                         url: file_url,
                         ..
                     }) => {
-                        // TODO : Download from mxc:// URL and store it in database.
-                        println!("{:#?} and \n {}", file_url.as_ref(), msg_body);
+                        let request = MediaRequest {
+                            format: MediaFormat::File,
+                            media_type: MediaType::Uri(file_url.as_ref().unwrap().clone()),
+                        };
+                        let client = MATRIX_CLIENT.get();
+                        let file_bytes = client.get_media_content(&request, true).await.unwrap();
+                        let path_string = Storage::get_path();
+                        let path = Path::new(path_string.as_str());
+                        let output_file_path = path.join(file_name);
+                        let mut file = std::fs::File::create(output_file_path).unwrap();
+                        let _ = file.write_all(&file_bytes);
+                        println!("File Saved Successfully");
+                        send_file_to_qaul(
+                            room.room_id(),
+                            file_name,
+                            format!("{} by {}", file_name, msg_sender),
+                        );
                     }
                     MessageType::Image(ImageMessageEventContent {
                         body: file_name,
@@ -443,23 +458,7 @@ fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) 
             qaul_room.last_index += 1;
         }
     } else {
-        // send to feed from matrix
-        // let proto_message = proto::Feed {
-        //     message: Some(proto::feed::Message::Send(proto::SendMessage {
-        //         content: msg_text,
-        //     })),
-        // };
-
-        // // encode message
-        // let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        // proto_message
-        //     .encode(&mut buf)
-        //     .expect("Vec<u8> provides capacity as needed");
-        // Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
-        // let last_index = config.feed.last_index;
-        // config.feed.last_index = last_index + 1;
-
-        // TODO: Send the file into the feed.
+       println!("Not Possible to send file into feed");
     }
     MatrixConfiguration::save(config.clone());
 }
