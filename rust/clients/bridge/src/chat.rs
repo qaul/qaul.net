@@ -5,13 +5,13 @@
 //!
 //! Request, display and send chat messages from CLI
 
+use super::rpc::Rpc;
 use crate::{
     configuration::MatrixConfiguration,
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+    user_accounts::BOT_USER_ACCOUNT_ID,
     users::QAUL_USERS,
 };
-
-use super::rpc::Rpc;
 use matrix_sdk::{
     room::Room,
     ruma::{
@@ -19,8 +19,14 @@ use matrix_sdk::{
         RoomId,
     },
 };
+use mime::{self, Mime, STAR, STAR_STAR};
 use prost::Message;
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::HashMap,
+    fmt,
+    fs::{self, File},
+    path::PathBuf,
+};
 use tokio::runtime::Runtime;
 
 /// include generated protobuf RPC rust definition file
@@ -207,7 +213,7 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
-    fn analyze_content(content: &Vec<u8>) -> Result<Vec<String>, String> {
+    fn analyze_content(content: &Vec<u8>, room_id: &RoomId) -> Result<Vec<String>, String> {
         let mut res: Vec<String> = vec![];
 
         if let Ok(content_message) = proto::ChatContentMessage::decode(&content[..]) {
@@ -216,19 +222,19 @@ impl Chat {
                     res.push(chat_content.text);
                     return Ok(res);
                 }
+
                 Some(proto::chat_content_message::Message::FileContent(file_content)) => {
-                    res.push(
-                        "file transfer id: ".to_string()
-                            + file_content.file_id.to_string().as_str(),
-                    );
-                    res.push(
-                        " name: ".to_string()
-                            + file_content.file_name.as_str()
-                            + " size: "
-                            + file_content.file_size.to_string().as_str(),
-                    );
+                    let mut file_path = String::new();
+                    file_path.push_str(&file_content.file_id.to_string());
+                    file_path.push('.');
+                    file_path.push_str(&file_content.file_extension.to_string());
+                    println!("Qaul->Matrix FilePath : {}", file_path);
+                    let extension = file_content.file_extension.to_string();
+                    let file_name = file_content.file_name;
+                    send_file_to_matrix(file_path, room_id, extension, file_name);
                     return Ok(res);
                 }
+
                 Some(proto::chat_content_message::Message::GroupEvent(group_event)) => {
                     match proto::GroupEventType::from_i32(group_event.event_type).unwrap() {
                         proto::GroupEventType::Joined => {
@@ -290,42 +296,45 @@ impl Chat {
                         let mut config = MATRIX_CONFIG.get().write().unwrap();
                         if !config.room_map.contains_key(&group_id) {
                             // print all messages in the group list
-                            for message in proto_conversation.message_list {
-                                if let Ok(ss) = Self::analyze_content(&message.content) {
-                                    print! {"{} | ", message.index};
-                                    match proto::MessageStatus::from_i32(message.status).unwrap() {
-                                        proto::MessageStatus::Sending => print!(".. | "),
-                                        proto::MessageStatus::Sent => print!("✓. | "),
-                                        proto::MessageStatus::Confirmed => print!("✓✓ | "),
-                                        proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
-                                        proto::MessageStatus::Receiving => print!("🚚 | "),
-                                        proto::MessageStatus::Received => print!("📨 | "),
-                                    }
+                            // for message in proto_conversation.message_list {
+                            //     if let Ok(ss) = Self::analyze_content(&message.content) {
+                            //         print! {"{} | ", message.index};
+                            //         match proto::MessageStatus::from_i32(message.status).unwrap() {
+                            //             proto::MessageStatus::Sending => print!(".. | "),
+                            //             proto::MessageStatus::Sent => print!("✓. | "),
+                            //             proto::MessageStatus::Confirmed => print!("✓✓ | "),
+                            //             proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
+                            //             proto::MessageStatus::Receiving => print!("🚚 | "),
+                            //             proto::MessageStatus::Received => print!("📨 | "),
+                            //         }
 
-                                    print!("{} | ", message.sent_at);
-                                    println!("{}", bs58::encode(message.sender_id).into_string());
-                                    println!(
-                                        " [{}] {}",
-                                        bs58::encode(message.message_id).into_string(),
-                                        message.received_at
-                                    );
+                            //         print!("{} | ", message.sent_at);
+                            //         println!("{}", bs58::encode(message.sender_id).into_string());
+                            //         println!(
+                            //             " [{}] {}",
+                            //             bs58::encode(message.message_id).into_string(),
+                            //             message.received_at
+                            //         );
 
-                                    for s in ss {
-                                        // This part does not have any mapping with matrix room.
-                                        // Show and navigate with help command.
-                                        QaulMenu::help(group_id_byte.clone());
-                                        println!("\t{}", s);
-                                    }
-                                    println!("");
-                                }
-                            }
+                            //         for s in ss {
+                            //             // This part does not have any mapping with matrix room.
+                            //             // Show and navigate with help command.
+                            //             QaulMenu::help(group_id_byte.clone());
+                            //             println!("\t{}", s);
+                            //         }
+                            //         println!("");
+                            //     }
+                            // }
+                            println!("No Mapping found");
                         } else {
                             let matrix_room = config.room_map.get_mut(&group_id).unwrap();
                             let last_index_grp = matrix_room.last_index;
                             let room_id = matrix_room.clone().matrix_room_id;
                             for message in proto_conversation.message_list {
-                                if let Ok(ss) = Self::analyze_content(&message.content) {
-                                    if message.index > last_index_grp {
+                                if message.index > last_index_grp {
+                                    if let Ok(ss) =
+                                        Self::analyze_content(&message.content, &room_id)
+                                    {
                                         print! {"{} | ", message.index};
                                         // message.sender_id is same as user.id
                                         match proto::MessageStatus::from_i32(message.status)
@@ -415,4 +424,36 @@ impl QaulMenu {
         Chat::send_chat_message(group_id, msg);
         //
     }
+}
+
+fn send_file_to_matrix(file_path: String, room_id: &RoomId, extension: String, file_name: String) {
+    let path = std::env::current_dir().unwrap();
+    let mut storage_path = path.as_path().to_str().unwrap().to_string();
+    let user = BOT_USER_ACCOUNT_ID.get();
+    storage_path.push_str(&format!("/{}", user));
+    storage_path.push_str(&format!("/files/{}", file_path));
+
+    let matrix_client = MATRIX_CLIENT.get();
+    let room = matrix_client.get_room(&room_id).unwrap();
+    if let Room::Joined(room) = room {
+        // Build the message content to send to matrix
+        let rt = Runtime::new().unwrap();
+        rt.block_on(async {
+            // Sends messages into the matrix room
+            let file_buff = PathBuf::from(storage_path.clone());
+            let mut buff = File::open(file_buff).unwrap();
+            let mut content_type: &Mime = &STAR_STAR;
+            println!("{}", extension);
+            match extension.as_str() {
+                "jpg" | "png" | "jpeg" | "gif" | "bmp" | "svg" => content_type = &mime::IMAGE_STAR,
+                "pdf" => content_type = &mime::APPLICATION_PDF,
+                _ => println!("Please raise a github ticket since we don't allow this file-type."),
+            }
+            room.send_attachment(&file_name, content_type, &mut buff, None)
+                .await
+                .unwrap();
+        });
+        // Delete the file from bot server.
+        fs::remove_file(storage_path).expect("could not remove file");
+    };
 }
