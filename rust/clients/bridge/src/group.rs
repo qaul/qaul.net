@@ -668,7 +668,7 @@ impl Group {
                                 for member in members {
                                     let user_name = chat::Chat::find_user_for_given_id(
                                         users.clone(),
-                                        bs58::encode(member.user_id).into_string(),
+                                        bs58::encode(member.clone().user_id).into_string(),
                                     )
                                     .unwrap();
                                     let mut isAdmin = String::new();
@@ -678,7 +678,7 @@ impl Group {
                                         isAdmin.push_str("Member");
                                     }
                                     member_string
-                                        .push_str(&format!("{} : {}({})\n", i, user_name, isAdmin));
+                                        .push_str(&format!("{} : {}({}) | Peer ID : {}\n", i, user_name, isAdmin,bs58::encode(member.user_id).into_string()));
                                     i += 1;
                                 }
                                 let message_format = format!("# Group Information \n\nGroup ID : {}\nCreated at : {}\nList of Members : \n{}",group_id,creation_time,member_string);
