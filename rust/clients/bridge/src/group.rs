@@ -664,7 +664,7 @@ impl Group {
                                 let members = group_info_response.members;
                                 let mut member_string = String::new();
                                 let users = QAUL_USERS.get();
-                                let i = 1;
+                                let mut i = 1;
                                 for member in members {
                                     let user_name = chat::Chat::find_user_for_given_id(
                                         users.clone(),
@@ -679,6 +679,7 @@ impl Group {
                                     }
                                     member_string
                                         .push_str(&format!("{} : {}({})\n", i, user_name, isAdmin));
+                                    i += 1;
                                 }
                                 let message_format = format!("# Group Information \n\nGroup ID : {}\nCreated at : {}\nList of Members : \n{}",group_id,creation_time,member_string);
                                 matrix_rpc(message_format, RoomId::try_from(room_id).unwrap());

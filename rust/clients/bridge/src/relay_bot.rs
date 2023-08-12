@@ -11,21 +11,31 @@ use super::rpc::Rpc;
 use config::*;
 use libqaul::storage::Storage;
 use matrix_sdk::{
+    media::{MediaEventContent, MediaFormat, MediaRequest, MediaType},
     room::Room,
     ruma::{
         events::{
             room::{
                 member::MemberEventContent,
-                message::{MessageEventContent, MessageType, TextMessageEventContent},
+                message::{
+                    FileMessageEventContent, ImageMessageEventContent, MessageEventContent,
+                    MessageType, TextMessageEventContent,
+                },
             },
             AnyMessageEventContent, MessageEventType, StrippedStateEvent, SyncMessageEvent,
         },
+        identifiers::_macros::mxc_uri,
         RoomId,
     },
     Client, ClientConfig, SyncSettings,
 };
 use prost::Message;
-use tokio::time::{sleep, Duration};
+// use std::fs::File;
+use std::io::prelude::*;
+use tokio::{
+    runtime::Runtime,
+    time::{sleep, Duration},
+};
 use url::Url;
 use uuid::Uuid;
 // static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
@@ -36,7 +46,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
 }
-use crate::{chat, configuration::MatrixRoom, group, users};
+use crate::{chat, chatfile, configuration::MatrixRoom, group, users};
 
 // Setup a storage object for the Client to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
@@ -89,8 +99,37 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                 match msgtype {
                     MessageType::Audio(_) => todo!(),
                     MessageType::Emote(_) => todo!(),
-                    MessageType::File(_) => todo!(),
-                    MessageType::Image(_) => todo!(),
+                    MessageType::File(FileMessageEventContent {
+                        body: msg_body,
+                        url: file_url,
+                        ..
+                    }) => {
+                        // TODO : Download from mxc:// URL and store it in database.
+                        println!("{:#?} and \n {}", file_url.as_ref(), msg_body);
+                    }
+                    MessageType::Image(ImageMessageEventContent {
+                        body: file_name,
+                        url: image_url,
+                        ..
+                    }) => {
+                        let request = MediaRequest {
+                            format: MediaFormat::File,
+                            media_type: MediaType::Uri(image_url.as_ref().unwrap().clone()),
+                        };
+                        let client = MATRIX_CLIENT.get();
+                        let file_bytes = client.get_media_content(&request, true).await.unwrap();
+                        let path_string = Storage::get_path();
+                        let path = Path::new(path_string.as_str());
+                        let output_file_path = path.join(file_name);
+                        let mut file = std::fs::File::create(output_file_path).unwrap();
+                        let _ = file.write_all(&file_bytes);
+                        println!("File Saved Successfully");
+                        send_file_to_qaul(
+                            room.room_id(),
+                            file_name,
+                            format!("{} by {}", file_name, msg_sender),
+                        );
+                    }
                     MessageType::Location(_) => todo!(),
                     MessageType::Notice(_) => todo!(),
                     MessageType::ServerNotice(_) => todo!(),
@@ -385,6 +424,43 @@ fn send_qaul(msg_text: String, room_id: &RoomId) {
         config.feed.last_index = last_index + 1;
     }
 
+    MatrixConfiguration::save(config.clone());
+}
+
+fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) {
+    println!("File from Matrix arrived in Qaul");
+    let mut config = MATRIX_CONFIG.get().write().unwrap();
+    // config.room_map; Find the key corresponsing to given value and use feed to send msg to the mapped gropID.
+    // forward the message in that qaul group instead of feed.
+    let qaul_id = find_key_for_value(config.room_map.clone(), room_id.clone());
+    if qaul_id.is_some() {
+        chatfile::ChatFile::send_file(
+            chat::Chat::uuid_string_to_bin(qaul_id.unwrap().to_string()).unwrap(),
+            file_name.clone(),
+            description,
+        );
+        if let Some(qaul_room) = config.room_map.get_mut(&qaul_id.unwrap()) {
+            qaul_room.last_index += 1;
+        }
+    } else {
+        // send to feed from matrix
+        // let proto_message = proto::Feed {
+        //     message: Some(proto::feed::Message::Send(proto::SendMessage {
+        //         content: msg_text,
+        //     })),
+        // };
+
+        // // encode message
+        // let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        // proto_message
+        //     .encode(&mut buf)
+        //     .expect("Vec<u8> provides capacity as needed");
+        // Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        // let last_index = config.feed.last_index;
+        // config.feed.last_index = last_index + 1;
+
+        // TODO: Send the file into the feed.
+    }
     MatrixConfiguration::save(config.clone());
 }
 

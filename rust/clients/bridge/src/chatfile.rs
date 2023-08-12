@@ -116,7 +116,7 @@ impl ChatFile {
     }
 
     /// send file via rpc
-    fn send_file(group_id: Vec<u8>, file_name: String, description: String) {
+    pub fn send_file(group_id: Vec<u8>, file_name: String, description: String) {
         // create file send message
         let proto_message = proto::ChatFile {
             message: Some(proto::chat_file::Message::SendFileRequest(
