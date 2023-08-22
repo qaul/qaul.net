@@ -609,7 +609,7 @@ impl Group {
                                     );
                                 } else {
                                     // Invite user into this group.
-                                    let users = QAUL_USERS.get();
+                                    let users = QAUL_USERS.get().read().unwrap();
                                     let user_name = chat::Chat::find_user_for_given_id(
                                         users.clone(),
                                         qaul_user_id.to_owned(),
@@ -663,7 +663,7 @@ impl Group {
                                 let creation_time = group_info_response.created_at;
                                 let members = group_info_response.members;
                                 let mut member_string = String::new();
-                                let users = QAUL_USERS.get();
+                                let users = QAUL_USERS.get().read().unwrap();
                                 let mut i = 1;
                                 for member in members {
                                     let user_name = chat::Chat::find_user_for_given_id(

@@ -349,7 +349,7 @@ impl Chat {
                                         }
 
                                         print!("{} | ", message.sent_at);
-                                        let users = QAUL_USERS.get();
+                                        let users = QAUL_USERS.get().read().unwrap();
                                         println!("{:#?}", users);
                                         let sender_id =
                                             bs58::encode(message.sender_id).into_string();
