@@ -338,7 +338,7 @@ impl Group {
     }
 
     /// group invited
-    fn group_invited() {
+    pub fn group_invited() {
         // group list send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInvitedRequest(
@@ -815,7 +815,6 @@ impl Group {
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
                         // List of pending invites
-                        println!("=============List Of Invited=================");
                         for invite in group_invited_response.invited {
                             if let Some(group) = invite.group {
                                 let group_id = uuid::Uuid::from_bytes(
