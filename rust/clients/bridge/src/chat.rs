@@ -213,7 +213,22 @@ impl Chat {
         Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
-    fn analyze_content(content: &Vec<u8>, room_id: &RoomId) -> Result<Vec<String>, String> {
+    fn analyze_content(
+        message: &proto::ChatMessage,
+        room_id: &RoomId,
+    ) -> Result<Vec<String>, String> {
+        loop {
+            match proto::MessageStatus::from_i32(message.status).unwrap() {
+                proto::MessageStatus::Sending => print!("Sending Qaul Message"),
+                proto::MessageStatus::Sent => print!("Sent Qaul Message"),
+                proto::MessageStatus::Confirmed => print!("Confirmed"),
+                proto::MessageStatus::ConfirmedByAll => print!("Confirming Qaul Message"),
+                proto::MessageStatus::Receiving => print!("Receiving Qaul Message"),
+                proto::MessageStatus::Received => break,
+            }
+        }
+        println!("Message Received from Qaul");
+        let content: &Vec<u8> = &message.content;
         let mut res: Vec<String> = vec![];
 
         if let Ok(content_message) = proto::ChatContentMessage::decode(&content[..]) {
@@ -332,9 +347,7 @@ impl Chat {
                             let room_id = matrix_room.clone().matrix_room_id;
                             for message in proto_conversation.message_list {
                                 if message.index > last_index_grp {
-                                    if let Ok(ss) =
-                                        Self::analyze_content(&message.content, &room_id)
-                                    {
+                                    if let Ok(ss) = Self::analyze_content(&message, &room_id) {
                                         print! {"{} | ", message.index};
                                         // message.sender_id is same as user.id
                                         match proto::MessageStatus::from_i32(message.status)
@@ -440,7 +453,9 @@ fn send_file_to_matrix(file_path: String, room_id: &RoomId, extension: String, f
         let rt = Runtime::new().unwrap();
         rt.block_on(async {
             // Sends messages into the matrix room
+            println!("{}", storage_path);
             let file_buff = PathBuf::from(storage_path.clone());
+            // TODO : Always check for the
             let mut buff = File::open(file_buff).unwrap();
             let mut content_type: &Mime = &STAR_STAR;
             println!("{}", extension);
@@ -454,6 +469,7 @@ fn send_file_to_matrix(file_path: String, room_id: &RoomId, extension: String, f
                 .unwrap();
         });
         // Delete the file from bot server.
+        println!("Deleting file from : {}", storage_path);
         fs::remove_file(storage_path).expect("could not remove file");
     };
 }
