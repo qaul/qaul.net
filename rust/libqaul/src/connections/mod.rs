@@ -10,10 +10,8 @@ pub mod events;
 pub mod internet;
 pub mod lan;
 
-use libp2p::{
-    noise::{Keypair, X25519Spec},
-    Multiaddr,
-};
+use libp2p::noise::Config as NoiseConfig;
+use libp2p::{identity::Keypair, Multiaddr};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -87,15 +85,15 @@ impl Connections {
     /// initialize connections
     pub async fn init() -> Connections {
         // create transport encryption keys for noise protocol
-        let auth_keys = Keypair::<X25519Spec>::new()
-            .into_authentic(Node::get_keys())
-            .expect("can create auth keys");
+        let auth_keys = Keypair::generate_ed25519();
+        // .into_authentic(Node::get_keys())
+        // .expect("can create auth keys");
 
         // initialize Lan module
-        let lan = Lan::init(auth_keys.clone()).await;
+        let lan = Lan::init(NoiseConfig::new(&auth_keys.clone()).unwrap()).await;
 
         // initialize Internet overlay module
-        let internet = Internet::init(auth_keys).await;
+        let internet = Internet::init(&auth_keys).await;
 
         // initialize BLE  module
         Ble::init();

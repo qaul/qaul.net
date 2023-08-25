@@ -24,8 +24,10 @@ use libp2p::swarm::keep_alive;
 use libp2p::{
     core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
-    identify, mplex,
-    noise::{AuthenticKeypair, NoiseConfig, X25519Spec},
+    identify,
+    identity::Keypair,
+    mplex,
+    noise::Config as NoiseConfig,
     ping,
     swarm::{NetworkBehaviour, Swarm},
     tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
@@ -209,7 +211,7 @@ pub struct Internet {
 
 impl Internet {
     /// Initialize swarm for Internet overlay connection module
-    pub async fn init(auth_keys: AuthenticKeypair<X25519Spec>) -> Self {
+    pub async fn init(auth_keys: &Keypair) -> Self {
         log::trace!("Internet.init() start");
 
         INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
@@ -237,9 +239,9 @@ impl Internet {
 
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
-            .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
+            .authenticate(NoiseConfig::new(auth_keys).unwrap())
             .multiplex(upgrade::SelectUpgrade::new(
-                yamux::YamuxConfig::default(),
+                yamux::Config::default(),
                 mplex::MplexConfig::default(),
             ))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
