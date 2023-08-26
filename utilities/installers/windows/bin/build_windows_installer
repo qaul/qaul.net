@@ -1,6 +1,20 @@
 #!/usr/bin/bash
 set -eo pipefail
 
+#-----------------------------------------------------------------NoticeStart-
+# Utilities
+#
+# Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+# This software is published under the AGPLv3 license.
+#-----------------------------------------------------------------NoticeEnd---
+#
+# dmgbuild
+#
+# DESCRIPTION
+#   Bundles the Windows executable into an installer using InnoSetup.
+#   Although this is a bash script, it expects to be run in a Windows environment.
+#   It has been written in bash out of convenience, since CircleCI supports it.
+#
 # Note: this script uses relative paths, so it's meant to be run from within the bin folder.
 
 BUILD_PATH="../../../../qaul_ui/build/windows/runner/Release"
@@ -29,8 +43,8 @@ if [ ! -d "../${DEPS_PATH}" ]; then mkdir "$DEPS_PATH"; fi
 cp "${BUILD_PATH}/qaul.exe" "$DEPS_PATH"
 # copy libqaul.dll
 cp "$LIBQAUL_DLL" "$DEPS_PATH"
-# copy all *.dll files that flutter bundled with executable
-find "${BUILD_PATH}/" -name '*.dll' -exec cp {} "$DEPS_PATH" \;
+# Run PowerShell command to list DLL files in BUILD_PATH and copy each file to DEPS_PATH
+powershell -command "Get-ChildItem '$BUILD_PATH' -Filter *.dll | ForEach-Object { Copy-Item -Path \$_.FullName -Destination '$DEPS_PATH' }"
 # copy entire data folder
 cp -R "${BUILD_PATH}/data" "$DEPS_PATH"
 
