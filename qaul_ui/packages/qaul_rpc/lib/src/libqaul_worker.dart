@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:protobuf/protobuf.dart' as pb;
 import 'package:utils/utils.dart';
 import 'package:uuid/uuid.dart';
@@ -384,30 +383,7 @@ class LibqaulWorker {
     if (res == null) return;
 
     if (res.module == Modules.BLE && res.data is BleRightsRequest) {
-      // TODO mode to ble_translator
-      if (Platform.isAndroid) {
-        final permissions = await [
-          // Permission.bluetooth,
-          Permission.bluetoothScan,
-          Permission.bluetoothConnect,
-          Permission.bluetoothAdvertise
-        ].request();
-
-        final stats = <String>[];
-        for (final p in permissions.entries) {
-          stats.add('\n\t· ${p.key}: ${p.value}');
-        }
-        Future.delayed(const Duration(seconds: 5)).then((value) => _log.config(
-            '[Android] Required BLE Permission Statuses: ${stats.join()}'));
-
-        final msg = Ble(
-          rightsResult: RightsResult(
-              rightsGranted: permissions.values
-                  .where((p) => p != PermissionStatus.granted)
-                  .isEmpty),
-        );
-        await _sendMessage(Modules.BLE, msg);
-      }
+      _log.fine('BleRightsRequest received, must be handled by native code');
       return;
     }
     if (res.module != Modules.DEBUG) {
