@@ -175,7 +175,7 @@ class _InternetNodesList extends HookConsumerWidget {
             rowCount: nodes.length,
             onAddRowPressed: () async {
               final res = await showDialog(
-                  context: context, builder: (_) => _AddNodeDialog());
+                  context: context, builder: (_) => const _AddNodeDialog());
 
               if (res is! _AddNodeDialogResponse) return;
 
@@ -238,7 +238,7 @@ class _InternetNodesList extends HookConsumerWidget {
                 onPressed: () async {
                   final res = await showDialog(
                     context: context,
-                    builder: (_) => _AddNodeDialog(isIPv4: false),
+                    builder: (_) => const _AddNodeDialog(isIPv4: false),
                   );
 
                   if (res is! _AddNodeDialogResponse) return;
@@ -263,7 +263,7 @@ class _AddNodeDialogResponse {
 }
 
 class _AddNodeDialog extends HookWidget {
-  _AddNodeDialog({
+  const _AddNodeDialog({
     Key? key,
     this.name,
     this.ip,
@@ -277,8 +277,6 @@ class _AddNodeDialog extends HookWidget {
 
   /// If [false], will be considered IPv6
   final bool isIPv4;
-
-  final _formKey = GlobalKey<FormState>();
 
   String get _descriptor => isIPv4 ? '/ip4/' : '/ip6/';
 
@@ -306,89 +304,95 @@ class _AddNodeDialog extends HookWidget {
     final portCtrl = useTextEditingController(text: port);
 
     final l10n = AppLocalizations.of(context)!;
-    var orientation = MediaQuery.of(context).orientation;
-    final tcpField = [
-      _spacer,
-      Text('/tcp/', style: _fixedTextStyle),
-      _spacer,
-      Expanded(
-        child: TextFormField(
-          controller: portCtrl,
-          decoration: _decoration('port', hint: '9229'),
-          keyboardType: TextInputType.number,
-          validator: (val) {
-            if (isValidPort(val)) return null;
-            return l10n.invalidPortMessage;
-          },
-        ),
-      ),
-    ];
+    final orientation = MediaQuery.of(context).orientation;
 
-    return AlertDialog(
-      title:
-          orientation == Orientation.landscape ? null : Text(l10n.addNodeCTA),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              autofocus: true,
-              controller: nameCtrl,
-              decoration: _decoration(l10n.name),
-              keyboardType: TextInputType.name,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_descriptor, style: _fixedTextStyle),
-                _spacer,
-                Expanded(
-                  child: TextFormField(
-                    controller: ipCtrl,
-                    inputFormatters: [_formatter],
-                    decoration: _decoration('ip', hint: _hint),
-                    validator: (val) {
-                      if (_isValidIP(val)) return null;
-                      return l10n.invalidIPMessage;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    enableInteractiveSelection: false,
-                  ),
-                ),
-                if (orientation == Orientation.landscape) ...tcpField,
-              ],
-            ),
-            if (orientation == Orientation.portrait) ...[
-              const SizedBox(height: 20),
-              Row(children: tcpField),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(l10n.okDialogButton),
-          onPressed: () {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
-            Navigator.pop(
-              context,
-              _buildIPAddress(
-                ip: ipCtrl.text,
-                port: portCtrl.text,
-                name: nameCtrl.text,
-              ),
-            );
-          },
-        ),
-        TextButton(
-          child: Text(l10n.cancelDialogButton),
-          onPressed: () => Navigator.pop(context),
+    final tcpField = useMemoized(
+      () => [
+        _spacer,
+        Text('/tcp/', style: _fixedTextStyle),
+        _spacer,
+        Expanded(
+          child: TextFormField(
+            controller: portCtrl,
+            decoration: _decoration('port', hint: '9229'),
+            keyboardType: TextInputType.number,
+            validator: (val) {
+              if (isValidPort(val)) return null;
+              return l10n.invalidPortMessage;
+            },
+          ),
         ),
       ],
+      [portCtrl],
+    );
+
+    return Form(
+      child: Builder(builder: (context) {
+        return AlertDialog(
+          title: orientation == Orientation.landscape
+              ? null
+              : Text(l10n.addNodeCTA),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                autofocus: true,
+                controller: nameCtrl,
+                decoration: _decoration(l10n.name),
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_descriptor, style: _fixedTextStyle),
+                  _spacer,
+                  Expanded(
+                    child: TextFormField(
+                      controller: ipCtrl,
+                      inputFormatters: [_formatter],
+                      decoration: _decoration('ip', hint: _hint),
+                      validator: (val) {
+                        if (_isValidIP(val)) return null;
+                        return l10n.invalidIPMessage;
+                      },
+                      keyboardType: isIPv4
+                          ? const TextInputType.numberWithOptions(decimal: true)
+                          : TextInputType.text,
+                      enableInteractiveSelection: false,
+                    ),
+                  ),
+                  if (orientation == Orientation.landscape) ...tcpField,
+                ],
+              ),
+              if (orientation == Orientation.portrait) ...[
+                const SizedBox(height: 20),
+                Row(children: tcpField),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(l10n.okDialogButton),
+              onPressed: () {
+                if (Form.of(context).validate() == false) return;
+                Navigator.pop(
+                  context,
+                  _buildIPAddress(
+                    ip: ipCtrl.text,
+                    port: portCtrl.text,
+                    name: nameCtrl.text,
+                  ),
+                );
+              },
+            ),
+            TextButton(
+              child: Text(l10n.cancelDialogButton),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      }),
     );
   }
 
