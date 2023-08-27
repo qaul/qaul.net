@@ -6,7 +6,6 @@
 //! This client uses all the functionality of the qaul-cli
 //! and implements Matrix bridge over
 
-use async_std::io;
 use futures_ticker::Ticker;
 use uuid::Uuid;
 //use async_std::stream;
@@ -14,15 +13,14 @@ use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use std::collections::HashMap;
-use std::{thread, env};
 use std::time::Duration;
+use std::{env, thread};
 
 use libqaul;
 
 mod ble;
 mod chat;
 mod chatfile;
-mod cli;
 mod configuration;
 mod connections;
 mod debug;
@@ -37,12 +35,10 @@ mod rtc;
 mod user_accounts;
 mod users;
 
-use cli::Cli;
 use rpc::Rpc;
 use user_accounts::UserAccounts;
 /// Events of the async loop
 enum EventType {
-    Cli(String),
     Rpc(bool),
 }
 
@@ -80,8 +76,6 @@ async fn main() {
     }
     // initialize user accounts
     UserAccounts::init();
-    // listen for new commands from CLI
-    let mut stdin = io::BufReader::new(io::stdin()).lines();
 
     thread::spawn(|| {
         // connect the matrix bot with the qaul-cli
@@ -107,7 +101,6 @@ async fn main() {
     // loop and poll CLI and RPC
     loop {
         let evt = {
-            let line_fut = stdin.next().fuse();
             let rpc_fut = futures_ticker.next().fuse();
             let feed_fut = feed_ticker.next().fuse();
             let group_fut = group_ticker.next().fuse();
@@ -115,15 +108,14 @@ async fn main() {
             let invited_fut = invited_ticker.next().fuse();
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
             // You need to downgrade to version 0.2.400 if this happens to you
-            pin_mut!(line_fut);
+
             pin_mut!(rpc_fut);
             pin_mut!(feed_fut);
             pin_mut!(group_fut);
             pin_mut!(users_fut);
             pin_mut!(invited_fut);
             select! {
-                line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
-                _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
+               _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
                 _feed_ticker = feed_fut => {
                     if let Ok(config) = MATRIX_CONFIG.get().read() {
                         let last_index = &config.feed.last_index;
@@ -164,9 +156,6 @@ async fn main() {
 
         if let Some(event) = evt {
             match event {
-                EventType::Cli(line) => {
-                    Cli::process_command(line);
-                }
                 EventType::Rpc(_) => match libqaul::api::receive_rpc() {
                     Ok(data) => {
                         Rpc::received_message(data);
