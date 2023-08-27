@@ -11,7 +11,7 @@ use super::rpc::Rpc;
 use config::*;
 use libqaul::storage::Storage;
 use matrix_sdk::{
-    media::{MediaEventContent, MediaFormat, MediaRequest, MediaType},
+    media::{MediaFormat, MediaRequest, MediaType},
     room::Room,
     ruma::{
         events::{
@@ -22,9 +22,8 @@ use matrix_sdk::{
                     MessageType, TextMessageEventContent,
                 },
             },
-            AnyMessageEventContent, MessageEventType, StrippedStateEvent, SyncMessageEvent,
+            AnyMessageEventContent, StrippedStateEvent, SyncMessageEvent,
         },
-        identifiers::_macros::mxc_uri,
         RoomId,
     },
     Client, ClientConfig, SyncSettings,
@@ -32,10 +31,7 @@ use matrix_sdk::{
 use prost::Message;
 // use std::fs::File;
 use std::io::prelude::*;
-use tokio::{
-    runtime::Runtime,
-    time::{sleep, Duration},
-};
+use tokio::time::{sleep, Duration};
 use url::Url;
 use uuid::Uuid;
 // static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
@@ -167,7 +163,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             // on receiving !help from matrix, Give brief of all possible commands.
                             if msg_body.contains("!help") {
                                 let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
-                                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n!group-info : Get details for the qaul group with which this matrix room is connected.",
+                                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n !remove {qaul_user_id} : To remove a user from the qaul into this matrix room.\n!group-info : Get details for the qaul group with which this matrix room is connected.",
                                 ));
                                 room.send(content, None).await.unwrap();
                             }
@@ -194,7 +190,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                     println!("{}", request_id);
                                     // Create group only if the mapping between a qaul grp and matrix room doesn't exist.
                                     // If it exist then please check if user already exist or not. If not then invite :)
-                                    let mut config = MATRIX_CONFIG.get().write().unwrap().clone();
+                                    let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                     let room_id = room.room_id();
                                     let qaul_group_id: Option<Uuid> = find_key_for_value(
                                         config.room_map.clone(),
@@ -257,7 +253,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                     println!("{}", request_id);
                                     // Create group only if the mapping between a qaul grp and matrix room doesn't exist.
                                     // If it exist then please check if user already exist or not. If not then invite :)
-                                    let mut config = MATRIX_CONFIG.get().write().unwrap().clone();
+                                    let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                     let room_id = room.room_id();
                                     let qaul_group_id: Option<Uuid> = find_key_for_value(
                                         config.room_map.clone(),
@@ -292,7 +288,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
 
                             // on receiving !qaul-info in matrix, You get the details of the group information.
                             if msg_body.contains("!group-info") {
-                                let mut config = MATRIX_CONFIG.get().write().unwrap().clone();
+                                let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                 let room_id = room.room_id();
                                 let qaul_group_id: Option<Uuid> =
                                     find_key_for_value(config.room_map.clone(), room_id.clone());

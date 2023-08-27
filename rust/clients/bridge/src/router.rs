@@ -4,7 +4,6 @@
 //! # Router module functions
 
 use prost::Message;
-use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.router.rs"); }
@@ -13,78 +12,6 @@ mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.
 pub struct Router {}
 
 impl Router {
-    /// CLI command interpretation
-    /// 
-    /// The CLI commands of router module are processed here
-    pub fn cli(command: &str) {
-        match command {
-            // request routing table,
-            // with per module connectivity per user.
-            cmd if cmd.starts_with("table list") => {
-                Self::request_routing_table();
-            },
-            // request neighbours list of all neighbouring nodes.
-            cmd if cmd.starts_with("neighbours list") => {
-                Self::request_neighbours_list();
-            },
-            // request connections table, with all known connections 
-            // per connection module.
-            cmd if cmd.starts_with("connections list") => {
-                Self::request_connections_list();
-            },
-            // unknown command
-            _ => log::error!("unknown router command"),
-        }
-    }
-
-    /// create rpc request for routing table list
-    fn request_routing_table() {
-        // create request message
-        let proto_message = proto::Router {
-            message: Some(proto::router::Message::RoutingTableRequest (
-                proto::RoutingTableRequest {}
-            )),
-        };
-
-        // send message
-        Self::send_message(proto_message);
-    }
-
-    /// create rpc request for neighbours list
-    fn request_neighbours_list() {
-        // create request message
-        let proto_message = proto::Router {
-            message: Some(proto::router::Message::NeighboursRequest (
-                proto::NeighboursRequest {}
-            )),
-        };
-
-        // send message
-        Self::send_message(proto_message);
-    }
-
-    /// create rpc request for connections list
-    fn request_connections_list() {
-        // create request message
-        let proto_message = proto::Router {
-            message: Some(proto::router::Message::ConnectionsRequest (
-                proto::ConnectionsRequest {}
-            )),
-        };
-
-        // send message
-        Self::send_message(proto_message);
-    }
-
-    /// Encode and send protobuf message
-    fn send_message(message: proto::Router) {
-        // encode message
-        let mut buf = Vec::with_capacity(message.encoded_len());
-        message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Router.into(), "".to_string());
-    }
 
     /// Process received RPC message
     /// 

@@ -26,56 +26,6 @@ use matrix_sdk::{
 pub struct Feed {}
 
 impl Feed {
-    /// CLI command interpretation
-    /// 
-    /// The CLI commands of feed module are processed here
-    pub fn cli(command: &str) {
-        match command {
-            // send feed message
-            cmd if cmd.starts_with("send ") => {
-                Self::send_feed_message(cmd.strip_prefix("send ").unwrap().to_string());
-            },
-            // request feed list
-            cmd if cmd.starts_with("list") => {
-                match cmd.strip_prefix("list ") {
-                    Some(index_str) => {
-                        if let Ok(index) = index_str.parse::<u64>() {
-                            // request messages
-                            Self::request_feed_list(index);
-                        }
-                        else {
-                            log::error!("feed list index is not a valid number");
-                        }
-                    },
-                    None => {
-                        // request all messages
-                        Self::request_feed_list(0);
-                    }
-                }
-            },
-            // unknown command
-            _ => log::error!("unknown feed command"),
-        }
-    }
-
-    /// create and send feed message via rpc
-    fn send_feed_message(message_text: String) {
-        // create feed send message
-        let proto_message = proto::Feed {
-            message: Some(proto::feed::Message::Send(
-                proto::SendMessage{
-                    content: message_text,
-                }
-            )),
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
-    }
 
     /// request feed list via rpc
     pub fn request_feed_list(last_index: u64) {
