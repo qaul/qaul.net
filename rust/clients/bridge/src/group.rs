@@ -10,7 +10,7 @@ use crate::{
     chat,
     configuration::{MatrixConfiguration, MatrixRoom},
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
-    users::{self, QAUL_USERS},
+    users::{QAUL_USERS},
 };
 use libp2p::PeerId;
 use matrix_sdk::{
@@ -41,185 +41,6 @@ mod proto_chat {
 pub struct Group {}
 
 impl Group {
-    /// CLI command interpretation
-    ///
-    /// The CLI commands of group module are processed here
-    pub fn cli(command: &str) {
-        match command {
-            // create group
-            cmd if cmd.starts_with("create ") => {
-                let command_string = cmd.strip_prefix("create ").unwrap().to_string();
-                let group_name = command_string.trim().to_string();
-
-                if group_name.len() > 0 {
-                    // We pass empty room_id so that normal qaul groups do not get disturbed.
-                    Self::create_group(group_name.clone(), "".to_string());
-                } else {
-                    log::error!("group create command incorrectly formatted");
-                }
-            }
-            // rename group
-            cmd if cmd.starts_with("rename ") => {
-                let command_string = cmd.strip_prefix("rename ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            let group_name = command_string
-                                .strip_prefix(group_id_str.clone())
-                                .unwrap()
-                                .to_string()
-                                .trim()
-                                .to_string();
-
-                            if group_name.len() > 0 {
-                                Self::rename_group(group_id, group_name.to_string());
-                            } else {
-                                log::error!("group name is missing");
-                            }
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group create command incorrectly formatted");
-                }
-            }
-            // group info
-            cmd if cmd.starts_with("info ") => {
-                let command_string = cmd.strip_prefix("info ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            Self::group_info(group_id, "".to_owned());
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group create command incorrectly formatted");
-                }
-            }
-            // group list
-            cmd if cmd.starts_with("list") => {
-                //let command_string = cmd.strip_prefix("list ").unwrap().to_string();
-                Self::group_list();
-            }
-            // group list
-            cmd if cmd.starts_with("invited") => {
-                Self::group_invited();
-            }
-            // group invite
-            cmd if cmd.starts_with("invite ") => {
-                let command_string = cmd.strip_prefix("invite ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            if let Some(user_id_str) = iter.next() {
-                                match Self::id_string_to_bin(user_id_str.to_string()) {
-                                    Ok(user_id) => {
-                                        Self::invite(group_id, user_id);
-                                    }
-                                    Err(e) => {
-                                        log::error!("{}", e);
-                                        return;
-                                    }
-                                }
-                            } else {
-                                log::error!("user id is not given");
-                            }
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group create command incorrectly formatted");
-                }
-            }
-            // accept invite
-            cmd if cmd.starts_with("accept ") => {
-                let command_string = cmd.strip_prefix("accept ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            Self::reply_invite(group_id, true);
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group accept command incorrectly formatted");
-                }
-            }
-            // decline invite
-            cmd if cmd.starts_with("decline ") => {
-                let command_string = cmd.strip_prefix("decline ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            Self::reply_invite(group_id, false);
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group accept command incorrectly formatted");
-                }
-            }
-            // remove member
-            cmd if cmd.starts_with("remove ") => {
-                let command_string = cmd.strip_prefix("remove ").unwrap().to_string();
-                let mut iter = command_string.split_whitespace();
-
-                if let Some(group_id_str) = iter.next() {
-                    match Self::uuid_string_to_bin(group_id_str.to_string()) {
-                        Ok(group_id) => {
-                            if let Some(user_id_str) = iter.next() {
-                                match Self::id_string_to_bin(user_id_str.to_string()) {
-                                    Ok(user_id) => {
-                                        Self::remove_member(group_id, user_id);
-                                    }
-                                    Err(e) => {
-                                        log::error!("{}", e);
-                                        return;
-                                    }
-                                }
-                            } else {
-                                log::error!("user id is not given");
-                            }
-                        }
-                        Err(e) => {
-                            log::error!("{}", e);
-                            return;
-                        }
-                    }
-                } else {
-                    log::error!("group remove command incorrectly formatted");
-                }
-            }
-            // unknown command
-            _ => log::error!("unknown group command"),
-        }
-    }
 
     /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
@@ -265,32 +86,6 @@ impl Group {
 
         // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Group.into(), request_id);
-    }
-
-    /// rename group
-    fn rename_group(group_id: Vec<u8>, group_name: String) {
-        // rename group send message
-        let proto_message = proto::Group {
-            message: Some(proto::group::Message::GroupRenameRequest(
-                proto::GroupRenameRequest {
-                    group_name: group_name.clone(),
-                    group_id: group_id.clone(),
-                },
-            )),
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(
-            buf,
-            super::rpc::proto::Modules::Group.into(),
-            "".to_string(),
-        );
     }
 
     /// group info
@@ -431,53 +226,6 @@ impl Group {
             "".to_string(),
         );
     }
-
-    /// Process the last message & print it's content
-    // fn print_last_message(data: Vec<u8>) {
-    //     if let Ok(content_message) = proto_chat::ChatContentMessage::decode(&data[..]) {
-    //         match content_message.message {
-    //             Some(proto_chat::chat_content_message::Message::ChatContent(chat_content)) => {
-    //                 println!("\t\t{}", chat_content.text);
-    //             }
-    //             Some(proto_chat::chat_content_message::Message::FileContent(file_content)) => {
-    //                 println!(
-    //                     "\t\tfile {} [{}] ID {}",
-    //                     file_content.file_name,
-    //                     file_content.file_size.to_string(),
-    //                     file_content.file_id.to_string()
-    //                 );
-    //                 println!("\t\t{}", file_content.file_description);
-    //             }
-    //             Some(proto_chat::chat_content_message::Message::GroupEvent(group_event)) => {
-    //                 match proto_chat::GroupEventType::from_i32(group_event.event_type).unwrap() {
-    //                     proto_chat::GroupEventType::Joined => {
-    //                         println!(
-    //                             "\t\tNew user joined group, user id: {}",
-    //                             bs58::encode(group_event.user_id).into_string()
-    //                         );
-    //                     }
-    //                     proto_chat::GroupEventType::Left => {
-    //                         println!(
-    //                             "\t\tUser left group, user id: {}",
-    //                             bs58::encode(group_event.user_id).into_string()
-    //                         );
-    //                     }
-    //                     proto_chat::GroupEventType::Removed => {
-    //                         println!("\t\tYou have been removed from this group.");
-    //                     }
-    //                     proto_chat::GroupEventType::Created => {
-    //                         println!("\t\tYou created this group");
-    //                     }
-    //                     proto_chat::GroupEventType::InviteAccepted => {
-    //                         println!("\t\tYou accepted the invitation");
-    //                     }
-    //                     _ => {}
-    //                 }
-    //             }
-    //             None => {}
-    //         }
-    //     }
-    // }
 
     /// Process received RPC message
     ///
@@ -659,7 +407,6 @@ impl Group {
 
                             if cmd == "info" {
                                 let group_id = group_id.to_string();
-                                let group_name = group_info_response.group_name.clone();
                                 let creation_time = group_info_response.created_at;
                                 let members = group_info_response.members;
                                 let mut member_string = String::new();
@@ -671,14 +418,14 @@ impl Group {
                                         bs58::encode(member.clone().user_id).into_string(),
                                     )
                                     .unwrap();
-                                    let mut isAdmin = String::new();
+                                    let mut is_admin = String::new();
                                     if member.role == 255 {
-                                        isAdmin.push_str("Admin");
+                                        is_admin.push_str("Admin");
                                     } else {
-                                        isAdmin.push_str("Member");
+                                        is_admin.push_str("Member");
                                     }
                                     member_string
-                                        .push_str(&format!("{} : {}({}) | Peer ID : {}\n", i, user_name, isAdmin,bs58::encode(member.user_id).into_string()));
+                                        .push_str(&format!("{} : {}({}) | Peer ID : {}\n", i, user_name, is_admin,bs58::encode(member.user_id).into_string()));
                                     i += 1;
                                 }
                                 let message_format = format!("# Group Information \n\nGroup ID : {}\nCreated at : {}\nList of Members : \n{}",group_id,creation_time,member_string);
@@ -687,19 +434,14 @@ impl Group {
                         }
                     }
                     Some(proto::group::Message::GroupListResponse(group_list_response)) => {
-                        // List groups
-                        // println!("=============List Of Groups=================");
                         let all_groups = group_list_response.groups.clone();
 
                         let mut config = MATRIX_CONFIG.get().write().unwrap();
-                        // Create a HashMap for mapping. OR Deserialize from existing config.
-                        // let mut qaul_groups = QAUL_GROUPS.get().write().unwrap();
-                        for group in all_groups {
+                       for group in all_groups {
                             // If Mapping exist let it be. Else create new room.
                             let group_id =
                                 uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
                             // qaul_groups.insert(group_id, group.group_name.clone());
-                            // Currently we have user_id and not user_name. Shall we do this ? Or If yes then how to get
                             let mut qaul_room_admin = format!("@qaul://{}", "[username]");
                             for member in group.members {
                                 if member.role == 255 {
@@ -749,69 +491,7 @@ impl Group {
                                 }
                             }
                         }
-                        // for group in group_list_response.groups {
-                        //     let group_id =
-                        //         uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
-                        //     // Mapping of groups with qaul Room;
-                        //     let group_type: String;
-                        //     match group.is_direct_chat {
-                        //         true => group_type = "Direct".to_string(),
-                        //         false => group_type = "Group".to_string(),
-                        //     }
-                        //     println!(
-                        //         "{} {} {}",
-                        //         group_type,
-                        //         group_id.to_string(),
-                        //         group.group_name.clone()
-                        //     );
-                        //     print!("\tstatus: ");
-                        //     match proto::GroupStatus::from_i32(group.status) {
-                        //         Some(proto::GroupStatus::Active) => println!("Active"),
-                        //         Some(proto::GroupStatus::InviteAccepted) => {
-                        //             println!("Invite Accepted")
-                        //         }
-                        //         Some(proto::GroupStatus::Deactivated) => println!("Deactivated"),
-                        //         None => println!("NOT SET"),
-                        //     }
-
-                        //     println!(
-                        //         "\tcreated_at: {}, members: {}",
-                        //         group.created_at,
-                        //         group.members.len()
-                        //     );
-                        //     for member in group.members {
-                        //         print!(
-                        //             "\t\t id: {} , state: ",
-                        //             bs58::encode(member.user_id.clone()).into_string()
-                        //         );
-                        //         match proto::GroupMemberState::from_i32(member.state).unwrap() {
-                        //             proto::GroupMemberState::Invited => {
-                        //                 print!("invited , role: ");
-                        //             }
-                        //             proto::GroupMemberState::Activated => {
-                        //                 print!("activated , role: ");
-                        //             }
-                        //         }
-
-                        //         match proto::GroupMemberRole::from_i32(member.role).unwrap() {
-                        //             proto::GroupMemberRole::User => {
-                        //                 println!("user , sent: {}", member.last_message_index);
-                        //             }
-                        //             proto::GroupMemberRole::Admin => {
-                        //                 println!("admin , sent: {}", member.last_message_index);
-                        //             }
-                        //         }
-                        //     }
-                        //     println!("\trevision: {}", group.revision);
-                        //     println!("\tunread messages: {}", group.unread_messages);
-                        //     println!("\tlast message:");
-                        //     println!(
-                        //         "\t\tsent_at: {} from: {}",
-                        //         group.last_message_at,
-                        //         bs58::encode(group.last_message_sender_id).into_string()
-                        //     );
-                        //     Self::print_last_message(group.last_message);
-                        // }
+                      
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
                         // List of pending invites

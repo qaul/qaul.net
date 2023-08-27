@@ -59,47 +59,6 @@ impl UserAccounts {
         None
     }
 
-    /// CLI command interpretation
-    ///
-    /// The CLI commands of user accounts module are processed here
-    pub fn cli(command: &str) {
-        match command {
-            // request default user account
-            cmd if cmd.starts_with("default") => {
-                Self::request_default_account();
-            }
-            // create new user account
-            cmd if cmd.starts_with("create ") => {
-                Self::create_user_account(cmd.strip_prefix("create ").unwrap().to_string());
-            }
-            // unknown command
-            _ => log::error!("unknown account command"),
-        }
-    }
-
-    /// Create new user account
-    fn create_user_account(user_name: String) {
-        // create info request message
-        let proto_message = proto::UserAccounts {
-            message: Some(proto::user_accounts::Message::CreateUserAccount(
-                proto::CreateUserAccount { name: user_name },
-            )),
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(
-            buf,
-            super::rpc::proto::Modules::Useraccounts.into(),
-            "".to_string(),
-        );
-    }
-
     /// Request default user account
     fn request_default_account() {
         // create info request message

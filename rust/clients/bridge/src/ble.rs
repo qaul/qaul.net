@@ -6,7 +6,6 @@
 //! Control functions for the Bluetooth Low Energy Module.
 
 use prost::Message;
-use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
 mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.ble.rs"); }
@@ -16,69 +15,6 @@ mod proto_sys { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.
 pub struct Ble {}
 
 impl Ble {
-    /// CLI command interpretation
-    /// 
-    /// The CLI commands of BLE module are processed here
-    pub fn cli(command: &str) {
-        match command {
-            // request BLE device info
-            cmd if cmd.starts_with("info") => {
-                // create rpc message
-                let proto_message = proto::Ble {
-                    message: Some(proto::ble::Message::InfoRequest(
-                        proto::InfoRequest{}
-                    )),
-                };
-                // send the message
-                Self::rpc_send(proto_message);
-            },
-            // send start request for BLE module
-            cmd if cmd.starts_with("start") => {
-                // create rpc message
-                let proto_message = proto::Ble {
-                    message: Some(proto::ble::Message::StartRequest(
-                        proto::StartRequest{}
-                    )),
-                };
-                // send the message
-                Self::rpc_send(proto_message);
-            },
-            // send stop request for BLE module
-            cmd if cmd.starts_with("stop") => {
-                // create rpc message
-                let proto_message = proto::Ble {
-                    message: Some(proto::ble::Message::StopRequest(
-                        proto::StopRequest{}
-                    )),
-                };
-                // send the message
-                Self::rpc_send(proto_message);
-            },
-            // request discovered devices
-            cmd if cmd.starts_with("discovered") => {
-                // create rpc message
-                let proto_message = proto::Ble {
-                    message: Some(proto::ble::Message::DiscoveredRequest(
-                        proto::DiscoveredRequest{}
-                    )),
-                };
-                // send the message
-                Self::rpc_send(proto_message);
-            },
-            // unknown command
-            _ => log::error!("unknown BLE command"),
-        }
-    }
-
-    /// Send rpc message to libqaul
-    fn rpc_send(proto_message: proto::Ble) {
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
-
-        // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Ble.into(), "".to_string());
-    }
 
     /// Print BLE module information
     fn print_info(info: proto::InfoResponse) {
