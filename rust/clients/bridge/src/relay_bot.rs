@@ -367,24 +367,31 @@ async fn login(
 }
 
 #[tokio::main]
-pub async fn connect() -> Result<(), matrix_sdk::Error> {
+pub async fn connect(arguments: HashMap<usize, String>) -> Result<(), matrix_sdk::Error> {
     println!("Connecting to Matrix Bot");
 
     // Configuration for starting of the bot
     let path_string = Storage::get_path();
     let path = Path::new(path_string.as_str());
     let config_path = path.join("matrix.yaml");
-    let config: MatrixConfiguration = match Config::builder()
+    let mut config: MatrixConfiguration = match Config::builder()
         .add_source(File::with_name(&config_path.to_str().unwrap()))
         .build()
     {
-        Err(e) => {
-            log::error!("{}", e);
-            MatrixConfiguration::default()
-        }
+        Err(_) => MatrixConfiguration::default(),
         Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
     };
-
+    MatrixConfiguration::save(config.clone());
+    if config.relay_bot.homeserver == "" {
+        config.relay_bot.homeserver = arguments.get(&1).unwrap().clone();
+    }
+    if config.relay_bot.bot_id == "" {
+        config.relay_bot.bot_id = arguments.get(&2).unwrap().clone();
+    }
+    if config.relay_bot.bot_password == "" {
+        config.relay_bot.bot_password = arguments.get(&3).unwrap().clone();
+    }
+    MatrixConfiguration::save(config.clone());
     MATRIX_CONFIG.set(RwLock::new(config.clone()));
     login(
         &config.relay_bot.homeserver,
@@ -458,7 +465,7 @@ fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) 
             qaul_room.last_index += 1;
         }
     } else {
-       println!("Not Possible to send file into feed");
+        println!("Not Possible to send file into feed");
     }
     MatrixConfiguration::save(config.clone());
 }
