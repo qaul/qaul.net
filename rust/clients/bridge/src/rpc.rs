@@ -77,7 +77,7 @@ impl Rpc {
                         // TODO: authorisation
                     }
                     Some(proto::Modules::Useraccounts) => {
-                        super::user_accounts::UserAccounts::rpc(message.data);
+                        //super::user_accounts::UserAccounts::rpc(message.data);
                     }
                     Some(proto::Modules::Users) => {
                         super::users::Users::rpc(message.data, message.request_id);
@@ -104,7 +104,7 @@ impl Rpc {
                         super::chatfile::ChatFile::rpc(message.data);
                     }
                     Some(proto::Modules::Group) => {
-                        super::group::Group::rpc(message.data,message.request_id);
+                        super::group::Group::rpc(message.data, message.request_id);
                     }
                     Some(proto::Modules::Rtc) => {
                         super::rtc::Rtc::rpc(message.data);

@@ -36,7 +36,7 @@ mod user_accounts;
 mod users;
 
 use rpc::Rpc;
-use user_accounts::UserAccounts;
+
 /// Events of the async loop
 enum EventType {
     Rpc(bool),
@@ -57,12 +57,15 @@ async fn main() {
         std::thread::sleep(Duration::from_millis(10));
     }
 
+    // Set user account
     // if no account, creating new accounts
     if libqaul::node::user_accounts::UserAccounts::len() == 0 {
+        // TODO: the name of the user account should be configurable
         libqaul::node::user_accounts::UserAccounts::create("Qaul Matrix Bridge Bot".to_owned());
-        println!("Starting the Bridge...");
-        std::thread::sleep(Duration::from_secs(2));
     }
+    let default_user = libqaul::node::user_accounts::UserAccounts::get_default_user().unwrap();
+    // initialize user account
+    user_accounts::UserAccounts::init(default_user);
     println!("Matrix Bot has been initialized as a Qaul User");
 
     // Get the command-line arguments as a collection of strings.
@@ -74,8 +77,6 @@ async fn main() {
     for (index, arg) in args.iter().enumerate().skip(1) {
         arguments.insert(index, arg.to_owned());
     }
-    // initialize user accounts
-    UserAccounts::init();
 
     thread::spawn(|| {
         // connect the matrix bot with the qaul-cli
