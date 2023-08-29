@@ -329,11 +329,11 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             log::trace!("lan connection closed: {:?}", peer_id);
                             Neighbours::delete(ConnectionModule::Lan, peer_id);
                         },
-                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
-                            //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::trace!("lan connection banned: {:?}", peer_id);
-                            Neighbours::delete(ConnectionModule::Lan, peer_id);
-                        },
+                        // libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
+                        //     //remove from neighbour table, after then scheduler will auto remove this neighbour
+                        //     log::trace!("lan connection banned: {:?}", peer_id);
+                        //     Neighbours::delete(ConnectionModule::Lan, peer_id);
+                        // },
                         libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
                             lan.swarm.behaviour_mut().process_events(behaviour);
                         }
@@ -389,11 +389,11 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                                 _ => {}
                             }
                         }
-                        libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
-                            //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::trace!("internet connection banned: {:?}", peer_id);
-                            Neighbours::delete(ConnectionModule::Internet, peer_id);
-                        },
+                        // libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
+                        //     //remove from neighbour table, after then scheduler will auto remove this neighbour
+                        //     log::trace!("internet connection banned: {:?}", peer_id);
+                        //     Neighbours::delete(ConnectionModule::Internet, peer_id);
+                        // }
                         libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
                             internet.swarm.behaviour_mut().process_events(behaviour);
                         }
