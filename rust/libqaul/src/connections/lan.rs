@@ -25,7 +25,7 @@ use libp2p::{
     mdns::{async_io::Behaviour as Mdns, Config},
     noise::Config as NoiseConfig,
     ping,
-    swarm::{keep_alive, NetworkBehaviour, Swarm},
+    swarm::{keep_alive, NetworkBehaviour, Swarm, SwarmBuilder},
     tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
     yamux,
 };
@@ -198,8 +198,11 @@ impl Lan {
 
         let transport_upgraded = transport
             .upgrade(upgrade::Version::V1)
-            .authenticate(NoiseConfig::xx(auth_keys).into_authenticated())
-            .multiplex(upgrade::ReadyUpgrade::new(yamux::Config::default()))
+            .authenticate(auth_keys)
+            .multiplex(upgrade::SelectUpgrade::new(
+                yamux::Config::default(),
+                yamux::Config::default(),
+            ))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
 
@@ -243,7 +246,9 @@ impl Lan {
 
             log::trace!("Lan::init() swarm behaviour floodsub subscribed");
 
-            Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
+            //Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
+            SwarmBuilder::with_async_std_executor(transport_upgraded, behaviour, Node::get_id())
+                .build()
         };
 
         log::trace!("Lan::init() swarm created");

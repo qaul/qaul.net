@@ -26,10 +26,9 @@ use libp2p::{
     floodsub::{Floodsub, FloodsubEvent},
     identify,
     identity::Keypair,
-    mplex,
     noise::Config as NoiseConfig,
     ping,
-    swarm::{NetworkBehaviour, Swarm},
+    swarm::{NetworkBehaviour, Swarm, SwarmBuilder},
     tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
     yamux, Multiaddr, PeerId,
 };
@@ -242,7 +241,7 @@ impl Internet {
             .authenticate(NoiseConfig::new(auth_keys).unwrap())
             .multiplex(upgrade::SelectUpgrade::new(
                 yamux::Config::default(),
-                mplex::MplexConfig::default(),
+                yamux::Config::default(),
             ))
             //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
             .boxed();
@@ -266,7 +265,7 @@ impl Internet {
 
         // create behaviour
         let mut swarm = {
-            let mut behaviour = QaulInternetBehaviour {
+            let mut behaviour: QaulInternetBehaviour = QaulInternetBehaviour {
                 floodsub: Floodsub::new(Node::get_id()),
                 identify: identify::Behaviour::new(identify::Config::new(
                     "/ipfs/0.1.0".into(),
@@ -278,7 +277,10 @@ impl Internet {
                 qaul_messaging: QaulMessaging::new(Node::get_id()),
             };
             behaviour.floodsub.subscribe(Node::get_topic());
-            Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
+
+            SwarmBuilder::with_async_std_executor(transport_upgraded, behaviour, Node::get_id())
+                .build()
+            //Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
         };
 
         log::trace!("Internet.init() swarm created");
