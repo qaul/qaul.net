@@ -51,16 +51,19 @@ pub fn ping_event(event: Event, module: ConnectionModule) {
     match event {
         Event {
             peer,
-            result: Result::Ok(Duration { secs, nanos }),
+            result: Result::Ok(duration),
             connection,
         } => {
             log::debug!(
                 "PingSuccess::Ping: connection_id: {}, rtt to {} is {} ms",
                 peer,
                 connection,
-                secs * 1000 + nanos / 1_000_000
+                duration.as_secs() * 1000 + (duration.subsec_nanos() as u64 / 1_000_000 as u64)
             );
-            let rtt_micros = u32::try_from(secs * 1_000_000 + nanos / 1_000).ok();
+
+            let rtt_micros = u32::try_from(
+                duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
+            );
             match rtt_micros {
                 Ok(micros) => Neighbours::update_node(module, peer, micros),
                 Err(_) => Neighbours::update_node(module, peer, 4294967295),
