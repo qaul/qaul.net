@@ -323,10 +323,10 @@ impl UserAccounts {
         let key_base58: String;
 
         #[allow(unreachable_patterns)]
-        match key.try_into().unwrap() {
-            Some(ed_key) => {
+        match key.try_into_ed25519() {
+            Ok(ed_key) => {
                 key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(ed_key.encode_protobuf()).into_string();
+                key_base58 = bs58::encode(ed_key.to_bytes()).into_string();
             }
             _ => {
                 key_type = "UNDEFINED".to_owned();
