@@ -64,7 +64,7 @@ impl Users {
                 // encode values from bytes
                 let q8id = QaulId::bytes_to_q8id(user.id.clone());
                 let id = PeerId::from_bytes(&user.id).unwrap();
-                let key = PublicKey::from_protobuf_encoding(&user.key).unwrap();
+                let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
                 // fill result into user table
                 users.users.insert(
                     q8id,
@@ -87,7 +87,7 @@ impl Users {
         // save user to the data base
         DbUsers::add_user(UserData {
             id: id.to_bytes(),
-            key: key.clone().to_protobuf_encoding(),
+            key: key.clone().encode_protobuf(),
             name: name.clone(),
             verified,
             blocked,
@@ -200,7 +200,7 @@ impl Users {
             if let Some(value) = store.users.get(q8id) {
                 let user_info = router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
-                    key: value.key.clone().to_protobuf_encoding(),
+                    key: value.key.clone().encode_protobuf(),
                     name: value.name.clone(),
                 };
                 users.info.push(user_info);
@@ -214,7 +214,7 @@ impl Users {
         // loop through it and add it to the users list
         for value in users {
             let id_result = PeerId::from_bytes(&value.id);
-            let key_result = PublicKey::from_protobuf_encoding(&value.key);
+            let key_result = PublicKey::try_decode_protobuf(&value.key);
 
             if let (Ok(id), Ok(key)) = (id_result, key_result) {
                 Self::add_with_check(id, key, value.name.clone());
@@ -248,13 +248,8 @@ impl Users {
         if !users.users.contains_key(&q8id_my) {
             return Err("my user is not existed".to_string());
         }
-        let mut key1 = users
-            .users
-            .get(&q8id_my)
-            .unwrap()
-            .key
-            .to_protobuf_encoding();
-        let mut key2 = users.users.get(&q8id).unwrap().key.to_protobuf_encoding();
+        let mut key1 = users.users.get(&q8id_my).unwrap().key.encode_protobuf();
+        let mut key2 = users.users.get(&q8id).unwrap().key.encode_protobuf();
 
         // merge two keys
         let mut data: Vec<u8> = vec![];
@@ -468,7 +463,7 @@ impl Users {
                                     // save to data base
                                     DbUsers::add_user(UserData {
                                         id: user_id.to_bytes(),
-                                        key: user_result.key.clone().to_protobuf_encoding(),
+                                        key: user_result.key.clone().encode_protobuf(),
                                         name: user_result.name.clone(),
                                         verified: updated_user.verified,
                                         blocked: updated_user.blocked,
@@ -540,10 +535,10 @@ impl Users {
         let key_base58: String;
 
         #[allow(unreachable_patterns)]
-        match key.into_ed25519 {
-            Some(ed_key) => {
+        match key.try_into_ed25519() {
+            Ok(ed_key) => {
                 key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(ed_key.encode()).into_string();
+                key_base58 = bs58::encode(ed_key.to_bytes()).into_string();
             }
             _ => {
                 key_type = "UNDEFINED".to_owned();
