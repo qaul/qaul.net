@@ -11,7 +11,7 @@
 
 use base64::Engine;
 use libp2p::{
-    identity::{ed25519, Keypair, PublicKey},
+    identity::{Keypair, PublicKey},
     PeerId,
 };
 use prost::Message;

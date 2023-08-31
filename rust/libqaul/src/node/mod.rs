@@ -11,6 +11,7 @@
 pub mod user_accounts;
 
 use base64;
+use base64::Engine;
 use libp2p::{
     floodsub::Topic,
     identity::{ed25519, Keypair},
@@ -64,17 +65,20 @@ impl Node {
     /// create a new node and save the parameters into config
     fn new() {
         // create node
-        let keys_ed25519 = ed25519::Keypair::generate();
-        let keys = keys_ed25519.into_ed25519();
-        let id = PeerId::from(keys.public());
+        let keys_ed25519 = Keypair::generate_ed25519();
+        let id = PeerId::from(keys_ed25519.public());
         let topic = Topic::new("pages");
-        let node = Node { id, keys, topic };
+        let node = Node {
+            id,
+            keys: keys_ed25519,
+            topic,
+        };
 
         // save node to configuration file
         {
             let mut config = Configuration::get_mut();
-            config.node.keys =
-                base64::Engine::general_purpose::STANDARD.encode(&keys_ed25519.encode());
+            config.node.keys = base64::engine::general_purpose::STANDARD
+                .encode(keys_ed25519.to_protobuf_encoding().unwrap());
             config.node.id = id.to_string();
             config.node.initialized = 1;
         }
@@ -90,12 +94,10 @@ impl Node {
     /// start an existing node from the config parameters
     fn from_config() {
         let config = Configuration::get();
-        let mut basedecode = base64::Engine::general_purpose::STANDARD
+        let mut basedecode = base64::engine::general_purpose::STANDARD
             .decode(&config.node.keys)
             .unwrap();
-        let keys = ed25519::Keypair::decode(&mut basedecode)
-            .unwrap()
-            .into_ed25519();
+        let keys = Keypair::from_protobuf_encoding(&mut basedecode).unwrap();
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
 
@@ -160,7 +162,7 @@ impl Node {
                             }
                             // external addresses
                             for address in internet_connection.swarm.external_addresses() {
-                                addresses.push(address.addr.to_string());
+                                addresses.push(address.to_string());
                             }
                         } else if let Some(lan_connection) = lan {
                             // listener addresses
@@ -169,7 +171,7 @@ impl Node {
                             }
                             // external addresses
                             for address in lan_connection.swarm.external_addresses() {
-                                addresses.push(address.addr.to_string());
+                                addresses.push(address.to_string());
                             }
                         } else {
                             log::error!("lan & internet swarms missing");
