@@ -70,7 +70,7 @@ impl Node {
         let topic = Topic::new("pages");
         let node = Node {
             id,
-            keys: keys_ed25519,
+            keys: keys_ed25519.clone(),
             topic,
         };
 
@@ -78,7 +78,7 @@ impl Node {
         {
             let mut config = Configuration::get_mut();
             config.node.keys = base64::engine::general_purpose::STANDARD
-                .encode(keys_ed25519.to_protobuf_encoding().unwrap());
+                .encode(keys_ed25519.clone().to_protobuf_encoding().unwrap());
             config.node.id = id.to_string();
             config.node.initialized = 1;
         }

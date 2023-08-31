@@ -30,13 +30,13 @@ impl Crypto25519 {
     pub fn private_key_to_montgomery(key: Keypair) -> Option<Vec<u8>> {
         // get ed25519 keypair
         #[allow(irrefutable_let_patterns)]
-        if let Some(ed25519_keypair) = key.into_ed25519() {
+        if let Ok(ed25519_keypair) = key.try_into_ed25519() {
             // get dalek keypair as bytes
             //
             // unfortunately the dalek keypair is private in the
             // libp2p keypair structure, therefore we have to
             // make the detour via the bytes.
-            let ed25519_dalek_keypair_bytes = ed25519_keypair.encode();
+            let ed25519_dalek_keypair_bytes = ed25519_keypair.to_bytes();
 
             // create dalek ed25519 keypair
             if let Ok(ed25519_dalek_keypair) =
@@ -77,9 +77,9 @@ impl Crypto25519 {
     pub fn public_key_to_montgomery(key: PublicKey) -> Option<x25519_dalek::PublicKey> {
         // get ed25519 structure
         #[allow(irrefutable_let_patterns)]
-        if let Some(ed25519_pub) = key.into_ed25519() {
+        if let Ok(ed25519_pub) = key.try_into_ed25519() {
             // convert to dalek public key in bytes form
-            let dalek_pub_bytes = ed25519_pub.encode();
+            let dalek_pub_bytes = ed25519_pub.to_bytes();
 
             // generate Montgomery form
             // x25519_dalek::PublicKey internal is private, we have to go via bytes
