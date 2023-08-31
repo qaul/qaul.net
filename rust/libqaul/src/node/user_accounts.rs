@@ -9,6 +9,7 @@
 //! * Public / private key
 //! * user name (optional)
 
+use base64::Engine;
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
     PeerId,
@@ -52,12 +53,10 @@ impl UserAccounts {
         let mut iter = IntoIterator::into_iter(config_users);
 
         while let Some(user) = iter.next() {
-            let mut basedecode = base64::Engine::general_purpose::STANDARD
+            let mut basedecode = base64::engine::general_purpose::STANDARD
                 .decode(&user.keys)
                 .unwrap();
-            let keys = ed25519::Keypair::decode(&mut basedecode)
-                .unwrap()
-                .into_ed25519();
+            let keys = Keypair::ed25519_from_bytes(&mut basedecode).unwrap();
             let id = PeerId::from(keys.public());
 
             // check if saved ID and the id from the keypair are equal
@@ -85,13 +84,13 @@ impl UserAccounts {
     /// create a new user account with user name
     pub fn create(name: String) -> UserAccount {
         // create user
-        let keys_ed25519 = ed25519::Keypair::generate();
-        let keys_config = base64::Engine::general_purpose::STANDARD.encode(keys_ed25519.encode());
-        let keys = keys_ed25519.into_ed25519();
-        let id = PeerId::from(keys.public());
+        let keys_ed25519 = Keypair::generate_ed25519();
+        let keys_config = base64::engine::general_purpose::STANDARD
+            .encode(keys_ed25519.to_protobuf_encoding().unwrap());
+        let id = PeerId::from(keys_ed25519.public());
         let user = UserAccount {
             id,
-            keys: keys.clone(),
+            keys: keys_ed25519.clone(),
             name: name.clone(),
         };
 
@@ -112,7 +111,7 @@ impl UserAccounts {
         Configuration::save();
 
         // add it to users list
-        crate::router::users::Users::add(id, keys.public(), name.clone(), false, false);
+        crate::router::users::Users::add(id, keys_ed25519.public(), name.clone(), false, false);
 
         // add user to routing table / connections table
         crate::router::connections::ConnectionTable::add_local_user(id);
@@ -231,7 +230,7 @@ impl UserAccounts {
                                                     key: user_account
                                                         .keys
                                                         .public()
-                                                        .to_protobuf_encoding(),
+                                                        .encode_protobuf(),
                                                     key_type,
                                                     key_base58,
                                                 }),
@@ -284,7 +283,7 @@ impl UserAccounts {
                                     name: user_account.name,
                                     id: user_account.id.to_bytes(),
                                     id_base58: user_account.id.to_base58(),
-                                    key: user_account.keys.public().to_protobuf_encoding(),
+                                    key: user_account.keys.public().encode_protobuf(),
                                     key_type,
                                     key_base58,
                                 },
@@ -324,10 +323,10 @@ impl UserAccounts {
         let key_base58: String;
 
         #[allow(unreachable_patterns)]
-        match key.into_ed25519() {
+        match key.try_into().unwrap() {
             Some(ed_key) => {
                 key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(ed_key.encode()).into_string();
+                key_base58 = bs58::encode(ed_key.encode_protobuf()).into_string();
             }
             _ => {
                 key_type = "UNDEFINED".to_owned();
