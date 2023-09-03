@@ -18,20 +18,13 @@ use std::{env, thread};
 
 use libqaul;
 
-mod ble;
 mod chat;
 mod chatfile;
 mod configuration;
-mod connections;
-mod debug;
-mod dtn;
 mod feed;
 mod group;
-mod node;
 mod relay_bot;
-mod router;
 mod rpc;
-mod rtc;
 mod user_accounts;
 mod users;
 
