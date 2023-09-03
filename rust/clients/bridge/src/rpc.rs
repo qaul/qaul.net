@@ -71,7 +71,7 @@ impl Rpc {
 
                 match proto::Modules::from_i32(message.module) {
                     Some(proto::Modules::Node) => {
-                        super::node::Node::rpc(message.data);
+                        // super::node::Node::rpc(message.data);
                     }
                     Some(proto::Modules::Rpc) => {
                         // TODO: authorisation
@@ -83,7 +83,7 @@ impl Rpc {
                         super::users::Users::rpc(message.data, message.request_id);
                     }
                     Some(proto::Modules::Router) => {
-                        super::router::Router::rpc(message.data);
+                        // super::router::Router::rpc(message.data);
                     }
                     Some(proto::Modules::Feed) => {
                         super::feed::Feed::rpc(message.data);
@@ -92,13 +92,13 @@ impl Rpc {
                         super::chat::Chat::rpc(message.data);
                     }
                     Some(proto::Modules::Connections) => {
-                        super::connections::Connections::rpc(message.data);
+                        // super::connections::Connections::rpc(message.data);
                     }
                     Some(proto::Modules::Ble) => {
-                        super::ble::Ble::rpc(message.data);
+                        // super::ble::Ble::rpc(message.data);
                     }
                     Some(proto::Modules::Debug) => {
-                        super::debug::Debug::rpc(message.data);
+                        // super::debug::Debug::rpc(message.data);
                     }
                     Some(proto::Modules::Chatfile) => {
                         super::chatfile::ChatFile::rpc(message.data);
@@ -107,10 +107,10 @@ impl Rpc {
                         super::group::Group::rpc(message.data, message.request_id);
                     }
                     Some(proto::Modules::Rtc) => {
-                        super::rtc::Rtc::rpc(message.data);
+                        // super::rtc::Rtc::rpc(message.data);
                     }
                     Some(proto::Modules::Dtn) => {
-                        super::dtn::Dtn::rpc(message.data);
+                        // super::dtn::Dtn::rpc(message.data);
                     }
                     Some(proto::Modules::None) => {}
                     None => {}
