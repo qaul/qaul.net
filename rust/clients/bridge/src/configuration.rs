@@ -58,11 +58,12 @@ impl Default for RelayBot {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Feed {
     pub last_index: u64,
+    pub feed_room : RoomId,
 }
 
 impl Default for Feed {
     fn default() -> Self {
-        Feed { last_index: 0 }
+        Feed { last_index: 0, feed_room: RoomId::try_from("!nGnOGFPgRafNcUAJJA:matrix.org").expect("Please add a valid room ID") }
     }
 }
 

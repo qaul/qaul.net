@@ -93,58 +93,82 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                 ..
             } => {
                 match msgtype {
-                    MessageType::Audio(_) => todo!(),
-                    MessageType::Emote(_) => todo!(),
+                    MessageType::Audio(_) => {},
+                    MessageType::Emote(_) => {},
                     MessageType::File(FileMessageEventContent {
                         body: file_name,
                         url: file_url,
                         ..
                     }) => {
-                        let request = MediaRequest {
-                            format: MediaFormat::File,
-                            media_type: MediaType::Uri(file_url.as_ref().unwrap().clone()),
-                        };
-                        let client = MATRIX_CLIENT.get();
-                        let file_bytes = client.get_media_content(&request, true).await.unwrap();
-                        let path_string = Storage::get_path();
-                        let path = Path::new(path_string.as_str());
-                        let output_file_path = path.join(file_name);
-                        let mut file = std::fs::File::create(output_file_path).unwrap();
-                        let _ = file.write_all(&file_bytes);
-                        println!("File Saved Successfully");
-                        send_file_to_qaul(
-                            room.room_id(),
-                            file_name,
-                            format!("{} by {}", file_name, msg_sender),
-                        );
+                        // let config = MATRIX_CONFIG.get().read().unwrap();
+                        // let bot_user_name = format!(
+                        //     "@{}:{}",
+                        //     config.relay_bot.bot_id,
+                        //     config.relay_bot.homeserver.replace("https://", "")
+                        // );
+                        if msg_sender != "@qaul-bot:matrix.org" {
+                            let request = MediaRequest {
+                                format: MediaFormat::File,
+                                media_type: MediaType::Uri(file_url.as_ref().unwrap().clone()),
+                            };
+                            let client = MATRIX_CLIENT.get();
+                            let file_bytes =
+                                client.get_media_content(&request, true).await.unwrap();
+                            let path_string = Storage::get_path();
+                            let path = Path::new(path_string.as_str());
+                            let output_file_path = path.join(file_name);
+                            let mut file = std::fs::File::create(output_file_path).unwrap();
+                            let _ = file.write_all(&file_bytes);
+                            println!("File Saved Successfully");
+                            send_file_to_qaul(
+                                room.room_id(),
+                                file_name,
+                                format!("{} by {}", file_name, msg_sender),
+                            );
+                        }
                     }
                     MessageType::Image(ImageMessageEventContent {
                         body: file_name,
                         url: image_url,
                         ..
                     }) => {
-                        let request = MediaRequest {
-                            format: MediaFormat::File,
-                            media_type: MediaType::Uri(image_url.as_ref().unwrap().clone()),
-                        };
-                        let client = MATRIX_CLIENT.get();
-                        let file_bytes = client.get_media_content(&request, true).await.unwrap();
-                        let path_string = Storage::get_path();
-                        let path = Path::new(path_string.as_str());
-                        let output_file_path = path.join(file_name);
-                        let mut file = std::fs::File::create(output_file_path).unwrap();
-                        let _ = file.write_all(&file_bytes);
-                        println!("File Saved Successfully");
-                        send_file_to_qaul(
-                            room.room_id(),
-                            file_name,
-                            format!("{} by {}", file_name, msg_sender),
-                        );
+                        // let config = MATRIX_CONFIG.get().read().unwrap();
+                        // let bot_user_name = format!(
+                        //     "@{}:{}",
+                        //     config.relay_bot.bot_id,
+                        //     config.relay_bot.homeserver.replace("https://", "")
+                        // );
+                        if msg_sender != "@qaul-bot:matrix.org" {
+                            let request = MediaRequest {
+                                format: MediaFormat::File,
+                                media_type: MediaType::Uri(image_url.as_ref().unwrap().clone()),
+                            };
+                            let client = MATRIX_CLIENT.get();
+                            let file_bytes =
+                                client.get_media_content(&request, true).await.unwrap();
+                            let path_string = Storage::get_path();
+                            let path = Path::new(path_string.as_str());
+                            let output_file_path = path.join(file_name);
+                            let mut file = std::fs::File::create(output_file_path).unwrap();
+                            let _ = file.write_all(&file_bytes);
+                            println!("File Saved Successfully");
+                            send_file_to_qaul(
+                                room.room_id(),
+                                file_name,
+                                format!("{} by {}", file_name, msg_sender),
+                            );
+                        }
                     }
-                    MessageType::Location(_) => todo!(),
-                    MessageType::Notice(_) => todo!(),
-                    MessageType::ServerNotice(_) => todo!(),
+                    MessageType::Location(_) => {},
+                    MessageType::Notice(_) => {},
+                    MessageType::ServerNotice(_) => {},
                     MessageType::Text(TextMessageEventContent { body: msg_body, .. }) => {
+                        // let config = MATRIX_CONFIG.get().read().unwrap();
+                        // let bot_user_name = format!(
+                        //     "@{}:{}",
+                        //     config.relay_bot.bot_id,
+                        //     config.relay_bot.homeserver.replace("https://", "")
+                        // );
                         if msg_sender != "@qaul-bot:matrix.org" {
                             let msg_text = format!("{} : {}", msg_sender, msg_body);
                             // Check first whether from feed room or what.
@@ -314,9 +338,9 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             println!("Sent the message in the matrix room by !qaul-bot");
                         }
                     }
-                    MessageType::Video(_) => todo!(),
-                    MessageType::VerificationRequest(_) => todo!(),
-                    _ => todo!(),
+                    MessageType::Video(_) => {},
+                    MessageType::VerificationRequest(_) => {},
+                    _ => {},
                 };
             }
         }
