@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "qaul"
-#define MyAppVersion "APPVERSIONHERE"
+#define MyAppVersion "2.0.0-beta.16"
 #define MyAppPublisher "qaul"
 #define MyAppURL "https://qaul.net"
 #define MyAppExeName "qaul.exe"
@@ -40,10 +40,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}{#MyAppDependenciesFolder}\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-; Source: "{#SourcePath}{#MyAppDependenciesFolder}\native_context_menu_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}{#MyAppDependenciesFolder}\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourcePath}{#MyAppDependenciesFolder}\libqaul.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}{#MyAppDependenciesFolder}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}{#MyAppDependenciesFolder}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
