@@ -84,6 +84,18 @@ async fn on_stripped_state_room(
 
 // Listen for any messages coming from Matrix
 async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Room) {
+    // Building up matrix bot ID name based on the configuration.
+    let bot_id = MATRIX_CONFIG.get().read().unwrap().relay_bot.bot_id.clone();
+    let homeserver = MATRIX_CONFIG
+        .get()
+        .read()
+        .unwrap()
+        .relay_bot
+        .homeserver
+        .clone()
+        .replace("https://", "");
+    let bot_matrix_id = format!("@{}:{}", bot_id, homeserver);
+    let bot_matrix_id = bot_matrix_id.as_str();
     // Check if the room that received the message is already joined by the bot
     if let Room::Joined(room) = room {
         match &event {
@@ -105,7 +117,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     }) => {
                         // We don't consider message in matrix from the bot
                         // since it would be the response being sent from qaul.
-                        if msg_sender != "@qaul-bot:matrix.org" {
+                        if msg_sender != bot_matrix_id {
                             // generate the File Request Body
                             let request = MediaRequest {
                                 format: MediaFormat::File,
@@ -140,7 +152,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     }) => {
                         // We don't consider message in matrix from the bot
                         // since it would be the response being sent from qaul.
-                        if msg_sender != "@qaul-bot:matrix.org" {
+                        if msg_sender != bot_matrix_id {
                             // generate the File Request Body
                             let request = MediaRequest {
                                 format: MediaFormat::File,
@@ -174,7 +186,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     MessageType::Text(TextMessageEventContent { body: msg_body, .. }) => {
                         // We don't consider message in matrix from the bot
                         // since it would be the response being sent from qaul.
-                        if msg_sender != "@qaul-bot:matrix.org" {
+                        if msg_sender != bot_matrix_id {
                             let msg_text = format!("{} : {}", msg_sender, msg_body);
 
                             // Send the text to qaul to process the incoming matrix message
@@ -445,7 +457,7 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
                 .required(true),
         )
         .get_matches();
-    
+
     // Add the flag args values into the Matrix Configuration.
     let homeserver_url = matches.value_of("HomeserverURL").unwrap();
     let bot_account = matches.value_of("Bot-Account").unwrap();
@@ -456,10 +468,10 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
     config.relay_bot.bot_password = bot_password.to_owned();
     config.feed.feed_room = RoomId::try_from(feed_room).unwrap();
     MatrixConfiguration::save(config.clone());
-    
+
     // Save the configuration into storage.
     MATRIX_CONFIG.set(RwLock::new(config.clone()));
-    
+
     // Login with all parameters.
     login(
         &config.relay_bot.homeserver,
@@ -473,7 +485,7 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
 fn send_qaul(msg_text: String, room_id: &RoomId) {
     println!("Message from Matrix arrived");
     let mut config = MATRIX_CONFIG.get().write().unwrap();
-    
+
     // Find Qaul Group ID given a matrix Room ID.
     let qaul_id = find_key_for_value(config.room_map.clone(), room_id.clone());
     if qaul_id.is_some() {
