@@ -3,17 +3,16 @@
 
 //! # bridge client for Matrix<-->Qaul Bridge
 //!
-//! This client uses all the functionality of the qaul-cli
-//! and implements Matrix bridge over
+//! bridge can be used to run on an embedded device, such as a raspberry Pi,
+//! or as a static node on a server in the Internet.
 
-use futures_ticker::Ticker;
-use uuid::Uuid;
-//use async_std::stream;
 use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
-use std::time::Duration;
+use futures_ticker::Ticker;
 use std::thread;
+use std::time::Duration;
+use uuid::Uuid;
 
 use libqaul;
 
@@ -50,7 +49,7 @@ async fn main() {
     }
 
     // Set user account
-    // if no account, creating new accounts
+    // if no account, creating new account
     if libqaul::node::user_accounts::UserAccounts::len() == 0 {
         // TODO: the name of the user account should be configurable
         libqaul::node::user_accounts::UserAccounts::create("Qaul Matrix Bridge Bot".to_owned());
@@ -73,14 +72,16 @@ async fn main() {
     });
 
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
-    let mut feed_ticker = Ticker::new(Duration::from_secs(3));
-    let mut group_ticker = Ticker::new(Duration::from_secs(10));
+    // check arival of feed messages every 30 milliseconds
+    let mut feed_ticker = Ticker::new(Duration::from_millis(30));
+    // check arival of group messages every 30 milliseconds
+    let mut group_ticker = Ticker::new(Duration::from_millis(30));
+    // check for new users on the network every 50 milliseconds
     let mut user_ticker = Ticker::new(Duration::from_millis(50));
+    // check for any invitations incoming for groups every 50 milliseconds
     let mut invited_ticker = Ticker::new(Duration::from_millis(50));
+
     // loop and poll CLI and RPC
     loop {
         let evt = {
@@ -89,14 +90,13 @@ async fn main() {
             let group_fut = group_ticker.next().fuse();
             let users_fut = user_ticker.next().fuse();
             let invited_fut = invited_ticker.next().fuse();
-            // This Macro is shown wrong by Rust-Language-Server > 0.2.400
-            // You need to downgrade to version 0.2.400 if this happens to you
 
             pin_mut!(rpc_fut);
             pin_mut!(feed_fut);
             pin_mut!(group_fut);
             pin_mut!(users_fut);
             pin_mut!(invited_fut);
+
             select! {
                _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
                 _feed_ticker = feed_fut => {
@@ -108,7 +108,7 @@ async fn main() {
                         println!("Waiting for the configuration to Sync")
                     }
                     None
-                }
+                },
                 _group_ticker = group_fut => {
                     if let Ok(config) = MATRIX_CONFIG.get().read() {
                         group::Group::group_list();
@@ -125,11 +125,11 @@ async fn main() {
                         println!("Waiting for the configuration to Sync")
                     }
                     None
-                }
+                },
                 _users_ticker = users_fut => {
                     users::Users::request_user_list("".to_string());
                     None
-                }
+                },
                 _invited_ticker = invited_fut => {
                     group::Group::group_invited();
                     None

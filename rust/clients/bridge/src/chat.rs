@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Chat Module Interactions
@@ -294,7 +294,6 @@ fn send_file_to_matrix(file_path: String, room_id: &RoomId, extension: String, f
             // Sends messages into the matrix room
             println!("{}", storage_path);
             let file_buff = PathBuf::from(storage_path.clone());
-            // TODO : Always check for the
             let mut buff = File::open(file_buff).unwrap();
             let mut content_type: &Mime = &STAR_STAR;
             println!("{}", extension);
