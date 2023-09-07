@@ -12,9 +12,8 @@ use uuid::Uuid;
 use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
-use std::collections::HashMap;
 use std::time::Duration;
-use std::{env, thread};
+use std::thread;
 
 use libqaul;
 
@@ -61,19 +60,9 @@ async fn main() {
     user_accounts::UserAccounts::init(default_user);
     println!("Matrix Bot has been initialized as a Qaul User");
 
-    // Get the command-line arguments as a collection of strings.
-    let args: Vec<String> = env::args().collect();
-
-    // The first argument is the name of the program itself.
-    // Start iterating from the second argument.
-    let mut arguments: HashMap<usize, String> = HashMap::new();
-    for (index, arg) in args.iter().enumerate().skip(1) {
-        arguments.insert(index, arg.to_owned());
-    }
-
     thread::spawn(|| {
         // connect the matrix bot with the qaul-cli
-        match relay_bot::connect(arguments) {
+        match relay_bot::connect() {
             Ok(_) => {
                 println!("Matrix-Bridge connecting");
             }

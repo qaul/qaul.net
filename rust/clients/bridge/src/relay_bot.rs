@@ -8,6 +8,7 @@ use super::configuration::MatrixConfiguration;
 use std::{collections::HashMap, path::Path, sync::RwLock};
 // use state::Storage;
 use super::rpc::Rpc;
+use clap::{App, Arg};
 use config::*;
 use libqaul::storage::Storage;
 use matrix_sdk::{
@@ -93,8 +94,8 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                 ..
             } => {
                 match msgtype {
-                    MessageType::Audio(_) => {},
-                    MessageType::Emote(_) => {},
+                    MessageType::Audio(_) => {}
+                    MessageType::Emote(_) => {}
                     MessageType::File(FileMessageEventContent {
                         body: file_name,
                         url: file_url,
@@ -159,9 +160,9 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             );
                         }
                     }
-                    MessageType::Location(_) => {},
-                    MessageType::Notice(_) => {},
-                    MessageType::ServerNotice(_) => {},
+                    MessageType::Location(_) => {}
+                    MessageType::Notice(_) => {}
+                    MessageType::ServerNotice(_) => {}
                     MessageType::Text(TextMessageEventContent { body: msg_body, .. }) => {
                         // let config = MATRIX_CONFIG.get().read().unwrap();
                         // let bot_user_name = format!(
@@ -338,9 +339,9 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             println!("Sent the message in the matrix room by !qaul-bot");
                         }
                     }
-                    MessageType::Video(_) => {},
-                    MessageType::VerificationRequest(_) => {},
-                    _ => {},
+                    MessageType::Video(_) => {}
+                    MessageType::VerificationRequest(_) => {}
+                    _ => {}
                 };
             }
         }
@@ -387,7 +388,7 @@ async fn login(
 }
 
 #[tokio::main]
-pub async fn connect(arguments: HashMap<usize, String>) -> Result<(), matrix_sdk::Error> {
+pub async fn connect() -> Result<(), matrix_sdk::Error> {
     println!("Connecting to Matrix Bot");
 
     // Configuration for starting of the bot
@@ -402,15 +403,52 @@ pub async fn connect(arguments: HashMap<usize, String>) -> Result<(), matrix_sdk
         Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
     };
     MatrixConfiguration::save(config.clone());
-    if config.relay_bot.homeserver == "" {
-        config.relay_bot.homeserver = arguments.get(&1).unwrap().clone();
-    }
-    if config.relay_bot.bot_id == "" {
-        config.relay_bot.bot_id = arguments.get(&2).unwrap().clone();
-    }
-    if config.relay_bot.bot_password == "" {
-        config.relay_bot.bot_password = arguments.get(&3).unwrap().clone();
-    }
+    let matches = App::new("Qaul Bridge")
+        .version("1.0")
+        .author("Harshil-Jani")
+        .about("Description of your CLI app")
+        .arg(
+            Arg::with_name("HomeserverURL")
+                .short('h')
+                .long("homeserver")
+                .value_name("HOMESERVER-URL")
+                .help("The Homeserver URL")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("Bot-Account")
+                .short('a')
+                .long("account")
+                .value_name("ACCOUNT")
+                .help("The Bot Account")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("Bot-Password")
+                .short('p')
+                .long("password")
+                .value_name("PASSWORD")
+                .help("The Bot Password")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("Feed-Room")
+                .short('f')
+                .long("feed")
+                .value_name("ROOM")
+                .help("The Feed Room")
+                .required(true),
+        )
+        .get_matches();
+
+    let homeserver_url = matches.value_of("HomeserverURL").unwrap();
+    let bot_account = matches.value_of("Bot-Account").unwrap();
+    let bot_password = matches.value_of("Bot-Password").unwrap();
+    let feed_room = matches.value_of("Feed-Room").unwrap();
+    config.relay_bot.homeserver = homeserver_url.to_owned();
+    config.relay_bot.bot_id = bot_account.to_owned();
+    config.relay_bot.bot_password = bot_password.to_owned();
+    config.feed.feed_room = RoomId::try_from(feed_room).unwrap();
     MatrixConfiguration::save(config.clone());
     MATRIX_CONFIG.set(RwLock::new(config.clone()));
     login(
