@@ -422,15 +422,15 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
     // Accepts the Flagged input from the CLI.
     let matches = App::new("Qaul Bridge")
         .version("1.0")
-        .author("Harshil-Jani")
-        .about("Description of your CLI app")
+        .author("Qaul Community")
+        .about("Matrix Qaul Bridge")
         .arg(
             Arg::with_name("HomeserverURL")
                 .short('h')
                 .long("homeserver")
                 .value_name("HOMESERVER-URL")
                 .help("The Homeserver URL")
-                .required(true),
+                .required(false),
         )
         .arg(
             Arg::with_name("Bot-Account")
@@ -438,7 +438,7 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
                 .long("account")
                 .value_name("ACCOUNT")
                 .help("The Bot Account")
-                .required(true),
+                .required(false),
         )
         .arg(
             Arg::with_name("Bot-Password")
@@ -446,7 +446,7 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
                 .long("password")
                 .value_name("PASSWORD")
                 .help("The Bot Password")
-                .required(true),
+                .required(false),
         )
         .arg(
             Arg::with_name("Feed-Room")
@@ -454,19 +454,38 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
                 .long("feed")
                 .value_name("ROOM")
                 .help("The Feed Room")
-                .required(true),
+                .required(false),
         )
         .get_matches();
 
     // Add the flag args values into the Matrix Configuration.
-    let homeserver_url = matches.value_of("HomeserverURL").unwrap();
-    let bot_account = matches.value_of("Bot-Account").unwrap();
-    let bot_password = matches.value_of("Bot-Password").unwrap();
-    let feed_room = matches.value_of("Feed-Room").unwrap();
-    config.relay_bot.homeserver = homeserver_url.to_owned();
-    config.relay_bot.bot_id = bot_account.to_owned();
-    config.relay_bot.bot_password = bot_password.to_owned();
-    config.feed.feed_room = RoomId::try_from(feed_room).unwrap();
+    let _homeserver_url = match matches.value_of("HomeserverURL") {
+        Some(url) => {
+            config.relay_bot.homeserver = url.to_owned();
+        }
+        None => {}
+    };
+
+    let _bot_account = match matches.value_of("Bot-Account") {
+        Some(account) => {
+            config.relay_bot.bot_id = account.to_owned();
+        }
+        None => {}
+    };
+
+    let _bot_password = match matches.value_of("Bot-Password") {
+        Some(password) => {
+            config.relay_bot.bot_password = password.to_owned();
+        }
+        None => {}
+    };
+
+    let _feed_room = match matches.value_of("Feed-Room") {
+        Some(room) => {
+            config.feed.feed_room = RoomId::try_from(room).unwrap();
+        }
+        None => {}
+    };
     MatrixConfiguration::save(config.clone());
 
     // Save the configuration into storage.
