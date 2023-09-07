@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Group module functions
@@ -10,7 +10,7 @@ use crate::{
     chat,
     configuration::{MatrixConfiguration, MatrixRoom},
     relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
-    users::{QAUL_USERS},
+    users::QAUL_USERS,
 };
 use libp2p::PeerId;
 use matrix_sdk::{
@@ -24,8 +24,6 @@ use matrix_sdk::{
 };
 use prost::Message;
 use tokio::runtime::Runtime;
-
-// pub static QAUL_GROUPS: state::Storage<RwLock<BTreeMap<Uuid, String>>> = state::Storage::new();
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -41,7 +39,6 @@ mod proto_chat {
 pub struct Group {}
 
 impl Group {
-
     /// Convert Group ID from String to Binary
     fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
@@ -318,18 +315,10 @@ impl Group {
                     }
 
                     Some(proto::group::Message::GroupInfoResponse(group_info_response)) => {
-                        // group
-                        // println!("====================================");
-                        // println!("Group Information");
                         let group_id = uuid::Uuid::from_bytes(
                             group_info_response.group_id.try_into().unwrap(),
                         );
-                        // println!("\tid: {}", group_id.to_string());
-                        // println!("\tname: {}", group_info_response.group_name.clone());
-                        // println!("\tcreated_at: {}", group_info_response.created_at);
-                        // println!("\tmembers: {:#?}", group_info_response.members);
 
-                        // TODO : Do code cleanup here reffering invite and remove.
                         if request_id != "" {
                             // reqeust_id = qaul_user_id#room_id
                             let mut iter = request_id.split('#');
@@ -391,7 +380,6 @@ impl Group {
                                             .unwrap(),
                                         user_id,
                                     );
-                                    // TODO : Change all the to_owned or to_string into any one.
                                     matrix_rpc(
                                         "User has been removed".to_owned(),
                                         RoomId::try_from(room_id).unwrap(),
@@ -424,8 +412,13 @@ impl Group {
                                     } else {
                                         is_admin.push_str("Member");
                                     }
-                                    member_string
-                                        .push_str(&format!("{} : {}({}) | Peer ID : {}\n", i, user_name, is_admin,bs58::encode(member.user_id).into_string()));
+                                    member_string.push_str(&format!(
+                                        "{} : {}({}) | Peer ID : {}\n",
+                                        i,
+                                        user_name,
+                                        is_admin,
+                                        bs58::encode(member.user_id).into_string()
+                                    ));
                                     i += 1;
                                 }
                                 let message_format = format!("# Group Information \n\nGroup ID : {}\nCreated at : {}\nList of Members : \n{}",group_id,creation_time,member_string);
@@ -437,7 +430,7 @@ impl Group {
                         let all_groups = group_list_response.groups.clone();
 
                         let mut config = MATRIX_CONFIG.get().write().unwrap();
-                       for group in all_groups {
+                        for group in all_groups {
                             // If Mapping exist let it be. Else create new room.
                             let group_id =
                                 uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
@@ -491,7 +484,6 @@ impl Group {
                                 }
                             }
                         }
-                      
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
                         // List of pending invites

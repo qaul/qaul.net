@@ -1,12 +1,11 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Relay Bot functions
 //!
 //! Logging in and listening for the message on matrix room and sending messages from qaul.
+
 use super::configuration::MatrixConfiguration;
-use std::{collections::HashMap, path::Path, sync::RwLock};
-// use state::Storage;
 use super::rpc::Rpc;
 use clap::{App, Arg};
 use config::*;
@@ -30,13 +29,12 @@ use matrix_sdk::{
     Client, ClientConfig, SyncSettings,
 };
 use prost::Message;
-// use std::fs::File;
 use std::io::prelude::*;
+use std::{collections::HashMap, path::Path, sync::RwLock};
 use tokio::time::{sleep, Duration};
 use url::Url;
 use uuid::Uuid;
-// static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
-/// include generated protobuf RPC rust definition file
+
 mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
@@ -45,10 +43,11 @@ mod proto {
 }
 use crate::{chat, chatfile, configuration::MatrixRoom, group, users};
 
-// Setup a storage object for the Client to make it available globally
+// Setup a storage object for the Matrix Client and Config to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
 pub static MATRIX_CONFIG: state::Storage<RwLock<MatrixConfiguration>> = state::Storage::new();
 
+// Autojoining the room if someone invites the matrix bot account
 async fn on_stripped_state_room(
     room_member: StrippedStateEvent<MemberEventContent>,
     client: Client,
@@ -62,10 +61,8 @@ async fn on_stripped_state_room(
         println!("Autojoining room {}", room.room_id());
         let mut delay = 2;
 
+        // retry autojoin due to synapse sending invites, before the invited user can join
         while let Err(err) = room.accept_invitation().await {
-            // retry autojoin due to synapse sending invites, before the
-            // invited user can join for more information see
-            // https://github.com/matrix-org/synapse/issues/4345
             eprintln!(
                 "Failed to join room {} ({:?}), retrying in {}s",
                 room.room_id(),
@@ -85,7 +82,9 @@ async fn on_stripped_state_room(
     }
 }
 
+// Listen for any messages coming from Matrix
 async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Room) {
+    // Check if the room that received the message is already joined by the bot
     if let Room::Joined(room) = room {
         match &event {
             SyncMessageEvent {
@@ -93,6 +92,9 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                 sender: msg_sender,
                 ..
             } => {
+                // Check for the type of message ariving
+                // Supporting Files, Images, Text Messages
+                // TODO : implement other types once qaul supports them.
                 match msgtype {
                     MessageType::Audio(_) => {}
                     MessageType::Emote(_) => {}
@@ -101,26 +103,29 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                         url: file_url,
                         ..
                     }) => {
-                        // let config = MATRIX_CONFIG.get().read().unwrap();
-                        // let bot_user_name = format!(
-                        //     "@{}:{}",
-                        //     config.relay_bot.bot_id,
-                        //     config.relay_bot.homeserver.replace("https://", "")
-                        // );
+                        // We don't consider message in matrix from the bot
+                        // since it would be the response being sent from qaul.
                         if msg_sender != "@qaul-bot:matrix.org" {
+                            // generate the File Request Body
                             let request = MediaRequest {
                                 format: MediaFormat::File,
                                 media_type: MediaType::Uri(file_url.as_ref().unwrap().clone()),
                             };
+
+                            // get the bytes data decrypted from the matrix into qaul
                             let client = MATRIX_CLIENT.get();
                             let file_bytes =
                                 client.get_media_content(&request, true).await.unwrap();
+
+                            // Save the file to local storage
                             let path_string = Storage::get_path();
                             let path = Path::new(path_string.as_str());
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
                             let _ = file.write_all(&file_bytes);
                             println!("File Saved Successfully");
+
+                            // Send the file to qaul world
                             send_file_to_qaul(
                                 room.room_id(),
                                 file_name,
@@ -133,26 +138,29 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                         url: image_url,
                         ..
                     }) => {
-                        // let config = MATRIX_CONFIG.get().read().unwrap();
-                        // let bot_user_name = format!(
-                        //     "@{}:{}",
-                        //     config.relay_bot.bot_id,
-                        //     config.relay_bot.homeserver.replace("https://", "")
-                        // );
+                        // We don't consider message in matrix from the bot
+                        // since it would be the response being sent from qaul.
                         if msg_sender != "@qaul-bot:matrix.org" {
+                            // generate the File Request Body
                             let request = MediaRequest {
                                 format: MediaFormat::File,
                                 media_type: MediaType::Uri(image_url.as_ref().unwrap().clone()),
                             };
+
+                            // get the bytes data decrypted from the matrix into qaul
                             let client = MATRIX_CLIENT.get();
                             let file_bytes =
                                 client.get_media_content(&request, true).await.unwrap();
+
+                            // Save the file to local storage
                             let path_string = Storage::get_path();
                             let path = Path::new(path_string.as_str());
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
                             let _ = file.write_all(&file_bytes);
                             println!("File Saved Successfully");
+
+                            // Send the file to qaul world
                             send_file_to_qaul(
                                 room.room_id(),
                                 file_name,
@@ -164,15 +172,12 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                     MessageType::Notice(_) => {}
                     MessageType::ServerNotice(_) => {}
                     MessageType::Text(TextMessageEventContent { body: msg_body, .. }) => {
-                        // let config = MATRIX_CONFIG.get().read().unwrap();
-                        // let bot_user_name = format!(
-                        //     "@{}:{}",
-                        //     config.relay_bot.bot_id,
-                        //     config.relay_bot.homeserver.replace("https://", "")
-                        // );
+                        // We don't consider message in matrix from the bot
+                        // since it would be the response being sent from qaul.
                         if msg_sender != "@qaul-bot:matrix.org" {
                             let msg_text = format!("{} : {}", msg_sender, msg_body);
-                            // Check first whether from feed room or what.
+
+                            // Send the text to qaul to process the incoming matrix message
                             send_qaul(msg_text, room.room_id());
 
                             // on receiving !qaul from matrix, Send message
@@ -195,7 +200,6 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
 
                             // on receiving !qaul in matrix, Send message
                             if msg_body.contains("!invite") {
-                                // TODO : Do code cleanup just like !remove command so we handle all core logics in qaul world without disturbance to relay bot.
                                 let matrix_user =
                                     room.get_member(&msg_sender).await.unwrap().unwrap();
                                 // Admin Powers
@@ -204,8 +208,6 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                     let _command = iter.next().unwrap();
                                     // TODO : Try to return an error if userID is wrong.
                                     let qaul_user_id = iter.next().unwrap().to_string();
-                                    // creating new group with request_id as matrix room name.
-                                    // request ID = sender + room_name + qaul_user_id
                                     let room_id_string = room.room_id().to_string();
                                     let sender_string = msg_sender.to_string();
                                     let request_id = format!(
@@ -214,7 +216,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                     );
                                     println!("{}", request_id);
                                     // Create group only if the mapping between a qaul grp and matrix room doesn't exist.
-                                    // If it exist then please check if user already exist or not. If not then invite :)
+                                    // If it exist then please check if user already exist or not. If not then invite
                                     let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                     let room_id = room.room_id();
                                     let qaul_group_id: Option<Uuid> = find_key_for_value(
@@ -276,8 +278,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                         room_id_string, sender_string, qaul_user_id
                                     );
                                     println!("{}", request_id);
-                                    // Create group only if the mapping between a qaul grp and matrix room doesn't exist.
-                                    // If it exist then please check if user already exist or not. If not then invite :)
+
                                     let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                     let room_id = room.room_id();
                                     let qaul_group_id: Option<Uuid> = find_key_for_value(
@@ -292,6 +293,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                             ));
                                         room.send(content, None).await.unwrap();
                                     } else {
+                                        // Check for the group information to see if user is member of the Qaul Room or not
                                         group::Group::group_info(
                                             chat::Chat::uuid_string_to_bin(
                                                 qaul_group_id.unwrap().to_string(),
@@ -311,7 +313,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                 }
                             }
 
-                            // on receiving !qaul-info in matrix, You get the details of the group information.
+                            // on receiving !group-info in matrix, You get the details of the group information.
                             if msg_body.contains("!group-info") {
                                 let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                 let room_id = room.room_id();
@@ -375,6 +377,7 @@ async fn login(
     // initial sync to avoid responding to messages before the bot was running.
     client.register_event_handler(on_room_message).await;
     client.register_event_handler(on_stripped_state_room).await;
+
     // Store matrix client inside storage stack.
     MATRIX_CLIENT.set(client.clone());
 
@@ -403,6 +406,8 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
         Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
     };
     MatrixConfiguration::save(config.clone());
+
+    // Accepts the Flagged input from the CLI.
     let matches = App::new("Qaul Bridge")
         .version("1.0")
         .author("Harshil-Jani")
@@ -440,7 +445,8 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
                 .required(true),
         )
         .get_matches();
-
+    
+    // Add the flag args values into the Matrix Configuration.
     let homeserver_url = matches.value_of("HomeserverURL").unwrap();
     let bot_account = matches.value_of("Bot-Account").unwrap();
     let bot_password = matches.value_of("Bot-Password").unwrap();
@@ -450,7 +456,11 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
     config.relay_bot.bot_password = bot_password.to_owned();
     config.feed.feed_room = RoomId::try_from(feed_room).unwrap();
     MatrixConfiguration::save(config.clone());
+    
+    // Save the configuration into storage.
     MATRIX_CONFIG.set(RwLock::new(config.clone()));
+    
+    // Login with all parameters.
     login(
         &config.relay_bot.homeserver,
         &config.relay_bot.bot_id,
@@ -463,8 +473,8 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
 fn send_qaul(msg_text: String, room_id: &RoomId) {
     println!("Message from Matrix arrived");
     let mut config = MATRIX_CONFIG.get().write().unwrap();
-    // config.room_map; Find the key corresponsing to given value and use feed to send msg to the mapped gropID.
-    // forward the message in that qaul group instead of feed.
+    
+    // Find Qaul Group ID given a matrix Room ID.
     let qaul_id = find_key_for_value(config.room_map.clone(), room_id.clone());
     if qaul_id.is_some() {
         // create group send message
@@ -507,13 +517,15 @@ fn send_qaul(msg_text: String, room_id: &RoomId) {
     MatrixConfiguration::save(config.clone());
 }
 
+// Logic to send file to qaul
 fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) {
     println!("File from Matrix arrived in Qaul");
     let mut config = MATRIX_CONFIG.get().write().unwrap();
-    // config.room_map; Find the key corresponsing to given value and use feed to send msg to the mapped gropID.
-    // forward the message in that qaul group instead of feed.
+
+    // Find Qaul Group ID given a matrix Room ID.
     let qaul_id = find_key_for_value(config.room_map.clone(), room_id.clone());
     if qaul_id.is_some() {
+        // Sending File in Qaul via RPC.
         chatfile::ChatFile::send_file(
             chat::Chat::uuid_string_to_bin(qaul_id.unwrap().to_string()).unwrap(),
             file_name.clone(),
@@ -523,11 +535,14 @@ fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) 
             qaul_room.last_index += 1;
         }
     } else {
+        // No Qaul Group Found for this Matrix Room
+        // TODO : Send files in Qaul Feed once Qaul supports files in feed.
         println!("Not Possible to send file into feed");
     }
     MatrixConfiguration::save(config.clone());
 }
 
+// Given a value find its key
 fn find_key_for_value(map: HashMap<Uuid, MatrixRoom>, value: RoomId) -> Option<Uuid> {
     map.iter()
         .find_map(|(key, &ref val)| {
