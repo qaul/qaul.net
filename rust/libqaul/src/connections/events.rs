@@ -5,7 +5,7 @@
 
 use libp2p::ping::{Event, Failure};
 use std::convert::TryFrom;
-use std::time::Duration;
+//use std::time::Duration;
 
 use qaul_info::QaulInfoEvent;
 use qaul_messaging::QaulMessagingEvent;
@@ -69,13 +69,13 @@ pub fn ping_event(event: Event, module: ConnectionModule) {
                 Err(_) => Neighbours::update_node(module, peer, 4294967295),
             }
         }
-        Event {
-            peer,
-            result: Result::Ok(Duration { .. }),
-            connection: _,
-        } => {
-            log::debug!("PingSuccess::Pong from {}", peer);
-        }
+        // Event {
+        //     peer,
+        //     result: Result::Ok(Duration { .. }),
+        //     connection: _,
+        // } => {
+        //     log::debug!("PingSuccess::Pong from {}", peer);
+        // }
         Event {
             peer,
             result: Result::Err(Failure::Timeout),

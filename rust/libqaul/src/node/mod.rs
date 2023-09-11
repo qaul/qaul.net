@@ -12,11 +12,7 @@ pub mod user_accounts;
 
 use base64;
 use base64::Engine;
-use libp2p::{
-    floodsub::Topic,
-    identity::{ed25519, Keypair},
-    PeerId,
-};
+use libp2p::{floodsub::Topic, identity::Keypair, PeerId};
 use prost::Message;
 use state;
 
