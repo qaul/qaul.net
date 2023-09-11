@@ -15,7 +15,6 @@ use libp2p::{identity::Keypair, Multiaddr};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
-use crate::node::Node;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::configuration::InternetPeer;

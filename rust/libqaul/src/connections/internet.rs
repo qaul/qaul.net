@@ -56,7 +56,7 @@ use crate::storage::configuration::Configuration;
 use std::time::Duration;
 
 #[derive(NetworkBehaviour)]
-#[behaviour(out_event = "QaulInternetEvent")]
+#[behaviour(to_swarm = "QaulInternetEvent")]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: identify::Behaviour,
