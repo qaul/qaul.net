@@ -38,6 +38,7 @@ async fn main() {
     // get current working directory
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
+    println!("bridge storage path: {}", storage_path.clone());
 
     // initialize relay bot
     relay_bot::init(&storage_path).await;

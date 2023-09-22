@@ -466,10 +466,11 @@ async fn login(
     password: &str,
 ) -> Result<(), matrix_sdk::Error> {
     // the location for `JsonStore` to save files to
-    let mut home = dirs::config_dir().expect("no home directory found");
-    home.push("qaul/matrix");
-    println!("{:?}", home);
-    let client_config = ClientConfig::new().store_path(home);
+    let path_string = MatrixConfiguration::get_path();
+    let path = Path::new(path_string.as_str());
+    let matrix_path = path.join("matrix");
+    println!("matrix bot home: {:?}", matrix_path);
+    let client_config = ClientConfig::new().store_path(matrix_path);
     let homeserver_url = Url::parse(&homeserver_url).expect("Couldn't parse the homeserver URL");
 
     // create a new Client with the given homeserver url and config
