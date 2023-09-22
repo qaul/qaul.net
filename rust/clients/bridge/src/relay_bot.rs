@@ -9,7 +9,6 @@ use super::configuration::MatrixConfiguration;
 use super::rpc::Rpc;
 use clap::{App, Arg};
 use config::*;
-use libqaul::storage::Storage;
 use matrix_sdk::{
     media::{MediaFormat, MediaRequest, MediaType},
     room::Room,
@@ -46,6 +45,105 @@ use crate::{chat, chatfile, configuration::MatrixRoom, group, users};
 // Setup a storage object for the Matrix Client and Config to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
 pub static MATRIX_CONFIG: state::Storage<RwLock<MatrixConfiguration>> = state::Storage::new();
+
+/// # Relay Bot Initialization Function
+///
+/// This function needs to be run before starting the main loop and running libqaul.
+/// The function creates the matrix configuration and initializes the bridge.
+pub async fn init(storage_path: &String) {
+    // initialize matrix configuration
+    MatrixConfiguration::init(storage_path.to_owned());
+
+    // Configuration for starting of the bot
+    let path = Path::new(storage_path);
+    let config_path = path.join("matrix.yaml");
+    let mut config: MatrixConfiguration = match Config::builder()
+        .add_source(File::with_name(&config_path.to_str().unwrap()))
+        .build()
+    {
+        Err(_) => MatrixConfiguration::default(),
+        Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
+    };
+    MatrixConfiguration::save(config.clone());
+
+    // Accepts the Flagged input from the CLI.
+    let matches = App::new("Qaul Bridge")
+        .version("1.0")
+        .author("Qaul Community")
+        .about("Matrix Qaul Bridge")
+        .arg(
+            Arg::with_name("HomeserverURL")
+                .short('h')
+                .long("homeserver")
+                .value_name("HOMESERVER-URL")
+                .help("The Homeserver URL")
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("Bot-Account")
+                .short('a')
+                .long("account")
+                .value_name("ACCOUNT")
+                .help("The Bot Account")
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("Bot-Password")
+                .short('p')
+                .long("password")
+                .value_name("PASSWORD")
+                .help("The Bot Password")
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("Feed-Room")
+                .short('f')
+                .long("feed")
+                .value_name("ROOM")
+                .help("The Feed Room")
+                .required(false),
+        )
+        .get_matches();
+
+    // Add the flag args values into the Matrix Configuration.
+    let _homeserver_url = match matches.value_of("HomeserverURL") {
+        Some(url) => {
+            config.relay_bot.homeserver = url.to_owned();
+        }
+        None => {}
+    };
+
+    let _bot_account = match matches.value_of("Bot-Account") {
+        Some(account) => {
+            config.relay_bot.bot_id = account.to_owned();
+        }
+        None => {}
+    };
+
+    let _bot_password = match matches.value_of("Bot-Password") {
+        Some(password) => {
+            config.relay_bot.bot_password = password.to_owned();
+        }
+        None => {}
+    };
+
+    let _feed_room = match matches.value_of("Feed-Room") {
+        Some(room) => match RoomId::try_from(room) {
+            Ok(feed_room_id) => {
+                config.feed.feed_room = feed_room_id;
+            }
+            Err(e) => {
+                log::error!("feed room option `-f {}` is not valid.", room);
+                log::error!("{}", e);
+            }
+        },
+        None => {}
+    };
+    MatrixConfiguration::save(config.clone());
+
+    // Save the configuration into storage.
+    MATRIX_CONFIG.set(RwLock::new(config.clone()));
+}
 
 // Autojoining the room if someone invites the matrix bot account
 async fn on_stripped_state_room(
@@ -130,7 +228,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                 client.get_media_content(&request, true).await.unwrap();
 
                             // Save the file to local storage
-                            let path_string = Storage::get_path();
+                            let path_string = MatrixConfiguration::get_path();
                             let path = Path::new(path_string.as_str());
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
@@ -165,7 +263,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                 client.get_media_content(&request, true).await.unwrap();
 
                             // Save the file to local storage
-                            let path_string = Storage::get_path();
+                            let path_string = MatrixConfiguration::get_path();
                             let path = Path::new(path_string.as_str());
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
@@ -404,98 +502,9 @@ async fn login(
 
 #[tokio::main]
 pub async fn connect() -> Result<(), matrix_sdk::Error> {
-    println!("Connecting to Matrix Bot");
+    log::info!("Connecting to Matrix Bot");
 
-    // Configuration for starting of the bot
-    let path_string = Storage::get_path();
-    let path = Path::new(path_string.as_str());
-    let config_path = path.join("matrix.yaml");
-    let mut config: MatrixConfiguration = match Config::builder()
-        .add_source(File::with_name(&config_path.to_str().unwrap()))
-        .build()
-    {
-        Err(_) => MatrixConfiguration::default(),
-        Ok(c) => c.try_deserialize::<MatrixConfiguration>().unwrap(),
-    };
-    MatrixConfiguration::save(config.clone());
-
-    // Accepts the Flagged input from the CLI.
-    let matches = App::new("Qaul Bridge")
-        .version("1.0")
-        .author("Qaul Community")
-        .about("Matrix Qaul Bridge")
-        .arg(
-            Arg::with_name("HomeserverURL")
-                .short('h')
-                .long("homeserver")
-                .value_name("HOMESERVER-URL")
-                .help("The Homeserver URL")
-                .required(false),
-        )
-        .arg(
-            Arg::with_name("Bot-Account")
-                .short('a')
-                .long("account")
-                .value_name("ACCOUNT")
-                .help("The Bot Account")
-                .required(false),
-        )
-        .arg(
-            Arg::with_name("Bot-Password")
-                .short('p')
-                .long("password")
-                .value_name("PASSWORD")
-                .help("The Bot Password")
-                .required(false),
-        )
-        .arg(
-            Arg::with_name("Feed-Room")
-                .short('f')
-                .long("feed")
-                .value_name("ROOM")
-                .help("The Feed Room")
-                .required(false),
-        )
-        .get_matches();
-
-    // Add the flag args values into the Matrix Configuration.
-    let _homeserver_url = match matches.value_of("HomeserverURL") {
-        Some(url) => {
-            config.relay_bot.homeserver = url.to_owned();
-        }
-        None => {}
-    };
-
-    let _bot_account = match matches.value_of("Bot-Account") {
-        Some(account) => {
-            config.relay_bot.bot_id = account.to_owned();
-        }
-        None => {}
-    };
-
-    let _bot_password = match matches.value_of("Bot-Password") {
-        Some(password) => {
-            config.relay_bot.bot_password = password.to_owned();
-        }
-        None => {}
-    };
-
-    let _feed_room = match matches.value_of("Feed-Room") {
-        Some(room) => match RoomId::try_from(room) {
-            Ok(feed_room_id) => {
-                config.feed.feed_room = feed_room_id;
-            }
-            Err(e) => {
-                log::error!("feed room option `-f {}` is not valid.", room);
-                log::error!("{}", e);
-            }
-        },
-        None => {}
-    };
-    MatrixConfiguration::save(config.clone());
-
-    // Save the configuration into storage.
-    MATRIX_CONFIG.set(RwLock::new(config.clone()));
+    let config = MATRIX_CONFIG.get().write().unwrap();
 
     // Login with all parameters.
     login(

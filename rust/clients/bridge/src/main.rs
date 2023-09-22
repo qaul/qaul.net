@@ -39,6 +39,9 @@ async fn main() {
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
+    // initialize relay bot
+    relay_bot::init(&storage_path).await;
+
     // start libqaul in new thread and save configuration file to current working path
     libqaul::api::start_with_config(storage_path, None);
 
