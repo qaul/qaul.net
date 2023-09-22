@@ -481,9 +481,15 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
     };
 
     let _feed_room = match matches.value_of("Feed-Room") {
-        Some(room) => {
-            config.feed.feed_room = RoomId::try_from(room).unwrap();
-        }
+        Some(room) => match RoomId::try_from(room) {
+            Ok(feed_room_id) => {
+                config.feed.feed_room = feed_room_id;
+            }
+            Err(e) => {
+                log::error!("feed room option `-f {}` is not valid.", room);
+                log::error!("{}", e);
+            }
+        },
         None => {}
     };
     MatrixConfiguration::save(config.clone());
