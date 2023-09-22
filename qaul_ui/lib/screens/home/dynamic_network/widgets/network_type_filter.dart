@@ -39,6 +39,13 @@ final _filteredNodes = Provider<NetworkNode>((ref) {
 class _NetworkTypeFilterToolbar extends HookConsumerWidget {
   const _NetworkTypeFilterToolbar({Key? key}) : super(key: key);
 
+  static final List<NetworkTypeFilter> availableFilters = [
+    if (Platform.isAndroid) NetworkTypeFilter.bluetooth,
+    NetworkTypeFilter.lan,
+    NetworkTypeFilter.internet,
+    NetworkTypeFilter.all,
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(_networkTypeFilter);
@@ -47,8 +54,8 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
       return filter == t ? Colors.lightBlue : Colors.blueGrey.shade200;
     }
 
-    final buttons = List.generate(NetworkTypeFilter.values.length, (i) {
-      final filter = NetworkTypeFilter.values[i];
+    final buttons = List.generate(availableFilters.length, (i) {
+      final filter = availableFilters[i];
       return filterButton(
         context,
         filter: filter,
