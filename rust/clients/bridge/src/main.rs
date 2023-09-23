@@ -6,13 +6,11 @@
 //! bridge can be used to run on an embedded device, such as a raspberry Pi,
 //! or as a static node on a server in the Internet.
 
-use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
 use std::thread;
 use std::time::Duration;
-use uuid::Uuid;
 
 use libqaul;
 
@@ -26,6 +24,7 @@ mod rpc;
 mod user_accounts;
 mod users;
 
+use configuration::MatrixConfiguration;
 use rpc::Rpc;
 
 /// Events of the async loop
@@ -104,29 +103,24 @@ async fn main() {
             select! {
                _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
                 _feed_ticker = feed_fut => {
-                    if let Ok(config) = MATRIX_CONFIG.get().read() {
-                        let last_index = &config.feed.last_index;
-                        // Check unread messages from Libqaul
-                        feed::Feed::request_feed_list(*last_index);
-                    } else {
-                        println!("Waiting for the configuration to Sync")
-                    }
+                    // Check unread messages from Libqaul
+                    let last_index = MatrixConfiguration::get_last_index();
+                    feed::Feed::request_feed_list(last_index);
                     None
                 },
                 _group_ticker = group_fut => {
-                    if let Ok(config) = MATRIX_CONFIG.get().read() {
-                        group::Group::group_list();
-                        let qaul_groups: Vec<Uuid> = config.room_map.keys().cloned().collect();
+                    group::Group::group_list();
+                    let qaul_groups = MatrixConfiguration::get_qaul_groups();
 
-                        // Check unread messages from Libqaul groups
-                        for group in qaul_groups {
-                            let matrix_room = config.room_map.get(&group).unwrap();
-                                let last_index_grp = matrix_room.last_index;
-                            let group_id = group.as_bytes().to_vec();
-                            chat::Chat::request_chat_conversation(group_id,last_index_grp);
+                    // Check unread messages from Libqaul groups
+                    for group in qaul_groups {
+                        match MatrixConfiguration::get_matrix_room_last_index(&group) {
+                            Some(last_index) => {
+                                let group_id = group.as_bytes().to_vec();
+                                chat::Chat::request_chat_conversation(group_id, last_index);
+                            }
+                            None => log::warn!("matrix room not found for qaul group"),
                         }
-                    } else {
-                        println!("Waiting for the configuration to Sync")
                     }
                     None
                 },

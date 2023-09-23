@@ -17,7 +17,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
 }
 
-use crate::relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG};
+use crate::{configuration::MatrixConfiguration, relay_bot::MATRIX_CLIENT};
 
 use matrix_sdk::{
     room::Room,
@@ -63,10 +63,9 @@ impl Users {
                             Self::matrix_rpc(proto_userlist.user.clone(), room_id);
                         } else {
                             // Send the Response to master matrix room
-                            let config = MATRIX_CONFIG.get().read().unwrap();
                             Self::matrix_rpc(
                                 proto_userlist.user.clone(),
-                                config.feed.feed_room.clone(),
+                                MatrixConfiguration::get_feed_room(),
                             );
                         }
                     }

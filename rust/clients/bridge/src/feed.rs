@@ -12,10 +12,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
 }
 
-use crate::{
-    configuration::MatrixConfiguration,
-    relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
-};
+use crate::{configuration::MatrixConfiguration, relay_bot::MATRIX_CLIENT};
 
 use matrix_sdk::{
     room::Room,
@@ -56,8 +53,8 @@ impl Feed {
                 match feed.message {
                     Some(proto::feed::Message::Received(proto_feedlist)) => {
                         // The configuration Object from matrix.yaml
-                        let mut config = MATRIX_CONFIG.get().write().unwrap();
-                        let last_index_matrix = config.feed.last_index;
+                        let last_index_matrix = MatrixConfiguration::get_feed_last_index();
+                        let mut new_last_index = last_index_matrix;
                         // print all messages in the feed list
                         for message in proto_feedlist.feed_message {
                             print! {"[{}] ", message.index};
@@ -71,12 +68,13 @@ impl Feed {
                             println!("");
                             if message.index > last_index_matrix {
                                 Self::matrix_send(message.content);
-                                config.feed.last_index = message.index;
-                                MatrixConfiguration::save(config.clone());
+                                new_last_index = message.index;
                             }
                         }
-                        // MATRIX_CONFIG.set(config.clone().into()) is not helping to save;
-                        MATRIX_CONFIG.set(config.clone().into());
+                        // save last index
+                        if new_last_index > last_index_matrix {
+                            MatrixConfiguration::set_feed_last_index(new_last_index);
+                        }
                     }
                     _ => {
                         log::error!("unprocessable RPC feed message");
@@ -92,20 +90,25 @@ impl Feed {
     fn matrix_send(message: String) {
         // Get the Room based on RoomID from the client information
         let matrix_client = MATRIX_CLIENT.get();
-        let config = MATRIX_CONFIG.get().read().unwrap();
-        let room_id = &config.feed.feed_room;
-        let room = matrix_client.get_room(&room_id).unwrap();
-        // Check if the room is already joined or not
-        if let Room::Joined(room) = room {
-            // Build the message content to send to matrix
-            let content =
-                AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(message));
+        let room_id = &MatrixConfiguration::get_feed_room();
 
-            let rt = Runtime::new().unwrap();
-            rt.block_on(async {
-                // Sends messages into the matrix room
-                room.send(content, None).await.unwrap();
-            });
+        match matrix_client.get_room(&room_id) {
+            Some(room) => {
+                // Check if the room is already joined or not
+                if let Room::Joined(room) = room {
+                    // Build the message content to send to matrix
+                    let content = AnyMessageEventContent::RoomMessage(
+                        MessageEventContent::text_plain(message),
+                    );
+
+                    let rt = Runtime::new().unwrap();
+                    rt.block_on(async {
+                        // Sends messages into the matrix room
+                        room.send(content, None).await.unwrap();
+                    });
+                }
+            }
+            None => log::warn!("Not able to send feed message to matrix room. Room not found."),
         }
     }
 }

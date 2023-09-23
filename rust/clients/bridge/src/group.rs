@@ -9,7 +9,7 @@ use super::rpc::Rpc;
 use crate::{
     chat,
     configuration::{MatrixConfiguration, MatrixRoom},
-    relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+    relay_bot::MATRIX_CLIENT,
     users::QAUL_USERS,
 };
 use libp2p::PeerId;
@@ -246,18 +246,17 @@ impl Group {
                             let sender_id = iter.next().unwrap();
                             let qaul_user_id = iter.next().unwrap();
                             if let Ok(room_id) = RoomId::try_from(room_id) {
-                                let mut config = MATRIX_CONFIG.get().write().unwrap();
                                 let room_info = MatrixRoom {
                                     matrix_room_id: room_id,
                                     qaul_group_name: sender_id.to_owned(),
                                     last_index: 0,
                                 };
-                                config.room_map.insert(group_id, room_info);
+                                MatrixConfiguration::create_qaul_matrix_room(group_id, room_info);
+
                                 Self::invite(
                                     Self::uuid_string_to_bin(group_id.to_string()).unwrap(),
                                     Self::id_string_to_bin(qaul_user_id.to_string()).unwrap(),
                                 );
-                                MatrixConfiguration::save(config.clone());
                             }
                         }
                     }
@@ -429,7 +428,7 @@ impl Group {
                     Some(proto::group::Message::GroupListResponse(group_list_response)) => {
                         let all_groups = group_list_response.groups.clone();
 
-                        let mut config = MATRIX_CONFIG.get().write().unwrap();
+                        //let mut config = MATRIX_CONFIG.get().write().unwrap();
                         for group in all_groups {
                             // If Mapping exist let it be. Else create new room.
                             let group_id =
@@ -446,7 +445,9 @@ impl Group {
                             // If group mapping does not exist
                             // If group_name contains matrix user name then only do this.
                             if let Ok(user) = UserId::try_from(group.group_name.clone()) {
-                                if !config.room_map.contains_key(&group_id) {
+                                //if !config.room_map.contains_key(&group_id) {
+                                if MatrixConfiguration::get_related_matrix_room(group_id).is_none()
+                                {
                                     let matrix_client = MATRIX_CLIENT.get();
                                     let rt = Runtime::new().unwrap();
                                     rt.block_on(async {
@@ -478,8 +479,10 @@ impl Group {
                                             qaul_group_name: group.group_name,
                                             last_index: 0,
                                         };
-                                        config.room_map.insert(group_id, room_info);
-                                        MatrixConfiguration::save(config.clone());
+
+                                        MatrixConfiguration::create_qaul_matrix_room(
+                                            group_id, room_info,
+                                        );
                                     });
                                 }
                             }

@@ -7,8 +7,8 @@
 
 use super::rpc::Rpc;
 use crate::{
-    configuration::MatrixConfiguration,
-    relay_bot::{MATRIX_CLIENT, MATRIX_CONFIG},
+    configuration::{MatrixConfiguration, MatrixRoom},
+    relay_bot::MATRIX_CLIENT,
     user_accounts::BOT_USER_ACCOUNT_ID,
     users::QAUL_USERS,
 };
@@ -28,6 +28,7 @@ use std::{
     path::PathBuf,
 };
 use tokio::runtime::Runtime;
+use uuid::Uuid;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -47,7 +48,6 @@ mod proto_file {
 pub struct Chat {}
 
 impl Chat {
-
     /// Convert Group ID from String to Binary
     pub fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
@@ -176,68 +176,26 @@ impl Chat {
     /// Process received RPC message
     ///
     /// Decodes received protobuf encoded binary RPC message
-    /// of the feed module.
+    /// of the chat module.
     pub fn rpc(data: Vec<u8>) {
         match proto::Chat::decode(&data[..]) {
             Ok(chat) => {
                 match chat.message {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
-                        let group_id =
-                            uuid::Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
-                        let mut config = MATRIX_CONFIG.get().write().unwrap();
-                        if !config.room_map.contains_key(&group_id) {
-                            println!("No Mapping found");
-                        } else {
-                            let matrix_room = config.room_map.get_mut(&group_id).unwrap();
-                            let last_index_grp = matrix_room.last_index;
-                            let room_id = matrix_room.clone().matrix_room_id;
-                            for message in proto_conversation.message_list {
-                                if message.index > last_index_grp {
-                                    if let Ok(ss) = Self::analyze_content(&message, &room_id) {
-                                        print! {"{} | ", message.index};
-                                        // message.sender_id is same as user.id
-                                        match proto::MessageStatus::from_i32(message.status)
-                                            .unwrap()
-                                        {
-                                            proto::MessageStatus::Sending => print!(".. | "),
-                                            proto::MessageStatus::Sent => print!("✓. | "),
-                                            proto::MessageStatus::Confirmed => print!("✓✓ | "),
-                                            proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
-                                            proto::MessageStatus::Receiving => print!("🚚 | "),
-                                            proto::MessageStatus::Received => print!("📨 | "),
-                                        }
+                        let group_id = uuid::Uuid::from_bytes(
+                            proto_conversation.group_id.clone().try_into().unwrap(),
+                        );
 
-                                        print!("{} | ", message.sent_at);
-                                        let users = QAUL_USERS.get().read().unwrap();
-                                        println!("{:#?}", users);
-                                        let sender_id =
-                                            bs58::encode(message.sender_id).into_string();
-                                        println!("{}", sender_id);
-                                        let user_name =
-                                            Self::find_user_for_given_id(users.clone(), sender_id)
-                                                .unwrap();
-                                        println!(
-                                            " [{}] {}",
-                                            bs58::encode(message.message_id).into_string(),
-                                            message.received_at
-                                        );
-
-                                        for s in ss {
-                                            // This part is mapped with the matrix room.
-                                            // Allow inviting the users or removing them.
-                                            Self::matrix_send(&s, &room_id, user_name.clone());
-                                            println!("\t{}", s);
-                                        }
-                                        println!("");
-                                        matrix_room.update_last_index(message.index);
-                                    }
-                                }
-                            }
-                            MatrixConfiguration::save(config.clone());
+                        match MatrixConfiguration::get_related_matrix_room(group_id) {
+                            None => log::warn!("No Mapping found"),
+                            Some(matrix_room) => Self::process_incoming_chat_message(
+                                group_id,
+                                proto_conversation,
+                                matrix_room,
+                            ),
                         }
                     }
-
                     _ => {
                         log::error!("unprocessable RPC chat message");
                     }
@@ -246,6 +204,69 @@ impl Chat {
             Err(error) => {
                 log::error!("{:?}", error);
             }
+        }
+    }
+
+    /// process incoming chat message
+    fn process_incoming_chat_message(
+        group_id: Uuid,
+        conversation: crate::chat::proto::ChatConversationList,
+        matrix_room: MatrixRoom,
+    ) {
+        let last_index_grp = matrix_room.last_index;
+        let mut new_last_index = last_index_grp;
+        let room_id = matrix_room.clone().matrix_room_id;
+        for message in conversation.message_list {
+            if message.index > last_index_grp {
+                if let Ok(ss) = Self::analyze_content(&message, &room_id) {
+                    print! {"{} | ", message.index};
+                    // message.sender_id is same as user.id
+                    match proto::MessageStatus::from_i32(message.status).unwrap() {
+                        proto::MessageStatus::Sending => {
+                            print!(".. | ")
+                        }
+                        proto::MessageStatus::Sent => print!("✓. | "),
+                        proto::MessageStatus::Confirmed => {
+                            print!("✓✓ | ")
+                        }
+                        proto::MessageStatus::ConfirmedByAll => {
+                            print!("✓✓✓| ")
+                        }
+                        proto::MessageStatus::Receiving => {
+                            print!("🚚 | ")
+                        }
+                        proto::MessageStatus::Received => {
+                            print!("📨 | ")
+                        }
+                    }
+
+                    print!("{} | ", message.sent_at);
+                    let users = QAUL_USERS.get().read().unwrap();
+                    println!("{:#?}", users);
+                    let sender_id = bs58::encode(message.sender_id).into_string();
+                    println!("{}", sender_id);
+                    let user_name = Self::find_user_for_given_id(users.clone(), sender_id).unwrap();
+                    println!(
+                        " [{}] {}",
+                        bs58::encode(message.message_id).into_string(),
+                        message.received_at
+                    );
+
+                    for s in ss {
+                        // This part is mapped with the matrix room.
+                        // Allow inviting the users or removing them.
+                        Self::matrix_send(&s, &room_id, user_name.clone());
+                        println!("\t{}", s);
+                    }
+                    println!("");
+                    new_last_index = message.index;
+                }
+            }
+        }
+
+        // save new last index
+        if new_last_index > last_index_grp {
+            MatrixConfiguration::set_matrix_room_last_index(group_id, new_last_index);
         }
     }
 
