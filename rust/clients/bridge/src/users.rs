@@ -66,7 +66,7 @@ impl Users {
                             let config = MATRIX_CONFIG.get().read().unwrap();
                             Self::matrix_rpc(
                                 proto_userlist.user.clone(),
-                                config.feed.feed_room.clone(),
+                                RoomId::try_from(config.feed.feed_room.clone()).expect("Invalid Feed Room. Please update correct room into configuration"),
                             );
                         }
                     }

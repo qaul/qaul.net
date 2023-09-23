@@ -19,7 +19,7 @@ use crate::{
 
 use matrix_sdk::{
     room::Room,
-    ruma::events::{room::message::MessageEventContent, AnyMessageEventContent},
+    ruma::{events::{room::message::MessageEventContent, AnyMessageEventContent}, RoomId},
 };
 
 /// feed module function handling
@@ -93,7 +93,7 @@ impl Feed {
         // Get the Room based on RoomID from the client information
         let matrix_client = MATRIX_CLIENT.get();
         let config = MATRIX_CONFIG.get().read().unwrap();
-        let room_id = &config.feed.feed_room;
+        let room_id = &RoomId::try_from(config.feed.feed_room.clone()).expect("Invalid Feed Room. Please update correct room into configuration");
         let room = matrix_client.get_room(&room_id).unwrap();
         // Check if the room is already joined or not
         if let Room::Joined(room) = room {

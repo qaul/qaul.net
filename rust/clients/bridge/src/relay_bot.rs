@@ -128,9 +128,9 @@ pub async fn init(storage_path: &String) {
     };
 
     let _feed_room = match matches.value_of("Feed-Room") {
-        Some(room) => match RoomId::try_from(room) {
+        Some(room) => match RoomId::try_from(room) {          
             Ok(feed_room_id) => {
-                config.feed.feed_room = feed_room_id;
+                config.feed.feed_room = feed_room_id.to_string();
             }
             Err(e) => {
                 log::error!("feed room option `-f {}` is not valid.", room);
