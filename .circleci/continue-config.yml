@@ -465,20 +465,20 @@ jobs:
             - run:
                 command: |
                     sudo apt update
-                    sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
+                    sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config cmake libssl-dev build-essential
                     protoc --version
                 name: Install protoc
             - setup-sccache
             - restore-sccache-cache
             - run:
-                command: cd rust && cargo build --release
+                command: cd rust && cargo build --release --all
                 name: Build Libqaul for Linux
             - save-sccache-cache
             - run:
                 command: |
                     cd rust/target/release
                     mkdir cli-binaries
-                    mv qauld qaul-cli cli-binaries
+                    mv qauld qaul-cli  qaul-matrix-bridge cli-binaries
                     cd cli-binaries
                     zip linux-cli-binaries *
                 name: zip command-line binaries

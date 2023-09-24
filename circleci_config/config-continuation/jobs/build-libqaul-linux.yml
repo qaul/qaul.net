@@ -5,20 +5,20 @@ steps:
       name: Install protoc
       command: |
         sudo apt update
-        sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
+        sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config cmake libssl-dev build-essential
         protoc --version
   - setup-sccache
   - restore-sccache-cache
   - run:
       name: Build Libqaul for Linux
-      command: cd rust && cargo build --release
+      command: cd rust && cargo build --release --all
   - save-sccache-cache
   - run:
       name: zip command-line binaries
       command: |
         cd rust/target/release
         mkdir cli-binaries
-        mv qauld qaul-cli cli-binaries
+        mv qauld qaul-cli  qaul-matrix-bridge cli-binaries
         cd cli-binaries
         zip linux-cli-binaries *
   - persist_to_workspace:
