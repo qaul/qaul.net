@@ -478,7 +478,7 @@ jobs:
                 command: |
                     cd rust/target/release
                     mkdir cli-binaries
-                    mv qauld qaul-cli cli-binaries qaul-matrix-bridge
+                    mv qauld qaul-cli  qaul-matrix-bridge cli-binaries
                     cd cli-binaries
                     zip linux-cli-binaries *
                 name: zip command-line binaries
