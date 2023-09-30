@@ -41,7 +41,7 @@ mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
 }
-use crate::{chat, chatfile, configuration::MatrixRoom, group, users};
+use crate::{chat, chatfile, configuration::MatrixRoom, group, users, MATRIX_INIT};
 
 // Setup a storage object for the Matrix Client and Config to make it available globally
 pub static MATRIX_CLIENT: state::Storage<Client> = state::Storage::new();
@@ -504,6 +504,8 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
         &config.relay_bot.bot_password,
     )
     .await?;
+    let mut matrix_initialized = MATRIX_INIT.get().write().unwrap();
+    matrix_initialized.logged_in = true;
     Ok(())
 }
 

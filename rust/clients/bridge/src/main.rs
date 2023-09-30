@@ -10,6 +10,7 @@ use crate::relay_bot::MATRIX_CONFIG;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
+use std::sync::RwLock;
 use std::thread;
 use std::time::Duration;
 use uuid::Uuid;
@@ -33,8 +34,14 @@ enum EventType {
     Rpc(bool),
 }
 
+pub struct MatrixInit {
+    pub logged_in : bool
+}
+pub static MATRIX_INIT: state::Storage<RwLock<MatrixInit>> = state::Storage::new();
+
 #[async_std::main]
 async fn main() {
+    MATRIX_INIT.set(MatrixInit{logged_in : false}.into());
     // get current working directory
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
@@ -81,7 +88,10 @@ async fn main() {
     let mut user_ticker = Ticker::new(Duration::from_millis(50));
     // check for any invitations incoming for groups every 50 milliseconds
     let mut invited_ticker = Ticker::new(Duration::from_millis(50));
-
+    while MATRIX_INIT.get().read().unwrap().logged_in == false {
+        // wait and do nothing
+        println!("Waiting");
+    }
     // loop and poll CLI and RPC
     loop {
         let evt = {
