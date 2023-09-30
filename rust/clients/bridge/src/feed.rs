@@ -61,14 +61,14 @@ impl Feed {
                         // print all messages in the feed list
                         for message in proto_feedlist.feed_message {
                             print! {"[{}] ", message.index};
-                            println!("Time Sent - {}", message.time_sent);
-                            println!("Timestamp Sent - {}", message.timestamp_sent);
-                            println!("Time Received - {}", message.time_received);
-                            println!("Timestamp Received - {}", message.timestamp_received);
-                            println!("Message ID {}", message.message_id_base58);
-                            println!("From {}", message.sender_id_base58);
-                            println!("\t{}", message.content);
-                            println!("");
+                            log::info!("Time Sent - {}", message.time_sent);
+                            log::info!("Timestamp Sent - {}", message.timestamp_sent);
+                            log::info!("Time Received - {}", message.time_received);
+                            log::info!("Timestamp Received - {}", message.timestamp_received);
+                            log::info!("Message ID {}", message.message_id_base58);
+                            log::info!("From {}", message.sender_id_base58);
+                            log::info!("\t{}", message.content);
+                            log::info!("");
                             if message.index > last_index_matrix {
                                 Self::matrix_send(message.content);
                                 config.feed.last_index = message.index;

@@ -47,7 +47,6 @@ mod proto_file {
 pub struct Chat {}
 
 impl Chat {
-
     /// Convert Group ID from String to Binary
     pub fn id_string_to_bin(id: String) -> Result<Vec<u8>, String> {
         // check length
@@ -112,7 +111,7 @@ impl Chat {
                 proto::MessageStatus::Received => break,
             }
         }
-        println!("Message Received from Qaul");
+        log::info!("Message Received from Qaul");
         let content: &Vec<u8> = &message.content;
         let mut res: Vec<String> = vec![];
 
@@ -128,7 +127,7 @@ impl Chat {
                     file_path.push_str(&file_content.file_id.to_string());
                     file_path.push('.');
                     file_path.push_str(&file_content.file_extension.to_string());
-                    println!("Qaul->Matrix FilePath : {}", file_path);
+                    log::info!("Qaul->Matrix FilePath : {}", file_path);
                     let extension = file_content.file_extension.to_string();
                     let file_name = file_content.file_name;
                     send_file_to_matrix(file_path, room_id, extension, file_name);
@@ -187,7 +186,7 @@ impl Chat {
                             uuid::Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
                         let mut config = MATRIX_CONFIG.get().write().unwrap();
                         if !config.room_map.contains_key(&group_id) {
-                            println!("No Mapping found");
+                            log::info!("No Mapping found");
                         } else {
                             let matrix_room = config.room_map.get_mut(&group_id).unwrap();
                             let last_index_grp = matrix_room.last_index;
@@ -210,14 +209,14 @@ impl Chat {
 
                                         print!("{} | ", message.sent_at);
                                         let users = QAUL_USERS.get().read().unwrap();
-                                        println!("{:#?}", users);
+                                        log::info!("{:#?}", users);
                                         let sender_id =
                                             bs58::encode(message.sender_id).into_string();
-                                        println!("{}", sender_id);
+                                        log::info!("{}", sender_id);
                                         let user_name =
                                             Self::find_user_for_given_id(users.clone(), sender_id)
                                                 .unwrap();
-                                        println!(
+                                        log::info!(
                                             " [{}] {}",
                                             bs58::encode(message.message_id).into_string(),
                                             message.received_at
@@ -227,9 +226,9 @@ impl Chat {
                                             // This part is mapped with the matrix room.
                                             // Allow inviting the users or removing them.
                                             Self::matrix_send(&s, &room_id, user_name.clone());
-                                            println!("\t{}", s);
+                                            log::info!("\t{}", s);
                                         }
-                                        println!("");
+                                        log::info!("");
                                         matrix_room.update_last_index(message.index);
                                     }
                                 }
@@ -292,22 +291,24 @@ fn send_file_to_matrix(file_path: String, room_id: &RoomId, extension: String, f
         let rt = Runtime::new().unwrap();
         rt.block_on(async {
             // Sends messages into the matrix room
-            println!("{}", storage_path);
+            log::info!("{}", storage_path);
             let file_buff = PathBuf::from(storage_path.clone());
             let mut buff = File::open(file_buff).unwrap();
             let mut content_type: &Mime = &STAR_STAR;
-            println!("{}", extension);
+            log::info!("{}", extension);
             match extension.as_str() {
                 "jpg" | "png" | "jpeg" | "gif" | "bmp" | "svg" => content_type = &mime::IMAGE_STAR,
                 "pdf" => content_type = &mime::APPLICATION_PDF,
-                _ => println!("Please raise a github ticket since we don't allow this file-type."),
+                _ => {
+                    log::info!("Please raise a github ticket since we don't allow this file-type.")
+                }
             }
             room.send_attachment(&file_name, content_type, &mut buff, None)
                 .await
                 .unwrap();
         });
         // Delete the file from bot server.
-        println!("Deleting file from : {}", storage_path);
+        log::info!("Deleting file from : {}", storage_path);
         fs::remove_file(storage_path).expect("could not remove file");
     };
 }

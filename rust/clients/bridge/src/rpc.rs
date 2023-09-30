@@ -25,12 +25,12 @@ impl Rpc {
         if my_user_id == None {
             if module == proto::Modules::Node as i32 {
                 // print message
-                println!("Operation not permitted");
-                println!("No user account set yet");
-                println!("Please create a user account");
-                println!("");
-                println!("    account create {{Your User Name}}");
-                println!("");
+                log::info!("Operation not permitted");
+                log::info!("No user account set yet");
+                log::info!("Please create a user account");
+                log::info!("");
+                log::info!("    account create {{Your User Name}}");
+                log::info!("");
 
                 // stop here
                 return;

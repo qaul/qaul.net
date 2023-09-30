@@ -58,12 +58,12 @@ async fn on_stripped_state_room(
     }
 
     if let Room::Invited(room) = room {
-        println!("Autojoining room {}", room.room_id());
+        log::info!("Autojoining room {}", room.room_id());
         let mut delay = 2;
 
         // retry autojoin due to synapse sending invites, before the invited user can join
         while let Err(err) = room.accept_invitation().await {
-            eprintln!(
+            log::info!(
                 "Failed to join room {} ({:?}), retrying in {}s",
                 room.room_id(),
                 err,
@@ -74,11 +74,11 @@ async fn on_stripped_state_room(
             delay *= 2;
 
             if delay > 3600 {
-                eprintln!("Can't join room {} ({:?})", room.room_id(), err);
+                log::info!("Can't join room {} ({:?})", room.room_id(), err);
                 break;
             }
         }
-        println!("Successfully joined room {}", room.room_id());
+        log::info!("Successfully joined room {}", room.room_id());
     }
 }
 
@@ -135,7 +135,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
                             let _ = file.write_all(&file_bytes);
-                            println!("File Saved Successfully");
+                            log::info!("File Saved Successfully");
 
                             // Send the file to qaul world
                             send_file_to_qaul(
@@ -170,7 +170,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             let output_file_path = path.join(file_name);
                             let mut file = std::fs::File::create(output_file_path).unwrap();
                             let _ = file.write_all(&file_bytes);
-                            println!("File Saved Successfully");
+                            log::info!("File Saved Successfully");
 
                             // Send the file to qaul world
                             send_file_to_qaul(
@@ -205,7 +205,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                             // on receiving !help from matrix, Give brief of all possible commands.
                             if msg_body.contains("!help") {
                                 let content = AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(
-                                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n !remove {qaul_user_id} : To remove a user from the qaul into this matrix room.\n!group-info : Get details for the qaul group with which this matrix room is connected.",
+                                    "!qaul : Ping to check if the bot is active or not.\n!users : Get list of all the users on the network.\n!invite {qaul_user_id} : To invite a user from the qaul into this matrix room.\n!remove {qaul_user_id} : To remove a user from the qaul into this matrix room.\n!group-info : Get details for the qaul group with which this matrix room is connected.",
                                 ));
                                 room.send(content, None).await.unwrap();
                             }
@@ -226,7 +226,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                         "invite#{}#{}#{}",
                                         room_id_string, sender_string, qaul_user_id
                                     );
-                                    println!("{}", request_id);
+                                    log::info!("{}", request_id);
                                     // Create group only if the mapping between a qaul grp and matrix room doesn't exist.
                                     // If it exist then please check if user already exist or not. If not then invite
                                     let config = MATRIX_CONFIG.get().write().unwrap().clone();
@@ -254,7 +254,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                             .unwrap(),
                                             request_id,
                                         );
-                                        println!("The Room Mapping already exist for this room");
+                                        log::info!("The Room Mapping already exist for this room");
                                         // Else Invite the given user in same mapping of the matrix room.
                                     }
                                 } else {
@@ -289,7 +289,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                         "remove#{}#{}#{}",
                                         room_id_string, sender_string, qaul_user_id
                                     );
-                                    println!("{}", request_id);
+                                    log::info!("{}", request_id);
 
                                     let config = MATRIX_CONFIG.get().write().unwrap().clone();
                                     let room_id = room.room_id();
@@ -350,7 +350,7 @@ async fn on_room_message(event: SyncMessageEvent<MessageEventContent>, room: Roo
                                 }
                             }
                         } else {
-                            println!("Sent the message in the matrix room by !qaul-bot");
+                            log::info!("Sent the message in the matrix room by !qaul-bot");
                         }
                     }
                     MessageType::Video(_) => {}
@@ -370,7 +370,7 @@ async fn login(
     // the location for `JsonStore` to save files to
     let mut home = dirs::config_dir().expect("no home directory found");
     home.push("qaul/matrix");
-    println!("{:?}", home);
+    log::info!("{:?}", home);
     let client_config = ClientConfig::new().store_path(home);
     let homeserver_url = Url::parse(&homeserver_url).expect("Couldn't parse the homeserver URL");
 
@@ -379,7 +379,7 @@ async fn login(
     client
         .login(&username, &password, None, Some("command bot"))
         .await?;
-    println!("logged in as {}", username);
+    log::info!("logged in as {}", username);
 
     // An initial sync to set up state and so our bot doesn't respond to old
     // messages. If the `StateStore` finds saved state in the location given the
@@ -404,7 +404,7 @@ async fn login(
 
 #[tokio::main]
 pub async fn connect() -> Result<(), matrix_sdk::Error> {
-    println!("Connecting to Matrix Bot");
+    log::info!("Connecting to Matrix Bot");
 
     // Configuration for starting of the bot
     let path_string = Storage::get_path();
@@ -510,7 +510,7 @@ pub async fn connect() -> Result<(), matrix_sdk::Error> {
 }
 
 fn send_qaul(msg_text: String, room_id: &RoomId) {
-    println!("Message from Matrix arrived");
+    log::info!("Message from Matrix arrived");
     let mut config = MATRIX_CONFIG.get().write().unwrap();
 
     // Find Qaul Group ID given a matrix Room ID.
@@ -558,7 +558,7 @@ fn send_qaul(msg_text: String, room_id: &RoomId) {
 
 // Logic to send file to qaul
 fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) {
-    println!("File from Matrix arrived in Qaul");
+    log::info!("File from Matrix arrived in Qaul");
     let mut config = MATRIX_CONFIG.get().write().unwrap();
 
     // Find Qaul Group ID given a matrix Room ID.
@@ -576,7 +576,7 @@ fn send_file_to_qaul(room_id: &RoomId, file_name: &String, description: String) 
     } else {
         // No Qaul Group Found for this Matrix Room
         // TODO : Send files in Qaul Feed once Qaul supports files in feed.
-        println!("Not Possible to send file into feed");
+        log::info!("Not Possible to send file into feed");
     }
     MatrixConfiguration::save(config.clone());
 }

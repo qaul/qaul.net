@@ -15,7 +15,6 @@ mod proto {
 pub struct ChatFile {}
 
 impl ChatFile {
-
     /// send file via rpc
     pub fn send_file(group_id: Vec<u8>, file_name: String, description: String) {
         // create file send message
@@ -43,7 +42,6 @@ impl ChatFile {
         );
     }
 
-
     /// Process received RPC message
     ///
     /// Decodes received protobuf encoded binary RPC message
@@ -54,10 +52,10 @@ impl ChatFile {
                 match file_share.message {
                     Some(proto::chat_file::Message::FileHistoryResponse(proto_file_history)) => {
                         // List header
-                        println!("====================================");
-                        println!("File Sharing Histories");
-                        println!("------------------------------------");
-                        println!(
+                        log::info!("====================================");
+                        log::info!("File Sharing Histories");
+                        log::info!("------------------------------------");
+                        log::info!(
                             "offset={}, limit={}, total={}",
                             proto_file_history.offset,
                             proto_file_history.limit,
@@ -66,14 +64,15 @@ impl ChatFile {
 
                         // print all messages in the feed list
                         for entry in proto_file_history.histories {
-                            println!("[{}] - {}", entry.file_id, entry.file_name);
-                            println!("\t Time: {}, SenderId: {}", entry.time, entry.sender_id);
-                            println!("\t Group Id: {}", entry.group_id);
-                            println!(
+                            log::info!("[{}] - {}", entry.file_id, entry.file_name);
+                            log::info!("\t Time: {}, SenderId: {}", entry.time, entry.sender_id);
+                            log::info!("\t Group Id: {}", entry.group_id);
+                            log::info!(
                                 "\t FileSize: {}, Description: {}",
-                                entry.file_size, entry.file_description
+                                entry.file_size,
+                                entry.file_description
                             );
-                            println!("");
+                            log::info!("");
                         }
                     }
                     _ => {

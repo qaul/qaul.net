@@ -233,12 +233,12 @@ impl Group {
             Ok(group_chat) => {
                 match group_chat.message {
                     Some(proto::group::Message::GroupCreateResponse(create_group_response)) => {
-                        println!("====================================");
-                        println!("Group was created or updated");
+                        log::info!("====================================");
+                        log::info!("Group was created or updated");
                         let group_id = uuid::Uuid::from_bytes(
                             create_group_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
+                        log::info!("\tid: {}", group_id.to_string());
                         if request_id.contains('#') {
                             let mut iter = request_id.split('#');
                             let _cmd = iter.next().unwrap();
@@ -263,54 +263,54 @@ impl Group {
                     }
                     Some(proto::group::Message::GroupRenameResponse(rename_group_response)) => {
                         let result = rename_group_response.result.unwrap();
-                        println!("====================================");
-                        println!("Group Rename status: {}", result.status);
+                        log::info!("====================================");
+                        log::info!("Group Rename status: {}", result.status);
                         let group_id = uuid::Uuid::from_bytes(
                             rename_group_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
+                        log::info!("\tid: {}", group_id.to_string());
                         if !result.status {
-                            println!("\terror: {}", result.message);
+                            log::info!("\terror: {}", result.message);
                         }
                     }
                     Some(proto::group::Message::GroupInviteMemberResponse(
                         invite_group_response,
                     )) => {
                         let result = invite_group_response.result.unwrap();
-                        println!("====================================");
-                        println!("Group Invite status: {}", result.status);
+                        log::info!("====================================");
+                        log::info!("Group Invite status: {}", result.status);
                         let group_id = uuid::Uuid::from_bytes(
                             invite_group_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
+                        log::info!("\tid: {}", group_id.to_string());
                         if !result.status {
-                            println!("\terror: {}", result.message);
+                            log::info!("\terror: {}", result.message);
                         }
                     }
                     Some(proto::group::Message::GroupReplyInviteResponse(reply_group_response)) => {
                         let result = reply_group_response.result.unwrap();
-                        println!("====================================");
-                        println!("Reply Group Invite status: {}", result.status);
+                        log::info!("====================================");
+                        log::info!("Reply Group Invite status: {}", result.status);
                         let group_id = uuid::Uuid::from_bytes(
                             reply_group_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
+                        log::info!("\tid: {}", group_id.to_string());
                         if !result.status {
-                            println!("\terror: {}", result.message);
+                            log::info!("\terror: {}", result.message);
                         }
                     }
                     Some(proto::group::Message::GroupRemoveMemberResponse(
                         remove_member_response,
                     )) => {
                         let result = remove_member_response.result.unwrap();
-                        println!("====================================");
-                        println!("Group Remove Member status: {}", result.status);
+                        log::info!("====================================");
+                        log::info!("Group Remove Member status: {}", result.status);
                         let group_id = uuid::Uuid::from_bytes(
                             remove_member_response.group_id.try_into().unwrap(),
                         );
-                        println!("\tid: {}", group_id.to_string());
+                        log::info!("\tid: {}", group_id.to_string());
                         if !result.status {
-                            println!("\terror: {}", result.message);
+                            log::info!("\terror: {}", result.message);
                         }
                     }
 
@@ -323,13 +323,13 @@ impl Group {
                             // reqeust_id = qaul_user_id#room_id
                             let mut iter = request_id.split('#');
                             let cmd = iter.next().unwrap();
-                            println!("cmd : {}", cmd);
+                            log::info!("cmd : {}", cmd);
                             let room_id = iter.next().unwrap();
-                            println!("room : {}", room_id);
+                            log::info!("room : {}", room_id);
                             let _sender = iter.next().unwrap();
-                            println!("sender : {}", _sender);
+                            log::info!("sender : {}", _sender);
                             let qaul_user_id = iter.next().unwrap();
-                            println!("qaul user : {}", qaul_user_id);
+                            log::info!("qaul user : {}", qaul_user_id);
 
                             if cmd == "invite" {
                                 let grp_members = group_info_response.members.clone();
@@ -450,7 +450,7 @@ impl Group {
                                     let matrix_client = MATRIX_CLIENT.get();
                                     let rt = Runtime::new().unwrap();
                                     rt.block_on(async {
-                                        println!("{:#?}", group_id);
+                                        log::info!("{:#?}", group_id);
                                         // Check if user exist on matrix
                                         // Create a group on matrix with qaul user name.
                                         let mut request = CreateRoomRequest::new();
@@ -469,7 +469,7 @@ impl Group {
                                         {
                                             joined_room.invite_user_by_id(&user).await.unwrap();
                                         } else {
-                                            println!("Wait till the bot joins the room");
+                                            log::info!("Wait till the bot joins the room");
                                         }
 
                                         // Save things to Config file
@@ -492,14 +492,14 @@ impl Group {
                                 let group_id = uuid::Uuid::from_bytes(
                                     group.group_id.clone().try_into().unwrap(),
                                 );
-                                println!("id: {}", group_id.to_string());
-                                println!("\tname: {}", group.group_name.clone());
-                                println!(
+                                log::info!("id: {}", group_id.to_string());
+                                log::info!("\tname: {}", group.group_name.clone());
+                                log::info!(
                                     "\tsender: {}",
                                     bs58::encode(invite.sender_id).into_string()
                                 );
-                                println!("\treceived at: {}", invite.received_at);
-                                println!(
+                                log::info!("\treceived at: {}", invite.received_at);
+                                log::info!(
                                     "\tcreated_at: {}, members: {}",
                                     invite.received_at,
                                     group.members.len()

@@ -35,13 +35,13 @@ enum EventType {
 }
 
 pub struct MatrixInit {
-    pub logged_in : bool
+    pub logged_in: bool,
 }
 pub static MATRIX_INIT: state::Storage<RwLock<MatrixInit>> = state::Storage::new();
 
 #[async_std::main]
 async fn main() {
-    MATRIX_INIT.set(MatrixInit{logged_in : false}.into());
+    MATRIX_INIT.set(MatrixInit { logged_in: false }.into());
     // get current working directory
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
@@ -64,16 +64,16 @@ async fn main() {
     let default_user = libqaul::node::user_accounts::UserAccounts::get_default_user().unwrap();
     // initialize user account
     user_accounts::UserAccounts::init(default_user);
-    println!("Matrix Bot has been initialized as a Qaul User");
+    log::info!("Matrix Bot has been initialized as a Qaul User");
 
     thread::spawn(|| {
         // connect the matrix bot with the qaul-cli
         match relay_bot::connect() {
             Ok(_) => {
-                println!("Matrix-Bridge connecting");
+                log::info!("Matrix-Bridge connecting");
             }
             Err(error) => {
-                println!("{}", error);
+                log::info!("{}", error);
             }
         }
     });
@@ -90,7 +90,7 @@ async fn main() {
     let mut invited_ticker = Ticker::new(Duration::from_millis(50));
     while MATRIX_INIT.get().read().unwrap().logged_in == false {
         // wait and do nothing
-        println!("Waiting");
+        log::info!("Waiting");
     }
     // loop and poll CLI and RPC
     loop {
@@ -115,7 +115,7 @@ async fn main() {
                         // Check unread messages from Libqaul
                         feed::Feed::request_feed_list(*last_index);
                     } else {
-                        println!("Waiting for the configuration to Sync")
+                        log::info!("Waiting for the configuration to Sync")
                     }
                     None
                 },
@@ -132,7 +132,7 @@ async fn main() {
                             chat::Chat::request_chat_conversation(group_id,last_index_grp);
                         }
                     } else {
-                        println!("Waiting for the configuration to Sync")
+                        log::info!("Waiting for the configuration to Sync")
                     }
                     None
                 },
