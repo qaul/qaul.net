@@ -635,7 +635,7 @@ jobs:
             - save-sccache-cache
             - persist_to_workspace:
                 paths:
-                    - rust/target/arm/debian/*.deb
+                    - rust/target/debian/*.deb
                 root: ~/qaul-libp2p
     build-qauld-linux:
         executor: rust-linux
@@ -979,6 +979,7 @@ jobs:
                     WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
 
                     AMD64_FILE="qauld_amd64.deb"
+                    ARM64_FILE="qauld_arm64.deb"
                     ARMHF_FILE="qauld_armhf.deb"
 
                     cd artifacts
@@ -991,12 +992,14 @@ jobs:
                     mv "$ORIGINAL_ARMHF_FILE.deb" "$ARMHF_FILE"
 
                     echo "Using debian amd artifact name: $AMD64_FILE"
-                    echo "Using debian arm artifact name: $ARMHF_FILE"
+                    echo "Using debian arm artifact name: $ARM64_FILE"
+                    echo "Using debian armhf artifact name: $ARMHF_FILE"
 
                     DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
                       | sed "s/TAGNAME/${TAG}/g" \
                       | sed "s/DEB_AMD/${AMD64_FILE}/g" \
-                      | sed "s/DEB_ARM/${ARMHF_FILE}/g" \
+                      | sed "s/DEB_ARM/${ARM64_FILE}/g" \
+                      | sed "s/DEB_ARMHF/${ARMHF_FILE}/g" \
                       | sed "s/APKVERSION/${APK_FILE}/g" \
                       | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
                       | sed "s/ARMSNAPVERSION/${LINUX_ARM_FILE}/g" \
