@@ -1,0 +1,27 @@
+executor: rust-linux-arm
+steps:
+  - checkout-project
+  - run:
+      name: Install protoc
+      command: |
+        sudo apt update
+        sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
+        protoc --version
+  - setup-sccache
+  - restore-sccache-cache
+  - run:
+      name: Build Libqaul for Linux on arm
+      command: cd rust && cargo build --release
+  - save-sccache-cache
+  - run:
+      name: zip command-line binaries
+      command: |
+        cd rust/target/release
+        mkdir cli-binaries
+        mv qauld qaul-cli cli-binaries
+        cd cli-binaries
+        zip arm-linux-cli-binaries *
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - rust/target/release/cli-binaries/arm-linux-cli-binaries.zip
