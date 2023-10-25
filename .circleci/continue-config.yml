@@ -186,6 +186,14 @@ executors:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul-libp2p
+    rust-linux-arm:
+        docker:
+            - image: cimg/rust:1.72.0
+        environment:
+            CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        resource_class: arm.medium
+        shell: /bin/bash --login -o pipefail
+        working_directory: ~/qaul-libp2p
     rust-macos:
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -427,6 +435,34 @@ jobs:
                 paths:
                     - qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip
                 root: ~/qaul-libp2p
+    build-libqaul-arm-linux:
+        executor: rust-linux-arm
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    sudo apt update
+                    sudo apt install -y protobuf-compiler libdbus-1-dev pkg-config
+                    protoc --version
+                name: Install protoc
+            - setup-sccache
+            - restore-sccache-cache
+            - run:
+                command: cd rust && cargo build --release
+                name: Build Libqaul for Linux on arm
+            - save-sccache-cache
+            - run:
+                command: |
+                    cd rust/target/release
+                    mkdir cli-binaries
+                    mv qauld qaul-cli cli-binaries
+                    cd cli-binaries
+                    zip arm-linux-cli-binaries *
+                name: zip command-line binaries
+            - persist_to_workspace:
+                paths:
+                    - rust/target/release/cli-binaries/arm-linux-cli-binaries.zip
+                root: ~/qaul-libp2p
     build-libqaul-ios:
         executor: rust-macos
         steps:
@@ -578,6 +614,29 @@ jobs:
                     - rust/target/release/cli-binaries/windows-cli-binaries.zip
                 root: ~/qaul-libp2p
         working_directory: ~/qaul-libp2p
+    build-qauld-arm-linux:
+        executor: rust-linux-arm
+        steps:
+            - checkout-project
+            - run:
+                command: |
+                    sudo apt update
+                    sudo apt install -y protobuf-compiler
+                    protoc --version
+                name: Install protoc
+            - setup-sccache
+            - restore-sccache-cache
+            - run:
+                command: cd rust && cargo install cargo-deb
+                name: Install cargo-deb package
+            - run:
+                command: cd rust/clients/qauld && cargo deb
+                name: Build qauld for Linux on arm
+            - save-sccache-cache
+            - persist_to_workspace:
+                paths:
+                    - rust/target/arm/debian/*.deb
+                root: ~/qaul-libp2p
     build-qauld-linux:
         executor: rust-linux
         steps:
@@ -871,9 +930,11 @@ jobs:
                     # Linux - libqaul
                     cp rust/target/release/liblibqaul.so ./artifacts/
                     cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+                    cp rust/target/release/cli-binaries/arm-linux-cli-binaries.zip ./artifacts/
 
                     # Linux - qauld debian installers
                     cp rust/target/debian/*.deb ./artifacts/
+                    cp rust/target/arm/debian/*.deb ./artifacts/
                     cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
 
                     # MacOS
@@ -1231,7 +1292,19 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
+            - build-libqaul-arm-linux:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-rust
             - build-qauld-linux:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - verify-version-rust
+            - build-qauld-arm-linux:
                 filters:
                     tags:
                         only: /.*/
@@ -1243,7 +1316,9 @@ workflows:
                         only: /.*/
                 requires:
                     - build-libqaul-linux
+                    - build-libqaul-arm-linux
                     - build-qauld-linux
+                    - build-qauld-arm-linux
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>

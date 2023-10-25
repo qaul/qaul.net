@@ -18,9 +18,11 @@ steps:
         # Linux - libqaul
         cp rust/target/release/liblibqaul.so ./artifacts/
         cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
+        cp rust/target/release/cli-binaries/arm-linux-cli-binaries.zip ./artifacts/
 
         # Linux - qauld debian installers
         cp rust/target/debian/*.deb ./artifacts/
+        cp rust/target/arm/debian/*.deb ./artifacts/
         cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
 
         # MacOS
@@ -62,7 +64,7 @@ steps:
         LINUX_ARM_FILE="qaul-arm64-$FLUTTER_VERSION"
         MACOS_FILE="qaul-$FLUTTER_VERSION"
         WINDOWS_FILE="qaul_installer_$FLUTTER_VERSION"
-        
+
         AMD64_FILE="qauld_amd64.deb"
         ARMHF_FILE="qauld_armhf.deb"
 
@@ -74,10 +76,10 @@ steps:
         # Rename original debian file names
         mv "$ORIGINAL_AMD64_FILE.deb" "$AMD64_FILE"
         mv "$ORIGINAL_ARMHF_FILE.deb" "$ARMHF_FILE"
-        
+
         echo "Using debian amd artifact name: $AMD64_FILE"
         echo "Using debian arm artifact name: $ARMHF_FILE"
-        
+
         DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/DEB_AMD/${AMD64_FILE}/g" \

@@ -1,0 +1,22 @@
+executor: rust-linux-arm
+steps:
+  - checkout-project
+  - run:
+      name: Install protoc
+      command: |
+        sudo apt update
+        sudo apt install -y protobuf-compiler
+        protoc --version
+  - setup-sccache
+  - restore-sccache-cache
+  - run:
+      name: Install cargo-deb package
+      command: cd rust && cargo install cargo-deb
+  - run:
+      name: Build qauld for Linux on arm
+      command: cd rust/clients/qauld && cargo deb
+  - save-sccache-cache
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - rust/target/arm/debian/*.deb
