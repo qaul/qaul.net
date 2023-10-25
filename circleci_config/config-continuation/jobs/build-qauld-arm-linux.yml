@@ -19,4 +19,4 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/arm/debian/*.deb
+        - rust/target/debian/*.deb
