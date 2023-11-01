@@ -18,11 +18,10 @@ steps:
         # Linux - libqaul
         cp rust/target/release/liblibqaul.so ./artifacts/
         cp rust/target/release/cli-binaries/linux-cli-binaries.zip ./artifacts/
-        cp rust/target/release/cli-binaries/arm-linux-cli-binaries.zip ./artifacts/
+        cp rust/target/release/cli-binaries/linux-cli-binaries-arm64.zip ./artifacts/
 
         # Linux - qauld debian installers
         cp rust/target/debian/*.deb ./artifacts/
-        cp rust/target/arm/debian/*.deb ./artifacts/
         cp rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb ./artifacts/
 
         # MacOS
@@ -73,9 +72,11 @@ steps:
 
         # Get debian file names
         ORIGINAL_AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
+        ORIGINAL_ARM64_FILE=$(filename deb | grep "arm64" | cut -f1)
         ORIGINAL_ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
         # Rename original debian file names
         mv "$ORIGINAL_AMD64_FILE.deb" "$AMD64_FILE"
+        mv "$ORIGINAL_ARM64_FILE.deb" "$ARM64_FILE"
         mv "$ORIGINAL_ARMHF_FILE.deb" "$ARMHF_FILE"
 
         echo "Using debian amd artifact name: $AMD64_FILE"
