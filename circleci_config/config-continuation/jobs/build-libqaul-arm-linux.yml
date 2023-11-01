@@ -24,4 +24,4 @@ steps:
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:
-        - rust/target/release/cli-binaries/arm-linux-cli-binaries.zip
+        - rust/target/release/cli-binaries/linux-cli-binaries-arm64.zip

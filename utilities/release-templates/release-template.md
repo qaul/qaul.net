@@ -20,7 +20,7 @@ The Command-line tools can be used to run qaul from the terminal. For example on
 - [MacOS Command-line tools](https://github.com/qaul/qaul.net/releases/download/TAGNAME/macos-cli-binaries.zip)
 - Linux
   - [Linux Command-line tools - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries.zip)
-  - [Linux Command-line tools - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/arm-linux-cli-binaries.zip)
+  - [Linux Command-line tools - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries-arm64.zip)
   - [qauld Debian Installer - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_AMD)
   - [qauld Debian Installer - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM)
   - [qauld Debian Installer - armhf (for Raspberry Pi)](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARMHF)
