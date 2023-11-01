@@ -457,7 +457,7 @@ jobs:
                     mkdir cli-binaries
                     mv qauld qaul-cli cli-binaries
                     cd cli-binaries
-                    zip arm-linux-cli-binaries *
+                    zip linux-cli-binaries-arm64 *
                 name: zip command-line binaries
             - persist_to_workspace:
                 paths:
