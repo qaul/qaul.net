@@ -75,6 +75,9 @@ impl NetworkBehaviour for QaulInfo {
         Poll::Pending
     }
 
+    /// This callback function is invoked for every established inbound connection.
+    /// For documentation please see:
+    /// https://docs.rs/libp2p/latest/libp2p/swarm/trait.NetworkBehaviour.html#tymethod.handle_established_inbound_connection
     fn handle_established_inbound_connection(
         &mut self,
         _connection_id: libp2p::swarm::ConnectionId,
@@ -82,9 +85,12 @@ impl NetworkBehaviour for QaulInfo {
         _local_addr: &Multiaddr,
         _remote_addr: &Multiaddr,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
-        todo!()
+        Ok(Default::default())
     }
 
+    /// This callback function is invoked for every established outbound connection.
+    /// For documentation please see:
+    /// https://docs.rs/libp2p/latest/libp2p/swarm/trait.NetworkBehaviour.html#tymethod.handle_established_outbound_connection
     fn handle_established_outbound_connection(
         &mut self,
         _connection_id: libp2p::swarm::ConnectionId,
@@ -92,13 +98,17 @@ impl NetworkBehaviour for QaulInfo {
         _addr: &Multiaddr,
         _role_override: libp2p::core::Endpoint,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
-        todo!()
+        Ok(Default::default())
     }
 
-    fn on_swarm_event(&mut self, _event: libp2p::swarm::FromSwarm<Self::ConnectionHandler>) {
-        todo!()
-    }
+    /// This callback function informs the behaviour about an event from Swarm.
+    /// For documentation please see:
+    /// https://docs.rs/libp2p/latest/libp2p/swarm/trait.NetworkBehaviour.html#tymethod.on_swarm_event
+    fn on_swarm_event(&mut self, _event: libp2p::swarm::FromSwarm<Self::ConnectionHandler>) {}
 
+    /// This callback function informs the behaviour about an event generated.
+    /// For documentation please see:
+    /// https://docs.rs/libp2p/latest/libp2p/swarm/trait.NetworkBehaviour.html#tymethod.on_connection_handler_event
     fn on_connection_handler_event(
         &mut self,
         peer_id: libp2p::PeerId,
@@ -165,6 +175,7 @@ impl From<QaulInfoEvent> for QaulInfoData {
 }
 
 /// Configuration options for the qaul info behaviour
+#[derive(Debug, Clone)]
 pub struct QaulInfoConfig {
     /// Peer id of the local node. Used for the source of the messages that we publish.
     pub local_peer_id: PeerId,
