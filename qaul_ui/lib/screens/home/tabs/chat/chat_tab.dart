@@ -62,6 +62,8 @@ class _ChatState extends _BaseTabState<_Chat> {
       if (newChat is User) {
         final newRoom = ChatRoom.blank(otherUser: newChat);
         setOpenChat(newRoom, newChat);
+      } else if (newChat is ChatRoom) {
+        setOpenChat(newChat);
       }
     }, [setOpenChat]);
 
