@@ -25,12 +25,15 @@ class _CreateNewRoomDialog extends StatelessWidget {
                   ],
                 ),
                 title: Text(l10n.createNewGroup),
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => _CreateNewGroupDialog(),
-                  ),
-                ),
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => _CreateNewGroupDialog(),
+                    ),
+                  );
+                  Navigator.pop(context, result);
+                },
               );
             }
             final usr = users[i - 1];
@@ -53,21 +56,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final worker = ref.read(qaulWorkerProvider);
-    final defaultUser = ref.watch(defaultUserProvider)!;
-
-    final mobile =
-        Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
-    final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
-      if (mobile) {
-        openChat(room,
-            ref: ref,
-            context: context,
-            user: defaultUser,
-            otherUser: otherUser);
-      } else {
-        ref.read(currentOpenChatRoom.notifier).state = room;
-      }
-    }, [mobile]);
 
     final loading = useState(false);
     final nameCtrl = useTextEditingController();
@@ -141,7 +129,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                   var chatRoom = ref
                       .read(chatRoomsProvider)
                       .firstWhereOrNull((g) => g.name == name);
-                  if (chatRoom != null) setOpenChat(chatRoom);
+
                   Navigator.pop(context, chatRoom);
                 },
               ),
