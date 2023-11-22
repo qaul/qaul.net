@@ -46,7 +46,7 @@ impl Group {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             let group_name = command_string
-                                .strip_prefix(group_id_str.clone())
+                                .strip_prefix(group_id_str)
                                 .unwrap()
                                 .to_string()
                                 .trim()

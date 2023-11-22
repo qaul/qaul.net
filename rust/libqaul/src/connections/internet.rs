@@ -20,47 +20,36 @@
 //!   listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
 //! ```
 
-use libp2p::swarm::keep_alive;
 use libp2p::{
-    core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
     identify,
     identity::Keypair,
-    noise::Config as NoiseConfig,
-    ping,
-    swarm::{NetworkBehaviour, Swarm, SwarmBuilder},
-    tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
-    yamux, Multiaddr, PeerId,
+    noise, ping,
+    swarm::{NetworkBehaviour, Swarm},
+    tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
-// DNS is excluded on mobile, as it is not working there
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::dns::DnsConfig;
-use libp2p::Transport;
 use prost::Message;
-
-use crate::node::Node;
-use crate::services::feed::Feed;
-
-use crate::connections::{events, ConnectionModule};
-use crate::utilities::timestamp::Timestamp;
-use qaul_info::{QaulInfo, QaulInfoEvent};
-use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 use state::Storage;
+use std::time::Duration;
 use std::{
     collections::{BTreeMap, HashMap},
     sync::RwLock,
 };
 
+use crate::connections::{events, ConnectionModule};
+use crate::node::Node;
 use crate::services::feed::proto_net;
+use crate::services::feed::Feed;
 use crate::storage::configuration::Configuration;
-use std::time::Duration;
+use crate::utilities::timestamp::Timestamp;
+use qaul_info::{QaulInfo, QaulInfoEvent};
+use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 
 #[derive(NetworkBehaviour)]
 #[behaviour(to_swarm = "QaulInternetEvent")]
 pub struct QaulInternetBehaviour {
     pub floodsub: Floodsub,
     pub identify: identify::Behaviour,
-    pub keep_alive: keep_alive::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -74,9 +63,6 @@ impl QaulInternetBehaviour {
             }
             QaulInternetEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
-            }
-            QaulInternetEvent::KeepAlive(ev) => {
-                self.keep_alive_event(ev);
             }
             QaulInternetEvent::Ping(ev) => {
                 self.ping_event(ev);
@@ -95,9 +81,6 @@ impl QaulInternetBehaviour {
     }
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Internet);
-    }
-    fn keep_alive_event(&mut self, event: void::Void) {
-        log::trace!("Internet KeepAlive event: {:?}", event);
     }
     fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Internet);
@@ -159,7 +142,6 @@ static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage:
 pub enum QaulInternetEvent {
     Floodsub(FloodsubEvent),
     Identify(identify::Event),
-    KeepAlive(void::Void),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
@@ -174,12 +156,6 @@ impl From<FloodsubEvent> for QaulInternetEvent {
 impl From<identify::Event> for QaulInternetEvent {
     fn from(event: identify::Event) -> Self {
         Self::Identify(event)
-    }
-}
-
-impl From<void::Void> for QaulInternetEvent {
-    fn from(event: void::Void) -> Self {
-        Self::KeepAlive(event)
     }
 }
 
@@ -218,43 +194,7 @@ impl Internet {
         }));
         INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
 
-        // TCP transport for android without DNS resolution
-        // as the DNS module crashes on android due to a file system access
-        #[cfg(any(target_os = "android", target_os = "ios"))]
-        let transport = {
-            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
-            tcp
-        };
-        // create tcp transport with DNS for all other devices
-        #[cfg(not(any(target_os = "android", target_os = "ios")))]
-        let transport = async {
-            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
-            let dns_tcp = DnsConfig::system(tcp).await.unwrap();
-            dns_tcp
-        }
-        .await;
-
-        log::trace!("Internet.init() transport created");
-
-        let transport_upgraded = transport
-            .upgrade(upgrade::Version::V1)
-            .authenticate(NoiseConfig::new(auth_keys).unwrap())
-            .multiplex(upgrade::SelectUpgrade::new(
-                yamux::Config::default(),
-                yamux::Config::default(),
-            ))
-            //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
-            .boxed();
-
-        log::trace!("Internet.init() transport_upgraded");
-
         // create ping configuration
-        // with customized parameters
-        //
-        // * keep connection alive
-        // * set interval
-        // * set timeout
-        // * set maximal failures
         let mut ping_config = ping::Config::new();
 
         let config = Configuration::get();
@@ -264,24 +204,33 @@ impl Internet {
         log::trace!("Internet.init() ping_config");
 
         // create behaviour
-        let mut swarm = {
-            let mut behaviour: QaulInternetBehaviour = QaulInternetBehaviour {
-                floodsub: Floodsub::new(Node::get_id()),
-                identify: identify::Behaviour::new(identify::Config::new(
-                    "/ipfs/0.1.0".into(),
-                    Node::get_keys().public(),
-                )),
-                keep_alive: libp2p::swarm::keep_alive::Behaviour::default(),
-                ping: ping::Behaviour::new(ping_config),
-                qaul_info: QaulInfo::new(Node::get_id()),
-                qaul_messaging: QaulMessaging::new(Node::get_id()),
-            };
-            behaviour.floodsub.subscribe(Node::get_topic());
-
-            SwarmBuilder::with_async_std_executor(transport_upgraded, behaviour, Node::get_id())
-                .build()
-            //Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
+        let mut behaviour: QaulInternetBehaviour = QaulInternetBehaviour {
+            floodsub: Floodsub::new(Node::get_id()),
+            identify: identify::Behaviour::new(identify::Config::new(
+                "/ipfs/0.1.0".into(),
+                Node::get_keys().public(),
+            )),
+            ping: ping::Behaviour::new(ping_config),
+            qaul_info: QaulInfo::new(Node::get_id()),
+            qaul_messaging: QaulMessaging::new(Node::get_id()),
         };
+        behaviour.floodsub.subscribe(Node::get_topic());
+
+        let mut swarm = SwarmBuilder::with_existing_identity(auth_keys.to_owned())
+            .with_async_std()
+            .with_tcp(
+                tcp::Config::new().nodelay(true),
+                noise::Config::new,
+                yamux::Config::default,
+            )
+            .unwrap()
+            .with_quic()
+            .with_behaviour(|_| behaviour)
+            .unwrap()
+            .with_swarm_config(|cfg| {
+                cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX))
+            })
+            .build();
 
         log::trace!("Internet.init() swarm created");
 
