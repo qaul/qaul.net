@@ -10,7 +10,6 @@ pub mod events;
 pub mod internet;
 pub mod lan;
 
-use libp2p::noise::Config as NoiseConfig;
 use libp2p::{identity::Keypair, Multiaddr};
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -89,7 +88,7 @@ impl Connections {
         // .expect("can create auth keys");
 
         // initialize Lan module
-        let lan = Lan::init(NoiseConfig::new(&auth_keys.clone()).unwrap()).await;
+        let lan = Lan::init(&auth_keys).await;
 
         // initialize Internet overlay module
         let internet = Internet::init(&auth_keys).await;

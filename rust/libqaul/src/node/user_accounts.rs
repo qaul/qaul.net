@@ -11,7 +11,7 @@
 
 use base64::Engine;
 use libp2p::{
-    identity::{Keypair, PublicKey},
+    identity::{ed25519, Keypair, PublicKey},
     PeerId,
 };
 use prost::Message;
@@ -56,7 +56,8 @@ impl UserAccounts {
             let mut basedecode = base64::engine::general_purpose::STANDARD
                 .decode(&user.keys)
                 .unwrap();
-            let keys = Keypair::ed25519_from_bytes(&mut basedecode).unwrap();
+            let ed25519_keys = ed25519::Keypair::try_from_bytes(&mut basedecode).unwrap();
+            let keys = Keypair::from(ed25519_keys);
             let id = PeerId::from(keys.public());
 
             // check if saved ID and the id from the keypair are equal
@@ -86,7 +87,42 @@ impl UserAccounts {
         // create user
         let keys_ed25519 = Keypair::generate_ed25519();
         let keys_config = base64::engine::general_purpose::STANDARD
-            .encode(keys_ed25519.to_protobuf_encoding().unwrap());
+            .encode(keys_ed25519.clone().try_into_ed25519().unwrap().to_bytes());
+        /*
+        {
+            // questions:
+            // - what did we save before? private key? keypair?
+            //   - answer: keypair!: ed25519::Keypair
+
+            // get the binary ed25519 keypair
+            let ed25519_binary_keypair =
+                keys_ed25519.clone().try_into_ed25519().unwrap().to_bytes();
+
+            // test the key encoding
+            log::info!("==============================");
+            log::info!("Test Key Saveing Configuration");
+            log::info!("------------------------------");
+            log::info!("keys_config: {}", keys_config.clone());
+
+            // convert the string into a keypair again
+            let mut binary2 = base64::engine::general_purpose::STANDARD
+                .decode(&keys_config)
+                .unwrap();
+
+            // binary comparison of the keypairs
+            log::info!("binary keypair before encoding:");
+            log::info!("{:?}", ed25519_binary_keypair);
+            log::info!("binary keypair after encoding: ");
+            log::info!("{:?}", binary2);
+            log::info!("------------------------------");
+
+            // reconvert into a Keypair structure
+            let ed_kp2 = ed25519::Keypair::try_from_bytes(&mut binary2).unwrap();
+            let _kp2 = Keypair::from(ed_kp2);
+
+            log::info!("==============================");
+        }
+         */
         let id = PeerId::from(keys_ed25519.public());
         let user = UserAccount {
             id,

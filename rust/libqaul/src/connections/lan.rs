@@ -19,23 +19,16 @@
 //! ```
 
 use libp2p::{
-    core::upgrade,
     floodsub::{Floodsub, FloodsubEvent},
+    identity::Keypair,
     mdns,
     mdns::{async_io::Behaviour as Mdns, Config},
-    noise::Config as NoiseConfig,
-    ping,
-    swarm::{keep_alive, NetworkBehaviour, Swarm, SwarmBuilder},
-    tcp::{async_io::Transport as TcpTransport, Config as GenTcpConfig},
-    yamux,
+    noise, ping,
+    swarm::{NetworkBehaviour, Swarm},
+    tcp, yamux, SwarmBuilder,
 };
 use prost::Message;
 use std::time::Duration;
-
-// DNS is excluded on mobile, as it is not working there
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
-use libp2p::dns::DnsConfig;
-use libp2p::Transport;
 
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
@@ -50,7 +43,6 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
     pub mdns: Mdns,
-    pub keep_alive: keep_alive::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -64,9 +56,6 @@ impl QaulLanBehaviour {
             }
             QaulLanEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(ev);
-            }
-            QaulLanEvent::KeepAlive(ev) => {
-                self.keep_alive_event(ev);
             }
             QaulLanEvent::Ping(ev) => {
                 self.ping_event(ev);
@@ -84,9 +73,6 @@ impl QaulLanBehaviour {
     }
     fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
         events::qaul_messaging_event(event, ConnectionModule::Lan);
-    }
-    fn keep_alive_event(&mut self, event: void::Void) {
-        log::trace!("QaulLanBehaviour::keep_alive_event: {:?}", event);
     }
     fn ping_event(&mut self, event: ping::Event) {
         events::ping_event(event, ConnectionModule::Lan);
@@ -127,7 +113,6 @@ impl QaulLanBehaviour {
 pub enum QaulLanEvent {
     Floodsub(FloodsubEvent),
     Mdns(mdns::Event),
-    KeepAlive(void::Void),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
@@ -142,12 +127,6 @@ impl From<FloodsubEvent> for QaulLanEvent {
 impl From<mdns::Event> for QaulLanEvent {
     fn from(event: mdns::Event) -> Self {
         Self::Mdns(event)
-    }
-}
-
-impl From<void::Void> for QaulLanEvent {
-    fn from(event: void::Void) -> Self {
-        Self::KeepAlive(event)
     }
 }
 
@@ -175,43 +154,10 @@ pub struct Lan {
 
 impl Lan {
     /// Initialize swarm for LAN connection module
-    pub async fn init(auth_keys: NoiseConfig) -> Lan {
+    pub async fn init(auth_keys: &Keypair) -> Lan {
         log::trace!("Lan::init() start");
 
-        // TCP transport without DNS resolution on android
-        // as the DNS module crashes on android due to a file system access
-        #[cfg(any(target_os = "android", target_os = "ios"))]
-        let transport = {
-            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
-            tcp
-        };
-        // create tcp transport with DNS for all other devices
-        #[cfg(not(any(target_os = "android", target_os = "ios")))]
-        let transport = async {
-            let tcp = TcpTransport::new(GenTcpConfig::new().nodelay(true));
-            let dns_tcp = DnsConfig::system(tcp).await.unwrap();
-            dns_tcp
-        }
-        .await;
-
-        log::trace!("Lan::init() transport created");
-
-        let transport_upgraded = transport
-            .upgrade(upgrade::Version::V1)
-            .authenticate(auth_keys)
-            .multiplex(upgrade::SelectUpgrade::new(
-                yamux::Config::default(),
-                yamux::Config::default(),
-            ))
-            //.timeout(std::time::Duration::from_secs(100 * 365 * 24 * 3600)) // 100 years
-            .boxed();
-
-        log::trace!("Lan::init() transport_upgraded");
-
         // create ping configuration
-        // with customized parameters
-        //
-        // * keep connection alive
         let mut ping_config = ping::Config::new();
 
         let config = Configuration::get();
@@ -220,36 +166,35 @@ impl Lan {
 
         log::trace!("Lan::init() ping_config");
 
-        let mut swarm = {
-            log::trace!("Lan::init() swarm creation started");
+        // create MDNS behaviour
+        // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
+        let mdns = Mdns::new(Config::default(), Node::get_id()).unwrap();
 
-            // create MDNS behaviour
-            // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-            let mdns = Mdns::new(Config::default(), Node::get_id()).unwrap();
-
-            log::trace!("Lan::init() swarm mdns module created");
-
-            // TODO: set shorter re-advertisement time
-            //       see here: libp2p-mdns/src/behaviour.rs
-            let mut behaviour = QaulLanBehaviour {
-                floodsub: Floodsub::new(Node::get_id()),
-                mdns,
-                keep_alive: libp2p::swarm::keep_alive::Behaviour::default(),
-                ping: ping::Behaviour::new(ping_config),
-                qaul_info: QaulInfo::new(Node::get_id()),
-                qaul_messaging: QaulMessaging::new(Node::get_id()),
-            };
-
-            log::trace!("Lan::init() swarm behaviour defined");
-
-            behaviour.floodsub.subscribe(Node::get_topic());
-
-            log::trace!("Lan::init() swarm behaviour floodsub subscribed");
-
-            //Swarm::with_threadpool_executor(transport_upgraded, behaviour, Node::get_id())
-            SwarmBuilder::with_async_std_executor(transport_upgraded, behaviour, Node::get_id())
-                .build()
+        // create behaviour
+        let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
+            floodsub: Floodsub::new(Node::get_id()),
+            mdns,
+            ping: ping::Behaviour::new(ping_config),
+            qaul_info: QaulInfo::new(Node::get_id()),
+            qaul_messaging: QaulMessaging::new(Node::get_id()),
         };
+        behaviour.floodsub.subscribe(Node::get_topic());
+
+        let mut swarm = SwarmBuilder::with_existing_identity(auth_keys.to_owned())
+            .with_async_std()
+            .with_tcp(
+                tcp::Config::new().nodelay(true),
+                noise::Config::new,
+                yamux::Config::default,
+            )
+            .unwrap()
+            .with_quic()
+            .with_behaviour(|_| behaviour)
+            .unwrap()
+            .with_swarm_config(|cfg| {
+                cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX))
+            })
+            .build();
 
         log::trace!("Lan::init() swarm created");
 

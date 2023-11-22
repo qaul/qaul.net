@@ -12,6 +12,7 @@ pub mod user_accounts;
 
 use base64;
 use base64::Engine;
+use libp2p::identity::ed25519;
 use libp2p::{floodsub::Topic, identity::Keypair, PeerId};
 use prost::Message;
 use state;
@@ -74,7 +75,7 @@ impl Node {
         {
             let mut config = Configuration::get_mut();
             config.node.keys = base64::engine::general_purpose::STANDARD
-                .encode(keys_ed25519.clone().to_protobuf_encoding().unwrap());
+                .encode(keys_ed25519.clone().try_into_ed25519().unwrap().to_bytes());
             config.node.id = id.to_string();
             config.node.initialized = 1;
         }
@@ -93,7 +94,8 @@ impl Node {
         let mut basedecode = base64::engine::general_purpose::STANDARD
             .decode(&config.node.keys)
             .unwrap();
-        let keys = Keypair::from_protobuf_encoding(&mut basedecode).unwrap();
+        let ed25519_keys = ed25519::Keypair::try_from_bytes(&mut basedecode).unwrap();
+        let keys = Keypair::from(ed25519_keys);
         let id = PeerId::from(keys.public());
         let topic = Topic::new("pages");
 

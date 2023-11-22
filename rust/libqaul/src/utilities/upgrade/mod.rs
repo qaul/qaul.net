@@ -17,8 +17,8 @@ use std::path::Path;
 use crate::utilities::upgrade::backup::Backup;
 
 pub mod backup;
-mod v2_0_0_beta_9;
 mod v2_0_0_beta_15;
+mod v2_0_0_beta_9;
 
 /// upgrade module
 pub struct Upgrade {}
@@ -30,7 +30,7 @@ impl Upgrade {
         // get current version from Cargo.toml
         let cur_version: &str = env!("CARGO_PKG_VERSION");
         println!("running libqaul {}", cur_version);
-        let mut old_version: String = String::from(cur_version.clone());
+        let mut old_version: String = String::from(cur_version);
         let storage_path_buf = Path::new(&storage_path);
 
         // read old version
@@ -107,7 +107,7 @@ impl Upgrade {
                 }
             }
         }
-        
+
         // restore the upgraded last version
         log::trace!("restore upgraded version {}", version);
         if backup::Backup::restore(&storage_path, &backup_path) == true {
