@@ -282,11 +282,11 @@ impl Crypto {
 
                 // decide how to go further
                 match (
-                    messaging::proto::CryptoState::from_i32(message.state),
+                    messaging::proto::CryptoState::try_from(message.state),
                     session.state.clone(),
                 ) {
                     (
-                        Some(messaging::proto::CryptoState::Handshake),
+                        Ok(messaging::proto::CryptoState::Handshake),
                         CryptoProcessState::HalfOutgoing,
                     ) => {
                         log::trace!("decrypt {}: second handshake", session.session_id);
@@ -308,7 +308,7 @@ impl Crypto {
                         }
                     }
                     (
-                        Some(messaging::proto::CryptoState::Transport),
+                        Ok(messaging::proto::CryptoState::Transport),
                         CryptoProcessState::Transport,
                     ) => {
                         log::trace!(
@@ -329,7 +329,7 @@ impl Crypto {
                         }
                     }
                     (
-                        Some(messaging::proto::CryptoState::Transport),
+                        Ok(messaging::proto::CryptoState::Transport),
                         CryptoProcessState::HalfOutgoing,
                     ) => {
                         log::trace!(
@@ -365,8 +365,8 @@ impl Crypto {
                 log::trace!("decrypt no session found");
 
                 // check what kind of message we are getting
-                match messaging::proto::CryptoState::from_i32(message.state) {
-                    Some(messaging::proto::CryptoState::Handshake) => {
+                match messaging::proto::CryptoState::try_from(message.state) {
+                    Ok(messaging::proto::CryptoState::Handshake) => {
                         log::trace!("decrypt incoming first handshake");
 
                         // decrypt new handshake

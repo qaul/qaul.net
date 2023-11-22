@@ -20,7 +20,7 @@ use crate::utilities::qaul_id::QaulId;
 use libp2p::PeerId;
 use prost::Message;
 use qaul_info::QaulInfoReceived;
-use state::Storage;
+use state::InitCell;
 use std::{
     collections::HashMap,
     sync::RwLock,
@@ -45,7 +45,7 @@ use crate::router::user_requester::UserRequester;
 use crate::router::user_requester::UserResponser;
 
 /// mutable state of Neighbours table per ConnectionModule
-static SCHEDULER: Storage<RwLock<Scheduler>> = Storage::new();
+static SCHEDULER: InitCell<RwLock<Scheduler>> = InitCell::new();
 
 /// global scheduler state
 #[derive(Clone, Debug)]
@@ -474,10 +474,10 @@ impl RouterInfo {
 
                 match message_result {
                     Ok(content) => {
-                        match router_net_proto::RouterInfoModule::from_i32(
+                        match router_net_proto::RouterInfoModule::try_from(
                             content.router_info_module,
                         ) {
-                            Some(router_net_proto::RouterInfoModule::RouterInfo) => {
+                            Ok(router_net_proto::RouterInfoModule::RouterInfo) => {
                                 let message_info = router_net_proto::RouterInfoMessage::decode(
                                     &content.content[..],
                                 );
@@ -487,13 +487,6 @@ impl RouterInfo {
                                     //let users = messages.users;
                                     let routes = messages.routes;
                                     let feeds = messages.feeds;
-
-                                    // match users {
-                                    //     Some(router_net_proto::UserInfoTable { info }) => {
-                                    //         Users::add_user_info_table(info);
-                                    //     }
-                                    //     _ => {}
-                                    // }
 
                                     match routes {
                                         Some(router_net_proto::RoutingInfoTable { entry }) => {
@@ -532,7 +525,7 @@ impl RouterInfo {
                                     }
                                 }
                             }
-                            Some(router_net_proto::RouterInfoModule::FeedRequest) => {
+                            Ok(router_net_proto::RouterInfoModule::FeedRequest) => {
                                 let message_info = router_net_proto::FeedRequestMessage::decode(
                                     &content.content[..],
                                 );
@@ -548,7 +541,7 @@ impl RouterInfo {
                                     }
                                 }
                             }
-                            Some(router_net_proto::RouterInfoModule::FeedResponse) => {
+                            Ok(router_net_proto::RouterInfoModule::FeedResponse) => {
                                 let message_info = router_net_proto::FeedResponseMessage::decode(
                                     &content.content[..],
                                 );
@@ -580,7 +573,7 @@ impl RouterInfo {
                                     }
                                 }
                             }
-                            Some(router_net_proto::RouterInfoModule::UserRequest) => {
+                            Ok(router_net_proto::RouterInfoModule::UserRequest) => {
                                 let message_info =
                                     router_net_proto::UserIdTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
@@ -588,14 +581,14 @@ impl RouterInfo {
                                     UserResponser::add(&received.received_from, &table);
                                 }
                             }
-                            Some(router_net_proto::RouterInfoModule::UserResponse) => {
+                            Ok(router_net_proto::RouterInfoModule::UserResponse) => {
                                 let message_info =
                                     router_net_proto::UserInfoTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
                                     Users::add_user_info_table(&message.info);
                                 }
                             }
-                            _ => {}
+                            Err(_) => {}
                         }
                     }
                     Err(msg) => {

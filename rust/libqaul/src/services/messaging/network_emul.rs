@@ -1,8 +1,8 @@
 use crate::utilities::timestamp::{self, Timestamp};
-use state::Storage;
+use state::InitCell;
 use std::sync::RwLock;
 
-static STATE: Storage<RwLock<NetworkEmulatorStat>> = Storage::new();
+static STATE: InitCell<RwLock<NetworkEmulatorStat>> = InitCell::new();
 
 pub struct NetworkEmulatorStat {
     pub loss_rate: u64,

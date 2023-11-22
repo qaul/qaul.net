@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
 
@@ -37,7 +37,7 @@ pub mod proto {
 }
 
 /// mutable state of messages, scheduled for sending
-pub static MESSAGING: Storage<RwLock<Messaging>> = Storage::new();
+pub static MESSAGING: InitCell<RwLock<Messaging>> = InitCell::new();
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -50,7 +50,7 @@ pub struct ScheduledMessage {
 }
 
 /// mutable state of messages, scheduled for sending
-pub static UNCONFIRMED: Storage<RwLock<UnConfirmedMessages>> = Storage::new();
+pub static UNCONFIRMED: InitCell<RwLock<UnConfirmedMessages>> = InitCell::new();
 
 // TODO: check if it wouldn't be easier to store
 // the message

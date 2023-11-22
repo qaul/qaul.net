@@ -19,7 +19,7 @@ use database::DataBase;
 use state;
 
 /// make storage path accessible
-static STORAGE_PATH: state::Storage<String> = state::Storage::new();
+static STORAGE_PATH: state::InitCell<String> = state::InitCell::new();
 
 /// storage module structure
 pub struct Storage {}

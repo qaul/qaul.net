@@ -14,7 +14,7 @@ use sled_extensions::{
     structured::Iter,
     DbExt,
 };
-use state::Storage;
+use state::InitCell;
 use std::{
     collections::BTreeMap,
     convert::TryInto,
@@ -50,7 +50,7 @@ pub mod proto_net {
 pub const DEF_PACKAGE_SIZE: u32 = 64000;
 
 /// mutable state of all file
-static ALLFILES: Storage<RwLock<AllFiles>> = Storage::new();
+static ALLFILES: InitCell<RwLock<AllFiles>> = InitCell::new();
 
 /// Structure to management for file histories based on the each user_id.
 pub struct AllFiles {

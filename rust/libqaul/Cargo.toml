@@ -20,26 +20,26 @@ serde = {version = "=1.0", features = ["derive"] }
 serde_json = "=1.0"
 once_cell = "1.9"
 log = "0.4"
-pretty_env_logger = "0.4"
+pretty_env_logger = "0.5.0"
 simplelog = "0.12.0"
 multi_log = "0.1.2"
 filetime = "0.2"
 bincode = "1.3"
 config = "0.13.2"
 lazy_static = "1.4"
-toml = "0.7.2"
-base64 ="0.21"
-state = "0.5"
+toml = "0.8.8"
+base64 ="0.21.5"
+state = "0.6.0"
 humantime = "2.1"
 tracing = "0.1.30"
 void = "1.0"
 wasm-timer = "0.2"
 rand = "0.8"
-prost = "0.11.0"
+prost = "0.12.3"
 libc = "0.2"
 crossbeam-channel = "0.5"
-bs58 = "0.4"
-futures-ticker = "0.0.2"
+bs58 = "0.5"
+futures-ticker = "0.0.3"
 jni = "0.21"
 serde_yaml = "0.9.9"
 sled = "0.34.7"
@@ -63,7 +63,7 @@ qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
-prost-build = "0.11.1"
+prost-build = "0.12.3"
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]

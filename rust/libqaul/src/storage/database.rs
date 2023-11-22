@@ -7,13 +7,13 @@
 
 use libp2p::PeerId;
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::{collections::BTreeMap, path::Path, sync::RwLock};
 
 use crate::router::users::UserData;
 
 /// make database globally accessible
-static DATABASE: Storage<RwLock<DataBase>> = Storage::new();
+static DATABASE: InitCell<RwLock<DataBase>> = InitCell::new();
 
 /// DataBase Module
 #[derive(Clone, Debug)]

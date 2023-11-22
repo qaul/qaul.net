@@ -436,29 +436,30 @@ impl Group {
                     println!("\t\t{}", file_content.file_description);
                 }
                 Some(proto_chat::chat_content_message::Message::GroupEvent(group_event)) => {
-                    match proto_chat::GroupEventType::from_i32(group_event.event_type).unwrap() {
-                        proto_chat::GroupEventType::Joined => {
+                    match proto_chat::GroupEventType::try_from(group_event.event_type) {
+                        Ok(proto_chat::GroupEventType::Joined) => {
                             println!(
                                 "\t\tNew user joined group, user id: {}",
                                 bs58::encode(group_event.user_id).into_string()
                             );
                         }
-                        proto_chat::GroupEventType::Left => {
+                        Ok(proto_chat::GroupEventType::Left) => {
                             println!(
                                 "\t\tUser left group, user id: {}",
                                 bs58::encode(group_event.user_id).into_string()
                             );
                         }
-                        proto_chat::GroupEventType::Removed => {
+                        Ok(proto_chat::GroupEventType::Removed) => {
                             println!("\t\tYou have been removed from this group.");
                         }
-                        proto_chat::GroupEventType::Created => {
+                        Ok(proto_chat::GroupEventType::Created) => {
                             println!("\t\tYou created this group");
                         }
-                        proto_chat::GroupEventType::InviteAccepted => {
+                        Ok(proto_chat::GroupEventType::InviteAccepted) => {
                             println!("\t\tYou accepted the invitation");
                         }
-                        _ => {}
+                        Ok(_) => {}
+                        Err(_) => {}
                     }
                 }
                 None => {}
@@ -564,13 +565,13 @@ impl Group {
                                 group.group_name.clone()
                             );
                             print!("\tstatus: ");
-                            match proto::GroupStatus::from_i32(group.status) {
-                                Some(proto::GroupStatus::Active) => println!("Active"),
-                                Some(proto::GroupStatus::InviteAccepted) => {
+                            match proto::GroupStatus::try_from(group.status) {
+                                Ok(proto::GroupStatus::Active) => println!("Active"),
+                                Ok(proto::GroupStatus::InviteAccepted) => {
                                     println!("Invite Accepted")
                                 }
-                                Some(proto::GroupStatus::Deactivated) => println!("Deactivated"),
-                                None => println!("NOT SET"),
+                                Ok(proto::GroupStatus::Deactivated) => println!("Deactivated"),
+                                Err(_) => println!("NOT SET"),
                             }
 
                             println!(
@@ -583,22 +584,24 @@ impl Group {
                                     "\t\t id: {} , state: ",
                                     bs58::encode(member.user_id.clone()).into_string()
                                 );
-                                match proto::GroupMemberState::from_i32(member.state).unwrap() {
-                                    proto::GroupMemberState::Invited => {
+                                match proto::GroupMemberState::try_from(member.state) {
+                                    Ok(proto::GroupMemberState::Invited) => {
                                         print!("invited , role: ");
                                     }
-                                    proto::GroupMemberState::Activated => {
+                                    Ok(proto::GroupMemberState::Activated) => {
                                         print!("activated , role: ");
                                     }
+                                    Err(_) => {}
                                 }
 
-                                match proto::GroupMemberRole::from_i32(member.role).unwrap() {
-                                    proto::GroupMemberRole::User => {
+                                match proto::GroupMemberRole::try_from(member.role) {
+                                    Ok(proto::GroupMemberRole::User) => {
                                         println!("user , sent: {}", member.last_message_index);
                                     }
-                                    proto::GroupMemberRole::Admin => {
+                                    Ok(proto::GroupMemberRole::Admin) => {
                                         println!("admin , sent: {}", member.last_message_index);
                                     }
+                                    Err(_) => {}
                                 }
                             }
                             println!("\trevision: {}", group.revision);

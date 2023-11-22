@@ -9,7 +9,7 @@ use libp2p::{identity::PublicKey, PeerId};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
-use state::Storage;
+use state::InitCell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
@@ -34,7 +34,7 @@ pub mod proto_net {
 }
 
 /// mutable state of users table
-static USERS: Storage<RwLock<Users>> = Storage::new();
+static USERS: InitCell<RwLock<Users>> = InitCell::new();
 
 /// implementation of all known users for routing references
 pub struct Users {

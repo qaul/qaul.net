@@ -14,7 +14,7 @@
 
 use libp2p::PeerId;
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::sync::RwLock;
@@ -33,10 +33,10 @@ use crate::utilities::timestamp::Timestamp;
 
 /// Mutable module state
 /// Tables with all stats for each connection module
-static LOCAL: Storage<RwLock<RoutingTable>> = Storage::new();
-static INTERNET: Storage<RwLock<ConnectionTable>> = Storage::new();
-static LAN: Storage<RwLock<ConnectionTable>> = Storage::new();
-static BLE: Storage<RwLock<ConnectionTable>> = Storage::new();
+static LOCAL: InitCell<RwLock<RoutingTable>> = InitCell::new();
+static INTERNET: InitCell<RwLock<ConnectionTable>> = InitCell::new();
+static LAN: InitCell<RwLock<ConnectionTable>> = InitCell::new();
+static BLE: InitCell<RwLock<ConnectionTable>> = InitCell::new();
 
 /// Connection entry for UserEntry
 struct NeighbourEntry {

@@ -7,7 +7,7 @@
 //! qaul router.
 
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::sync::RwLock;
 
 pub mod connections;
@@ -40,7 +40,7 @@ pub mod router_net_proto {
 
 /// mutable state of router,
 /// used for storing the router configuration
-static ROUTER: Storage<RwLock<Router>> = Storage::new();
+static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
 
 /// qaul community router access
 #[derive(Clone)]

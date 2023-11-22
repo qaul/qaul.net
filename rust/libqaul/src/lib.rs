@@ -9,7 +9,7 @@ use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
@@ -39,10 +39,10 @@ use utilities::timestamp::Timestamp;
 use utilities::upgrade;
 
 /// check this when the library finished initializing
-static INITIALIZED: Storage<bool> = Storage::new();
+static INITIALIZED: InitCell<bool> = InitCell::new();
 
 /// default configs
-static DEFCONFIGS: Storage<BTreeMap<String, String>> = Storage::new();
+static DEFCONFIGS: InitCell<BTreeMap<String, String>> = InitCell::new();
 
 /// To see logs on android we need the android logger
 #[cfg(target_os = "android")]

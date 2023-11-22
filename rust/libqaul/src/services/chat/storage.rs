@@ -8,7 +8,7 @@
 
 use libp2p::PeerId;
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -19,7 +19,7 @@ use crate::utilities::timestamp::Timestamp;
 use prost::Message;
 
 /// mutable state of chat messages
-static CHAT: Storage<RwLock<ChatStorage>> = Storage::new();
+static CHAT: InitCell<RwLock<ChatStorage>> = InitCell::new();
 
 /// chat DB references per user account
 #[derive(Clone)]

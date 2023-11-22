@@ -12,7 +12,7 @@
 
 use libp2p::{floodsub::Topic, PeerId};
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::{collections::BTreeMap, fmt, sync::RwLock};
 use uuid::Uuid;
 
@@ -40,14 +40,14 @@ pub mod proto_rpc {
 }
 
 /// Module State
-static BLE: Storage<RwLock<Ble>> = Storage::new();
+static BLE: InitCell<RwLock<Ble>> = InitCell::new();
 /// List of detected BLE nodes needing ID confirmation
-static TO_CONFIRM: Storage<RwLock<BTreeMap<Vec<u8>, ToConfirm>>> = Storage::new();
+static TO_CONFIRM: InitCell<RwLock<BTreeMap<Vec<u8>, ToConfirm>>> = InitCell::new();
 /// List of discovered and available BLE nodes
 ///
 /// This structure contains a translation table from
 /// the BLE ID to the BLE ID
-static NODES: Storage<RwLock<BTreeMap<Vec<u8>, BleNode>>> = Storage::new();
+static NODES: InitCell<RwLock<BTreeMap<Vec<u8>, BleNode>>> = InitCell::new();
 
 /// Detected BLE node, which is not known yet
 /// and therefore its ID needs to be confirmed.

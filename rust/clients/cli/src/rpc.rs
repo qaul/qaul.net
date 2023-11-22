@@ -69,51 +69,51 @@ impl Rpc {
             Ok(message) => {
                 log::trace!("qaul rpc message received");
 
-                match proto::Modules::from_i32(message.module) {
-                    Some(proto::Modules::Node) => {
+                match proto::Modules::try_from(message.module) {
+                    Ok(proto::Modules::Node) => {
                         super::node::Node::rpc(message.data);
                     }
-                    Some(proto::Modules::Rpc) => {
+                    Ok(proto::Modules::Rpc) => {
                         // TODO: authorisation
                     }
-                    Some(proto::Modules::Useraccounts) => {
+                    Ok(proto::Modules::Useraccounts) => {
                         super::user_accounts::UserAccounts::rpc(message.data);
                     }
-                    Some(proto::Modules::Users) => {
+                    Ok(proto::Modules::Users) => {
                         super::users::Users::rpc(message.data);
                     }
-                    Some(proto::Modules::Router) => {
+                    Ok(proto::Modules::Router) => {
                         super::router::Router::rpc(message.data);
                     }
-                    Some(proto::Modules::Feed) => {
+                    Ok(proto::Modules::Feed) => {
                         super::feed::Feed::rpc(message.data);
                     }
-                    Some(proto::Modules::Chat) => {
+                    Ok(proto::Modules::Chat) => {
                         super::chat::Chat::rpc(message.data);
                     }
-                    Some(proto::Modules::Connections) => {
+                    Ok(proto::Modules::Connections) => {
                         super::connections::Connections::rpc(message.data);
                     }
-                    Some(proto::Modules::Ble) => {
+                    Ok(proto::Modules::Ble) => {
                         super::ble::Ble::rpc(message.data);
                     }
-                    Some(proto::Modules::Debug) => {
+                    Ok(proto::Modules::Debug) => {
                         super::debug::Debug::rpc(message.data);
                     }
-                    Some(proto::Modules::Chatfile) => {
+                    Ok(proto::Modules::Chatfile) => {
                         super::chatfile::ChatFile::rpc(message.data);
                     }
-                    Some(proto::Modules::Group) => {
+                    Ok(proto::Modules::Group) => {
                         super::group::Group::rpc(message.data);
                     }
-                    Some(proto::Modules::Rtc) => {
+                    Ok(proto::Modules::Rtc) => {
                         super::rtc::Rtc::rpc(message.data);
                     }
-                    Some(proto::Modules::Dtn) => {
+                    Ok(proto::Modules::Dtn) => {
                         super::dtn::Dtn::rpc(message.data);
                     }
-                    Some(proto::Modules::None) => {}
-                    None => {}
+                    Ok(proto::Modules::None) => {}
+                    Err(_) => {}
                 }
             }
             Err(error) => {

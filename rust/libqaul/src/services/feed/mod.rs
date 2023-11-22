@@ -15,7 +15,7 @@ use libp2p::{
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::{convert::TryInto, sync::RwLock};
 
@@ -41,7 +41,7 @@ pub mod proto_net {
 }
 
 /// mutable state of feed messages
-static FEED: Storage<RwLock<Feed>> = Storage::new();
+static FEED: InitCell<RwLock<Feed>> = InitCell::new();
 
 /// For storing in data base
 #[derive(Serialize, Deserialize, Clone)]

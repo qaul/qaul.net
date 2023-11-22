@@ -7,36 +7,21 @@
 //! It can be used to run on an embedded device, such as a raspberry Pi,
 //! or as a static node on a server in the Internet.
 
-use clap::{App, Arg};
+use clap::Parser;
 use std::collections::BTreeMap;
 use std::{thread, time::Duration};
 
 use libqaul;
 
-/// get command line arguments
-pub fn get_argument(pattern: &str) -> Option<String> {
-    let matches = App::new("")
-        .arg(
-            Arg::with_name("name")
-                .short('n')
-                .long("name")
-                .takes_value(true)
-                .help("user name"),
-        )
-        .arg(
-            Arg::with_name("port")
-                .short('p')
-                .long("port")
-                .takes_value(true)
-                .help("port number"),
-        )
-        .get_matches();
-
-    if let Some(v) = matches.value_of(pattern) {
-        Some(v.to_string())
-    } else {
-        None
-    }
+/// qauld - qaul daemon : CLI Arguments
+#[derive(Parser)]
+struct CliArguments {
+    /// User Name
+    #[arg(short, long)]
+    name: Option<String>,
+    /// Port Number
+    #[arg(short, long)]
+    port: Option<u16>,
 }
 
 /// create a default user account for zero configuration Community Node startups
@@ -59,11 +44,14 @@ async fn main() {
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
     // parse parameters and create default config
+    let cli_arguments = CliArguments::parse();
     let mut def_config: BTreeMap<String, String> = BTreeMap::new();
-    let possible_arguments = vec!["name", "port"];
-    for s in possible_arguments {
-        if let Some(v) = get_argument(&s) {
-            def_config.insert(s.to_string(), v.clone());
+    {
+        if let Some(v) = cli_arguments.name.as_deref() {
+            def_config.insert("name".to_string(), v.to_string());
+        }
+        if let Some(v) = cli_arguments.port {
+            def_config.insert("port".to_string(), v.to_string());
         }
     }
 
@@ -79,8 +67,8 @@ async fn main() {
     // if no account, creating new accounts
     if libqaul::node::user_accounts::UserAccounts::len() == 0 {
         let user_name: String;
-        if let Some(usr_name) = get_argument("name") {
-            user_name = usr_name.clone();
+        if let Some(usr_name) = cli_arguments.name.as_deref() {
+            user_name = usr_name.to_string();
         } else {
             user_name = create_default_named();
         }

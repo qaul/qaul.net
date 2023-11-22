@@ -12,7 +12,7 @@
 
 use libp2p::PeerId;
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::collections::{BTreeMap, HashMap};
 use std::sync::RwLock;
 
@@ -23,7 +23,7 @@ use crate::rpc::Rpc;
 use crate::utilities::qaul_id::QaulId;
 
 /// mutable state of table
-static ROUTINGTABLE: Storage<RwLock<RoutingTable>> = Storage::new();
+static ROUTINGTABLE: InitCell<RwLock<RoutingTable>> = InitCell::new();
 
 /// table entry per user
 #[derive(Debug, Clone)]

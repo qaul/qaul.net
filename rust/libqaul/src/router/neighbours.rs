@@ -9,7 +9,7 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::{collections::HashMap, sync::RwLock};
 
 use super::info::RouterInfo;
@@ -20,17 +20,17 @@ use crate::storage::database::DataBase;
 use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
 
 /// mutable state of Internet neighbour node table
-static INTERNET: Storage<RwLock<Neighbours>> = Storage::new();
+static INTERNET: InitCell<RwLock<Neighbours>> = InitCell::new();
 /// mutable state of LAN neighbour node table
-static LAN: Storage<RwLock<Neighbours>> = Storage::new();
+static LAN: InitCell<RwLock<Neighbours>> = InitCell::new();
 /// mutable state of BLE neighbour node table
-static BLE: Storage<RwLock<Neighbours>> = Storage::new();
+static BLE: InitCell<RwLock<Neighbours>> = InitCell::new();
 
 /// Data base table of all ever discovered neighbour nodes
 ///
 /// This table is used to find the node id from the small id
 /// used by the BLE module.
-static NODES: Storage<Tree<Node>> = Storage::new();
+static NODES: InitCell<Tree<Node>> = InitCell::new();
 
 /// Node entry in the data base
 #[derive(Clone, Debug, Serialize, Deserialize)]

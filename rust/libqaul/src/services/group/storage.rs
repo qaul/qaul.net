@@ -7,14 +7,14 @@
 
 use libp2p::PeerId;
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use crate::storage::database::DataBase;
 
 /// mutable state of all user groups
-pub static GROUPSTORAGE: Storage<RwLock<GroupStorage>> = Storage::new();
+pub static GROUPSTORAGE: InitCell<RwLock<GroupStorage>> = InitCell::new();
 
 use super::{Group, GroupInvited};
 

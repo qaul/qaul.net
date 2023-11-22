@@ -12,15 +12,15 @@
 //! advertised and can be requested from the sending node.
 
 use libp2p::PeerId;
-use state::Storage;
+use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
 
 /// mutable state of feed requester
-pub static FEEDREQUESTER: Storage<RwLock<FeedRequester>> = Storage::new();
+pub static FEEDREQUESTER: InitCell<RwLock<FeedRequester>> = InitCell::new();
 
 /// mutable state of the feed responser
-pub static FEEDRESPONSER: Storage<RwLock<FeedResponser>> = Storage::new();
+pub static FEEDRESPONSER: InitCell<RwLock<FeedResponser>> = InitCell::new();
 
 /// Feed Request Structure
 pub struct FeedRequest {
