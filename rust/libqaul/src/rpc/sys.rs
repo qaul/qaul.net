@@ -15,17 +15,17 @@
 use crate::connections::ble::Ble;
 use crate::connections::{internet::Internet, lan::Lan};
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
-use state::Storage;
+use state::InitCell;
 
 #[cfg(target_os = "android")]
 use crate::api::android::Android;
 
 /// receiving end of the mpsc channel
-static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
+static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
 /// sending end of the mpsc channel
-static EXTERN_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 /// sending end of th mpsc channel for libqaul to send
-static LIBQAUL_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 
 /// Handling of SYS messages of libqaul
 pub struct Sys {}

@@ -9,7 +9,7 @@
 use libp2p::PeerId;
 use prost::Message;
 use sled_extensions::{bincode::Tree, DbExt};
-use state::Storage;
+use state::InitCell;
 use std::fmt;
 use std::{convert::TryInto, sync::RwLock};
 
@@ -49,7 +49,7 @@ pub struct DtnStorageState {
 }
 
 /// mutable state of storge
-pub static STORAGESTATE: Storage<RwLock<DtnStorageState>> = Storage::new();
+pub static STORAGESTATE: InitCell<RwLock<DtnStorageState>> = InitCell::new();
 
 /// qaul Delayed
 ///

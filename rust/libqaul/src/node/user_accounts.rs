@@ -15,7 +15,7 @@ use libp2p::{
     PeerId,
 };
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::sync::RwLock;
 
 use crate::router;
@@ -30,7 +30,7 @@ pub mod proto {
 }
 
 /// mutable state of users table
-static USERACCOUNTS: Storage<RwLock<UserAccounts>> = Storage::new();
+static USERACCOUNTS: InitCell<RwLock<UserAccounts>> = InitCell::new();
 
 #[derive(Clone)]
 pub struct UserAccount {

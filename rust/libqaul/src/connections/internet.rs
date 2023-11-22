@@ -29,7 +29,7 @@ use libp2p::{
     tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::time::Duration;
 use std::{
     collections::{BTreeMap, HashMap},
@@ -135,8 +135,8 @@ pub struct InternetReConnection {
 pub struct InternetReConnections {
     peers: HashMap<Multiaddr, InternetReConnection>,
 }
-static INTERNETRECONNECTIONS: Storage<RwLock<InternetReConnections>> = Storage::new();
-static INTERNETCONNECTIONS: Storage<RwLock<BTreeMap<String, PeerId>>> = Storage::new();
+static INTERNETRECONNECTIONS: InitCell<RwLock<InternetReConnections>> = InitCell::new();
+static INTERNETCONNECTIONS: InitCell<RwLock<BTreeMap<String, PeerId>>> = InitCell::new();
 
 #[derive(Debug)]
 pub enum QaulInternetEvent {

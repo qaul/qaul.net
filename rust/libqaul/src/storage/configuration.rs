@@ -11,7 +11,7 @@
 
 use config::{Config, File};
 use serde::{Deserialize, Serialize};
-use state::Storage;
+use state::InitCell;
 use std::{
     fs,
     path::Path,
@@ -19,7 +19,7 @@ use std::{
 };
 
 /// make configuration globally accessible mutable state
-static CONFIG: Storage<RwLock<Configuration>> = Storage::new();
+static CONFIG: InitCell<RwLock<Configuration>> = InitCell::new();
 
 /// Configuration of the local Node
 ///

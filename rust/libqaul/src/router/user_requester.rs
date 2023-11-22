@@ -12,15 +12,15 @@
 //! advertised and can be requested from the sending node.
 
 use libp2p::PeerId;
-use state::Storage;
+use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
 
 /// mutable state of user requester
-pub static USERREQUESTER: Storage<RwLock<UserRequester>> = Storage::new();
+pub static USERREQUESTER: InitCell<RwLock<UserRequester>> = InitCell::new();
 
 /// mutable state of the user responser
-pub static USERRESPONSER: Storage<RwLock<UserResponser>> = Storage::new();
+pub static USERRESPONSER: InitCell<RwLock<UserResponser>> = InitCell::new();
 
 /// User Request Structure
 pub struct UserRequest {

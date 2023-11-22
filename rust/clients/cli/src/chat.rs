@@ -216,34 +216,35 @@ impl Chat {
                     return Ok(res);
                 }
                 Some(proto::chat_content_message::Message::GroupEvent(group_event)) => {
-                    match proto::GroupEventType::from_i32(group_event.event_type).unwrap() {
-                        proto::GroupEventType::Joined => {
+                    match proto::GroupEventType::try_from(group_event.event_type) {
+                        Ok(proto::GroupEventType::Joined) => {
                             res.push(
                                 "New user joined group, user id: ".to_string()
                                     + bs58::encode(group_event.user_id).into_string().as_str(),
                             );
                             return Ok(res);
                         }
-                        proto::GroupEventType::Left => {
+                        Ok(proto::GroupEventType::Left) => {
                             res.push(
                                 "User left group, user id: ".to_string()
                                     + bs58::encode(group_event.user_id).into_string().as_str(),
                             );
                             return Ok(res);
                         }
-                        proto::GroupEventType::Removed => {
+                        Ok(proto::GroupEventType::Removed) => {
                             res.push("You have been removed from the group".to_string());
                             return Ok(res);
                         }
-                        proto::GroupEventType::Created => {
+                        Ok(proto::GroupEventType::Created) => {
                             res.push("You created this group".to_string());
                             return Ok(res);
                         }
-                        proto::GroupEventType::InviteAccepted => {
+                        Ok(proto::GroupEventType::InviteAccepted) => {
                             res.push("You accepted the invitation".to_string());
                             return Ok(res);
                         }
-                        _ => {}
+                        Ok(_) => {}
+                        Err(_) => {}
                     }
                 }
                 None => {}
@@ -278,13 +279,14 @@ impl Chat {
                         for message in proto_conversation.message_list {
                             if let Ok(ss) = Self::analyze_content(&message.content) {
                                 print! {"{} | ", message.index};
-                                match proto::MessageStatus::from_i32(message.status).unwrap() {
-                                    proto::MessageStatus::Sending => print!(".. | "),
-                                    proto::MessageStatus::Sent => print!("✓. | "),
-                                    proto::MessageStatus::Confirmed => print!("✓✓ | "),
-                                    proto::MessageStatus::ConfirmedByAll => print!("✓✓✓| "),
-                                    proto::MessageStatus::Receiving => print!("🚚 | "),
-                                    proto::MessageStatus::Received => print!("📨 | "),
+                                match proto::MessageStatus::try_from(message.status) {
+                                    Ok(proto::MessageStatus::Sending) => print!(".. | "),
+                                    Ok(proto::MessageStatus::Sent) => print!("✓. | "),
+                                    Ok(proto::MessageStatus::Confirmed) => print!("✓✓ | "),
+                                    Ok(proto::MessageStatus::ConfirmedByAll) => print!("✓✓✓| "),
+                                    Ok(proto::MessageStatus::Receiving) => print!("🚚 | "),
+                                    Ok(proto::MessageStatus::Received) => print!("📨 | "),
+                                    Err(_) => {}
                                 }
 
                                 print!("{} | ", message.sent_at);

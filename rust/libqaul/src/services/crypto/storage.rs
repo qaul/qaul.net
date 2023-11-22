@@ -11,7 +11,7 @@ use sled_extensions::{
     structured::Iter,
     DbExt,
 };
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -20,7 +20,7 @@ use crate::services::messaging::proto;
 use crate::storage::database::DataBase;
 
 /// mutable state of messages, scheduled for sending
-pub static CRYPTOSTORAGE: Storage<RwLock<CryptoStorage>> = Storage::new();
+pub static CRYPTOSTORAGE: InitCell<RwLock<CryptoStorage>> = InitCell::new();
 
 /// Group DB links for user account
 #[derive(Clone)]

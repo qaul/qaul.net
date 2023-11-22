@@ -11,10 +11,10 @@ libqaul = { path = "../../libqaul" }
 async-std = { version = "1.12.0", features = ["attributes"] }
 futures = "0.3.21"
 log = "0.4"
-pretty_env_logger = "0.4"
-prost = "0.11.0"
-futures-ticker = "0.0.2"
-state = "0.5"
-bs58 = "0.4"
+pretty_env_logger = "0.5.0"
+prost = "0.12.3"
+futures-ticker = "0.0.3"
+state = "0.6.0"
+bs58 = "0.5.0"
 serde = {version = "=1.0", features = ["derive"] }
 uuid = { version = "1.1.2", features = ["v4"] }

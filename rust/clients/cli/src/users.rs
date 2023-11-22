@@ -205,7 +205,7 @@ impl Users {
                         if user.connections.len() > 0 {
                             println!("  Connections: module | hc | rtt | via");
                             for cnn in user.connections {
-                                let module = proto::ConnectionModule::from_i32(cnn.module)
+                                let module = proto::ConnectionModule::try_from(cnn.module)
                                     .unwrap()
                                     .as_str_name();
                                 println!(

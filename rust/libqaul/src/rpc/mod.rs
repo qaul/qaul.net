@@ -10,7 +10,7 @@ pub mod debug;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
-use state::Storage;
+use state::InitCell;
 use std::sync::RwLock;
 
 use prost::Message;
@@ -48,14 +48,14 @@ pub struct MessageCounter {
     count: i32,
 }
 /// state of message counter
-static EXTERN_SEND_COUNT: Storage<RwLock<MessageCounter>> = Storage::new();
+static EXTERN_SEND_COUNT: InitCell<RwLock<MessageCounter>> = InitCell::new();
 
 /// receiving end of the mpsc channel
-static EXTERN_RECEIVE: Storage<Receiver<Vec<u8>>> = Storage::new();
+static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
 /// sending end of the mpsc channel
-static EXTERN_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 /// sending end of th mpsc channel for libqaul to send
-static LIBQAUL_SEND: Storage<Sender<Vec<u8>>> = Storage::new();
+static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 
 /// Handling of RPC messages of libqaul
 pub struct Rpc {}
@@ -136,59 +136,59 @@ impl Rpc {
 
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
-                match Modules::from_i32(message.module) {
-                    Some(Modules::Node) => {
+                match Modules::try_from(message.module) {
+                    Ok(Modules::Node) => {
                         Self::increase_message_counter();
                         Node::rpc(message.data, lan, internet);
                     }
-                    Some(Modules::Rpc) => {
+                    Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
                         // TODO: authorisation
                     }
-                    Some(Modules::Useraccounts) => {
+                    Ok(Modules::Useraccounts) => {
                         UserAccounts::rpc(message.data);
                     }
-                    Some(Modules::Users) => {
+                    Ok(Modules::Users) => {
                         Users::rpc(message.data, message.user_id);
                     }
-                    Some(Modules::Router) => {
+                    Ok(Modules::Router) => {
                         Router::rpc(message.data);
                     }
-                    Some(Modules::Feed) => {
+                    Ok(Modules::Feed) => {
                         Feed::rpc(message.data, message.user_id, lan, internet);
                     }
-                    Some(Modules::Connections) => {
+                    Ok(Modules::Connections) => {
                         Connections::rpc(message.data, internet);
                     }
-                    Some(Modules::Ble) => {
+                    Ok(Modules::Ble) => {
                         Ble::rpc(message.data);
                     }
-                    Some(Modules::Debug) => {
+                    Ok(Modules::Debug) => {
                         Debug::rpc(message.data, message.user_id);
                     }
-                    Some(Modules::Chat) => {
+                    Ok(Modules::Chat) => {
                         Chat::rpc(message.data, message.user_id, lan, internet);
                     }
-                    Some(Modules::Chatfile) => {
+                    Ok(Modules::Chatfile) => {
                         log::trace!("Message Modules::Chatfile received");
                         ChatFile::rpc(message.data, message.user_id).await;
                     }
-                    Some(Modules::Group) => {
+                    Ok(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
                         Group::rpc(message.data, message.user_id, message.request_id);
                     }
-                    Some(Modules::Rtc) => {
+                    Ok(Modules::Rtc) => {
                         log::trace!("Message Modules::Group received");
                         Rtc::rpc(message.data, message.user_id);
                     }
-                    Some(Modules::Dtn) => {
+                    Ok(Modules::Dtn) => {
                         log::trace!("Message Modules::Group received");
                         Dtn::rpc(message.data, message.user_id);
                     }
-                    Some(Modules::None) => {
+                    Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
                     }
-                    None => {
+                    Err(_) => {
                         log::error!("Message module undefined");
                     }
                 }

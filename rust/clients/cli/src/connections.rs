@@ -215,37 +215,37 @@ impl Connections {
                         let mut line = 1;
                         println!("");
 
-                        match proto::Info::from_i32(proto_list.info) {
-                            Some(proto::Info::Request) => {
+                        match proto::Info::try_from(proto_list.info) {
+                            Ok(proto::Info::Request) => {
                                 // all fine no further info
                             }
-                            Some(proto::Info::AddSuccess) => {
+                            Ok(proto::Info::AddSuccess) => {
                                 println!(
                                     "Address successfully added to 'Internet Peer Nodes List'"
                                 );
                                 println!("");
                             }
-                            Some(proto::Info::AddErrorInvalid) => {
+                            Ok(proto::Info::AddErrorInvalid) => {
                                 println!("ERROR: Invalid address, couldn't be added to 'Internet Peer Nodes List'");
                                 println!("");
                             }
-                            Some(proto::Info::RemoveSuccess) => {
+                            Ok(proto::Info::RemoveSuccess) => {
                                 println!(
                                     "Address successfully removed from 'Internet Peer Nodes List'"
                                 );
                                 println!("");
                             }
-                            Some(proto::Info::StateSuccess) => {
+                            Ok(proto::Info::StateSuccess) => {
                                 println!(
                                     "Address successfully state changed in 'Internet Peer Nodes List'"
                                 );
                                 println!("");
                             }
-                            Some(proto::Info::RemoveErrorNotFound) => {
+                            Ok(proto::Info::RemoveErrorNotFound) => {
                                 println!("ERROR: Address not found in 'Internet Peer Nodes List'");
                                 println!("");
                             }
-                            None => {
+                            Err(_) => {
                                 println!("Unknown Reason for 'Internet Peer Nodes List' response");
                                 println!("");
                             }

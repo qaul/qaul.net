@@ -2,19 +2,19 @@
 // This software is published under the AGPLv3 license.
 
 //! # Libqaul File Logger
-//! 
+//!
 //! Configurable file logger for libqaul, which can dynamically
 //! enable and disable logging to file during runtime.
 
-use state::Storage;
-use std::sync::RwLock;
-use std::fs::File;
 use crate::storage::configuration::Configuration;
+use state::InitCell;
+use std::fs::File;
+use std::sync::RwLock;
 
 extern crate log;
 
 /// mutable state of file logger configuration
-static FILELOGGERCONFIG: Storage<RwLock<FileLoggerConfig>> = Storage::new();
+static FILELOGGERCONFIG: InitCell<RwLock<FileLoggerConfig>> = InitCell::new();
 
 /// File Logger Configuration
 pub struct FileLoggerConfig {
@@ -54,15 +54,15 @@ impl log::Log for FileLogger {
     /// log to file logger
     fn log(&self, record: &log::Record) {
         let config = FILELOGGERCONFIG.get().read().unwrap();
-        if config.enable{
+        if config.enable {
             self.logger.log(record);
-        }        
+        }
     }
 
     /// flush logs to file
     fn flush(&self) {
         let config = FILELOGGERCONFIG.get().read().unwrap();
-        if config.enable{
+        if config.enable {
             self.logger.flush();
         }
     }

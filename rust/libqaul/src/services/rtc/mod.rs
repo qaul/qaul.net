@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use crate::node::user_accounts::UserAccount;
 use crate::rpc::Rpc;
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -57,7 +57,7 @@ pub struct RtcSessions {
 }
 
 /// mutable state for sessions
-pub static RTCSESSIONS: Storage<RwLock<RtcSessions>> = Storage::new();
+pub static RTCSESSIONS: InitCell<RwLock<RtcSessions>> = InitCell::new();
 
 /// Real Time Communication Module
 pub struct Rtc {}

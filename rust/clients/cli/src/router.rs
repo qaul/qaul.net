@@ -3,18 +3,20 @@
 
 //! # Router module functions
 
-use prost::Message;
 use super::rpc::Rpc;
+use prost::Message;
 
 /// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.router.rs"); }
+mod proto {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.router.rs");
+}
 
 /// router module function handling
 pub struct Router {}
 
 impl Router {
     /// CLI command interpretation
-    /// 
+    ///
     /// The CLI commands of router module are processed here
     pub fn cli(command: &str) {
         match command {
@@ -22,16 +24,16 @@ impl Router {
             // with per module connectivity per user.
             cmd if cmd.starts_with("table list") => {
                 Self::request_routing_table();
-            },
+            }
             // request neighbours list of all neighbouring nodes.
             cmd if cmd.starts_with("neighbours list") => {
                 Self::request_neighbours_list();
-            },
-            // request connections table, with all known connections 
+            }
+            // request connections table, with all known connections
             // per connection module.
             cmd if cmd.starts_with("connections list") => {
                 Self::request_connections_list();
-            },
+            }
             // unknown command
             _ => log::error!("unknown router command"),
         }
@@ -41,8 +43,8 @@ impl Router {
     fn request_routing_table() {
         // create request message
         let proto_message = proto::Router {
-            message: Some(proto::router::Message::RoutingTableRequest (
-                proto::RoutingTableRequest {}
+            message: Some(proto::router::Message::RoutingTableRequest(
+                proto::RoutingTableRequest {},
             )),
         };
 
@@ -54,8 +56,8 @@ impl Router {
     fn request_neighbours_list() {
         // create request message
         let proto_message = proto::Router {
-            message: Some(proto::router::Message::NeighboursRequest (
-                proto::NeighboursRequest {}
+            message: Some(proto::router::Message::NeighboursRequest(
+                proto::NeighboursRequest {},
             )),
         };
 
@@ -67,8 +69,8 @@ impl Router {
     fn request_connections_list() {
         // create request message
         let proto_message = proto::Router {
-            message: Some(proto::router::Message::ConnectionsRequest (
-                proto::ConnectionsRequest {}
+            message: Some(proto::router::Message::ConnectionsRequest(
+                proto::ConnectionsRequest {},
             )),
         };
 
@@ -80,14 +82,20 @@ impl Router {
     fn send_message(message: proto::Router) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
-        message.encode(&mut buf).expect("Vec<u8> provides capacity as needed");
+        message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Router.into(), "".to_string());
+        Rpc::send_message(
+            buf,
+            super::rpc::proto::Modules::Router.into(),
+            "".to_string(),
+        );
     }
 
     /// Process received RPC message
-    /// 
+    ///
     /// Decodes received protobuf encoded binary RPC message
     /// of the router module.
     pub fn rpc(data: Vec<u8>) {
@@ -99,7 +107,7 @@ impl Router {
                         println!("Routing Table");
                         println!("No. | User ID");
                         println!("      * Connection Module | RTT in ms | hop count | Via Neighbour Node Id");
-        
+
                         let mut line = 1;
 
                         // loop through all routing table entries
@@ -113,34 +121,41 @@ impl Router {
                                 let via = bs58::encode(connection.via.clone());
 
                                 // get enum name as string
-                                let module = match proto::ConnectionModule::from_i32(connection.module) {
-                                    Some(proto::ConnectionModule::None) => "None",
-                                    Some(proto::ConnectionModule::Lan) => "Lan",
-                                    Some(proto::ConnectionModule::Internet) => "Internet",
-                                    Some(proto::ConnectionModule::Ble) => "Ble",
-                                    Some(proto::ConnectionModule::Local) => "Local",
-                                    None => "Unknown",
-                                };
+                                let module =
+                                    match proto::ConnectionModule::try_from(connection.module) {
+                                        Ok(proto::ConnectionModule::None) => "None",
+                                        Ok(proto::ConnectionModule::Lan) => "Lan",
+                                        Ok(proto::ConnectionModule::Internet) => "Internet",
+                                        Ok(proto::ConnectionModule::Ble) => "Ble",
+                                        Ok(proto::ConnectionModule::Local) => "Local",
+                                        Err(_) => "Unknown",
+                                    };
 
                                 // print connection entry
-                                println!("      * {} | {} | {} | {}", module, connection.rtt, connection.hop_count, via.into_string());
+                                println!(
+                                    "      * {} | {} | {} | {}",
+                                    module,
+                                    connection.rtt,
+                                    connection.hop_count,
+                                    via.into_string()
+                                );
                             }
 
                             line += 1;
                         }
                         println!("");
-                    },
+                    }
                     Some(proto::router::Message::NeighboursList(proto_message)) => {
                         println!("");
                         println!("Neighbours List - All Nodes that are Direct Neighbours");
                         println!("");
-                        
+
                         println!("LAN Neighbours");
                         Self::rpc_display_neighbours_list(proto_message.lan);
 
                         println!("Internet Neighbours");
                         Self::rpc_display_neighbours_list(proto_message.internet);
-                    },
+                    }
                     Some(proto::router::Message::ConnectionsList(proto_message)) => {
                         println!("");
                         println!("Connections List - All Connections of this Node");
@@ -151,22 +166,26 @@ impl Router {
 
                         println!("Internet Connections");
                         Self::rpc_display_connections_list(proto_message.internet);
-                    },
+                    }
                     _ => {
                         log::error!("unprocessable RPC router message");
-                    },
-                }    
-            },
+                    }
+                }
+            }
             Err(error) => {
                 log::error!("{:?}", error);
-            },
+            }
         }
     }
 
     /// Display Neighbours list
     fn rpc_display_neighbours_list(neighbours_list: Vec<proto::NeighboursEntry>) {
         for entry in neighbours_list {
-            println!("{}, {} rtt", bs58::encode(entry.node_id).into_string(), entry.rtt);
+            println!(
+                "{}, {} rtt",
+                bs58::encode(entry.node_id).into_string(),
+                entry.rtt
+            );
         }
         println!("");
     }
@@ -182,7 +201,12 @@ impl Router {
             println!("{} | {:?}", line, bs58::encode(entry.user_id).into_string());
             // loop through all neighbour entries of a user entry
             for connection in entry.connections {
-                println!("      * {} | {} | {:?}", connection.rtt, connection.hop_count, bs58::encode(connection.via).into_string());
+                println!(
+                    "      * {} | {} | {:?}",
+                    connection.rtt,
+                    connection.hop_count,
+                    bs58::encode(connection.via).into_string()
+                );
             }
             line += 1;
         }

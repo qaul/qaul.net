@@ -3,21 +3,20 @@
 
 //! The flooder floods messages via floodsub/Gossipsub to the network.
 //! It contains a ring buffer of messages to process.
-//! 
+//!
 //! It sends the messages of the feed service.
-//! 
+//!
 //! Most messages are repostings from incoming floods on some interface,
 //! that need to be flooded via the other interfaces.
 
-use libp2p::floodsub::Topic;
-use state::Storage;
-use std::sync::RwLock;
-use std::collections::VecDeque;
 use crate::connections::ConnectionModule;
+use libp2p::floodsub::Topic;
+use state::InitCell;
+use std::collections::VecDeque;
+use std::sync::RwLock;
 
 // mutable state of feed messages
-pub static FLOODER: Storage<RwLock<Flooder>> = Storage::new();
-
+pub static FLOODER: InitCell<RwLock<Flooder>> = InitCell::new();
 
 pub struct FloodMessageContainer {
     pub message: Vec<u8>,
@@ -32,7 +31,9 @@ pub struct Flooder {
 impl Flooder {
     /// Initialize the flooder and create the ring buffer.
     pub fn init() {
-        let flooder = Flooder { to_send: VecDeque::new() };
+        let flooder = Flooder {
+            to_send: VecDeque::new(),
+        };
         FLOODER.set(RwLock::new(flooder));
     }
 
@@ -46,6 +47,6 @@ impl Flooder {
 
         // add it to sending queue
         let mut flooder = FLOODER.get().write().unwrap();
-        flooder.to_send.push_back(msg);    
+        flooder.to_send.push_back(msg);
     }
 }
