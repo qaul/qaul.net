@@ -13,7 +13,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 default = []
 
 [dependencies]
-libp2p = { version = "0.52.3", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "websocket", "dns", "macros"] }
+libp2p = { version = "0.52.4", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "websocket", "dns", "macros"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 futures = "0.3.15"
 serde = {version = "=1.0", features = ["derive"] }
@@ -56,7 +56,7 @@ fs_extra = "1.2.0"
 semver = "1.0"
 
 # only for desktop platforms: Linux, Mac, Windows
-directories = "4.0"
+directories = "5.0.1"
 
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
