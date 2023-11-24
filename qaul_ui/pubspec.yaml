@@ -1,7 +1,7 @@
 name: qaul_ui
 description: qaul - Internet Independent Wireless Mesh Communication App
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 2.0.0-beta.16+1106
 
@@ -14,53 +14,53 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  adaptive_theme: ^3.0.0
-  archive: ^3.1.8
-  badges: ^3.0.2
-  better_open_file: ^3.6.3
-  bubble: ^1.2.1
-  collection: ^1.15.0
-  cupertino_icons: ^1.0.2
-  device_info_plus: ^9.0.2
-  equatable: ^2.0.3
-  ffi: ^2.0.1
-  file_picker: ^5.0.1
-  filesize: ^2.0.1
-  fixnum: ^1.0.1
-  flame: ^1.2.1
-  flame_forge2d: ^0.14.1
-  fluent_ui: ^4.2.0
-  flutter_chat_types: ^3.4.5
-  flutter_chat_ui: ^1.6.6
-  flutter_email_sender: ^6.0.0
-  flutter_hooks: ^0.18.4
-  flutter_markdown: ^0.6.8
-  flutter_svg: ^2.0.0+1
-  font_awesome_flutter: ^10.1.0
-  hive: ^2.0.4
-  hive_flutter: ^1.1.0
-  hooks_riverpod: ^1.0.4
-  image: ^4.0.17
-  image_picker: ^0.8.6+1
-  infinite_scroll_pagination: ^3.2.0
-  intersperse: ^2.0.0
-  intl: ^0.18.0
-  local_notifications: { 'path': 'packages/local_notifications' }
-  logging: ^1.0.2
-  mailto: ^2.0.0
-  meta: ^1.7.0
-  mime: ^1.0.2
-  neat_periodic_task: ^2.0.0
-  open_simplex_2: ^0.2.1
-  package_info_plus: ^4.0.2
-  path: ^1.8.1
-  path_provider: ^2.0.8
-  qaul_rpc: { 'path': 'packages/qaul_rpc' }
-  responsive_framework: ^1.1.0
-  shared_preferences: ^2.0.12
-  uni_links: ^0.5.1
-  url_launcher: ^6.0.18
-  utils: { 'path': 'packages/utils' }
+  adaptive_theme: 3.4.1
+  archive: 3.4.9
+  badges: 3.1.2
+  better_open_file: 3.6.4
+  bubble: 1.2.1
+  collection: 1.17.1
+  cupertino_icons: 1.0.6
+  device_info_plus: 9.1.1
+  equatable: 2.0.5
+  ffi: 2.0.2
+  file_picker: 6.1.1
+  filesize: 2.0.1
+  fixnum: 1.1.0
+  flame: 1.8.1
+  flame_forge2d: 0.14.1
+  fluent_ui: 4.7.3
+  flutter_chat_types: 3.6.2
+  flutter_chat_ui: 1.6.10
+  flutter_email_sender: 6.0.2
+  flutter_hooks: 0.18.6
+  flutter_markdown: 0.6.15+1
+  flutter_svg: 2.0.9
+  font_awesome_flutter: 10.6.0
+  hive: 2.2.3
+  hive_flutter: 1.1.0
+  hooks_riverpod: 1.0.4
+  image: 4.1.3
+  image_picker: 0.8.9
+  infinite_scroll_pagination: 3.2.0
+  intersperse: 2.0.0
+  intl: 0.18.0
+  local_notifications: { "path": "packages/local_notifications" }
+  logging: 1.2.0
+  mailto: 2.0.0
+  meta: 1.9.1
+  mime: 1.0.4
+  neat_periodic_task: 2.0.1
+  open_simplex_2: 0.2.1
+  package_info_plus: 4.0.2
+  path: 1.8.3
+  path_provider: 2.0.15
+  qaul_rpc: { "path": "packages/qaul_rpc" }
+  responsive_framework: 1.1.0
+  shared_preferences: 2.2.2
+  uni_links: 0.5.1
+  url_launcher: 6.1.14
+  utils: { "path": "packages/utils" }
 
 dev_dependencies:
   flutter_test:
@@ -68,13 +68,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
-  build_runner: ^2.1.4
-  fast_base58: ^0.2.1
-#  flutter_launcher_icons: ^0.11.0
-  flutter_launcher_icons: any
-  flutter_lints: ^2.0.1
-  hive_generator: ^2.0.0
-  uuid: ^3.0.6
+  build_runner: 2.4.6
+  fast_base58: 0.2.1
+  flutter_launcher_icons: 0.13.1
+  flutter_lints: 2.0.3
+  hive_generator: 2.0.1
+  uuid: 3.0.7
 
 flutter_icons:
   ios: true

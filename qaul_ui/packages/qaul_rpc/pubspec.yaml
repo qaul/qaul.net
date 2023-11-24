@@ -2,7 +2,7 @@ name: qaul_rpc
 description: RPC Connection between the Flutter app & qaul-rpc.
 version: 0.0.1
 
-publish_to: 'none'
+publish_to: "none"
 
 flutter:
 
@@ -14,23 +14,23 @@ dependencies:
   flutter:
     sdk: flutter
 
-  collection: ^1.15.0
-  logging: ^1.0.2
+  collection: 1.17.1
+  logging: 1.2.0
 
-  ffi: ^2.0.1
-  fixnum: ^1.0.1
-  convert: ^3.0.1
-  meta: ^1.7.0
-  protobuf: ^2.0.0
+  ffi: 2.0.2
+  fixnum: 1.1.0
+  convert: 3.1.1
+  meta: 1.9.1
+  protobuf: 2.1.0
 
-  uuid: ^3.0.6
-  rxdart: ^0.27.3
-  equatable: ^2.0.3
-  fast_base58: ^0.2.1
-  hooks_riverpod: ^1.0.3
-  utils: { 'path': '../utils' }
+  uuid: 3.0.7
+  rxdart: 0.27.7
+  equatable: 2.0.5
+  fast_base58: 0.2.1
+  hooks_riverpod: 1.0.4
+  utils: { "path": "../utils" }
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: 2.0.3
