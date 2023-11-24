@@ -25,5 +25,6 @@
     "[proto3]": {
         "editor.defaultFormatter": "xaver.clang-format",
         "editor.formatOnSave": true
-    }
+    },
+    "cmake.configureOnOpen": false
 }

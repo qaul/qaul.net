@@ -7,8 +7,11 @@ members = [
     # binaries
     "clients/cli",
     "clients/qauld",
+    "clients/bridge",
 
     # libp2p modules
     "libp2p_modules/qaul_info",
     "libp2p_modules/qaul_messaging"
 ]
+
+default-members = ["libqaul", "clients/cli", "clients/qauld"]
