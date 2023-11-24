@@ -227,7 +227,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             ),
             avatarBuilder: (id) {
-              var user = room.members.firstWhereOrNull((u) => id == u.idBase58);
+              var user = room.members.firstWhereOrNull((u) => id.id == u.idBase58);
               if (user == null) return const SizedBox();
               return QaulAvatar.small(user: user, badgeEnabled: false);
             },
