@@ -5,6 +5,7 @@
 //!
 //! Conversation of Ed25519 to Montgomery Curve25519 representation.
 
+use libp2p;
 use libp2p::identity::{Keypair, PublicKey};
 use sha2::{Digest, Sha512};
 
@@ -39,11 +40,25 @@ impl Crypto25519 {
             let ed25519_dalek_keypair_bytes = ed25519_keypair.to_bytes();
 
             // create dalek ed25519 keypair
-            if let Ok(ed25519_dalek_keypair) =
-                ed25519_dalek::Keypair::from_bytes(&ed25519_dalek_keypair_bytes)
+            if let Ok(ed25519_dalek_signingkey) =
+                ed25519_dalek::SigningKey::from_keypair_bytes(&ed25519_dalek_keypair_bytes)
             {
                 // get dalek secret key as bytes
-                let ed25519_dalek_secret_bytes = ed25519_dalek_keypair.secret.to_bytes();
+                let ed25519_dalek_secret_bytes = ed25519_dalek_signingkey.to_bytes();
+
+                // make sure the transformation was correct and we have the correct secret key
+                {
+                    let retransformed_ed25519_keypair = libp2p::identity::ed25519::Keypair::from(
+                        libp2p::identity::ed25519::SecretKey::try_from_bytes(
+                            ed25519_dalek_secret_bytes,
+                        )
+                        .unwrap(),
+                    );
+                    assert!(
+                        ed25519_dalek_keypair_bytes == retransformed_ed25519_keypair.to_bytes(),
+                        "secret key transformation failed"
+                    );
+                }
 
                 // transform into dalek curve25519 secret key as bytes
                 let mut curve25519_dalek_secret: [u8; 32] = [0; 32];
