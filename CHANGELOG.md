@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 beta 17] 2023-11-26
+
+This release upgrades libp2p to 0.52.4 and includes the new `quic` transport protocol option.
+
+Added
+
+- added `quic` transport option.
+- CI builds arm64 CLI binaries for ARM linux, e.g. for Raspberry Pi.
+- CI builds arm64 linux snap app.
+
+Fixed
+
+- UI group creation issue on Android.
+- fixed various small bugs
+
+Changed
+
+- upgraded libp2p to 0.52.4
+- upgraded rust dalek crypto to new major version.
+- upgraded all rust libraries to current version.
+- upgraded flutter to 3.16
+- upgraded all flutter libraries to current version.
+- removed mplex stream multiplexer from TCP transport protocol. TCP transport is always using yamux now.
+
 ## [2.0.0 beta 16] 2023-08-01
 
 This release newly includes the android BLE-module. The Android BLE module is still experimental.
