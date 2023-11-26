@@ -14,13 +14,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  collection: 1.17.1
+  collection: 1.18.0
   logging: 1.2.0
 
   ffi: 2.0.2
   fixnum: 1.1.0
   convert: 3.1.1
-  meta: 1.9.1
+  meta: 1.10.0
   protobuf: 2.1.0
 
   uuid: 3.0.7
