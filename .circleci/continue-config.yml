@@ -115,7 +115,7 @@ commands:
 executors:
     flutter:
         docker:
-            - image: ghcr.io/cirruslabs/flutter:3.10.5
+            - image: ghcr.io/cirruslabs/flutter:3.16.0
         working_directory: ~/qaul-libp2p/qaul_ui
     flutter-android:
         docker:
@@ -366,7 +366,7 @@ jobs:
                 root: ~/qaul-libp2p
     build-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022

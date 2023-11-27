@@ -37,7 +37,7 @@ rust-macos:
 # --------------------
 flutter:
   docker:
-    - image: ghcr.io/cirruslabs/flutter:3.10.5
+    - image: ghcr.io/cirruslabs/flutter:3.16.0
   working_directory: ~/qaul-libp2p/qaul_ui
 flutter-android:
   docker:
