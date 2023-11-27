@@ -124,7 +124,7 @@ executors:
             _JAVA_OPTIONS: -Xmx2048m
             FASTLANE_LANE: upload_beta_playstore
             FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m"
             LANG: en_US.UTF-8
             LC_ALL: en_US.UTF-8
@@ -137,7 +137,7 @@ executors:
         environment:
             FASTLANE_LANE: upload_testflight
             FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 14.1.0
@@ -145,14 +145,14 @@ executors:
         working_directory: ~/qaul-libp2p/qaul_ui/ios
     flutter-linux:
         environment:
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202010-01
         working_directory: ~/qaul-libp2p/qaul_ui
     flutter-linux-arm:
         environment:
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202101-01
@@ -160,7 +160,7 @@ executors:
         working_directory: ~/qaul-libp2p/qaul_ui
     flutter-macos:
         environment:
-            FLUTTER_VERSION: 3.10.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 14.0.1

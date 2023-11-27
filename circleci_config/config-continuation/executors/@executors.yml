@@ -53,7 +53,7 @@ flutter-android:
     _JAVA_OPTIONS: "-Xmx2048m"
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
     SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
-    FLUTTER_VERSION: "3.10.5"
+    FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
   macos:
@@ -63,14 +63,14 @@ flutter-ios:
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_testflight
-    FLUTTER_VERSION: "3.10.5"
+    FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux:
   machine:
     image: ubuntu-2004:202010-01
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.10.5"
+    FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux-arm:
   machine:
@@ -78,7 +78,7 @@ flutter-linux-arm:
   resource_class: arm.medium
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.10.5"
+    FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
@@ -86,7 +86,7 @@ flutter-macos:
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.10.5"
+    FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ubuntu-lean:
   working_directory: ~/qaul-libp2p/qaul_ui
