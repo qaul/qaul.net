@@ -16,8 +16,8 @@ use lazy_static::*;
 use std::{ffi::c_void, sync::Mutex};
 
 /// Modules for integrating with JavaVM
-use jni::objects::{GlobalRef, JClass, JObject, JString, JValue};
-use jni::sys::{jbyteArray, jint, jstring, JNI_ERR, JNI_VERSION_1_6};
+use jni::objects::{GlobalRef, JByteArray, JClass, JObject, JString};
+use jni::sys::{jint, jstring, JNI_ERR, JNI_VERSION_1_6};
 use jni::JNIEnv;
 use jni::{JavaVM, NativeMethod};
 
@@ -67,19 +67,19 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(env: JNIEnv, _: JCl
         .expect("Couldn't create java string!");
 
     // return the raw pointer
-    output.into_inner()
+    output.into_raw()
 }
 
 /// start libqaul from android
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
-    env: JNIEnv,
+    mut env: JNIEnv,
     _: JClass,
     path: JString,
 ) {
     // get path string
     let android_path: String = env
-        .get_string(path)
+        .get_string(&path)
         .expect("Couldn't get Java path string!")
         .into();
 
@@ -90,7 +90,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
 /// check if libqaul finished initializing
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
-    _env: JNIEnv,
+    mut _env: JNIEnv,
     _: JClass,
 ) -> bool {
     super::initialization_finished()
@@ -100,7 +100,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
 /// this function is only for debugging
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
-    _env: JNIEnv,
+    mut _env: JNIEnv,
     _: JClass,
 ) -> jint {
     // return number of RPC messages sent to libqaul
@@ -111,7 +111,7 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
 /// from libqaul
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
-    _env: JNIEnv,
+    mut _env: JNIEnv,
     _: JClass,
 ) -> jint {
     // return the number of RPC messages in the pipeline to be
@@ -121,13 +121,13 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
 
 /// send an rpc message from android to libqaul
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_send(
-    env: JNIEnv,
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_send<'local>(
+    env: JNIEnv<'local>,
     _: JClass,
-    message: jbyteArray,
+    message: JByteArray<'local>,
 ) {
     // get the message out of java
-    let binary_message: Vec<u8> = env.convert_byte_array(message).unwrap();
+    let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
 
     // send it to libqaul
     super::send_rpc(binary_message);
@@ -135,10 +135,10 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_send(
 
 /// receive an rpc message on android from libqaul
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive(
-    env: JNIEnv,
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive<'local>(
+    env: JNIEnv<'local>,
     _: JClass,
-) -> jbyteArray {
+) -> JByteArray<'local> {
     // check if there is an RPC message
     if let Ok(message) = super::receive_rpc() {
         // convert message to java byte array
@@ -160,13 +160,13 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive(
 
 /// send a sys protobuf message from BLE module to libqaul
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend(
-    env: JNIEnv,
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend<'local>(
+    env: JNIEnv<'local>,
     _: JClass,
-    message: jbyteArray,
+    message: JByteArray<'local>,
 ) {
     // get the message out of java
-    let binary_message: Vec<u8> = env.convert_byte_array(message).unwrap();
+    let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
 
     // send it to libqaul
     super::send_sys(binary_message);
@@ -174,10 +174,10 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend(
 
 /// receive a sys message on android from libqaul
 #[no_mangle]
-pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive(
-    env: JNIEnv,
+pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive<'local>(
+    env: JNIEnv<'local>,
     _: JClass,
-) -> jbyteArray {
+) -> JByteArray<'local> {
     // check if there is an RPC message
     if let Ok(message) = super::receive_sys() {
         // convert message to java byte array
@@ -202,7 +202,7 @@ impl Android {
     }
 
     unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
-        let env: JNIEnv = jvm.get_env().unwrap();
+        let mut env: JNIEnv = jvm.get_env().unwrap();
         let jni_version = env.get_version().unwrap();
         let version: jint = jni_version.into();
 
@@ -226,7 +226,7 @@ impl Android {
 
     fn call_jvm<F>(callback: &Mutex<Option<GlobalRef>>, run: F)
     where
-        F: Fn(JObject, &JNIEnv) + Send + 'static,
+        F: Fn(&JObject, &mut JNIEnv) + Send + 'static,
     {
         let ptr_jvm = JVM_GLOBAL.lock().unwrap();
         if (*ptr_jvm).is_none() {
@@ -238,9 +238,9 @@ impl Android {
         }
         let jvm: &JavaVM = (*ptr_jvm).as_ref().unwrap();
         match jvm.attach_current_thread_permanently() {
-            Ok(env) => {
+            Ok(mut env) => {
                 let obj = (*ptr_fn).as_ref().unwrap().as_obj();
-                run(obj, &env);
+                run(obj, &mut env);
                 if let Ok(true) = env.exception_check() {
                     let _ = env.exception_describe();
                     let _ = env.exception_clear();
@@ -253,13 +253,13 @@ impl Android {
     }
 
     pub fn call_java_callback(fun_type: Vec<u8>) {
-        Self::call_jvm(&JNI_CALLBACK, move |obj: JObject, env: &JNIEnv| {
-            let jmessage: jbyteArray = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
+        Self::call_jvm(&JNI_CALLBACK, move |obj: &JObject, env: &mut JNIEnv| {
+            let jmessage = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
             match env.call_method(
                 obj,
                 "OnLibqaulMessage",
                 "([B)V",
-                &[JValue::from(JObject::from(jmessage))],
+                &[(&JObject::from(jmessage)).into()],
             ) {
                 Ok(jvalue) => {
                     log::debug!("callback succeed: {:?}", jvalue);

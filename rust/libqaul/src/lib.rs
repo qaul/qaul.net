@@ -47,8 +47,6 @@ static DEFCONFIGS: InitCell<BTreeMap<String, String>> = InitCell::new();
 /// To see logs on android we need the android logger
 #[cfg(target_os = "android")]
 extern crate log;
-#[cfg(target_os = "android")]
-use log::Level;
 
 #[cfg(target_os = "android")]
 extern crate android_logger;
@@ -155,7 +153,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
     #[cfg(target_os = "android")]
     {
         let env_logger = Box::new(android_logger::AndroidLogger::new(
-            Config::default().with_min_level(Level::Info),
+            Config::default().with_max_level(log::LevelFilter::Info),
         ));
         let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
             simplelog::LevelFilter::Error,
