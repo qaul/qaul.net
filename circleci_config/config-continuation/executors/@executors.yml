@@ -27,7 +27,8 @@ rust-linux-arm:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
 rust-macos:
   macos:
-    xcode: 13.0.0
+    xcode: 14.0.1
+  resource_class: macos.m1.medium.gen1
   working_directory: ~/qaul-libp2p
   shell: /bin/bash --login -o pipefail
   environment:
@@ -58,6 +59,7 @@ flutter-android:
 flutter-ios:
   macos:
     xcode: 14.1.0
+  resource_class: macos.m1.medium.gen1
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui/ios
   environment:
@@ -83,6 +85,7 @@ flutter-linux-arm:
 flutter-macos:
   macos:
     xcode: 14.0.1
+  resource_class: macos.m1.medium.gen1
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
