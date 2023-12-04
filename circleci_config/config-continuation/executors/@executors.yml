@@ -28,7 +28,7 @@ rust-linux-arm:
 rust-macos:
   macos:
     xcode: 14.0.1
-  resource_class: macos.m1.medium.gen1
+  resource_class: macos.x86.medium.gen2
   working_directory: ~/qaul-libp2p
   shell: /bin/bash --login -o pipefail
   environment:
@@ -59,7 +59,7 @@ flutter-android:
 flutter-ios:
   macos:
     xcode: 14.1.0
-  resource_class: macos.m1.medium.gen1
+  resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui/ios
   environment:
@@ -85,7 +85,7 @@ flutter-linux-arm:
 flutter-macos:
   macos:
     xcode: 14.0.1
-  resource_class: macos.m1.medium.gen1
+  resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul-libp2p/qaul_ui
   environment:
