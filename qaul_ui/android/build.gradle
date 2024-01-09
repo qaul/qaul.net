@@ -1,3 +1,6 @@
+group = "net.qaul.android"
+version = "1.0.0"
+
 buildscript {
     ext.kotlin_version = '1.7.0'
     repositories {
@@ -16,11 +19,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-
-        //
-        flatDir {
-            dirs 'libs'
-        }
     }
 }
 
