@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:filesize/filesize.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -21,8 +24,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:path/path.dart' hide context, Context;
+import 'package:path/path.dart' as p hide context, Context;
+import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
@@ -33,14 +38,11 @@ import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
 
+part 'audio_message_widget.dart';
 part 'custom_input.dart';
-
 part 'file_message_widget.dart';
-
 part 'file_sharing.dart';
-
 part 'group_settings.dart';
-
 part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
@@ -95,7 +97,8 @@ class ChatScreen extends StatefulHookConsumerWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with AudioRecorderMixin {
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -104,6 +107,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   final Map<String, String> _overflowMenuOptions = {};
 
+  late AudioRecorder audioRecord;
+
+  late AudioPlayer audioPlayer;
+
+  bool isRecording = false;
+
+  late String audioPath;
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
@@ -126,6 +136,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     assert(otherUser != null || room.isGroupChatRoom,
         'Must either be a group chat or contain another user');
     _scheduleUpdateCurrentOpenChat();
+    audioPlayer = AudioPlayer();
+    audioRecord = AudioRecorder();
   }
 
   @override
@@ -140,6 +152,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (oldWidget.room == room) return;
     _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    audioRecord.dispose();
+    audioPlayer.dispose();
   }
 
   @override
@@ -227,7 +246,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             ),
             avatarBuilder: (id) {
-              var user = room.members.firstWhereOrNull((u) => id.id == u.idBase58);
+              var user =
+                  room.members.firstWhereOrNull((u) => id.id == u.idBase58);
               if (user == null) return const SizedBox();
               return QaulAvatar.small(user: user, badgeEnabled: false);
             },
@@ -235,6 +255,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               isDisabled: room.status != ChatRoomStatus.active,
+              isRecording: isRecording,
               disabledMessage: room.status != ChatRoomStatus.inviteAccepted
                   ? null
                   : 'Please wait for the admin to confirm your acceptance to send messages',
@@ -289,6 +310,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           if (result != null) {
                             File file = File(result.path);
 
+                            // ignore: use_build_context_synchronously
+                            if (!context.mounted) return;
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) {
+                                return _SendFileDialog(
+                                  file,
+                                  room: room,
+                                  partialMessage: text?.text,
+                                  onSendPressed: (description) {
+                                    final worker = ref.read(qaulWorkerProvider);
+                                    worker.sendFile(
+                                      pathName: file.path,
+                                      conversationId: room.conversationId,
+                                      description: description.text,
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          }
+                        },
+              onRecordAudioPressed: !(Platform.isAndroid || Platform.isIOS)
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                      ? null
+                      : ({types.PartialText? text}) async {
+                          (isRecording)
+                              ? await stopRecording()
+                              : await startRecording();
+                          if (!isRecording) {
+                            File file = File(audioPath);
                             // ignore: use_build_context_synchronously
                             if (!context.mounted) return;
                             showModalBottomSheet(
@@ -386,6 +439,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 isDefaultUser: message.author.id == user.idBase58,
               );
             },
+            audioMessageBuilder: (message, {required int messageWidth}) {
+              return AudioMessageWidget(
+                message: message,
+                messageWidth: messageWidth,
+                isDefaultUser: message.author.id == user.idBase58,
+              );
+            },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
                 colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
@@ -477,6 +537,49 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _overflowMenuOptions.clear();
     }
   }
+
+  Future<void> startRecording() async {
+    try {
+      if (await audioRecord.hasPermission()) {
+        const encoder = AudioEncoder.aacLc;
+        setState(() {
+          isRecording = true;
+        });
+        const config = RecordConfig(encoder: encoder, numChannels: 1);
+        await recordFile(audioRecord, config);
+      }
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      final path = await audioRecord.stop();
+      setState(() {
+        isRecording = false;
+        audioPath = path!;
+      });
+    } catch (e) {
+      return;
+    }
+  }
+}
+
+mixin AudioRecorderMixin {
+  Future<void> recordFile(AudioRecorder recorder, RecordConfig config) async {
+    final path = await _getPath();
+
+    await recorder.start(config, path: path);
+  }
+
+  Future<String> _getPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return p.join(
+      dir.path,
+      'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+    );
+  }
 }
 
 extension _MessageExtension on Message {
@@ -517,6 +620,21 @@ extension _MessageExtension on Message {
           !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
+          author: author.toInternalUser(),
+          createdAt: receivedAt.millisecondsSinceEpoch,
+          status: mappedState,
+          uri: filePath,
+          size: (content as FileShareContent).size,
+          name: (content as FileShareContent).fileName,
+          metadata: {
+            'description': (content as FileShareContent).description,
+            'messageState': status.toJson(),
+          },
+        );
+      } else if (mimeStr != null && RegExp('audio/.*').hasMatch(mimeStr)) {
+        return types.AudioMessage(
+          id: messageIdBase58,
+          duration: const Duration(seconds: 100),
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
           status: mappedState,
