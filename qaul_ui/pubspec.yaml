@@ -14,7 +14,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-
   adaptive_theme: ^3.4.1
   archive: ^3.4.9
   badges: ^3.1.2
@@ -63,6 +62,8 @@ dependencies:
   utils: { "path": "packages/utils" }
   version: ^3.0.2
   flutter_markdown: ^0.7.1
+  record: ^5.0.4
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
