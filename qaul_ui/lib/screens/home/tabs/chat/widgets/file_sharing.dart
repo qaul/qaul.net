@@ -30,7 +30,7 @@ class _SendFileDialog extends HookConsumerWidget {
                 children: [
                   Text(filesize(file.lengthSync())),
                   Text(
-                    basename(file.path),
+                    p.basename(file.path),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -47,8 +47,7 @@ class _SendFileDialog extends HookConsumerWidget {
         const SizedBox(height: 8),
         _CustomInput(
           initialText: partialMessage,
-          hintText: AppLocalizations.of(context)!
-              .chatEmptyMessageHint,
+          hintText: AppLocalizations.of(context)!.chatEmptyMessageHint,
           onSendPressed: (desc) {
             final worker = ref.read(qaulWorkerProvider);
             worker.sendFile(
