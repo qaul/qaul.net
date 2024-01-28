@@ -53,7 +53,9 @@ impl Default for Lan {
         Lan {
             active: true,
             listen: vec![
+                String::from("/ip4/0.0.0.0/udp/0/quic-v1"),
                 String::from("/ip4/0.0.0.0/tcp/0"),
+                String::from("/ip6/::/udp/0/quic-v1"),
                 String::from("/ip6/::/tcp/0"),
             ],
         }
@@ -89,25 +91,31 @@ impl Default for Internet {
         }
         // allow unused_variable needed for android
         #[allow(unused_variables)]
+        let listen_ipv4_quic: String = format!("/ip4/0.0.0.0/udp/{}/quic-v1", port);
+        #[allow(unused_variables)]
         let listen_ipv4: String = format!("/ip4/0.0.0.0/tcp/{}", port);
+        #[allow(unused_variables)]
+        let listen_ipv6_quic: String = format!("/ip6/::/udp/{}/quic-v1", port);
         #[allow(unused_variables)]
         let listen_ipv6: String = format!("/ip6/::/tcp/{}", port);
 
         Internet {
             active: true,
             peers: vec![InternetPeer {
-                address: String::from("/ip4/144.91.74.192/tcp/9229"),
+                address: String::from("/ip4/144.91.74.192/udp/9229/quic-v1"),
                 name: String::from("qaul Community Node"),
                 enabled: false,
             }],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
             listen: vec![
+                String::from("/ip4/0.0.0.0/udp/9229/quic-v1"),
                 String::from("/ip4/0.0.0.0/tcp/9229"),
+                String::from("/ip6/::/udp/9229/quic-v1"),
                 String::from("/ip6/::/tcp/9229"),
             ],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            listen: vec![listen_ipv4, listen_ipv6],
+            listen: vec![listen_ipv4_quic, listen_ipv4, listen_ipv6_quic, listen_ipv6],
         }
     }
 }
@@ -244,16 +252,6 @@ impl Configuration {
             }
             Ok(c) => c.try_deserialize::<Configuration>().unwrap(),
         };
-
-        // There is no key for debug in the the configuration hence fails.
-
-        // Add configuration options from environment variables (with a prefix of QAUL)
-        // e.g. `QAUL_DEBUG=1 ./target/qaul` sets the `debug` key
-
-        // match e.merge(Environment::with_prefix("QAUL")) {
-        //     Ok(env) => settings = env.clone(),
-        //     Err(e) => error!("Environment {:?}", e),
-        // }
 
         // put configuration to state
         CONFIG.set(RwLock::new(config));
