@@ -322,6 +322,9 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                 lan_event = lan_fut => {
                     //log::trace!("Unhandled lan connection module event: {:?}", lan_event);
                     match lan_event.unwrap() {
+                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id,  ..} => {
+                            log::trace!("lan connection established: {:?}", peer_id);
+                        }
                         libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
                             //remove from neighbour table, after then scheduler will auto remove this neighbour
                             log::trace!("lan connection closed: {:?}", peer_id);

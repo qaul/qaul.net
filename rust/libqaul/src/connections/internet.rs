@@ -186,7 +186,7 @@ pub struct Internet {
 
 impl Internet {
     /// Initialize swarm for Internet overlay connection module
-    pub async fn init(auth_keys: &Keypair) -> Self {
+    pub async fn init(node_keys: &Keypair) -> Self {
         log::trace!("Internet.init() start");
 
         INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
@@ -216,7 +216,7 @@ impl Internet {
         };
         behaviour.floodsub.subscribe(Node::get_topic());
 
-        let mut swarm = SwarmBuilder::with_existing_identity(auth_keys.to_owned())
+        let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_async_std()
             .with_tcp(
                 tcp::Config::new().nodelay(true),
@@ -225,7 +225,7 @@ impl Internet {
             )
             .unwrap()
             .with_quic()
-            .with_behaviour(|_| behaviour)
+            .with_behaviour(|_| Ok(behaviour))
             .unwrap()
             .with_swarm_config(|cfg| {
                 cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX))

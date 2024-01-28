@@ -1,6 +1,4 @@
-# qaul-cli
-
-**qaul RPC CLI client**
+# qaul-cli - qaul RPC CLI client
 
 This CLI client starts libqaul in an own thread, and uses the protobuf RPC interface to communicate with libqaul.
 

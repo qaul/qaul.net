@@ -21,9 +21,7 @@
 use libp2p::{
     floodsub::{Floodsub, FloodsubEvent},
     identity::Keypair,
-    mdns,
-    mdns::{async_io::Behaviour as Mdns, Config},
-    noise, ping,
+    mdns, noise, ping,
     swarm::{NetworkBehaviour, Swarm},
     tcp, yamux, SwarmBuilder,
 };
@@ -42,7 +40,7 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 #[behaviour(to_swarm = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
-    pub mdns: Mdns,
+    pub mdns: mdns::async_io::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -80,9 +78,12 @@ impl QaulLanBehaviour {
     fn mdsn_event(&mut self, event: mdns::Event) {
         match event {
             mdns::Event::Discovered(discovered_list) => {
-                for (peer, _addr) in discovered_list {
-                    log::trace!("MdnsEvent::Discovered, peer {:?} to floodsub added", peer);
-                    self.floodsub.add_node_to_partial_view(peer);
+                for (peer_id, _addr) in discovered_list {
+                    log::trace!(
+                        "MdnsEvent::Discovered, peer {:?} to floodsub added",
+                        peer_id.clone()
+                    );
+                    self.floodsub.add_node_to_partial_view(peer_id);
                 }
             }
             mdns::Event::Expired(expired_list) => {
@@ -154,7 +155,7 @@ pub struct Lan {
 
 impl Lan {
     /// Initialize swarm for LAN connection module
-    pub async fn init(auth_keys: &Keypair) -> Lan {
+    pub async fn init(node_keys: &Keypair) -> Lan {
         log::trace!("Lan::init() start");
 
         // create ping configuration
@@ -168,7 +169,7 @@ impl Lan {
 
         // create MDNS behaviour
         // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-        let mdns = Mdns::new(Config::default(), Node::get_id()).unwrap();
+        let mdns = mdns::async_io::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
@@ -180,7 +181,7 @@ impl Lan {
         };
         behaviour.floodsub.subscribe(Node::get_topic());
 
-        let mut swarm = SwarmBuilder::with_existing_identity(auth_keys.to_owned())
+        let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_async_std()
             .with_tcp(
                 tcp::Config::new().nodelay(true),
@@ -189,7 +190,10 @@ impl Lan {
             )
             .unwrap()
             .with_quic()
-            .with_behaviour(|_| behaviour)
+            .with_behaviour(|key| {
+                log::trace!("internal LAN node ID: {:?}", key.public().to_peer_id());
+                Ok(behaviour)
+            })
             .unwrap()
             .with_swarm_config(|cfg| {
                 cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX))

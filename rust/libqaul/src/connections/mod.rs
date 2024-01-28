@@ -10,10 +10,11 @@ pub mod events;
 pub mod internet;
 pub mod lan;
 
-use libp2p::{identity::Keypair, Multiaddr};
+use libp2p::Multiaddr;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
+use crate::node::Node;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::configuration::InternetPeer;
@@ -82,16 +83,14 @@ pub struct Connections {
 impl Connections {
     /// initialize connections
     pub async fn init() -> Connections {
-        // create transport encryption keys for noise protocol
-        let auth_keys = Keypair::generate_ed25519();
-        // .into_authentic(Node::get_keys())
-        // .expect("can create auth keys");
+        // get node keys
+        let node_keys = Node::get_keys();
 
         // initialize Lan module
-        let lan = Lan::init(&auth_keys).await;
+        let lan = Lan::init(&node_keys).await;
 
         // initialize Internet overlay module
-        let internet = Internet::init(&auth_keys).await;
+        let internet = Internet::init(&node_keys).await;
 
         // initialize BLE  module
         Ble::init();
