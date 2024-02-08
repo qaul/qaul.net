@@ -17,7 +17,11 @@
 //!     name: qaul Community Node
 //!     enabled: false
 //!   do_listen: false
-//!   listen: [/ip4/0.0.0.0/tcp/9229, /ip6/::/tcp/9229]
+//!   listen:
+//!   - /ip4/0.0.0.0/udp/9229/quic-v1
+//!   - /ip4/0.0.0.0/tcp/9229
+//!   - /ip6/::/udp/9229/quic-v1
+//!   - /ip6/::/tcp/9229
 //! ```
 
 use libp2p::{
@@ -225,7 +229,10 @@ impl Internet {
             )
             .unwrap()
             .with_quic()
-            .with_behaviour(|_| Ok(behaviour))
+            .with_behaviour(|key| {
+                log::trace!("internal INTERNET node ID: {:?}", key.public().to_peer_id());
+                Ok(behaviour)
+            })
             .unwrap()
             .with_swarm_config(|cfg| {
                 cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX))
@@ -238,9 +245,19 @@ impl Internet {
         // the configuration array config.internet.listen
         let config = Configuration::get();
 
-        for listen in &config.lan.listen {
-            Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
-                .expect("swarm can be started");
+        for listen in &config.internet.listen {
+            match Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket")) {
+                Ok(listener_id) => {
+                    log::info!(
+                        "INTERNET listening on `{}` with ID {:?}",
+                        listen,
+                        listener_id
+                    );
+                }
+                Err(e) => {
+                    log::error!("Error INTERNET start listening on `{}`: {}", listen, e);
+                }
+            }
         }
 
         // connect to remote peers that are specified in
@@ -255,7 +272,7 @@ impl Internet {
         internet
     }
 
-    // check if conneciton is active
+    // check if connection is active
     pub fn is_active_connection(address: &Multiaddr) -> bool {
         let config = Configuration::get();
         let address_str = address.to_string();
@@ -320,7 +337,7 @@ impl Internet {
         return None;
     }
 
-    ///add reconnection
+    /// add reconnection
     pub fn add_reconnection(address: Multiaddr) {
         let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
         if let Some(peer) = reconnections.peers.get_mut(&address) {

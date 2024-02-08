@@ -353,18 +353,20 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                                 libp2p::swarm::DialError::Transport(unreachable_addrs) => {
                                     for (addr, _) in unreachable_addrs {
 
-                                        //check if address is active
+                                        // check if address is active
                                         if Internet::is_active_connection(&addr){
                                             Internet::add_reconnection(addr);
                                         }
 
                                     }
                                 },
-                                _ => {}
+                                _ => {
+                                    log::trace!("INTERNET Outgoing Connection Error");
+                                }
                             }
                         }
-                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id, endpoint, ..} =>{
-                            //remove from attempting connections
+                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id, endpoint, ..} => {
+                            // remove from attempting connections
                             match endpoint{
                                 libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
                                     log::info!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
@@ -391,7 +393,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             }
                         }
                         // libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
-                        //     //remove from neighbour table, after then scheduler will auto remove this neighbour
+                        //     // remove from neighbour table, after then scheduler will auto remove this neighbour
                         //     log::trace!("internet connection banned: {:?}", peer_id);
                         //     Neighbours::delete(ConnectionModule::Internet, peer_id);
                         // }
