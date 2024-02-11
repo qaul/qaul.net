@@ -102,7 +102,7 @@ impl Default for Internet {
         Internet {
             active: true,
             peers: vec![InternetPeer {
-                address: String::from("/ip4/144.91.74.192/udp/9229/quic-v1"),
+                address: String::from("/ip4/144.91.74.192/tcp/9229"),
                 name: String::from("qaul Community Node"),
                 enabled: false,
             }],
@@ -257,6 +257,17 @@ impl Configuration {
         CONFIG.set(RwLock::new(config));
     }
 
+    /// Load a configuration file for upgrading purposes
+    ///
+    /// This function is only to be used for the upgrading procedure.
+    /// Libqaul uses the `init()` function to load and initialize the configuration!
+    pub fn load(path: &str) -> Option<Configuration> {
+        if let Ok(c) = Config::builder().add_source(File::with_name(path)).build() {
+            return Some(c.try_deserialize::<Configuration>().unwrap());
+        }
+        None
+    }
+
     /// lend configuration for reading
     pub fn get<'a>() -> RwLockReadGuard<'a, Configuration> {
         let config = CONFIG.get().read().unwrap();
@@ -274,7 +285,7 @@ impl Configuration {
         None
     }
 
-    // CHANGE: remove this function & save configuration directly via UserAccount
+    /// CHANGE: remove this function & save configuration directly via UserAccount
     pub fn update_user_storage(user_id: String, opt: &StorageOptions) {
         let mut config = CONFIG.get().write().unwrap();
         for i in 0..config.user_accounts.len() {
@@ -287,7 +298,7 @@ impl Configuration {
         }
     }
 
-    // CHANGE: remove this function and save configuration directly via UserAccount
+    /// CHANGE: remove this function and save configuration directly via UserAccount
     pub fn update_total_size(user_id: String, size: u32) {
         let mut config = CONFIG.get().write().unwrap();
         for i in 0..config.user_accounts.len() {
