@@ -49,7 +49,7 @@ dependencies:
   local_notifications: { "path": "packages/local_notifications" }
   logging: 1.2.0
   mailto: 2.0.0
-  meta: 1.10.0
+  meta: ^1.9.1
   mime: 1.0.4
   neat_periodic_task: 2.0.1
   open_simplex_2: 0.2.1
