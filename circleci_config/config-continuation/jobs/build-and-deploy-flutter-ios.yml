@@ -10,22 +10,23 @@ steps:
         gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
+  - run: flutter doctor --verbose
   - run:
-      name: debug issue
+      name: "Prepare For Cache Key"
       command: |
-        echo "pwd:"
-        pwd
-        echo ""
-        echo "ls -alt:"
-        ls -alt
-        echo ""
-        echo "ls -alt ..:"
-        ls -alt ..
-        echo ""
-        echo "which flutter:"
-        which flutter
-
-  - install-flutter-deps
+        cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+  - restore_cache:
+      name: Restore Flutter pub cache
+      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+  - run:
+      name: Install Flutter Dependencies
+      command: cd .. && flutter pub get
+  - save_cache:
+      name: Save Flutter pub cache
+      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+      paths:
+        - << parameters.dart-tool-cache >>
+        - << parameters.pub-cache >>
   - install-bundler-deps
   - install-cocoapods-deps
   - run:

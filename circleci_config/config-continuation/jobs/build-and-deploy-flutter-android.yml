@@ -19,7 +19,23 @@ steps:
         unzip jniLibs.zip
   - install-flutter:
       version: "$FLUTTER_VERSION"
-  - install-flutter-deps
+  - run: flutter doctor --verbose
+  - run:
+      name: "Prepare For Cache Key"
+      command: |
+        cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+  - restore_cache:
+      name: Restore Flutter pub cache
+      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+  - run:
+      name: Install Flutter Dependencies
+      command: cd .. && flutter pub get
+  - save_cache:
+      name: Save Flutter pub cache
+      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+      paths:
+        - << parameters.dart-tool-cache >>
+        - << parameters.pub-cache >>
   - run:
       name: Install Bundler
       command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"

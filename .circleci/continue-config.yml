@@ -146,14 +146,14 @@ executors:
         working_directory: ~/qaul.net/qaul_ui/ios
     flutter-linux:
         environment:
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.16.5
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202010-01
         working_directory: ~/qaul.net/qaul_ui
     flutter-linux-arm:
         environment:
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.16.5
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202101-01
@@ -254,7 +254,23 @@ jobs:
                 name: Unzip compressed jniLibs
             - install-flutter:
                 version: $FLUTTER_VERSION
-            - install-flutter-deps
+            - run: flutter doctor --verbose
+            - run:
+                command: |
+                    cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+                name: Prepare For Cache Key
+            - restore_cache:
+                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                name: Restore Flutter pub cache
+            - run:
+                command: cd .. && flutter pub get
+                name: Install Flutter Dependencies
+            - save_cache:
+                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                name: Save Flutter pub cache
+                paths:
+                    - << parameters.dart-tool-cache >>
+                    - << parameters.pub-cache >>
             - run:
                 command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
                 name: Install Bundler
@@ -282,21 +298,23 @@ jobs:
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
+            - run: flutter doctor --verbose
             - run:
                 command: |
-                    echo "pwd:"
-                    pwd
-                    echo ""
-                    echo "ls -alt:"
-                    ls -alt
-                    echo ""
-                    echo "ls -alt ..:"
-                    ls -alt ..
-                    echo ""
-                    echo "which flutter:"
-                    which flutter
-                name: debug issue
-            - install-flutter-deps
+                    cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
+                name: Prepare For Cache Key
+            - restore_cache:
+                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                name: Restore Flutter pub cache
+            - run:
+                command: cd .. && flutter pub get
+                name: Install Flutter Dependencies
+            - save_cache:
+                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                name: Save Flutter pub cache
+                paths:
+                    - << parameters.dart-tool-cache >>
+                    - << parameters.pub-cache >>
             - install-bundler-deps
             - install-cocoapods-deps
             - run:

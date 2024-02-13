@@ -72,7 +72,7 @@ flutter-linux:
     image: ubuntu-2004:202010-01
   working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.16.0"
+    FLUTTER_VERSION: "3.16.5"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux-arm:
   machine:
@@ -80,7 +80,7 @@ flutter-linux-arm:
   resource_class: arm.medium
   working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.16.0"
+    FLUTTER_VERSION: "3.16.5"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
