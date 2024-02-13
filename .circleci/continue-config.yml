@@ -282,6 +282,20 @@ jobs:
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
+            - run:
+                command: |
+                    echo "pwd:"
+                    pwd
+                    echo ""
+                    echo "ls -alt:"
+                    ls -alt
+                    echo ""
+                    echo "ls -alt ..:"
+                    ls -alt ..
+                    echo ""
+                    echo "which flutter:"
+                    which flutter
+                name: debug issue
             - install-flutter-deps
             - install-bundler-deps
             - install-cocoapods-deps

@@ -10,6 +10,21 @@ steps:
         gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
+  - run:
+      name: debug issue
+      command: |
+        echo "pwd:"
+        pwd
+        echo ""
+        echo "ls -alt:"
+        ls -alt
+        echo ""
+        echo "ls -alt ..:"
+        ls -alt ..
+        echo ""
+        echo "which flutter:"
+        which flutter
+
   - install-flutter-deps
   - install-bundler-deps
   - install-cocoapods-deps
