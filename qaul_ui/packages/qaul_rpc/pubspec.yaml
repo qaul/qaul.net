@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  collection: 1.18.0
+  collection: ^1.17.1
   logging: 1.2.0
 
   ffi: 2.0.2

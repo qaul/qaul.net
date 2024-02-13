@@ -20,7 +20,7 @@ dependencies:
   badges: 3.1.2
   better_open_file: 3.6.4
   bubble: 1.2.1
-  collection: 1.18.0
+  collection: ^1.17.1
   cupertino_icons: 1.0.6
   device_info_plus: 9.1.1
   equatable: 2.0.5
