@@ -2,7 +2,7 @@ executor:
   name: win/server-2022
   size: "medium"
   shell: bash.exe
-working_directory: ~/qaul-libp2p/qaul_ui
+working_directory: ~/qaul.net/qaul_ui
 environment:
   FLUTTER_VERSION: "3.16.0"
   REPO_URL: "https://github.com/qaul/qaul.net"
@@ -31,6 +31,6 @@ steps:
       name: Run iscc
       command: cd ../utilities/installers/windows/bin && bash build_windows_installer
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - utilities\installers\windows\*.exe

@@ -17,6 +17,6 @@ steps:
       command: cd rust/clients/qauld && cargo deb
   - save-sccache-cache
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/debian/*.deb

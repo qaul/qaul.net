@@ -22,6 +22,6 @@ steps:
         cd cli-binaries
         zip linux-cli-binaries-arm64 *
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/release/cli-binaries/linux-cli-binaries-arm64.zip

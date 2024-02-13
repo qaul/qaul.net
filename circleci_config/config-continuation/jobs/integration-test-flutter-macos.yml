@@ -21,5 +21,5 @@ steps:
 
         flutter test integration_test --dart-define=testing_mode=true -d macos
   - store_artifacts:
-      path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+      path: ~/qaul.net/qaul_ui/integration_test/failures
 

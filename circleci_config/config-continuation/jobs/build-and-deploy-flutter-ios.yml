@@ -23,6 +23,6 @@ steps:
       path: output
       destination: output
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - qaul_ui/ios/output/gym/Runner.ipa

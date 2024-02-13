@@ -24,7 +24,7 @@ steps:
       command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
   - save-sccache-cache
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/debian/*.deb
         - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb

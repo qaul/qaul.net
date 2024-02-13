@@ -37,7 +37,7 @@ steps:
         cd cli-binaries
         zip macos-cli-binaries *
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/release/liblibqaul.dylib
         - rust/target/release/cli-binaries/macos-cli-binaries.zip
