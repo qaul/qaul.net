@@ -25,6 +25,6 @@ steps:
       command: cd rust/libqaul && sh build_libqaul_ios.sh
   - save-sccache-cache
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/universal/release/liblibqaul.a

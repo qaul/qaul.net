@@ -3,7 +3,7 @@ docker:
     auth:
       username: $DOCKERHUB_USERNAME
       password: $DOCKERHUB_PASSWORD
-working_directory: ~/qaul-libp2p/utilities/qauld-docker
+working_directory: ~/qaul.net/utilities/qauld-docker
 steps:
   - checkout-project
   - setup_remote_docker:

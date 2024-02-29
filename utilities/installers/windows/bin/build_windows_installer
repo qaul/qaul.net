@@ -17,7 +17,7 @@ set -eo pipefail
 #
 # Note: this script uses relative paths, so it's meant to be run from within the bin folder.
 
-BUILD_PATH="../../../../qaul_ui/build/windows/runner/Release"
+BUILD_PATH="../../../../qaul_ui/build/windows/x64/runner/Release"
 INSTALLER_PATH=".."
 LIBQAUL_DLL="../../../../rust/target/release/libqaul.dll"
 

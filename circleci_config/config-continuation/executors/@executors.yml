@@ -5,7 +5,7 @@ rust-android:
   docker:
     - image: cimg/android:2023.02-ndk
   resource_class: large
-  working_directory: ~/qaul-libp2p
+  working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
     ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/25.2.9519653
@@ -13,7 +13,7 @@ rust-android:
 rust-linux:
   docker:
     - image: cimg/rust:1.75.0
-  working_directory: ~/qaul-libp2p
+  working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -21,7 +21,7 @@ rust-linux-arm:
   docker:
     - image: cimg/rust:1.75.0
   resource_class: arm.medium
-  working_directory: ~/qaul-libp2p
+  working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -29,7 +29,7 @@ rust-macos:
   macos:
     xcode: 14.0.1
   resource_class: macos.x86.medium.gen2
-  working_directory: ~/qaul-libp2p
+  working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -39,13 +39,13 @@ rust-macos:
 flutter:
   docker:
     - image: ghcr.io/cirruslabs/flutter:3.16.0
-  working_directory: ~/qaul-libp2p/qaul_ui
+  working_directory: ~/qaul.net/qaul_ui
 flutter-android:
   docker:
     - image: cimg/android:2021.10
   resource_class: large
   shell: /bin/bash --login -o pipefail
-  working_directory: ~/qaul-libp2p/qaul_ui/android
+  working_directory: ~/qaul.net/qaul_ui/android
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_beta_playstore
@@ -53,7 +53,7 @@ flutter-android:
     LC_ALL: en_US.UTF-8
     _JAVA_OPTIONS: "-Xmx2048m"
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
-    SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
+    SUPPLY_JSON_KEY: ~/qaul.net/qaul_ui/android/fastlane/google-credentials.json
     FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
@@ -61,7 +61,7 @@ flutter-ios:
     xcode: 14.1.0
   resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
-  working_directory: ~/qaul-libp2p/qaul_ui/ios
+  working_directory: ~/qaul.net/qaul_ui/ios
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_testflight
@@ -70,28 +70,28 @@ flutter-ios:
 flutter-linux:
   machine:
     image: ubuntu-2004:202010-01
-  working_directory: ~/qaul-libp2p/qaul_ui
+  working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.16.0"
+    FLUTTER_VERSION: "3.16.5"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux-arm:
   machine:
     image: ubuntu-2004:202101-01
   resource_class: arm.medium
-  working_directory: ~/qaul-libp2p/qaul_ui
+  working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.16.0"
+    FLUTTER_VERSION: "3.16.5"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
     xcode: 14.0.1
   resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
-  working_directory: ~/qaul-libp2p/qaul_ui
+  working_directory: ~/qaul.net/qaul_ui
   environment:
     FLUTTER_VERSION: "3.16.0"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ubuntu-lean:
-  working_directory: ~/qaul-libp2p/qaul_ui
+  working_directory: ~/qaul.net/qaul_ui
   docker:
     - image: cimg/base:2022.05

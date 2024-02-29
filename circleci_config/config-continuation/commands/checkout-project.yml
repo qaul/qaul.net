@@ -7,7 +7,7 @@ steps:
         - source-v1-{{ .Branch }}-
         - source-v1-
   - checkout:
-      path: ~/qaul-libp2p
+      path: ~/qaul.net
   - save_cache:
       name: Save GIT cache
       key: source-v1-{{ .Branch }}-{{ .Revision }}

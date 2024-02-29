@@ -2,7 +2,7 @@ executor:
   name: win/default
   size: "medium"
   shell: bash.exe
-working_directory: ~/qaul-libp2p
+working_directory: ~/qaul.net
 environment:
   CARGO_NET_GIT_FETCH_WITH_CLI: "true"
 steps:
@@ -40,7 +40,7 @@ steps:
         cd cli-binaries
         tar -a -c -f windows-cli-binaries.zip *
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - rust/target/release/libqaul.dll
         - rust/target/release/cli-binaries/windows-cli-binaries.zip

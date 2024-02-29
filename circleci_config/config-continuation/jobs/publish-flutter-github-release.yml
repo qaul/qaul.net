@@ -2,7 +2,7 @@ executor: flutter-ubuntu-lean
 steps:
   - checkout-project
   - attach_workspace:
-      at: ~/qaul-libp2p
+      at: ~/qaul.net
   - run:
       name: Copy executables to ./artifacts
       shell: /bin/bash --login +eo pipefail

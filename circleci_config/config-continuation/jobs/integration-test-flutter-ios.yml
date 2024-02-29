@@ -36,4 +36,4 @@ steps:
 
         flutter test integration_test -d "$ID" --dart-define=testing_mode=true
   - store_artifacts:
-      path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+      path: ~/qaul.net/qaul_ui/integration_test/failures

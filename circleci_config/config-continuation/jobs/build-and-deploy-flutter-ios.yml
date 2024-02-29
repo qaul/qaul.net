@@ -10,7 +10,10 @@ steps:
         gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
-  - install-flutter-deps
+  - run: flutter doctor --verbose
+  - run:
+      name: Install Flutter Dependencies
+      command: cd .. && flutter pub get
   - install-bundler-deps
   - install-cocoapods-deps
   - run:
@@ -23,6 +26,6 @@ steps:
       path: output
       destination: output
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - qaul_ui/ios/output/gym/Runner.ipa

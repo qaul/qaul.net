@@ -14,7 +14,7 @@ commands:
                     - source-v1-
                 name: Restore GIT cache
             - checkout:
-                path: ~/qaul-libp2p
+                path: ~/qaul.net
             - save_cache:
                 key: source-v1-{{ .Branch }}-{{ .Revision }}
                 name: Save GIT cache
@@ -116,7 +116,7 @@ executors:
     flutter:
         docker:
             - image: ghcr.io/cirruslabs/flutter:3.16.0
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     flutter-android:
         docker:
             - image: cimg/android:2021.10
@@ -129,10 +129,10 @@ executors:
             LANG: en_US.UTF-8
             LC_ALL: en_US.UTF-8
             REPO_URL: https://github.com/qaul/qaul.net
-            SUPPLY_JSON_KEY: ~/qaul-libp2p/qaul_ui/android/fastlane/google-credentials.json
+            SUPPLY_JSON_KEY: ~/qaul.net/qaul_ui/android/fastlane/google-credentials.json
         resource_class: large
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui/android
+        working_directory: ~/qaul.net/qaul_ui/android
     flutter-ios:
         environment:
             FASTLANE_LANE: upload_testflight
@@ -143,22 +143,22 @@ executors:
             xcode: 14.1.0
         resource_class: macos.x86.medium.gen2
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui/ios
+        working_directory: ~/qaul.net/qaul_ui/ios
     flutter-linux:
         environment:
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.16.5
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202010-01
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     flutter-linux-arm:
         environment:
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.16.5
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202101-01
         resource_class: arm.medium
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     flutter-macos:
         environment:
             FLUTTER_VERSION: 3.16.0
@@ -167,11 +167,11 @@ executors:
             xcode: 14.0.1
         resource_class: macos.x86.medium.gen2
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     flutter-ubuntu-lean:
         docker:
             - image: cimg/base:2022.05
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     rust-android:
         docker:
             - image: cimg/android:2023.02-ndk
@@ -180,14 +180,14 @@ executors:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         resource_class: large
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
+        working_directory: ~/qaul.net
     rust-linux:
         docker:
             - image: cimg/rust:1.75.0
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
+        working_directory: ~/qaul.net
     rust-linux-arm:
         docker:
             - image: cimg/rust:1.75.0
@@ -195,7 +195,7 @@ executors:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         resource_class: arm.medium
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
+        working_directory: ~/qaul.net
     rust-macos:
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -203,7 +203,7 @@ executors:
             xcode: 14.0.1
         resource_class: macos.x86.medium.gen2
         shell: /bin/bash --login -o pipefail
-        working_directory: ~/qaul-libp2p
+        working_directory: ~/qaul.net
 jobs:
     analyze-flutter:
         executor: flutter
@@ -231,7 +231,7 @@ jobs:
                     docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
                     docker push "qaulnet/qauld:${CIRCLE_TAG}"
                 name: Push qauld Docker image
-        working_directory: ~/qaul-libp2p/utilities/qauld-docker
+        working_directory: ~/qaul.net/utilities/qauld-docker
     build-and-deploy-flutter-android:
         executor: flutter-android
         steps:
@@ -254,7 +254,10 @@ jobs:
                 name: Unzip compressed jniLibs
             - install-flutter:
                 version: $FLUTTER_VERSION
-            - install-flutter-deps
+            - run: flutter doctor --verbose
+            - run:
+                command: cd .. && flutter pub get
+                name: Install Flutter Dependencies
             - run:
                 command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
                 name: Install Bundler
@@ -268,7 +271,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - qaul_ui/build/app/outputs/bundle/release/*.aab
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-and-deploy-flutter-ios:
         executor: flutter-ios
         steps:
@@ -282,7 +285,10 @@ jobs:
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
-            - install-flutter-deps
+            - run: flutter doctor --verbose
+            - run:
+                command: cd .. && flutter pub get
+                name: Install Flutter Dependencies
             - install-bundler-deps
             - install-cocoapods-deps
             - run:
@@ -297,7 +303,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - qaul_ui/ios/output/gym/Runner.ipa
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-flutter-linux:
         executor: flutter-linux
         steps:
@@ -314,7 +320,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - qaul_ui/*.snap
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-flutter-linux-arm:
         executor: flutter-linux-arm
         steps:
@@ -331,7 +337,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - qaul_ui/*.snap
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-flutter-macos:
         executor: flutter-macos
         steps:
@@ -366,7 +372,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - utilities/installers/macos/*.dmg
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-flutter-windows:
         environment:
             FLUTTER_VERSION: 3.16.0
@@ -402,8 +408,8 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - utilities\installers\windows\*.exe
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p/qaul_ui
+                root: ~/qaul.net
+        working_directory: ~/qaul.net/qaul_ui
     build-libqaul-android:
         executor: rust-android
         steps:
@@ -437,7 +443,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-libqaul-arm-linux:
         executor: rust-linux-arm
         steps:
@@ -465,7 +471,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - rust/target/release/cli-binaries/linux-cli-binaries-arm64.zip
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-libqaul-ios:
         executor: rust-macos
         steps:
@@ -496,7 +502,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - rust/target/universal/release/liblibqaul.a
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-libqaul-linux:
         executor: rust-linux
         steps:
@@ -525,7 +531,7 @@ jobs:
                 paths:
                     - rust/target/release/liblibqaul.so
                     - rust/target/release/cli-binaries/linux-cli-binaries.zip
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-libqaul-macos:
         executor: rust-macos
         steps:
@@ -569,7 +575,7 @@ jobs:
                 paths:
                     - rust/target/release/liblibqaul.dylib
                     - rust/target/release/cli-binaries/macos-cli-binaries.zip
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-libqaul-windows:
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
@@ -615,8 +621,8 @@ jobs:
                 paths:
                     - rust/target/release/libqaul.dll
                     - rust/target/release/cli-binaries/windows-cli-binaries.zip
-                root: ~/qaul-libp2p
-        working_directory: ~/qaul-libp2p
+                root: ~/qaul.net
+        working_directory: ~/qaul.net
     build-qauld-arm-linux:
         executor: rust-linux-arm
         steps:
@@ -639,7 +645,7 @@ jobs:
             - persist_to_workspace:
                 paths:
                     - rust/target/debian/*.deb
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     build-qauld-linux:
         executor: rust-linux
         steps:
@@ -670,7 +676,7 @@ jobs:
                 paths:
                     - rust/target/debian/*.deb
                     - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     integration-test-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx3g
@@ -723,7 +729,7 @@ jobs:
 
                     flutter test integration_test --dart-define=testing_mode=true
                 name: Run integration tests on Android Emulator
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     integration-test-flutter-ios:
         executor: flutter-ios
         steps:
@@ -763,7 +769,7 @@ jobs:
                     flutter test integration_test -d "$ID" --dart-define=testing_mode=true
                 name: Run integration tests on iOS Simulator
             - store_artifacts:
-                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+                path: ~/qaul.net/qaul_ui/integration_test/failures
     integration-test-flutter-linux:
         environment:
             FLUTTER_VERSION: 3.3.1
@@ -824,7 +830,7 @@ jobs:
                     flutter test integration_test --dart-define=testing_mode=true -d macos
                 name: Run integration tests on MacOS
             - store_artifacts:
-                path: ~/qaul-libp2p/qaul_ui/integration_test/failures
+                path: ~/qaul.net/qaul_ui/integration_test/failures
     integration-test-flutter-windows:
         environment:
             FLUTTER_VERSION: 3.3.1
@@ -855,13 +861,13 @@ jobs:
 
                     flutter test integration_test --dart-define=testing_mode=true -d windows
                 name: Run integration tests on Windows
-        working_directory: ~/qaul-libp2p/qaul_ui
+        working_directory: ~/qaul.net/qaul_ui
     publish-flutter-github-release:
         executor: flutter-ubuntu-lean
         steps:
             - checkout-project
             - attach_workspace:
-                at: ~/qaul-libp2p
+                at: ~/qaul.net
             - run:
                 command: |
                     mkdir artifacts
@@ -919,7 +925,7 @@ jobs:
         steps:
             - checkout-project
             - attach_workspace:
-                at: ~/qaul-libp2p
+                at: ~/qaul.net
             - run:
                 command: |
                     mkdir artifacts

@@ -2,7 +2,7 @@ executor: rust-linux
 steps:
   - checkout-project
   - attach_workspace:
-      at: ~/qaul-libp2p
+      at: ~/qaul.net
   - run:
       name: Copy binaries to ./artifacts
       shell: /bin/bash --login +eo pipefail

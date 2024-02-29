@@ -14,23 +14,23 @@ dependencies:
   flutter:
     sdk: flutter
 
-  collection: 1.18.0
-  logging: 1.2.0
+  collection: ^1.17.1
+  logging: ^1.2.0
 
-  ffi: 2.0.2
-  fixnum: 1.1.0
-  convert: 3.1.1
-  meta: 1.10.0
-  protobuf: 2.1.0
+  ffi: ^2.0.2
+  fixnum: ^1.1.0
+  convert: ^3.1.1
+  meta: ^1.9.1
+  protobuf: ^2.1.0
 
-  uuid: 3.0.7
-  rxdart: 0.27.7
-  equatable: 2.0.5
-  fast_base58: 0.2.1
-  hooks_riverpod: 1.0.4
+  uuid: ^3.0.7
+  rxdart: ^0.27.7
+  equatable: ^2.0.5
+  fast_base58: ^0.2.1
+  hooks_riverpod: ^1.0.4
   utils: { "path": "../utils" }
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: 2.0.3
+  flutter_lints: ^2.0.3

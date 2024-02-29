@@ -11,6 +11,6 @@ steps:
       name: Build Flutter Application for Linux
       command: cd ../utilities/installers/linux && bash snapbuild
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - qaul_ui/*.snap

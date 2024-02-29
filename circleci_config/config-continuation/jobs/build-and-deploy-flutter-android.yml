@@ -19,7 +19,10 @@ steps:
         unzip jniLibs.zip
   - install-flutter:
       version: "$FLUTTER_VERSION"
-  - install-flutter-deps
+  - run: flutter doctor --verbose
+  - run:
+      name: Install Flutter Dependencies
+      command: cd .. && flutter pub get
   - run:
       name: Install Bundler
       command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
@@ -31,6 +34,6 @@ steps:
       name: fastlane
       command: bundle exec fastlane $FASTLANE_LANE
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - qaul_ui/build/app/outputs/bundle/release/*.aab

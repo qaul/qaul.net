@@ -28,6 +28,6 @@ steps:
         cd qaul_ui/android/libqaul/src/main/jniLibs
         zip -r jniLibs *
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - qaul_ui/android/libqaul/src/main/jniLibs/jniLibs.zip

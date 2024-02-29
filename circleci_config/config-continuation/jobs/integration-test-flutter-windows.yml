@@ -2,7 +2,7 @@ executor:
   name: win/server-2022
   size: "medium"
   shell: bash.exe
-working_directory: ~/qaul-libp2p/qaul_ui
+working_directory: ~/qaul.net/qaul_ui
 environment:
   FLUTTER_VERSION: "3.3.1"
   REPO_URL: "https://github.com/qaul/qaul.net"
