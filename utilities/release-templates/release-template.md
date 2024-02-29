@@ -4,8 +4,8 @@ Download and install qaul on your device and share the app with others.
 
 - [Windows Installer](https://github.com/qaul/qaul.net/releases/download/TAGNAME/WINDOWSVERSION.exe)
 - [MacOS Installer](https://github.com/qaul/qaul.net/releases/download/TAGNAME/MACOSVERSION.dmg)
-- [Linux Snap Package - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/SNAPVERSION.snap)
-- [Linux Snap Package - armhf](https://github.com/qaul/qaul.net/releases/download/TAGNAME/ARMSNAPVERSION.snap)
+- [Linux Snap Package - x86-64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/SNAPVERSION.snap)
+- [Linux Snap Package - aarch64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/ARMSNAPVERSION.snap)
 - [Android Universal APK](https://github.com/qaul/qaul.net/releases/download/TAGNAME/APKVERSION.apk)
 
 ## Command-line tools (qaul-cli & qauld)
@@ -22,5 +22,5 @@ The Command-line tools can be used to run qaul from the terminal. For example on
   - [Linux Command-line tools - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries.zip)
   - [Linux Command-line tools - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/linux-cli-binaries-arm64.zip)
   - [qauld Debian Installer - amd64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_AMD)
-  - [qauld Debian Installer - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM)
+  - [qauld Debian Installer - arm64](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARM64)
   - [qauld Debian Installer - armhf (for Raspberry Pi)](https://github.com/qaul/qaul.net/releases/download/TAGNAME/DEB_ARMHF)

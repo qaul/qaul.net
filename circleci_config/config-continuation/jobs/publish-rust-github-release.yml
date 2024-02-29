@@ -86,7 +86,7 @@ steps:
         DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/DEB_AMD/${AMD64_FILE}/g" \
-          | sed "s/DEB_ARM/${ARM64_FILE}/g" \
+          | sed "s/DEB_ARM64/${ARM64_FILE}/g" \
           | sed "s/DEB_ARMHF/${ARMHF_FILE}/g" \
           | sed "s/APKVERSION/${APK_FILE}/g" \
           | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
