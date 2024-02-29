@@ -55,13 +55,15 @@ dependencies:
   open_simplex_2: 0.2.1
   package_info_plus: 4.0.2
   path: 1.8.3
-  path_provider: 2.0.15
+  path_provider: ^2.0.15
   qaul_rpc: { "path": "packages/qaul_rpc" }
   responsive_framework: 1.1.0
   shared_preferences: 2.2.2
   uni_links: 0.5.1
   url_launcher: 6.1.14
   utils: { "path": "packages/utils" }
+  record: ^5.0.4
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
