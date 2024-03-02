@@ -1,4 +1,4 @@
-FROM rust:latest AS builder
+FROM rust:1.68.2-bullseye AS builder
 
 RUN apt-get update
 RUN apt-get install -y git protobuf-compiler
