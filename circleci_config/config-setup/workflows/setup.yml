@@ -47,6 +47,9 @@ jobs:
                     echo '  "run-rust-tagged-workflow": true,'
                     echo '  "run-docker-tagged-workflow": true'
                   fi
+                
+                elif [[ "$CIRCLE_TAG" ~= ^generate-sbom$ ]]; then
+                  echo '  "run-generate-sbom": true'
                 fi
                 echo '}'
               } > /tmp/pipeline-parameters.json

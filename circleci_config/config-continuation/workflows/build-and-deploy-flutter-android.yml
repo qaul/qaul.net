@@ -10,9 +10,15 @@ jobs:
       filters:
         tags:
           only: /.*/
-  - publish-flutter-github-release:
+  - generate-sbom:
       requires:
         - build-and-deploy-flutter-android
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - generate-sbom
       filters:
         tags:
           only: /.*/

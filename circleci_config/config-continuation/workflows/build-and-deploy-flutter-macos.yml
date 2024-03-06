@@ -13,9 +13,15 @@ jobs:
       filters:
         tags:
           only: /.*/
-  - publish-flutter-github-release:
+  - generate-sbom:
       requires:
         - build-flutter-macos
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - generate-sbom
       filters:
         tags:
           only: /.*/

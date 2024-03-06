@@ -5,4 +5,5 @@ when:
 jobs:
   - verify-version-rust: { 'filters': { 'tags': { 'only': '/.*/' } } }
   - build-libqaul-android: { 'requires': [ 'verify-version-rust' ], 'filters': { 'tags': { 'only': '/.*/' } } }
-  - publish-rust-github-release: { 'requires': [ 'build-libqaul-android' ], 'filters': { 'tags': { 'only': '/.*/' } } }
+  - generate-sbom: { 'requires': [ 'build-libqaul-android' ], 'filters': { 'tags': { 'only': '/.*/' } } }
+  - publish-rust-github-release: { 'requires': [ 'generate-sbom' ], 'filters': { 'tags': { 'only': '/.*/' } } }
