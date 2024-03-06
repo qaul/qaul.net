@@ -10,6 +10,7 @@ rust-android:
   environment:
     ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/25.2.9519653
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+    FLUTTER_VERSION: "3.16.0"
 rust-linux:
   docker:
     - image: cimg/rust:1.75.0
