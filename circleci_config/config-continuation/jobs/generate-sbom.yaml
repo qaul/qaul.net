@@ -1,0 +1,27 @@
+executor: rust-android
+steps:
+  - checkout-project
+  - run:
+      name: Install Rust
+      command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
+  - run:
+      name: Install Syft
+      command: |
+        mkdir ~/syft
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b ~/syft
+        cd ~/syft
+        echo "export PATH=$(pwd):${PATH}" >> $BASH_ENV
+  - run:
+      name: Generate SBOM Files
+      command: cd utilities/scripts && bash build-sbom.sh
+  - store_artifacts:
+      path: sbom.cdx.json
+  - store_artifacts:
+      path: sbom.spdx.json
+  - persist_to_workspace:
+      root: ~/qaul-libp2p
+      paths:
+        - sbom.cdx.json
+        - sbom.spdx.json

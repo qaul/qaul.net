@@ -1,0 +1,30 @@
+# https://github.com/anchore/syft?tab=readme-ov-file#configuration
+#
+# the output format(s) of the SBOM report (options: syft-table, syft-text, syft-json, spdx-json, ...)
+# same as -o, --output, and SYFT_OUTPUT env var
+# to specify multiple output files in differing formats, use a list:
+# output:
+#   - "syft-json=<syft-json-output-file>"
+#   - "spdx-json=<spdx-json-output-file>"
+output:
+  - spdx-json@2.2=sbom.spdx.json
+  - cyclonedx-json=sbom.cdx.json
+
+# suppress all output (except for the SBOM report)
+# same as -q ; SYFT_QUIET env var
+quiet: false
+
+# options that apply to all scan sources
+source:
+  # alias name for the source
+  # SYFT_SOURCE_NAME env var; --source-name flag
+  name: "qaul.net"
+
+  # alias version for the source
+  # SYFT_SOURCE_VERSION env var; --source-version flag
+  version: "1.0.0"
+
+  # options affecting the file source type
+  file:
+    # the file digest algorithms to use on the scanned file (options: "md5", "sha1", "sha224", "sha256", "sha384", "sha512")
+    digests: ["sha256"]

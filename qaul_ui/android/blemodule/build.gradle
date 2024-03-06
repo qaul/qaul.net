@@ -5,15 +5,12 @@ plugins {
     id 'com.google.protobuf'
 }
 
+group = "net.qaul.ble"
+version = "1.0.0"
+
 protobuf {
     protoc {
-        // brenodt (Jul-07-23): for apple m1, add protoc_platform=osx-x86_64 in $HOME/.gradle/gradle.properties
-        // https://github.com/grpc/grpc-java/issues/7690
-        if (project.hasProperty('protoc_platform')) {
-            artifact = "com.google.protobuf:protoc:3.6.1:${protoc_platform}"
-        } else {
-            artifact = "com.google.protobuf:protoc:3.6.1"
-        }
+        artifact = "com.google.protobuf:protoc:3.25.1"
     }
     plugins {
         javalite {

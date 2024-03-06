@@ -3,3 +3,4 @@ target/
 Cargo.lock
 **/*.rs.bk
 bak/
+sbom.spdx.json

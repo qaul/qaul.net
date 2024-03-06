@@ -3,6 +3,9 @@ plugins {
     id 'kotlin-android'
 }
 
+group = "net.qaul.libqaul"
+version = "1.0.0"
+
 android {
     compileSdk 31
 

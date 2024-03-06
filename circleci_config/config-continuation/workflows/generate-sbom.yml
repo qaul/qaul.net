@@ -1,0 +1,6 @@
+when: << pipeline.parameters.run-generate-sbom >>
+jobs:
+  - generate-sbom:
+      filters:
+        tags:
+          only: /.*/

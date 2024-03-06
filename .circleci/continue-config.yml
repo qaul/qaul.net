@@ -178,6 +178,7 @@ executors:
         environment:
             ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/25.2.9519653
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+            FLUTTER_VERSION: 3.16.0
         resource_class: large
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net
@@ -677,6 +678,34 @@ jobs:
                     - rust/target/debian/*.deb
                     - rust/target/armv7-unknown-linux-gnueabihf/debian/*.deb
                 root: ~/qaul.net
+    generate-sbom:
+        executor: rust-android
+        steps:
+            - checkout-project
+            - run:
+                command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                name: Install Rust
+            - install-flutter:
+                version: $FLUTTER_VERSION
+            - run:
+                command: |
+                    mkdir ~/syft
+                    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b ~/syft
+                    cd ~/syft
+                    echo "export PATH=$(pwd):${PATH}" >> $BASH_ENV
+                name: Install Syft
+            - run:
+                command: cd utilities/scripts && bash build-sbom.sh
+                name: Generate SBOM Files
+            - store_artifacts:
+                path: sbom.cdx.json
+            - store_artifacts:
+                path: sbom.spdx.json
+            - persist_to_workspace:
+                paths:
+                    - sbom.cdx.json
+                    - sbom.spdx.json
+                root: ~/qaul-libp2p
     integration-test-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx3g
@@ -882,6 +911,10 @@ jobs:
                     # Linux
                     cp *.snap ./artifacts/
 
+                    # SBOMs
+                    cp sbom.cdx.json ./artifacts
+                    cp sbom.spdx.json ./artifacts
+
                     # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
                     exit 0
                 name: Copy executables to ./artifacts
@@ -952,6 +985,10 @@ jobs:
                     # Windows
                     cp rust/target/release/libqaul.dll ./artifacts/
                     cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
+
+                    # SBOMs
+                    cp sbom.cdx.json ./artifacts
+                    cp sbom.spdx.json ./artifacts
 
                     # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
                     exit 0
@@ -1095,6 +1132,9 @@ parameters:
     run-flutter-workflow:
         default: false
         type: boolean
+    run-generate-sbom:
+        default: false
+        type: boolean
     run-rust-android-tagged-workflow:
         default: false
         type: boolean
@@ -1142,12 +1182,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-flutter
-            - publish-flutter-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-and-deploy-flutter-android
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-flutter-tagged-workflow >>
@@ -1164,12 +1210,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-flutter
-            - publish-flutter-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-and-deploy-flutter-ios
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-flutter-tagged-workflow >>
@@ -1192,13 +1244,19 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-flutter
-            - publish-flutter-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-flutter-linux
                     - build-flutter-linux-arm
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-flutter-tagged-workflow >>
@@ -1215,12 +1273,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-flutter
-            - publish-flutter-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-flutter-macos
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             and:
                 - false
@@ -1239,12 +1303,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-flutter
-            - publish-flutter-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-flutter-windows
+            - publish-flutter-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-flutter-tagged-workflow >>
@@ -1261,12 +1331,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - publish-rust-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-libqaul-android
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
@@ -1283,12 +1359,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - publish-rust-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-libqaul-ios
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
@@ -1323,7 +1405,7 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - publish-rust-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
@@ -1332,6 +1414,12 @@ workflows:
                     - build-libqaul-arm-linux
                     - build-qauld-linux
                     - build-qauld-arm-linux
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
@@ -1348,12 +1436,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - publish-rust-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-libqaul-macos
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
@@ -1370,12 +1464,18 @@ workflows:
                         only: /.*/
                 requires:
                     - verify-version-rust
-            - publish-rust-github-release:
+            - generate-sbom:
                 filters:
                     tags:
                         only: /.*/
                 requires:
                     - build-libqaul-windows
+            - publish-rust-github-release:
+                filters:
+                    tags:
+                        only: /.*/
+                requires:
+                    - generate-sbom
         when:
             or:
                 - << pipeline.parameters.run-rust-tagged-workflow >>
@@ -1384,4 +1484,11 @@ workflows:
         jobs:
             - build-libqaul-linux
         when: << pipeline.parameters.run-rust-workflow >>
+    generate-sbom:
+        jobs:
+            - generate-sbom:
+                filters:
+                    tags:
+                        only: /.*/
+        when: << pipeline.parameters.run-generate-sbom >>
 

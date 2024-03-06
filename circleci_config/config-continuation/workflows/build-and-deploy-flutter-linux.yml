@@ -16,10 +16,16 @@ jobs:
       filters:
         tags:
           only: /.*/
-  - publish-flutter-github-release:
+  - generate-sbom:
       requires:
         - build-flutter-linux
         - build-flutter-linux-arm
+      filters:
+        tags:
+          only: /.*/
+  - publish-flutter-github-release:
+      requires:
+        - generate-sbom
       filters:
         tags:
           only: /.*/
