@@ -689,7 +689,7 @@ jobs:
                     echo "export PATH=$(pwd):${PATH}" >> $BASH_ENV
                 name: Install Syft
             - run:
-                command: cd ../utilities/scripts && bash build-sbom.sh
+                command: cd utilities/scripts && bash build-sbom.sh
                 name: Generate SBOM Files
             - store_artifacts:
                 path: sbom.cdx.json

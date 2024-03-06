@@ -15,7 +15,7 @@ steps:
         echo "export PATH=$(pwd):${PATH}" >> $BASH_ENV
   - run:
       name: Generate SBOM Files
-      command: cd ../utilities/scripts && bash build-sbom.sh
+      command: cd utilities/scripts && bash build-sbom.sh
   - store_artifacts:
       path: sbom.cdx.json
   - store_artifacts:
