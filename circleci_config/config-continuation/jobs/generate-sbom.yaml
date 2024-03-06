@@ -13,9 +13,9 @@ steps:
       name: Generate SBOM Files
       command: cd ../utilities/scripts && bash build-sbom.sh
   - store_artifacts:
-      path:
-        - sbom.cdx.json
-        - sbom.spdx.json
+      path: sbom.cdx.json
+  - store_artifacts:
+      path: sbom.spdx.json
   - persist_to_workspace:
       root: ~/qaul-libp2p
       paths:

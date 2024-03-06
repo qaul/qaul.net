@@ -688,9 +688,9 @@ jobs:
                 command: cd ../utilities/scripts && bash build-sbom.sh
                 name: Generate SBOM Files
             - store_artifacts:
-                path:
-                    - sbom.cdx.json
-                    - sbom.spdx.json
+                path: sbom.cdx.json
+            - store_artifacts:
+                path: sbom.spdx.json
             - persist_to_workspace:
                 paths:
                     - sbom.cdx.json
