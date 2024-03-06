@@ -1476,6 +1476,9 @@ workflows:
         when: << pipeline.parameters.run-rust-workflow >>
     generate-sbom:
         jobs:
-            - generate-sbom
+            - generate-sbom:
+                filters:
+                    tags:
+                        only: /.*/
         when: << pipeline.parameters.run-generate-sbom >>
 
