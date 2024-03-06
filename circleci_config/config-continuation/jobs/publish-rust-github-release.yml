@@ -31,6 +31,10 @@ steps:
         # Windows
         cp rust/target/release/libqaul.dll ./artifacts/
         cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
+        
+        # SBOMs
+        cp sbom.cdx.json ./artifacts
+        cp sbom.spdx.json ./artifacts
 
         # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
         exit 0

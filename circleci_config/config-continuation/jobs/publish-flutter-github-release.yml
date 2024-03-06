@@ -18,6 +18,10 @@ steps:
         cp ../utilities/installers/windows/*.exe ./artifacts/
         # Linux
         cp *.snap ./artifacts/
+        
+        # SBOMs
+        cp sbom.cdx.json ./artifacts
+        cp sbom.spdx.json ./artifacts
 
         # +eo pipefail + exit 0 >> step succeeds regardless of a command failing
         exit 0

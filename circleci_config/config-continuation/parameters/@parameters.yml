@@ -43,3 +43,6 @@ run-rust-windows-tagged-workflow:
 run-docker-tagged-workflow:
   type: boolean
   default: false
+run-generate-sbom:
+  type: boolean
+  default: false
