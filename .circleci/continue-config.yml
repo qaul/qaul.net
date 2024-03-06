@@ -682,7 +682,11 @@ jobs:
             - install-flutter:
                 version: $FLUTTER_VERSION
             - run:
-                command: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+                command: |
+                    mkdir ~/syft
+                    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b ~/syft
+                    cd ~/syft
+                    echo "export PATH=$(pwd):${PATH}" >> $BASH_ENV
                 name: Install Syft
             - run:
                 command: cd ../utilities/scripts && bash build-sbom.sh
