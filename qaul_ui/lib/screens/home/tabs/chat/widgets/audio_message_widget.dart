@@ -35,6 +35,12 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
 
   late StreamSubscription<Duration> _positionChangedSubscription;
 
+  Color get primaryColor => Theme.of(context).colorScheme.primary;
+
+  Color get containerColor => Theme.of(context).colorScheme.primaryContainer;
+
+  Color get backgroundColor => Theme.of(context).colorScheme.background;
+
   @override
   void initState() {
     _playerStateChangedSubscription =
@@ -69,53 +75,54 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: _controlSize / 2),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _buildControl(),
-                _buildSlider(constraints.maxWidth),
-              ],
+    final ttheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 8, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: _controlSize / 2),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              audioControls(),
+              Expanded(child: audioSlider()),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 16),
+            child: Text(
+              '${_duration?.inSeconds ?? 0.0} Seconds',
+              style: ttheme.labelLarge?.copyWith(
+                color: backgroundColor,
+                fontStyle: FontStyle.italic,
+              ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                SizedBox(width: widget.messageWidth.toDouble() / 4),
-                Text(':: ${_duration?.inSeconds ?? 0.0} Seconds'),
-              ],
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildControl() {
-    Icon icon;
-    Color color;
-
-    if (_audioPlayer.state == PlayerState.playing) {
-      icon = const Icon(Icons.pause, color: Colors.red, size: 30);
-      color = Colors.red.withOpacity(0.1);
-    } else {
-      final theme = Theme.of(context);
-      icon = Icon(Icons.play_arrow, color: theme.primaryColor, size: 30);
-      color = theme.primaryColor.withOpacity(0.1);
-    }
-
+  Widget audioControls() {
     return ClipOval(
       child: Material(
-        color: color,
+        color: containerColor,
         child: InkWell(
-          child:
-              SizedBox(width: _controlSize, height: _controlSize, child: icon),
+          child: SizedBox(
+            width: _controlSize,
+            height: _controlSize,
+            child: Icon(
+              _audioPlayer.state == PlayerState.playing
+                  ? Icons.pause
+                  : Icons.play_arrow,
+              color: primaryColor,
+            ),
+          ),
           onTap: () {
             if (_audioPlayer.state == PlayerState.playing) {
               pause();
@@ -128,7 +135,7 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
     );
   }
 
-  Widget _buildSlider(double widgetWidth) {
+  Widget audioSlider() {
     bool canSetValue = false;
     final duration = _duration;
     final position = _position;
@@ -138,23 +145,18 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
       canSetValue &= position.inMilliseconds < duration.inMilliseconds;
     }
 
-    double width = widgetWidth - _controlSize;
-
-    return SizedBox(
-      width: width,
-      child: Slider(
-        activeColor: Theme.of(context).primaryColor,
-        inactiveColor: Theme.of(context).colorScheme.secondary,
-        onChanged: (v) {
-          if (duration != null) {
-            final position = v * duration.inMilliseconds;
-            _audioPlayer.seek(Duration(milliseconds: position.round()));
-          }
-        },
-        value: canSetValue && duration != null && position != null
-            ? position.inMilliseconds / duration.inMilliseconds
-            : 0.0,
-      ),
+    return Slider(
+      activeColor: primaryColor,
+      inactiveColor: backgroundColor,
+      onChanged: (v) {
+        if (duration != null) {
+          final position = v * duration.inMilliseconds;
+          _audioPlayer.seek(Duration(milliseconds: position.round()));
+        }
+      },
+      value: canSetValue && duration != null && position != null
+          ? position.inMilliseconds / duration.inMilliseconds
+          : 0.0,
     );
   }
 
@@ -176,6 +178,5 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
     _duration = duration;
   }
 
-  Source get _source =>
-      kIsWeb ? UrlSource(audioPath!) : DeviceFileSource(audioPath!);
+  Source get _source => DeviceFileSource(audioPath!);
 }
