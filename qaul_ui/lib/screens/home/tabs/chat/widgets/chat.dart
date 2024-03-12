@@ -7,7 +7,6 @@ import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:filesize/filesize.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -24,7 +23,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:path/path.dart' as p hide context, Context;
+import 'package:path/path.dart' hide context, Context;
 import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
@@ -39,10 +38,15 @@ import '../../tab.dart';
 import 'conditional/conditional.dart';
 
 part 'audio_message_widget.dart';
+
 part 'custom_input.dart';
+
 part 'file_message_widget.dart';
+
 part 'file_sharing.dart';
+
 part 'group_settings.dart';
+
 part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
@@ -97,8 +101,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen>
-    with AudioRecorderMixin {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -107,13 +110,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   final Map<String, String> _overflowMenuOptions = {};
 
-  late AudioRecorder audioRecord;
-
-  late AudioPlayer audioPlayer;
+  final audioPlayer = AudioPlayer();
+  final audioRecorder = AudioRecorder();
 
   bool isRecording = false;
 
   late String audioPath;
+
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
@@ -136,8 +139,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     assert(otherUser != null || room.isGroupChatRoom,
         'Must either be a group chat or contain another user');
     _scheduleUpdateCurrentOpenChat();
-    audioPlayer = AudioPlayer();
-    audioRecord = AudioRecorder();
   }
 
   @override
@@ -156,9 +157,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   @override
   void dispose() {
-    super.dispose();
-    audioRecord.dispose();
     audioPlayer.dispose();
+    audioRecorder.dispose();
+    super.dispose();
   }
 
   @override
@@ -332,7 +333,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                             );
                           }
                         },
-              onRecordAudioPressed: !(Platform.isAndroid || Platform.isIOS)
+              onRecordAudioPressed: !(Platform.isAndroid ||
+                      Platform.isIOS ||
+                      Platform.isMacOS)
                   ? null
                   : (room.messages?.isEmpty ?? true)
                       ? null
@@ -540,22 +543,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   Future<void> startRecording() async {
     try {
-      if (await audioRecord.hasPermission()) {
-        const encoder = AudioEncoder.aacLc;
+      if (await audioRecorder.hasPermission()) {
         setState(() {
           isRecording = true;
         });
-        const config = RecordConfig(encoder: encoder, numChannels: 1);
-        await recordFile(audioRecord, config);
+        final path = await getNewAudioFilePath();
+        await audioRecorder.start(const RecordConfig(), path: path);
       }
     } catch (e) {
       return;
     }
   }
 
+  Future<String> getNewAudioFilePath() async {
+    final dir = (Platform.isAndroid)
+        ? (await getExternalStorageDirectory())
+        : (await getApplicationSupportDirectory());
+
+    if (dir == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context)!.genericErrorMessage),
+        ));
+      }
+      return "";
+    }
+
+    return join(dir.path, 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a');
+  }
+
   Future<void> stopRecording() async {
     try {
-      final path = await audioRecord.stop();
+      final path = await audioRecorder.stop();
       setState(() {
         isRecording = false;
         audioPath = path!;
@@ -563,22 +582,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     } catch (e) {
       return;
     }
-  }
-}
-
-mixin AudioRecorderMixin {
-  Future<void> recordFile(AudioRecorder recorder, RecordConfig config) async {
-    final path = await _getPath();
-
-    await recorder.start(config, path: path);
-  }
-
-  Future<String> _getPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return p.join(
-      dir.path,
-      'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
-    );
   }
 }
 

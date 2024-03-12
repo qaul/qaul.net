@@ -30,7 +30,7 @@ class _SendFileDialog extends HookConsumerWidget {
                 children: [
                   Text(filesize(file.lengthSync())),
                   Text(
-                    p.basename(file.path),
+                    basename(file.path),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
