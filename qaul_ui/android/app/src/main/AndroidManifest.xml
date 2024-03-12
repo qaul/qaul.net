@@ -41,6 +41,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
 
+    <!-- Audio messages support -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Optional: Add this permission if you want to use bluetooth telephony device like headset/earbuds (min SDK: 23) -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <!-- The queries element is required to open URLs, starting on Android 11 (API 30) -->
     <queries>
         <intent>
