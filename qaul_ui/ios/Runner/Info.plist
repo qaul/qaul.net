@@ -66,5 +66,7 @@
     <string>You can send photos as attachments to your peers. For that, please grant access to the application.</string>
     <key>NSCameraUsageDescription</key>
     <string>You can take pictures and send them as attachments to your peers. For that, please grant access to the application.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>You can send audio messages to your peers. For that, please grant access to the application.</string>
 </dict>
 </plist>
