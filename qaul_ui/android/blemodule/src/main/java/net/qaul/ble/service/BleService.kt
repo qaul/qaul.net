@@ -166,9 +166,13 @@ class BleService : LifecycleService() {
                 settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 settingsBuilder.setConnectable(true)
 
-                bluetoothLeAdvertiser!!.startAdvertising(
-                    settingsBuilder.build(), dataBuilder.build(), advertiseCallback
-                )
+                try {
+                    bluetoothLeAdvertiser!!.startAdvertising(
+                        settingsBuilder.build(), dataBuilder.build(), advertiseCallback
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             } else {
                 AppLog.e(
                     TAG, "Peripheral not supported"
