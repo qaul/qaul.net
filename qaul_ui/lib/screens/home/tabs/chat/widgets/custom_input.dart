@@ -21,9 +21,11 @@ class _CustomInput extends StatefulWidget {
     required this.hintText,
     this.onAttachmentPressed,
     this.onPickImagePressed,
+    this.onRecordAudioPressed,
     this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
+    this.isRecording = false,
   }) : super(key: key);
 
   final void Function(types.PartialText) onSendPressed;
@@ -31,6 +33,8 @@ class _CustomInput extends StatefulWidget {
   final Function({types.PartialText? text})? onAttachmentPressed;
 
   final Function({types.PartialText? text})? onPickImagePressed;
+
+  final Function({types.PartialText? text})? onRecordAudioPressed;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
 
@@ -41,6 +45,8 @@ class _CustomInput extends StatefulWidget {
   final String? disabledMessage;
 
   final String hintText;
+
+  final bool isRecording;
 
   @override
   _CustomInputState createState() => _CustomInputState();
@@ -178,6 +184,14 @@ class _CustomInputState extends State<_CustomInput> {
                                           icon: Icons.add_a_photo,
                                           onPressed: () => _sendFilePressed(
                                               widget.onPickImagePressed),
+                                        ),
+                                      if (widget.onRecordAudioPressed != null)
+                                        _AttachmentButton(
+                                          icon: (widget.isRecording)
+                                              ? Icons.stop_circle
+                                              : Icons.mic_none,
+                                          onPressed: () => _sendFilePressed(
+                                              widget.onRecordAudioPressed),
                                         ),
                                     ],
                                   ),

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
@@ -22,7 +24,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' hide context, Context;
+import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
@@ -32,6 +36,8 @@ import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
+
+part 'audio_message_widget.dart';
 
 part 'custom_input.dart';
 
@@ -104,6 +110,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   final Map<String, String> _overflowMenuOptions = {};
 
+  final audioPlayer = AudioPlayer();
+  final audioRecorder = AudioRecorder();
+
+  bool isRecording = false;
+
+  late String audioPath;
+
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
@@ -140,6 +153,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (oldWidget.room == room) return;
     _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    audioRecorder.dispose();
+    super.dispose();
   }
 
   @override
@@ -227,7 +247,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             ),
             avatarBuilder: (id) {
-              var user = room.members.firstWhereOrNull((u) => id.id == u.idBase58);
+              var user =
+                  room.members.firstWhereOrNull((u) => id.id == u.idBase58);
               if (user == null) return const SizedBox();
               return QaulAvatar.small(user: user, badgeEnabled: false);
             },
@@ -235,6 +256,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               isDisabled: room.status != ChatRoomStatus.active,
+              isRecording: isRecording,
               disabledMessage: room.status != ChatRoomStatus.inviteAccepted
                   ? null
                   : 'Please wait for the admin to confirm your acceptance to send messages',
@@ -289,6 +311,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           if (result != null) {
                             File file = File(result.path);
 
+                            // ignore: use_build_context_synchronously
+                            if (!context.mounted) return;
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) {
+                                return _SendFileDialog(
+                                  file,
+                                  room: room,
+                                  partialMessage: text?.text,
+                                  onSendPressed: (description) {
+                                    final worker = ref.read(qaulWorkerProvider);
+                                    worker.sendFile(
+                                      pathName: file.path,
+                                      conversationId: room.conversationId,
+                                      description: description.text,
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          }
+                        },
+              onRecordAudioPressed: !(Platform.isAndroid ||
+                      Platform.isIOS ||
+                      Platform.isMacOS)
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                      ? null
+                      : ({types.PartialText? text}) async {
+                          (isRecording)
+                              ? await stopRecording()
+                              : await startRecording();
+                          if (!isRecording) {
+                            File file = File(audioPath);
                             // ignore: use_build_context_synchronously
                             if (!context.mounted) return;
                             showModalBottomSheet(
@@ -386,6 +442,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 isDefaultUser: message.author.id == user.idBase58,
               );
             },
+            audioMessageBuilder: (message, {required int messageWidth}) {
+              return AudioMessageWidget(
+                message: message,
+                messageWidth: messageWidth,
+                isDefaultUser: message.author.id == user.idBase58,
+              );
+            },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
                 colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
@@ -477,6 +540,49 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _overflowMenuOptions.clear();
     }
   }
+
+  Future<void> startRecording() async {
+    try {
+      if (await audioRecorder.hasPermission()) {
+        setState(() {
+          isRecording = true;
+        });
+        final path = await getNewAudioFilePath();
+        await audioRecorder.start(const RecordConfig(), path: path);
+      }
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<String> getNewAudioFilePath() async {
+    final dir = (Platform.isAndroid)
+        ? (await getExternalStorageDirectory())
+        : (await getApplicationSupportDirectory());
+
+    if (dir == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AppLocalizations.of(context)!.genericErrorMessage),
+        ));
+      }
+      return "";
+    }
+
+    return join(dir.path, 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a');
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      final path = await audioRecorder.stop();
+      setState(() {
+        isRecording = false;
+        audioPath = path!;
+      });
+    } catch (e) {
+      return;
+    }
+  }
 }
 
 extension _MessageExtension on Message {
@@ -517,6 +623,21 @@ extension _MessageExtension on Message {
           !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
+          author: author.toInternalUser(),
+          createdAt: receivedAt.millisecondsSinceEpoch,
+          status: mappedState,
+          uri: filePath,
+          size: (content as FileShareContent).size,
+          name: (content as FileShareContent).fileName,
+          metadata: {
+            'description': (content as FileShareContent).description,
+            'messageState': status.toJson(),
+          },
+        );
+      } else if (mimeStr != null && RegExp('audio/.*').hasMatch(mimeStr)) {
+        return types.AudioMessage(
+          id: messageIdBase58,
+          duration: const Duration(seconds: 100),
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
           status: mappedState,

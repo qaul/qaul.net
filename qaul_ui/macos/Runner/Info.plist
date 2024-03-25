@@ -30,5 +30,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>You can send audio messages to your peers. For that, please grant access to the application.</string>
 </dict>
 </plist>

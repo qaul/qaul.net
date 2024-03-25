@@ -21,6 +21,10 @@ class QaulApp extends PlatformAwareBuilder {
     return AdaptiveTheme(
       light: ThemeData(
         brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.lightBlue,
+          brightness: Brightness.light,
+        ),
         primarySwatch: Colors.lightBlue,
         scaffoldBackgroundColor: Colors.white,
         navigationBarTheme: const NavigationBarThemeData(
@@ -70,6 +74,10 @@ class QaulApp extends PlatformAwareBuilder {
       ),
       dark: ThemeData(
         brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.lightBlue,
+          brightness: Brightness.dark,
+        ),
         primarySwatch: Colors.lightBlue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         iconTheme: const IconThemeData(color: Colors.white),
