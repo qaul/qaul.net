@@ -1,0 +1,21 @@
+[package]
+name = "ble_module"
+version = "0.1.0"
+authors = ["qaul community <contact@qaul.net>"]
+edition = "2021"
+license = "AGPL"
+
+[dependencies]
+async-std = { version = "1.12.0", features = ["attributes", "tokio1"] }
+async-trait = "0.1.66"
+bluer = { version = "0.15.7", features = ["full"] }
+bytes = "1.4.0"
+crossbeam-channel = "0.5.6"
+filetime = "0.2.19"
+futures = "0.3.26"
+futures-concurrency = "7.1.0"
+log = "0.4"
+prost = "0.11.6"
+simplelog = "0.12.0"
+state = "0.5.3"
+
