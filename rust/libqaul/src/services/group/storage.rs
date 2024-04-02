@@ -6,25 +6,26 @@
 //! Saves and retrieves groups from data base.
 
 use libp2p::PeerId;
-use sled_extensions::{bincode::Tree, DbExt};
+use sled;
 use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
+use super::{Group, GroupInvited};
 use crate::storage::database::DataBase;
 
 /// mutable state of all user groups
 pub static GROUPSTORAGE: InitCell<RwLock<GroupStorage>> = InitCell::new();
 
-use super::{Group, GroupInvited};
-
 /// Group DB links for user account
 #[derive(Clone)]
 pub struct GroupAccountDb {
     /// group DB reference
-    pub groups: Tree<Group>,
+    /// bincode of `Group`
+    pub groups: sled::Tree,
     /// invited DB ref
-    pub invited: Tree<GroupInvited>,
+    /// bincode of `GroupInvited`
+    pub invited: sled::Tree,
 }
 
 /// qaul Chat Conversation Storage
@@ -75,8 +76,8 @@ impl GroupStorage {
         let db = DataBase::get_user_db(account_id);
 
         // open trees
-        let groups: Tree<Group> = db.open_bincode_tree("groups").unwrap();
-        let invited: Tree<GroupInvited> = db.open_bincode_tree("invited").unwrap();
+        let groups: sled::Tree = db.open_tree("groups").unwrap();
+        let invited: sled::Tree = db.open_tree("invited").unwrap();
 
         let group_account_db = GroupAccountDb { groups, invited };
 
@@ -99,9 +100,11 @@ impl GroupStorage {
 
         // get group
         match db_ref.groups.get(group_id) {
-            Ok(group) => {
-                return group;
+            Ok(Some(group_bytes)) => {
+                let group: Group = bincode::deserialize(&group_bytes).unwrap();
+                return Some(group);
             }
+            Ok(None) => return None,
             Err(e) => log::error!("{}", e),
         }
 
@@ -133,7 +136,8 @@ impl GroupStorage {
         let db_ref = Self::get_db_ref(account_id);
 
         // save group in data base
-        if let Err(e) = db_ref.groups.insert(group.id.clone(), group) {
+        let group_bytes = bincode::serialize(&group).unwrap();
+        if let Err(e) = db_ref.groups.insert(group.id.clone(), group_bytes) {
             log::error!("Error saving group to data base: {}", e);
         }
         // flush trees to disk
@@ -192,9 +196,11 @@ impl GroupStorage {
 
         // get invite
         match db_ref.invited.get(group_id) {
-            Ok(invite) => {
-                return invite;
+            Ok(Some(invite_bytes)) => {
+                let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
+                return Some(invite);
             }
+            Ok(None) => return None,
             Err(e) => log::error!("{}", e),
         }
 
@@ -210,7 +216,8 @@ impl GroupStorage {
         let db_ref = Self::get_db_ref(account_id);
 
         // save group invite in data base
-        if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite) {
+        let invite_bytes = bincode::serialize(&invite).unwrap();
+        if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite_bytes) {
             log::error!("Error saving group invite to data base: {}", e);
         }
         // flush trees to disk

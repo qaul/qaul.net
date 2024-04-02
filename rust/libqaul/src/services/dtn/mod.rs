@@ -8,10 +8,10 @@
 
 use libp2p::PeerId;
 use prost::Message;
-use sled_extensions::{bincode::Tree, DbExt};
+use serde::{Deserialize, Serialize};
+use sled;
 use state::InitCell;
-use std::fmt;
-use std::{convert::TryInto, sync::RwLock};
+use std::{convert::TryInto, fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -25,27 +25,30 @@ pub mod proto_rpc {
     include!("qaul.rpc.dtn.rs");
 }
 /// DTN message entry new_sig => {org_sig, size}
-/// This structure is used to update stroage node state(used size and message count)
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
+/// This structure is used to update storage node state(used size and message count)
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub struct DtnMessageEntry {
-    // orignal DTN message signature
+    /// original DTN message signature
     pub org_sig: Vec<u8>,
-    // DTN payload size (bytes)
+    /// DTN payload size (bytes)
     pub size: u32,
 }
 
 /// dtn storage state
 #[derive(Clone)]
 pub struct DtnStorageState {
-    // Repacked and pending DTN message count
+    /// Repacked and pending DTN message count
     pub message_counts: u32,
-    // Current used size
+    /// Current used size
     pub used_size: u64,
-    // DTN message table ref
-    pub db_ref: Tree<DtnMessageEntry>,
-    // DTN message id table ref (org_dtn_sig => new_dtn_sig)
-    // This is used to prevent dup DTN message incoming
-    pub db_ref_id: Tree<Vec<u8>>,
+    /// DTN message table ref
+    ///
+    /// value: bincode of `DtnMessageEntry`
+    pub db_ref: sled::Tree,
+    /// DTN message id table ref (org_dtn_sig => new_dtn_sig)
+    /// This is used to prevent dup DTN message incoming
+    /// saved as `Vec<u8>`
+    pub db_ref_id: sled::Tree,
 }
 
 /// mutable state of storge
@@ -57,19 +60,21 @@ pub struct Dtn {}
 
 impl Dtn {
     /// init function
-    /// Read dtn message table and initialize strage state
+    /// Read dtn message table and initialize storage state
     pub fn init() {
         let db = DataBase::get_node_db();
 
         // open trees
-        let dtn_messages: Tree<DtnMessageEntry> = db.open_bincode_tree("dtn-messages").unwrap();
-        let db_ref_id: Tree<Vec<u8>> = db.open_bincode_tree("dtn-messages-ids").unwrap();
+        let dtn_messages: sled::Tree = db.open_tree("dtn-messages").unwrap();
+        let db_ref_id: sled::Tree = db.open_tree("dtn-messages-ids").unwrap();
 
-        //calc current used size
+        // calc current used size
         let mut used_size: u64 = 0;
         for entry in dtn_messages.iter() {
-            if let Ok((_, ent)) = entry {
-                used_size = used_size + (ent.size as u64);
+            if let Ok((_, message_entry_bytes)) = entry {
+                let message_entry: DtnMessageEntry =
+                    bincode::deserialize(&message_entry_bytes).unwrap();
+                used_size = used_size + (message_entry.size as u64);
             }
         }
         let storage_state = DtnStorageState {
@@ -197,13 +202,16 @@ impl Dtn {
             storage_state.message_counts = storage_state.message_counts + 1;
             storage_state.used_size = new_size;
 
-            if let Err(_e) = storage_state.db_ref.insert(
-                signature.clone(),
-                DtnMessageEntry {
-                    org_sig: org_sig.clone(),
-                    size: dtn_payload.len() as u32,
-                },
-            ) {
+            let message_entry = DtnMessageEntry {
+                org_sig: org_sig.clone(),
+                size: dtn_payload.len() as u32,
+            };
+            let message_entry_bytes = bincode::serialize(&message_entry).unwrap();
+
+            if let Err(_e) = storage_state
+                .db_ref
+                .insert(signature.clone(), message_entry_bytes)
+            {
                 log::error!("dnt entry storing error!");
             } else {
                 if let Err(_e) = storage_state.db_ref.flush() {
@@ -253,7 +261,8 @@ impl Dtn {
         let mut state = STORAGESTATE.get().write().unwrap();
         if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
             // update storage node state
-            let entry = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
+            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
+            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
             if state.used_size > entry.size as u64 {
                 state.used_size = state.used_size + (entry.size as u64);
             } else {
@@ -282,7 +291,7 @@ impl Dtn {
         }
     }
 
-    /// prtocess DTN messages from network
+    /// process DTN messages from network
     pub fn net(user_id: &PeerId, sender_id: &PeerId, signature: &Vec<u8>, dtn_payload: &Vec<u8>) {
         if let Some(user_account) = UserAccounts::get_by_id(*user_id) {
             match proto::Container::decode(&dtn_payload[..]) {

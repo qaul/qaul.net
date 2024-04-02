@@ -60,7 +60,9 @@ impl Users {
         let mut users = USERS.get().write().unwrap();
         // iterate over all values in db
         for res in tree.iter() {
-            if let Ok((_vec, user)) = res {
+            if let Ok((_vec, user_bytes)) = res {
+                // decode user bytes
+                let user: UserData = bincode::deserialize(&user_bytes).unwrap();
                 // encode values from bytes
                 let q8id = QaulId::bytes_to_q8id(user.id.clone());
                 let id = PeerId::from_bytes(&user.id).unwrap();

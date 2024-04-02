@@ -7,7 +7,7 @@ use libp2p::PeerId;
 use std::collections::BTreeMap;
 
 use super::group_id::GroupId;
-use super::{Group, GroupStorage};
+use super::{Group, GroupInvited, GroupStorage};
 use crate::services::chat::{self, Chat, ChatStorage};
 use crate::utilities::timestamp::Timestamp;
 
@@ -243,7 +243,8 @@ impl GroupManage {
 
         for entry in db_ref.groups.iter() {
             match entry {
-                Ok((_, group)) => {
+                Ok((_, group_bytes)) => {
+                    let group: Group = bincode::deserialize(&group_bytes).unwrap();
                     let mut members: Vec<super::proto_rpc::GroupMember> = vec![];
                     for m in group.members.values() {
                         let member = super::proto_rpc::GroupMember {
@@ -285,8 +286,9 @@ impl GroupManage {
 
         for entry in db_ref.invited.iter() {
             match entry {
-                Ok((_, invite)) => {
+                Ok((_, invite_bytes)) => {
                     let mut members: Vec<super::proto_rpc::GroupMember> = Vec::new();
+                    let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
                     for (_, member) in invite.group.members {
                         members.push(super::proto_rpc::GroupMember {
                             user_id: member.user_id,

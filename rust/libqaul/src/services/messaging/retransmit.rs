@@ -8,6 +8,7 @@
 use libp2p::PeerId;
 use prost::Message;
 
+use super::UnConfirmedMessage;
 use crate::router;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
@@ -21,7 +22,7 @@ impl MessagingRetransmit {
         // get unconfirmed table
         let unconfirmed = super::UNCONFIRMED.get().write().unwrap();
         if unconfirmed.unconfirmed.len() == 0 {
-            // there are no message to retrans
+            // there are no message to retransmit
             return;
         }
 
@@ -31,7 +32,10 @@ impl MessagingRetransmit {
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
         for entry in unconfirmed.unconfirmed.iter() {
-            if let Ok((signature, mut unconfirmed_message)) = entry {
+            if let Ok((signature, unconfirmed_message_bytes)) = entry {
+                let mut unconfirmed_message: UnConfirmedMessage =
+                    bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+
                 // let's assume message transmit in 3 seconds
                 if cur_time < (unconfirmed_message.last_sent + 3000) {
                     continue;
@@ -80,9 +84,11 @@ impl MessagingRetransmit {
 
                             unconfirmed_message.retry = new_retry;
                             unconfirmed_message.last_sent = cur_time;
+                            let unconfirmed_message_todb =
+                                bincode::serialize(&unconfirmed_message).unwrap();
                             if let Err(_e) = unconfirmed
                                 .unconfirmed
-                                .insert(signature, unconfirmed_message.clone())
+                                .insert(signature, unconfirmed_message_todb)
                             {
                                 log::error!("updating unconfirmed table error!");
                             } else {

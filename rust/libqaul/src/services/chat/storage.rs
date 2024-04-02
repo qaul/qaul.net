@@ -7,7 +7,7 @@
 //! and their overview from the data base.
 
 use libp2p::PeerId;
-use sled_extensions::{bincode::Tree, DbExt};
+use sled;
 use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
@@ -24,10 +24,14 @@ static CHAT: InitCell<RwLock<ChatStorage>> = InitCell::new();
 /// chat DB references per user account
 #[derive(Clone)]
 pub struct ChatAccountDb {
-    // messages sled data base tree
-    pub messages: Tree<rpc_proto::ChatMessage>,
-    // message id => db key
-    pub message_ids: Tree<Vec<u8>>,
+    /// messages sled data base tree
+    ///
+    /// value: Vec<u8> bincode of rpc_proto::ChatMessage
+    pub messages: sled::Tree,
+    /// message id => db key
+    ///
+    /// value: Vec<u8> of db key
+    pub message_ids: sled::Tree,
 }
 
 /// qaul Chat Conversation Storage
@@ -58,32 +62,6 @@ impl ChatStorage {
             }
         }
         true
-    }
-
-    /// get messages by ids
-    #[allow(dead_code)]
-    pub fn get_messages_by_id(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-        let mut res: Vec<Vec<u8>> = vec![];
-
-        let db_ref = Self::get_db_ref(user_id.clone());
-        for id in message_ids {
-            match db_ref.message_ids.get(id) {
-                Ok(opt_key) => {
-                    if let Some(db_key) = opt_key {
-                        match db_ref.messages.get(&db_key) {
-                            Ok(opt_msg) => {
-                                if let Some(msg) = opt_msg {
-                                    res.push(msg.content.clone());
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-        res
     }
 
     /// remove messages by ids
@@ -177,7 +155,8 @@ impl ChatStorage {
         };
 
         // save message in data base
-        if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message) {
+        let chat_message_bytes = bincode::serialize(&chat_message).unwrap();
+        if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message_bytes) {
             log::error!("Error saving chat message to data base: {}", e);
         }
         // flush trees to disk
@@ -210,7 +189,9 @@ impl ChatStorage {
         // get data base of user account
         let db_ref = Self::get_db_ref(account_id.clone());
         if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
-            if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap() {
+            if let Some(chat_msg_bytes) = db_ref.messages.get(&key).unwrap() {
+                let mut chat_msg: rpc_proto::ChatMessage =
+                    bincode::deserialize(&chat_msg_bytes).unwrap();
                 chat_msg.status = rpc_proto::MessageStatus::Confirmed as i32;
                 chat_msg.received_at = received_at;
 
@@ -227,7 +208,8 @@ impl ChatStorage {
                 //       set received_by_all flag if yes
 
                 // save message in data base
-                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {
+                let chat_msg_bytes = bincode::serialize(&chat_msg).unwrap();
+                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg_bytes) {
                     log::error!("Error saving chat message to data base: {}", e);
                 }
                 // flush trees to disk
@@ -247,11 +229,14 @@ impl ChatStorage {
         // get data base of user account
         let db_ref = Self::get_db_ref(account_id.to_owned());
         if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
-            if let Some(mut chat_msg) = db_ref.messages.get(&key).unwrap() {
+            if let Some(chat_msg_fromdb) = db_ref.messages.get(&key).unwrap() {
+                let mut chat_msg: rpc_proto::ChatMessage =
+                    bincode::deserialize(&chat_msg_fromdb).unwrap();
                 chat_msg.status = status as i32;
 
                 // save message in data base
-                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg) {
+                let chat_msg_todb = bincode::serialize(&chat_msg).unwrap();
+                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg_todb) {
                     log::error!("Error saving chat message to data base: {}", e);
                 }
                 // flush trees to disk
@@ -280,7 +265,9 @@ impl ChatStorage {
                 .range(first_key.as_slice()..last_key.as_slice())
             {
                 match res {
-                    Ok((_id, message)) => {
+                    Ok((_id, message_bytes)) => {
+                        let message: rpc_proto::ChatMessage =
+                            bincode::deserialize(&message_bytes).unwrap();
                         message_list.push(message);
                     }
                     Err(e) => {
@@ -326,8 +313,9 @@ impl ChatStorage {
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             // check if result is really of the same group
-            if group_id.to_owned() == value.group_id {
-                return value.index + 1;
+            let chat_message: rpc_proto::ChatMessage = bincode::deserialize(&value).unwrap();
+            if group_id.to_owned() == chat_message.group_id {
+                return chat_message.index + 1;
             }
         }
 
@@ -366,8 +354,8 @@ impl ChatStorage {
         let db = DataBase::get_user_db(account_id);
 
         // open trees
-        let messages: Tree<rpc_proto::ChatMessage> = db.open_bincode_tree("chat_messages").unwrap();
-        let message_ids: Tree<Vec<u8>> = db.open_bincode_tree("chat_message_ids").unwrap();
+        let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
+        let message_ids: sled::Tree = db.open_tree("chat_message_ids").unwrap();
 
         let chat_user = ChatAccountDb {
             messages,

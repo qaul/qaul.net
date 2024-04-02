@@ -9,7 +9,7 @@
 use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use sled_extensions::{bincode::Tree, DbExt};
+use sled;
 use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
@@ -102,7 +102,9 @@ pub enum MessagingServiceType {
 /// Unconfirmed Messages Structure
 pub struct UnConfirmedMessages {
     /// signature => UnConfirmedMessage
-    pub unconfirmed: Tree<UnConfirmedMessage>,
+    ///
+    /// value: bincode of `UnConfirmedMessage`
+    pub unconfirmed: sled::Tree,
 }
 
 /// Qaul Messaging Structure
@@ -137,7 +139,7 @@ impl Messaging {
         let db = DataBase::get_node_db();
 
         // open trees
-        let unconfirmed: Tree<UnConfirmedMessage> = db.open_bincode_tree("unconfirmed").unwrap();
+        let unconfirmed: sled::Tree = db.open_tree("unconfirmed").unwrap();
         let unconfirmed_messages = UnConfirmedMessages { unconfirmed };
         UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
@@ -164,9 +166,10 @@ impl Messaging {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
 
         // insert message to data base
+        let new_entry_bytes = bincode::serialize(&new_entry).unwrap();
         if let Err(e) = unconfirmed
             .unconfirmed
-            .insert(container.signature.clone(), new_entry)
+            .insert(container.signature.clone(), new_entry_bytes)
         {
             log::error!("{}", e);
         }
@@ -201,7 +204,10 @@ impl Messaging {
                 }
 
                 match v {
-                    Some(unconfirmed) => {
+                    Some(unconfirmed_bytes) => {
+                        let unconfirmed: UnConfirmedMessage =
+                            bincode::deserialize(&unconfirmed_bytes).unwrap();
+
                         // check message and decide what to do
                         match unconfirmed.message_type {
                             MessagingServiceType::Unconfirmed => {
@@ -272,15 +278,18 @@ impl Messaging {
             return;
         }
 
-        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        let unconfirmed_message_bytes = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
         if unconfirmed_message.scheduled {
             return;
         }
 
         unconfirmed_message.scheduled = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
         if let Err(_e) = unconfirmed
             .unconfirmed
-            .insert(signature.clone(), unconfirmed_message)
+            .insert(signature.clone(), unconfirmed_message_todb)
         {
             log::error!("error updating unconfirmed table");
         } else {
@@ -296,15 +305,18 @@ impl Messaging {
             return;
         }
 
-        let mut unconfirmed_message = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        let unconfirmed_message_bytes = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
         if unconfirmed_message.scheduled {
             return;
         }
 
         unconfirmed_message.scheduled_dtn = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
         if let Err(_e) = unconfirmed
             .unconfirmed
-            .insert(signature.clone(), unconfirmed_message)
+            .insert(signature.clone(), unconfirmed_message_todb)
         {
             log::error!("error updating unconfirmed table");
         } else {

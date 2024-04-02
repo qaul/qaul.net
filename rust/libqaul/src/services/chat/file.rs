@@ -9,11 +9,7 @@
 use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use sled_extensions::{
-    bincode::{BincodeEncoding, Tree},
-    structured::Iter,
-    DbExt,
-};
+use sled;
 use state::InitCell;
 use std::{
     collections::BTreeMap,
@@ -62,14 +58,16 @@ pub struct AllFiles {
 pub struct UserFiles {
     /// history table
     ///
-    /// index: file ID
-    pub histories: Tree<FileHistory>,
+    /// key: file ID
+    /// value: bincode of `FileHistory`
+    pub histories: sled::Tree,
     /// file data chunks
     ///
     /// Storage of incoming chunks until receiving is completed.
     ///
-    /// index: file_id & chunk_index
-    pub file_chunks: Tree<Vec<u8>>,
+    /// key: file_id & chunk_index
+    /// value: `Vec<u8>`
+    pub file_chunks: sled::Tree,
 }
 
 impl UserFiles {
@@ -77,8 +75,10 @@ impl UserFiles {
     pub fn get_filehistory(&self, file_id: u64) -> Option<FileHistory> {
         // get invite
         match self.histories.get(file_id.to_be_bytes().to_vec()) {
-            Ok(file_history) => {
-                return file_history;
+            Ok(file_history_bytes) => {
+                let file_history: FileHistory =
+                    bincode::deserialize(&file_history_bytes.unwrap()).unwrap();
+                return Some(file_history);
             }
             Err(e) => log::error!("{}", e),
         }
@@ -87,7 +87,7 @@ impl UserFiles {
     }
 
     /// get file history iterator
-    pub fn get_filehistory_iterator(&self) -> Iter<FileHistory, BincodeEncoding> {
+    pub fn get_filehistory_iterator(&self) -> sled::Iter {
         // get key range
         let first_key: u64 = 0;
         let last_key: u64 = u64::MAX;
@@ -103,9 +103,10 @@ impl UserFiles {
     /// save file history
     pub fn save_filehistory(&self, file_id: u64, file_history: FileHistory) {
         // save file history into data base
+        let file_history_bytes = bincode::serialize(&file_history).unwrap();
         if let Err(e) = self
             .histories
-            .insert(file_id.to_be_bytes().to_vec(), file_history)
+            .insert(file_id.to_be_bytes().to_vec(), file_history_bytes)
         {
             log::error!("Error saving file history to data base: {}", e);
             return;
@@ -169,7 +170,7 @@ impl UserFiles {
     }
 
     /// get all file chunks for a specific id
-    pub fn get_file_chunks(&self, file_id: &Vec<u8>) -> Iter<Vec<u8>, BincodeEncoding> {
+    pub fn get_file_chunks(&self, file_id: &Vec<u8>) -> sled::Iter {
         // get key range
         let (first_key, last_key) = Self::get_chunk_key_range(file_id);
 
@@ -322,8 +323,8 @@ impl ChatFile {
         let db = DataBase::get_user_db(user_id.clone());
 
         // open trees
-        let histories: Tree<FileHistory> = db.open_bincode_tree("chat_file").unwrap();
-        let file_chunks: Tree<Vec<u8>> = db.open_bincode_tree("file_chunks").unwrap();
+        let histories: sled::Tree = db.open_tree("chat_file").unwrap();
+        let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
 
         let user_files = UserFiles {
             histories,
@@ -423,8 +424,9 @@ impl ChatFile {
                     }
 
                     // check if we collect the result
+                    let file_history: FileHistory = bincode::deserialize(&message).unwrap();
                     if counter >= history_req.offset {
-                        histories.push(message);
+                        histories.push(file_history);
                     }
 
                     counter = counter + 1;
@@ -585,9 +587,10 @@ impl ChatFile {
         let db_ref = Self::get_db_ref(&user_account.id);
 
         // save file history to data base
+        let file_history_bytes = bincode::serialize(&file_history).unwrap();
         if let Err(e) = db_ref
             .histories
-            .insert(&file_id.to_be_bytes(), file_history.clone())
+            .insert(&file_id.to_be_bytes(), file_history_bytes)
         {
             log::error!("Error saving file history to data base: {}", e);
         } else {

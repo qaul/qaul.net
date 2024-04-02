@@ -43,7 +43,6 @@ futures-ticker = "0.0.3"
 jni = "0.21.1"
 serde_yaml = "0.9.27"
 sled = "0.34.7"
-sled-extensions = { version = "0.2.0", features = ["bincode"] }
 uuid = { version = "1.6.1", features = ["v4"] }
 ed25519-dalek = "2.1.0"
 x25519-dalek = "2.0.0"
