@@ -6,11 +6,7 @@
 //! Handling of the data base access for the crypto handshake and session state.
 
 use libp2p::PeerId;
-use sled_extensions::{
-    bincode::{BincodeEncoding, Tree},
-    structured::Iter,
-    DbExt,
-};
+use sled;
 use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
@@ -26,10 +22,14 @@ pub static CRYPTOSTORAGE: InitCell<RwLock<CryptoStorage>> = InitCell::new();
 #[derive(Clone)]
 pub struct CryptoAccount {
     /// user crypto session state storage
-    pub state: Tree<CryptoState>,
+    ///
+    /// value: bincode of `CryptoState`
+    pub state: sled::Tree,
     /// unprocessable out of order handshake
     /// state messages
-    pub cache: Tree<proto::Encrypted>,
+    ///
+    /// value: bincode of `proto::Encrypted`
+    pub cache: sled::Tree,
 }
 
 impl CryptoAccount {
@@ -85,11 +85,17 @@ impl CryptoAccount {
 
         for result in iterator {
             match result {
-                Ok((_key, session)) => match session.state {
-                    super::CryptoProcessState::HalfOutgoing => state_option = Some(session),
-                    super::CryptoProcessState::HalfIncoming => return Some(session),
-                    super::CryptoProcessState::Transport => return Some(session),
-                },
+                Ok((_key, crypto_state_bytes)) => {
+                    let crypto_state: CryptoState =
+                        bincode::deserialize(&crypto_state_bytes).unwrap();
+                    match crypto_state.state {
+                        super::CryptoProcessState::HalfOutgoing => {
+                            state_option = Some(crypto_state)
+                        }
+                        super::CryptoProcessState::HalfIncoming => return Some(crypto_state),
+                        super::CryptoProcessState::Transport => return Some(crypto_state),
+                    }
+                }
                 Err(e) => log::error!("{}", e),
             }
         }
@@ -104,9 +110,11 @@ impl CryptoAccount {
 
         // get result from data base
         match self.state.get(key) {
-            Ok(state_option) => {
-                return state_option;
+            Ok(Some(crypto_state_bytes)) => {
+                let crypto_state: CryptoState = bincode::deserialize(&crypto_state_bytes).unwrap();
+                return Some(crypto_state);
             }
+            Ok(None) => return None,
             Err(e) => log::error!("{}", e),
         }
 
@@ -119,7 +127,8 @@ impl CryptoAccount {
         let key = Self::create_state_key(remote_id, session_id);
 
         // save message in data base
-        if let Err(e) = self.state.insert(key, crypto_state) {
+        let crypto_state_bytes = bincode::serialize(&crypto_state).unwrap();
+        if let Err(e) = self.state.insert(key, crypto_state_bytes) {
             log::error!("Error handshake to db: {}", e);
         }
 
@@ -141,7 +150,8 @@ impl CryptoAccount {
         let key = Self::create_cache_key(remote_id, session_id, nonce);
 
         // save message in data base
-        if let Err(e) = self.cache.insert(key, message) {
+        let message_bytes = bincode::serialize(&message).unwrap();
+        if let Err(e) = self.cache.insert(key, message_bytes) {
             log::error!("Error handshake to db: {}", e);
         }
 
@@ -149,21 +159,6 @@ impl CryptoAccount {
         if let Err(e) = self.cache.flush() {
             log::error!("Error db flush: {}", e);
         }
-    }
-
-    /// get an iterator over all messages in cache
-    #[allow(dead_code)]
-    pub fn get_cache_messages(
-        &self,
-        remote_id: PeerId,
-        session_id: u32,
-    ) -> Iter<proto::Encrypted, BincodeEncoding> {
-        let (first_key, last_key) = Self::create_cache_key_range(remote_id, session_id);
-
-        // get results from data base
-        let result = self.cache.range(first_key..last_key);
-
-        result
     }
 }
 
@@ -220,8 +215,8 @@ impl CryptoStorage {
         let db = DataBase::get_user_db(account_id);
 
         // open trees
-        let state: Tree<CryptoState> = db.open_bincode_tree("crypto_state").unwrap();
-        let cache: Tree<proto::Encrypted> = db.open_bincode_tree("crypto_cache").unwrap();
+        let state: sled::Tree = db.open_tree("crypto_state").unwrap();
+        let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
 
         let crypto_account = CryptoAccount { state, cache };
 

@@ -14,7 +14,7 @@ use libp2p::{
 };
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use sled_extensions::{bincode::Tree, DbExt};
+use sled;
 use state::InitCell;
 use std::collections::BTreeMap;
 use std::{convert::TryInto, sync::RwLock};
@@ -46,17 +46,17 @@ static FEED: InitCell<RwLock<Feed>> = InitCell::new();
 /// For storing in data base
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FeedMessageData {
-    // index of message in the data base
+    /// index of message in the data base
     pub index: u64,
-    // hash of the message
+    /// hash of the message
     pub message_id: Vec<u8>,
-    // user ID of the sender
+    /// user ID of the sender
     pub sender_id: Vec<u8>,
-    // time sent in milli seconds
+    /// time sent in milli seconds
     pub timestamp_sent: u64,
-    // time received in milli seconds
+    /// time received in milli seconds
     pub timestamp_received: u64,
-    // the message content
+    /// the message content
     pub content: String,
 }
 /// Feed message
@@ -94,15 +94,19 @@ pub struct FeedMessageSendContainer {
 
 /// qaul Feed storage and logic
 pub struct Feed {
-    // in memory BTreeMap
+    /// in memory BTreeMap of messages
     pub messages: BTreeMap<Vec<u8>, proto_net::FeedMessageContent>,
 
-    // sled data base tree for message_id to last index
-    pub tree_ids: Tree<u64>,
+    /// sled data base tree for message_id to last index
+    ///
+    /// value: bincode of `u64`
+    pub tree_ids: sled::Tree,
 
-    // sled data base tree
-    pub tree: Tree<FeedMessageData>,
-    // last recent message
+    /// sled data base tree of
+    ///
+    /// value: bincode of `FeedMessageData`
+    pub tree: sled::Tree,
+    /// last recent message
     pub last_message: u64,
 }
 
@@ -111,8 +115,8 @@ impl Feed {
     pub fn init() {
         // get database and initialize tree
         let db = DataBase::get_node_db();
-        let tree: Tree<FeedMessageData> = db.open_bincode_tree("feed").unwrap();
-        let tree_ids: Tree<u64> = db.open_bincode_tree("feed_id").unwrap();
+        let tree: sled::Tree = db.open_tree("feed").unwrap();
+        let tree_ids: sled::Tree = db.open_tree("feed_id").unwrap();
 
         // get last key
         let last_message: u64;
@@ -325,7 +329,11 @@ impl Feed {
         };
 
         // save to data base
-        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
+        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        if let Err(e) = feed
+            .tree
+            .insert(&last_message.to_be_bytes(), message_data_bytes)
+        {
             log::error!("Error saving feed message to data base: {}", e);
         } else {
             if let Err(e) = feed.tree.flush() {
@@ -333,7 +341,8 @@ impl Feed {
             }
         }
 
-        if let Err(e) = feed.tree_ids.insert(&message_id[..], last_message) {
+        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        if let Err(e) = feed.tree_ids.insert(&message_id[..], last_message_bytes) {
             log::error!("Error saving feed id to data base: {}", e);
         } else {
             if let Err(e) = feed.tree_ids.flush() {
@@ -372,7 +381,11 @@ impl Feed {
         };
 
         // save to data base
-        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data) {
+        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        if let Err(e) = feed
+            .tree
+            .insert(&last_message.to_be_bytes(), message_data_bytes)
+        {
             log::error!("Error saving feed message to data base: {}", e);
         } else {
             if let Err(e) = feed.tree.flush() {
@@ -380,7 +393,8 @@ impl Feed {
             }
         }
 
-        if let Err(e) = feed.tree_ids.insert(&signature[..], last_message) {
+        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        if let Err(e) = feed.tree_ids.insert(&signature[..], last_message_bytes) {
             log::error!("Error saving feed id to data base: {}", e);
         } else {
             if let Err(e) = feed.tree_ids.flush() {
@@ -406,7 +420,8 @@ impl Feed {
         let first_message_bytes = first_message.to_be_bytes().to_vec();
         for res in feed.tree.range(first_message_bytes.as_slice()..) {
             match res {
-                Ok((_id, message)) => {
+                Ok((_id, message_bytes)) => {
+                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
                     ids.push(message.message_id.clone());
                 }
                 Err(e) => {
@@ -437,8 +452,10 @@ impl Feed {
         let mut res: Vec<(Vec<u8>, Vec<u8>, String, u64)> = vec![];
         let feed = FEED.get().read().unwrap();
         for id in ids {
-            if let Some(index) = feed.tree_ids.get(&id[..]).unwrap() {
-                if let Some(message) = feed.tree.get(index.to_be_bytes()).unwrap() {
+            if let Some(index_bytes) = feed.tree_ids.get(&id[..]).unwrap() {
+                let index: u64 = bincode::deserialize(&index_bytes).unwrap();
+                if let Some(message_bytes) = feed.tree.get(index.to_be_bytes()).unwrap() {
+                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
                     res.push((
                         id.clone(),
                         message.sender_id.clone(),
@@ -472,7 +489,10 @@ impl Feed {
             // and there fore have a higher key.
             for res in feed.tree.range(first_message_bytes.as_slice()..) {
                 match res {
-                    Ok((_id, message)) => {
+                    Ok((_id, message_bytes)) => {
+                        let message: FeedMessageData =
+                            bincode::deserialize(&message_bytes).unwrap();
+
                         if feed.messages.contains_key(&message.message_id) {
                             log::trace!("key exist");
                         } else {

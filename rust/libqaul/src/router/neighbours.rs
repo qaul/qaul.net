@@ -8,7 +8,7 @@
 use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use sled_extensions::{bincode::Tree, DbExt};
+use sled::Tree;
 use state::InitCell;
 use std::{collections::HashMap, sync::RwLock};
 
@@ -30,7 +30,9 @@ static BLE: InitCell<RwLock<Neighbours>> = InitCell::new();
 ///
 /// This table is used to find the node id from the small id
 /// used by the BLE module.
-static NODES: InitCell<Tree<Node>> = InitCell::new();
+///
+/// The DB saves the serialized bincode of `Node`
+static NODES: InitCell<Tree> = InitCell::new();
 
 /// Node entry in the data base
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -80,7 +82,7 @@ impl Neighbours {
 
         // get nodes tree from data base and set it to state
         let db = DataBase::get_node_db();
-        let tree = db.open_bincode_tree("nodes").unwrap();
+        let tree = db.open_tree("nodes").unwrap();
         NODES.set(tree);
     }
 
@@ -130,7 +132,8 @@ impl Neighbours {
                 };
 
                 // save user
-                if let Err(e) = tree.insert(id.as_slice(), node) {
+                let node_bytes = bincode::serialize(&node).unwrap();
+                if let Err(e) = tree.insert(id.as_slice(), node_bytes) {
                     log::error!("Error saving node to data base: {}", e);
                 } else {
                     if let Err(e) = tree.flush() {
@@ -231,7 +234,8 @@ impl Neighbours {
         // search for key
         let mut result = tree.scan_prefix(prefix);
 
-        if let Some(Ok((_key, node))) = result.next() {
+        if let Some(Ok((_key, node_bytes))) = result.next() {
+            let node: Node = bincode::deserialize(&node_bytes).unwrap();
             return Some(node);
         }
 
@@ -252,7 +256,8 @@ impl Neighbours {
         // search for key
         let mut result = tree.scan_prefix(prefix);
 
-        if let Some(Ok((_key, node))) = result.next() {
+        if let Some(Ok((_key, node_bytes))) = result.next() {
+            let node: Node = bincode::deserialize(&node_bytes).unwrap();
             return Some(node);
         }
 
