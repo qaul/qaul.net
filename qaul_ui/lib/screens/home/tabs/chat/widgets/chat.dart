@@ -39,6 +39,8 @@ import 'conditional/conditional.dart';
 
 part 'audio_message_widget.dart';
 
+part 'audio_recording.dart';
+
 part 'custom_input.dart';
 
 part 'file_message_widget.dart';
@@ -110,13 +112,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   final Map<String, String> _overflowMenuOptions = {};
 
-  final audioPlayer = AudioPlayer();
-  final audioRecorder = AudioRecorder();
-
-  bool isRecording = false;
-
-  late String audioPath;
-
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
@@ -153,13 +148,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (oldWidget.room == room) return;
     _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
-  }
-
-  @override
-  void dispose() {
-    audioPlayer.dispose();
-    audioRecorder.dispose();
-    super.dispose();
   }
 
   @override
@@ -256,7 +244,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
               isDisabled: room.status != ChatRoomStatus.active,
-              isRecording: isRecording,
               disabledMessage: room.status != ChatRoomStatus.inviteAccepted
                   ? null
                   : 'Please wait for the admin to confirm your acceptance to send messages',
@@ -333,39 +320,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             );
                           }
                         },
-              onRecordAudioPressed: !(Platform.isAndroid ||
+              onSendAudioPressed: !(Platform.isAndroid ||
                       Platform.isIOS ||
                       Platform.isMacOS)
                   ? null
                   : (room.messages?.isEmpty ?? true)
                       ? null
                       : ({types.PartialText? text}) async {
-                          (isRecording)
-                              ? await stopRecording()
-                              : await startRecording();
-                          if (!isRecording) {
-                            File file = File(audioPath);
-                            // ignore: use_build_context_synchronously
-                            if (!context.mounted) return;
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (_) {
-                                return _SendFileDialog(
-                                  file,
-                                  room: room,
-                                  partialMessage: text?.text,
-                                  onSendPressed: (description) {
-                                    final worker = ref.read(qaulWorkerProvider);
-                                    worker.sendFile(
-                                      pathName: file.path,
-                                      conversationId: room.conversationId,
-                                      description: description.text,
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          }
+                          // ignore: use_build_context_synchronously
+                          if (!context.mounted) return;
+                          showModalBottomSheet(
+                            context: context,
+                            enableDrag: false,
+                            isDismissible: false,
+                            builder: (_) {
+                              return _RecordAudioDialog(
+                                room: room,
+                                partialMessage: text?.text,
+                                onSendPressed: (file, description) {
+                                  final worker = ref.read(qaulWorkerProvider);
+                                  worker.sendFile(
+                                    pathName: file.path,
+                                    conversationId: room.conversationId,
+                                    description: description.text,
+                                  );
+                                },
+                              );
+                            },
+                          );
                         },
             ),
             onMessageTap: (context, message) async {
@@ -538,49 +520,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     if (room.isDirectChat && _overflowMenuOptions.isNotEmpty) {
       _overflowMenuOptions.clear();
-    }
-  }
-
-  Future<void> startRecording() async {
-    try {
-      if (await audioRecorder.hasPermission()) {
-        setState(() {
-          isRecording = true;
-        });
-        final path = await getNewAudioFilePath();
-        await audioRecorder.start(const RecordConfig(), path: path);
-      }
-    } catch (e) {
-      return;
-    }
-  }
-
-  Future<String> getNewAudioFilePath() async {
-    final dir = (Platform.isAndroid)
-        ? (await getExternalStorageDirectory())
-        : (await getApplicationSupportDirectory());
-
-    if (dir == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context)!.genericErrorMessage),
-        ));
-      }
-      return "";
-    }
-
-    return join(dir.path, 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a');
-  }
-
-  Future<void> stopRecording() async {
-    try {
-      final path = await audioRecorder.stop();
-      setState(() {
-        isRecording = false;
-        audioPath = path!;
-      });
-    } catch (e) {
-      return;
     }
   }
 }
