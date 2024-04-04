@@ -54,16 +54,10 @@ class QaulTable extends StatelessWidget {
           ),
         if (addButtonEnabled) ...[
           const SizedBox(height: 12.0),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                splashRadius: 24,
-                onPressed: onAddRowPressed,
-              ),
-              const SizedBox(width: 12.0),
-              Text(addRowLabel),
-            ],
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: Text(addRowLabel),
+            onTap: onAddRowPressed,
           ),
         ],
       ],

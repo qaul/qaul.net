@@ -11,8 +11,9 @@ class InternetNode extends Equatable {
     required this.isActive,
     required this.name,
   })  : isIPv4 = address.contains('/ip4/'),
+        isQuic = address.contains(_quicPathDescriptor),
         ip = address.replaceAll('/ip4/', '').split('/').first,
-        port = address.split('/').last;
+        port = _extractPortFromAddress(address);
 
   final String address;
   final bool isActive;
@@ -21,6 +22,18 @@ class InternetNode extends Equatable {
   final bool isIPv4;
   final String ip;
   final String port;
+  final bool isQuic;
+
+  static const _quicPathDescriptor = 'quic-v1';
+
+  static String _extractPortFromAddress(String addr) {
+    final addressSections = addr.split('/');
+    if (addressSections.last != _quicPathDescriptor) {
+      return addressSections.last;
+    }
+    addressSections.removeLast();
+    return addressSections.last;
+  }
 
   @override
   List<Object?> get props => [address];
