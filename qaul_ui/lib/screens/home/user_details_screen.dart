@@ -158,11 +158,9 @@ class UserDetailsScreen extends HookConsumerWidget {
     BuildContext context, {
     required String description,
   }) async {
-    void pop({bool res = false}) => Navigator.pop(context, res);
-
     return await showDialog(
       context: context,
-      builder: (c) {
+      builder: (context) {
         final l10n = AppLocalizations.of(context)!;
 
         return QaulDialog(
@@ -177,9 +175,9 @@ class UserDetailsScreen extends HookConsumerWidget {
             ],
           ),
           button1Label: l10n.okDialogButton,
-          onButton1Pressed: () => pop(res: true),
+          onButton1Pressed: () => Navigator.pop(context, true),
           button2Label: l10n.cancelDialogButton,
-          onButton2Pressed: pop,
+          onButton2Pressed: () => Navigator.pop(context),
         );
       },
     );
