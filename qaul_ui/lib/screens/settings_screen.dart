@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -55,7 +54,9 @@ class SettingsScreen extends HookConsumerWidget {
               icon: const FaIcon(FontAwesomeIcons.android),
               content: const _AndroidOptions(),
             ),
-          ]
+          ],
+
+          const SizedBox(height: 20,)
         ],
       ),
     );
@@ -220,6 +221,7 @@ class _InternetNodesList extends HookConsumerWidget {
                       port: node.port,
                       name: node.name,
                       isIPv4: node.isIPv4,
+                      usesQuic: node.isQuic,
                     ),
                   );
 
@@ -229,25 +231,6 @@ class _InternetNodesList extends HookConsumerWidget {
                 },
               );
             },
-          ),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                splashRadius: 24,
-                onPressed: () async {
-                  final res = await showDialog(
-                    context: context,
-                    builder: (_) => const _AddNodeDialog(isIPv4: false),
-                  );
-
-                  if (res is! _AddNodeDialogResponse) return;
-                  addNode(res.address, res.name);
-                },
-              ),
-              const SizedBox(width: 12.0),
-              Text(l10n.addIPv6NodeCTA),
-            ],
           ),
         ],
       ),
@@ -269,6 +252,7 @@ class _AddNodeDialog extends HookWidget {
     this.ip,
     this.port,
     this.isIPv4 = true,
+    this.usesQuic = false,
   }) : super(key: key);
 
   final String? name;
@@ -278,27 +262,32 @@ class _AddNodeDialog extends HookWidget {
   /// If [false], will be considered IPv6
   final bool isIPv4;
 
-  String get _descriptor => isIPv4 ? '/ip4/' : '/ip6/';
+  /// If [true], will assume the address uses the quic protocol
+  final bool usesQuic;
 
-  TextInputFormatter get _formatter =>
-      isIPv4 ? IPv4TextInputFormatter() : IPv6TextInputFormatter();
-
-  String get _hint =>
-      isIPv4 ? '000.000.000.000' : '0000:0000:0000:0000:0000:0000:0000:0000';
-
-  bool _isValidIP(String? value) =>
-      isIPv4 ? isValidIPv4(value) : isValidIPv6(value);
-
-  _AddNodeDialogResponse _buildIPAddress(
-      {required String ip, required String port, required String name}) {
+  _AddNodeDialogResponse _buildIPAddress({
+    required String ip,
+    required String port,
+    required String name,
+    required bool useIPv6,
+    required bool useQuic,
+  }) {
+    var address = useIPv6 ? '/ip6/$ip' : '/ip4/$ip';
+    if (useQuic) {
+      address += '/udp/$port/quic-v1';
+    } else {
+      address += '/tcp/$port';
+    }
     return _AddNodeDialogResponse(
-      address: isIPv4 ? '/ip4/$ip/tcp/$port' : '/ip6/$ip/tcp/$port',
+      address: address,
       name: name,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final ttheme = Theme.of(context).textTheme;
+
     final nameCtrl = useTextEditingController(text: name);
     final ipCtrl = useTextEditingController(text: ip);
     final portCtrl = useTextEditingController(text: port);
@@ -306,10 +295,13 @@ class _AddNodeDialog extends HookWidget {
     final l10n = AppLocalizations.of(context)!;
     final orientation = MediaQuery.of(context).orientation;
 
+    final isIPv6 = useState(isIPv4 == false);
+    final isQuic = useState(usesQuic);
+
     final tcpField = useMemoized(
       () => [
         _spacer,
-        Text('/tcp/', style: _fixedTextStyle),
+        Text(isQuic.value ? '/udp/' : '/tcp/', style: _fixedTextStyle),
         _spacer,
         Expanded(
           child: TextFormField(
@@ -322,19 +314,27 @@ class _AddNodeDialog extends HookWidget {
             },
           ),
         ),
+        if (isQuic.value) ...[
+          _spacer,
+          Text('/quic-v1', style: _fixedTextStyle),
+        ],
       ],
-      [portCtrl],
+      [portCtrl, isQuic.value],
     );
 
     return Form(
       child: Builder(builder: (context) {
         return AlertDialog(
-          title: orientation == Orientation.landscape
-              ? null
-              : Text(l10n.addNodeCTA),
+          title: Text(l10n.addNodeCTA),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // used to force the dialog to fill the available horizontal space
+              const Row(mainAxisSize: MainAxisSize.max, children: [
+                SizedBox(width: double.maxFinite),
+              ]),
+
               TextField(
                 autofocus: true,
                 controller: nameCtrl,
@@ -345,18 +345,32 @@ class _AddNodeDialog extends HookWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_descriptor, style: _fixedTextStyle),
+                  Text(
+                    isIPv6.value ? '/ip6/' : '/ip4/',
+                    style: _fixedTextStyle,
+                  ),
                   _spacer,
                   Expanded(
                     child: TextFormField(
                       controller: ipCtrl,
-                      inputFormatters: [_formatter],
-                      decoration: _decoration('ip', hint: _hint),
-                      validator: (val) {
-                        if (_isValidIP(val)) return null;
+                      inputFormatters: [
+                        isIPv6.value
+                            ? IPv6TextInputFormatter()
+                            : IPv4TextInputFormatter()
+                      ],
+                      decoration: _decoration(
+                        'ip',
+                        hint: isIPv6.value
+                            ? '0000:0000:0000:0000:0000:0000:0000:0000'
+                            : '000.000.000.000',
+                      ),
+                      validator: (v) {
+                        if (isIPv6.value ? isValidIPv6(v) : isValidIPv4(v)) {
+                          return null;
+                        }
                         return l10n.invalidIPMessage;
                       },
-                      keyboardType: isIPv4
+                      keyboardType: isIPv6.value
                           ? const TextInputType.numberWithOptions(decimal: true)
                           : TextInputType.text,
                       enableInteractiveSelection: false,
@@ -369,6 +383,24 @@ class _AddNodeDialog extends HookWidget {
                 const SizedBox(height: 20),
                 Row(children: tcpField),
               ],
+
+              const SizedBox(height: 8),
+              const Divider(),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(l10n.options, style: ttheme.titleMedium),
+              ),
+              SwitchListTile(
+                value: isIPv6.value,
+                onChanged: (v) => {isIPv6.value = v},
+                title: Text(l10n.useIpv6),
+              ),
+              SwitchListTile(
+                value: isQuic.value,
+                onChanged: (v) => {isQuic.value = v},
+                title: Text(l10n.useQuic),
+              ),
             ],
           ),
           actions: [
@@ -382,6 +414,8 @@ class _AddNodeDialog extends HookWidget {
                     ip: ipCtrl.text,
                     port: portCtrl.text,
                     name: nameCtrl.text,
+                    useIPv6: isIPv6.value,
+                    useQuic: isQuic.value,
                   ),
                 );
               },
