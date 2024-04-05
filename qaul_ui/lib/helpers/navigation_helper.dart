@@ -18,17 +18,24 @@ class NavigationHelper {
   static const support = '/support';
   static const fileHistory = '/fileHistory';
 
-  static Route<T> _buildRoute<T>(final RouteSettings settings, final WidgetBuilder page) =>
+  static Route<T> _buildRoute<T>(
+          final RouteSettings settings, final WidgetBuilder page) =>
       CupertinoPageRoute(builder: page, settings: settings);
 
   static Route<dynamic> onGenerateRoute(final RouteSettings s) {
     Widget routeWidget = const SizedBox.shrink();
     switch (s.name) {
       case initial:
-        routeWidget = WillPopScope(onWillPop: () async => false, child: SplashScreen());
+        routeWidget = PopScope(
+          canPop: false,
+          child: SplashScreen(),
+        );
         break;
       case createAccount:
-        routeWidget = WillPopScope(onWillPop: () async => false, child: CreateAccountScreen());
+        routeWidget = PopScope(
+          canPop: false,
+          child: CreateAccountScreen(),
+        );
         break;
       case home:
         // WillPopScope handled in build method of HomeScreen -> Custom behavior

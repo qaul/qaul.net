@@ -125,8 +125,8 @@ class _AvailableConnectionsTable extends ConsumerWidget {
     );
   }
 
-  String _buildCapitalizedEnumName() => describeEnum(type)
-      .splitMapJoin(RegExp(r'^.{1}'), onMatch: (m) => m[0]!.toUpperCase(), onNonMatch: (n) => n);
+  String _buildCapitalizedEnumName() => type.name
+      .splitMapJoin(RegExp(r'^.'), onMatch: (m) => m[0]!.toUpperCase(), onNonMatch: (n) => n);
 
   IconData _mapIconFromType(ConnectionType type) {
     switch (type) {

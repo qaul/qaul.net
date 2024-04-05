@@ -72,7 +72,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                                 child: Text(l10n.deleteLogs),
                                 onPressed: () async {
                                   await emailLogger.deleteLogs();
-                                  if (!mounted) return;
+                                  if (!context.mounted) return;
                                   Navigator.pop(context);
                                 },
                               ),
@@ -102,7 +102,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                                     await emailLogger.sendLogs(
                                         reader: ref.read);
                                     await emailLogger.deleteLogs();
-                                    if (!mounted) return;
+                                    if (!context.mounted) return;
                                     Navigator.pop(context);
                                   }
                                 : null,
