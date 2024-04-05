@@ -25,10 +25,9 @@ class HomeScreen extends HookConsumerWidget {
 
     final disablePageViewScroll = useState(false);
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (_) async {
         if (Platform.isAndroid) gotoToPubTab();
-        return false;
       },
       child: Scaffold(
         body: QaulNavBarDecorator(
