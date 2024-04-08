@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:equatable/equatable.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/cupertino.dart' hide Draggable;
@@ -55,8 +56,7 @@ class DynamicNetworkScreen extends HookConsumerWidget {
   }
 }
 
-class _DynamicNetworkGameEngine extends Forge2DGame
-    with HasTappables, HasDraggables {
+class _DynamicNetworkGameEngine extends Forge2DGame {
   _DynamicNetworkGameEngine({required this.root})
       : super(gravity: Vector2(0, 0));
   final NetworkNode root;
@@ -67,11 +67,12 @@ class _DynamicNetworkGameEngine extends Forge2DGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final boundaries = _createBoundaries(this);
-    boundaries.forEach(add);
 
-    final worldCenter = screenToWorld(size * camera.zoom / 2);
-    add(_NetworkNodeComponent(
+    final boundaries = _createBoundaries(this, camera);
+    boundaries.forEach(world.add);
+
+    final worldCenter = camera.visibleWorldRect.center.toVector2();
+    world.add(_NetworkNodeComponent(
       root,
       worldCenter,
       radius: 8,
@@ -80,11 +81,12 @@ class _DynamicNetworkGameEngine extends Forge2DGame
   }
 }
 
-List<_Wall> _createBoundaries(Forge2DGame game) {
-  final topLeft = Vector2.zero();
-  final bottomRight = game.screenToWorld(game.camera.viewport.effectiveSize);
-  final topRight = Vector2(bottomRight.x, topLeft.y);
-  final bottomLeft = Vector2(topLeft.x, bottomRight.y);
+List<_Wall> _createBoundaries(Forge2DGame game, CameraComponent camera) {
+  final visibleRect = game.camera.visibleWorldRect;
+  final topLeft = visibleRect.topLeft.toVector2();
+  final topRight = visibleRect.topRight.toVector2();
+  final bottomRight = visibleRect.bottomRight.toVector2();
+  final bottomLeft = visibleRect.bottomLeft.toVector2();
 
   return [
     _Wall(topLeft, topRight),
@@ -121,7 +123,7 @@ class _Wall extends BodyComponent {
 }
 
 class _NetworkNodeComponent extends BodyComponent
-    with Tappable, Draggable, ContactCallbacks {
+    with TapCallbacks, DragCallbacks, ContactCallbacks {
   _NetworkNodeComponent(
     this.node,
     this._position, {
@@ -131,8 +133,7 @@ class _NetworkNodeComponent extends BodyComponent
     this.ballParent,
     this.openBottomSheetOnTap = true,
   }) {
-    // Node is painted manually on render()
-    paint = Paint()..color = Colors.transparent;
+    paint = Paint()..color = colorGenerationStrategy(node.user.idBase58);
   }
 
   final double radius;
@@ -197,6 +198,18 @@ class _NetworkNodeComponent extends BodyComponent
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    // if level >= 4, the circle is too small to render text
+    if (level < 4) {
+      add(TextComponent(
+        text: initials(node.user.name),
+        textRenderer: TextPaint(
+          style: TextStyle(fontSize: radius, height: 0.7 + 0.0625 * radius),
+        ),
+        anchor: Anchor.center,
+        priority: 2,
+      ));
+    }
+
     if (ballParent != null) restartTimer();
 
     body.setFixedRotation(true);
@@ -209,25 +222,28 @@ class _NetworkNodeComponent extends BodyComponent
       final angle = i * (2 * math.pi / numberOfChildren);
       i++;
 
-      var newRadius = radius * .65 / numberOfChildren;
+      var newRadius = radius * .65;
 
       var polar = Vector2(math.cos(angle), math.sin(angle));
 
       if (initialDirection != null) {
-        polar.rotate(polar.dot(initialDirection!), center: _position);
+        polar.rotate(polar.dot(initialDirection!), center: position);
       }
       final scaled = polar.clone()..scaleTo((radius + newRadius));
 
+      final newPos = position - scaled;
+      final localCenter = body.worldPoint(position) - newPos;
+
       var component = _NetworkNodeComponent(
         child,
-        _position - scaled,
+        localCenter,
         radius: newRadius,
         level: level + 1,
         initialDirection: polar,
         ballParent: this,
       );
 
-      gameRef.add(component);
+      world.add(component);
     }
   }
 
@@ -272,9 +288,10 @@ class _NetworkNodeComponent extends BodyComponent
 
       world.createJoint(DistanceJoint(jointDef));
     } else {
-      final center = gameRef.screenToWorld(gameRef.size * camera.zoom / 2);
-      final fixedPoint =
-          world.createBody(BodyDef(type: BodyType.static, position: center));
+      final center = game.camera.visibleWorldRect.center.toVector2();
+      final fixedPoint = world.createBody(
+        BodyDef(type: BodyType.static, position: center),
+      );
 
       final jointDef = RopeJointDef()
         ..maxLength = 20.0
@@ -288,47 +305,13 @@ class _NetworkNodeComponent extends BodyComponent
     return body;
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    var circle = Paint()..color = colorGenerationStrategy(node.user.idBase58);
-    canvas.drawCircle(Offset.zero, radius, circle);
-
-    const factor = 10;
-    final fontSize = radius * factor;
-
-    // Remove too small to see initials
-    if (fontSize < factor) return;
-
-    if (kDebugMode) {
-      canvas.drawCircle(Offset.zero, .2, Paint()..color = Colors.red);
-    }
-
-    final proportionalFontSize = gameRef.screenToWorld(Vector2(fontSize, 0)).x;
-
-    final style = TextStyle(
-      fontSize: proportionalFontSize,
-      color: Colors.white,
-      fontWeight: FontWeight.w700,
-      // y = 0.0625x+0.7
-      height: 0.7 + 0.0625 * proportionalFontSize,
-    );
-    final tp = TextPainter(
-      text: TextSpan(text: initials(node.user.name), style: style),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-    tp.layout();
-    tp.paint(canvas, Offset.zero - tp.size.center(Offset.zero));
-  }
-
   // **************************
   // Tappable methods
   // **************************
   @override
   bool onTapDown(_) {
-    if (openBottomSheetOnTap && gameRef.buildContext != null) {
-      Scaffold.of(gameRef.buildContext!).showBottomSheet(
+    if (openBottomSheetOnTap && game.buildContext != null) {
+      Scaffold.of(game.buildContext!).showBottomSheet(
         (context) => _NetworkNodeInfoBottomSheet(node: node),
         backgroundColor: Colors.transparent,
       );
@@ -340,7 +323,8 @@ class _NetworkNodeComponent extends BodyComponent
   // Draggable methods
   // **************************
   @override
-  bool onDragStart(DragStartInfo info) {
+  bool onDragStart(DragStartEvent info) {
+    super.onDragStart(info);
     if (ballParent != null) return true;
 
     _timer?.cancel();
@@ -348,7 +332,8 @@ class _NetworkNodeComponent extends BodyComponent
   }
 
   @override
-  bool onDragUpdate(DragUpdateInfo info) {
+  bool onDragUpdate(DragUpdateEvent info) {
+    super.onDragUpdate(info);
     if (ballParent != null) return true;
 
     final mouseJointDef = MouseJointDef()
@@ -364,12 +349,13 @@ class _NetworkNodeComponent extends BodyComponent
       mouseJoint = MouseJoint(mouseJointDef);
       world.createJoint(mouseJoint!);
     }
-    mouseJoint?.setTarget(info.eventPosition.game);
+    mouseJoint?.setTarget(info.localStartPosition);
     return false;
   }
 
   @override
-  bool onDragEnd(DragEndInfo info) {
+  bool onDragEnd(DragEndEvent info) {
+    super.onDragEnd(info);
     if (ballParent != null || mouseJoint == null) return true;
 
     world.destroyJoint(mouseJoint!);
@@ -379,7 +365,8 @@ class _NetworkNodeComponent extends BodyComponent
   }
 
   @override
-  bool onDragCancel() {
+  bool onDragCancel(DragCancelEvent event) {
+    super.onDragCancel(event);
     if (ballParent != null) return true;
 
     restartTimer();
