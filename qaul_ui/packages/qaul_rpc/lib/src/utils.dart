@@ -26,6 +26,9 @@ mixin FilePathResolverMixin {
     required String extension,
   }) {
     var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
+    if (Platform.isWindows){
+      storagePath = read(libqaulLogsStoragePath)!.replaceAll('\\logs', '');  
+    }
     var uuid = read(defaultUserProvider)!.idBase58;
 
     return '$storagePath/$uuid/files/$id.$extension';
