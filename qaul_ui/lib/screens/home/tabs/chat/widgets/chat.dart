@@ -322,7 +322,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         },
               onSendAudioPressed: !(Platform.isAndroid ||
                       Platform.isIOS ||
-                      Platform.isMacOS)
+                      Platform.isMacOS ||
+                      Platform.isWindows)
                   ? null
                   : (room.messages?.isEmpty ?? true)
                       ? null
