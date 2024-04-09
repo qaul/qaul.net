@@ -22,15 +22,13 @@ class NetworkNode extends Equatable {
     var rootNode = NetworkNode(user: root, children: const {});
     if (users.isEmpty) return rootNode;
 
-    bool typeIsNotAll(NetworkTypeFilter t) => t != NetworkTypeFilter.all;
-
     final options = filter != NetworkTypeFilter.all
         ? [filter]
-        : NetworkTypeFilter.values.where(typeIsNotAll).toList();
+        : [NetworkTypeFilter.bluetooth, NetworkTypeFilter.internet, NetworkTypeFilter.lan];
 
-    if (filter == NetworkTypeFilter.all) {
-      users = _filterOutRepeatingConnections(users);
-    }
+    // if (filter == NetworkTypeFilter.all) {
+    //   users = _filterOutRepeatingConnections(users);
+    // }
 
     final unstructured = _assignParentToChildNodes(root, users, options);
     return _buildNetworkNodeListRecursively(rootNode, allNodes: unstructured);

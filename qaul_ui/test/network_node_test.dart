@@ -378,4 +378,56 @@ void main() {
       ),
     );
   });
+
+  test('Node with cyclic reference drops worst connection 2', () async {
+    var user = generateUser('a');
+
+    var peer1 = generateUser('t v', connections: const {
+      ConnectionType.ble: ConnectionInfo(ping: 3, hopCount: 2),
+      ConnectionType.lan: ConnectionInfo(ping: 218, hopCount: 1),
+      ConnectionType.internet: ConnectionInfo(ping: 115, hopCount: 2),
+    });
+    var peer2 = generateUser('b', connections: const {
+      ConnectionType.ble: ConnectionInfo(ping: 0, hopCount: 1),
+      ConnectionType.lan: ConnectionInfo(ping: 19, hopCount: 1),
+      ConnectionType.internet: ConnectionInfo(ping: 50, hopCount: 1),
+    });
+    var peer3 = generateUser('c', connections: const {
+      ConnectionType.ble: ConnectionInfo(ping: 312, hopCount: 4),
+      ConnectionType.lan: ConnectionInfo(ping: 527, hopCount: 3),
+    });
+    var peer4 = generateUser('d', connections: const {
+      ConnectionType.ble: ConnectionInfo(ping: 44, hopCount: 3),
+      ConnectionType.lan: ConnectionInfo(ping: 259, hopCount: 2),
+    });
+    final users = [
+      peer1,
+      peer2,
+      peer3,
+      peer4,
+    ];
+
+    final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.all);
+
+    expect(
+      tree,
+      NetworkNode(
+        user: user,
+        children: {
+          toNetworkNode(peer2, parent: user, children: {
+            toNetworkNode(peer1, parent: peer2, children: {
+              toNetworkNode(peer4, parent: peer1, children: {
+                toNetworkNode(peer3, parent: peer4),
+              }),
+            }),
+          }),
+          toNetworkNode(peer1, parent: user, children: {
+            toNetworkNode(peer4, parent: peer1, children: {
+              toNetworkNode(peer3, parent: peer4),
+            }),
+          }),
+        },
+      ),
+    );
+  });
 }
