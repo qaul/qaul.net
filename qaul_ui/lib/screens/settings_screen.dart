@@ -252,7 +252,7 @@ class _AddNodeDialog extends HookWidget {
     this.ip,
     this.port,
     this.isIPv4 = true,
-    this.usesQuic = false,
+    this.usesQuic = true,
   }) : super(key: key);
 
   final String? name;
