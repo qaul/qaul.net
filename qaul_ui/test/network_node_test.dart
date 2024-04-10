@@ -379,10 +379,11 @@ void main() {
     );
   });
 
-  test('Node with cyclic reference drops worst connection 2', () async {
-    var user = generateUser('a');
+  test('branch one takes the LAN Path, branch two takes the Internet Path', () async {
+    var user = generateUser('0');
 
-    var peer1 = generateUser('t v', connections: const {
+    // Branch 1
+    var peer1 = generateUser('a', connections: const {
       ConnectionType.ble: ConnectionInfo(ping: 3, hopCount: 2),
       ConnectionType.lan: ConnectionInfo(ping: 218, hopCount: 1),
       ConnectionType.internet: ConnectionInfo(ping: 115, hopCount: 2),
@@ -400,11 +401,23 @@ void main() {
       ConnectionType.ble: ConnectionInfo(ping: 44, hopCount: 3),
       ConnectionType.lan: ConnectionInfo(ping: 259, hopCount: 2),
     });
+
+    // Branch 2
+    var peer5 = generateUser('f', connections: const {
+      ConnectionType.internet: ConnectionInfo(ping: 180, hopCount: 1),
+    });
+    var peer6 = generateUser('g', connections: const {
+      ConnectionType.internet: ConnectionInfo(ping: 250, hopCount: 2),
+    });
+
     final users = [
       peer1,
       peer2,
       peer3,
       peer4,
+
+      peer5,
+      peer6,
     ];
 
     final tree = NetworkNode.fromUserData(user, users, NetworkTypeFilter.all);
@@ -425,6 +438,10 @@ void main() {
             toNetworkNode(peer4, parent: peer1, children: {
               toNetworkNode(peer3, parent: peer4),
             }),
+          }),
+
+          toNetworkNode(peer5, parent: user, children: {
+            toNetworkNode(peer6, parent: peer5),
           }),
         },
       ),

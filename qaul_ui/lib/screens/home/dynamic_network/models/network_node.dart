@@ -12,6 +12,12 @@ class NetworkNode extends Equatable {
   final Uint8List? parentId;
   final Set<NetworkNode>? children;
 
+  @override
+  List<Object?> get props => [user];
+
+  @override
+  String toString() => 'NetworkNode(${user.name}, children: $children)';
+
   Uint8List get id => user.id;
 
   factory NetworkNode.fromUserData(
@@ -24,17 +30,23 @@ class NetworkNode extends Equatable {
 
     final options = filter != NetworkTypeFilter.all
         ? [filter]
-        : [NetworkTypeFilter.bluetooth, NetworkTypeFilter.internet, NetworkTypeFilter.lan];
+        : [
+            NetworkTypeFilter.lan,
+            NetworkTypeFilter.bluetooth,
+            NetworkTypeFilter.internet,
+          ];
 
-    // if (filter == NetworkTypeFilter.all) {
-    //   users = _filterOutRepeatingConnections(users);
-    // }
+    Set<NetworkNode> nodes = {};
+    for (final opt in options) {
+      final a = _assignParentToChildNodes(root, users, [opt]);
+      nodes = nodes.union(a);
 
-    final unstructured = _assignParentToChildNodes(root, users, options);
-    return _buildNetworkNodeListRecursively(rootNode, allNodes: unstructured);
+    }
+
+    return _buildNetworkNodeListRecursively(rootNode, allNodes: nodes.toList());
   }
 
-  static List<NetworkNode> _assignParentToChildNodes(
+  static Set<NetworkNode> _assignParentToChildNodes(
     User root,
     List<User> users,
     List<NetworkTypeFilter> options,
@@ -44,44 +56,13 @@ class NetworkNode extends Equatable {
         u.availableTypes![type]!.hopCount != null &&
         u.availableTypes![type]!.ping != null;
 
-    final unstructured = <NetworkNode>[];
+    final unstructured = <NetworkNode>{};
     for (final type in options) {
       final flt = _mapFilter(type);
       final fltrd = users.where((u) => hasValidConnectionData(u, flt)).toList();
       unstructured.addAll(_prepareUnstructuredNetworkNodes(root, fltrd, flt));
     }
     return unstructured;
-  }
-
-  static List<User> _filterOutRepeatingConnections(List<User> users) {
-    bool connectionIsBetter(MapEntry<ConnectionType, ConnectionInfo> entry,
-        {required MapEntry<ConnectionType, ConnectionInfo> reference}) =>
-        (entry.value.hopCount ?? -1) < (reference.value.hopCount ?? -1) ||
-            (entry.value.ping ?? -1) < (reference.value.ping ?? -1);
-
-    final out = <User>[];
-    for (final usr in users) {
-      if (usr.availableTypes?.keys.length == 1) {
-        out.add(usr);
-        continue;
-      }
-
-      MapEntry<ConnectionType, ConnectionInfo>? bestConnection;
-      for (final MapEntry<ConnectionType, ConnectionInfo> entry
-      in (usr.availableTypes?.entries ?? const Iterable.empty())) {
-        if (bestConnection == null) {
-          bestConnection = entry;
-          continue;
-        }
-        if (!connectionIsBetter(entry, reference: bestConnection)) continue;
-
-        bestConnection = entry;
-      }
-      if (bestConnection == null) continue;
-
-      out.add(usr.copyWith(availableTypes: {}..addEntries([bestConnection])));
-    }
-    return out;
   }
 
   static List<NetworkNode> _prepareUnstructuredNetworkNodes(
@@ -149,10 +130,4 @@ class NetworkNode extends Equatable {
           .toSet(),
     );
   }
-
-  @override
-  List<Object?> get props => [user, parentId, children];
-
-  @override
-  String toString() => 'NetworkNode(${user.name}, children: $children)';
 }
