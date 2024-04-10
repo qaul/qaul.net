@@ -143,11 +143,11 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
                 children: [
                   OutlinedButton(
                     onPressed: onCancelPressed,
-                    child: Text('Cancel'),
+                    child: const Text('Cancel'),
                   ),
                   FilledButton(
                     onPressed: onSendPressed,
-                    child: Text('Send'),
+                    child: const Text('Send'),
                   ),
                 ],
               ),
