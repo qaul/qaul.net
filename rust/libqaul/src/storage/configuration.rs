@@ -102,7 +102,7 @@ impl Default for Internet {
         Internet {
             active: true,
             peers: vec![InternetPeer {
-                address: String::from("/ip4/144.91.74.192/tcp/9229"),
+                address: String::from("/ip4/144.91.74.192/udp/9229/quic-v1"),
                 name: String::from("qaul Community Node"),
                 enabled: false,
             }],

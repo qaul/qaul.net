@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0 beta 18] 2024-04-11
+
+This release moves away from the unmaintained `sled-extensions` data base extensions to a direct use of the `sled` data base.
+
+Added
+
+- Automatically generate SBOM files for all binaries.
+- UI redesign for simple adding of static links (Community Nodes) with many options: QUIC/TCP/IPv4/IPv6
+
+Fixed
+
+- UI: block user issue fixed
+- Fixed a crash on Android, when BLE failed to initialize on a device (thanks to @link2xt)
+
+Changed
+
+- migrated from sled 0.29 used by sled-extensions to current sled 0.34.7.
+- upgraded many libraries
+- made `quic` the default transport option for static links
+
 ## [2.0.0 beta 17] 2023-11-26
 
 This release upgrades libp2p to 0.52.4 and includes the new `quic` transport protocol option.

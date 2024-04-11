@@ -1,6 +1,6 @@
 [package]
 name = "qauld"
-version = "2.0.0-beta.17"
+version = "2.0.0-beta.18"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 description = "qaul daemon"
@@ -14,14 +14,14 @@ repository = "https://github.com/qaul/qaul.net"
 [dependencies]
 libqaul = { path = "../../libqaul" }
 async-std = { version = "1.12.0", features = ["attributes"] }
-futures = "0.3.29"
-log = "0.4.20"
+futures = "0.3.30"
+log = "0.4.21"
 pretty_env_logger = "0.5.0"
 prost = "0.12.3"
 futures-ticker = "0.0.3"
 state = "0.6.0"
-bs58 = "0.5.0"
-clap = { version = "4.4.8", features = ["derive"]}
+bs58 = "0.5.1"
+clap = { version = "4.5.4", features = ["derive"]}
 
 
 [package.metadata.deb]

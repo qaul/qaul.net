@@ -7,6 +7,10 @@ node.db/
 logs/
 version
 
+# generated SBOM files
+*.cdx.json
+*.spdx.json
+
 # android artifacts
 android/app/debug
 android/app/profile
