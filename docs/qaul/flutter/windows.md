@@ -3,11 +3,11 @@
 ## Prerequisits
 ### Install Visual Studio
 
-In order to develop for the windows desktop platform you need to have 'Microsoft Visual Studio 2019' or 'Microsoft Visual Studio 2022' installed.
+In order to develop for the windows desktop platform you need to have 'Microsoft Visual Studio 2022' installed.
 
 <https://visualstudio.microsoft.com/downloads/>
 
-In Microsoft Visual Studio 2019/2022, you need to have 'Desktop development with C++' workload installed.
+In Microsoft Visual Studio 2022, you need to have 'Desktop development with C++' workload installed.
 
 ### Install Git for Windows
 
@@ -73,7 +73,7 @@ cargo build
 # copy libqaul.dll to flutter runner
 ## this step is required in order to run flutter app
 ## create the location folder if it does not yet exist
-cp .\target\debug\libqaul.dll ..\qaul_ui\build\windows\runner\Debug\
+cp .\target\debug\libqaul.dll ..\qaul_ui\build\windows\x64\runner\Debug\
 ```
 
 ### Build and Run Windows Desktop App
