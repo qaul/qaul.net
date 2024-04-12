@@ -16,7 +16,8 @@ Added
 
 Fixed
 
-- UI: block user issue fixed
+- UI: block user issue fixed 
+- UI: Network view upgraded & fixed not showing all connections
 - Fixed a crash on Android, when BLE failed to initialize on a device (thanks to @link2xt)
 
 Changed
