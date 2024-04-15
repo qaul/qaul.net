@@ -21,7 +21,7 @@ steps:
   - store_artifacts:
       path: sbom.spdx.json
   - persist_to_workspace:
-      root: ~/qaul-libp2p
+      root: ~/qaul.net
       paths:
         - sbom.cdx.json
         - sbom.spdx.json

@@ -705,7 +705,7 @@ jobs:
                 paths:
                     - sbom.cdx.json
                     - sbom.spdx.json
-                root: ~/qaul-libp2p
+                root: ~/qaul.net
     integration-test-flutter-android:
         environment:
             _JAVA_OPTIONS: -Xmx3g
