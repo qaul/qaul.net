@@ -16,7 +16,7 @@ slots:
 apps:
   qaul:
     command: bin/qaul
-    extensions: [gnome-3-34]
+    extensions: [gnome-3-38]
     plugs:
       - home
       - mount-observe
