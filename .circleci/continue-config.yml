@@ -146,14 +146,14 @@ executors:
         working_directory: ~/qaul.net/qaul_ui/ios
     flutter-linux:
         environment:
-            FLUTTER_VERSION: 3.16.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202010-01
         working_directory: ~/qaul.net/qaul_ui
     flutter-linux-arm:
         environment:
-            FLUTTER_VERSION: 3.16.5
+            FLUTTER_VERSION: 3.16.0
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
             image: ubuntu-2004:202101-01
