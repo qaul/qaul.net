@@ -44,6 +44,10 @@ brew install gh
 # Download Libqaul *.dylib File from latest Github Release
 gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/"
 
+# Force signature on dylib
+CODE_SIGNING_IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Distribution: Verein" | awk '{print $2}')
+codesign --force --sign "$CODE_SIGNING_IDENTITY" liblibqaul.dylib
+
 # Pre-build for macos
 flutter build macos --config-only
 
