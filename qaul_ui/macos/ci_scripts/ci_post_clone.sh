@@ -19,7 +19,7 @@ set -e
 #
 
 # The default execution directory of this script is the ci_scripts directory.
-cd $CI_PRIMARY_REPOSITORY_PATH # change working directory to the root of cloned repo.
+cd $CI_PRIMARY_REPOSITORY_PATH/qaul_ui # change working directory to the root of cloned repo.
 
 # Install Flutter using git.
 git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter
@@ -42,6 +42,6 @@ cd macos && pod install # run `pod install` in the `macos` directory.
 brew install gh
 
 # Download Libqaul *.dylib File from latest Github Release
-gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/" --dir .
+gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/"
 
 exit 0
