@@ -246,11 +246,11 @@ jobs:
                 name: Install Github CLI and unzip
             - run:
                 command: |
-                    gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir qaul_ui/android/libqaul/src/main/jniLibs
+                    gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
                 name: Download Libqaul jniLibs from latest Github Release
             - run:
                 command: |
-                    cd qaul_ui/android/libqaul/src/main/jniLibs
+                    cd libqaul/src/main/jniLibs
                     unzip jniLibs.zip
                 name: Unzip compressed jniLibs
             - install-flutter:

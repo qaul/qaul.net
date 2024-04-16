@@ -11,11 +11,11 @@ steps:
   - run:
       name: Download Libqaul jniLibs from latest Github Release
       command: |
-        gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir qaul_ui/android/libqaul/src/main/jniLibs
+        gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
   - run:
       name: Unzip compressed jniLibs
       command: |
-        cd qaul_ui/android/libqaul/src/main/jniLibs
+        cd libqaul/src/main/jniLibs
         unzip jniLibs.zip
   - install-flutter:
       version: "$FLUTTER_VERSION"
