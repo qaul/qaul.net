@@ -45,6 +45,6 @@ brew install gh
 gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/"
 
 # Pre-build for macos
-flutter build macos --config-only --no-codesign
+flutter build macos --config-only
 
 exit 0
