@@ -112,4 +112,5 @@ steps:
           -n "qaul - v${RUST_VERSION}" \
           -b "${DESCRIPTION}" \
           -replace \
+          -prerelease \
           "${TAG}" .
