@@ -30,7 +30,6 @@ flutter precache --macos
 
 # Install Flutter dependencies.
 flutter pub get
-flutter build macos
 
 # Install CocoaPods using Homebrew.
 HOMEBREW_NO_AUTO_UPDATE=1 # disable homebrew's automatic updates.
@@ -44,5 +43,8 @@ brew install gh
 
 # Download Libqaul *.dylib File from latest Github Release
 gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/"
+
+# Pre-build for macos
+flutter build macos
 
 exit 0
