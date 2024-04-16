@@ -30,6 +30,7 @@ flutter precache --macos
 
 # Install Flutter dependencies.
 flutter pub get
+flutter build macos
 
 # Install CocoaPods using Homebrew.
 HOMEBREW_NO_AUTO_UPDATE=1 # disable homebrew's automatic updates.
