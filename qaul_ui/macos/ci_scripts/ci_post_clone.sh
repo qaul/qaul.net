@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 #-----------------------------------------------------------------NoticeStart-
@@ -36,12 +36,12 @@ HOMEBREW_NO_AUTO_UPDATE=1 # disable homebrew's automatic updates.
 brew install cocoapods
 
 # Install CocoaPods dependencies.
-cd ios && pod install # run `pod install` in the `ios` directory.
+cd macos && pod install # run `pod install` in the `macos` directory.
 
 # Install Github CLI
 brew install gh
 
 # Download Libqaul *.dylib File from latest Github Release
-gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/" --dir macos
+gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/" --dir .
 
 exit 0
