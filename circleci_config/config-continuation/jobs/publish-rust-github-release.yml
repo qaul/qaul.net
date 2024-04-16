@@ -93,8 +93,8 @@ steps:
           | sed "s/DEB_ARM64/${ARM64_FILE}/g" \
           | sed "s/DEB_ARMHF/${ARMHF_FILE}/g" \
           | sed "s/APKVERSION/${APK_FILE}/g" \
-          | sed "s/SNAPVERSION/${LINUX_FILE}/g" \
-          | sed "s/ARMSNAPVERSION/${LINUX_ARM_FILE}/g" \
+          | sed "s/SNAP_VERSION/${LINUX_FILE}/g" \
+          | sed "s/SNAP_ARM_VERSION/${LINUX_ARM_FILE}/g" \
           | sed "s/MACOSVERSION/${MACOS_FILE}/g" \
           | sed "s/WINDOWSVERSION/${WINDOWS_FILE}/g" \
         )
