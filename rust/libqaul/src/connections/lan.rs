@@ -171,7 +171,9 @@ impl Lan {
 
         // create MDNS behaviour
         // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-        let mdns = mdns::async_io::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
+        let mut mdns_config = mdns::Config::default();
+        mdns_config.enable_ipv6 = true;
+        let mdns = mdns::async_io::Behaviour::new(mdns_config, Node::get_id()).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
