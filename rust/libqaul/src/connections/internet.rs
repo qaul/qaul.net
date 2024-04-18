@@ -13,7 +13,7 @@
 //! internet:
 //!   active: true
 //!   peers:
-//!   - address: /ip4/144.91.74.192/tcp/9229
+//!   - address: /ip4/144.91.74.192/udp/9229/quic-v1
 //!     name: qaul Community Node
 //!     enabled: false
 //!   do_listen: false
