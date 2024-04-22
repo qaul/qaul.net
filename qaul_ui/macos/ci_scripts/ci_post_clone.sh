@@ -38,11 +38,8 @@ brew install cocoapods
 # Install CocoaPods dependencies.
 cd macos && pod install # run `pod install` in the `macos` directory.
 
-# Install Github CLI
-brew install gh
-
-# Download Libqaul *.dylib File from latest Github Release
-gh release download --pattern "*.dylib" --repo "https://github.com/qaul/qaul.net/"
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # Pre-build for macos
 flutter build macos --config-only

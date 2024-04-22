@@ -35,7 +35,7 @@ class LibqaulFFI extends LibqaulInterface {
       }
     } else if (Platform.isMacOS) {
       // find the library in the rust target build folder
-      _lib = DynamicLibrary.open('liblibqaul.dylib');
+      _lib = DynamicLibrary.open('libqaul.dylib');
     } else if (Platform.isWindows) {
       var lib =
           Platform.script.resolve('libqaul.dll').toFilePath(windows: true);
