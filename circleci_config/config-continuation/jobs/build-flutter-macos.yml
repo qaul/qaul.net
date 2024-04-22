@@ -7,7 +7,11 @@ steps:
   - run:
       name: Download Libqaul *.dylib File from latest Github Release
       command: |
-        gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        TAG="v${VERSION}"
+        echo "Downloading assets from the release tag '$TAG'"
+        
+        gh release download "$TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
   - run:
       name: Install node-appdmg
       command: |

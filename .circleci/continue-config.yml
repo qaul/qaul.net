@@ -246,7 +246,11 @@ jobs:
                 name: Install Github CLI and unzip
             - run:
                 command: |
-                    gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
+                    VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    TAG="v${VERSION}"
+                    echo "Downloading assets from the release tag '$TAG'"
+
+                    gh release download "$TAG" --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
                 name: Download Libqaul jniLibs from latest Github Release
             - run:
                 command: |
@@ -282,7 +286,11 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    gh release download --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
+                    VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    TAG="v${VERSION}"
+                    echo "Downloading assets from the release tag '$TAG'"
+
+                    gh release download "$TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -348,7 +356,11 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    gh release download --pattern "*.dylib" --repo "$REPO_URL" --dir macos
+                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    TAG="v${VERSION}"
+                    echo "Downloading assets from the release tag '$TAG'"
+
+                    gh release download "$TAG" --pattern "*.dylib" --repo "$REPO_URL" --dir macos
                 name: Download Libqaul *.dylib File from latest Github Release
             - run:
                 command: |
@@ -393,7 +405,11 @@ jobs:
             - run:
                 command: |
                     export PATH="/c/Program Files/Github CLI:${PATH}"
-                    gh release download --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    TAG="v${VERSION}"
+                    echo "Downloading assets from the release tag '$TAG'"
+
+                    gh release download "$TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
                 name: Download Libqaul *.dll File from latest Github Release
             - install-flutter:
                 version: $FLUTTER_VERSION
@@ -951,6 +967,7 @@ jobs:
                       -c "${CIRCLE_SHA1}" \
                       -n "qaul - v${RUST_VERSION}" \
                       -replace \
+                      -prerelease \
                       "${TAG}" .
                 name: Publish Release on GitHub
     publish-rust-github-release:
@@ -1067,6 +1084,7 @@ jobs:
                       -n "qaul - v${RUST_VERSION}" \
                       -b "${DESCRIPTION}" \
                       -replace \
+                      -prerelease \
                       "${TAG}" .
                 name: Publish Release on GitHub
     test-flutter:

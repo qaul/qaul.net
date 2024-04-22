@@ -11,7 +11,11 @@ steps:
   - run:
       name: Download Libqaul jniLibs from latest Github Release
       command: |
-        gh release download --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
+        VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        TAG="v${VERSION}"
+        echo "Downloading assets from the release tag '$TAG'"
+        
+        gh release download "$TAG" --pattern "jniLibs.zip" --repo "$REPO_URL" --dir libqaul/src/main/jniLibs
   - run:
       name: Unzip compressed jniLibs
       command: |

@@ -18,7 +18,11 @@ steps:
       name: Download Libqaul *.dll File from latest Github Release
       command: |
         export PATH="/c/Program Files/Github CLI:${PATH}"
-        gh release download --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
+        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        TAG="v${VERSION}"
+        echo "Downloading assets from the release tag '$TAG'"
+        
+        gh release download "$TAG" --pattern "*.dll" --repo "$REPO_URL" --dir ../rust/target/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
   - run:
