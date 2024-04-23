@@ -1,6 +1,5 @@
 // !$*UTF8*$!
 {
-	/* generated with cargo-xcode 1.10.0 */
 	archiveVersion = 1;
 	classes = {
 	};
@@ -34,7 +33,7 @@
 /* Begin PBXFileReference section */
 		CA00102577DC479D50D4B138 /* libqaul.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libqaul.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA01D2BC11242EFCF5272DF3 /* liblibqaul_static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibqaul_static.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		CAF989BF31013EF4668187A5 /* Cargo.toml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cargo.toml; path = Cargo.toml; sourceTree = "<group>"; };
+		CAF989BF31013EF4668187A5 /* Cargo.toml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cargo.toml; path = ../../rust/libqaul/Cargo.toml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -156,17 +155,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		CA00B2665C69499D38D54C43 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
-				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.dylib;
-				DYLIB_COMPATIBILITY_VERSION = 2;
-				PRODUCT_NAME = libqaul;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
-			};
-			name = Release;
-		};
 		CA00997E051E499D38D54C43 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -174,21 +162,18 @@
 				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.dylib;
 				DYLIB_COMPATIBILITY_VERSION = 2;
 				PRODUCT_NAME = libqaul;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
 		};
-		CA01B2665C693EF60293643C /* Release */ = {
+		CA00B2665C69499D38D54C43 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
-				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.a;
-				INSTALL_GROUP = "";
-				INSTALL_MODE_FLAG = "";
-				INSTALL_OWNER = "";
-				PRODUCT_NAME = libqaul_static;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "xrsimulator xros watchsimulator watchos macosx iphonesimulator iphoneos driverkit appletvsimulator appletvos";
+				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.dylib;
+				DYLIB_COMPATIBILITY_VERSION = 2;
+				PRODUCT_NAME = libqaul;
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
 		};
@@ -197,22 +182,24 @@
 			buildSettings = {
 				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
 				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.a;
-				INSTALL_GROUP = "";
-				INSTALL_MODE_FLAG = "";
-				INSTALL_OWNER = "";
 				PRODUCT_NAME = libqaul_static;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "xrsimulator xros watchsimulator watchos macosx iphonesimulator iphoneos driverkit appletvsimulator appletvos";
+				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Debug;
+		};
+		CA01B2665C693EF60293643C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
+				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.a;
+				PRODUCT_NAME = libqaul_static;
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
 		};
 		CAF7548B5B243CC16B37690B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"ADDITIONAL_SDKS[sdk=i*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=w*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=x*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=a*]" = macosx;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CARGO_TARGET_DIR = "$(PROJECT_TEMP_DIR)/cargo_target";
 				CARGO_XCODE_BUILD_PROFILE = release;
@@ -223,6 +210,7 @@
 				PRODUCT_NAME = libqaul;
 				RUSTUP_TOOLCHAIN = "";
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
 			};
 			name = Release;
@@ -230,10 +218,6 @@
 		CAF8548B5B24228BE02872F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				"ADDITIONAL_SDKS[sdk=i*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=w*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=x*]" = macosx;
-				"ADDITIONAL_SDKS[sdk=a*]" = macosx;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CARGO_TARGET_DIR = "$(PROJECT_TEMP_DIR)/cargo_target";
 				CARGO_XCODE_BUILD_PROFILE = debug;
@@ -245,6 +229,7 @@
 				PRODUCT_NAME = libqaul;
 				RUSTUP_TOOLCHAIN = "";
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
 			};
 			name = Debug;
