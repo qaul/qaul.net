@@ -41,6 +41,9 @@ cd macos && pod install # run `pod install` in the `macos` directory.
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
+# Install protobuf
+brew install protobuf
+
 # Pre-build for macos
 flutter build macos --config-only
 
