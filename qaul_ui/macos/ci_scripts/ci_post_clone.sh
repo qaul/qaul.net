@@ -10,9 +10,10 @@ set -e
 #
 # DESCRIPTION
 #   This post-clone script is meant to be used to setup the XCode Cloud
-#   environment. It does mainly two things:
-#     - download and install flutter
-#     - download the latest libqaul *.dylib
+#   environment. It does:
+#     - install flutter
+#     - install rust
+#     - install protoc (rust dependency)
 #
 #   It's based on the Flutter documentation for setting up XCode Cloud:
 #   https://docs.flutter.dev/deployment/cd#custom-build-script

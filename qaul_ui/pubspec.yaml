@@ -3,7 +3,7 @@ description: qaul - Internet Independent Wireless Mesh Communication App
 
 publish_to: "none"
 
-version: 2.0.0+1185
+version: 2.0.0-beta.18+1185
 
 environment:
   sdk: ">=2.15.0 <3.0.0"
