@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1300"
-   version = "1.7">
+   version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -83,23 +83,5 @@
    <ArchiveAction
       buildConfiguration = "Release"
       revealArchiveInOrganizer = "NO">
-      <PostActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Script"
-               scriptText = "# notarytool credentials.&#10;# This assumes that a valid profile named &quot;NOTARY_PASSWORD&quot; is available in the Keychain.&#10;# The following command creates such profile:&#10;# xcrun notarytool store-credentials &quot;NOTARY_PASSWORD&quot; \&#10;#               --apple-id &quot;AC_USERNAME&quot; \&#10;#               --team-id &lt;WWDRTeamID&gt; \&#10;#               --password &lt;secret_2FA_password&gt;&#10;# See: https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow&#10;# See: https://support.apple.com/en-us/HT204397&#10;AC_PASSWORD=&quot;NOTARY_PASSWORD&quot;&#10;&#10;# Initialize variables&#10;# Do all of the work in a subdirectory of /tmp, and use a&#10;# unique ID so that there&apos;s no collision with previous builds.&#10;EXPORT_UUID=`uuidgen`&#10;EXPORT_PATH=&quot;/tmp/$PRODUCT_NAME-$EXPORT_UUID/&quot;&#10;APP_PATH=&quot;$EXPORT_PATH/$PRODUCT_NAME.app&quot;&#10;DMG_PATH=&quot;$EXPORT_PATH/$PRODUCT_NAME.dmg&quot;&#10;&#10;mkdir -p &quot;$EXPORT_PATH&quot;&#10;&#10;# Xcode doesn&apos;t show run script errors in build log.&#10;exec &gt; &quot;$EXPORT_PATH/Xcode run script.log&quot; 2&gt;&amp;1&#10;&#10;&#10;# Use osascript(1) to present notification banners; otherwise&#10;# there&apos;s no progress indication until the script finishes.&#10;/usr/bin/osascript -e &apos;display notification &quot;Exporting application archive&#x2026;&quot; with title &quot;Submitting app for notarization&quot;&apos;&#10;&#10;&#10;# Ask xcodebuild(1) to export the app. Use the export options&#10;# from a previous manual export that used a Developer ID.&#10;/usr/bin/xcodebuild -exportArchive -archivePath &quot;$ARCHIVE_PATH&quot; -exportOptionsPlist &quot;$SRCROOT/ExportOptions.plist&quot; -exportPath &quot;$EXPORT_PATH&quot;&#10;&#10;&#10;osascript -e &apos;display notification &quot;Creating UDIF Disk Image&#x2026;&quot; with title &quot;Submitting app for notarization&quot;&apos;&#10;&#10;&#10;# Create a UDIF bzip2-compressed disk image.&#10;cd &quot;$EXPORT_PATH/&quot;&#10;mkdir &quot;$PRODUCT_NAME&quot;&#10;mv -v &quot;$APP_PATH&quot; &quot;$PRODUCT_NAME&quot;&#10;&#10;&#10;/usr/bin/hdiutil create -srcfolder &quot;$PRODUCT_NAME&quot; -format UDBZ &quot;$DMG_PATH&quot;&#10;&#10;&#10;osascript -e &apos;display notification &quot;Submitting UDIF Disk Image for notarization&#x2026;&quot; with title &quot;Submitting app for notarization&quot;&apos;&#10;&#10;&#10;# Submit the finished deliverables for notarization.&#10;# Wait up to 2 hours for a response.&#10;# Use verbose logging in order to file feedback if an error occurs.&#10;&quot;$DEVELOPER_BIN_DIR/notarytool&quot; submit -p &quot;$AC_PASSWORD&quot; --verbose &quot;$DMG_PATH&quot; --wait --timeout 2h --output-format plist &gt; &quot;NotarizationResponse.plist&quot;&#10;&#10;return_code=$?&#10;&#10;&#10;if [ $return_code -eq 0 ]; then&#10;message=`/usr/libexec/PlistBuddy -c &quot;Print :message&quot; &quot;NotarizationResponse.plist&quot;`&#10;status=`/usr/libexec/PlistBuddy -c &quot;Print :status&quot; &quot;NotarizationResponse.plist&quot;`&#10;else&#10;message=&quot;An Error Occurred.&quot;&#10;status=&quot;Check Xcode log.&quot;&#10;open &quot;$EXPORT_PATH/Xcode run script.log&quot;&#10;fi&#10;&#10;&#10;# Show and speak the final status.&#10;osascript -e &quot;on run(argv)&quot; \&#10;-e &apos;display notification item 1 of argv &amp; &quot; : &quot; &amp; item 2 of argv with title &quot;Submitting app for notarization&quot; sound name &quot;Crystal&quot;&apos; \&#10;-e &apos;set text item delimiters to &quot;, &quot;&apos; \&#10;-e &quot;set args to argv as text&quot; \&#10;-e &quot;delay 5&quot; \&#10;-e &quot;end&quot; \&#10;-- &quot;$message&quot; &quot;$status&quot;&#10;&#10;&#10;# Echo the folder that was created, which also signals completion.&#10;echo &quot;$EXPORT_PATH&quot; &gt; &quot;/tmp/xcode_archive.out&quot;&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "33CC10EC2044A3C60003C045"
-                     BuildableName = "qaul &#x2013; &#x642;&#x648;&#x644;.app"
-                     BlueprintName = "Runner"
-                     ReferencedContainer = "container:Runner.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PostActions>
    </ArchiveAction>
 </Scheme>
