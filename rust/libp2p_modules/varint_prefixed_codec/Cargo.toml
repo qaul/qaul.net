@@ -1,0 +1,13 @@
+[package]
+name = "varint_prefixed_codec"
+edition = "2021"
+description = "Codec for qaul's libp2p protocols. This codec check for a configurable maximal package length and prefixes each package with it's length encoded as `unsigned_varint`."
+version = "1.0.0"
+authors = ["qaul community <contact@qaul.net>"]
+license = "AGPL"
+
+[dependencies]
+asynchronous-codec = "0.7"
+bytes = "1.6"
+unsigned-varint = "0.8"
+log = "0.4"

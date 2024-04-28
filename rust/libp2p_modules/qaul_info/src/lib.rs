@@ -6,12 +6,15 @@
 //! This module is a libp2p swarm-behaviour module.
 //! It manages and defines the routing info exchange protocol.
 
+//pub mod codec;
+//pub mod length_codec;
+//pub mod max_varint_codec;
 pub mod protocol;
 pub mod types;
 
 use libp2p::{
     core::Multiaddr,
-    swarm::{NetworkBehaviour, NotifyHandler, OneShotHandler, PollParameters, ToSwarm},
+    swarm::{NetworkBehaviour, NotifyHandler, OneShotHandler, ToSwarm},
     PeerId,
 };
 use std::{
@@ -63,11 +66,7 @@ impl NetworkBehaviour for QaulInfo {
     type ConnectionHandler = OneShotHandler<QaulInfoProtocol, QaulInfoData, InnerMessage>;
     type ToSwarm = QaulInfoEvent;
 
-    fn poll(
-        &mut self,
-        _: &mut Context<'_>,
-        _: &mut impl PollParameters,
-    ) -> Poll<ToSwarm<Self::ToSwarm, QaulInfoData>> {
+    fn poll(&mut self, _: &mut Context<'_>) -> Poll<ToSwarm<Self::ToSwarm, QaulInfoData>> {
         if let Some(event) = self.events.pop_front() {
             return Poll::Ready(event);
         }
@@ -104,7 +103,7 @@ impl NetworkBehaviour for QaulInfo {
     /// This callback function informs the behaviour about an event from Swarm.
     /// For documentation please see:
     /// https://docs.rs/libp2p/latest/libp2p/swarm/trait.NetworkBehaviour.html#tymethod.on_swarm_event
-    fn on_swarm_event(&mut self, _event: libp2p::swarm::FromSwarm<Self::ConnectionHandler>) {}
+    fn on_swarm_event(&mut self, _event: libp2p::swarm::FromSwarm) {}
 
     /// This callback function informs the behaviour about an event generated.
     /// For documentation please see:
@@ -118,9 +117,13 @@ impl NetworkBehaviour for QaulInfo {
         // We received one of the following event notification
         let qaul_info_data = match event {
             // only process a received message
-            InnerMessage::Received(event) => event,
+            Ok(InnerMessage::Received(event)) => event,
             // ignore the sent event
-            InnerMessage::Sent => return,
+            Ok(InnerMessage::Sent) => return,
+            Err(err) => {
+                log::error!("qaul_info_data failed: {}", err);
+                return;
+            }
         };
 
         // forward the message to the user
