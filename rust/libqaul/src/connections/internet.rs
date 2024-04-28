@@ -109,7 +109,7 @@ impl QaulInternetBehaviour {
             identify::Event::Sent { peer_id } => {
                 log::trace!("IdentifyEvent::Sent to {:?}", peer_id);
             }
-            identify::Event::Pushed { peer_id } => {
+            identify::Event::Pushed { peer_id, info: _ } => {
                 log::trace!("IdentifyEvent::Pushed {:?}", peer_id);
             }
             identify::Event::Error { peer_id, error } => {

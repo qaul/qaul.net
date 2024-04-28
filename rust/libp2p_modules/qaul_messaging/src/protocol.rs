@@ -1,16 +1,32 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! Qaul Messaging Protocol
+//! # Qaul Messaging Protocol Definition
+//!
+//! The codec used is prefixing all packages with an `unsigned_varint` encoded message length.
 
+use asynchronous_codec::Framed;
+use futures::SinkExt;
+use futures::StreamExt;
 use futures::{
     io::{AsyncRead, AsyncWrite},
-    AsyncWriteExt, Future,
+    Future,
 };
-use libp2p::core::{upgrade, InboundUpgrade, OutboundUpgrade, UpgradeInfo};
+use libp2p::core::{InboundUpgrade, OutboundUpgrade, UpgradeInfo};
+use libp2p::swarm::StreamProtocol;
 use std::{io, iter, pin::Pin};
 
+use varint_prefixed_codec::VarintPrefixedCodec;
+
 use crate::types::QaulMessagingData;
+
+/// define maximal message length in bytes
+///
+/// This length must not be exceeded. Packages exceeding this size will be discarded.
+const MAX_MESSAGE_LEN_BYTES: usize = 65536;
+
+/// create protocol name
+pub const PROTOCOL_NAME: StreamProtocol = StreamProtocol::new("/qaul_messaging/1.0.0");
 
 /// Implementation of `ConnectionUpgrade` for the qaul_messaging protocol.
 #[derive(Debug, Clone, Default)]
@@ -24,11 +40,11 @@ impl QaulMessagingProtocol {
 }
 
 impl UpgradeInfo for QaulMessagingProtocol {
-    type Info = &'static str;
+    type Info = StreamProtocol;
     type InfoIter = iter::Once<Self::Info>;
 
     fn protocol_info(&self) -> Self::InfoIter {
-        iter::once("/qaul_messaging/1.0.0")
+        iter::once(PROTOCOL_NAME)
     }
 }
 
@@ -40,10 +56,21 @@ where
     type Error = io::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Output, Self::Error>> + Send>>;
 
-    fn upgrade_inbound(self, mut substream: TSocket, _info: Self::Info) -> Self::Future {
+    fn upgrade_inbound(self, socket: TSocket, _info: Self::Info) -> Self::Future {
         Box::pin(async move {
-            // receive new QaulMessaging binary message
-            let data = upgrade::read_length_prefixed(&mut substream, 65536).await?;
+            let mut framed = Framed::new(socket, VarintPrefixedCodec::new(MAX_MESSAGE_LEN_BYTES));
+
+            let incoming_data = framed
+                .next()
+                .await
+                .ok_or_else(|| io::ErrorKind::UnexpectedEof)?;
+
+            let data: Vec<u8> = match incoming_data {
+                Ok(data) => data,
+                Err(err) => {
+                    return Err(err);
+                }
+            };
 
             // hand it directly to the internal message bus
             Ok(QaulMessagingData { data })
@@ -52,11 +79,11 @@ where
 }
 
 impl UpgradeInfo for QaulMessagingData {
-    type Info = &'static str;
+    type Info = StreamProtocol;
     type InfoIter = iter::Once<Self::Info>;
 
     fn protocol_info(&self) -> Self::InfoIter {
-        iter::once("/qaul_messaging/1.0.0")
+        iter::once(PROTOCOL_NAME)
     }
 }
 
@@ -68,10 +95,11 @@ where
     type Error = io::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Output, Self::Error>> + Send>>;
 
-    fn upgrade_outbound(self, mut substream: TSocket, _: Self::Info) -> Self::Future {
+    fn upgrade_outbound(self, socket: TSocket, _: Self::Info) -> Self::Future {
         Box::pin(async move {
-            upgrade::write_length_prefixed(&mut substream, self.data).await?;
-            substream.close().await?;
+            let mut framed = Framed::new(socket, VarintPrefixedCodec::new(MAX_MESSAGE_LEN_BYTES));
+            framed.send(self.data).await?;
+            framed.close().await?;
 
             Ok(())
         })

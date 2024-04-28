@@ -8,6 +8,7 @@
 
 use libp2p::PeerId;
 
+/*
 /// message structure that is sent over the network
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct QaulRoutingInfoMessage {
@@ -17,6 +18,7 @@ pub struct QaulRoutingInfoMessage {
     //pub node_id: PeerId,
     pub data: Vec<u8>,
 }
+*/
 
 /// a message we sent
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
