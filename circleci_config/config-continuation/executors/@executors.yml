@@ -59,7 +59,7 @@ flutter-android:
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
   macos:
-    xcode: 14.1.0
+    xcode: 15.0.0
   resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul.net/qaul_ui/ios
@@ -85,7 +85,7 @@ flutter-linux-arm:
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
-    xcode: 14.0.1
+    xcode: 15.0.0
   resource_class: macos.x86.medium.gen2
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul.net/qaul_ui
