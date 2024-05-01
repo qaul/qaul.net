@@ -24,7 +24,7 @@ ConnectionType _mapFilter(NetworkTypeFilter t) {
 final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.all);
 
 /// Nodes that fit the current filter criteria
-final _filteredNodes = Provider<NetworkNode>((ref) {
+final _filteredNodes = StateProvider<NetworkNode>((ref) {
   final filter = ref.watch(_networkTypeFilter);
   final defaultUser = ref.watch(defaultUserProvider)!;
   final users = ref

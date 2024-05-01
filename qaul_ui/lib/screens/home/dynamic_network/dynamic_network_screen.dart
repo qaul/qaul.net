@@ -311,8 +311,12 @@ class _NetworkNodeComponent extends BodyComponent
   @override
   bool onTapDown(_) {
     if (openBottomSheetOnTap && game.buildContext != null) {
-      Scaffold.of(game.buildContext!).showBottomSheet(
-        (context) => _NetworkNodeInfoBottomSheet(node: node),
+      PersistentBottomSheetController? controller;
+      controller = Scaffold.of(game.buildContext!).showBottomSheet(
+        (context) => _NetworkNodeInfoBottomSheet(
+          node: node,
+          onClosePressed: () => controller?.close(),
+        ),
         backgroundColor: Colors.transparent,
       );
     }

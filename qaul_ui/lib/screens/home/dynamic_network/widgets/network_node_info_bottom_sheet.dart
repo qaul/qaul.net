@@ -3,9 +3,10 @@ part of '../dynamic_network_screen.dart';
 class _NetworkNodeInfoBottomSheet extends StatelessWidget {
   const _NetworkNodeInfoBottomSheet({
     Key? key,
-    required this.node,
+    required this.node, this.onClosePressed,
   }) : super(key: key);
   final NetworkNode node;
+  final VoidCallback? onClosePressed;
 
   List<ConnectionType> get _supportedTypes =>
       [ConnectionType.ble, ConnectionType.lan, ConnectionType.internet];
@@ -36,7 +37,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20.0),
         padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
         decoration: BoxDecoration(
-          color: Theme.of(context).appBarTheme.backgroundColor,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(20.0),
           ),
@@ -49,7 +50,7 @@ class _NetworkNodeInfoBottomSheet extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: onClosePressed,
                 child: const Icon(Icons.close_rounded),
               ),
             ),
