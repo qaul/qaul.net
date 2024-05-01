@@ -14,13 +14,13 @@ steps:
         cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
   - restore_cache:
       name: Restore Flutter pub cache
-      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+      key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
   - run:
       name: Install Flutter Dependencies
       command: flutter pub get
   - save_cache:
       name: Save Flutter pub cache
-      key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+      key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
       paths:
         - << parameters.dart-tool-cache >>
         - << parameters.pub-cache >>

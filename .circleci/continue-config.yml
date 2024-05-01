@@ -9,14 +9,14 @@ commands:
         steps:
             - restore_cache:
                 keys:
-                    - source-v1-{{ .Branch }}-{{ .Revision }}
-                    - source-v1-{{ .Branch }}-
-                    - source-v1-
+                    - source-v4-{{ .Branch }}-{{ .Revision }}
+                    - source-v4-{{ .Branch }}-
+                    - source-v4-
                 name: Restore GIT cache
             - checkout:
                 path: ~/qaul.net
             - save_cache:
-                key: source-v1-{{ .Branch }}-{{ .Revision }}
+                key: source-v4-{{ .Branch }}-{{ .Revision }}
                 name: Save GIT cache
                 paths:
                     - .git
@@ -25,14 +25,14 @@ commands:
         steps:
             - restore_cache:
                 keys:
-                    - gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
-                    - gem-cache-v2-{{ arch }}-
+                    - gem-cache-v4-{{ arch }}-{{ checksum "Gemfile.lock" }}
+                    - gem-cache-v4-{{ arch }}-
                 name: Restore Bundle cache
             - run:
                 command: bundle check || sudo bundle install --path vendor/bundle
                 name: Install Bundle
             - save_cache:
-                key: gem-cache-v2-{{ arch }}-{{ checksum "Gemfile.lock" }}
+                key: gem-cache-v4-{{ arch }}-{{ checksum "Gemfile.lock" }}
                 name: Save Bundle cache
                 paths:
                     - vendor/bundle
@@ -40,7 +40,7 @@ commands:
         description: Install Pods dependencies
         steps:
             - restore_cache:
-                key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+                key: pods-cache-v4-{{ arch }}-{{ checksum "Podfile.lock" }}
                 name: Restore CocoaPods cache
             - run:
                 command: |
@@ -48,7 +48,7 @@ commands:
                     pod install
                 name: Install CocoaPods
             - save_cache:
-                key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
+                key: pods-cache-v4-{{ arch }}-{{ checksum "Podfile.lock" }}
                 name: Save CocoaPods cache
                 paths:
                     - ./Pods
@@ -79,13 +79,13 @@ commands:
                     cat "$(find .. -iname "pubspec.lock" | head -n 1)" > pubspec.rev
                 name: Prepare For Cache Key
             - restore_cache:
-                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
                 name: Restore Flutter pub cache
             - run:
                 command: flutter pub get
                 name: Install Flutter Dependencies
             - save_cache:
-                key: pub-cache-v3-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
+                key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
                 name: Save Flutter pub cache
                 paths:
                     - << parameters.dart-tool-cache >>
@@ -139,7 +139,9 @@ executors:
         environment:
             FASTLANE_LANE: upload_testflight
             FL_OUTPUT_DIR: output
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.19.4
+            HOMEBREW_NO_AUTO_UPDATE: 1
+            HOMEBREW_NO_INSTALL_CLEANUP: 1
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 15.0.0
@@ -282,7 +284,18 @@ jobs:
     build-and-deploy-flutter-ios:
         executor: flutter-ios
         steps:
-            - checkout-project
+            - checkout:
+                path: ~/qaul.net
+            - run:
+                command: |
+                    # The reason these are being uninstalled is because they cause
+                    # incompatibility issues. cocoapods/ruby installed manually.
+                    brew uninstall rbenv pyenv
+                    brew install cocoapods ruby
+                    PODS_PATH="$(brew --prefix cocoapods)/bin"
+                    RUBY_PATH="$(brew --prefix ruby)/bin"
+                    echo "export PATH=${PODS_PATH}:${RUBY_PODS}:${PATH}" >> $BASH_ENV
+                name: Install CocoaPods/Ruby manually, uninstall rbenv/pyenv
             - run:
                 command: brew install gh
                 name: Install Github CLI
@@ -300,13 +313,27 @@ jobs:
             - run:
                 command: cd .. && flutter pub get
                 name: Install Flutter Dependencies
-            - install-bundler-deps
-            - install-cocoapods-deps
+            - run:
+                command: |
+                    export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
+
+                    echo "Running ruby $(which ruby) version $(ruby --version)"
+                    bundle check || sudo bundle install --path vendor/bundle
+                name: Install Bundle
+            - run:
+                command: |
+                    echo "Running pod $(which pod) version $(pod --version)"
+                    pod install
+                name: Install CocoaPods
             - run:
                 command: flutter build ios --release --no-codesign --config-only
                 name: Build Flutter iOS Configuration
             - run:
-                command: bundle exec fastlane $FASTLANE_LANE
+                command: |
+                    export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
+
+                    echo "Running ruby $(which ruby) version $(ruby --version)"
+                    bundle exec fastlane $FASTLANE_LANE
                 name: fastlane
             - store_artifacts:
                 destination: output

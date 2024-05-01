@@ -3,13 +3,13 @@ steps:
   - restore_cache:
       name: Restore GIT cache
       keys:
-        - source-v1-{{ .Branch }}-{{ .Revision }}
-        - source-v1-{{ .Branch }}-
-        - source-v1-
+        - source-v4-{{ .Branch }}-{{ .Revision }}
+        - source-v4-{{ .Branch }}-
+        - source-v4-
   - checkout:
       path: ~/qaul.net
   - save_cache:
       name: Save GIT cache
-      key: source-v1-{{ .Branch }}-{{ .Revision }}
+      key: source-v4-{{ .Branch }}-{{ .Revision }}
       paths:
         - .git

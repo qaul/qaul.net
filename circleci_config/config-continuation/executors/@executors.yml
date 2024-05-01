@@ -68,8 +68,10 @@ flutter-ios:
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_testflight
-    FLUTTER_VERSION: "3.16.0"
+    FLUTTER_VERSION: "3.19.4"
     REPO_URL: "https://github.com/qaul/qaul.net"
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
 flutter-linux:
   machine:
     image: ubuntu-2004:202010-01

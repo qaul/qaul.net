@@ -6,7 +6,7 @@ platform :ios do
   before_all do
     setup_circle_ci
     if is_ci?
-        xcversion(version: "14.1.0")
+        xcversion(version: "15.0.1")
     end
   end
   desc "Syncs with the stored keys, certificates & provisioning profiles"
