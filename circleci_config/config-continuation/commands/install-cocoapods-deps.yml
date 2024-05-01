@@ -5,7 +5,9 @@ steps:
       key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
   - run:
       name: Install CocoaPods
-      command: pod install
+      command: |
+        pod --version
+        pod install
   - save_cache:
       name: Save CocoaPods cache
       key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}

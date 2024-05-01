@@ -43,7 +43,9 @@ commands:
                 key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
                 name: Restore CocoaPods cache
             - run:
-                command: pod install
+                command: |
+                    pod --version
+                    pod install
                 name: Install CocoaPods
             - save_cache:
                 key: pods-cache-v1-{{ arch }}-{{ checksum "Podfile.lock" }}
