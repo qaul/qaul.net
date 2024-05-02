@@ -90,7 +90,11 @@ impl QaulLanBehaviour {
             }
             mdns::Event::Expired(expired_list) => {
                 for (peer, _addr) in expired_list {
-                    if !self.mdns.has_node(&peer) {
+                    // TODO: why to remove it at all? does it not get removed automatically, when disconnected?
+                    //
+                    // Why should we check again if a node is in discovered list, once it has expired?
+                    // Apparently the expired node is not instantly removed from the discovered_nodes list too.
+                    if !self.mdns.discovered_nodes().any(|p| p == &peer) {
                         log::trace!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
                         self.floodsub.remove_node_from_partial_view(&peer);
                     }
