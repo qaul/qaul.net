@@ -8,12 +8,12 @@ license = "AGPL"
 
 [dependencies]
 libp2p = { version = "0.53.2", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "websocket", "dns", "macros"] }
-cuckoofilter = "0.5.0"
-fnv = "1.0.7"
-futures = "0.3.30"
-log = "0.4.21"
-rand = "0.8.5"
-smallvec = "1.13.2"
+cuckoofilter = "0.5"
+fnv = "1.0"
+futures = "0.3"
+log = "0.4"
+rand = "0.8"
+smallvec = "1.13"
 asynchronous-codec = "0.7"
 bytes = "1.6"
 unsigned-varint = "0.8"
