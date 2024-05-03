@@ -151,6 +151,18 @@ impl Backup {
         if Self::move_files(&files, backup_path, storage_path) == false {
             return false;
         }
-        Self::move_folders(&folders, backup_path, storage_path)
+        if Self::move_folders(&folders, backup_path, storage_path) == false {
+            return false;
+        }
+
+        // create version file
+        let version_path = storage_path.join("version");
+        let cur_version: &str = env!("CARGO_PKG_VERSION");
+        if let Err(_) = std::fs::write(version_path, cur_version) {
+            println!("failed to write current version file!");
+            return false;
+        }
+
+        true
     }
 }
