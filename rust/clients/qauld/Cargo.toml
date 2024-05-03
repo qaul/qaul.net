@@ -1,6 +1,6 @@
 [package]
 name = "qauld"
-version = "2.0.0-beta.18"
+version = "2.0.0-beta.19"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 description = "qaul daemon"
