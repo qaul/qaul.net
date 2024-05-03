@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import 'coordinators/email_logging_coordinator/email_logging_coordinator.dart';
+import 'force_update_overlay.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'qaul_app.dart';
 
@@ -23,7 +25,9 @@ void main() async {
     await Initializer.initialize(_container.read);
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
-    runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
+    runApp(_CustomProviderScope(
+      ForceUpdateOverlay(child: QaulApp(themeMode: savedThemeMode)),
+    ));
   }, (error, stack) => Logger.root.severe(error, error, stack));
 }
 
