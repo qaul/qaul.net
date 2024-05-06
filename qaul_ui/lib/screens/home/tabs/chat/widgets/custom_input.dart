@@ -175,17 +175,20 @@ class _CustomInputState extends State<_CustomInput> {
                                         _AttachmentButton(
                                           onPressed: () => _sendFilePressed(
                                               widget.onAttachmentPressed),
+                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
                                         ),
                                       if (widget.onPickImagePressed != null)
                                         _AttachmentButton(
                                           icon: Icons.add_a_photo,
                                           onPressed: () => _sendFilePressed(
                                               widget.onPickImagePressed),
+                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
                                         ),
                                       if (widget.onSendAudioPressed != null)
                                         _AttachmentButton(
                                           icon: Icons.mic_none,
                                           onPressed: widget.onSendAudioPressed,
+                                          tooltip: AppLocalizations.of(context)!.sendAudioTooltip,
                                         ),
                                     ],
                                   ),
@@ -259,12 +262,14 @@ class _AttachmentButton extends StatelessWidget {
     Key? key,
     this.onPressed,
     this.icon = Icons.attach_file,
+    this.tooltip,
   }) : super(key: key);
 
   final void Function()? onPressed;
 
   final IconData icon;
 
+  final String? tooltip;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -277,7 +282,7 @@ class _AttachmentButton extends StatelessWidget {
         splashRadius: 24,
         onPressed: onPressed,
         padding: EdgeInsets.zero,
-        tooltip: AppLocalizations.of(context)!.sendFileTooltip,
+        tooltip: tooltip,
       ),
     );
   }
