@@ -9,6 +9,7 @@
   "backButtonTooltip": "Back",
   "sendTooltip": "Send",
   "sendFileTooltip": "Send File",
+  "sendAudioTooltip": "Record audio message",
   "start": "Start",
   "createUserAccount": "Create user profile",
   "learnMore": "Learn about qaul",

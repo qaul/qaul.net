@@ -6,6 +6,7 @@
     "backButtonTooltip": "Назад",
     "sendTooltip": "Отправить",
     "sendFileTooltip": "Отправить файл",
+    "sendAudioTooltip": "Записать аудиосообщение",  
     "start": "Пуск",
     "createUserAccount": "Создать профиль пользователя",
     "learnMore": "Узнайте о qaul",

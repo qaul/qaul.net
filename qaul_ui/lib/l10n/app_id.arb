@@ -6,6 +6,7 @@
   "backButtonTooltip": "Kembali",
   "sendTooltip": "Kirim",
   "sendFileTooltip": "Kirim Berkas",
+  "sendAudioTooltip": "Rekam pesan audio",  
   "start": "Mulailah",
   "createUserAccount": "Buat profil pengguna",
   "learnMore": "Pelajari tentang qaul",

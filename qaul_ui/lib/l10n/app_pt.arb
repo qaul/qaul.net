@@ -6,6 +6,7 @@
   "backButtonTooltip": "Voltar",
   "sendTooltip": "Enviar",
   "sendFileTooltip": "Send Arquivo",
+  "sendAudioTooltip": "Gravar mensagem de áudio",  
   "start": "Começar",
   "createUserAccount": "Criar perfil de usuário",
   "learnMore": "Aprenda mais sobre qaul",
