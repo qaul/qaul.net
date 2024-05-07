@@ -62,20 +62,20 @@ pub fn get_default_config(pattern: &str) -> Option<String> {
     None
 }
 
-/// Events of the async loop
+/// Event Types of the async loop
 enum EventType {
-    Rpc(bool),
-    Sys(bool),
-    Flooding(bool),
-    FeedRequest(bool),
-    FeedResponse(bool),
-    UserRequest(bool),
-    UserResponse(bool),
-    RoutingInfo(bool),
-    ReConnecting(bool),
-    RoutingTable(bool),
-    Messaging(bool),
-    Retransmit(bool),
+    Rpc,
+    Sys,
+    Flooding,
+    FeedRequest,
+    FeedResponse,
+    UserRequest,
+    UserResponse,
+    RoutingInfo,
+    ReConnecting,
+    RoutingTable,
+    Messaging,
+    Retransmit,
 }
 
 /// initialize and start libqaul with a optional custom configuration options
@@ -404,26 +404,26 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                     }
                     None
                 },
-                _rpc_event = rpc_fut => Some(EventType::Rpc(true)),
-                _sys_event = sys_fut => Some(EventType::Sys(true)),
-                _flooding_event = flooding_fut => Some(EventType::Flooding(true)),
-                _feedreq_event = feedreq_fut => Some(EventType::FeedRequest(true)),
-                _feedresp_event = feedresp_fut => Some(EventType::FeedResponse(true)),
-                _userreq_event = userreq_fut => Some(EventType::UserRequest(true)),
-                _userresp_event = userresp_fut => Some(EventType::UserResponse(true)),
-                _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo(true)),
-                _connection_event = connection_fut => Some(EventType::ReConnecting(true)),
-                _routing_table_event = routing_table_fut => Some(EventType::RoutingTable(true)),
-                _messaging_event = messaging_fut => Some(EventType::Messaging(true)),
-                _retransmit_event = retransmit_fut => Some(EventType::Retransmit(true)),
+                _rpc_event = rpc_fut => Some(EventType::Rpc),
+                _sys_event = sys_fut => Some(EventType::Sys),
+                _flooding_event = flooding_fut => Some(EventType::Flooding),
+                _feedreq_event = feedreq_fut => Some(EventType::FeedRequest),
+                _feedresp_event = feedresp_fut => Some(EventType::FeedResponse),
+                _userreq_event = userreq_fut => Some(EventType::UserRequest),
+                _userresp_event = userresp_fut => Some(EventType::UserResponse),
+                _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo),
+                _connection_event = connection_fut => Some(EventType::ReConnecting),
+                _routing_table_event = routing_table_fut => Some(EventType::RoutingTable),
+                _messaging_event = messaging_fut => Some(EventType::Messaging),
+                _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
             }
         };
 
         if let Some(event) = evt {
             match event {
-                EventType::Rpc(_) => {
+                EventType::Rpc => {
                     if let Ok(rpc_message) = libqaul_rpc_receive.try_recv() {
-                        // we received a message, send it to RPC crate
+                        // we received a message, send it to RPC
                         Rpc::process_received_message(
                             rpc_message,
                             Some(&mut lan),
@@ -432,9 +432,9 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         .await;
                     }
                 }
-                EventType::Sys(_) => {
+                EventType::Sys => {
                     if let Ok(sys_message) = libqaul_sys_receive.try_recv() {
-                        // we received a message, send it to RPC crate
+                        // we received a message, send it to SYS
                         Sys::process_received_message(
                             sys_message,
                             Some(&mut lan),
@@ -442,7 +442,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         );
                     }
                 }
-                EventType::Flooding(_) => {
+                EventType::Flooding => {
                     // send messages in the flooding queue
                     // get sending queue
                     let mut flooder = flooder::FLOODER.get().write().unwrap();
@@ -468,8 +468,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::FeedRequest(_) => {
-                    // send messages in the flooding queue
+                EventType::FeedRequest => {
                     // get sending queue
                     let mut feed_requester = feed_requester::FEEDREQUESTER.get().write().unwrap();
 
@@ -483,7 +482,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             );
                             continue;
                         }
-                        //make dataMessaging
+
                         let data = RouterInfo::create_feed_request(&request.feed_ids);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -504,8 +503,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::FeedResponse(_) => {
-                    // send messages in the flooding queue
+                EventType::FeedResponse => {
                     // get sending queue
                     let mut feed_responser = feed_requester::FEEDRESPONSER.get().write().unwrap();
 
@@ -520,7 +518,6 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             continue;
                         }
 
-                        //make data
                         let data = RouterInfo::create_feed_response(&request.feeds);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -541,7 +538,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::UserRequest(_) => {
+                EventType::UserRequest => {
                     // send messages in the flooding queue
                     // get sending queue
                     let mut user_requester = user_requester::USERREQUESTER.get().write().unwrap();
@@ -556,7 +553,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             );
                             continue;
                         }
-                        //make dataMessaging
+
                         let data = RouterInfo::create_user_request(&request.user_ids);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -577,8 +574,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::UserResponse(_) => {
-                    // send messages in the flooding queue
+                EventType::UserResponse => {
                     // get sending queue
                     let mut user_responser = user_requester::USERRESPONSER.get().write().unwrap();
 
@@ -593,7 +589,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                             continue;
                         }
 
-                        //make data
+                        // make data
                         let data = RouterInfo::create_user_response(&request.users);
                         match connection_module {
                             ConnectionModule::Lan => lan
@@ -615,7 +611,7 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                     }
                 }
 
-                EventType::RoutingInfo(_) => {
+                EventType::RoutingInfo => {
                     // send routing info to neighbours
                     // check scheduler
                     if let Some((neighbour_id, connection_module, data)) =
@@ -647,18 +643,18 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::ReConnecting(_) => {
+                EventType::ReConnecting => {
                     if let Some(addr) = Internet::check_reconnection() {
                         log::trace!("redial....: {:?}", addr);
                         Internet::peer_redial(&addr, &mut internet.swarm).await;
                         Internet::set_redialed(&addr);
                     }
                 }
-                EventType::RoutingTable(_) => {
+                EventType::RoutingTable => {
                     // create new routing table
                     router::connections::ConnectionTable::create_routing_table();
                 }
-                EventType::Messaging(_) => {
+                EventType::Messaging => {
                     // send scheduled messages
                     if let Some((neighbour_id, connection_module, data)) =
                         Messaging::check_scheduler()
@@ -701,7 +697,8 @@ pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, Str
                         }
                     }
                 }
-                EventType::Retransmit(_) => {
+                EventType::Retransmit => {
+                    // check if there are messages to retransmit
                     services::messaging::retransmit::MessagingRetransmit::process();
                 }
             }
