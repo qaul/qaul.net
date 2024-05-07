@@ -59,16 +59,6 @@ pub struct FeedMessageData {
     /// the message content
     pub content: String,
 }
-/// Feed message
-#[derive(Debug, Clone)]
-pub struct FeedMessage {
-    /// the user id of the user sending this message
-    pub sender: PeerId,
-    /// the content of the message
-    pub content: String,
-    /// the time when this message was sent in seconds
-    pub time: u64,
-}
 
 /// Serializable format of the feed message
 #[derive(Debug, Clone, Serialize, Deserialize)]

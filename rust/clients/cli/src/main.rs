@@ -7,10 +7,9 @@
 //! RPC system and
 
 use async_std::io;
-use futures_ticker::Ticker;
-//use async_std::stream;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
+use futures_ticker::Ticker;
 use std::time::Duration;
 
 use libqaul;
@@ -35,10 +34,10 @@ use cli::Cli;
 use rpc::Rpc;
 use user_accounts::UserAccounts;
 
-/// Events of the async loop
+/// Event Types of the async loop
 enum EventType {
     Cli(String),
-    Rpc(bool),
+    Rpc,
 }
 
 #[async_std::main]
@@ -81,7 +80,7 @@ async fn main() {
 
             select! {
                 line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
-                _rpc_ticker = rpc_fut => Some(EventType::Rpc(true)),
+                _rpc_ticker = rpc_fut => Some(EventType::Rpc),
             }
         };
 
@@ -90,7 +89,7 @@ async fn main() {
                 EventType::Cli(line) => {
                     Cli::process_command(line);
                 }
-                EventType::Rpc(_) => match libqaul::api::receive_rpc() {
+                EventType::Rpc => match libqaul::api::receive_rpc() {
                     Ok(data) => {
                         Rpc::received_message(data);
                     }
