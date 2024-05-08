@@ -109,10 +109,11 @@ class _ForceUpdateOverlayState extends ConsumerState<ForceUpdateOverlay> {
 
 class ForceUpdateDialog extends StatelessWidget {
   const ForceUpdateDialog({
+    Key? key,
     required this.previous,
     required this.required,
     this.onLinkPressed,
-  });
+  }) : super(key: key);
 
   final String previous;
   final String required;
@@ -141,21 +142,21 @@ class ForceUpdateDialog extends StatelessWidget {
 
             Text("What's wrong", style: ttheme.titleLarge),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               "You're updating to a major release, which is incompatible with the last detected version.",
             ),
             const SizedBox(height: 8),
 
             Text("What should I do", style: ttheme.titleLarge),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               "Update to the previous version before updating to this one.",
             ),
             const SizedBox(height: 8),
 
             Text("Why it's necessary", style: ttheme.titleLarge),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               "This ensures qaul.net can migrate you to the latest major release without data loss.",
             ),
 
@@ -178,18 +179,19 @@ class ForceUpdateDialog extends StatelessWidget {
               ),
             ),
 
-
-
             Align(
               alignment: Alignment.bottomCenter,
               child: TextButton(
                 onPressed: onLinkPressed,
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text("qaul.net project website"),
-                    const SizedBox(width: 8),
-                    Icon(Icons.open_in_new, size: 16,)
+                    SizedBox(width: 8),
+                    Icon(
+                      Icons.open_in_new,
+                      size: 16,
+                    )
                   ],
                 ),
               ),

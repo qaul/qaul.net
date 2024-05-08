@@ -14,6 +14,7 @@
 ///         via
 /// 2) Channel: let the platform code load the library and
 ///             communicate with the platform via platform channels.
+library libqaul;
 
 import 'dart:ffi';
 import 'dart:io';

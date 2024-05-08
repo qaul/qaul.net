@@ -18,7 +18,7 @@ Future<String?> findFolderWithFilesOfExtension(
   return null;
 }
 
-abstract class FilePathResolverMixin {
+mixin FilePathResolverMixin {
   @protected
   String getFilePath(
     Reader read, {
