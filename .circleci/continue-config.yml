@@ -215,11 +215,11 @@ jobs:
         steps:
             - checkout-project
             - install-flutter-deps
-            - command: |
-                cd widgetbook
-                flutter pub get
-              name: Install widgetbook dependencies
-              run: null
+            - run:
+                command: |
+                    cd widgetbook
+                    flutter pub get
+                name: Install widgetbook dependencies
             - run: flutter analyze
     build-and-deploy-docker-qauld:
         docker:
