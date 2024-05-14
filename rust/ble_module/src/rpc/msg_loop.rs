@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{borrow::Borrow, error::Error};
 
 use async_std::task::spawn;
 use bytes::Bytes;
@@ -38,6 +38,18 @@ pub async fn listen_for_sys_msgs(
                             log::debug!(
                                 "Set up advertisement and scan filter, entering BLE main loop."
                             );
+
+                            match ble_service {
+                                QaulBleService::Idle(_) => {
+                                    log::error!("Error occured in configuring BLE module");
+                                }
+                                QaulBleService::Started(svc) => {
+                                    println!("QaulBle service started.");
+                                    // println!("{:#?}", *svc);
+                                    // let srv_clone =srv.clone();
+                                    ble_service = svc.spawn_handles().await;
+                                }
+                            }
                             local_sender_handle.send_start_successful();
                         }
                         QaulBleService::Started(_) => {

@@ -167,6 +167,8 @@ impl IdleBleService {
 
         let (cmd_tx, cmd_rx) = async_std::channel::bounded::<BleMainLoopEvent>(8);
 
+        println!("=========Starting BLE main loop...");
+
         let join_handle: JoinHandle<IdleBleService> = async_std::task::Builder::new()
             .name("main-ble-loop".into())
             .local(async move {
@@ -174,6 +176,7 @@ impl IdleBleService {
                 // --------------------------------- SCAN -------------------------------------------
                 // ==================================================================================
 
+                println!("============Scanning started for devices");
                 let device_stream = match self.adapter.discover_devices().await {
                     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
                         AdapterEvent::DeviceAdded(addr) => {
@@ -192,6 +195,11 @@ impl IdleBleService {
                         return self;
                     }
                 };
+
+                match async_std::task::try_current() {
+                    Some(t) => println!("The name of this task is {:?}", t.name()),
+                    None => println!("Not inside a task!"),
+                }
 
                 // ==================================================================================
                 // --------------------------------- MAIN BLE LOOP ----------------------------------
@@ -272,11 +280,16 @@ impl IdleBleService {
                 self
             })
             .expect("Unable to spawn BLE main loop!");
+        // join_handle.await;
 
+        // let j  = &join_handle;
+        // *j.;
         QaulBleService::Started(StartedBleService {
+            // join_handle,
             join_handle,
             cmd_handle: cmd_tx,
         })
+        // return QaulBleService::Idle();
     }
 
     async fn on_device_discovered(
@@ -384,6 +397,24 @@ impl IdleBleService {
 }
 
 impl StartedBleService {
+    pub async fn spawn_handles(self) -> QaulBleService {
+        // let mut svc : JoinHandle<IdleBleService> ;
+        // swap(&mut svc, self.join_handle);
+        // self.join_handle.await;
+        let buf: &JoinHandle<IdleBleService> = &self.join_handle;
+        buf.await;
+
+        println!("Spawning handles");
+
+        // buf.await;
+        // self.join_handle = buf;
+        // QaulBleService::Idle(buf.)
+        QaulBleService::Started(self::StartedBleService {
+            join_handle: self.join_handle,
+            cmd_handle: self.cmd_handle.clone(),
+        })
+    }
+
     pub async fn direct_send(
         &mut self,
         direct_send_request: BleDirectSend,
