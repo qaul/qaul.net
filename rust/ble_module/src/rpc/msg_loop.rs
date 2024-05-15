@@ -50,6 +50,7 @@ pub async fn listen_for_sys_msgs(
                                     ble_service = svc.spawn_handles().await;
                                 }
                             }
+                            println!("=============Msg_loop");
                             local_sender_handle.send_start_successful();
                         }
                         QaulBleService::Started(_) => {

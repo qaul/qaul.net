@@ -10,6 +10,9 @@ use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
 
+use std::fs::File;
+use std::io::Write;
+
 use crate::ble::ble_uuids::main_service_uuid;
 use crate::ble::ble_uuids::msg_char;
 use crate::ble::ble_uuids::msg_service_uuid;
@@ -30,7 +33,7 @@ enum QaulBleHandle {
 }
 
 pub struct StartedBleService {
-    join_handle: JoinHandle<IdleBleService>,
+    join_handle: Option<JoinHandle<IdleBleService>>,
     cmd_handle: Sender<BleMainLoopEvent>,
 }
 
@@ -175,7 +178,6 @@ impl IdleBleService {
                 // ==================================================================================
                 // --------------------------------- SCAN -------------------------------------------
                 // ==================================================================================
-
                 println!("============Scanning started for devices");
                 let device_stream = match self.adapter.discover_devices().await {
                     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
@@ -280,13 +282,9 @@ impl IdleBleService {
                 self
             })
             .expect("Unable to spawn BLE main loop!");
-        // join_handle.await;
-
-        // let j  = &join_handle;
-        // *j.;
+            println!("====================hehe");
         QaulBleService::Started(StartedBleService {
-            // join_handle,
-            join_handle,
+            join_handle: Some(join_handle),
             cmd_handle: cmd_tx,
         })
         // return QaulBleService::Idle();
@@ -398,19 +396,24 @@ impl IdleBleService {
 
 impl StartedBleService {
     pub async fn spawn_handles(self) -> QaulBleService {
-        // let mut svc : JoinHandle<IdleBleService> ;
-        // swap(&mut svc, self.join_handle);
-        // self.join_handle.await;
-        let buf: &JoinHandle<IdleBleService> = &self.join_handle;
-        buf.await;
+        match self.join_handle {
+            Some(join_handles) => {
+                println!("Spawning handles");
+                println!("id = {}", join_handles.task().id());
+                // join_handles.await;
+                async_std::task::block_on(join_handles);
 
-        println!("Spawning handles");
-
+                println!("sad");
+            }
+            None => {
+                println!("No handle to spawn");
+            }
+        }
         // buf.await;
         // self.join_handle = buf;
         // QaulBleService::Idle(buf.)
         QaulBleService::Started(self::StartedBleService {
-            join_handle: self.join_handle,
+            join_handle: None,
             cmd_handle: self.cmd_handle.clone(),
         })
     }
@@ -435,9 +438,19 @@ impl StartedBleService {
             return QaulBleService::Started(self);
         }
 
-        sender.send_stop_successful();
+        // let ble_service: IdleBleService;
+        // match self.join_handle {
+        //     Some(join_handles) => {
+        //         println!("Spawning handles");
+        //         ble_service = join_handles.await;
+        //     }
+        //     None => {
+        //         println!("No handle to spawn");
+        //     }
+        // }
+        // sender.send_stop_successful();
 
-        QaulBleService::Idle(self.join_handle.await)
+        QaulBleService::Idle(self.join_handle.unwrap().await)
     }
 }
 
@@ -475,3 +488,7 @@ pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     };
     Ok(response)
 }
+
+// impl Copy for JoinHandle<IdleBleService>{
+
+// }
