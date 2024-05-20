@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, error::Error};
 
-use async_std::{channel::Sender, prelude::*, task::JoinHandle};
+use async_std::{channel::Sender, prelude::*, sync::Arc, task::JoinHandle};
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
     gatt::{local::*, CharacteristicReader},
@@ -9,9 +9,6 @@ use bluer::{
 use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
-
-use std::fs::File;
-use std::io::Write;
 
 use crate::ble::ble_uuids::main_service_uuid;
 use crate::ble::ble_uuids::msg_char;
@@ -167,41 +164,84 @@ impl IdleBleService {
                 return QaulBleService::Idle(self);
             }
         };
+        println!(
+            "Advertising on Bluetooth adapter {} with address {:#?}",
+            self.adapter.name(),
+            self.adapter.address().await
+        );
+        // let adapter = self.adapter.clone();
 
+        // let inner = adapter.inner();
+        // #![feature(arc_unwrap_or_clone)]
+        let adapterr = Arc::from(self.adapter.clone());
+        let adp2 = self.adapter.clone();
+        // match Arc::try_unwrap(adapterr) {
+        //     Ok(adapter) => {
+        //         println!("Unwrapped adapter");
+        //     }
+        //     Err(err) => {
+        //         println!("Failed to unwrap adapter");
+        //     }
+        // }
+        // let adapter = Arc::unwrap_or_clone(adapterr);
+        // let adapterrr = Arc::downgrade(&adapterr);
+        // let (adp_tx, adp_rx) = async_std::channel::bounded::<Adapter>(1);
         let (cmd_tx, cmd_rx) = async_std::channel::bounded::<BleMainLoopEvent>(8);
-
-        println!("=========Starting BLE main loop...");
+        // adp_tx.try_send(self.adapter.clone()).unwrap();
 
         let join_handle: JoinHandle<IdleBleService> = async_std::task::Builder::new()
             .name("main-ble-loop".into())
             .local(async move {
-                // ==================================================================================
-                // --------------------------------- SCAN -------------------------------------------
-                // ==================================================================================
-                println!("============Scanning started for devices");
-                let device_stream = match self.adapter.discover_devices().await {
-                    Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
-                        AdapterEvent::DeviceAdded(addr) => {
-                            if self.device_block_list.contains(&addr) {
-                                return None;
-                            }
-                            match self.adapter.device(addr) {
-                                Ok(device) => Some(BleMainLoopEvent::DeviceDiscovered(device)),
-                                Err(_) => None,
-                            }
-                        }
-                        _ => None,
-                    }),
-                    Err(err) => {
-                        log::error!("{:#?}", err);
-                        return self;
-                    }
-                };
+                println!("=========Starting BLE main loop...");
 
-                match async_std::task::try_current() {
-                    Some(t) => println!("The name of this task is {:?}", t.name()),
-                    None => println!("Not inside a task!"),
-                }
+                // let adapter2 = Arc::clone(&adapterr);// (&adapterr);
+                // println!("{:#?}", Arc::strong_count(&adapterr));
+               
+                // let mut adapter = self.adapter.clone(); 
+                // match Arc::try_unwrap(adapterr) {
+                //     Ok(adp) => {
+                //         adapter = adp;
+                //         println!("Unwrapped adapter");
+                //     }
+                //     Err(arc_ad) => {
+                //         // adapter = arc_ad.clone();
+                //         println!("Failed to unwrap adapter");
+                //     }
+                // }
+                // // if (adp2 = adapter){}
+                // // assert!(adp2,adapter);
+                // // let adapter = Arc::unwrap_or_clone(adapterr);
+                // // let adapter = adapterr.clone();
+                // println!(
+                //     "Advertising on Bluetooth adapter {} with address {:#?}",
+                //     adapter.name(),
+                //     adapter.address().await
+                // );
+
+                // let device_stream = match adapter.discover_devices().await {
+                //     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
+                //         AdapterEvent::DeviceAdded(addr) => {
+                //             println!("==========================New Device found{}", addr);
+                //             if self.device_block_list.contains(&addr) {
+                //                 return None;
+                //             }
+                //             match adapter.device(addr) {
+                //                 Ok(device) => Some(BleMainLoopEvent::DeviceDiscovered(device)),
+                //                 Err(_) => None,
+                //             }
+                //         }
+                //         _ => None,
+                //     }),
+                //     Err(err) => {
+                //         log::error!("Error: {:#?}", err);
+                //         return self;
+                //     }
+                // };
+
+                // match async_std::task::try_current() {
+                //     Some(t) => println!("The name of this task is {:?}", t.name()),
+                //     None => println!("Not inside a task!"),
+                // }
 
                 // ==================================================================================
                 // --------------------------------- MAIN BLE LOOP ----------------------------------
@@ -215,7 +255,7 @@ impl IdleBleService {
                     cmd_rx,
                     main_evt_stream,
                     msg_evt_stream,
-                    device_stream,
+                    // device_stream,
                     message_rx,
                 )
                     .merge();
@@ -282,9 +322,9 @@ impl IdleBleService {
                 self
             })
             .expect("Unable to spawn BLE main loop!");
-            println!("====================hehe");
+        async_std::task::block_on(join_handle);
         QaulBleService::Started(StartedBleService {
-            join_handle: Some(join_handle),
+            join_handle: None, //Some(join_handle),
             cmd_handle: cmd_tx,
         })
         // return QaulBleService::Idle();
@@ -311,7 +351,11 @@ impl IdleBleService {
         log::debug!("Discovered qaul bluetooth device {}", &stringified_addr);
 
         if !device.is_connected().await? {
-            device.connect().await?;
+            // device.connect().await?;
+            let _ = self
+                .adapter
+                .connect_device(device.address(), bluer::AddressType::LePublic)
+                .await;
             log::info!("Connected to device {}", &stringified_addr);
         }
 
