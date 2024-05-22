@@ -13,6 +13,11 @@ integration-test:
 	flutter test integration_test -d "$$ID" --dart-define=testing_mode=true #--update-goldens
 
 # -----------------------
+# WidgetBook
+# -----------------------
+run-widgetbook:
+	@cd widgetbook && flutter run -d macos
+# -----------------------
 
 .PHONY: sort-dependencies
 sort-dependencies:

@@ -10,7 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import 'coordinators/email_logging_coordinator/email_logging_coordinator.dart';
-import 'force_update_overlay.dart';
+import 'force_update.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'qaul_app.dart';
 
@@ -21,12 +21,24 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     Logger.root.level = kDebugMode ? Level.CONFIG : Level.FINE;
 
+    final (shouldForceUpdate, previousVersion) =
+        await ForceUpdateSystem.shouldForceUpdate();
+
+    if (shouldForceUpdate) {
+      runApp(MaterialApp(
+        home: ForceUpdateDialog(
+          required: ForceUpdateSystem.forceUpdateVersion.toString(),
+          previous: previousVersion?.toString() ?? '',
+          onLinkPressed: ForceUpdateSystem.openQaulRepo,
+        ),
+      ));
+      return;
+    }
+
     await Initializer.initialize(_container.read);
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
-    runApp(_CustomProviderScope(
-      ForceUpdateOverlay(child: QaulApp(themeMode: savedThemeMode)),
-    ));
+    runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
   }, (error, stack) => Logger.root.severe(error, error, stack));
 }
 
