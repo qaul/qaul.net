@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
   qaul_ui:
     path: ../
   widgetbook: ^3.7.1
@@ -23,3 +26,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
