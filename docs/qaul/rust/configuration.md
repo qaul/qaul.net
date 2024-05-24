@@ -39,7 +39,7 @@ lan:
   # and port of the LAN module
   # 0.0.0.0 - the module is listening on all addresses.
   # 0 - the port number 0 zero means the lan module chooses a random free port
-  listen: [/ip4/0.0.0.0/udp/0/quic-v1, /ip4/0.0.0.0/tcp/0, /ip6/::/udp/0/quic-v1, /ip6/::/tcp/0]
+  listen: [/ip4/0.0.0.0/udp/0/quic-v1, /ip6/::/udp/0/quic-v1]
 
 # Internet Connection Module Configuration
 internet:
@@ -47,15 +47,13 @@ internet:
   # a list of all nodes the Internet module connects to.
   peers:
     # connect to node on the IP address 144.91.74.192
-    # on port 9229, via a the TCP connection
-    - /ip4/144.91.74.192/tcp/9229
-    # or via a UDP/quic connection
+    # on port 9229, via a UDP/quic connection
     - /ip4/144.91.74.192/udp/9229/quic-v1
   do_listen: false
   # multi address configuring the port the internet module listens on
   # 0.0.0.0 - the module is listening on all addresses.
   # 9229 - the port number 9229 zero means the module listens on port 9229 for incoming connections
-  listen: [/ip4/0.0.0.0/udp/9229/quic-v1, /ip4/0.0.0.0/tcp/9229, /ip6/::/udp/9229/quic-v1, /ip6/::/tcp/9229]
+  listen: [/ip4/0.0.0.0/udp/9229/quic-v1, /ip6/::/udp/9229/quic-v1]
 
 # User Accounts Configuration
 # It contains a list with all the user accounts registered on this node

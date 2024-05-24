@@ -15,6 +15,7 @@ use std::path::Path;
 use crate::utilities::upgrade::backup::Backup;
 
 pub mod backup;
+pub mod v2_0_0_rc_1;
 
 /// upgrade module
 pub struct Upgrade {}
@@ -63,7 +64,6 @@ impl Upgrade {
     fn upgrade(storage_path: &Path, old_version: &str) -> bool {
         println!("running upgrade check for version {}", old_version);
 
-        #[allow(unused_mut)]
         let mut version = Version::parse(old_version).unwrap();
 
         // check if libqaul is upgradable
@@ -89,11 +89,25 @@ impl Upgrade {
             println!("backup failed");
             return false;
         }
-        #[allow(unused_mut)]
         let mut backup_path = storage_path.join("backup").join(old_version);
 
         // upgrade one version after the other
         // put new upgrade version below this chain.
+
+        // upgrade to version 2.0.0-rc.1
+        if version < Version::parse("2.0.0-rc.1").unwrap() {
+            match v2_0_0_rc_1::VersionUpgrade::upgrade(storage_path, &backup_path) {
+                Ok((new_version, new_path)) => {
+                    // update values
+                    version = Version::parse(&new_version).unwrap();
+                    backup_path = new_path;
+                }
+                Err(e) => {
+                    println!("Upgrade to 2.0.0-rc.1 failed: {}", e);
+                    return false;
+                }
+            }
+        }
 
         // restore the upgraded last version
         if backup::Backup::restore(&storage_path, &backup_path) == true {

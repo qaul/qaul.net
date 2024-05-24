@@ -69,7 +69,7 @@ enum Info {
 // Internet Nodes Entry
 //
 // Contains a node address as a libp2p multiaddress.
-// e.g. "/ip4/144.91.74.192/tcp/9229"
+// e.g. "/ip4/144.91.74.192/udp/9229/quic-v1"
 message InternetNodesEntry {
     // address
     string address = 1;

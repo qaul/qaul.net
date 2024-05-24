@@ -8,14 +8,18 @@
         }
     ],
     "cSpell.words": [
-        "qaul",
-        "libqaul",
         "behaviour",
         "BLE",
         "floodsub",
         "keypair",
         "libp2p",
-        "protobuf"
+        "libqaul",
+        "mdns",
+        "multiaddress",
+        "peerid",
+        "protobuf",
+        "qaul",
+        "quic"
     ],
     "[rust]": {
         "editor.defaultFormatter": "rust-lang.rust-analyzer",

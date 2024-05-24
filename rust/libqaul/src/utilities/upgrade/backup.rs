@@ -10,17 +10,6 @@ use std::path::Path;
 /// to the backup folder
 pub struct Backup {}
 impl Backup {
-    // pub fn copy_file(file: &str, to: &str) -> bool {
-    //     let options = fs_extra::file::CopyOptions::new();
-    //     fs_extra::file::copy(file, to, &options);
-    //     true
-    // }
-    // pub fn copy_folder(folder: &str, to: &str) -> bool {
-    //     let options = fs_extra::dir::CopyOptions::new();
-    //     fs_extra::dir::copy(folder, to, &options);
-    //     true
-    // }
-
     /// move file
     pub fn move_file(file: &Path, to: &Path) -> bool {
         let options = fs_extra::file::CopyOptions::new();

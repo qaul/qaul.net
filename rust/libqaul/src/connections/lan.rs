@@ -15,17 +15,15 @@
 //!   active: true
 //!   listen:
 //!   - /ip4/0.0.0.0/udp/0/quic-v1
-//!   - /ip4/0.0.0.0/tcp/0
 //!   - /ip6/::/udp/0/quic-v1
-//!   - /ip6/::/tcp/0
 //! ```
 
 use libp2p::{
     floodsub::{Floodsub, FloodsubEvent},
     identity::Keypair,
-    mdns, noise, ping,
+    mdns, ping,
     swarm::{NetworkBehaviour, Swarm},
-    tcp, yamux, SwarmBuilder,
+    SwarmBuilder,
 };
 use prost::Message;
 use std::time::Duration;
@@ -189,12 +187,6 @@ impl Lan {
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_async_std()
-            .with_tcp(
-                tcp::Config::new().nodelay(true),
-                noise::Config::new,
-                yamux::Config::default,
-            )
-            .unwrap()
             .with_quic()
             .with_behaviour(|key| {
                 log::trace!("internal LAN node ID: {:?}", key.public().to_peer_id());

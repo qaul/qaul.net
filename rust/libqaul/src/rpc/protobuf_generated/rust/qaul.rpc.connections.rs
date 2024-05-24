@@ -64,7 +64,7 @@ pub struct InternetNodesList {
 /// Internet Nodes Entry
 ///
 /// Contains a node address as a libp2p multiaddress.
-/// e.g. "/ip4/144.91.74.192/tcp/9229"
+/// e.g. "/ip4/144.91.74.192/udp/9229/quic-v1"
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InternetNodesEntry {
