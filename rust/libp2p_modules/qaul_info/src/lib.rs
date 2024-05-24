@@ -121,7 +121,7 @@ impl NetworkBehaviour for QaulInfo {
             // ignore the sent event
             Ok(InnerMessage::Sent) => return,
             Err(err) => {
-                log::error!("qaul_info_data failed: {}", err);
+                log::trace!("qaul_info_data failed: {}", err);
                 return;
             }
         };
