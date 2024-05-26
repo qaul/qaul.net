@@ -54,7 +54,9 @@ impl Default for Lan {
             active: true,
             listen: vec![
                 String::from("/ip4/0.0.0.0/udp/0/quic-v1"),
+                String::from("/ip4/0.0.0.0/tcp/0"),
                 String::from("/ip6/::/udp/0/quic-v1"),
+                String::from("/ip6/::/tcp/0"),
             ],
         }
     }
@@ -91,7 +93,11 @@ impl Default for Internet {
         #[allow(unused_variables)]
         let listen_ipv4_quic: String = format!("/ip4/0.0.0.0/udp/{}/quic-v1", port);
         #[allow(unused_variables)]
+        let listen_ipv4: String = format!("/ip4/0.0.0.0/tcp/{}", port);
+        #[allow(unused_variables)]
         let listen_ipv6_quic: String = format!("/ip6/::/udp/{}/quic-v1", port);
+        #[allow(unused_variables)]
+        let listen_ipv6: String = format!("/ip6/::/tcp/{}", port);
 
         Internet {
             active: true,
@@ -104,10 +110,12 @@ impl Default for Internet {
             #[cfg(any(target_os = "android", target_os = "ios"))]
             listen: vec![
                 String::from("/ip4/0.0.0.0/udp/9229/quic-v1"),
+                String::from("/ip4/0.0.0.0/tcp/9229"),
                 String::from("/ip6/::/udp/9229/quic-v1"),
+                String::from("/ip6/::/tcp/9229"),
             ],
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            listen: vec![listen_ipv4_quic, listen_ipv6_quic],
+            listen: vec![listen_ipv4_quic, listen_ipv4, listen_ipv6_quic, listen_ipv6],
         }
     }
 }

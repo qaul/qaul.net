@@ -5,9 +5,6 @@
 //!
 //! Changes to be upgraded:
 //!
-//! * configuration file: remove all TCP listen entries
-//!   - config.internet.listen
-//!   - config.lan.listen
 //! * configuration file: change all TCP peer entries to UDP/QUIC entries
 //!   - config.internet.peers
 
@@ -72,22 +69,13 @@ impl VersionUpgrade {
                 keys: old_cfg.node.keys.clone(),
             };
 
-            // remove all non QUIC LAN listening interfaces
-            let mut listen_lan: Vec<String> = vec![];
-            for entry in old_cfg.lan.listen.iter() {
-                if Self::multiaddr_is_quic(entry) {
-                    listen_lan.push(entry.to_string());
-                }
-            }
-            if listen_lan.len() == 0 {
-                listen_lan.push(String::from("/ip4/0.0.0.0/udp/0/quic-v1"));
-                listen_lan.push(String::from("/ip6/::/udp/0/quic-v1"));
-            }
+            // Copy LAN section
             let lan = crate::storage::configuration::Lan {
                 active: old_cfg.lan.active,
-                listen: listen_lan,
+                listen: old_cfg.lan.listen.clone(),
             };
 
+            // Internet section update
             // change TCP peer addresses to QUIC addresses
             let mut peers: Vec<crate::storage::configuration::InternetPeer> = vec![];
             for peer in &old_cfg.internet.peers {
@@ -102,31 +90,11 @@ impl VersionUpgrade {
                     None => {}
                 }
             }
-
-            // remove all non QUIC internet listening interfaces
-            let mut listen_internet: Vec<String> = vec![];
-            for entry in old_cfg.internet.listen.iter() {
-                if Self::multiaddr_is_quic(entry) {
-                    listen_internet.push(entry.to_string());
-                }
-            }
-            if listen_internet.len() == 0 {
-                #[cfg(any(target_os = "android", target_os = "ios"))]
-                {
-                    listen_internet.push(String::from("/ip4/0.0.0.0/udp/9229/quic-v1"));
-                    listen_internet.push(String::from("/ip6/::/udp/9229/quic-v1"));
-                }
-                #[cfg(not(any(target_os = "android", target_os = "ios")))]
-                {
-                    listen_internet.push(String::from("/ip4/0.0.0.0/udp/0/quic-v1"));
-                    listen_internet.push(String::from("/ip6/::/udp/0/quic-v1"));
-                }
-            }
             let internet = crate::storage::configuration::Internet {
                 active: old_cfg.internet.active,
                 peers,
                 do_listen: old_cfg.internet.do_listen,
-                listen: listen_internet,
+                listen: old_cfg.internet.listen.clone(),
             };
 
             // copy user account
@@ -181,25 +149,6 @@ impl VersionUpgrade {
             println!("Error: Configuration can't be loaded");
             false
         }
-    }
-
-    /// check if a multi-address is UDP?
-    fn multiaddr_is_quic(multiaddr_string: &String) -> bool {
-        let multiaddr: Multiaddr = multiaddr_string.parse().unwrap();
-
-        // check if it is a udp address
-        let protocols = multiaddr.protocol_stack().collect::<Vec<_>>();
-        if protocols.len() < 2 {
-            return false;
-        }
-        if protocols[1] != "udp" {
-            return false;
-        }
-        if protocols[2] != "quic-v1" {
-            return false;
-        }
-
-        false
     }
 
     /// change TCP multi-address to UDP/QUIC
