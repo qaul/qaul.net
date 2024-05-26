@@ -27,7 +27,7 @@ Changed
 - Upgraded many libraries to new versions.
 - removed old versions of unmaintained `sled` versions, which were only used for the upgrade procedure to qaul 2.0.0 beta 18.
   This means that upgrading to qaul version 2.0.0 beta 19 is only possible from qaul version 2.0.0 beta 18.
-- Removed TCP connection stack, in favor for the new UDP/QUIC protocol for interconnections.
+- Configuration auto-upgrade of all static TCP peer entries to use the QUIC protocol for interconnections.
 
 ## [2.0.0 beta 18] 2024-04-11
 

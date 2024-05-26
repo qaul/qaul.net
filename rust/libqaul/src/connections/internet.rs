@@ -19,16 +19,18 @@
 //!   do_listen: false
 //!   listen:
 //!   - /ip4/0.0.0.0/udp/9229/quic-v1
+//!   - /ip4/0.0.0.0/tcp/9229
 //!   - /ip6/::/udp/9229/quic-v1
+//!   - /ip6/::/tcp/9229
 //! ```
 
 use libp2p::{
     floodsub::{Floodsub, FloodsubEvent},
     identify,
     identity::Keypair,
-    ping,
+    noise, ping,
     swarm::{NetworkBehaviour, Swarm},
-    Multiaddr, PeerId, SwarmBuilder,
+    tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
 use state::InitCell;
@@ -220,6 +222,12 @@ impl Internet {
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_async_std()
+            .with_tcp(
+                tcp::Config::new().nodelay(true),
+                noise::Config::new,
+                yamux::Config::default,
+            )
+            .unwrap()
             .with_quic()
             .with_behaviour(|key| {
                 log::trace!("internal INTERNET node ID: {:?}", key.public().to_peer_id());
