@@ -12,12 +12,13 @@ bool forceUpdateRequired(Version current, Version target) {
   if (current == target) {
     return int.parse(current.build) < int.parse(target.build);
   }
-  throw UnimplementedError("until now, qaul only has one version. Add logic");
+  return false;
 }
 
 /// Utility class to give support to the Force-update flow
 class ForceUpdateSystem {
-  static final _qaulRepoURL = Uri.parse("https://github.com/qaul/qaul.net");
+  static final _qaulRepoURL =
+      Uri.parse("https://github.com/qaul/qaul.net/releases/tag/v2.0.0-beta.18");
 
   static final forceUpdateVersion =
       Version(2, 0, 0, preRelease: ["beta"], build: "18");
@@ -28,10 +29,37 @@ class ForceUpdateSystem {
   static bool _isFile(FileSystemEntity e) =>
       e.statSync().type == FileSystemEntityType.file;
 
-  static Future<(bool required, Version? version)> shouldForceUpdate() async {
-    // - Android : `/data/user/0/net.qaul.qaul_app/files`
-    final appDocumentDir = await getApplicationSupportDirectory();
+  // This is the folder where qaul_rpc stores all user data. Deleting it erases
+  // user information, which prompts for account creation.
+  static Future<Directory> _qaulRpcFilesDir() async {
+    if (Platform.isIOS) {
+      // - iOS : /var/mobile/Containers/Data/Application/THE-DEVICE-ID/Documents
+      return getApplicationDocumentsDirectory();
+    }
 
+    // Returns the following Path:
+    // - Android : /data/user/0/net.qaul.qaul_app/files
+    // - MacOS   : /Users/XYZ/Library/Containers/net.qaul.app/Data/Library/Application Support/net.qaul.app
+    //
+    // On iOS, it's easier to use `getApplicationDocumentsDirectory`; however, the path returned would be:
+    // /var/mobile/Containers/Data/Application/THE-DEVICE-ID/Library/Application Support
+    final appDocumentDir = await getApplicationSupportDirectory();
+    print('-' * 80);
+    print(appDocumentDir);
+    print('-' * 80);
+
+    if (Platform.isMacOS) {
+      var dir = Directory("${appDocumentDir.parent.path}/net.qaul.qaul");
+      assert(dir.existsSync());
+      return dir;
+    }
+
+    // if Platform.isAndroid
+    return appDocumentDir;
+  }
+
+  static Future<(bool required, Version? version)> shouldForceUpdate() async {
+    final appDocumentDir = await _qaulRpcFilesDir();
     final entities = appDocumentDir.listSync();
     for (final e in entities) {
       if (!e.path.endsWith('version') || !_isFile(e)) {
@@ -61,19 +89,26 @@ class ForceUpdateSystem {
       launchUrl(_qaulRepoURL);
     }
   }
+
+  static Future<void> deleteAccount() async {
+    final appDocumentDir = await _qaulRpcFilesDir();
+    await appDocumentDir.delete(recursive: true);
+  }
 }
 
 class ForceUpdateDialog extends StatelessWidget {
   const ForceUpdateDialog({
     Key? key,
     required this.previous,
-    required this.required,
+    required this.current,
     this.onLinkPressed,
+    this.onDeleteAccountPressed,
   }) : super(key: key);
 
   final String previous;
-  final String required;
+  final String current;
   final VoidCallback? onLinkPressed;
+  final VoidCallback? onDeleteAccountPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -86,57 +121,49 @@ class ForceUpdateDialog extends StatelessWidget {
         textAlign: TextAlign.center,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: ListView(
             children: [
               Text(
                 l10n.forceUpdateRequired,
                 style: ttheme.displaySmall,
               ),
               const SizedBox(height: 20),
-
               Text(l10n.forceUpdateDescription1),
               const SizedBox(height: 8),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(child: Text(l10n.forceUpdateDescription2)),
-                  const SizedBox(height: 8),
-                  IconButton(
-                    onPressed: onLinkPressed,
-                    icon: const Icon(Icons.open_in_new),
-                  ),
-                ],
-              ),
+              Text(l10n.forceUpdateDescription2),
               const SizedBox(height: 8),
-
+              FilledButton(
+                onPressed: onLinkPressed,
+                style: FilledButton.styleFrom(
+                  maximumSize: const Size.fromWidth(200),
+                ),
+                child: Text(
+                  l10n.forceUpdateDownloadQaul18,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 40),
               Text(l10n.forceUpdateDescription3),
               const SizedBox(height: 8),
               FilledButton(
-                onPressed: () {},
+                onPressed: onDeleteAccountPressed,
                 child: Text(l10n.forceUpdateCreateAccount),
               ),
-
               const SizedBox(height: 8),
               Text(l10n.forceUpdateDisclaimer, style: ttheme.labelLarge),
-
-              // const Expanded(child: SizedBox.shrink()),
-              Expanded(
-                child: SizedBox(
-                  width: double.maxFinite,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(l10n.previousVersion, style: ttheme.titleSmall),
-                      Text(previous),
-                      const SizedBox(height: 8),
-                      Text(l10n.currentVersion, style: ttheme.titleSmall),
-                      Text(required),
-                    ],
-                  ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(l10n.previousVersion, style: ttheme.titleSmall),
+                    Text(previous),
+                    const SizedBox(height: 8),
+                    Text(l10n.currentVersion, style: ttheme.titleSmall),
+                    Text(current),
+                  ],
                 ),
               ),
             ],
