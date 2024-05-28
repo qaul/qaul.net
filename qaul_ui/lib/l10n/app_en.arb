@@ -162,6 +162,7 @@
   "forceUpdateRequired": "Upgrade Required",
   "forceUpdateDescription1": "info: qaul has a new database format. Users of qaul 2.0.0-beta.17 and earlier who wish to keep their existing account need to migrate their data to the new format.",
   "forceUpdateDescription2": "To migrate an existing database, download qaul 2.0.0-beta.18 and run it",
+  "forceUpdateDownloadQaul18": "Download qaul 2.0.0-beta.18",
   "forceUpdateDescription3": "If you don't wish to keep your existing data base",
   "forceUpdateCreateAccount": "Create new account",
   "forceUpdateDisclaimer": "(you will lose all your data and accounts)",

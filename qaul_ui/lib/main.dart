@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:logging/logging.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import 'coordinators/email_logging_coordinator/email_logging_coordinator.dart';
@@ -25,21 +27,44 @@ void main() async {
         await ForceUpdateSystem.shouldForceUpdate();
 
     if (shouldForceUpdate) {
-      runApp(MaterialApp(
-        home: ForceUpdateDialog(
-          required: ForceUpdateSystem.forceUpdateVersion.toString(),
-          previous: previousVersion?.toString() ?? '',
-          onLinkPressed: ForceUpdateSystem.openQaulRepo,
-        ),
-      ));
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+      runApp(
+        AdaptiveTheme(
+            light: QaulApp.lightTheme,
+            dark: QaulApp.darkTheme,
+            initial: AdaptiveThemeMode.system,
+            builder: (theme, darkTheme) {
+              return MaterialApp(
+                theme: theme,
+                darkTheme: darkTheme,
+
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: ForceUpdateDialog(
+                  current: packageInfo.version,
+                  previous: previousVersion?.toString() ?? '',
+                  onLinkPressed: ForceUpdateSystem.openQaulRepo,
+                  onDeleteAccountPressed: () async {
+                    await ForceUpdateSystem.deleteAccount();
+                    await _defaultAppEntrypoint();
+                  },
+                ),
+              );
+            }),
+      );
       return;
     }
 
-    await Initializer.initialize(_container.read);
-
-    final savedThemeMode = await AdaptiveTheme.getThemeMode();
-    runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
+    await _defaultAppEntrypoint();
   }, (error, stack) => Logger.root.severe(error, error, stack));
+}
+
+Future<void> _defaultAppEntrypoint() async {
+  await Initializer.initialize(_container.read);
+
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 }
 
 class _CustomProviderScope extends StatefulWidget {

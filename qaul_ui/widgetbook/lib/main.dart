@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:qaul_ui/qaul_app.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
@@ -34,6 +35,22 @@ class WidgetbookApp extends StatelessWidget {
           locales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           initialLocale: AppLocalizations.supportedLocales.last,
+        ),
+        MaterialThemeAddon(
+          themes: [
+            WidgetbookTheme(
+              name: 'Light',
+              data: QaulApp.lightTheme,
+            ),
+            WidgetbookTheme(
+              name: 'Dark',
+              data: QaulApp.darkTheme,
+            ),
+          ],
+          // initialTheme: WidgetbookTheme(
+          //   name: 'Light',
+          //   data: yourMaterialLightTheme,
+          // ),
         ),
       ],
     );
