@@ -123,13 +123,56 @@ class ForceUpdateDialog extends StatelessWidget {
   final VoidCallback? onLinkPressed;
   final VoidCallback? onDeleteAccountPressed;
 
+  void _confirmAccountDeletion(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(l10n.forceUpdateConfirmationDialog),
+          actions: [
+            TextButton(
+              onPressed: onDeleteAccountPressed,
+              child: Text(l10n.okDialogButton),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancelDialogButton),
+            ),
+          ],
+        );
+        return Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.forceUpdateConfirmationDialog),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: onDeleteAccountPressed,
+                    child: Text(l10n.okDialogButton),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancelDialogButton),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final ttheme = Theme.of(context).textTheme;
 
-    return Dialog(
-      child: DefaultTextStyle(
+    return Scaffold(
+      body: DefaultTextStyle(
         style: ttheme.bodyMedium!,
         textAlign: TextAlign.center,
         child: Padding(
@@ -159,7 +202,7 @@ class ForceUpdateDialog extends StatelessWidget {
               Text(l10n.forceUpdateDescription3),
               const SizedBox(height: 8),
               FilledButton(
-                onPressed: onDeleteAccountPressed,
+                onPressed: () => _confirmAccountDeletion(context),
                 child: Text(l10n.forceUpdateCreateAccount),
               ),
               const SizedBox(height: 8),

@@ -166,6 +166,7 @@
   "forceUpdateDescription3": "If you don't wish to keep your existing data base",
   "forceUpdateCreateAccount": "Create new account",
   "forceUpdateDisclaimer": "(you will lose all your data and accounts)",
+  "forceUpdateConfirmationDialog": "All your existing data will be deleted.",
   "previousVersion": "formerly installed version:",
   "currentVersion": "currently installed version:"
 }
