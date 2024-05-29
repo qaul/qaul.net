@@ -14,12 +14,12 @@ pub mod utils;
 
 use async_trait::async_trait;
 use prost::Message;
-use state::Storage;
+use state::InitCell;
 
 use proto_sys::Ble;
 
 /// sender of the mpsc channel: libqaul ---> ble_module
-static EXTERN_SEND: Storage<async_std::channel::Sender<Vec<u8>>> = Storage::new();
+static EXTERN_SEND: InitCell<async_std::channel::Sender<Vec<u8>>> = InitCell::new();
 
 #[async_trait]
 pub trait SysRpcReceiver {
