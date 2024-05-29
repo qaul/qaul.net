@@ -36,13 +36,22 @@ class ForceUpdateSystem {
       // - iOS : /var/mobile/Containers/Data/Application/THE-DEVICE-ID/Documents
       return getApplicationDocumentsDirectory();
     }
+    if (Platform.isLinux) {
+      final env = Platform.environment;
+      if (env["FLUTTER_ROOT"]!.contains('snap')) {
+        return Directory('${env['HOME']}/snap/flutter/common');
+      }
+      return env.containsKey('SNAP')
+          ? Directory('${env['HOME']}/snap/qaul/common')
+          : Directory('${env['HOME']}/.config/qaul');
+    }
 
     // Returns the following Path:
     // - Android : /data/user/0/net.qaul.qaul_app/files
     // - MacOS   : /Users/XYZ/Library/Containers/net.qaul.app/Data/Library/Application Support/net.qaul.app
     // - Windows : C:\Users\XYZ\AppData\Roaming\net.qaul.qaulapp\qaul
     //
-    // On iOS, it's easier to use `getApplicationDocumentsDirectory`; however, the path returned would be:
+    // On iOS, it's easiePr to use `getApplicationDocumentsDirectory`; however, the path returned would be:
     // /var/mobile/Containers/Data/Application/THE-DEVICE-ID/Library/Application Support
     final appDocumentDir = await getApplicationSupportDirectory();
 
@@ -64,9 +73,6 @@ class ForceUpdateSystem {
 
   static Future<(bool required, Version? version)> shouldForceUpdate() async {
     final appDocumentDir = await _qaulRpcFilesDir();
-    print('-' * 80);
-    print(appDocumentDir);
-    print('-' * 80);
     final entities = appDocumentDir.listSync();
     for (final e in entities) {
       if (!e.path.endsWith('version') || !_isFile(e)) {
