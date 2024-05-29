@@ -35,7 +35,6 @@ dependencies:
   flutter_chat_ui: ^1.6.10
   flutter_email_sender: ^6.0.2
   flutter_hooks: ^0.18.6
-  flutter_markdown: ^0.6.15+1
   flutter_svg: ^2.0.9
   font_awesome_flutter: ^10.6.0
   hive: ^2.2.3
@@ -104,5 +103,4 @@ flutter:
   assets:
     - assets/about/
     - assets/icons/
-    - assets/license/
     - assets/logo/
