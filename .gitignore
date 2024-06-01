@@ -6,6 +6,7 @@ node.db/
 12D3KooW*/
 logs/
 version
+.vscode/ 
 
 # generated SBOM files
 *.cdx.json
