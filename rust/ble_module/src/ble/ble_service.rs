@@ -1,6 +1,9 @@
-use std::{cell::RefCell, collections::HashMap, error::Error};
-
-use async_std::{channel::Sender, prelude::*, sync::Arc, task::JoinHandle};
+use async_std::{
+    channel::{Receiver, Sender},
+    prelude::*,
+    sync::Arc,
+    task::JoinHandle,
+};
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
     gatt::{local::*, CharacteristicReader},
@@ -9,6 +12,12 @@ use bluer::{
 use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
+use state::InitCell;
+use std::{
+    cell::{Cell, RefCell},
+    collections::HashMap,
+    error::Error,
+};
 
 use crate::ble::ble_uuids::main_service_uuid;
 use crate::ble::ble_uuids::msg_char;
@@ -18,7 +27,6 @@ use crate::{
     ble::utils::mac_to_string,
     rpc::{proto_sys::*, utils::*},
 };
-
 pub enum QaulBleService {
     Idle(IdleBleService),
     Started(StartedBleService),
@@ -66,6 +74,11 @@ impl IdleBleService {
             address_lookup: RefCell::new(HashMap::new()),
         }))
     }
+
+    // pub fn adapter_channel_handles() -> (Sender<Adapter>, Receiver<Adapter>){
+    //     let (adp_send, adp_recv) = async_std::channel::unbounded::<Adapter>();
+    //     (adp_send, adp_recv)
+    // }
 
     pub async fn advertise_scan_listen(
         mut self,
@@ -164,85 +177,62 @@ impl IdleBleService {
                 return QaulBleService::Idle(self);
             }
         };
-        println!(
-            "Advertising on Bluetooth adapter {} with address {:#?}",
-            self.adapter.name(),
-            self.adapter.address().await
-        );
-        // let adapter = self.adapter.clone();
-
-        // let inner = adapter.inner();
-        // #![feature(arc_unwrap_or_clone)]
-        let adapterr = Arc::from(self.adapter.clone());
-        let adp2 = self.adapter.clone();
-        // match Arc::try_unwrap(adapterr) {
-        //     Ok(adapter) => {
-        //         println!("Unwrapped adapter");
-        //     }
-        //     Err(err) => {
-        //         println!("Failed to unwrap adapter");
-        //     }
-        // }
-        // let adapter = Arc::unwrap_or_clone(adapterr);
-        // let adapterrr = Arc::downgrade(&adapterr);
-        // let (adp_tx, adp_rx) = async_std::channel::bounded::<Adapter>(1);
+        let (adp_send, adp_recv) = async_std::channel::unbounded::<Adapter>();
+        match adp_send.try_send(self.adapter.clone()) {
+            Ok(_) => {
+                log::debug!("Sent adapter to channel");
+            }
+            Err(err) => {
+                log::error!("{:#?}", err);
+            }
+        }
         let (cmd_tx, cmd_rx) = async_std::channel::bounded::<BleMainLoopEvent>(8);
-        // adp_tx.try_send(self.adapter.clone()).unwrap();
 
-        let join_handle: JoinHandle<IdleBleService> = async_std::task::Builder::new()
+        let join_handle = async_std::task::Builder::new()
             .name("main-ble-loop".into())
             .local(async move {
-                println!("=========Starting BLE main loop...");
+                log::info!("Starting BLE main loop...");
 
-                // let adapter2 = Arc::clone(&adapterr);// (&adapterr);
-                // println!("{:#?}", Arc::strong_count(&adapterr));
-               
-                // let mut adapter = self.adapter.clone(); 
-                // match Arc::try_unwrap(adapterr) {
-                //     Ok(adp) => {
-                //         adapter = adp;
-                //         println!("Unwrapped adapter");
-                //     }
-                //     Err(arc_ad) => {
-                //         // adapter = arc_ad.clone();
-                //         println!("Failed to unwrap adapter");
-                //     }
-                // }
-                // // if (adp2 = adapter){}
-                // // assert!(adp2,adapter);
-                // // let adapter = Arc::unwrap_or_clone(adapterr);
-                // // let adapter = adapterr.clone();
-                // println!(
-                //     "Advertising on Bluetooth adapter {} with address {:#?}",
-                //     adapter.name(),
-                //     adapter.address().await
-                // );
+                let mut adapter = self.adapter.clone();
+                match adp_recv.recv().await {
+                    Ok(adp) => {
+                        log::info!("Received adapter from channel");
+                        adapter = adp;
+                    }
+                    Err(err) => {
+                        log::error!("Failed to receive adapter from channel: {:#?}", err);
+                        // return self;
+                    }
+                };
 
-                // let device_stream = match adapter.discover_devices().await {
-                //     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
-                //         AdapterEvent::DeviceAdded(addr) => {
-                //             println!("==========================New Device found{}", addr);
-                //             if self.device_block_list.contains(&addr) {
-                //                 return None;
-                //             }
-                //             match adapter.device(addr) {
-                //                 Ok(device) => Some(BleMainLoopEvent::DeviceDiscovered(device)),
-                //                 Err(_) => None,
-                //             }
-                //         }
-                //         _ => None,
-                //     }),
-                //     Err(err) => {
-                //         log::error!("Error: {:#?}", err);
-                //         return self;
-                //     }
-                // };
+                // let adapter: Adapter = adp_recv.recv().await.unwrap();
+                println!(
+                    "Advertising on Bluetooth adapter {} with address {:#?}",
+                    adapter.name(),
+                    adapter.address().await
+                );
 
-                // match async_std::task::try_current() {
-                //     Some(t) => println!("The name of this task is {:?}", t.name()),
-                //     None => println!("Not inside a task!"),
-                // }
-
+                let device_stream = match adapter.discover_devices().await {
+                    Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
+                        AdapterEvent::DeviceAdded(addr) => {
+                            if self.device_block_list.contains(&addr) {
+                                return None;
+                            }
+                            match adapter.device(addr) {
+                                Ok(device) => {
+                                    println!("{:?}", device);
+                                    Some(BleMainLoopEvent::DeviceDiscovered(device))
+                                }
+                                Err(_) => None,
+                            }
+                        }
+                        _ => None,
+                    }),
+                    Err(err) => {
+                        log::error!("Error: {:#?}", err);
+                        return self;
+                    }
+                };
                 // ==================================================================================
                 // --------------------------------- MAIN BLE LOOP ----------------------------------
                 // ==================================================================================
@@ -255,7 +245,7 @@ impl IdleBleService {
                     cmd_rx,
                     main_evt_stream,
                     msg_evt_stream,
-                    // device_stream,
+                    device_stream,
                     message_rx,
                 )
                     .merge();
@@ -269,8 +259,11 @@ impl IdleBleService {
                             break;
                         }
                         BleMainLoopEvent::SendMessage((receiver_id, data)) => {
+                            println!("===============Sending message to {:?}", receiver_id);
                             match self.send_direct_message(receiver_id, data).await {
-                                Ok(_) => todo!(),
+                                Ok(_) => {
+                                    todo!()
+                                }
                                 Err(err) => {
                                     log::error!("Error sending direct BLE message: {:#?}", err)
                                 }
@@ -297,10 +290,13 @@ impl IdleBleService {
                             CharacteristicControlEvent::Notify(_) => (),
                         },
                         BleMainLoopEvent::DeviceDiscovered(device) => {
-                            match self
+                            
+                            // let handle = async_std::task::spawn( async move{
+                            let s = self
                                 .on_device_discovered(&device, &mut internal_sender)
-                                .await
-                            {
+                                .await;
+                            log::info!("Device discovered");
+                            match s {
                                 Ok(msg_receivers) => {
                                     for rec in msg_receivers {
                                         let message_tx = message_tx.clone();
@@ -311,6 +307,10 @@ impl IdleBleService {
                                     log::error!("{:#?}", err);
                                 }
                             }
+                            // self
+                            // });
+                            // handle.await;
+                            // break;
                         }
                     }
                 }
@@ -318,16 +318,14 @@ impl IdleBleService {
                 for handle in self.ble_handles.drain(..) {
                     drop(handle)
                 }
-
                 self
             })
             .expect("Unable to spawn BLE main loop!");
-        async_std::task::block_on(join_handle);
+
         QaulBleService::Started(StartedBleService {
-            join_handle: None, //Some(join_handle),
+            join_handle: Some(join_handle),
             cmd_handle: cmd_tx,
         })
-        // return QaulBleService::Idle();
     }
 
     async fn on_device_discovered(
@@ -335,55 +333,63 @@ impl IdleBleService {
         device: &Device,
         sender: &mut BleResultSender,
     ) -> Result<Vec<CharacteristicReader>, Box<dyn Error>> {
-        let mut msg_receivers: Vec<CharacteristicReader> = vec![];
+        // log::info!("=++++++++++==========+++++Device discovered: {:?}", device);
 
-        let stringified_addr = mac_to_string(&device.address());
-        let uuids = device.uuids().await?.unwrap_or_default();
-        log::trace!(
-            "Discovered device {} with service UUIDs {:?}",
-            &stringified_addr,
-            &uuids
-        );
+        let rssi = device.rssi().await?.unwrap_or(999) as i32;
+        log::info!("Device RSSI: {:?}", rssi);
+        if rssi > 0 {
+            let mut msg_receivers: Vec<CharacteristicReader> = vec![];
+            let stringified_addr = mac_to_string(&device.address());
+            let uuids = device.uuids().await?.unwrap_or_default();
+            log::info!(
+                "Discovered device {} with service UUIDs {:?}",
+                &stringified_addr,
+                &uuids
+            );
 
-        if !uuids.contains(&main_service_uuid()) {
-            return Ok(msg_receivers);
-        }
-        log::debug!("Discovered qaul bluetooth device {}", &stringified_addr);
-
-        if !device.is_connected().await? {
-            // device.connect().await?;
-            let _ = self
-                .adapter
-                .connect_device(device.address(), bluer::AddressType::LePublic)
-                .await;
-            log::info!("Connected to device {}", &stringified_addr);
-        }
-
-        for service in device.services().await? {
-            let service_uuid = service.uuid().await?;
-            if service_uuid != main_service_uuid() {
-                continue;
+            if !uuids.contains(&main_service_uuid()) {
+                log::error!("Device does not support qaul main service");
+                return Ok(msg_receivers);
             }
-            for char in service.characteristics().await? {
-                let flags = char.flags().await?;
-                if flags.notify || flags.indicate {
-                    msg_receivers.push(char.notify_io().await?);
-                    log::info!(
-                        "Setting up notification for characteristic {} of device {}",
-                        char.uuid().await?,
-                        &stringified_addr
-                    );
-                } else if flags.read && char.uuid().await? == read_char() {
-                    let remote_qaul_id = char.read().await?;
-                    self.address_lookup
-                        .borrow_mut()
-                        .insert(remote_qaul_id.clone(), device.address());
-                    let rssi = device.rssi().await?.unwrap_or(999) as i32;
-                    sender.send_device_found(remote_qaul_id, rssi)
+            log::info!("Discovered qaul bluetooth device {}", &stringified_addr);
+
+            if !device.is_connected().await? {
+                // device.connect().await?;
+                let _ = self
+                    .adapter
+                    .connect_device(device.address(), bluer::AddressType::LePublic)
+                    .await;
+                log::info!("Connected to device {}", &stringified_addr);
+            }
+
+            for service in device.services().await? {
+                let service_uuid = service.uuid().await?;
+                if service_uuid != main_service_uuid() {
+                    continue;
+                }
+                for char in service.characteristics().await? {
+                    let flags = char.flags().await?;
+                    if flags.notify || flags.indicate {
+                        msg_receivers.push(char.notify_io().await?);
+                        log::info!(
+                            "Setting up notification for characteristic {} of device {}",
+                            char.uuid().await?,
+                            &stringified_addr
+                        );
+                    } else if flags.read && char.uuid().await? == read_char() {
+                        let remote_qaul_id = char.read().await?;
+                        self.address_lookup
+                            .borrow_mut()
+                            .insert(remote_qaul_id.clone(), device.address());
+
+                        sender.send_device_found(remote_qaul_id, rssi)
+                    }
                 }
             }
+            Ok(msg_receivers)
+        } else {
+            Err("Device RSSI less than 0".into())
         }
-        Ok(msg_receivers)
     }
 
     async fn spawn_msg_listener(
@@ -412,6 +418,11 @@ impl IdleBleService {
         receiver_id: Vec<u8>,
         data: Vec<u8>,
     ) -> Result<(), Box<dyn Error>> {
+        println!(
+            "=============Sending direct message again to {:?}",
+            receiver_id
+        );
+
         let addr_loopup = self.address_lookup.borrow();
         let recipient = addr_loopup
             .get(&receiver_id)
@@ -439,27 +450,20 @@ impl IdleBleService {
 }
 
 impl StartedBleService {
-    pub async fn spawn_handles(self) -> QaulBleService {
+    pub async fn spawn_handles(self) {
+        // let handle = async_std::task::spawn(async move {
         match self.join_handle {
             Some(join_handles) => {
                 println!("Spawning handles");
                 println!("id = {}", join_handles.task().id());
-                // join_handles.await;
-                async_std::task::block_on(join_handles);
-
-                println!("sad");
+                join_handles.await;
             }
             None => {
                 println!("No handle to spawn");
             }
         }
-        // buf.await;
-        // self.join_handle = buf;
-        // QaulBleService::Idle(buf.)
-        QaulBleService::Started(self::StartedBleService {
-            join_handle: None,
-            cmd_handle: self.cmd_handle.clone(),
-        })
+        // });
+        // handle.await;
     }
 
     pub async fn direct_send(
@@ -492,7 +496,7 @@ impl StartedBleService {
         //         println!("No handle to spawn");
         //     }
         // }
-        // sender.send_stop_successful();
+        sender.send_stop_successful();
 
         QaulBleService::Idle(self.join_handle.unwrap().await)
     }

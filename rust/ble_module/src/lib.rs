@@ -29,7 +29,8 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
         rt.block_on(async move {
             // start BLE module main loop
             main_loop(sys_rpc_callback, rpc_receiver).await;
-        })
+        });
+
     });
 }
 

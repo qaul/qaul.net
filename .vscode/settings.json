@@ -29,5 +29,6 @@
     "[proto3]": {
         "editor.defaultFormatter": "xaver.clang-format",
         "editor.formatOnSave": true
-    }
+    },
+    "cmake.sourceDirectory": "/home/death/Desktop/linux_backup/openSource/gsoc/qaul.net/qaul_ui/linux"
 }
