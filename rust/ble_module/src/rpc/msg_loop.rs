@@ -1,4 +1,5 @@
-use std::{borrow::Borrow, error::Error};
+// use std::{borrow::Borrow, error::Error};
+use std::error::Error;
 
 use async_std::task::spawn;
 use bytes::Bytes;
@@ -32,26 +33,26 @@ pub async fn listen_for_sys_msgs(
                     StartRequest(req) => match ble_service {
                         QaulBleService::Idle(svc) => {
                             let qaul_id = Bytes::from(req.qaul_id);
-                            ble_service = svc
-                                .advertise_scan_listen(qaul_id, None, internal_sender.clone())
-                                .await;
-                            log::debug!(
-                                "Set up advertisement and scan filter, entering BLE main loop."
-                            );
+                            let handle = async_std::task::spawn(async move {
+                                let ble_service = svc
+                                    .advertise_scan_listen(qaul_id, None, internal_sender.clone())
+                                    .await;
 
-                            match ble_service {
-                                QaulBleService::Idle(_) => {
-                                    log::error!("Error occured in configuring BLE module");
+                                log::debug!(
+                                    "Set up advertisement and scan filter, entering BLE main loop."
+                                );
+                                match ble_service {
+                                    QaulBleService::Idle(_) => {
+                                        log::error!("Error occured in configuring BLE module");
+                                    }
+                                    QaulBleService::Started(svc) => {
+                                        svc.spawn_handles().await;
+                                    }
                                 }
-                                QaulBleService::Started(svc) => {
-                                    println!("QaulBle service started.");
-                                    // println!("{:#?}", *svc);
-                                    // let srv_clone =srv.clone();
-                                    ble_service = svc.spawn_handles().await;
-                                }
-                            }
-                            println!("=============Msg_loop");
-                            local_sender_handle.send_start_successful();
+                                local_sender_handle.send_start_successful();
+                            });
+                            handle.await;
+                            break;
                         }
                         QaulBleService::Started(_) => {
                             log::warn!(

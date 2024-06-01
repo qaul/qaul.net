@@ -603,6 +603,7 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
+        log::info!("BLE send feed message to {:?}", receiver_small_id.clone());
         Self::message_send(receiver_small_id, sender_id, buf);
     }
 
