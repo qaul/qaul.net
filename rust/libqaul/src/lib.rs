@@ -87,6 +87,9 @@ enum EventType {
 /// * Optionally you can provide the following configuration values:
 ///   * listening port of the Internet connection module (default = randomly assigned)
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
+    // print storage path
+    println!("storage path: {}", storage_path);
+
     // check if we need to upgrade our stored data
     if upgrade::Upgrade::init(storage_path.clone()) == false {
         println!("upgrade to new version failed");
