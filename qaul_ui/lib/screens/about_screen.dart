@@ -53,7 +53,6 @@ class AboutScreen extends StatelessWidget {
                 text: TextSpan(
                   text:
                       'qaul is a fully free and open source software. It is published under the ',
-                  style: Theme.of(context).textTheme.bodySmall,
                   children: const <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
@@ -63,29 +62,13 @@ class AboutScreen extends StatelessWidget {
                           url:
                               "https://github.com/qaul/qaul.net/blob/main/LICENSE"),
                     ),
-                    TextSpan(
-                      text: '.\nThis App is published under the ',
-                    ),
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.baseline,
-                      baseline: TextBaseline.alphabetic,
-                      child: _LinkButton(
-                          urlLabel: "AGPLv3",
-                          url:
-                              "https://github.com/qaul/qaul.net/blob/main/LICENSE"),
-                    ),
-                    TextSpan(
-                      text: '.\ngraphics are published under cc-by license.',
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   text: '© ',
-                  style: Theme.of(context).textTheme.bodySmall,
                   children: const <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
@@ -104,8 +87,7 @@ class AboutScreen extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  text: 'Logo & project name are owned by\n© ',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  text: 'Logo & project name\n© ',
                   children: const <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
