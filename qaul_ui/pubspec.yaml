@@ -62,6 +62,7 @@ dependencies:
   url_launcher: ^6.1.14
   utils: { "path": "packages/utils" }
   version: ^3.0.2
+  flutter_markdown: ^0.7.1
 
 dev_dependencies:
   flutter_test:
