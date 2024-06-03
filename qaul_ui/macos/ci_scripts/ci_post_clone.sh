@@ -19,12 +19,19 @@ set -e
 #   https://docs.flutter.dev/deployment/cd#custom-build-script
 #
 
-# The default execution directory of this script is the ci_scripts directory.
-cd $CI_PRIMARY_REPOSITORY_PATH/qaul_ui # change working directory to the root of cloned repo.
+FLUTTER_VERSION="3.19.6"
 
 # Install Flutter using git.
 git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter
 export PATH="$PATH:$HOME/flutter/bin"
+
+# Make sure the right version is being used
+cd $HOME/flutter
+git fetch --tags
+git checkout tags/$FLUTTER_VERSION
+
+# The default execution directory of this script is the ci_scripts directory.
+cd $CI_PRIMARY_REPOSITORY_PATH/qaul_ui # change working directory to the root of cloned repo.
 
 # Install Flutter artifacts for MacOS
 flutter precache --macos
