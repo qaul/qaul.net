@@ -104,4 +104,5 @@ flutter:
   assets:
     - assets/about/
     - assets/icons/
+    - assets/license/
     - assets/logo/

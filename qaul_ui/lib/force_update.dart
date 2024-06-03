@@ -141,27 +141,6 @@ class ForceUpdateDialog extends StatelessWidget {
             ),
           ],
         );
-        return Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.forceUpdateConfirmationDialog),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton(
-                    onPressed: onDeleteAccountPressed,
-                    child: Text(l10n.okDialogButton),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancelDialogButton),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
       },
     );
   }

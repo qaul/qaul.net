@@ -4,8 +4,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../widgets/widgets.dart';
 
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({Key? key}) : super(key: key);
+class LicenseScreen extends StatelessWidget {
+  const LicenseScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,6 @@ class AboutScreen extends StatelessWidget {
             }
             return Markdown(
               data: ss.data ?? 'An error occurred',
-
             );
           }),
     );

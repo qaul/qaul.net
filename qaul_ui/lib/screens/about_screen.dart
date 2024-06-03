@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../helpers/navigation_helper.dart';
 import '../widgets/widgets.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -12,6 +13,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final defaultTextStyle = Theme.of(context).textTheme.bodyMedium!;
 
     return ResponsiveScaffold(
       icon: Icons.info_outline_rounded,
@@ -51,16 +53,19 @@ class AboutScreen extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
+                  style: defaultTextStyle,
                   text:
                       'qaul is a fully free and open source software. It is published under the ',
-                  children: const <InlineSpan>[
+                  children: <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
                       baseline: TextBaseline.alphabetic,
                       child: _LinkButton(
-                          urlLabel: "AGPLv3",
-                          url:
-                              "https://github.com/qaul/qaul.net/blob/main/LICENSE"),
+                        urlLabel: "AGPLv3",
+                        url: "",
+                        onPressed: () => Navigator.of(context)
+                            .pushNamed(NavigationHelper.license),
+                      ),
                     ),
                   ],
                 ),
@@ -69,6 +74,7 @@ class AboutScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   text: '© ',
+                  style: defaultTextStyle,
                   children: const <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
@@ -88,13 +94,15 @@ class AboutScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   text: 'Logo & project name\n© ',
+                  style: defaultTextStyle,
                   children: const <InlineSpan>[
                     WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
                       baseline: TextBaseline.alphabetic,
                       child: _LinkButton(
-                          urlLabel: "Christoph Wachter & Mathias Jud",
-                          url: "http://wachter-jud.net"),
+                        urlLabel: "Christoph Wachter & Mathias Jud",
+                        url: "http://wachter-jud.net",
+                      ),
                     ),
                     TextSpan(
                       text: '.',
@@ -116,11 +124,20 @@ class AboutScreen extends StatelessWidget {
 }
 
 class _LinkButton extends StatelessWidget {
-  const _LinkButton({Key? key, required this.urlLabel, required this.url})
-      : super(key: key);
+  const _LinkButton({
+    Key? key,
+    required this.urlLabel,
+    required this.url,
+    this.onPressed,
+  }) : super(key: key);
 
   final String urlLabel;
   final String url;
+
+  /// [onPressed] defines the behavior for the interaction with this button.
+  ///
+  /// If null, will default to opening the [url] using the url_launcher package.
+  final VoidCallback? onPressed;
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
@@ -143,9 +160,7 @@ class _LinkButton extends StatelessWidget {
         minimumSize: const Size(0, 0),
         textStyle: Theme.of(context).textTheme.bodySmall,
       ),
-      onPressed: () {
-        _launchUrl(url);
-      },
+      onPressed: onPressed ?? () => _launchUrl(url),
       child: Text(urlLabel),
     );
   }
