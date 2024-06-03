@@ -5,6 +5,7 @@ import '../screens/about_screen.dart';
 import '../screens/create_account_screen.dart';
 import '../screens/file_history_screen.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/license_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/support_screen.dart';
@@ -15,6 +16,7 @@ class NavigationHelper {
   static const home = '/home';
   static const settings = '/settings';
   static const about = '/about';
+  static const license = '/license';
   static const support = '/support';
   static const fileHistory = '/fileHistory';
 
@@ -46,6 +48,9 @@ class NavigationHelper {
         break;
       case about:
         routeWidget = const AboutScreen();
+        break;
+      case license:
+        routeWidget = const LicenseScreen();
         break;
       case support:
         routeWidget = const SupportScreen();
