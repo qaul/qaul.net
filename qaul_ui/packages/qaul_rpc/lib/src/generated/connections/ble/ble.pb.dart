@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: connections/ble/ble.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -28,7 +32,61 @@ enum Ble_Message {
   notSet
 }
 
+/// BLE system communication message
 class Ble extends $pb.GeneratedMessage {
+  factory Ble({
+    BleInfoRequest? infoRequest,
+    BleInfoResponse? infoResponse,
+    BleStartRequest? startRequest,
+    BleStartResult? startResult,
+    BleStopRequest? stopRequest,
+    BleStopResult? stopResult,
+    BleDeviceDiscovered? deviceDiscovered,
+    BleDeviceUnavailable? deviceUnavailable,
+    BleDirectSend? directSend,
+    BleDirectSendResult? directSendResult,
+    BleDirectReceived? directReceived,
+  }) {
+    final $result = create();
+    if (infoRequest != null) {
+      $result.infoRequest = infoRequest;
+    }
+    if (infoResponse != null) {
+      $result.infoResponse = infoResponse;
+    }
+    if (startRequest != null) {
+      $result.startRequest = startRequest;
+    }
+    if (startResult != null) {
+      $result.startResult = startResult;
+    }
+    if (stopRequest != null) {
+      $result.stopRequest = stopRequest;
+    }
+    if (stopResult != null) {
+      $result.stopResult = stopResult;
+    }
+    if (deviceDiscovered != null) {
+      $result.deviceDiscovered = deviceDiscovered;
+    }
+    if (deviceUnavailable != null) {
+      $result.deviceUnavailable = deviceUnavailable;
+    }
+    if (directSend != null) {
+      $result.directSend = directSend;
+    }
+    if (directSendResult != null) {
+      $result.directSendResult = directSendResult;
+    }
+    if (directReceived != null) {
+      $result.directReceived = directReceived;
+    }
+    return $result;
+  }
+  Ble._() : super();
+  factory Ble.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Ble.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Ble_Message> _Ble_MessageByTag = {
     1 : Ble_Message.infoRequest,
     2 : Ble_Message.infoResponse,
@@ -43,74 +101,22 @@ class Ble extends $pb.GeneratedMessage {
     11 : Ble_Message.directReceived,
     0 : Ble_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Ble', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Ble', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    ..aOM<BleInfoRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoRequest', subBuilder: BleInfoRequest.create)
-    ..aOM<BleInfoResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoResponse', subBuilder: BleInfoResponse.create)
-    ..aOM<BleStartRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startRequest', subBuilder: BleStartRequest.create)
-    ..aOM<BleStartResult>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startResult', subBuilder: BleStartResult.create)
-    ..aOM<BleStopRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stopRequest', subBuilder: BleStopRequest.create)
-    ..aOM<BleStopResult>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stopResult', subBuilder: BleStopResult.create)
-    ..aOM<BleDeviceDiscovered>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deviceDiscovered', subBuilder: BleDeviceDiscovered.create)
-    ..aOM<BleDeviceUnavailable>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deviceUnavailable', subBuilder: BleDeviceUnavailable.create)
-    ..aOM<BleDirectSend>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'directSend', subBuilder: BleDirectSend.create)
-    ..aOM<BleDirectSendResult>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'directSendResult', subBuilder: BleDirectSendResult.create)
-    ..aOM<BleDirectReceived>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'directReceived', subBuilder: BleDirectReceived.create)
+    ..aOM<BleInfoRequest>(1, _omitFieldNames ? '' : 'infoRequest', subBuilder: BleInfoRequest.create)
+    ..aOM<BleInfoResponse>(2, _omitFieldNames ? '' : 'infoResponse', subBuilder: BleInfoResponse.create)
+    ..aOM<BleStartRequest>(3, _omitFieldNames ? '' : 'startRequest', subBuilder: BleStartRequest.create)
+    ..aOM<BleStartResult>(4, _omitFieldNames ? '' : 'startResult', subBuilder: BleStartResult.create)
+    ..aOM<BleStopRequest>(5, _omitFieldNames ? '' : 'stopRequest', subBuilder: BleStopRequest.create)
+    ..aOM<BleStopResult>(6, _omitFieldNames ? '' : 'stopResult', subBuilder: BleStopResult.create)
+    ..aOM<BleDeviceDiscovered>(7, _omitFieldNames ? '' : 'deviceDiscovered', subBuilder: BleDeviceDiscovered.create)
+    ..aOM<BleDeviceUnavailable>(8, _omitFieldNames ? '' : 'deviceUnavailable', subBuilder: BleDeviceUnavailable.create)
+    ..aOM<BleDirectSend>(9, _omitFieldNames ? '' : 'directSend', subBuilder: BleDirectSend.create)
+    ..aOM<BleDirectSendResult>(10, _omitFieldNames ? '' : 'directSendResult', subBuilder: BleDirectSendResult.create)
+    ..aOM<BleDirectReceived>(11, _omitFieldNames ? '' : 'directReceived', subBuilder: BleDirectReceived.create)
     ..hasRequiredFields = false
   ;
 
-  Ble._() : super();
-  factory Ble({
-    BleInfoRequest? infoRequest,
-    BleInfoResponse? infoResponse,
-    BleStartRequest? startRequest,
-    BleStartResult? startResult,
-    BleStopRequest? stopRequest,
-    BleStopResult? stopResult,
-    BleDeviceDiscovered? deviceDiscovered,
-    BleDeviceUnavailable? deviceUnavailable,
-    BleDirectSend? directSend,
-    BleDirectSendResult? directSendResult,
-    BleDirectReceived? directReceived,
-  }) {
-    final _result = create();
-    if (infoRequest != null) {
-      _result.infoRequest = infoRequest;
-    }
-    if (infoResponse != null) {
-      _result.infoResponse = infoResponse;
-    }
-    if (startRequest != null) {
-      _result.startRequest = startRequest;
-    }
-    if (startResult != null) {
-      _result.startResult = startResult;
-    }
-    if (stopRequest != null) {
-      _result.stopRequest = stopRequest;
-    }
-    if (stopResult != null) {
-      _result.stopResult = stopResult;
-    }
-    if (deviceDiscovered != null) {
-      _result.deviceDiscovered = deviceDiscovered;
-    }
-    if (deviceUnavailable != null) {
-      _result.deviceUnavailable = deviceUnavailable;
-    }
-    if (directSend != null) {
-      _result.directSend = directSend;
-    }
-    if (directSendResult != null) {
-      _result.directSendResult = directSendResult;
-    }
-    if (directReceived != null) {
-      _result.directReceived = directReceived;
-    }
-    return _result;
-  }
-  factory Ble.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Ble.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -120,8 +126,10 @@ class Ble extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Ble copyWith(void Function(Ble) updates) => super.copyWith((message) => updates(message as Ble)) as Ble; // ignore: deprecated_member_use
+  Ble copyWith(void Function(Ble) updates) => super.copyWith((message) => updates(message as Ble)) as Ble;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Ble create() => Ble._();
   Ble createEmptyInstance() => create();
@@ -133,6 +141,7 @@ class Ble extends $pb.GeneratedMessage {
   Ble_Message whichMessage() => _Ble_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// device information request
   @$pb.TagNumber(1)
   BleInfoRequest get infoRequest => $_getN(0);
   @$pb.TagNumber(1)
@@ -144,6 +153,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   BleInfoRequest ensureInfoRequest() => $_ensure(0);
 
+  /// device information response
   @$pb.TagNumber(2)
   BleInfoResponse get infoResponse => $_getN(1);
   @$pb.TagNumber(2)
@@ -155,6 +165,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   BleInfoResponse ensureInfoResponse() => $_ensure(1);
 
+  /// start device request
   @$pb.TagNumber(3)
   BleStartRequest get startRequest => $_getN(2);
   @$pb.TagNumber(3)
@@ -166,6 +177,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   BleStartRequest ensureStartRequest() => $_ensure(2);
 
+  /// start device result
   @$pb.TagNumber(4)
   BleStartResult get startResult => $_getN(3);
   @$pb.TagNumber(4)
@@ -177,6 +189,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   BleStartResult ensureStartResult() => $_ensure(3);
 
+  /// stop device request
   @$pb.TagNumber(5)
   BleStopRequest get stopRequest => $_getN(4);
   @$pb.TagNumber(5)
@@ -188,6 +201,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   BleStopRequest ensureStopRequest() => $_ensure(4);
 
+  /// stop device result
   @$pb.TagNumber(6)
   BleStopResult get stopResult => $_getN(5);
   @$pb.TagNumber(6)
@@ -199,6 +213,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   BleStopResult ensureStopResult() => $_ensure(5);
 
+  /// device discovered
   @$pb.TagNumber(7)
   BleDeviceDiscovered get deviceDiscovered => $_getN(6);
   @$pb.TagNumber(7)
@@ -210,6 +225,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   BleDeviceDiscovered ensureDeviceDiscovered() => $_ensure(6);
 
+  /// device became unavailable
   @$pb.TagNumber(8)
   BleDeviceUnavailable get deviceUnavailable => $_getN(7);
   @$pb.TagNumber(8)
@@ -221,6 +237,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   BleDeviceUnavailable ensureDeviceUnavailable() => $_ensure(7);
 
+  /// send a direct message
   @$pb.TagNumber(9)
   BleDirectSend get directSend => $_getN(8);
   @$pb.TagNumber(9)
@@ -232,6 +249,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   BleDirectSend ensureDirectSend() => $_ensure(8);
 
+  /// direct message send result
   @$pb.TagNumber(10)
   BleDirectSendResult get directSendResult => $_getN(9);
   @$pb.TagNumber(10)
@@ -243,6 +261,7 @@ class Ble extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   BleDirectSendResult ensureDirectSendResult() => $_ensure(9);
 
+  /// direct message received
   @$pb.TagNumber(11)
   BleDirectReceived get directReceived => $_getN(10);
   @$pb.TagNumber(11)
@@ -255,15 +274,17 @@ class Ble extends $pb.GeneratedMessage {
   BleDirectReceived ensureDirectReceived() => $_ensure(10);
 }
 
+/// device information request message
 class BleInfoRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleInfoRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+  factory BleInfoRequest() => create();
+  BleInfoRequest._() : super();
+  factory BleInfoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BleInfoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleInfoRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  BleInfoRequest._() : super();
-  factory BleInfoRequest() => create();
-  factory BleInfoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory BleInfoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -273,8 +294,10 @@ class BleInfoRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleInfoRequest copyWith(void Function(BleInfoRequest) updates) => super.copyWith((message) => updates(message as BleInfoRequest)) as BleInfoRequest; // ignore: deprecated_member_use
+  BleInfoRequest copyWith(void Function(BleInfoRequest) updates) => super.copyWith((message) => updates(message as BleInfoRequest)) as BleInfoRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleInfoRequest create() => BleInfoRequest._();
   BleInfoRequest createEmptyInstance() => create();
@@ -284,24 +307,26 @@ class BleInfoRequest extends $pb.GeneratedMessage {
   static BleInfoRequest? _defaultInstance;
 }
 
+/// device information response message
 class BleInfoResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleInfoResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..aOM<BleDeviceInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: BleDeviceInfo.create)
-    ..hasRequiredFields = false
-  ;
-
-  BleInfoResponse._() : super();
   factory BleInfoResponse({
     BleDeviceInfo? device,
   }) {
-    final _result = create();
+    final $result = create();
     if (device != null) {
-      _result.device = device;
+      $result.device = device;
     }
-    return _result;
+    return $result;
   }
+  BleInfoResponse._() : super();
   factory BleInfoResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleInfoResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleInfoResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..aOM<BleDeviceInfo>(1, _omitFieldNames ? '' : 'device', subBuilder: BleDeviceInfo.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -311,8 +336,10 @@ class BleInfoResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleInfoResponse copyWith(void Function(BleInfoResponse) updates) => super.copyWith((message) => updates(message as BleInfoResponse)) as BleInfoResponse; // ignore: deprecated_member_use
+  BleInfoResponse copyWith(void Function(BleInfoResponse) updates) => super.copyWith((message) => updates(message as BleInfoResponse)) as BleInfoResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleInfoResponse create() => BleInfoResponse._();
   BleInfoResponse createEmptyInstance() => create();
@@ -321,6 +348,7 @@ class BleInfoResponse extends $pb.GeneratedMessage {
   static BleInfoResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleInfoResponse>(create);
   static BleInfoResponse? _defaultInstance;
 
+  /// fill in a device information of the BLE device
   @$pb.TagNumber(1)
   BleDeviceInfo get device => $_getN(0);
   @$pb.TagNumber(1)
@@ -333,25 +361,8 @@ class BleInfoResponse extends $pb.GeneratedMessage {
   BleDeviceInfo ensureDevice() => $_ensure(0);
 }
 
+/// BLE device information
 class BleDeviceInfo extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDeviceInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'bleSupport')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'bluetoothOn')
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'advExtended')
-    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'advExtendedBytes', $pb.PbFieldType.OU3)
-    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'le2m', protoName: 'le_2m')
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'leCoded')
-    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'leAudio')
-    ..aOB(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lePeriodicAdvSupport')
-    ..aOB(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'leMultipleAdvSupport')
-    ..aOB(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offloadFilterSupport')
-    ..aOB(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'offloadScanBatchingSupport')
-    ..hasRequiredFields = false
-  ;
-
-  BleDeviceInfo._() : super();
   factory BleDeviceInfo({
     $core.bool? bleSupport,
     $core.String? id,
@@ -367,50 +378,69 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
     $core.bool? offloadFilterSupport,
     $core.bool? offloadScanBatchingSupport,
   }) {
-    final _result = create();
+    final $result = create();
     if (bleSupport != null) {
-      _result.bleSupport = bleSupport;
+      $result.bleSupport = bleSupport;
     }
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
     if (bluetoothOn != null) {
-      _result.bluetoothOn = bluetoothOn;
+      $result.bluetoothOn = bluetoothOn;
     }
     if (advExtended != null) {
-      _result.advExtended = advExtended;
+      $result.advExtended = advExtended;
     }
     if (advExtendedBytes != null) {
-      _result.advExtendedBytes = advExtendedBytes;
+      $result.advExtendedBytes = advExtendedBytes;
     }
     if (le2m != null) {
-      _result.le2m = le2m;
+      $result.le2m = le2m;
     }
     if (leCoded != null) {
-      _result.leCoded = leCoded;
+      $result.leCoded = leCoded;
     }
     if (leAudio != null) {
-      _result.leAudio = leAudio;
+      $result.leAudio = leAudio;
     }
     if (lePeriodicAdvSupport != null) {
-      _result.lePeriodicAdvSupport = lePeriodicAdvSupport;
+      $result.lePeriodicAdvSupport = lePeriodicAdvSupport;
     }
     if (leMultipleAdvSupport != null) {
-      _result.leMultipleAdvSupport = leMultipleAdvSupport;
+      $result.leMultipleAdvSupport = leMultipleAdvSupport;
     }
     if (offloadFilterSupport != null) {
-      _result.offloadFilterSupport = offloadFilterSupport;
+      $result.offloadFilterSupport = offloadFilterSupport;
     }
     if (offloadScanBatchingSupport != null) {
-      _result.offloadScanBatchingSupport = offloadScanBatchingSupport;
+      $result.offloadScanBatchingSupport = offloadScanBatchingSupport;
     }
-    return _result;
+    return $result;
   }
+  BleDeviceInfo._() : super();
   factory BleDeviceInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDeviceInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDeviceInfo', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'bleSupport')
+    ..aOS(2, _omitFieldNames ? '' : 'id')
+    ..aOS(3, _omitFieldNames ? '' : 'name')
+    ..aOB(4, _omitFieldNames ? '' : 'bluetoothOn')
+    ..aOB(5, _omitFieldNames ? '' : 'advExtended')
+    ..a<$core.int>(6, _omitFieldNames ? '' : 'advExtendedBytes', $pb.PbFieldType.OU3)
+    ..aOB(7, _omitFieldNames ? '' : 'le2m', protoName: 'le_2m')
+    ..aOB(8, _omitFieldNames ? '' : 'leCoded')
+    ..aOB(9, _omitFieldNames ? '' : 'leAudio')
+    ..aOB(14, _omitFieldNames ? '' : 'lePeriodicAdvSupport')
+    ..aOB(15, _omitFieldNames ? '' : 'leMultipleAdvSupport')
+    ..aOB(16, _omitFieldNames ? '' : 'offloadFilterSupport')
+    ..aOB(17, _omitFieldNames ? '' : 'offloadScanBatchingSupport')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -420,8 +450,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDeviceInfo copyWith(void Function(BleDeviceInfo) updates) => super.copyWith((message) => updates(message as BleDeviceInfo)) as BleDeviceInfo; // ignore: deprecated_member_use
+  BleDeviceInfo copyWith(void Function(BleDeviceInfo) updates) => super.copyWith((message) => updates(message as BleDeviceInfo)) as BleDeviceInfo;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDeviceInfo create() => BleDeviceInfo._();
   BleDeviceInfo createEmptyInstance() => create();
@@ -430,6 +462,9 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   static BleDeviceInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDeviceInfo>(create);
   static BleDeviceInfo? _defaultInstance;
 
+  ///  Check if Bluetooth / Bluetooth Low Energy is supported
+  ///
+  ///  Android: check if a bluetooth adapter is found
   @$pb.TagNumber(1)
   $core.bool get bleSupport => $_getBF(0);
   @$pb.TagNumber(1)
@@ -439,6 +474,12 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearBleSupport() => clearField(1);
 
+  /// Bluetooth device address
+  /// 48 bit unique Bluetooth device addr
+  /// e.g. 80:86:F2:08:C7:98
+  ///
+  /// Android: BluetoothAdapter getAddress()
+  /// https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
   @$pb.TagNumber(2)
   $core.String get id => $_getSZ(1);
   @$pb.TagNumber(2)
@@ -448,6 +489,11 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearId() => clearField(2);
 
+  ///  Get Bluetooth Name
+  ///  this is field is purely informative
+  ///
+  ///  Android: BluetoothAdapter getName()
+  ///  https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
   @$pb.TagNumber(3)
   $core.String get name => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -457,6 +503,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearName() => clearField(3);
 
+  ///  Bluetooth is enable / powered on
+  ///
+  ///  Android: BluetoothAdapter isEnabled()
+  ///  https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled()
   @$pb.TagNumber(4)
   $core.bool get bluetoothOn => $_getBF(3);
   @$pb.TagNumber(4)
@@ -466,6 +516,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearBluetoothOn() => clearField(4);
 
+  ///  Is extended advertisement supported?
+  ///
+  ///  Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
   @$pb.TagNumber(5)
   $core.bool get advExtended => $_getBF(4);
   @$pb.TagNumber(5)
@@ -475,6 +529,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   void clearAdvExtended() => clearField(5);
 
+  ///  what is the maximal amount of bytes sendable via advertising?
+  ///
+  ///  Android: BluetoothAdapter getLeMaximumAdvertisingDataLength()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
   @$pb.TagNumber(6)
   $core.int get advExtendedBytes => $_getIZ(5);
   @$pb.TagNumber(6)
@@ -484,6 +542,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   void clearAdvExtendedBytes() => clearField(6);
 
+  ///  Is 2M phy supported?
+  ///
+  ///  Android: BluetoothAdapter isLe2MPhySupported()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLe2MPhySupported()
   @$pb.TagNumber(7)
   $core.bool get le2m => $_getBF(6);
   @$pb.TagNumber(7)
@@ -493,6 +555,11 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   void clearLe2m() => clearField(7);
 
+  ///  is extended advertising supported in coded
+  ///  mode? (For long distance connections)
+  ///
+  ///  Android: BluetoothAdapter isLeCodedPhySupported()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeCodedPhySupported()
   @$pb.TagNumber(8)
   $core.bool get leCoded => $_getBF(7);
   @$pb.TagNumber(8)
@@ -502,6 +569,18 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   void clearLeCoded() => clearField(8);
 
+  ///  is LE audio supported?
+  ///
+  ///  This is the most recent BLE feature, supported on:
+  ///
+  ///  * android 12 and above
+  ///  * linux ?
+  ///  * ios ?
+  ///  * macos ?
+  ///  * windows ?
+  ///
+  ///  Android: AndroidAdapter isLeAudioSupported()
+  ///  https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
   @$pb.TagNumber(9)
   $core.bool get leAudio => $_getBF(8);
   @$pb.TagNumber(9)
@@ -511,6 +590,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   void clearLeAudio() => clearField(9);
 
+  ///  is periodic advertisment supported?
+  ///
+  ///  Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
   @$pb.TagNumber(14)
   $core.bool get lePeriodicAdvSupport => $_getBF(9);
   @$pb.TagNumber(14)
@@ -520,6 +603,18 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   void clearLePeriodicAdvSupport() => clearField(14);
 
+  ///  Is multi advertisement supported?
+  ///
+  ///  When multi advertisement is supported one can have different
+  ///  advertisement types parallely. Each advertisement has a
+  ///  different device address.
+  ///  For scanning devices it looks, as if multiple devices devices
+  ///  would advertise themselves.
+  ///  This is helpful to support several incompatible advertisement
+  ///  modes at the same time.
+  ///
+  ///  Android: BluetoothAdapter isMultipleAdvertisementSupported()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isMultipleAdvertisementSupported()
   @$pb.TagNumber(15)
   $core.bool get leMultipleAdvSupport => $_getBF(10);
   @$pb.TagNumber(15)
@@ -529,6 +624,9 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(15)
   void clearLeMultipleAdvSupport() => clearField(15);
 
+  ///  Android Specific: is Offloaded Filtering Supported?
+  ///
+  ///  Android: BluetoothAdapter isOffloadedFilteringSupported()
   @$pb.TagNumber(16)
   $core.bool get offloadFilterSupport => $_getBF(11);
   @$pb.TagNumber(16)
@@ -538,6 +636,10 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(16)
   void clearOffloadFilterSupport() => clearField(16);
 
+  ///  Android Specific: is Offloaded Scan Batching Supported?
+  ///
+  ///  Android: BluetoothAdapter isOffloadedScanBatchingSupported()
+  ///  https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isOffloadedScanBatchingSupported()
   @$pb.TagNumber(17)
   $core.bool get offloadScanBatchingSupport => $_getBF(12);
   @$pb.TagNumber(17)
@@ -548,29 +650,35 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   void clearOffloadScanBatchingSupport() => clearField(17);
 }
 
+///  Start Device
+///
+///  the module will try to start the device, power it up,
+///  get all rights, configure it for qaul, and
+///  send & receive advertising messages
 class BleStartRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleStartRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'qaulId', $pb.PbFieldType.OY)
-    ..e<BlePowerSetting>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'powerSetting', $pb.PbFieldType.OE, defaultOrMaker: BlePowerSetting.low_power, valueOf: BlePowerSetting.valueOf, enumValues: BlePowerSetting.values)
-    ..hasRequiredFields = false
-  ;
-
-  BleStartRequest._() : super();
   factory BleStartRequest({
     $core.List<$core.int>? qaulId,
     BlePowerSetting? powerSetting,
   }) {
-    final _result = create();
+    final $result = create();
     if (qaulId != null) {
-      _result.qaulId = qaulId;
+      $result.qaulId = qaulId;
     }
     if (powerSetting != null) {
-      _result.powerSetting = powerSetting;
+      $result.powerSetting = powerSetting;
     }
-    return _result;
+    return $result;
   }
+  BleStartRequest._() : super();
   factory BleStartRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleStartRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleStartRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'qaulId', $pb.PbFieldType.OY)
+    ..e<BlePowerSetting>(2, _omitFieldNames ? '' : 'powerSetting', $pb.PbFieldType.OE, defaultOrMaker: BlePowerSetting.low_power, valueOf: BlePowerSetting.valueOf, enumValues: BlePowerSetting.values)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -580,8 +688,10 @@ class BleStartRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleStartRequest copyWith(void Function(BleStartRequest) updates) => super.copyWith((message) => updates(message as BleStartRequest)) as BleStartRequest; // ignore: deprecated_member_use
+  BleStartRequest copyWith(void Function(BleStartRequest) updates) => super.copyWith((message) => updates(message as BleStartRequest)) as BleStartRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleStartRequest create() => BleStartRequest._();
   BleStartRequest createEmptyInstance() => create();
@@ -590,6 +700,10 @@ class BleStartRequest extends $pb.GeneratedMessage {
   static BleStartRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleStartRequest>(create);
   static BleStartRequest? _defaultInstance;
 
+  ///  qaul ID
+  ///
+  ///  The small 16 byte qaul id
+  ///  to be used to identify this node
   @$pb.TagNumber(1)
   $core.List<$core.int> get qaulId => $_getN(0);
   @$pb.TagNumber(1)
@@ -599,6 +713,7 @@ class BleStartRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearQaulId() => clearField(1);
 
+  /// power settings
   @$pb.TagNumber(2)
   BlePowerSetting get powerSetting => $_getN(1);
   @$pb.TagNumber(2)
@@ -609,34 +724,38 @@ class BleStartRequest extends $pb.GeneratedMessage {
   void clearPowerSetting() => clearField(2);
 }
 
+///  Start device result message
+///
+///  Feedback from the
 class BleStartResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleStartResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..e<BleError>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'errorReason', $pb.PbFieldType.OE, defaultOrMaker: BleError.UNKNOWN_ERROR, valueOf: BleError.valueOf, enumValues: BleError.values)
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'errorMessage')
-    ..hasRequiredFields = false
-  ;
-
-  BleStartResult._() : super();
   factory BleStartResult({
     $core.bool? success,
     BleError? errorReason,
     $core.String? errorMessage,
   }) {
-    final _result = create();
+    final $result = create();
     if (success != null) {
-      _result.success = success;
+      $result.success = success;
     }
     if (errorReason != null) {
-      _result.errorReason = errorReason;
+      $result.errorReason = errorReason;
     }
     if (errorMessage != null) {
-      _result.errorMessage = errorMessage;
+      $result.errorMessage = errorMessage;
     }
-    return _result;
+    return $result;
   }
+  BleStartResult._() : super();
   factory BleStartResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleStartResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleStartResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..e<BleError>(2, _omitFieldNames ? '' : 'errorReason', $pb.PbFieldType.OE, defaultOrMaker: BleError.UNKNOWN_ERROR, valueOf: BleError.valueOf, enumValues: BleError.values)
+    ..aOS(3, _omitFieldNames ? '' : 'errorMessage')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -646,8 +765,10 @@ class BleStartResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleStartResult copyWith(void Function(BleStartResult) updates) => super.copyWith((message) => updates(message as BleStartResult)) as BleStartResult; // ignore: deprecated_member_use
+  BleStartResult copyWith(void Function(BleStartResult) updates) => super.copyWith((message) => updates(message as BleStartResult)) as BleStartResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleStartResult create() => BleStartResult._();
   BleStartResult createEmptyInstance() => create();
@@ -656,6 +777,7 @@ class BleStartResult extends $pb.GeneratedMessage {
   static BleStartResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleStartResult>(create);
   static BleStartResult? _defaultInstance;
 
+  /// whether the device was successfully started
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
@@ -665,6 +787,7 @@ class BleStartResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSuccess() => clearField(1);
 
+  /// error reason
   @$pb.TagNumber(2)
   BleError get errorReason => $_getN(1);
   @$pb.TagNumber(2)
@@ -674,6 +797,7 @@ class BleStartResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearErrorReason() => clearField(2);
 
+  /// error message
   @$pb.TagNumber(3)
   $core.String get errorMessage => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -684,15 +808,17 @@ class BleStartResult extends $pb.GeneratedMessage {
   void clearErrorMessage() => clearField(3);
 }
 
+/// Stop Bluetooth Device
 class BleStopRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleStopRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+  factory BleStopRequest() => create();
+  BleStopRequest._() : super();
+  factory BleStopRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BleStopRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleStopRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  BleStopRequest._() : super();
-  factory BleStopRequest() => create();
-  factory BleStopRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory BleStopRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -702,8 +828,10 @@ class BleStopRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleStopRequest copyWith(void Function(BleStopRequest) updates) => super.copyWith((message) => updates(message as BleStopRequest)) as BleStopRequest; // ignore: deprecated_member_use
+  BleStopRequest copyWith(void Function(BleStopRequest) updates) => super.copyWith((message) => updates(message as BleStopRequest)) as BleStopRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleStopRequest create() => BleStopRequest._();
   BleStopRequest createEmptyInstance() => create();
@@ -713,34 +841,38 @@ class BleStopRequest extends $pb.GeneratedMessage {
   static BleStopRequest? _defaultInstance;
 }
 
+///  Stop Result
+///
+///  Feedback of the stop request
 class BleStopResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleStopResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..e<BleError>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'errorReason', $pb.PbFieldType.OE, defaultOrMaker: BleError.UNKNOWN_ERROR, valueOf: BleError.valueOf, enumValues: BleError.values)
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'errorMessage')
-    ..hasRequiredFields = false
-  ;
-
-  BleStopResult._() : super();
   factory BleStopResult({
     $core.bool? success,
     BleError? errorReason,
     $core.String? errorMessage,
   }) {
-    final _result = create();
+    final $result = create();
     if (success != null) {
-      _result.success = success;
+      $result.success = success;
     }
     if (errorReason != null) {
-      _result.errorReason = errorReason;
+      $result.errorReason = errorReason;
     }
     if (errorMessage != null) {
-      _result.errorMessage = errorMessage;
+      $result.errorMessage = errorMessage;
     }
-    return _result;
+    return $result;
   }
+  BleStopResult._() : super();
   factory BleStopResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleStopResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleStopResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..e<BleError>(2, _omitFieldNames ? '' : 'errorReason', $pb.PbFieldType.OE, defaultOrMaker: BleError.UNKNOWN_ERROR, valueOf: BleError.valueOf, enumValues: BleError.values)
+    ..aOS(3, _omitFieldNames ? '' : 'errorMessage')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -750,8 +882,10 @@ class BleStopResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleStopResult copyWith(void Function(BleStopResult) updates) => super.copyWith((message) => updates(message as BleStopResult)) as BleStopResult; // ignore: deprecated_member_use
+  BleStopResult copyWith(void Function(BleStopResult) updates) => super.copyWith((message) => updates(message as BleStopResult)) as BleStopResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleStopResult create() => BleStopResult._();
   BleStopResult createEmptyInstance() => create();
@@ -760,6 +894,7 @@ class BleStopResult extends $pb.GeneratedMessage {
   static BleStopResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleStopResult>(create);
   static BleStopResult? _defaultInstance;
 
+  /// whether the device was successfully stopped
   @$pb.TagNumber(1)
   $core.bool get success => $_getBF(0);
   @$pb.TagNumber(1)
@@ -769,6 +904,7 @@ class BleStopResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSuccess() => clearField(1);
 
+  /// error reason
   @$pb.TagNumber(2)
   BleError get errorReason => $_getN(1);
   @$pb.TagNumber(2)
@@ -778,6 +914,7 @@ class BleStopResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearErrorReason() => clearField(2);
 
+  /// error message
   @$pb.TagNumber(3)
   $core.String get errorMessage => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -788,29 +925,33 @@ class BleStopResult extends $pb.GeneratedMessage {
   void clearErrorMessage() => clearField(3);
 }
 
+///  Device Discovered
+///
+///  A new device has been discovered.
 class BleDeviceDiscovered extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDeviceDiscovered', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'qaulId', $pb.PbFieldType.OY)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rssi', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
-
-  BleDeviceDiscovered._() : super();
   factory BleDeviceDiscovered({
     $core.List<$core.int>? qaulId,
     $core.int? rssi,
   }) {
-    final _result = create();
+    final $result = create();
     if (qaulId != null) {
-      _result.qaulId = qaulId;
+      $result.qaulId = qaulId;
     }
     if (rssi != null) {
-      _result.rssi = rssi;
+      $result.rssi = rssi;
     }
-    return _result;
+    return $result;
   }
+  BleDeviceDiscovered._() : super();
   factory BleDeviceDiscovered.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDeviceDiscovered.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDeviceDiscovered', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'qaulId', $pb.PbFieldType.OY)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'rssi', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -820,8 +961,10 @@ class BleDeviceDiscovered extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDeviceDiscovered copyWith(void Function(BleDeviceDiscovered) updates) => super.copyWith((message) => updates(message as BleDeviceDiscovered)) as BleDeviceDiscovered; // ignore: deprecated_member_use
+  BleDeviceDiscovered copyWith(void Function(BleDeviceDiscovered) updates) => super.copyWith((message) => updates(message as BleDeviceDiscovered)) as BleDeviceDiscovered;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDeviceDiscovered create() => BleDeviceDiscovered._();
   BleDeviceDiscovered createEmptyInstance() => create();
@@ -830,6 +973,7 @@ class BleDeviceDiscovered extends $pb.GeneratedMessage {
   static BleDeviceDiscovered getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDeviceDiscovered>(create);
   static BleDeviceDiscovered? _defaultInstance;
 
+  /// qaul id of the device
   @$pb.TagNumber(1)
   $core.List<$core.int> get qaulId => $_getN(0);
   @$pb.TagNumber(1)
@@ -839,6 +983,7 @@ class BleDeviceDiscovered extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearQaulId() => clearField(1);
 
+  /// the received signal strength of this device
   @$pb.TagNumber(2)
   $core.int get rssi => $_getIZ(1);
   @$pb.TagNumber(2)
@@ -849,24 +994,29 @@ class BleDeviceDiscovered extends $pb.GeneratedMessage {
   void clearRssi() => clearField(2);
 }
 
+///  Device Unavailable
+///
+///  A formerly discovered device has become
+///  unavailable. No messages can be sent to it.
 class BleDeviceUnavailable extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDeviceUnavailable', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'qaulId', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  BleDeviceUnavailable._() : super();
   factory BleDeviceUnavailable({
     $core.List<$core.int>? qaulId,
   }) {
-    final _result = create();
+    final $result = create();
     if (qaulId != null) {
-      _result.qaulId = qaulId;
+      $result.qaulId = qaulId;
     }
-    return _result;
+    return $result;
   }
+  BleDeviceUnavailable._() : super();
   factory BleDeviceUnavailable.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDeviceUnavailable.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDeviceUnavailable', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'qaulId', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -876,8 +1026,10 @@ class BleDeviceUnavailable extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDeviceUnavailable copyWith(void Function(BleDeviceUnavailable) updates) => super.copyWith((message) => updates(message as BleDeviceUnavailable)) as BleDeviceUnavailable; // ignore: deprecated_member_use
+  BleDeviceUnavailable copyWith(void Function(BleDeviceUnavailable) updates) => super.copyWith((message) => updates(message as BleDeviceUnavailable)) as BleDeviceUnavailable;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDeviceUnavailable create() => BleDeviceUnavailable._();
   BleDeviceUnavailable createEmptyInstance() => create();
@@ -886,6 +1038,8 @@ class BleDeviceUnavailable extends $pb.GeneratedMessage {
   static BleDeviceUnavailable getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDeviceUnavailable>(create);
   static BleDeviceUnavailable? _defaultInstance;
 
+  /// qaul id of the device that
+  /// became unavailable
   @$pb.TagNumber(1)
   $core.List<$core.int> get qaulId => $_getN(0);
   @$pb.TagNumber(1)
@@ -896,39 +1050,41 @@ class BleDeviceUnavailable extends $pb.GeneratedMessage {
   void clearQaulId() => clearField(1);
 }
 
+/// send a direct message
 class BleDirectSend extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDirectSend', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receiverId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  BleDirectSend._() : super();
   factory BleDirectSend({
     $core.List<$core.int>? messageId,
     $core.List<$core.int>? receiverId,
     $core.List<$core.int>? senderId,
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (messageId != null) {
-      _result.messageId = messageId;
+      $result.messageId = messageId;
     }
     if (receiverId != null) {
-      _result.receiverId = receiverId;
+      $result.receiverId = receiverId;
     }
     if (senderId != null) {
-      _result.senderId = senderId;
+      $result.senderId = senderId;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  BleDirectSend._() : super();
   factory BleDirectSend.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDirectSend.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDirectSend', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'receiverId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'senderId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -938,8 +1094,10 @@ class BleDirectSend extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDirectSend copyWith(void Function(BleDirectSend) updates) => super.copyWith((message) => updates(message as BleDirectSend)) as BleDirectSend; // ignore: deprecated_member_use
+  BleDirectSend copyWith(void Function(BleDirectSend) updates) => super.copyWith((message) => updates(message as BleDirectSend)) as BleDirectSend;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDirectSend create() => BleDirectSend._();
   BleDirectSend createEmptyInstance() => create();
@@ -948,6 +1106,7 @@ class BleDirectSend extends $pb.GeneratedMessage {
   static BleDirectSend getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDirectSend>(create);
   static BleDirectSend? _defaultInstance;
 
+  /// message id (as a reference for the result message)
   @$pb.TagNumber(1)
   $core.List<$core.int> get messageId => $_getN(0);
   @$pb.TagNumber(1)
@@ -957,6 +1116,7 @@ class BleDirectSend extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearMessageId() => clearField(1);
 
+  /// qaul id of the device to send it to
   @$pb.TagNumber(2)
   $core.List<$core.int> get receiverId => $_getN(1);
   @$pb.TagNumber(2)
@@ -966,6 +1126,7 @@ class BleDirectSend extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearReceiverId() => clearField(2);
 
+  /// qaul id of the sending device
   @$pb.TagNumber(3)
   $core.List<$core.int> get senderId => $_getN(2);
   @$pb.TagNumber(3)
@@ -975,6 +1136,7 @@ class BleDirectSend extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearSenderId() => clearField(3);
 
+  /// data to be sent
   @$pb.TagNumber(4)
   $core.List<$core.int> get data => $_getN(3);
   @$pb.TagNumber(4)
@@ -985,34 +1147,36 @@ class BleDirectSend extends $pb.GeneratedMessage {
   void clearData() => clearField(4);
 }
 
+/// result after sending the direct message
 class BleDirectSendResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDirectSendResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'errorMessage')
-    ..hasRequiredFields = false
-  ;
-
-  BleDirectSendResult._() : super();
   factory BleDirectSendResult({
     $core.List<$core.int>? id,
     $core.bool? success,
     $core.String? errorMessage,
   }) {
-    final _result = create();
+    final $result = create();
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (success != null) {
-      _result.success = success;
+      $result.success = success;
     }
     if (errorMessage != null) {
-      _result.errorMessage = errorMessage;
+      $result.errorMessage = errorMessage;
     }
-    return _result;
+    return $result;
   }
+  BleDirectSendResult._() : super();
   factory BleDirectSendResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDirectSendResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDirectSendResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OY)
+    ..aOB(2, _omitFieldNames ? '' : 'success')
+    ..aOS(3, _omitFieldNames ? '' : 'errorMessage')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1022,8 +1186,10 @@ class BleDirectSendResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDirectSendResult copyWith(void Function(BleDirectSendResult) updates) => super.copyWith((message) => updates(message as BleDirectSendResult)) as BleDirectSendResult; // ignore: deprecated_member_use
+  BleDirectSendResult copyWith(void Function(BleDirectSendResult) updates) => super.copyWith((message) => updates(message as BleDirectSendResult)) as BleDirectSendResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDirectSendResult create() => BleDirectSendResult._();
   BleDirectSendResult createEmptyInstance() => create();
@@ -1032,6 +1198,7 @@ class BleDirectSendResult extends $pb.GeneratedMessage {
   static BleDirectSendResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDirectSendResult>(create);
   static BleDirectSendResult? _defaultInstance;
 
+  /// message id
   @$pb.TagNumber(1)
   $core.List<$core.int> get id => $_getN(0);
   @$pb.TagNumber(1)
@@ -1041,6 +1208,7 @@ class BleDirectSendResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
 
+  /// result after sending the message
   @$pb.TagNumber(2)
   $core.bool get success => $_getBF(1);
   @$pb.TagNumber(2)
@@ -1050,6 +1218,7 @@ class BleDirectSendResult extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearSuccess() => clearField(2);
 
+  /// error messages
   @$pb.TagNumber(3)
   $core.String get errorMessage => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -1060,29 +1229,31 @@ class BleDirectSendResult extends $pb.GeneratedMessage {
   void clearErrorMessage() => clearField(3);
 }
 
+/// direct message received message
 class BleDirectReceived extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleDirectReceived', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'from', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  BleDirectReceived._() : super();
   factory BleDirectReceived({
     $core.List<$core.int>? from,
     $core.List<$core.int>? data,
   }) {
-    final _result = create();
+    final $result = create();
     if (from != null) {
-      _result.from = from;
+      $result.from = from;
     }
     if (data != null) {
-      _result.data = data;
+      $result.data = data;
     }
-    return _result;
+    return $result;
   }
+  BleDirectReceived._() : super();
   factory BleDirectReceived.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory BleDirectReceived.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleDirectReceived', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.sys.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'from', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -1092,8 +1263,10 @@ class BleDirectReceived extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleDirectReceived copyWith(void Function(BleDirectReceived) updates) => super.copyWith((message) => updates(message as BleDirectReceived)) as BleDirectReceived; // ignore: deprecated_member_use
+  BleDirectReceived copyWith(void Function(BleDirectReceived) updates) => super.copyWith((message) => updates(message as BleDirectReceived)) as BleDirectReceived;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleDirectReceived create() => BleDirectReceived._();
   BleDirectReceived createEmptyInstance() => create();
@@ -1102,6 +1275,7 @@ class BleDirectReceived extends $pb.GeneratedMessage {
   static BleDirectReceived getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BleDirectReceived>(create);
   static BleDirectReceived? _defaultInstance;
 
+  /// qaul id of the sending device
   @$pb.TagNumber(1)
   $core.List<$core.int> get from => $_getN(0);
   @$pb.TagNumber(1)
@@ -1111,6 +1285,7 @@ class BleDirectReceived extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearFrom() => clearField(1);
 
+  /// the data received
   @$pb.TagNumber(4)
   $core.List<$core.int> get data => $_getN(1);
   @$pb.TagNumber(4)
@@ -1121,3 +1296,6 @@ class BleDirectReceived extends $pb.GeneratedMessage {
   void clearData() => clearField(4);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: services/feed/feed.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -17,41 +21,43 @@ enum Feed_Message {
   notSet
 }
 
+/// Feed service RPC message container
 class Feed extends $pb.GeneratedMessage {
+  factory Feed({
+    FeedMessageList? received,
+    SendMessage? send,
+    FeedMessageRequest? request,
+  }) {
+    final $result = create();
+    if (received != null) {
+      $result.received = received;
+    }
+    if (send != null) {
+      $result.send = send;
+    }
+    if (request != null) {
+      $result.request = request;
+    }
+    return $result;
+  }
+  Feed._() : super();
+  factory Feed.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Feed.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Feed_Message> _Feed_MessageByTag = {
     1 : Feed_Message.received,
     2 : Feed_Message.send,
     3 : Feed_Message.request,
     0 : Feed_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Feed', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Feed', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3])
-    ..aOM<FeedMessageList>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'received', subBuilder: FeedMessageList.create)
-    ..aOM<SendMessage>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'send', subBuilder: SendMessage.create)
-    ..aOM<FeedMessageRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'request', subBuilder: FeedMessageRequest.create)
+    ..aOM<FeedMessageList>(1, _omitFieldNames ? '' : 'received', subBuilder: FeedMessageList.create)
+    ..aOM<SendMessage>(2, _omitFieldNames ? '' : 'send', subBuilder: SendMessage.create)
+    ..aOM<FeedMessageRequest>(3, _omitFieldNames ? '' : 'request', subBuilder: FeedMessageRequest.create)
     ..hasRequiredFields = false
   ;
 
-  Feed._() : super();
-  factory Feed({
-    FeedMessageList? received,
-    SendMessage? send,
-    FeedMessageRequest? request,
-  }) {
-    final _result = create();
-    if (received != null) {
-      _result.received = received;
-    }
-    if (send != null) {
-      _result.send = send;
-    }
-    if (request != null) {
-      _result.request = request;
-    }
-    return _result;
-  }
-  factory Feed.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Feed.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -61,8 +67,10 @@ class Feed extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Feed copyWith(void Function(Feed) updates) => super.copyWith((message) => updates(message as Feed)) as Feed; // ignore: deprecated_member_use
+  Feed copyWith(void Function(Feed) updates) => super.copyWith((message) => updates(message as Feed)) as Feed;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Feed create() => Feed._();
   Feed createEmptyInstance() => create();
@@ -74,6 +82,7 @@ class Feed extends $pb.GeneratedMessage {
   Feed_Message whichMessage() => _Feed_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// received messages
   @$pb.TagNumber(1)
   FeedMessageList get received => $_getN(0);
   @$pb.TagNumber(1)
@@ -85,6 +94,7 @@ class Feed extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   FeedMessageList ensureReceived() => $_ensure(0);
 
+  /// send a new feed message
   @$pb.TagNumber(2)
   SendMessage get send => $_getN(1);
   @$pb.TagNumber(2)
@@ -96,6 +106,7 @@ class Feed extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   SendMessage ensureSend() => $_ensure(1);
 
+  /// request received messages
   @$pb.TagNumber(3)
   FeedMessageRequest get request => $_getN(2);
   @$pb.TagNumber(3)
@@ -108,29 +119,31 @@ class Feed extends $pb.GeneratedMessage {
   FeedMessageRequest ensureRequest() => $_ensure(2);
 }
 
+/// request feed messages
 class FeedMessageRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessageRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastReceived', $pb.PbFieldType.OY)
-    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false
-  ;
-
-  FeedMessageRequest._() : super();
   factory FeedMessageRequest({
     $core.List<$core.int>? lastReceived,
     $fixnum.Int64? lastIndex,
   }) {
-    final _result = create();
+    final $result = create();
     if (lastReceived != null) {
-      _result.lastReceived = lastReceived;
+      $result.lastReceived = lastReceived;
     }
     if (lastIndex != null) {
-      _result.lastIndex = lastIndex;
+      $result.lastIndex = lastIndex;
     }
-    return _result;
+    return $result;
   }
+  FeedMessageRequest._() : super();
   factory FeedMessageRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory FeedMessageRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FeedMessageRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'lastReceived', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(2, _omitFieldNames ? '' : 'lastIndex', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -140,8 +153,10 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedMessageRequest copyWith(void Function(FeedMessageRequest) updates) => super.copyWith((message) => updates(message as FeedMessageRequest)) as FeedMessageRequest; // ignore: deprecated_member_use
+  FeedMessageRequest copyWith(void Function(FeedMessageRequest) updates) => super.copyWith((message) => updates(message as FeedMessageRequest)) as FeedMessageRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static FeedMessageRequest create() => FeedMessageRequest._();
   FeedMessageRequest createEmptyInstance() => create();
@@ -150,6 +165,7 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   static FeedMessageRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FeedMessageRequest>(create);
   static FeedMessageRequest? _defaultInstance;
 
+  /// DEPRECATED
   @$pb.TagNumber(1)
   $core.List<$core.int> get lastReceived => $_getN(0);
   @$pb.TagNumber(1)
@@ -159,6 +175,15 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearLastReceived() => clearField(1);
 
+  ///  Index of the last message received
+  ///
+  ///  The message index is a continues numbering
+  ///  of incoming messages in the database of the node.
+  ///
+  ///  When this variable is set, only
+  ///  newer messages will be sent.
+  ///  Default value is 0, when the value
+  ///  is 0, all feed messages will be sent.
   @$pb.TagNumber(2)
   $fixnum.Int64 get lastIndex => $_getI64(1);
   @$pb.TagNumber(2)
@@ -169,24 +194,26 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   void clearLastIndex() => clearField(2);
 }
 
+/// List of feed messages
 class FeedMessageList extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessageList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
-    ..pc<FeedMessage>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feedMessage', $pb.PbFieldType.PM, subBuilder: FeedMessage.create)
-    ..hasRequiredFields = false
-  ;
-
-  FeedMessageList._() : super();
   factory FeedMessageList({
     $core.Iterable<FeedMessage>? feedMessage,
   }) {
-    final _result = create();
+    final $result = create();
     if (feedMessage != null) {
-      _result.feedMessage.addAll(feedMessage);
+      $result.feedMessage.addAll(feedMessage);
     }
-    return _result;
+    return $result;
   }
+  FeedMessageList._() : super();
   factory FeedMessageList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory FeedMessageList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FeedMessageList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
+    ..pc<FeedMessage>(1, _omitFieldNames ? '' : 'feedMessage', $pb.PbFieldType.PM, subBuilder: FeedMessage.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -196,8 +223,10 @@ class FeedMessageList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedMessageList copyWith(void Function(FeedMessageList) updates) => super.copyWith((message) => updates(message as FeedMessageList)) as FeedMessageList; // ignore: deprecated_member_use
+  FeedMessageList copyWith(void Function(FeedMessageList) updates) => super.copyWith((message) => updates(message as FeedMessageList)) as FeedMessageList;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static FeedMessageList create() => FeedMessageList._();
   FeedMessageList createEmptyInstance() => create();
@@ -210,22 +239,8 @@ class FeedMessageList extends $pb.GeneratedMessage {
   $core.List<FeedMessage> get feedMessage => $_getList(0);
 }
 
+/// A single feed message
 class FeedMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FeedMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderId', $pb.PbFieldType.OY)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'senderIdBase58')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageId', $pb.PbFieldType.OY)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messageIdBase58')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeSent')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timeReceived')
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
-    ..a<$fixnum.Int64>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'index', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestampSent', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$fixnum.Int64>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestampReceived', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false
-  ;
-
-  FeedMessage._() : super();
   factory FeedMessage({
     $core.List<$core.int>? senderId,
     $core.String? senderIdBase58,
@@ -238,41 +253,57 @@ class FeedMessage extends $pb.GeneratedMessage {
     $fixnum.Int64? timestampSent,
     $fixnum.Int64? timestampReceived,
   }) {
-    final _result = create();
+    final $result = create();
     if (senderId != null) {
-      _result.senderId = senderId;
+      $result.senderId = senderId;
     }
     if (senderIdBase58 != null) {
-      _result.senderIdBase58 = senderIdBase58;
+      $result.senderIdBase58 = senderIdBase58;
     }
     if (messageId != null) {
-      _result.messageId = messageId;
+      $result.messageId = messageId;
     }
     if (messageIdBase58 != null) {
-      _result.messageIdBase58 = messageIdBase58;
+      $result.messageIdBase58 = messageIdBase58;
     }
     if (timeSent != null) {
-      _result.timeSent = timeSent;
+      $result.timeSent = timeSent;
     }
     if (timeReceived != null) {
-      _result.timeReceived = timeReceived;
+      $result.timeReceived = timeReceived;
     }
     if (content != null) {
-      _result.content = content;
+      $result.content = content;
     }
     if (index != null) {
-      _result.index = index;
+      $result.index = index;
     }
     if (timestampSent != null) {
-      _result.timestampSent = timestampSent;
+      $result.timestampSent = timestampSent;
     }
     if (timestampReceived != null) {
-      _result.timestampReceived = timestampReceived;
+      $result.timestampReceived = timestampReceived;
     }
-    return _result;
+    return $result;
   }
+  FeedMessage._() : super();
   factory FeedMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory FeedMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FeedMessage', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'senderId', $pb.PbFieldType.OY)
+    ..aOS(2, _omitFieldNames ? '' : 'senderIdBase58')
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OY)
+    ..aOS(4, _omitFieldNames ? '' : 'messageIdBase58')
+    ..aOS(5, _omitFieldNames ? '' : 'timeSent')
+    ..aOS(6, _omitFieldNames ? '' : 'timeReceived')
+    ..aOS(7, _omitFieldNames ? '' : 'content')
+    ..a<$fixnum.Int64>(8, _omitFieldNames ? '' : 'index', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(9, _omitFieldNames ? '' : 'timestampSent', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(10, _omitFieldNames ? '' : 'timestampReceived', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -282,8 +313,10 @@ class FeedMessage extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  FeedMessage copyWith(void Function(FeedMessage) updates) => super.copyWith((message) => updates(message as FeedMessage)) as FeedMessage; // ignore: deprecated_member_use
+  FeedMessage copyWith(void Function(FeedMessage) updates) => super.copyWith((message) => updates(message as FeedMessage)) as FeedMessage;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static FeedMessage create() => FeedMessage._();
   FeedMessage createEmptyInstance() => create();
@@ -301,6 +334,7 @@ class FeedMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSenderId() => clearField(1);
 
+  /// DEPRECATED
   @$pb.TagNumber(2)
   $core.String get senderIdBase58 => $_getSZ(1);
   @$pb.TagNumber(2)
@@ -319,6 +353,7 @@ class FeedMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearMessageId() => clearField(3);
 
+  /// DEPRECATED
   @$pb.TagNumber(4)
   $core.String get messageIdBase58 => $_getSZ(3);
   @$pb.TagNumber(4)
@@ -328,6 +363,7 @@ class FeedMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearMessageIdBase58() => clearField(4);
 
+  /// DEPRECATED
   @$pb.TagNumber(5)
   $core.String get timeSent => $_getSZ(4);
   @$pb.TagNumber(5)
@@ -337,6 +373,7 @@ class FeedMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   void clearTimeSent() => clearField(5);
 
+  /// DEPRECATED
   @$pb.TagNumber(6)
   $core.String get timeReceived => $_getSZ(5);
   @$pb.TagNumber(6)
@@ -383,24 +420,26 @@ class FeedMessage extends $pb.GeneratedMessage {
   void clearTimestampReceived() => clearField(10);
 }
 
+/// send feed message
 class SendMessage extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'content')
-    ..hasRequiredFields = false
-  ;
-
-  SendMessage._() : super();
   factory SendMessage({
     $core.String? content,
   }) {
-    final _result = create();
+    final $result = create();
     if (content != null) {
-      _result.content = content;
+      $result.content = content;
     }
-    return _result;
+    return $result;
   }
+  SendMessage._() : super();
   factory SendMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SendMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendMessage', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'content')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -410,8 +449,10 @@ class SendMessage extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SendMessage copyWith(void Function(SendMessage) updates) => super.copyWith((message) => updates(message as SendMessage)) as SendMessage; // ignore: deprecated_member_use
+  SendMessage copyWith(void Function(SendMessage) updates) => super.copyWith((message) => updates(message as SendMessage)) as SendMessage;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SendMessage create() => SendMessage._();
   SendMessage createEmptyInstance() => create();
@@ -430,3 +471,6 @@ class SendMessage extends $pb.GeneratedMessage {
   void clearContent() => clearField(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

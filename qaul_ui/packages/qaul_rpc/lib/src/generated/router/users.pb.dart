@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: router/users.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -23,7 +27,41 @@ enum Users_Message {
   notSet
 }
 
+/// users rpc message container
 class Users extends $pb.GeneratedMessage {
+  factory Users({
+    UserRequest? userRequest,
+    UserOnlineRequest? userOnlineRequest,
+    UserList? userList,
+    UserEntry? userUpdate,
+    SecurityNumberRequest? securityNumberRequest,
+    SecurityNumberResponse? securityNumberResponse,
+  }) {
+    final $result = create();
+    if (userRequest != null) {
+      $result.userRequest = userRequest;
+    }
+    if (userOnlineRequest != null) {
+      $result.userOnlineRequest = userOnlineRequest;
+    }
+    if (userList != null) {
+      $result.userList = userList;
+    }
+    if (userUpdate != null) {
+      $result.userUpdate = userUpdate;
+    }
+    if (securityNumberRequest != null) {
+      $result.securityNumberRequest = securityNumberRequest;
+    }
+    if (securityNumberResponse != null) {
+      $result.securityNumberResponse = securityNumberResponse;
+    }
+    return $result;
+  }
+  Users._() : super();
+  factory Users.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Users.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Users_Message> _Users_MessageByTag = {
     1 : Users_Message.userRequest,
     2 : Users_Message.userOnlineRequest,
@@ -33,49 +71,17 @@ class Users extends $pb.GeneratedMessage {
     6 : Users_Message.securityNumberResponse,
     0 : Users_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Users', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Users', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6])
-    ..aOM<UserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userRequest', subBuilder: UserRequest.create)
-    ..aOM<UserOnlineRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userOnlineRequest', subBuilder: UserOnlineRequest.create)
-    ..aOM<UserList>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userList', subBuilder: UserList.create)
-    ..aOM<UserEntry>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdate', subBuilder: UserEntry.create)
-    ..aOM<SecurityNumberRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberRequest', subBuilder: SecurityNumberRequest.create)
-    ..aOM<SecurityNumberResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberResponse', subBuilder: SecurityNumberResponse.create)
+    ..aOM<UserRequest>(1, _omitFieldNames ? '' : 'userRequest', subBuilder: UserRequest.create)
+    ..aOM<UserOnlineRequest>(2, _omitFieldNames ? '' : 'userOnlineRequest', subBuilder: UserOnlineRequest.create)
+    ..aOM<UserList>(3, _omitFieldNames ? '' : 'userList', subBuilder: UserList.create)
+    ..aOM<UserEntry>(4, _omitFieldNames ? '' : 'userUpdate', subBuilder: UserEntry.create)
+    ..aOM<SecurityNumberRequest>(5, _omitFieldNames ? '' : 'securityNumberRequest', subBuilder: SecurityNumberRequest.create)
+    ..aOM<SecurityNumberResponse>(6, _omitFieldNames ? '' : 'securityNumberResponse', subBuilder: SecurityNumberResponse.create)
     ..hasRequiredFields = false
   ;
 
-  Users._() : super();
-  factory Users({
-    UserRequest? userRequest,
-    UserOnlineRequest? userOnlineRequest,
-    UserList? userList,
-    UserEntry? userUpdate,
-    SecurityNumberRequest? securityNumberRequest,
-    SecurityNumberResponse? securityNumberResponse,
-  }) {
-    final _result = create();
-    if (userRequest != null) {
-      _result.userRequest = userRequest;
-    }
-    if (userOnlineRequest != null) {
-      _result.userOnlineRequest = userOnlineRequest;
-    }
-    if (userList != null) {
-      _result.userList = userList;
-    }
-    if (userUpdate != null) {
-      _result.userUpdate = userUpdate;
-    }
-    if (securityNumberRequest != null) {
-      _result.securityNumberRequest = securityNumberRequest;
-    }
-    if (securityNumberResponse != null) {
-      _result.securityNumberResponse = securityNumberResponse;
-    }
-    return _result;
-  }
-  factory Users.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Users.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -85,8 +91,10 @@ class Users extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Users copyWith(void Function(Users) updates) => super.copyWith((message) => updates(message as Users)) as Users; // ignore: deprecated_member_use
+  Users copyWith(void Function(Users) updates) => super.copyWith((message) => updates(message as Users)) as Users;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Users create() => Users._();
   Users createEmptyInstance() => create();
@@ -98,6 +106,10 @@ class Users extends $pb.GeneratedMessage {
   Users_Message whichMessage() => _Users_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// User Request returns a user list
+  /// containing all users with their connectivity
+  /// field set to either online or offline.
+  /// The connections are not set.
   @$pb.TagNumber(1)
   UserRequest get userRequest => $_getN(0);
   @$pb.TagNumber(1)
@@ -109,6 +121,9 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   UserRequest ensureUserRequest() => $_ensure(0);
 
+  /// User Online Request returns a user list
+  /// of all users currently online in the network.
+  /// Each user has
   @$pb.TagNumber(2)
   UserOnlineRequest get userOnlineRequest => $_getN(1);
   @$pb.TagNumber(2)
@@ -120,6 +135,10 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   UserOnlineRequest ensureUserOnlineRequest() => $_ensure(1);
 
+  ///  User List
+  ///
+  ///  Libqaul's return message for  'UserRequest' and
+  ///  'UserOnlineRequest', containing a list of UserEntry's
   @$pb.TagNumber(3)
   UserList get userList => $_getN(2);
   @$pb.TagNumber(3)
@@ -131,6 +150,11 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   UserList ensureUserList() => $_ensure(2);
 
+  ///  User Update
+  ///
+  ///  Sent to libqaul to update the verification & blocked fields
+  ///  of a user.
+  ///  All other fields will be ignored.
   @$pb.TagNumber(4)
   UserEntry get userUpdate => $_getN(3);
   @$pb.TagNumber(4)
@@ -142,6 +166,10 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   UserEntry ensureUserUpdate() => $_ensure(3);
 
+  ///  Security Number Request
+  ///
+  ///  Requests the specific security number for
+  ///  for the connection with this user.
   @$pb.TagNumber(5)
   SecurityNumberRequest get securityNumberRequest => $_getN(4);
   @$pb.TagNumber(5)
@@ -153,6 +181,18 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   SecurityNumberRequest ensureSecurityNumberRequest() => $_ensure(4);
 
+  ///  Security Number Response
+  ///
+  ///  Libqaul's response containing the security number.
+  ///
+  ///  The security number contains 8 blocks of 5 digit numbers.
+  ///  They shall be rendered in two rows. If a number is
+  ///  smaller then five-digits, the missing digits shall be filled
+  ///  with leading zeros.
+  ///
+  ///  example rendering of security number:
+  ///  13246 42369 46193 12484
+  ///  12142 31101 09874 34545
   @$pb.TagNumber(6)
   SecurityNumberResponse get securityNumberResponse => $_getN(5);
   @$pb.TagNumber(6)
@@ -165,15 +205,17 @@ class Users extends $pb.GeneratedMessage {
   SecurityNumberResponse ensureSecurityNumberResponse() => $_ensure(5);
 }
 
+/// UI request for some users
 class UserRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+  factory UserRequest() => create();
+  UserRequest._() : super();
+  factory UserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UserRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  UserRequest._() : super();
-  factory UserRequest() => create();
-  factory UserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -183,8 +225,10 @@ class UserRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserRequest copyWith(void Function(UserRequest) updates) => super.copyWith((message) => updates(message as UserRequest)) as UserRequest; // ignore: deprecated_member_use
+  UserRequest copyWith(void Function(UserRequest) updates) => super.copyWith((message) => updates(message as UserRequest)) as UserRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UserRequest create() => UserRequest._();
   UserRequest createEmptyInstance() => create();
@@ -194,15 +238,17 @@ class UserRequest extends $pb.GeneratedMessage {
   static UserRequest? _defaultInstance;
 }
 
+/// UI request for some online users
 class UserOnlineRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserOnlineRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+  factory UserOnlineRequest() => create();
+  UserOnlineRequest._() : super();
+  factory UserOnlineRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserOnlineRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UserOnlineRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  UserOnlineRequest._() : super();
-  factory UserOnlineRequest() => create();
-  factory UserOnlineRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserOnlineRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -212,8 +258,10 @@ class UserOnlineRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserOnlineRequest copyWith(void Function(UserOnlineRequest) updates) => super.copyWith((message) => updates(message as UserOnlineRequest)) as UserOnlineRequest; // ignore: deprecated_member_use
+  UserOnlineRequest copyWith(void Function(UserOnlineRequest) updates) => super.copyWith((message) => updates(message as UserOnlineRequest)) as UserOnlineRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UserOnlineRequest create() => UserOnlineRequest._();
   UserOnlineRequest createEmptyInstance() => create();
@@ -223,24 +271,26 @@ class UserOnlineRequest extends $pb.GeneratedMessage {
   static UserOnlineRequest? _defaultInstance;
 }
 
+/// user list
 class UserList extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserList', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..pc<UserEntry>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', $pb.PbFieldType.PM, subBuilder: UserEntry.create)
-    ..hasRequiredFields = false
-  ;
-
-  UserList._() : super();
   factory UserList({
     $core.Iterable<UserEntry>? user,
   }) {
-    final _result = create();
+    final $result = create();
     if (user != null) {
-      _result.user.addAll(user);
+      $result.user.addAll(user);
     }
-    return _result;
+    return $result;
   }
+  UserList._() : super();
   factory UserList.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory UserList.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UserList', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..pc<UserEntry>(1, _omitFieldNames ? '' : 'user', $pb.PbFieldType.PM, subBuilder: UserEntry.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -250,8 +300,10 @@ class UserList extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserList copyWith(void Function(UserList) updates) => super.copyWith((message) => updates(message as UserList)) as UserList; // ignore: deprecated_member_use
+  UserList copyWith(void Function(UserList) updates) => super.copyWith((message) => updates(message as UserList)) as UserList;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UserList create() => UserList._();
   UserList createEmptyInstance() => create();
@@ -264,20 +316,8 @@ class UserList extends $pb.GeneratedMessage {
   $core.List<UserEntry> get user => $_getList(0);
 }
 
+/// user entry
 class UserEntry extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserEntry', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'groupId', $pb.PbFieldType.OY)
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyBase58')
-    ..e<Connectivity>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
-    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verified')
-    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'blocked')
-    ..pc<RoutingTableConnection>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
-    ..hasRequiredFields = false
-  ;
-
-  UserEntry._() : super();
   factory UserEntry({
     $core.String? name,
     $core.List<$core.int>? id,
@@ -288,35 +328,49 @@ class UserEntry extends $pb.GeneratedMessage {
     $core.bool? blocked,
     $core.Iterable<RoutingTableConnection>? connections,
   }) {
-    final _result = create();
+    final $result = create();
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (groupId != null) {
-      _result.groupId = groupId;
+      $result.groupId = groupId;
     }
     if (keyBase58 != null) {
-      _result.keyBase58 = keyBase58;
+      $result.keyBase58 = keyBase58;
     }
     if (connectivity != null) {
-      _result.connectivity = connectivity;
+      $result.connectivity = connectivity;
     }
     if (verified != null) {
-      _result.verified = verified;
+      $result.verified = verified;
     }
     if (blocked != null) {
-      _result.blocked = blocked;
+      $result.blocked = blocked;
     }
     if (connections != null) {
-      _result.connections.addAll(connections);
+      $result.connections.addAll(connections);
     }
-    return _result;
+    return $result;
   }
+  UserEntry._() : super();
   factory UserEntry.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory UserEntry.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UserEntry', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..aOS(7, _omitFieldNames ? '' : 'keyBase58')
+    ..e<Connectivity>(8, _omitFieldNames ? '' : 'connectivity', $pb.PbFieldType.OE, defaultOrMaker: Connectivity.Online, valueOf: Connectivity.valueOf, enumValues: Connectivity.values)
+    ..aOB(9, _omitFieldNames ? '' : 'verified')
+    ..aOB(10, _omitFieldNames ? '' : 'blocked')
+    ..pc<RoutingTableConnection>(11, _omitFieldNames ? '' : 'connections', $pb.PbFieldType.PM, subBuilder: RoutingTableConnection.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -326,8 +380,10 @@ class UserEntry extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserEntry copyWith(void Function(UserEntry) updates) => super.copyWith((message) => updates(message as UserEntry)) as UserEntry; // ignore: deprecated_member_use
+  UserEntry copyWith(void Function(UserEntry) updates) => super.copyWith((message) => updates(message as UserEntry)) as UserEntry;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UserEntry create() => UserEntry._();
   UserEntry createEmptyInstance() => create();
@@ -336,6 +392,7 @@ class UserEntry extends $pb.GeneratedMessage {
   static UserEntry getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserEntry>(create);
   static UserEntry? _defaultInstance;
 
+  /// user name
   @$pb.TagNumber(1)
   $core.String get name => $_getSZ(0);
   @$pb.TagNumber(1)
@@ -345,6 +402,7 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearName() => clearField(1);
 
+  /// user ID (38 Byte PeerID)
   @$pb.TagNumber(2)
   $core.List<$core.int> get id => $_getN(1);
   @$pb.TagNumber(2)
@@ -354,6 +412,9 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearId() => clearField(2);
 
+  ///  direct chat group id
+  ///
+  ///  this is a predictable 16 bytes UUID
   @$pb.TagNumber(3)
   $core.List<$core.int> get groupId => $_getN(2);
   @$pb.TagNumber(3)
@@ -363,6 +424,7 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearGroupId() => clearField(3);
 
+  /// base58 string of public key
   @$pb.TagNumber(7)
   $core.String get keyBase58 => $_getSZ(3);
   @$pb.TagNumber(7)
@@ -372,6 +434,7 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   void clearKeyBase58() => clearField(7);
 
+  /// reachability of the user: online | reachable | offline
   @$pb.TagNumber(8)
   Connectivity get connectivity => $_getN(4);
   @$pb.TagNumber(8)
@@ -381,6 +444,7 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(8)
   void clearConnectivity() => clearField(8);
 
+  /// user has been verified
   @$pb.TagNumber(9)
   $core.bool get verified => $_getBF(5);
   @$pb.TagNumber(9)
@@ -390,6 +454,7 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   void clearVerified() => clearField(9);
 
+  /// user is blocked
   @$pb.TagNumber(10)
   $core.bool get blocked => $_getBF(6);
   @$pb.TagNumber(10)
@@ -399,43 +464,48 @@ class UserEntry extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   void clearBlocked() => clearField(10);
 
+  /// routing connection entries
+  /// RoutingTableConnection connections = 11;
   @$pb.TagNumber(11)
   $core.List<RoutingTableConnection> get connections => $_getList(7);
 }
 
+/// Routing table connection entry.
+/// This message contains a connection to a specific user.
 class RoutingTableConnection extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RoutingTableConnection', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..e<ConnectionModule>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtt', $pb.PbFieldType.OU3)
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'via', $pb.PbFieldType.OY)
-    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hopCount', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  RoutingTableConnection._() : super();
   factory RoutingTableConnection({
     ConnectionModule? module,
     $core.int? rtt,
     $core.List<$core.int>? via,
     $core.int? hopCount,
   }) {
-    final _result = create();
+    final $result = create();
     if (module != null) {
-      _result.module = module;
+      $result.module = module;
     }
     if (rtt != null) {
-      _result.rtt = rtt;
+      $result.rtt = rtt;
     }
     if (via != null) {
-      _result.via = via;
+      $result.via = via;
     }
     if (hopCount != null) {
-      _result.hopCount = hopCount;
+      $result.hopCount = hopCount;
     }
-    return _result;
+    return $result;
   }
+  RoutingTableConnection._() : super();
   factory RoutingTableConnection.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RoutingTableConnection.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RoutingTableConnection', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..e<ConnectionModule>(2, _omitFieldNames ? '' : 'module', $pb.PbFieldType.OE, defaultOrMaker: ConnectionModule.NONE, valueOf: ConnectionModule.valueOf, enumValues: ConnectionModule.values)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'rtt', $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'via', $pb.PbFieldType.OY)
+    ..a<$core.int>(5, _omitFieldNames ? '' : 'hopCount', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -445,8 +515,10 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection; // ignore: deprecated_member_use
+  RoutingTableConnection copyWith(void Function(RoutingTableConnection) updates) => super.copyWith((message) => updates(message as RoutingTableConnection)) as RoutingTableConnection;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RoutingTableConnection create() => RoutingTableConnection._();
   RoutingTableConnection createEmptyInstance() => create();
@@ -455,6 +527,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   static RoutingTableConnection getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RoutingTableConnection>(create);
   static RoutingTableConnection? _defaultInstance;
 
+  /// the connection module (LAN, Internet, BLE, etc.)
   @$pb.TagNumber(2)
   ConnectionModule get module => $_getN(0);
   @$pb.TagNumber(2)
@@ -464,6 +537,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearModule() => clearField(2);
 
+  /// the round trip time for this connection
   @$pb.TagNumber(3)
   $core.int get rtt => $_getIZ(1);
   @$pb.TagNumber(3)
@@ -473,6 +547,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearRtt() => clearField(3);
 
+  /// node id via which this connection is routed
   @$pb.TagNumber(4)
   $core.List<$core.int> get via => $_getN(2);
   @$pb.TagNumber(4)
@@ -482,6 +557,7 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearVia() => clearField(4);
 
+  /// hop count
   @$pb.TagNumber(5)
   $core.int get hopCount => $_getIZ(3);
   @$pb.TagNumber(5)
@@ -492,24 +568,26 @@ class RoutingTableConnection extends $pb.GeneratedMessage {
   void clearHopCount() => clearField(5);
 }
 
+/// security number request
 class SecurityNumberRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SecurityNumberRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  SecurityNumberRequest._() : super();
   factory SecurityNumberRequest({
     $core.List<$core.int>? userId,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
-    return _result;
+    return $result;
   }
+  SecurityNumberRequest._() : super();
   factory SecurityNumberRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SecurityNumberRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SecurityNumberRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -519,8 +597,10 @@ class SecurityNumberRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SecurityNumberRequest copyWith(void Function(SecurityNumberRequest) updates) => super.copyWith((message) => updates(message as SecurityNumberRequest)) as SecurityNumberRequest; // ignore: deprecated_member_use
+  SecurityNumberRequest copyWith(void Function(SecurityNumberRequest) updates) => super.copyWith((message) => updates(message as SecurityNumberRequest)) as SecurityNumberRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SecurityNumberRequest create() => SecurityNumberRequest._();
   SecurityNumberRequest createEmptyInstance() => create();
@@ -529,6 +609,7 @@ class SecurityNumberRequest extends $pb.GeneratedMessage {
   static SecurityNumberRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SecurityNumberRequest>(create);
   static SecurityNumberRequest? _defaultInstance;
 
+  /// user id
   @$pb.TagNumber(1)
   $core.List<$core.int> get userId => $_getN(0);
   @$pb.TagNumber(1)
@@ -539,34 +620,36 @@ class SecurityNumberRequest extends $pb.GeneratedMessage {
   void clearUserId() => clearField(1);
 }
 
+/// security number response
 class SecurityNumberResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SecurityNumberResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityHash', $pb.PbFieldType.OY)
-    ..p<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'securityNumberBlocks', $pb.PbFieldType.KU3)
-    ..hasRequiredFields = false
-  ;
-
-  SecurityNumberResponse._() : super();
   factory SecurityNumberResponse({
     $core.List<$core.int>? userId,
     $core.List<$core.int>? securityHash,
     $core.Iterable<$core.int>? securityNumberBlocks,
   }) {
-    final _result = create();
+    final $result = create();
     if (userId != null) {
-      _result.userId = userId;
+      $result.userId = userId;
     }
     if (securityHash != null) {
-      _result.securityHash = securityHash;
+      $result.securityHash = securityHash;
     }
     if (securityNumberBlocks != null) {
-      _result.securityNumberBlocks.addAll(securityNumberBlocks);
+      $result.securityNumberBlocks.addAll(securityNumberBlocks);
     }
-    return _result;
+    return $result;
   }
+  SecurityNumberResponse._() : super();
   factory SecurityNumberResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SecurityNumberResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SecurityNumberResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'securityHash', $pb.PbFieldType.OY)
+    ..p<$core.int>(3, _omitFieldNames ? '' : 'securityNumberBlocks', $pb.PbFieldType.KU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -576,8 +659,10 @@ class SecurityNumberResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SecurityNumberResponse copyWith(void Function(SecurityNumberResponse) updates) => super.copyWith((message) => updates(message as SecurityNumberResponse)) as SecurityNumberResponse; // ignore: deprecated_member_use
+  SecurityNumberResponse copyWith(void Function(SecurityNumberResponse) updates) => super.copyWith((message) => updates(message as SecurityNumberResponse)) as SecurityNumberResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SecurityNumberResponse create() => SecurityNumberResponse._();
   SecurityNumberResponse createEmptyInstance() => create();
@@ -586,6 +671,7 @@ class SecurityNumberResponse extends $pb.GeneratedMessage {
   static SecurityNumberResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SecurityNumberResponse>(create);
   static SecurityNumberResponse? _defaultInstance;
 
+  /// the user id of the remote user
   @$pb.TagNumber(1)
   $core.List<$core.int> get userId => $_getN(0);
   @$pb.TagNumber(1)
@@ -595,6 +681,7 @@ class SecurityNumberResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearUserId() => clearField(1);
 
+  /// deliver the full bytes of the hash
   @$pb.TagNumber(2)
   $core.List<$core.int> get securityHash => $_getN(1);
   @$pb.TagNumber(2)
@@ -604,7 +691,13 @@ class SecurityNumberResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearSecurityHash() => clearField(2);
 
+  /// fill in 8 numbers of 16bits
+  /// uint16 data type does not exist in protobuf, just fill them in the u16 as
+  /// u32.
   @$pb.TagNumber(3)
   $core.List<$core.int> get securityNumberBlocks => $_getList(2);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

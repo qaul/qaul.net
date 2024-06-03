@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: connections/ble/ble_net.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -17,7 +21,33 @@ enum BleMessage_Message {
   notSet
 }
 
+/// BLE network communication message
 class BleMessage extends $pb.GeneratedMessage {
+  factory BleMessage({
+    $core.List<$core.int>? info,
+    $core.List<$core.int>? feed,
+    $core.List<$core.int>? messaging,
+    Identification? identification,
+  }) {
+    final $result = create();
+    if (info != null) {
+      $result.info = info;
+    }
+    if (feed != null) {
+      $result.feed = feed;
+    }
+    if (messaging != null) {
+      $result.messaging = messaging;
+    }
+    if (identification != null) {
+      $result.identification = identification;
+    }
+    return $result;
+  }
+  BleMessage._() : super();
+  factory BleMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BleMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, BleMessage_Message> _BleMessage_MessageByTag = {
     1 : BleMessage_Message.info,
     2 : BleMessage_Message.feed,
@@ -25,39 +55,15 @@ class BleMessage extends $pb.GeneratedMessage {
     4 : BleMessage_Message.identification,
     0 : BleMessage_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BleMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.ble'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'BleMessage', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.ble'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4])
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'feed', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messaging', $pb.PbFieldType.OY)
-    ..aOM<Identification>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'identification', subBuilder: Identification.create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'info', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'feed', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'messaging', $pb.PbFieldType.OY)
+    ..aOM<Identification>(4, _omitFieldNames ? '' : 'identification', subBuilder: Identification.create)
     ..hasRequiredFields = false
   ;
 
-  BleMessage._() : super();
-  factory BleMessage({
-    $core.List<$core.int>? info,
-    $core.List<$core.int>? feed,
-    $core.List<$core.int>? messaging,
-    Identification? identification,
-  }) {
-    final _result = create();
-    if (info != null) {
-      _result.info = info;
-    }
-    if (feed != null) {
-      _result.feed = feed;
-    }
-    if (messaging != null) {
-      _result.messaging = messaging;
-    }
-    if (identification != null) {
-      _result.identification = identification;
-    }
-    return _result;
-  }
-  factory BleMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory BleMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -67,8 +73,10 @@ class BleMessage extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BleMessage copyWith(void Function(BleMessage) updates) => super.copyWith((message) => updates(message as BleMessage)) as BleMessage; // ignore: deprecated_member_use
+  BleMessage copyWith(void Function(BleMessage) updates) => super.copyWith((message) => updates(message as BleMessage)) as BleMessage;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static BleMessage create() => BleMessage._();
   BleMessage createEmptyInstance() => create();
@@ -80,6 +88,7 @@ class BleMessage extends $pb.GeneratedMessage {
   BleMessage_Message whichMessage() => _BleMessage_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// info message
   @$pb.TagNumber(1)
   $core.List<$core.int> get info => $_getN(0);
   @$pb.TagNumber(1)
@@ -89,6 +98,7 @@ class BleMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearInfo() => clearField(1);
 
+  /// feed message
   @$pb.TagNumber(2)
   $core.List<$core.int> get feed => $_getN(1);
   @$pb.TagNumber(2)
@@ -98,6 +108,7 @@ class BleMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearFeed() => clearField(2);
 
+  /// messaging message
   @$pb.TagNumber(3)
   $core.List<$core.int> get messaging => $_getN(2);
   @$pb.TagNumber(3)
@@ -107,6 +118,7 @@ class BleMessage extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearMessaging() => clearField(3);
 
+  /// identification request
   @$pb.TagNumber(4)
   Identification get identification => $_getN(3);
   @$pb.TagNumber(4)
@@ -119,29 +131,31 @@ class BleMessage extends $pb.GeneratedMessage {
   Identification ensureIdentification() => $_ensure(3);
 }
 
+/// Identfication Request
 class Identification extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Identification', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.ble'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'request')
-    ..aOM<NodeIdentification>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'node', subBuilder: NodeIdentification.create)
-    ..hasRequiredFields = false
-  ;
-
-  Identification._() : super();
   factory Identification({
     $core.bool? request,
     NodeIdentification? node,
   }) {
-    final _result = create();
+    final $result = create();
     if (request != null) {
-      _result.request = request;
+      $result.request = request;
     }
     if (node != null) {
-      _result.node = node;
+      $result.node = node;
     }
-    return _result;
+    return $result;
   }
+  Identification._() : super();
   factory Identification.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory Identification.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Identification', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.ble'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'request')
+    ..aOM<NodeIdentification>(2, _omitFieldNames ? '' : 'node', subBuilder: NodeIdentification.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -151,8 +165,10 @@ class Identification extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Identification copyWith(void Function(Identification) updates) => super.copyWith((message) => updates(message as Identification)) as Identification; // ignore: deprecated_member_use
+  Identification copyWith(void Function(Identification) updates) => super.copyWith((message) => updates(message as Identification)) as Identification;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Identification create() => Identification._();
   Identification createEmptyInstance() => create();
@@ -182,24 +198,26 @@ class Identification extends $pb.GeneratedMessage {
   NodeIdentification ensureNode() => $_ensure(1);
 }
 
+/// Identity Information
 class NodeIdentification extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NodeIdentification', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  NodeIdentification._() : super();
   factory NodeIdentification({
     $core.List<$core.int>? id,
   }) {
-    final _result = create();
+    final $result = create();
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
-    return _result;
+    return $result;
   }
+  NodeIdentification._() : super();
   factory NodeIdentification.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory NodeIdentification.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'NodeIdentification', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -209,8 +227,10 @@ class NodeIdentification extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NodeIdentification copyWith(void Function(NodeIdentification) updates) => super.copyWith((message) => updates(message as NodeIdentification)) as NodeIdentification; // ignore: deprecated_member_use
+  NodeIdentification copyWith(void Function(NodeIdentification) updates) => super.copyWith((message) => updates(message as NodeIdentification)) as NodeIdentification;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static NodeIdentification create() => NodeIdentification._();
   NodeIdentification createEmptyInstance() => create();
@@ -219,6 +239,7 @@ class NodeIdentification extends $pb.GeneratedMessage {
   static NodeIdentification getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NodeIdentification>(create);
   static NodeIdentification? _defaultInstance;
 
+  /// Node ID
   @$pb.TagNumber(1)
   $core.List<$core.int> get id => $_getN(0);
   @$pb.TagNumber(1)
@@ -229,3 +250,6 @@ class NodeIdentification extends $pb.GeneratedMessage {
   void clearId() => clearField(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

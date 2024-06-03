@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: connections/ble/ble_rpc.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -21,7 +25,52 @@ enum Ble_Message {
   notSet
 }
 
+///  BLE RPC Message Container
+///
+///  Union of all messages that can be sent or received
+///  via RPC between the UI and libqaul
 class Ble extends $pb.GeneratedMessage {
+  factory Ble({
+    InfoRequest? infoRequest,
+    InfoResponse? infoResponse,
+    StartRequest? startRequest,
+    StopRequest? stopRequest,
+    DiscoveredRequest? discoveredRequest,
+    DiscoveredResponse? discoveredResponse,
+    RightsRequest? rightsRequest,
+    RightsResult? rightsResult,
+  }) {
+    final $result = create();
+    if (infoRequest != null) {
+      $result.infoRequest = infoRequest;
+    }
+    if (infoResponse != null) {
+      $result.infoResponse = infoResponse;
+    }
+    if (startRequest != null) {
+      $result.startRequest = startRequest;
+    }
+    if (stopRequest != null) {
+      $result.stopRequest = stopRequest;
+    }
+    if (discoveredRequest != null) {
+      $result.discoveredRequest = discoveredRequest;
+    }
+    if (discoveredResponse != null) {
+      $result.discoveredResponse = discoveredResponse;
+    }
+    if (rightsRequest != null) {
+      $result.rightsRequest = rightsRequest;
+    }
+    if (rightsResult != null) {
+      $result.rightsResult = rightsResult;
+    }
+    return $result;
+  }
+  Ble._() : super();
+  factory Ble.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Ble.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Ble_Message> _Ble_MessageByTag = {
     1 : Ble_Message.infoRequest,
     2 : Ble_Message.infoResponse,
@@ -33,59 +82,19 @@ class Ble extends $pb.GeneratedMessage {
     8 : Ble_Message.rightsResult,
     0 : Ble_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Ble', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Ble', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8])
-    ..aOM<InfoRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoRequest', subBuilder: InfoRequest.create)
-    ..aOM<InfoResponse>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'infoResponse', subBuilder: InfoResponse.create)
-    ..aOM<StartRequest>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startRequest', subBuilder: StartRequest.create)
-    ..aOM<StopRequest>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stopRequest', subBuilder: StopRequest.create)
-    ..aOM<DiscoveredRequest>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discoveredRequest', subBuilder: DiscoveredRequest.create)
-    ..aOM<DiscoveredResponse>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discoveredResponse', subBuilder: DiscoveredResponse.create)
-    ..aOM<RightsRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsRequest', subBuilder: RightsRequest.create)
-    ..aOM<RightsResult>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsResult', subBuilder: RightsResult.create)
+    ..aOM<InfoRequest>(1, _omitFieldNames ? '' : 'infoRequest', subBuilder: InfoRequest.create)
+    ..aOM<InfoResponse>(2, _omitFieldNames ? '' : 'infoResponse', subBuilder: InfoResponse.create)
+    ..aOM<StartRequest>(3, _omitFieldNames ? '' : 'startRequest', subBuilder: StartRequest.create)
+    ..aOM<StopRequest>(4, _omitFieldNames ? '' : 'stopRequest', subBuilder: StopRequest.create)
+    ..aOM<DiscoveredRequest>(5, _omitFieldNames ? '' : 'discoveredRequest', subBuilder: DiscoveredRequest.create)
+    ..aOM<DiscoveredResponse>(6, _omitFieldNames ? '' : 'discoveredResponse', subBuilder: DiscoveredResponse.create)
+    ..aOM<RightsRequest>(7, _omitFieldNames ? '' : 'rightsRequest', subBuilder: RightsRequest.create)
+    ..aOM<RightsResult>(8, _omitFieldNames ? '' : 'rightsResult', subBuilder: RightsResult.create)
     ..hasRequiredFields = false
   ;
 
-  Ble._() : super();
-  factory Ble({
-    InfoRequest? infoRequest,
-    InfoResponse? infoResponse,
-    StartRequest? startRequest,
-    StopRequest? stopRequest,
-    DiscoveredRequest? discoveredRequest,
-    DiscoveredResponse? discoveredResponse,
-    RightsRequest? rightsRequest,
-    RightsResult? rightsResult,
-  }) {
-    final _result = create();
-    if (infoRequest != null) {
-      _result.infoRequest = infoRequest;
-    }
-    if (infoResponse != null) {
-      _result.infoResponse = infoResponse;
-    }
-    if (startRequest != null) {
-      _result.startRequest = startRequest;
-    }
-    if (stopRequest != null) {
-      _result.stopRequest = stopRequest;
-    }
-    if (discoveredRequest != null) {
-      _result.discoveredRequest = discoveredRequest;
-    }
-    if (discoveredResponse != null) {
-      _result.discoveredResponse = discoveredResponse;
-    }
-    if (rightsRequest != null) {
-      _result.rightsRequest = rightsRequest;
-    }
-    if (rightsResult != null) {
-      _result.rightsResult = rightsResult;
-    }
-    return _result;
-  }
-  factory Ble.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Ble.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -95,8 +104,10 @@ class Ble extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Ble copyWith(void Function(Ble) updates) => super.copyWith((message) => updates(message as Ble)) as Ble; // ignore: deprecated_member_use
+  Ble copyWith(void Function(Ble) updates) => super.copyWith((message) => updates(message as Ble)) as Ble;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Ble create() => Ble._();
   Ble createEmptyInstance() => create();
@@ -197,15 +208,17 @@ class Ble extends $pb.GeneratedMessage {
   RightsResult ensureRightsResult() => $_ensure(7);
 }
 
+/// UI request for information on devices and module status
 class InfoRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InfoRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  factory InfoRequest() => create();
+  InfoRequest._() : super();
+  factory InfoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory InfoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InfoRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  InfoRequest._() : super();
-  factory InfoRequest() => create();
-  factory InfoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory InfoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -215,8 +228,10 @@ class InfoRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  InfoRequest copyWith(void Function(InfoRequest) updates) => super.copyWith((message) => updates(message as InfoRequest)) as InfoRequest; // ignore: deprecated_member_use
+  InfoRequest copyWith(void Function(InfoRequest) updates) => super.copyWith((message) => updates(message as InfoRequest)) as InfoRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static InfoRequest create() => InfoRequest._();
   InfoRequest createEmptyInstance() => create();
@@ -226,34 +241,39 @@ class InfoRequest extends $pb.GeneratedMessage {
   static InfoRequest? _defaultInstance;
 }
 
+///  BLE Info Response Message
+///
+///  Contains information on the status of the module,
+///  as well as all available BLE devices
 class InfoResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'InfoResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'smallId', $pb.PbFieldType.OY)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status')
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deviceInfo', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
-
-  InfoResponse._() : super();
   factory InfoResponse({
     $core.List<$core.int>? smallId,
     $core.String? status,
     $core.List<$core.int>? deviceInfo,
   }) {
-    final _result = create();
+    final $result = create();
     if (smallId != null) {
-      _result.smallId = smallId;
+      $result.smallId = smallId;
     }
     if (status != null) {
-      _result.status = status;
+      $result.status = status;
     }
     if (deviceInfo != null) {
-      _result.deviceInfo = deviceInfo;
+      $result.deviceInfo = deviceInfo;
     }
-    return _result;
+    return $result;
   }
+  InfoResponse._() : super();
   factory InfoResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory InfoResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'InfoResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'smallId', $pb.PbFieldType.OY)
+    ..aOS(2, _omitFieldNames ? '' : 'status')
+    ..a<$core.List<$core.int>>(3, _omitFieldNames ? '' : 'deviceInfo', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -263,8 +283,10 @@ class InfoResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  InfoResponse copyWith(void Function(InfoResponse) updates) => super.copyWith((message) => updates(message as InfoResponse)) as InfoResponse; // ignore: deprecated_member_use
+  InfoResponse copyWith(void Function(InfoResponse) updates) => super.copyWith((message) => updates(message as InfoResponse)) as InfoResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static InfoResponse create() => InfoResponse._();
   InfoResponse createEmptyInstance() => create();
@@ -273,6 +295,7 @@ class InfoResponse extends $pb.GeneratedMessage {
   static InfoResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<InfoResponse>(create);
   static InfoResponse? _defaultInstance;
 
+  /// the small 16 byte BLE id
   @$pb.TagNumber(1)
   $core.List<$core.int> get smallId => $_getN(0);
   @$pb.TagNumber(1)
@@ -282,6 +305,7 @@ class InfoResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSmallId() => clearField(1);
 
+  /// status of the module
   @$pb.TagNumber(2)
   $core.String get status => $_getSZ(1);
   @$pb.TagNumber(2)
@@ -291,6 +315,7 @@ class InfoResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearStatus() => clearField(2);
 
+  /// devices
   @$pb.TagNumber(3)
   $core.List<$core.int> get deviceInfo => $_getN(2);
   @$pb.TagNumber(3)
@@ -301,15 +326,22 @@ class InfoResponse extends $pb.GeneratedMessage {
   void clearDeviceInfo() => clearField(3);
 }
 
+///  Request BLE module to start
+///
+///  Start message sent from UI to libqaul.
+///
+///  This message only has an effect if the module
+///  has not already started.
 class StartRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  factory StartRequest() => create();
+  StartRequest._() : super();
+  factory StartRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StartRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StartRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  StartRequest._() : super();
-  factory StartRequest() => create();
-  factory StartRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StartRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -319,8 +351,10 @@ class StartRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  StartRequest copyWith(void Function(StartRequest) updates) => super.copyWith((message) => updates(message as StartRequest)) as StartRequest; // ignore: deprecated_member_use
+  StartRequest copyWith(void Function(StartRequest) updates) => super.copyWith((message) => updates(message as StartRequest)) as StartRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static StartRequest create() => StartRequest._();
   StartRequest createEmptyInstance() => create();
@@ -330,15 +364,22 @@ class StartRequest extends $pb.GeneratedMessage {
   static StartRequest? _defaultInstance;
 }
 
+///  Request BLE module to stop
+///
+///  Stop message sent from UI to libqaul.
+///
+///  This message only has an effect if the module
+///  was started earlier and is running.
 class StopRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  factory StopRequest() => create();
+  StopRequest._() : super();
+  factory StopRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StopRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StopRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  StopRequest._() : super();
-  factory StopRequest() => create();
-  factory StopRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StopRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -348,8 +389,10 @@ class StopRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  StopRequest copyWith(void Function(StopRequest) updates) => super.copyWith((message) => updates(message as StopRequest)) as StopRequest; // ignore: deprecated_member_use
+  StopRequest copyWith(void Function(StopRequest) updates) => super.copyWith((message) => updates(message as StopRequest)) as StopRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static StopRequest create() => StopRequest._();
   StopRequest createEmptyInstance() => create();
@@ -359,15 +402,19 @@ class StopRequest extends $pb.GeneratedMessage {
   static StopRequest? _defaultInstance;
 }
 
+///  Request Discovered Nodes on BLE
+///
+///  Message sent from UI to libqaul.
 class DiscoveredRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DiscoveredRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  factory DiscoveredRequest() => create();
+  DiscoveredRequest._() : super();
+  factory DiscoveredRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DiscoveredRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DiscoveredRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  DiscoveredRequest._() : super();
-  factory DiscoveredRequest() => create();
-  factory DiscoveredRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DiscoveredRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -377,8 +424,10 @@ class DiscoveredRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DiscoveredRequest copyWith(void Function(DiscoveredRequest) updates) => super.copyWith((message) => updates(message as DiscoveredRequest)) as DiscoveredRequest; // ignore: deprecated_member_use
+  DiscoveredRequest copyWith(void Function(DiscoveredRequest) updates) => super.copyWith((message) => updates(message as DiscoveredRequest)) as DiscoveredRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DiscoveredRequest create() => DiscoveredRequest._();
   DiscoveredRequest createEmptyInstance() => create();
@@ -388,29 +437,33 @@ class DiscoveredRequest extends $pb.GeneratedMessage {
   static DiscoveredRequest? _defaultInstance;
 }
 
+///  All Discovered Nodes
+///
+///  Answer from libqaul to UI on DiscoveredRequest
 class DiscoveredResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DiscoveredResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'nodesCount', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'toConfirmCount', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
-
-  DiscoveredResponse._() : super();
   factory DiscoveredResponse({
     $core.int? nodesCount,
     $core.int? toConfirmCount,
   }) {
-    final _result = create();
+    final $result = create();
     if (nodesCount != null) {
-      _result.nodesCount = nodesCount;
+      $result.nodesCount = nodesCount;
     }
     if (toConfirmCount != null) {
-      _result.toConfirmCount = toConfirmCount;
+      $result.toConfirmCount = toConfirmCount;
     }
-    return _result;
+    return $result;
   }
+  DiscoveredResponse._() : super();
   factory DiscoveredResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DiscoveredResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DiscoveredResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'nodesCount', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'toConfirmCount', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -420,8 +473,10 @@ class DiscoveredResponse extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DiscoveredResponse copyWith(void Function(DiscoveredResponse) updates) => super.copyWith((message) => updates(message as DiscoveredResponse)) as DiscoveredResponse; // ignore: deprecated_member_use
+  DiscoveredResponse copyWith(void Function(DiscoveredResponse) updates) => super.copyWith((message) => updates(message as DiscoveredResponse)) as DiscoveredResponse;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DiscoveredResponse create() => DiscoveredResponse._();
   DiscoveredResponse createEmptyInstance() => create();
@@ -430,6 +485,7 @@ class DiscoveredResponse extends $pb.GeneratedMessage {
   static DiscoveredResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DiscoveredResponse>(create);
   static DiscoveredResponse? _defaultInstance;
 
+  /// number of nodes in discovery table
   @$pb.TagNumber(1)
   $core.int get nodesCount => $_getIZ(0);
   @$pb.TagNumber(1)
@@ -439,6 +495,7 @@ class DiscoveredResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearNodesCount() => clearField(1);
 
+  /// number of nodes in to_confirm table
   @$pb.TagNumber(2)
   $core.int get toConfirmCount => $_getIZ(1);
   @$pb.TagNumber(2)
@@ -449,15 +506,17 @@ class DiscoveredResponse extends $pb.GeneratedMessage {
   void clearToConfirmCount() => clearField(2);
 }
 
+/// Request Rights
 class RightsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RightsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+  factory RightsRequest() => create();
+  RightsRequest._() : super();
+  factory RightsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RightsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RightsRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  RightsRequest._() : super();
-  factory RightsRequest() => create();
-  factory RightsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RightsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -467,8 +526,10 @@ class RightsRequest extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RightsRequest copyWith(void Function(RightsRequest) updates) => super.copyWith((message) => updates(message as RightsRequest)) as RightsRequest; // ignore: deprecated_member_use
+  RightsRequest copyWith(void Function(RightsRequest) updates) => super.copyWith((message) => updates(message as RightsRequest)) as RightsRequest;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RightsRequest create() => RightsRequest._();
   RightsRequest createEmptyInstance() => create();
@@ -478,24 +539,26 @@ class RightsRequest extends $pb.GeneratedMessage {
   static RightsRequest? _defaultInstance;
 }
 
+/// Rights Request Results
 class RightsResult extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RightsResult', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rightsGranted')
-    ..hasRequiredFields = false
-  ;
-
-  RightsResult._() : super();
   factory RightsResult({
     $core.bool? rightsGranted,
   }) {
-    final _result = create();
+    final $result = create();
     if (rightsGranted != null) {
-      _result.rightsGranted = rightsGranted;
+      $result.rightsGranted = rightsGranted;
     }
-    return _result;
+    return $result;
   }
+  RightsResult._() : super();
   factory RightsResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory RightsResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RightsResult', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'rightsGranted')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -505,8 +568,10 @@ class RightsResult extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RightsResult copyWith(void Function(RightsResult) updates) => super.copyWith((message) => updates(message as RightsResult)) as RightsResult; // ignore: deprecated_member_use
+  RightsResult copyWith(void Function(RightsResult) updates) => super.copyWith((message) => updates(message as RightsResult)) as RightsResult;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static RightsResult create() => RightsResult._();
   RightsResult createEmptyInstance() => create();
@@ -525,3 +590,6 @@ class RightsResult extends $pb.GeneratedMessage {
   void clearRightsGranted() => clearField(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

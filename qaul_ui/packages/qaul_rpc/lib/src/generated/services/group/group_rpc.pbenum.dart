@@ -1,17 +1,22 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: services/group/group_rpc.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
-// ignore_for_file: UNDEFINED_SHOWN_NAME
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+
 import 'dart:core' as $core;
+
 import 'package:protobuf/protobuf.dart' as $pb;
 
+/// Group member state
 class GroupMemberState extends $pb.ProtobufEnum {
-  static const GroupMemberState Invited = GroupMemberState._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Invited');
-  static const GroupMemberState Activated = GroupMemberState._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Activated');
+  static const GroupMemberState Invited = GroupMemberState._(0, _omitEnumNames ? '' : 'Invited');
+  static const GroupMemberState Activated = GroupMemberState._(1, _omitEnumNames ? '' : 'Activated');
 
   static const $core.List<GroupMemberState> values = <GroupMemberState> [
     Invited,
@@ -24,9 +29,10 @@ class GroupMemberState extends $pb.ProtobufEnum {
   const GroupMemberState._($core.int v, $core.String n) : super(v, n);
 }
 
+/// Group member role
 class GroupMemberRole extends $pb.ProtobufEnum {
-  static const GroupMemberRole User = GroupMemberRole._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'User');
-  static const GroupMemberRole Admin = GroupMemberRole._(255, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Admin');
+  static const GroupMemberRole User = GroupMemberRole._(0, _omitEnumNames ? '' : 'User');
+  static const GroupMemberRole Admin = GroupMemberRole._(255, _omitEnumNames ? '' : 'Admin');
 
   static const $core.List<GroupMemberRole> values = <GroupMemberRole> [
     User,
@@ -39,10 +45,13 @@ class GroupMemberRole extends $pb.ProtobufEnum {
   const GroupMemberRole._($core.int v, $core.String n) : super(v, n);
 }
 
+///  Group Status
+///
+///  Indicates the working status of a group.
 class GroupStatus extends $pb.ProtobufEnum {
-  static const GroupStatus ACTIVE = GroupStatus._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ACTIVE');
-  static const GroupStatus INVITE_ACCEPTED = GroupStatus._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'INVITE_ACCEPTED');
-  static const GroupStatus DEACTIVATED = GroupStatus._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DEACTIVATED');
+  static const GroupStatus ACTIVE = GroupStatus._(0, _omitEnumNames ? '' : 'ACTIVE');
+  static const GroupStatus INVITE_ACCEPTED = GroupStatus._(1, _omitEnumNames ? '' : 'INVITE_ACCEPTED');
+  static const GroupStatus DEACTIVATED = GroupStatus._(2, _omitEnumNames ? '' : 'DEACTIVATED');
 
   static const $core.List<GroupStatus> values = <GroupStatus> [
     ACTIVE,
@@ -56,3 +65,5 @@ class GroupStatus extends $pb.ProtobufEnum {
   const GroupStatus._($core.int v, $core.String n) : super(v, n);
 }
 
+
+const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

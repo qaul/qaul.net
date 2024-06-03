@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: services/crypto/crypto_net.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -15,29 +19,31 @@ enum CryptoserviceContainer_Message {
   notSet
 }
 
+/// Cryptoservice sending container
 class CryptoserviceContainer extends $pb.GeneratedMessage {
+  factory CryptoserviceContainer({
+    SecondHandshake? secondHandshake,
+  }) {
+    final $result = create();
+    if (secondHandshake != null) {
+      $result.secondHandshake = secondHandshake;
+    }
+    return $result;
+  }
+  CryptoserviceContainer._() : super();
+  factory CryptoserviceContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CryptoserviceContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, CryptoserviceContainer_Message> _CryptoserviceContainer_MessageByTag = {
     1 : CryptoserviceContainer_Message.secondHandshake,
     0 : CryptoserviceContainer_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CryptoserviceContainer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.crypto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CryptoserviceContainer', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.crypto'), createEmptyInstance: create)
     ..oo(0, [1])
-    ..aOM<SecondHandshake>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'secondHandshake', subBuilder: SecondHandshake.create)
+    ..aOM<SecondHandshake>(1, _omitFieldNames ? '' : 'secondHandshake', subBuilder: SecondHandshake.create)
     ..hasRequiredFields = false
   ;
 
-  CryptoserviceContainer._() : super();
-  factory CryptoserviceContainer({
-    SecondHandshake? secondHandshake,
-  }) {
-    final _result = create();
-    if (secondHandshake != null) {
-      _result.secondHandshake = secondHandshake;
-    }
-    return _result;
-  }
-  factory CryptoserviceContainer.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CryptoserviceContainer.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -47,8 +53,10 @@ class CryptoserviceContainer extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  CryptoserviceContainer copyWith(void Function(CryptoserviceContainer) updates) => super.copyWith((message) => updates(message as CryptoserviceContainer)) as CryptoserviceContainer; // ignore: deprecated_member_use
+  CryptoserviceContainer copyWith(void Function(CryptoserviceContainer) updates) => super.copyWith((message) => updates(message as CryptoserviceContainer)) as CryptoserviceContainer;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static CryptoserviceContainer create() => CryptoserviceContainer._();
   CryptoserviceContainer createEmptyInstance() => create();
@@ -60,6 +68,7 @@ class CryptoserviceContainer extends $pb.GeneratedMessage {
   CryptoserviceContainer_Message whichMessage() => _CryptoserviceContainer_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// Second Handshake Message
   @$pb.TagNumber(1)
   SecondHandshake get secondHandshake => $_getN(0);
   @$pb.TagNumber(1)
@@ -72,29 +81,31 @@ class CryptoserviceContainer extends $pb.GeneratedMessage {
   SecondHandshake ensureSecondHandshake() => $_ensure(0);
 }
 
+/// Second Handshake Message
 class SecondHandshake extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SecondHandshake', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.net.crypto'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
-    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false
-  ;
-
-  SecondHandshake._() : super();
   factory SecondHandshake({
     $core.List<$core.int>? signature,
     $fixnum.Int64? receivedAt,
   }) {
-    final _result = create();
+    final $result = create();
     if (signature != null) {
-      _result.signature = signature;
+      $result.signature = signature;
     }
     if (receivedAt != null) {
-      _result.receivedAt = receivedAt;
+      $result.receivedAt = receivedAt;
     }
-    return _result;
+    return $result;
   }
+  SecondHandshake._() : super();
   factory SecondHandshake.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory SecondHandshake.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SecondHandshake', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.net.crypto'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'signature', $pb.PbFieldType.OY)
+    ..a<$fixnum.Int64>(2, _omitFieldNames ? '' : 'receivedAt', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -104,8 +115,10 @@ class SecondHandshake extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  SecondHandshake copyWith(void Function(SecondHandshake) updates) => super.copyWith((message) => updates(message as SecondHandshake)) as SecondHandshake; // ignore: deprecated_member_use
+  SecondHandshake copyWith(void Function(SecondHandshake) updates) => super.copyWith((message) => updates(message as SecondHandshake)) as SecondHandshake;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static SecondHandshake create() => SecondHandshake._();
   SecondHandshake createEmptyInstance() => create();
@@ -114,6 +127,7 @@ class SecondHandshake extends $pb.GeneratedMessage {
   static SecondHandshake getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SecondHandshake>(create);
   static SecondHandshake? _defaultInstance;
 
+  /// confirm message ID of first handshake message
   @$pb.TagNumber(1)
   $core.List<$core.int> get signature => $_getN(0);
   @$pb.TagNumber(1)
@@ -123,6 +137,7 @@ class SecondHandshake extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSignature() => clearField(1);
 
+  /// received at timestamp
   @$pb.TagNumber(2)
   $fixnum.Int64 get receivedAt => $_getI64(1);
   @$pb.TagNumber(2)
@@ -133,3 +148,6 @@ class SecondHandshake extends $pb.GeneratedMessage {
   void clearReceivedAt() => clearField(2);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
