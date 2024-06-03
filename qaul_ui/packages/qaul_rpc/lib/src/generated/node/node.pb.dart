@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: node/node.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -15,35 +19,37 @@ enum Node_Message {
   notSet
 }
 
+/// node rpc message container
 class Node extends $pb.GeneratedMessage {
+  factory Node({
+    $core.bool? getNodeInfo,
+    NodeInformation? info,
+  }) {
+    final $result = create();
+    if (getNodeInfo != null) {
+      $result.getNodeInfo = getNodeInfo;
+    }
+    if (info != null) {
+      $result.info = info;
+    }
+    return $result;
+  }
+  Node._() : super();
+  factory Node.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Node.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, Node_Message> _Node_MessageByTag = {
     1 : Node_Message.getNodeInfo,
     2 : Node_Message.info,
     0 : Node_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Node', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.node'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Node', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.node'), createEmptyInstance: create)
     ..oo(0, [1, 2])
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'getNodeInfo')
-    ..aOM<NodeInformation>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'info', subBuilder: NodeInformation.create)
+    ..aOB(1, _omitFieldNames ? '' : 'getNodeInfo')
+    ..aOM<NodeInformation>(2, _omitFieldNames ? '' : 'info', subBuilder: NodeInformation.create)
     ..hasRequiredFields = false
   ;
 
-  Node._() : super();
-  factory Node({
-    $core.bool? getNodeInfo,
-    NodeInformation? info,
-  }) {
-    final _result = create();
-    if (getNodeInfo != null) {
-      _result.getNodeInfo = getNodeInfo;
-    }
-    if (info != null) {
-      _result.info = info;
-    }
-    return _result;
-  }
-  factory Node.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Node.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -53,8 +59,10 @@ class Node extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Node copyWith(void Function(Node) updates) => super.copyWith((message) => updates(message as Node)) as Node; // ignore: deprecated_member_use
+  Node copyWith(void Function(Node) updates) => super.copyWith((message) => updates(message as Node)) as Node;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Node create() => Node._();
   Node createEmptyInstance() => create();
@@ -66,6 +74,7 @@ class Node extends $pb.GeneratedMessage {
   Node_Message whichMessage() => _Node_MessageByTag[$_whichOneof(0)]!;
   void clearMessage() => clearField($_whichOneof(0));
 
+  /// request node info message from libqaul
   @$pb.TagNumber(1)
   $core.bool get getNodeInfo => $_getBF(0);
   @$pb.TagNumber(1)
@@ -75,6 +84,7 @@ class Node extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearGetNodeInfo() => clearField(1);
 
+  /// libqaul sends node info
   @$pb.TagNumber(2)
   NodeInformation get info => $_getN(1);
   @$pb.TagNumber(2)
@@ -87,29 +97,31 @@ class Node extends $pb.GeneratedMessage {
   NodeInformation ensureInfo() => $_ensure(1);
 }
 
+/// node information
 class NodeInformation extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'NodeInformation', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.node'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idBase58')
-    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addresses')
-    ..hasRequiredFields = false
-  ;
-
-  NodeInformation._() : super();
   factory NodeInformation({
     $core.String? idBase58,
     $core.Iterable<$core.String>? addresses,
   }) {
-    final _result = create();
+    final $result = create();
     if (idBase58 != null) {
-      _result.idBase58 = idBase58;
+      $result.idBase58 = idBase58;
     }
     if (addresses != null) {
-      _result.addresses.addAll(addresses);
+      $result.addresses.addAll(addresses);
     }
-    return _result;
+    return $result;
   }
+  NodeInformation._() : super();
   factory NodeInformation.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory NodeInformation.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'NodeInformation', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.node'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'idBase58')
+    ..pPS(2, _omitFieldNames ? '' : 'addresses')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -119,8 +131,10 @@ class NodeInformation extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  NodeInformation copyWith(void Function(NodeInformation) updates) => super.copyWith((message) => updates(message as NodeInformation)) as NodeInformation; // ignore: deprecated_member_use
+  NodeInformation copyWith(void Function(NodeInformation) updates) => super.copyWith((message) => updates(message as NodeInformation)) as NodeInformation;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static NodeInformation create() => NodeInformation._();
   NodeInformation createEmptyInstance() => create();
@@ -129,6 +143,7 @@ class NodeInformation extends $pb.GeneratedMessage {
   static NodeInformation getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NodeInformation>(create);
   static NodeInformation? _defaultInstance;
 
+  /// the node ID in base 58 encoding
   @$pb.TagNumber(1)
   $core.String get idBase58 => $_getSZ(0);
   @$pb.TagNumber(1)
@@ -138,7 +153,12 @@ class NodeInformation extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearIdBase58() => clearField(1);
 
+  /// all known multi addresses under which
+  /// this node can be connected.
   @$pb.TagNumber(2)
   $core.List<$core.String> get addresses => $_getList(1);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

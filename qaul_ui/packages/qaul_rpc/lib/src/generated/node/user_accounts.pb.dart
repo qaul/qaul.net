@@ -1,9 +1,13 @@
-///
+//
 //  Generated code. Do not modify.
 //  source: node/user_accounts.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -17,7 +21,33 @@ enum UserAccounts_Message {
   notSet
 }
 
+/// user account rpc message container
 class UserAccounts extends $pb.GeneratedMessage {
+  factory UserAccounts({
+    $core.bool? getDefaultUserAccount,
+    CreateUserAccount? createUserAccount,
+    DefaultUserAccount? defaultUserAccount,
+    MyUserAccount? myUserAccount,
+  }) {
+    final $result = create();
+    if (getDefaultUserAccount != null) {
+      $result.getDefaultUserAccount = getDefaultUserAccount;
+    }
+    if (createUserAccount != null) {
+      $result.createUserAccount = createUserAccount;
+    }
+    if (defaultUserAccount != null) {
+      $result.defaultUserAccount = defaultUserAccount;
+    }
+    if (myUserAccount != null) {
+      $result.myUserAccount = myUserAccount;
+    }
+    return $result;
+  }
+  UserAccounts._() : super();
+  factory UserAccounts.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserAccounts.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
   static const $core.Map<$core.int, UserAccounts_Message> _UserAccounts_MessageByTag = {
     1 : UserAccounts_Message.getDefaultUserAccount,
     2 : UserAccounts_Message.createUserAccount,
@@ -25,39 +55,15 @@ class UserAccounts extends $pb.GeneratedMessage {
     4 : UserAccounts_Message.myUserAccount,
     0 : UserAccounts_Message.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserAccounts', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'UserAccounts', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
     ..oo(0, [1, 2, 3, 4])
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'getDefaultUserAccount')
-    ..aOM<CreateUserAccount>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createUserAccount', subBuilder: CreateUserAccount.create)
-    ..aOM<DefaultUserAccount>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'defaultUserAccount', subBuilder: DefaultUserAccount.create)
-    ..aOM<MyUserAccount>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'myUserAccount', subBuilder: MyUserAccount.create)
+    ..aOB(1, _omitFieldNames ? '' : 'getDefaultUserAccount')
+    ..aOM<CreateUserAccount>(2, _omitFieldNames ? '' : 'createUserAccount', subBuilder: CreateUserAccount.create)
+    ..aOM<DefaultUserAccount>(3, _omitFieldNames ? '' : 'defaultUserAccount', subBuilder: DefaultUserAccount.create)
+    ..aOM<MyUserAccount>(4, _omitFieldNames ? '' : 'myUserAccount', subBuilder: MyUserAccount.create)
     ..hasRequiredFields = false
   ;
 
-  UserAccounts._() : super();
-  factory UserAccounts({
-    $core.bool? getDefaultUserAccount,
-    CreateUserAccount? createUserAccount,
-    DefaultUserAccount? defaultUserAccount,
-    MyUserAccount? myUserAccount,
-  }) {
-    final _result = create();
-    if (getDefaultUserAccount != null) {
-      _result.getDefaultUserAccount = getDefaultUserAccount;
-    }
-    if (createUserAccount != null) {
-      _result.createUserAccount = createUserAccount;
-    }
-    if (defaultUserAccount != null) {
-      _result.defaultUserAccount = defaultUserAccount;
-    }
-    if (myUserAccount != null) {
-      _result.myUserAccount = myUserAccount;
-    }
-    return _result;
-  }
-  factory UserAccounts.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory UserAccounts.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -67,8 +73,10 @@ class UserAccounts extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  UserAccounts copyWith(void Function(UserAccounts) updates) => super.copyWith((message) => updates(message as UserAccounts)) as UserAccounts; // ignore: deprecated_member_use
+  UserAccounts copyWith(void Function(UserAccounts) updates) => super.copyWith((message) => updates(message as UserAccounts)) as UserAccounts;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static UserAccounts create() => UserAccounts._();
   UserAccounts createEmptyInstance() => create();
@@ -123,24 +131,26 @@ class UserAccounts extends $pb.GeneratedMessage {
   MyUserAccount ensureMyUserAccount() => $_ensure(3);
 }
 
+/// create a new user on this node
 class CreateUserAccount extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateUserAccount', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..hasRequiredFields = false
-  ;
-
-  CreateUserAccount._() : super();
   factory CreateUserAccount({
     $core.String? name,
   }) {
-    final _result = create();
+    final $result = create();
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
-    return _result;
+    return $result;
   }
+  CreateUserAccount._() : super();
   factory CreateUserAccount.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory CreateUserAccount.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CreateUserAccount', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -150,8 +160,10 @@ class CreateUserAccount extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  CreateUserAccount copyWith(void Function(CreateUserAccount) updates) => super.copyWith((message) => updates(message as CreateUserAccount)) as CreateUserAccount; // ignore: deprecated_member_use
+  CreateUserAccount copyWith(void Function(CreateUserAccount) updates) => super.copyWith((message) => updates(message as CreateUserAccount)) as CreateUserAccount;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static CreateUserAccount create() => CreateUserAccount._();
   CreateUserAccount createEmptyInstance() => create();
@@ -170,29 +182,31 @@ class CreateUserAccount extends $pb.GeneratedMessage {
   void clearName() => clearField(1);
 }
 
+/// Session Information
 class DefaultUserAccount extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DefaultUserAccount', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
-    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userAccountExists')
-    ..aOM<MyUserAccount>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'myUserAccount', subBuilder: MyUserAccount.create)
-    ..hasRequiredFields = false
-  ;
-
-  DefaultUserAccount._() : super();
   factory DefaultUserAccount({
     $core.bool? userAccountExists,
     MyUserAccount? myUserAccount,
   }) {
-    final _result = create();
+    final $result = create();
     if (userAccountExists != null) {
-      _result.userAccountExists = userAccountExists;
+      $result.userAccountExists = userAccountExists;
     }
     if (myUserAccount != null) {
-      _result.myUserAccount = myUserAccount;
+      $result.myUserAccount = myUserAccount;
     }
-    return _result;
+    return $result;
   }
+  DefaultUserAccount._() : super();
   factory DefaultUserAccount.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory DefaultUserAccount.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DefaultUserAccount', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'userAccountExists')
+    ..aOM<MyUserAccount>(2, _omitFieldNames ? '' : 'myUserAccount', subBuilder: MyUserAccount.create)
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -202,8 +216,10 @@ class DefaultUserAccount extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  DefaultUserAccount copyWith(void Function(DefaultUserAccount) updates) => super.copyWith((message) => updates(message as DefaultUserAccount)) as DefaultUserAccount; // ignore: deprecated_member_use
+  DefaultUserAccount copyWith(void Function(DefaultUserAccount) updates) => super.copyWith((message) => updates(message as DefaultUserAccount)) as DefaultUserAccount;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static DefaultUserAccount create() => DefaultUserAccount._();
   DefaultUserAccount createEmptyInstance() => create();
@@ -233,18 +249,8 @@ class DefaultUserAccount extends $pb.GeneratedMessage {
   MyUserAccount ensureMyUserAccount() => $_ensure(1);
 }
 
+/// Information about my user
 class MyUserAccount extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'MyUserAccount', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OY)
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'idBase58')
-    ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'key', $pb.PbFieldType.OY)
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyType')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyBase58')
-    ..hasRequiredFields = false
-  ;
-
-  MyUserAccount._() : super();
   factory MyUserAccount({
     $core.String? name,
     $core.List<$core.int>? id,
@@ -253,29 +259,41 @@ class MyUserAccount extends $pb.GeneratedMessage {
     $core.String? keyType,
     $core.String? keyBase58,
   }) {
-    final _result = create();
+    final $result = create();
     if (name != null) {
-      _result.name = name;
+      $result.name = name;
     }
     if (id != null) {
-      _result.id = id;
+      $result.id = id;
     }
     if (idBase58 != null) {
-      _result.idBase58 = idBase58;
+      $result.idBase58 = idBase58;
     }
     if (key != null) {
-      _result.key = key;
+      $result.key = key;
     }
     if (keyType != null) {
-      _result.keyType = keyType;
+      $result.keyType = keyType;
     }
     if (keyBase58 != null) {
-      _result.keyBase58 = keyBase58;
+      $result.keyBase58 = keyBase58;
     }
-    return _result;
+    return $result;
   }
+  MyUserAccount._() : super();
   factory MyUserAccount.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory MyUserAccount.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MyUserAccount', package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.user_accounts'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OY)
+    ..aOS(3, _omitFieldNames ? '' : 'idBase58')
+    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'key', $pb.PbFieldType.OY)
+    ..aOS(5, _omitFieldNames ? '' : 'keyType')
+    ..aOS(6, _omitFieldNames ? '' : 'keyBase58')
+    ..hasRequiredFields = false
+  ;
+
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
@@ -285,8 +303,10 @@ class MyUserAccount extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  MyUserAccount copyWith(void Function(MyUserAccount) updates) => super.copyWith((message) => updates(message as MyUserAccount)) as MyUserAccount; // ignore: deprecated_member_use
+  MyUserAccount copyWith(void Function(MyUserAccount) updates) => super.copyWith((message) => updates(message as MyUserAccount)) as MyUserAccount;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static MyUserAccount create() => MyUserAccount._();
   MyUserAccount createEmptyInstance() => create();
@@ -350,3 +370,6 @@ class MyUserAccount extends $pb.GeneratedMessage {
   void clearKeyBase58() => clearField(6);
 }
 
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
