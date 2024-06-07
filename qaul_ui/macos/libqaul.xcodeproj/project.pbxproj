@@ -3,12 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		CA0013AE437D499D38D54C43 /* Cargo.toml in Sources */ = {isa = PBXBuildFile; fileRef = CAF989BF31013EF4668187A5 /* Cargo.toml */; settings = {COMPILER_FLAGS = "--lib"; }; };
-		CA0113AE437D3EF60293643C /* Cargo.toml in Sources */ = {isa = PBXBuildFile; fileRef = CAF989BF31013EF4668187A5 /* Cargo.toml */; settings = {COMPILER_FLAGS = "--lib"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -31,8 +30,9 @@
 /* End PBXBuildRule section */
 
 /* Begin PBXFileReference section */
+		97640D3A2C0F74FD00742A91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		97640D3B2C0F7D0C00742A91 /* libqaul.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = libqaul.entitlements; sourceTree = "<group>"; };
 		CA00102577DC479D50D4B138 /* libqaul.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libqaul.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA01D2BC11242EFCF5272DF3 /* liblibqaul_static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibqaul_static.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF989BF31013EF4668187A5 /* Cargo.toml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cargo.toml; path = ../../rust/libqaul/Cargo.toml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -40,6 +40,8 @@
 		CAF089BF3101D65BC3C892A8 = {
 			isa = PBXGroup;
 			children = (
+				97640D3B2C0F7D0C00742A91 /* libqaul.entitlements */,
+				97640D3A2C0F74FD00742A91 /* Info.plist */,
 				CAF989BF31013EF4668187A5 /* Cargo.toml */,
 				CAF189BF310122869D176AE5 /* Products */,
 				CAF289BF310198AF0B5890DB /* Frameworks */,
@@ -50,7 +52,6 @@
 			isa = PBXGroup;
 			children = (
 				CA00102577DC479D50D4B138 /* libqaul.dylib */,
-				CA01D2BC11242EFCF5272DF3 /* liblibqaul_static.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,9 +66,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CA00102577DC499D38D54C43 /* libqaul.dylib (cdylib) */ = {
+		CA00102577DC499D38D54C43 /* libqaul.dylib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CA00F30D77C1499D38D54C43 /* Build configuration list for PBXNativeTarget "libqaul.dylib (cdylib)" */;
+			buildConfigurationList = CA00F30D77C1499D38D54C43 /* Build configuration list for PBXNativeTarget "libqaul.dylib" */;
 			buildPhases = (
 				CA00529B3F33499D38D54C43 /* Sources */,
 			);
@@ -76,26 +77,10 @@
 			);
 			dependencies = (
 			);
-			name = "libqaul.dylib (cdylib)";
+			name = libqaul.dylib;
 			productName = libqaul.dylib;
 			productReference = CA00102577DC479D50D4B138 /* libqaul.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
-		};
-		CA01D2BC11243EF60293643C /* libqaul.a (static library) */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CA01F30D77C13EF60293643C /* Build configuration list for PBXNativeTarget "libqaul.a (static library)" */;
-			buildPhases = (
-				CA01529B3F333EF60293643C /* Sources */,
-			);
-			buildRules = (
-				CAF489BF3101AC6C1400ACA8 /* PBXBuildRule */,
-			);
-			dependencies = (
-			);
-			name = "libqaul.a (static library)";
-			productName = liblibqaul_static.a;
-			productReference = CA01D2BC11242EFCF5272DF3 /* liblibqaul_static.a */;
-			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -107,10 +92,6 @@
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
 					CA00102577DC499D38D54C43 = {
-						CreatedOnToolsVersion = 9.2;
-						ProvisioningStyle = Automatic;
-					};
-					CA01D2BC11243EF60293643C = {
 						CreatedOnToolsVersion = 9.2;
 						ProvisioningStyle = Automatic;
 					};
@@ -129,8 +110,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CA00102577DC499D38D54C43 /* libqaul.dylib (cdylib) */,
-				CA01D2BC11243EF60293643C /* libqaul.a (static library) */,
+				CA00102577DC499D38D54C43 /* libqaul.dylib */,
 			);
 		};
 /* End PBXProject section */
@@ -144,14 +124,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CA01529B3F333EF60293643C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CA0113AE437D3EF60293643C /* Cargo.toml in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -160,7 +132,11 @@
 			buildSettings = {
 				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
 				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.dylib;
+				CODE_SIGN_ENTITLEMENTS = libqaul.entitlements;
+				DEVELOPMENT_TEAM = VVYZ2Q8TUK;
 				DYLIB_COMPATIBILITY_VERSION = 2;
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = net.qaul.app.libqaul;
 				PRODUCT_NAME = libqaul;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -171,28 +147,12 @@
 			buildSettings = {
 				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
 				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.dylib;
+				CODE_SIGN_ENTITLEMENTS = libqaul.entitlements;
+				DEVELOPMENT_TEAM = VVYZ2Q8TUK;
 				DYLIB_COMPATIBILITY_VERSION = 2;
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = net.qaul.app.libqaul;
 				PRODUCT_NAME = libqaul;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Release;
-		};
-		CA01997E051E3EF60293643C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
-				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.a;
-				PRODUCT_NAME = libqaul_static;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Debug;
-		};
-		CA01B2665C693EF60293643C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CARGO_XCODE_CARGO_DEP_FILE_NAME = liblibqaul.d;
-				CARGO_XCODE_CARGO_FILE_NAME = liblibqaul.a;
-				PRODUCT_NAME = libqaul_static;
 				SUPPORTED_PLATFORMS = macosx;
 			};
 			name = Release;
@@ -205,6 +165,7 @@
 				CARGO_XCODE_BUILD_PROFILE = release;
 				CARGO_XCODE_FEATURES = "";
 				CURRENT_PROJECT_VERSION = 2.0;
+				DYLIB_INSTALL_NAME_BASE = "@executable_path/../Frameworks/";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				MARKETING_VERSION = "2.0.0-beta.18";
 				PRODUCT_NAME = libqaul;
@@ -223,6 +184,7 @@
 				CARGO_XCODE_BUILD_PROFILE = debug;
 				CARGO_XCODE_FEATURES = "";
 				CURRENT_PROJECT_VERSION = 2.0;
+				DYLIB_INSTALL_NAME_BASE = "@executable_path/../Frameworks/";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				MARKETING_VERSION = "2.0.0-beta.18";
 				ONLY_ACTIVE_ARCH = YES;
@@ -237,20 +199,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CA00F30D77C1499D38D54C43 /* Build configuration list for PBXNativeTarget "libqaul.dylib (cdylib)" */ = {
+		CA00F30D77C1499D38D54C43 /* Build configuration list for PBXNativeTarget "libqaul.dylib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CA00B2665C69499D38D54C43 /* Release */,
 				CA00997E051E499D38D54C43 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CA01F30D77C13EF60293643C /* Build configuration list for PBXNativeTarget "libqaul.a (static library)" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CA01B2665C693EF60293643C /* Release */,
-				CA01997E051E3EF60293643C /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
