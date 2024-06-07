@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -90,6 +91,42 @@ class UserListNotifier extends StateNotifier<List<User>> {
 
   void add(User u) {
     state = [...state, u];
+  }
+
+  /// [updateMany] safely assigns [users] to this notifier's state.
+  ///
+  /// If [users] and [state] are deeply equal, will do nothing. As a result, it
+  /// avoids re-rendering UI code that depends on the [List<User>] that this
+  /// notifier exposes.
+  ///
+  /// New users get appended to the list, whilst existing ones get their data
+  /// updated.
+  void updateMany(List<User> users) {
+    if (const ListEquality().equals(state, users)) {
+      return;
+    }
+
+    final usrs = [...state];
+    for (final u in users) {
+      final idx = usrs.indexOf(u);
+      if (idx == -1) {
+        usrs.add(u);
+        continue;
+      }
+      final current = usrs.elementAt(idx);
+      usrs[idx] = User(
+        name: current.name == 'Name Undefined' ? u.name : current.name,
+        id: u.id,
+        conversationId: u.conversationId ?? current.conversationId,
+        status:
+            u.status == ConnectionStatus.offline ? current.status : u.status,
+        keyBase58: u.keyBase58 ?? current.keyBase58,
+        isBlocked: u.isBlocked ?? current.isBlocked,
+        isVerified: u.isVerified ?? current.isVerified,
+        availableTypes: u.availableTypes ?? current.availableTypes,
+      );
+    }
+    state = usrs;
   }
 
   void update(User u) {
