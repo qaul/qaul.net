@@ -75,11 +75,11 @@ impl UserFiles {
     pub fn get_filehistory(&self, file_id: u64) -> Option<FileHistory> {
         // get invite
         match self.histories.get(file_id.to_be_bytes().to_vec()) {
-            Ok(file_history_bytes) => {
-                let file_history: FileHistory =
-                    bincode::deserialize(&file_history_bytes.unwrap()).unwrap();
-                return Some(file_history);
-            }
+            Ok(None) => log::warn!("file history empty"),
+            Ok(Some(file_history_bytes)) => match bincode::deserialize(&file_history_bytes) {
+                Ok(file_history) => return Some(file_history),
+                Err(e) => log::error!("{}", e),
+            },
             Err(e) => log::error!("{}", e),
         }
 

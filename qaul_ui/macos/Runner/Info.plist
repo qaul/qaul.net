@@ -32,5 +32,7 @@
 	<string>NSApplication</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>You can send audio messages to your peers. For that, please grant access to the application.</string>
 </dict>
 </plist>

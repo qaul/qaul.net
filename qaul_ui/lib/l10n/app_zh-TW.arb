@@ -6,6 +6,7 @@
   "backButtonTooltip": "返回",
   "sendTooltip": "發送",
   "sendFileTooltip": "發送文件",
+  "sendAudioTooltip": "錄製音訊訊息",  
   "start": "開始",
   "createUserAccount": "建立賬號",
   "learnMore": "了解更多qaul.net",

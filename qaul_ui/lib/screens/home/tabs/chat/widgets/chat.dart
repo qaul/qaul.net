@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
@@ -22,7 +24,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' hide context, Context;
+import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
@@ -32,6 +36,10 @@ import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
+
+part 'audio_message_widget.dart';
+
+part 'audio_recording.dart';
 
 part 'custom_input.dart';
 
@@ -227,7 +235,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
             ),
             avatarBuilder: (id) {
-              var user = room.members.firstWhereOrNull((u) => id.id == u.idBase58);
+              var user =
+                  room.members.firstWhereOrNull((u) => id.id == u.idBase58);
               if (user == null) return const SizedBox();
               return QaulAvatar.small(user: user, badgeEnabled: false);
             },
@@ -311,6 +320,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             );
                           }
                         },
+              onSendAudioPressed: !(Platform.isAndroid ||
+                      Platform.isIOS ||
+                      Platform.isMacOS ||
+                      Platform.isWindows ||
+                      Platform.isLinux)
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                      ? null
+                      : ({types.PartialText? text}) async {
+                          // ignore: use_build_context_synchronously
+                          if (!context.mounted) return;
+                          showModalBottomSheet(
+                            context: context,
+                            enableDrag: false,
+                            isDismissible: false,
+                            builder: (_) {
+                              return _RecordAudioDialog(
+                                room: room,
+                                partialMessage: text?.text,
+                                onSendPressed: (file, description) {
+                                  final worker = ref.read(qaulWorkerProvider);
+                                  worker.sendFile(
+                                    pathName: file.path,
+                                    conversationId: room.conversationId,
+                                    description: description.text,
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
             ),
             onMessageTap: (context, message) async {
               if (message is! types.FileMessage || _isReceivingFile(message)) {
@@ -381,6 +421,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             imageMessageBuilder: (message, {required int messageWidth}) {
               return ImageMessageWidget(
+                message: message,
+                messageWidth: messageWidth,
+                isDefaultUser: message.author.id == user.idBase58,
+              );
+            },
+            audioMessageBuilder: (message, {required int messageWidth}) {
+              return AudioMessageWidget(
                 message: message,
                 messageWidth: messageWidth,
                 isDefaultUser: message.author.id == user.idBase58,
@@ -517,6 +564,21 @@ extension _MessageExtension on Message {
           !filePath.endsWith('svg')) {
         return types.ImageMessage(
           id: messageIdBase58,
+          author: author.toInternalUser(),
+          createdAt: receivedAt.millisecondsSinceEpoch,
+          status: mappedState,
+          uri: filePath,
+          size: (content as FileShareContent).size,
+          name: (content as FileShareContent).fileName,
+          metadata: {
+            'description': (content as FileShareContent).description,
+            'messageState': status.toJson(),
+          },
+        );
+      } else if (mimeStr != null && RegExp('audio/.*').hasMatch(mimeStr)) {
+        return types.AudioMessage(
+          id: messageIdBase58,
+          duration: const Duration(seconds: 100),
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
           status: mappedState,
