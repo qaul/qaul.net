@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0 Release Candidate 1] Unreleased
+## [2.0.0 Release Candidate 1] 2024-07-08
 
 This release can only be upgraded from qaul version `2.0.0-beta.18`.
 Please upgrade to beta 18 first, before upgrading to `Release Candidate 1` or later.
@@ -18,6 +18,7 @@ Added
 Fixed
 
 - Fixed a possible panic in libqaul that could occur when receiving an empty data package when receiving a file.
+- Fixed UI flickering in 'Network View'.
 
 Changed
 
@@ -26,7 +27,7 @@ Changed
   This codec is fully compatible to how qaul was sending it's messages before.
 - Upgraded many libraries to new versions.
 - removed old versions of unmaintained `sled` versions, which were only used for the upgrade procedure to qaul 2.0.0 beta 18.
-  This means that upgrading to qaul version 2.0.0 beta 19 is only possible from qaul version 2.0.0 beta 18.
+  This means that upgrading to qaul version 2.0.0 release candidate 1 is only possible from qaul version 2.0.0 beta 18.
 - Configuration auto-upgrade of all static TCP peer entries to use the QUIC protocol for interconnections.
 
 ## [2.0.0 beta 18] 2024-04-11
