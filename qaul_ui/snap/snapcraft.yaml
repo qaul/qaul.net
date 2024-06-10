@@ -46,7 +46,7 @@ parts:
   flutter-deps:
     plugin: nil
     source: https://github.com/flutter/flutter.git
-    source-tag: 3.16.0
+    source-tag: 3.22.2
     override-build: |
       set -eux
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
