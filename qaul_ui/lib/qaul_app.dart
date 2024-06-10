@@ -21,7 +21,7 @@ class QaulApp extends PlatformAwareBuilder {
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.lightBlue,
       brightness: Brightness.light,
-      background: Colors.white,
+      surface: Colors.white,
     ),
     brightness: Brightness.light,
     primarySwatch: Colors.lightBlue,

@@ -45,7 +45,7 @@ class QaulButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed ?? () {},
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(
+        backgroundColor: WidgetStateProperty.all(
           backgroundColor ?? Colors.transparent,
         ),
       ),

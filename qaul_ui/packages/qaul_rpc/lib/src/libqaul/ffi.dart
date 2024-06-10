@@ -39,7 +39,7 @@ class LibqaulFFI extends LibqaulInterface {
     } else if (Platform.isWindows) {
       var lib =
           Platform.script.resolve('libqaul.dll').toFilePath(windows: true);
-      _log.config("(Windows) attempting to open libqaul.ddl from path ${lib}");
+      _log.config("(Windows) attempting to open libqaul.ddl from path $lib");
       _lib = DynamicLibrary.open(lib);
     } else {
       throw ('Platform ${Platform.operatingSystem} not implemented yet OR is not supported by FFI.');

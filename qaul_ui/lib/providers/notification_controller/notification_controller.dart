@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
-import 'package:meta/meta.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
