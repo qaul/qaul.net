@@ -255,7 +255,7 @@ jobs:
                 name: Install Github CLI and unzip
             - run:
                 command: |
-                    VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    VERSION=$(grep "version:" ../pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
                     echo "Downloading assets from the release tag '$TAG'"
 
@@ -306,7 +306,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    VERSION=$(grep "version:" ../pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
                     echo "Downloading assets from the release tag '$TAG'"
 
@@ -390,7 +390,7 @@ jobs:
                 name: Install Github CLI
             - run:
                 command: |
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    VERSION=$(grep "version:" pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
                     echo "Downloading assets from the release tag '$TAG'"
 
@@ -422,7 +422,7 @@ jobs:
                 root: ~/qaul.net
     build-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.16.0
+            FLUTTER_VERSION: 3.22.2
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022
@@ -439,7 +439,7 @@ jobs:
             - run:
                 command: |
                     export PATH="/c/Program Files/Github CLI:${PATH}"
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    VERSION=$(grep "version:" pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
                     echo "Downloading assets from the release tag '$TAG'"
 
@@ -986,7 +986,7 @@ jobs:
                 name: Add utilities/bin to PATH
             - run:
                 command: |
-                    VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    VERSION=$(grep "version:" pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
 
                     cd artifacts
@@ -1066,7 +1066,7 @@ jobs:
                     TAG="v${RUST_VERSION}"
 
                     # Flutter Filenames make use of Flutter's App Version
-                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+                    FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
 
                     APK_FILE="qaul-$FLUTTER_VERSION"
                     LINUX_FILE="qaul-amd64-$FLUTTER_VERSION"

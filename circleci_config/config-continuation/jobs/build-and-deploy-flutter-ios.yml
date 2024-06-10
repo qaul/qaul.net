@@ -19,7 +19,7 @@ steps:
   - run:
       name: Download Libqaul *.a File from latest Github Release
       command: |
-        VERSION=$(grep "version:" ../pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        VERSION=$(grep "version:" ../pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
         TAG="v${VERSION}"
         echo "Downloading assets from the release tag '$TAG'"
         

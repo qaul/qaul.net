@@ -4,7 +4,7 @@ executor:
   shell: bash.exe
 working_directory: ~/qaul.net/qaul_ui
 environment:
-  FLUTTER_VERSION: "3.16.0"
+  FLUTTER_VERSION: "3.22.2"
   REPO_URL: "https://github.com/qaul/qaul.net"
 steps:
   - checkout-project
@@ -18,7 +18,7 @@ steps:
       name: Download Libqaul *.dll File from latest Github Release
       command: |
         export PATH="/c/Program Files/Github CLI:${PATH}"
-        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        VERSION=$(grep "version:" pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
         TAG="v${VERSION}"
         echo "Downloading assets from the release tag '$TAG'"
         

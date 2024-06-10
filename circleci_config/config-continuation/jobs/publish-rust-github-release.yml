@@ -60,7 +60,7 @@ steps:
         TAG="v${RUST_VERSION}"
 
         # Flutter Filenames make use of Flutter's App Version
-        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        FLUTTER_VERSION=$(grep "version:" qaul_ui/pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
 
         APK_FILE="qaul-$FLUTTER_VERSION"
         LINUX_FILE="qaul-amd64-$FLUTTER_VERSION"
