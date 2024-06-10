@@ -4,10 +4,11 @@ steps:
   - run:
       name: Verify that Git tag matches Flutter version
       command: |
-        VERSION=$(grep "version:" pubspec.yaml | awk '{ print $2 }' | sed 's/+.*$//')
+        # head -n1 is important here, as the app depends on the "version" package: https://pub.dev/packages/version
+        VERSION=$(grep "version:" pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
         PATTERN="^v${VERSION}-flutter(-android|-ios|-linux|-macos|-windows)?$"
         if [[ ! "$CIRCLE_TAG" =~ $PATTERN ]]; then
-          echo "Git tag: $CIRCLE_TAG does not match the version of this app: $VERSION"
+          echo "Git tag: '$CIRCLE_TAG' does not match the version of this app: $VERSION"
           echo "Please update app version at qaul_ui/pubspec.yaml"
           exit 1
         fi
