@@ -14,6 +14,17 @@ output:
 # same as -q ; SYFT_QUIET env var
 quiet: false
 
+# a list of globs to exclude from scanning, for example:
+# exclude:
+#   - "/etc/**"
+#   - "./out/**/*.json"
+# SYFT_EXCLUDE env var / --exclude flag
+exclude:
+  - "./qaul_ui/android/Gemfile.lock"
+  - "./qaul_ui/android/fastlane/**"
+  - "./qaul_ui/ios/Gemfile.lock"
+  - "./qaul_ui/ios/fastlane/**"
+
 # options that apply to all scan sources
 source:
   # alias name for the source
