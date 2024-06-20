@@ -38,12 +38,14 @@ class ForceUpdateSystem {
     }
     if (Platform.isLinux) {
       final env = Platform.environment;
-      if (env["FLUTTER_ROOT"]!.contains('snap')) {
+      if (env.containsKey("SNAP_USER_COMMON")) {
+        return Directory(env['SNAP_USER_COMMON']!);
+      }
+      if (env.containsKey("FLUTTER_ROOT") &&
+          ["FLUTTER_ROOT"].contains('snap')) {
         return Directory('${env['HOME']}/snap/flutter/common');
       }
-      return env.containsKey('SNAP')
-          ? Directory('${env['HOME']}/snap/qaul/common')
-          : Directory('${env['HOME']}/.config/qaul');
+      return Directory('${env['HOME']}/.config/qaul');
     }
 
     // Returns the following Path:
