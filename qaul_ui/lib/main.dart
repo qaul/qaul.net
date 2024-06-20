@@ -38,7 +38,6 @@ void main() async {
               return MaterialApp(
                 theme: theme,
                 darkTheme: darkTheme,
-
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: ForceUpdateDialog(
