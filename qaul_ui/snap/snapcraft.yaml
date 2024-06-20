@@ -4,7 +4,7 @@ summary: qaul - Internet Independent Wireless Mesh Communication App
 description: Communicate directly from device to device via your local wifi network, or via the shared wifi network of your phone. Mesh local clouds together via manually added static nodes. Use this peer to peer communication method to communicate internet independently and completely off-the-grid.
 
 confinement: strict
-base: core20
+base: core22
 grade: stable
 
 slots:
@@ -16,7 +16,7 @@ slots:
 apps:
   qaul:
     command: bin/qaul
-    extensions: [gnome-3-38]
+    extensions: [gnome]
     plugs:
       - home
       - mount-observe
@@ -46,7 +46,7 @@ parts:
   flutter-deps:
     plugin: nil
     source: https://github.com/flutter/flutter.git
-    source-tag: 3.22.2
+    source-tag: 3.22.1
     override-build: |
       set -eux
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/bin
@@ -61,12 +61,12 @@ parts:
       - curl
       - ninja-build
       - unzip
-    override-prime: ''
+    override-prime: ""
 
   libqaul:
     plugin: nil
     source: https://github.com/qaul/qaul.net.git
-    after: [ rust-deps ]
+    after: [rust-deps]
     build-packages:
       - protobuf-compiler
       - libc-bin
@@ -77,10 +77,10 @@ parts:
       cargo --version
 
       cd rust/libqaul || exit 1
-      
+
       rm build.rs
       cargo build --release
-      
+
       cd ..
 
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin/lib
@@ -88,7 +88,7 @@ parts:
 
   qaul:
     plugin: nil
-    after: [ flutter-deps ]
+    after: [flutter-deps]
     source: .
     override-build: |
       set -eux
@@ -96,7 +96,7 @@ parts:
       BEFORE="_lib = DynamicLibrary.open('../rust/target/\$mode/liblibqaul.so');"
       AFTER="_lib = DynamicLibrary.open('\${Platform.environment['SNAP']}/bin/lib/liblibqaul.so');"
       sed -i -e "s|$BEFORE|$AFTER|g" packages/qaul_rpc/lib/src/libqaul/ffi.dart
-      
+
       flutter pub get || true
       flutter build linux --release -v
 
