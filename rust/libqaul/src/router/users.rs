@@ -367,7 +367,7 @@ impl Users {
                         // get all online user ids by passing last_sent=0
                         let online_user_ids = RoutingTable::get_online_user_ids(0);
 
-                        // create empty user list
+                        // create empty user listonline_user_ids
                         let mut user_list = proto::UserList { user: Vec::new() };
 
                         // get user account

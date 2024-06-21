@@ -422,7 +422,7 @@ class BleService : LifecycleService() {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-//                AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
+               AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
 //                AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }

@@ -58,7 +58,6 @@ pub fn init() -> BleRpc {
 /// send sys message libqaul ---> ble_module
 #[allow(dead_code)]
 pub fn send_to_ble_module(binary_message: Vec<u8>) {
-    log::info!("Sending message to ble_module: {:?}", binary_message);
     if let Err(err) = EXTERN_SEND
         .try_get()
         .ok_or("Sender libqaul ---> ble_module not yet initialized!")
