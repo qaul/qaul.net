@@ -312,7 +312,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                                     characteristic
                                 ))
                             ) {
-                                AppLog.d(TAG, "characteristic : " + characteristic.uuid.toString())
+                                AppLog.d(TAG, "Notify or Indicate characteristic : " + characteristic.uuid.toString())
                                 mBluetoothGatt!!.setCharacteristicNotification(characteristic, true)
                                 val gattDescriptor =
                                     characteristic.descriptors as ArrayList<BluetoothGattDescriptor>
@@ -323,7 +323,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 }
             }
             if (!isQaulDevice) {
-                listener?.addToBlackList(this.bleDevice!!)
+                // listener?.addToBlackList(this.bleDevice!!)
                 disConnectedDevice() //discoverServices
                 return
             }

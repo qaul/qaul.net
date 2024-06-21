@@ -1,6 +1,6 @@
 use async_std::channel::Sender;
 
-use super::proto_sys::{self, BleDeviceDiscovered, BleError, BleStartResult};
+use super::proto_sys::{self, BleDeviceDiscovered, BleError, BleStartResult, BleDeviceUnavailable};
 
 #[derive(Clone)]
 pub struct BleResultSender(Sender<Vec<u8>>);
@@ -46,6 +46,12 @@ impl BleResultSender {
     pub fn send_device_found(&mut self, qaul_id: Vec<u8>, rssi: i32) {
         self.send_ble_sys_msg(proto_sys::ble::Message::DeviceDiscovered(
             BleDeviceDiscovered { qaul_id, rssi },
+        ))
+    }
+
+    pub fn send_device_unavailable(&mut self, qaul_id: Vec<u8>) {
+        self.send_ble_sys_msg(proto_sys::ble::Message::DeviceUnavailable(
+            BleDeviceUnavailable { qaul_id },
         ))
     }
 

@@ -1,9 +1,4 @@
-use async_std::{
-    channel::{Receiver, Sender},
-    prelude::*,
-    sync::Arc,
-    task::JoinHandle,
-};
+use async_std::{channel::Sender, prelude::*, task::JoinHandle};
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
     gatt::{local::*, CharacteristicReader},
@@ -12,19 +7,14 @@ use bluer::{
 use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
-use state::InitCell;
-use std::{
-    cell::{Cell, RefCell},
-    collections::HashMap,
-    error::Error,
-};
+use std::{cell::RefCell, collections::HashMap, collections::HashSet, error::Error};
 
-use crate::ble::ble_uuids::main_service_uuid;
 use crate::ble::ble_uuids::msg_char;
 use crate::ble::ble_uuids::msg_service_uuid;
 use crate::ble::ble_uuids::read_char;
+use crate::ble::{ble_uuids::main_service_uuid, utils::hex_to_bytes};
 use crate::{
-    ble::utils::mac_to_string,
+    ble::utils,
     rpc::{proto_sys::*, utils::*},
 };
 pub enum QaulBleService {
@@ -56,7 +46,7 @@ enum BleMainLoopEvent {
     MainCharEvent(CharacteristicControlEvent),
     MsgCharEvent(CharacteristicControlEvent),
     DeviceDiscovered(Device),
-    SendMessage((Vec<u8>, Vec<u8>)),
+    SendMessage((Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>)),
 }
 
 impl IdleBleService {
@@ -91,7 +81,14 @@ impl IdleBleService {
         // ==================================================================================
 
         let advertisement = Advertisement {
-            service_uuids: vec![main_service_uuid()].into_iter().collect(),
+            service_uuids: vec![
+                main_service_uuid(),
+                msg_service_uuid(),
+                msg_char(),
+                read_char(),
+            ]
+            .into_iter()
+            .collect(),
             tx_power: advert_mode,
             discoverable: Some(true),
             local_name: Some("qaul.net".to_string()),
@@ -193,7 +190,7 @@ impl IdleBleService {
             .local(async move {
                 log::info!("Starting BLE main loop...");
 
-                let mut adapter = self.adapter.clone();
+                let adapter: Adapter;
                 match adp_recv.recv().await {
                     Ok(adp) => {
                         log::info!("Received adapter from channel");
@@ -201,31 +198,40 @@ impl IdleBleService {
                     }
                     Err(err) => {
                         log::error!("Failed to receive adapter from channel: {:#?}", err);
-                        // return self;
+                        return self;
                     }
                 };
 
-                // let adapter: Adapter = adp_recv.recv().await.unwrap();
-                println!(
-                    "Advertising on Bluetooth adapter {} with address {:#?}",
-                    adapter.name(),
-                    adapter.address().await
-                );
-
+                let _ = adapter.set_discovery_filter(get_filter()).await;
                 let device_stream = match adapter.discover_devices().await {
                     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
-                        AdapterEvent::DeviceAdded(addr) => {
-                            if self.device_block_list.contains(&addr) {
-                                return None;
+                        AdapterEvent::DeviceAdded(addr) => match utils::find_device_by_mac(addr) {
+                            Some(device) => {
+                                utils::update_last_found(addr);
+                                Some(BleMainLoopEvent::DeviceDiscovered(device.device.clone()))
                             }
-                            match adapter.device(addr) {
-                                Ok(device) => {
-                                    println!("{:?}", device);
-                                    Some(BleMainLoopEvent::DeviceDiscovered(device))
+                            None => {
+                                if self.device_block_list.contains(&addr) {
+                                    return None;
                                 }
-                                Err(_) => None,
+                                match adapter.device(addr) {
+                                    Ok(device) => {
+                                        utils::add_device(utils::BleScanDevice {
+                                            qaul_id: vec![],
+                                            rssi: 0,
+                                            mac_address: addr,
+                                            device: device.clone(),
+                                            last_found_time: 0,
+                                            name: "".to_string(), // TODO: get device name
+                                            is_connected: false,
+                                        });
+                                        println!("{:?}", device);
+                                        Some(BleMainLoopEvent::DeviceDiscovered(device))
+                                    }
+                                    Err(_) => None,
+                                }
                             }
-                        }
+                        },
                         _ => None,
                     }),
                     Err(err) => {
@@ -233,6 +239,7 @@ impl IdleBleService {
                         return self;
                     }
                 };
+                utils::out_of_range_checker(internal_sender.clone());
                 // ==================================================================================
                 // --------------------------------- MAIN BLE LOOP ----------------------------------
                 // ==================================================================================
@@ -258,14 +265,36 @@ impl IdleBleService {
                         );
                             break;
                         }
-                        BleMainLoopEvent::SendMessage((receiver_id, data)) => {
+                        BleMainLoopEvent::SendMessage((
+                            message_id,
+                            receiver_id,
+                            sender_id,
+                            data,
+                        )) => {
                             println!("===============Sending message to {:?}", receiver_id);
-                            match self.send_direct_message(receiver_id, data).await {
-                                Ok(_) => {
-                                    todo!()
+                            match utils::bytes_to_str(&message_id) {
+                                Ok(msg_id) => {
+                                    log::info!("Message ID: {:?}", msg_id);
+                                    match self
+                                        .send_direct_message(msg_id.to_string(), receiver_id, sender_id, data)
+                                        .await
+                                    {
+                                        Ok(_) => {
+                                            todo!()
+                                        }
+                                        Err(err) => {
+                                            log::error!(
+                                                "Error sending direct BLE message: {:#?}",
+                                                err
+                                            )
+                                        }
+                                    }
                                 }
                                 Err(err) => {
-                                    log::error!("Error sending direct BLE message: {:#?}", err)
+                                    log::error!(
+                                        "Error converting message ID to string: {:#?}",
+                                        err
+                                    );
                                 }
                             }
                         }
@@ -273,7 +302,7 @@ impl IdleBleService {
                             log::info!(
                                 "Received {} bytes of data from {}",
                                 e.0.len(),
-                                mac_to_string(&e.1)
+                                utils::mac_to_string(&e.1)
                             );
                             internal_sender.send_direct_received(e.1 .0.to_vec(), e.0)
                         }
@@ -290,27 +319,26 @@ impl IdleBleService {
                             CharacteristicControlEvent::Notify(_) => (),
                         },
                         BleMainLoopEvent::DeviceDiscovered(device) => {
-                            
-                            // let handle = async_std::task::spawn( async move{
-                            let s = self
+                            match self
                                 .on_device_discovered(&device, &mut internal_sender)
-                                .await;
-                            log::info!("Device discovered");
-                            match s {
+                                .await
+                            {
                                 Ok(msg_receivers) => {
+                                    log::debug!(
+                                        "================== Device discovered {:?}",
+                                        device.name().await
+                                    );
+                                    let message_tx = message_tx.clone();
+                                    // let _ = self.spawn_msg_listener(main_chara_ctrl, message_tx);
                                     for rec in msg_receivers {
                                         let message_tx = message_tx.clone();
-                                        let _ = self.spawn_msg_listener(rec, message_tx);
+                                        // let _ = self.spawn_msg_listener(rec, message_tx);
                                     }
                                 }
                                 Err(err) => {
-                                    log::error!("{:#?}", err);
+                                    log::error!("===={:#?}", err);
                                 }
                             }
-                            // self
-                            // });
-                            // handle.await;
-                            // break;
                         }
                     }
                 }
@@ -333,63 +361,80 @@ impl IdleBleService {
         device: &Device,
         sender: &mut BleResultSender,
     ) -> Result<Vec<CharacteristicReader>, Box<dyn Error>> {
-        // log::info!("=++++++++++==========+++++Device discovered: {:?}", device);
-
         let rssi = device.rssi().await?.unwrap_or(999) as i32;
-        log::info!("Device RSSI: {:?}", rssi);
-        if rssi > 0 {
-            let mut msg_receivers: Vec<CharacteristicReader> = vec![];
-            let stringified_addr = mac_to_string(&device.address());
-            let uuids = device.uuids().await?.unwrap_or_default();
-            log::info!(
-                "Discovered device {} with service UUIDs {:?}",
-                &stringified_addr,
-                &uuids
-            );
-
-            if !uuids.contains(&main_service_uuid()) {
-                log::error!("Device does not support qaul main service");
-                return Ok(msg_receivers);
-            }
-            log::info!("Discovered qaul bluetooth device {}", &stringified_addr);
-
-            if !device.is_connected().await? {
-                // device.connect().await?;
-                let _ = self
-                    .adapter
-                    .connect_device(device.address(), bluer::AddressType::LePublic)
-                    .await;
-                log::info!("Connected to device {}", &stringified_addr);
-            }
-
-            for service in device.services().await? {
-                let service_uuid = service.uuid().await?;
-                if service_uuid != main_service_uuid() {
-                    continue;
-                }
-                for char in service.characteristics().await? {
-                    let flags = char.flags().await?;
-                    if flags.notify || flags.indicate {
-                        msg_receivers.push(char.notify_io().await?);
-                        log::info!(
-                            "Setting up notification for characteristic {} of device {}",
-                            char.uuid().await?,
-                            &stringified_addr
-                        );
-                    } else if flags.read && char.uuid().await? == read_char() {
-                        let remote_qaul_id = char.read().await?;
-                        self.address_lookup
-                            .borrow_mut()
-                            .insert(remote_qaul_id.clone(), device.address());
-
-                        sender.send_device_found(remote_qaul_id, rssi)
+        let mut read_char_uuid_found = false;
+        let mut msg_receivers: Vec<CharacteristicReader> = vec![];
+        let stringified_addr = utils::mac_to_string(&device.address());
+        let uuids = device.uuids().await?.unwrap_or_default();
+        log::info!(
+            "Discovered device {} with service UUIDs {:?}",
+            &stringified_addr,
+            &uuids
+        );
+        // let connection_status = ;
+        let mut retries = 2;
+        loop {
+            match device.connect().await {
+                Ok(()) => break,
+                Err(err) => {
+                    if retries > 0 {
+                        println!("    Connect error: {}", &err);
+                        retries -= 1;
+                    } else {
+                        return Err("Connection retries timeout.".into());
                     }
                 }
             }
-            Ok(msg_receivers)
-        } else {
-            Err("Device RSSI less than 0".into())
         }
+        for service in device.services().await? {
+            let service_uuid = service.uuid().await?;
+            log::info!(
+                "Service UUID: {:?} for device {:?}",
+                service_uuid,
+                &stringified_addr
+            );
+            if service_uuid != main_service_uuid() {
+                continue;
+            }
+            for char in service.characteristics().await? {
+                let flags = char.flags().await?;
+                if flags.notify || flags.indicate {
+                    msg_receivers.push(char.notify_io().await?);
+                    log::info!(
+                        "Setting up notification for characteristic {} of device {}",
+                        char.uuid().await?,
+                        &stringified_addr
+                    );
+                } else if flags.read && char.uuid().await? == read_char() {
+                    utils::add_ignore_device(utils::BleScanDevice {
+                        qaul_id: vec![],
+                        rssi,
+                        mac_address: device.address(),
+                        device: device.clone(),
+                        last_found_time: 0,
+                        name: device.name().await.unwrap().expect("name not set."), // TODO: get device name
+                        is_connected: false,
+                    });
+                    read_char_uuid_found = true;
+                    let remote_qaul_id = char.read().await?;
+                    self.address_lookup
+                        .borrow_mut()
+                        .insert(remote_qaul_id.clone(), device.address());
+
+                    sender.send_device_found(remote_qaul_id, rssi)
+                }
+            }
+        }
+        if !read_char_uuid_found {
+            log::info!(
+                "Read characteristic not found for device {}",
+                &stringified_addr
+            );
+            return Err("UUIDs not found".into());
+        }
+        Ok(msg_receivers)
+        // } else {
+        //     Err("Device RSSI less than 0".into())
     }
 
     async fn spawn_msg_listener(
@@ -402,9 +447,21 @@ impl IdleBleService {
                 if message_tx.receiver_count() != 0 {
                     break;
                 }
+                let mut hex_msg = utils::bytes_to_hex(&msg);
+                log::debug!(
+                    "Received message: {:?}  reader.device {:?} ",
+                    hex_msg,
+                    reader.device_address()
+                );
+                if hex_msg.starts_with("$$") {
+                    hex_msg = hex_msg["$$".len()..].to_string();
+                }
+                if hex_msg.ends_with("$$") {
+                    hex_msg = hex_msg[..hex_msg.len() - 2].to_string();
+                }
                 let _ = message_tx
                     .send(BleMainLoopEvent::MessageReceived((
-                        msg,
+                        hex_to_bytes(&hex_msg),
                         reader.device_address(),
                     )))
                     .await
@@ -415,7 +472,9 @@ impl IdleBleService {
 
     async fn send_direct_message(
         &self,
+        message_id: String,
         receiver_id: Vec<u8>,
+        sender_id: Vec<u8>,
         data: Vec<u8>,
     ) -> Result<(), Box<dyn Error>> {
         println!(
@@ -427,7 +486,7 @@ impl IdleBleService {
         let recipient = addr_loopup
             .get(&receiver_id)
             .ok_or("Could not find a device address for the given qaul ID!")?;
-        let stringified_addr = mac_to_string(&recipient);
+        let stringified_addr = utils::mac_to_string(&recipient);
         let device = self.adapter.device(recipient.to_owned())?;
 
         if !device.is_connected().await? {
@@ -472,7 +531,9 @@ impl StartedBleService {
     ) -> Result<(), Box<dyn Error>> {
         self.cmd_handle
             .send(BleMainLoopEvent::SendMessage((
+                direct_send_request.message_id,
                 direct_send_request.receiver_id,
+                direct_send_request.sender_id,
                 direct_send_request.data,
             )))
             .await?;
@@ -537,6 +598,24 @@ pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     Ok(response)
 }
 
-// impl Copy for JoinHandle<IdleBleService>{
+fn get_filter() -> bluer::DiscoveryFilter {
+    let mut qaul_uuids = HashSet::new();
+    qaul_uuids.insert(main_service_uuid());
+    qaul_uuids.insert(msg_service_uuid());
+    qaul_uuids.insert(read_char());
+    qaul_uuids.insert(msg_char());
 
+    bluer::DiscoveryFilter {
+        uuids: qaul_uuids,
+        ..Default::default()
+    }
+}
+
+// pub fn disconnect_device(mac_address: Vec<u8>) -> Result<(), Box<dyn Error>> {
+//     let addr = Address::from_bytes(mac_address);
+//     let session = bluer::Session::new()?;
+//     let adapter = session.default_adapter()?;
+//     let device = adapter.device(addr)?;
+//     device.disconnect()?;
+//     Ok(())
 // }

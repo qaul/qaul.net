@@ -691,6 +691,7 @@ impl Ble {
                     Self::module_stop_result(stop_result);
                 }
                 Some(proto::ble::Message::DeviceDiscovered(device)) => {
+                    log::info!("============================BLE device discovered");
                     Self::device_discovered(device);
                 }
                 Some(proto::ble::Message::DeviceUnavailable(device)) => {
