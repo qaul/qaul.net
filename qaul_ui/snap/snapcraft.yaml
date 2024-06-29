@@ -25,13 +25,6 @@ apps:
       - process-control
       - system-observe
 
-      #- appstream-metadata
-      #- desktop
-      #- desktop-launch
-      #- desktop-legacy
-      #- network-manager
-      #- network-manager-observe
-
     slots:
       - dbus-qaul
 
@@ -114,9 +107,3 @@ parts:
       - fonts-dejavu
       - fonts-freefont-ttf
       - fonts-ubuntu
-
-environment:
-  # (patch): flag required for app to work on RPi 4 - see https://forum.snapcraft.io/t/flutter-snap-app-on-rp4-with-unable-to-create-a-gl-context/25286/2
-  # (update): as of Jen-25th, no longer works on latest Ubuntu, 22, arm64. Removing it in favor of the default
-  # GDK_GL: gles
-  LD_LIBRARY_PATH: ${SNAP_LIBRARY_PATH}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$SNAP/usr/lib:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/bin/lib:/var/lib/snapd/snap/core18
