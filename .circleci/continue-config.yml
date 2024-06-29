@@ -145,7 +145,7 @@ executors:
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 15.0.0
-        resource_class: macos.x86.medium.gen2
+        resource_class: macos.m1.medium.gen1
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net/qaul_ui/ios
     flutter-linux:
@@ -169,7 +169,7 @@ executors:
             REPO_URL: https://github.com/qaul/qaul.net
         macos:
             xcode: 15.0.0
-        resource_class: macos.x86.medium.gen2
+        resource_class: macos.m1.medium.gen1
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net/qaul_ui
     flutter-ubuntu-lean:
@@ -206,7 +206,7 @@ executors:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         macos:
             xcode: 14.0.1
-        resource_class: macos.x86.medium.gen2
+        resource_class: macos.m1.medium.gen1
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net
 jobs:

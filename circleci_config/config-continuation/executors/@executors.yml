@@ -29,7 +29,7 @@ rust-linux-arm:
 rust-macos:
   macos:
     xcode: 14.0.1
-  resource_class: macos.x86.medium.gen2
+  resource_class: macos.m1.medium.gen1
   working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
@@ -60,7 +60,7 @@ flutter-android:
 flutter-ios:
   macos:
     xcode: 15.0.0
-  resource_class: macos.x86.medium.gen2
+  resource_class: macos.m1.medium.gen1
 #  TODO: resource class is deprecated but still not available on Free tier; must be changed on June.
 #  resource_class: macos.m1.medium.gen1
   shell: /bin/bash --login -o pipefail
@@ -90,7 +90,7 @@ flutter-linux-arm:
 flutter-macos:
   macos:
     xcode: 15.0.0
-  resource_class: macos.x86.medium.gen2
+  resource_class: macos.m1.medium.gen1
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul.net/qaul_ui
   environment:
