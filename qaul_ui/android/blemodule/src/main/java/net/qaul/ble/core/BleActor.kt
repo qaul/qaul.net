@@ -80,7 +80,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     private fun connectDevice(): Boolean {
         AppLog.i(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
-            AppLog.e("zzz", "connectDevice : $bluetoothDevice")
+            AppLog.e(TAG, "connectDevice : $bluetoothDevice")
             listener!!.onConnectionFailed(bleScanDevice = bleDevice!!)
         }
         failTimer = Timer()
@@ -145,7 +145,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
             AppLog.e(
-                "zzz",
+                TAG,
                 "onCharacteristicRead : " + characteristic.uuid.toString() + " , isFromMessage->  $isFromMessage"
             )
 
@@ -173,12 +173,12 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
-//            AppLog.e(
-//                "zzz ",
-//                "onCharacteristicWrite --------------> $listener  $messageId $ :  , data : " + BLEUtils.byteToHex(
-//                    characteristic.value
-//                )
-//            )
+        //    AppLog.e(
+        //        TAG,
+        //        "onCharacteristicWrite -------------->, data : " + BLEUtils.byteToHex(
+        //            characteristic.value
+        //        )
+        //    )
             if (listener != null) {
                 if (messageId.isEmpty() || messageId.isBlank()) {
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
@@ -220,6 +220,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
+            AppLog.e(TAG, "onDescriptorWrite asked")
             if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) {
                 descriptorWriteQueue.remove()
                 if (descriptorWriteQueue.size > 0) writeGattDescriptor(descriptorWriteQueue.element()) else {
@@ -261,7 +262,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     fun send(data: String): Int {
-//        AppLog.e("zzz", "send data----------------->   isWriting $isWriting  data $data")
+       AppLog.e(TAG, "send data----------------->   isWriting $isWriting  data $data")
         var data = data
         while (data.length > 40) {
             sendQueue.add(data.substring(0, 40))
@@ -277,8 +278,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             AppLog.e("TAG", "_send(): EMPTY QUEUE")
             return false
         }
-//        AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
+       AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
         val tx = BLEUtils.hexToByteArray(sendQueue.poll())
+        // AppLog.e(TAG, "_send(): $attempt Sending: ")
 //        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
         isWriting = true // Set the write in progress flag
         writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx, attempt)
@@ -346,6 +348,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * This method is used to write descriptor of gatt
      */
     private fun writeGattDescriptor(d: BluetoothGattDescriptor) {
+        AppLog.e(TAG, "writeGattDescriptor request ")
         if (isCharacteristicNotifiable(d.characteristic)) {
             d.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
         } else {
@@ -376,7 +379,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         override fun run() {
             if (listener != null) {
                 listener!!.onConnectionFailed(bleDevice!!)
-                AppLog.e("zzz", "ConnectionFailedTask : $bluetoothDevice")
+                AppLog.e(TAG, "ConnectionFailedTask : $bluetoothDevice")
                 disConnectedDevice()
                 listener!!.onDisconnected(bleDevice!!)
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -430,18 +433,17 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     ): Boolean {
         if (attempt < 3) {
             if (data != null) {
-//                AppLog.e(
-//                    TAG,
-//                    "writeServiceData -----------> : serUUID : $serUUID, charUUID:$charUUID, data :" + BLEUtils.byteToHex(
-//                        data
-//                    )
-//                )
+            //    AppLog.e(
+            //        TAG,
+            //        "writeServiceData -----------> : data : ${data}"
+            //    )
                 if (mBluetoothGatt != null) {
                     val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
                     if (service != null) {
                         val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
                         if (characteristic != null) {
                             characteristic.value = data
+                            AppLog.e(TAG, "===================Characterstic value = $data")
                             return mBluetoothGatt!!.writeCharacteristic(characteristic)
                         }
                     } else {

@@ -1,3 +1,11 @@
+use crate::ble::ble_uuids::msg_char;
+use crate::ble::ble_uuids::msg_service_uuid;
+use crate::ble::ble_uuids::read_char;
+use crate::ble::{ble_uuids::main_service_uuid, utils::hex_to_bytes};
+use crate::{
+    ble::utils,
+    rpc::{proto_sys::*, utils::*},
+};
 use async_std::{channel::Sender, prelude::*, task::JoinHandle};
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
@@ -7,16 +15,28 @@ use bluer::{
 use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
-use std::{cell::RefCell, collections::HashMap, collections::HashSet, error::Error};
-
-use crate::ble::ble_uuids::msg_char;
-use crate::ble::ble_uuids::msg_service_uuid;
-use crate::ble::ble_uuids::read_char;
-use crate::ble::{ble_uuids::main_service_uuid, utils::hex_to_bytes};
-use crate::{
-    ble::utils,
-    rpc::{proto_sys::*, utils::*},
+use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use std::string;
+use std::{
+    cell::RefCell, collections::HashMap, collections::HashSet, collections::VecDeque, error::Error,
+    sync::Mutex,
 };
+
+lazy_static! {
+    static ref HASH_MAP: Mutex<HashMap<String, VecDeque<(String, Vec<u8>, Vec<u8>)>>> =
+        Mutex::new(HashMap::new());
+}
+
+#[derive(Serialize, Deserialize)]
+struct Message {
+    #[serde(rename = "qaul_id")]
+    qaulId: Option<Vec<u8>>,
+
+    #[serde(rename = "message")]
+    message: Option<Vec<u8>>,
+}
 pub enum QaulBleService {
     Idle(IdleBleService),
     Started(StartedBleService),
@@ -276,7 +296,12 @@ impl IdleBleService {
                                 Ok(msg_id) => {
                                     log::info!("Message ID: {:?}", msg_id);
                                     match self
-                                        .send_direct_message(msg_id.to_string(), receiver_id, sender_id, data)
+                                        .send_direct_message(
+                                            msg_id.to_string(),
+                                            receiver_id,
+                                            sender_id,
+                                            data,
+                                        )
                                         .await
                                     {
                                         Ok(_) => {
@@ -311,9 +336,11 @@ impl IdleBleService {
                         }
                         BleMainLoopEvent::MsgCharEvent(e) => match e {
                             CharacteristicControlEvent::Write(write) => {
+                                let mac_address = write.device_address();
                                 if let Ok(reader) = write.accept() {
                                     let message_tx = message_tx.clone();
-                                    let _ = self.spawn_msg_listener(reader, message_tx);
+                                    let _ =
+                                        self.spawn_msg_listener(reader, message_tx, mac_address);
                                 }
                             }
                             CharacteristicControlEvent::Notify(_) => (),
@@ -441,6 +468,7 @@ impl IdleBleService {
         &self,
         reader: CharacteristicReader,
         message_tx: Sender<BleMainLoopEvent>,
+        mac_address: Address,
     ) {
         async_std::task::spawn(async move {
             while let Some(msg) = reader.recv().await.ok() {
@@ -448,21 +476,60 @@ impl IdleBleService {
                     break;
                 }
                 let mut hex_msg = utils::bytes_to_hex(&msg);
-                log::debug!(
-                    "Received message: {:?}  reader.device {:?} ",
-                    hex_msg,
-                    reader.device_address()
-                );
-                if hex_msg.starts_with("$$") {
-                    hex_msg = hex_msg["$$".len()..].to_string();
+                log::debug!("Received message: {:?} ", hex_msg);
+                let stringified_addr = utils::mac_to_string(&mac_address);
+                // let device = utils::find_device_by_mac(mac_address).unwrap();
+                // let mut msg_map = MSG_MAP.lock().unwrap();
+                match utils::find_msg_map_by_mac(stringified_addr.clone()) {
+                    Some(old_value) => {
+                        let mut old_value = old_value.clone();
+                        if hex_msg.ends_with("2424")
+                            || (old_value.ends_with("24") && hex_msg == "24")
+                        {
+                            old_value = old_value + &hex_msg;
+                            let trim_old_value = &old_value[2..old_value.len() - 2];
+                            if !trim_old_value.contains("$$") {
+                                hex_msg = trim_old_value.to_string();
+                                utils::remove_msg_map_by_mac(stringified_addr);
+                                // msg_map.remove(&stringified_addr);
+                            }
+                        } else {
+                            old_value += &hex_msg;
+                            utils::add_msg_map(stringified_addr, old_value.clone());
+                            // msg_map.insert(stringified_addr.clone(), old_value.clone());
+                        }
+                    }
+                    None => {
+                        if hex_msg.starts_with("2424") && hex_msg.ends_with("2424") {
+                            // Nothing to do here for now
+                        } else if hex_msg.starts_with("2424") {
+                            utils::add_msg_map(stringified_addr, hex_msg.clone());
+                            // msg_map.insert(stringified_addr.clone(), hex_msg.clone());
+                        } else {
+                            // Error handling
+                        }
+                    }
                 }
-                if hex_msg.ends_with("$$") {
-                    hex_msg = hex_msg[..hex_msg.len() - 2].to_string();
-                }
+                // let old_value_hex = utils::hex_to_bytes(&hex_msg.clone());
+                // let mut msg_data = utils::bytes_to_str(&old_value_hex).unwrap();
+                let mut data = if let Some(stripped) = hex_msg.strip_prefix("$$") {
+                    stripped.to_string()
+                } else {
+                    hex_msg.to_string()
+                };
+
+                data = if let Some(stripped) = data.strip_suffix("$$") {
+                    stripped.to_string()
+                } else {
+                    data.to_string()
+                };
+                let msg_object: Message = serde_json::from_str(&data).unwrap();
+                let message = msg_object.message.clone().unwrap();
                 let _ = message_tx
                     .send(BleMainLoopEvent::MessageReceived((
-                        hex_to_bytes(&hex_msg),
-                        reader.device_address(),
+                        // hex_to_bytes(&message),
+                        message,
+                        mac_address,
                     )))
                     .await
                     .map_err(|err| log::error!("{:#?}", err));
@@ -476,35 +543,97 @@ impl IdleBleService {
         receiver_id: Vec<u8>,
         sender_id: Vec<u8>,
         data: Vec<u8>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<String, Box<dyn Error>> {
         println!(
             "=============Sending direct message again to {:?}",
             receiver_id
         );
 
         let addr_loopup = self.address_lookup.borrow();
-        let recipient = addr_loopup
+        let mac_address = addr_loopup
             .get(&receiver_id)
             .ok_or("Could not find a device address for the given qaul ID!")?;
-        let stringified_addr = utils::mac_to_string(&recipient);
-        let device = self.adapter.device(recipient.to_owned())?;
+        let stringified_addr = utils::mac_to_string(mac_address);
+        // let device = self.adapter.device(recipient.to_owned())?;
 
-        if !device.is_connected().await? {
-            device.connect().await?;
-            log::info!("Connected to device {}", &stringified_addr);
-        }
+        // let device = utils::find_ignore_device_by_mac(*recipient);
+        match utils::find_ignore_device_by_mac(*mac_address) {
+            Some(ble_device) => {
+                let device = ble_device.device.clone();
 
-        for service in device.services().await? {
-            if service.uuid().await? == msg_service_uuid() {
-                for chara in service.characteristics().await? {
-                    if chara.uuid().await? == msg_char() {
-                        chara.write(&data).await?;
+                // let mainQueue : HashMap<String, VecDeque<(String, Vec<u8>, Vec<u8>)>> = HashMap::new();
+                let mut hash_map = HASH_MAP.lock().unwrap();
+                match hash_map.get(&stringified_addr) {
+                    Some(queue) => {
+                        let mut queue = queue.clone();
+                        if queue.len() < 2 {
+                            queue.push_back((message_id, sender_id, data.clone()));
+                        } else {
+                            queue.clear();
+                        }
+                        hash_map.insert(stringified_addr.clone(), queue);
+                    }
+                    None => {
+                        let mut queue: VecDeque<(String, Vec<u8>, Vec<u8>)> = VecDeque::new();
+                        queue.push_back((message_id, sender_id, data.clone()));
+                        hash_map.insert(stringified_addr.clone(), queue);
                     }
                 }
+
+                let extracted_queue = hash_map.get(&stringified_addr).clone();
+                let mut message_id: String = "".to_string();
+                let mut send_queue: VecDeque<String> = VecDeque::new();
+                if let Some(queue) = extracted_queue {
+                    let mut queue = queue.clone();
+                    if !queue.is_empty() {
+                        let data = queue.pop_front().unwrap();
+                        message_id = data.0;
+                        let msg = Message {
+                            qaulId: Some(data.1),
+                            message: Some(data.2),
+                        };
+                        let json_str = serde_json::to_string(&msg).unwrap();
+                        let bt_array = json_str.as_bytes();
+                        let delimiter = vec![0x24, 0x24];
+                        let temp = [delimiter.clone(), bt_array.to_vec(), delimiter].concat();
+                        let mut final_data = utils::bytes_to_hex(&temp);
+
+                        while final_data.len() > 40 {
+                            send_queue.push_back(final_data[..40].to_string());
+                            final_data = final_data[40..].to_string();
+                        }
+                        if !final_data.is_empty() {
+                            send_queue.push_back(final_data);
+                        }
+                    }
+                }
+                if !device.is_connected().await? {
+                    device.connect().await?;
+                    log::info!("Connected to device {}", &stringified_addr);
+                }
+                while send_queue.len() > 0 {
+                    let data = send_queue.pop_front().unwrap();
+                    let data = utils::hex_to_bytes(&data);
+                    for service in device.services().await? {
+                        if service.uuid().await? == msg_service_uuid() {
+                            for chara in service.characteristics().await? {
+                                if chara.uuid().await? == msg_char() {
+                                    chara.write(&data).await?;
+                                }
+                            }
+                        }
+                    }
+                }
+                if message_id != "" {
+                    Ok(message_id)
+                } else {
+                    Err("Message ID not found".into())
+                }
+            }
+            None => {
+                return Err("Device not found".into());
             }
         }
-
-        Ok(())
     }
 }
 
