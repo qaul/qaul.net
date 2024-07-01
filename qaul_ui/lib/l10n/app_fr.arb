@@ -112,10 +112,8 @@
     "inviteUser": "Inviter un utilisateur",
     "notifications": "Notifications",
     "fileHistory": "Historique du fichier",
-    "emptyNodeName": "Pas de nom"
-  }
-
-  "about": "À propose de nous",
+    "emptyNodeName": "Pas de nom",
+  "about": "À propos de nous",
   "accept": "Accepter",
   "addIPv6NodeCTA": "Ajouter un nœud IPv6",
   "addNodeCTA": "Ajouter un nœud Internet ",
