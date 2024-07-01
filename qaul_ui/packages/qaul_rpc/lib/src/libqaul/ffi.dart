@@ -65,12 +65,13 @@ class LibqaulFFI extends LibqaulInterface {
       final path = '${Platform.environment['SNAP_USER_COMMON']}';
 
       final pathBytes = Uint8List.fromList(path.codeUnits);
-      final buffer = malloc<Uint8>(pathBytes.length);
+      final buffer = malloc<Uint8>(pathBytes.length +1);
 
       try {
         for (var i = 0; i < pathBytes.length; i++) {
           buffer[i] = pathBytes[i];
         }
+        buffer[pathBytes.length] = 0;
 
         start(buffer);
       } catch (e) {
