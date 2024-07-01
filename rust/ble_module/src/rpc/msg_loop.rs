@@ -1,8 +1,6 @@
-// use std::{borrow::Borrow, error::Error};
-use std::error::Error;
-
 use async_std::task::spawn;
 use bytes::Bytes;
+use std::error::Error;
 
 use crate::{
     ble::ble_service::{get_device_info, QaulBleService},
@@ -11,6 +9,7 @@ use crate::{
 
 use super::BleRpc;
 
+/// Manages all sys messages defines in the 'ble.proto' file.
 pub async fn listen_for_sys_msgs(
     mut rpc_receiver: BleRpc,
     mut ble_service: QaulBleService,
@@ -37,10 +36,6 @@ pub async fn listen_for_sys_msgs(
                                 let ble_service = svc
                                     .advertise_scan_listen(qaul_id, None, internal_sender.clone())
                                     .await;
-
-                                log::debug!(
-                                    "Set up advertisement and scan filter, entering BLE main loop."
-                                );
                                 match ble_service {
                                     QaulBleService::Idle(_) => {
                                         log::error!("Error occured in configuring BLE module");

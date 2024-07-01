@@ -843,7 +843,7 @@ class BleService : LifecycleService() {
         AppLog.e(
             TAG, "sendMessage   ${BLEUtils.byteToHex(message)}"
         )
-        // var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
+        var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
         bleDevice?.let {
             if (hashMap.containsKey(it.macAddress)) {
                 var queue = hashMap[it.macAddress!!]
@@ -853,14 +853,14 @@ class BleService : LifecycleService() {
                     queue = LinkedList()
                 }
                 hashMap[it.macAddress!!] = queue!!
-                // mainQueue = queue
+                mainQueue = queue
                 // AppLog.d(TAG, " Manual send =======  Queue size was already 1 ")
             } else {
                 // AppLog.d(TAG, " Manual send =====  Queue size was empty ")
                 val queue: Queue<Triple<String, ByteArray, ByteArray>> = LinkedList()
                 queue.add(Triple(id, from, message))
                 hashMap[it.macAddress!!] = queue
-                // mainQueue = queue
+                mainQueue = queue
             }
             // AppLog.e(TAG, "device--> ${it.macAddress} ${mainQueue?.size}")
             sendMessageFromQueu(it.macAddress!!, true)
