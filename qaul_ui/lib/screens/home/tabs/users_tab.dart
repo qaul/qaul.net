@@ -96,7 +96,7 @@ class _AvailableConnections extends StatelessWidget {
           if (_hasInternet) ...[const Icon(CupertinoIcons.globe), space],
           if (_hasLan) ...[const Icon(Icons.wifi), space],
           if (_hasLocal) ...[const Icon(Icons.cable), space],
-          if (_hasBluetooth) const Icon(Icons.bluetooth),
+          if (_hasBluetooth) ...[const Icon(Icons.bluetooth)],
         ],
       ),
     );
