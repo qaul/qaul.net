@@ -3,7 +3,8 @@ use crate::rpc::utils::*;
 use lazy_static::lazy_static;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::sync::Mutex;
-
+use std:: {string, collections::HashMap};
+// use std::string;
 #[derive(Debug, Clone)]
 pub struct BleScanDevice {
     pub qaul_id: Vec<u8>,
@@ -20,6 +21,9 @@ lazy_static! {
 }
 lazy_static! {
     static ref DEVICE_LIST: Mutex<Vec<BleScanDevice>> = Mutex::new(Vec::new());
+}
+lazy_static! {
+    static ref MSG_MAP: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
 pub fn mac_to_string(addr: &Address) -> String {
@@ -58,6 +62,21 @@ pub fn find_device_by_mac(mac_address: Address) -> Option<BleScanDevice> {
 pub fn remove_device_by_mac(mac_address: Address) {
     let mut devices = DEVICE_LIST.lock().unwrap();
     devices.retain(|device| device.mac_address != mac_address);
+}
+
+pub fn add_msg_map(stringified_addr: String, hex_msg: String) {
+    let mut msg_map = MSG_MAP.lock().unwrap();
+    msg_map.insert(stringified_addr.clone(), hex_msg.clone());
+}
+
+pub fn find_msg_map_by_mac(stringified_addr: String) -> Option<String> {
+    let msg_map = MSG_MAP.lock().unwrap();
+    msg_map.get(&stringified_addr).cloned()
+}
+
+pub fn remove_msg_map_by_mac(stringified_addr: String) {
+    let mut msg_map = MSG_MAP.lock().unwrap();
+    msg_map.remove(&stringified_addr);
 }
 
 pub fn add_ignore_device(device: BleScanDevice) {

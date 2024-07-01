@@ -130,7 +130,7 @@ open class BleWrapperClass(context: Activity) {
                 }
 
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
-                    AppLog.e("zzz", " DIRECT_SEND ")
+                    AppLog.e(TAG, " DIRECT_SEND ")
 
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
@@ -265,16 +265,17 @@ open class BleWrapperClass(context: Activity) {
                     }
 
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
-                        AppLog.e("zzz", "---->onMessageReceived---> ${BLEUtils.byteToHex(message)}")
+                        // AppLog.e(TAG, "---->onMessageReceived---> ${BLEUtils.byteToHex(message)}")
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
                         val msgData = String(message).removeSuffix("$$").removePrefix("$$")
+                        AppLog.e(TAG, "---->onMessageReceived---> " + msgData)
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
                         directReceived.from = ByteString.copyFrom(bleDevice.qaulId)
                         directReceived.data = ByteString.copyFrom(msgObject.message)
 //                            ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
-                        AppLog.e("zzz", "---->onMessageReceived msgObject $msgObject")
+                        // AppLog.e(TAG, "---->onMessageReceived msgObject $msgObject")
                         sendResponse(bleRes)
                     }
                 })
