@@ -17,6 +17,8 @@ futures-concurrency = "7.6.1"
 lazy_static = "1.4"
 log = "0.4"
 prost = "0.12.6"
+serde = "1.0.203"
+serde_json = "1.0.118"
 simplelog = "0.12.2"
 state = "0.6.0"
 tokio = { version = "1", features = ["full"] }
