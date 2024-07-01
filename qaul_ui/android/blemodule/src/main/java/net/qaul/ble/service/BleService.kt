@@ -422,9 +422,9 @@ class BleService : LifecycleService() {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-               AppLog.e("zzz", "Write Request Received: " + String(value) + " :: " + requestId)
+            //    AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
-//                AppLog.e(TAG, "Data in hex:: $s")
+               AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
                 if (bleDevice == null) {
                     bleDevice = receiveList.find { it.macAddress == device.address }
@@ -437,6 +437,8 @@ class BleService : LifecycleService() {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
                         //SendResponse of oldValue
+
+                        AppLog.e(TAG, "onCharacteristicWriteRequest:  contain 2424")
                         oldValue += s
                         val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
                             .removePrefix("$$")
@@ -458,6 +460,7 @@ class BleService : LifecycleService() {
                             Log.e(TAG, "onCharacteristicWriteRequest:  contain $$")
                         }
                     } else {
+                        AppLog.e(TAG, "onCharacteristicWriteRequest:  not contain 2424")
                         oldValue += s
                         msgMap[device.address] = oldValue
                     }
@@ -466,6 +469,7 @@ class BleService : LifecycleService() {
                         //Send Response of s
                         val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
                             .removePrefix("$$")
+                        AppLog.e(TAG, "Got whole message at once $msgData")    
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
@@ -776,12 +780,12 @@ class BleService : LifecycleService() {
             ) {
                 val queue = hashMap[gatt?.device?.address]
                 if (queue?.isNotEmpty() == true) {
-                    Log.e("zzz", "onMessageSent:SIZE ->  queue.isNotEmpty()  ")
+                    AppLog.e(TAG, "onMessageSent:SIZE ->  queue.isNotEmpty()  ")
                     queue.poll()
                     hashMap[gatt?.device?.address!!] = queue
                 }
 
-                Log.e("zzz", "onMessageSent:SIZE ->  ${queue?.size} ")
+                AppLog.e(TAG, "onMessageSent:SIZE ->  ${queue?.size} ")
                 bleCallback?.onMessageSent(id = id, success = true, data = value)
                 sendMessageFromQueu(gatt?.device?.address!!)
 
@@ -797,12 +801,12 @@ class BleService : LifecycleService() {
 
             override fun addToBlackList(bleScanDevice: BLEScanDevice) {
                 blackList.add(bleScanDevice)
-                AppLog.e(TAG, " addToBlackList : $blackList")
+                // AppLog.e(TAG, " addToBlackList : $blackList")
             }
 
             override fun addToIgnoreList(bleScanDevice: BLEScanDevice) {
                 ignoreList.add(bleScanDevice)
-                AppLog.e(TAG, " addToIgnoreList : $ignoreList")
+                // AppLog.e(TAG, " addToIgnoreList : $ignoreList")
             }
 
         }
@@ -837,9 +841,9 @@ class BleService : LifecycleService() {
         }
 
         AppLog.e(
-            "zzz", "sendMessage   ${BLEUtils.byteToHex(message)}"
+            TAG, "sendMessage   ${BLEUtils.byteToHex(message)}"
         )
-        var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
+        // var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
         bleDevice?.let {
             if (hashMap.containsKey(it.macAddress)) {
                 var queue = hashMap[it.macAddress!!]
@@ -849,14 +853,16 @@ class BleService : LifecycleService() {
                     queue = LinkedList()
                 }
                 hashMap[it.macAddress!!] = queue!!
-                mainQueue = queue
+                // mainQueue = queue
+                // AppLog.d(TAG, " Manual send =======  Queue size was already 1 ")
             } else {
+                // AppLog.d(TAG, " Manual send =====  Queue size was empty ")
                 val queue: Queue<Triple<String, ByteArray, ByteArray>> = LinkedList()
                 queue.add(Triple(id, from, message))
                 hashMap[it.macAddress!!] = queue
-                mainQueue = queue
+                // mainQueue = queue
             }
-            AppLog.e(TAG, "device--> ${it.macAddress} ${mainQueue?.size}")
+            // AppLog.e(TAG, "device--> ${it.macAddress} ${mainQueue?.size}")
             sendMessageFromQueu(it.macAddress!!, true)
 
         }
@@ -871,7 +877,7 @@ class BleService : LifecycleService() {
                 if (!queue.isNullOrEmpty()) {
                     AppLog.e(
                         TAG,
-                        "sendMessageFromQueu ${queue.size}"
+                        "sendMessageFromQueu ${queue.size} ${isFromSendMessage}"
                     )
                     if (!isFromSendMessage || queue.size == 1) {
                         var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
@@ -899,14 +905,14 @@ class BleService : LifecycleService() {
                                 delimiter[1] = 36
                                 bleActor.tempData = delimiter + btArray + delimiter
                                 AppLog.e(
-                                    "zzz",
+                                    TAG,
                                     "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
                                 )
 //                                },500)
 
                             } else {
                                 AppLog.e(
-                                    "zzz", "data------------>onMessageSent Failed"
+                                    TAG, "data------------>onMessageSent Failed"
                                 )
                                 bleCallback?.onMessageSent(
                                     id = mesTrip.first, success = false, data = ByteArray(0)
