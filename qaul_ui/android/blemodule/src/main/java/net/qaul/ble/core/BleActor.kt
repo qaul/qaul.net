@@ -220,7 +220,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int
         ) {
             super.onDescriptorWrite(gatt, descriptor, status)
-            AppLog.e(TAG, "onDescriptorWrite asked")
             if (descriptorWriteQueue != null && descriptorWriteQueue.size > 0) {
                 descriptorWriteQueue.remove()
                 if (descriptorWriteQueue.size > 0) writeGattDescriptor(descriptorWriteQueue.element()) else {
@@ -230,7 +229,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 }
             }
 //            if (isReconnect && isFromMessage) {
-//                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
+//            AppLog.e(TAG, "onDescriptorWrite asked")
+                writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tempData, attempt)
 //                attempt = 0
 //                tempData = ByteArray(0)
 //                isReconnect = false
@@ -262,7 +262,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     fun send(data: String): Int {
-       AppLog.e(TAG, "send data----------------->   isWriting $isWriting  data $data")
+    //    AppLog.e(TAG, "send data----------------->   isWriting $isWriting  data $data")
         var data = data
         while (data.length > 40) {
             sendQueue.add(data.substring(0, 40))
@@ -278,10 +278,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             AppLog.e("TAG", "_send(): EMPTY QUEUE")
             return false
         }
-       AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
+    //    AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
         val tx = BLEUtils.hexToByteArray(sendQueue.poll())
-        // AppLog.e(TAG, "_send(): $attempt Sending: ")
-//        val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
+        // val tx = sendQueue.poll()?.toByteArray(Charset.forName("UTF-8"))
         isWriting = true // Set the write in progress flag
         writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx, attempt)
         return true
@@ -348,7 +347,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * This method is used to write descriptor of gatt
      */
     private fun writeGattDescriptor(d: BluetoothGattDescriptor) {
-        AppLog.e(TAG, "writeGattDescriptor request ")
         if (isCharacteristicNotifiable(d.characteristic)) {
             d.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
         } else {
@@ -443,7 +441,6 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                         val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
                         if (characteristic != null) {
                             characteristic.value = data
-                            AppLog.e(TAG, "===================Characterstic value = $data")
                             return mBluetoothGatt!!.writeCharacteristic(characteristic)
                         }
                     } else {

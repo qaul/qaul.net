@@ -269,7 +269,6 @@ open class BleWrapperClass(context: Activity) {
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
                         val msgData = String(message).removeSuffix("$$").removePrefix("$$")
-                        AppLog.e(TAG, "---->onMessageReceived---> " + msgData)
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
                         directReceived.from = ByteString.copyFrom(bleDevice.qaulId)
                         directReceived.data = ByteString.copyFrom(msgObject.message)
@@ -428,7 +427,6 @@ open class BleWrapperClass(context: Activity) {
             Class.forName(className)
             true
         } catch (e: ClassNotFoundException) {
-            e.printStackTrace()
             false
         }
     }
