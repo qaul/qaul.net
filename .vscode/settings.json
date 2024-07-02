@@ -1,0 +1,33 @@
+{
+    "cSpell.languageSettings": [
+        {
+            "languageId": "rust",
+            "includeRegExpList": [
+                "CStyleComment"
+            ],
+        }
+    ],
+    "cSpell.words": [
+        "behaviour",
+        "BLE",
+        "floodsub",
+        "keypair",
+        "libp2p",
+        "libqaul",
+        "mdns",
+        "multiaddress",
+        "peerid",
+        "protobuf",
+        "qaul",
+        "quic"
+    ],
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+        "editor.formatOnSave": true
+    },
+    "clang-format.style": "{ IndentWidth: 4, BasedOnStyle: google, AlignConsecutiveAssignments: true }",
+    "[proto3]": {
+        "editor.defaultFormatter": "xaver.clang-format",
+        "editor.formatOnSave": true
+    }
+}
