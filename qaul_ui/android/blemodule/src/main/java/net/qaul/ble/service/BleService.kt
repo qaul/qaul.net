@@ -424,7 +424,7 @@ class BleService : LifecycleService() {
                 )
             //    AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
-               AppLog.e(TAG, "Data in hex:: $s")
+            //    AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
                 if (bleDevice == null) {
                     bleDevice = receiveList.find { it.macAddress == device.address }
@@ -437,12 +437,9 @@ class BleService : LifecycleService() {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
                         //SendResponse of oldValue
-
-                        AppLog.e(TAG, "onCharacteristicWriteRequest:  contain 2424")
                         oldValue += s
                         val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
                             .removePrefix("$$")
-                        Log.e(TAG, "Msg Data:: $msgData")
                         if (!msgData.contains("$$")) {
                             val msgObject = Gson().fromJson(msgData, Message::class.java)
                             if (bleDevice == null) {
@@ -460,7 +457,6 @@ class BleService : LifecycleService() {
                             Log.e(TAG, "onCharacteristicWriteRequest:  contain $$")
                         }
                     } else {
-                        AppLog.e(TAG, "onCharacteristicWriteRequest:  not contain 2424")
                         oldValue += s
                         msgMap[device.address] = oldValue
                     }
@@ -469,7 +465,6 @@ class BleService : LifecycleService() {
                         //Send Response of s
                         val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
                             .removePrefix("$$")
-                        AppLog.e(TAG, "Got whole message at once $msgData")    
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
