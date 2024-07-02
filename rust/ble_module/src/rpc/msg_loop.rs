@@ -9,7 +9,7 @@ use crate::{
 
 use super::BleRpc;
 
-/// Manages all sys messages defines in the 'ble.proto' file.
+/// Manages all sys messages defined in the 'ble.proto' file.
 pub async fn listen_for_sys_msgs(
     mut rpc_receiver: BleRpc,
     mut ble_service: QaulBleService,
