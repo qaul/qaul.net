@@ -143,8 +143,10 @@ class BleService : LifecycleService() {
                 val settingsBuilder = AdvertiseSettings.Builder()
                 dataBuilder.setIncludeTxPowerLevel(true)
 
-                val uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
-                dataBuilder.addServiceUuid(uuid)
+                val main_uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
+                // val msg_uuid = ParcelUuid(UUID.fromString(MSG_SERVICE_UUID))
+                dataBuilder.addServiceUuid(main_uuid)
+                // dataBuilder.addServiceUuid(msg_uuid)
                 dataBuilder.setIncludeDeviceName(true)
                 when (advertMode) {
                     "low_power" -> {
@@ -286,7 +288,7 @@ class BleService : LifecycleService() {
      * This Method Will Parse Result of ScanResult according to Device
      */
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
-//        AppLog.e(TAG, "device : " + device.address)
+       AppLog.e(TAG, "device : " + device.address + " Device.name = " + device.name )
         if (blackList.find { it.macAddress == device.address } == null) {
             val selectItem = devicesList.toMutableList().find { it.macAddress == device.address }
 //            handler.postDelayed({
@@ -369,6 +371,7 @@ class BleService : LifecycleService() {
             this, gattServerCallback
         )
         gattServer?.addService(services[0])
+        // gattServer?.addService(services[1])
     }
 
     /**
@@ -424,7 +427,7 @@ class BleService : LifecycleService() {
                 )
             //    AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
-            //    AppLog.e(TAG, "Data in hex:: $s")
+               AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
                 if (bleDevice == null) {
                     bleDevice = receiveList.find { it.macAddress == device.address }
@@ -622,15 +625,26 @@ class BleService : LifecycleService() {
         }
         uuidList.clear()
         uuidList.add(ParcelUuid.fromString(SERVICE_UUID))
+        // uuidList.add(ParcelUuid.fromString(MSG_SERVICE_UUID))
         // TODO: DK
         setFilter(uuidList)
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
 
-
+                // App.Log.e(TAG, "device : " + result!!.device.name + " Device.address = " + result!!.device.address)
                 RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result!!.device.address)
-                parseBLEFrame(result!!.device, result.rssi, result)
+                // var uuidsScanned = result!!.device!!.getUuids()
+                // AppLog.e(TAG, "UUID : " + uuidsScanned)
+                // for (uuid in uuidsScanned) {
+                //     // AppLog.e(TAG, "UUID : " + uuid)
+                //     if((uuid.toString().lowercase()).equals(SERVICE_UUID) || (uuid.toString()).lowercase().equals(MSG_SERVICE_UUID)) {
+                //         AppLog.e(TAG, "UUID : " + uuid)
+                    
+                        parseBLEFrame(result!!.device, result.rssi, result)
+                    //     break
+                    // }
+                // }
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -821,6 +835,7 @@ class BleService : LifecycleService() {
                 BleActor(this, BleConnectionListener())
             }
         }
+        AppLog.e(TAG, "device222222--> ${device.macAddress}")
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor!!
 
