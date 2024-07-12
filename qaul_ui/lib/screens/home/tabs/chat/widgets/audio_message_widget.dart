@@ -173,7 +173,6 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
   }
 
   Future<void> _getDuration() async {
-    await _audioPlayer.setSourceUrl(audioPath!);
     final duration = await _audioPlayer.getDuration();
     _duration = duration;
   }
