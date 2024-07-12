@@ -31,6 +31,10 @@ mixin FilePathResolverMixin {
     }
     var uuid = read(defaultUserProvider)!.idBase58;
 
-    return '$storagePath/$uuid/files/$id.$extension';
+    final filePath = '$storagePath/$uuid/files/$id.$extension';
+    if (Platform.isWindows) {
+      return filePath.replaceAll('/', '\\');
+    }
+    return filePath;
   }
 }
