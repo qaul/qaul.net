@@ -275,7 +275,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
 
     private fun _send(): Boolean {
         if (sendQueue.isEmpty()) {
-            AppLog.e("TAG", "_send(): EMPTY QUEUE")
+            AppLog.e(TAG, "_send(): EMPTY QUEUE")
             return false
         }
     //    AppLog.e(TAG, "_send(): $attempt Sending: " + sendQueue.peek())
