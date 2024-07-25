@@ -117,7 +117,7 @@ class BleService : LifecycleService() {
                     BluetoothGattCharacteristic.PROPERTY_READ,
                     BluetoothGattCharacteristic.PERMISSION_READ
                 )
-
+                AppLog.e(TAG, "qaulId : " + qaul_id)
                 mainChar.value = qaulId
                 mainService.addCharacteristic(mainChar)
 
@@ -425,7 +425,7 @@ class BleService : LifecycleService() {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-            //    AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
+               AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
                 val s = BLEUtils.byteToHex(value)
                AppLog.e(TAG, "Data in hex:: $s")
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
@@ -916,7 +916,7 @@ class BleService : LifecycleService() {
                                 bleActor.tempData = delimiter + btArray + delimiter
                                 AppLog.e(
                                     TAG,
-                                    "data------------>sendMessage   ${BLEUtils.byteToHex(bleActor.tempData)}"
+                                    "data------------>sendMessage Id: ${bleActor.messageId}  ${BLEUtils.byteToHex(bleActor.tempData)}"
                                 )
 //                                },500)
 

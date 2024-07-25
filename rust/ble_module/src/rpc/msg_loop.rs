@@ -1,6 +1,6 @@
 use async_std::task::spawn;
 use bytes::Bytes;
-use std::{clone, error::Error};
+use std::error::Error;
 
 use crate::{
     ble::ble_service::{get_device_info, QaulBleService},
@@ -19,7 +19,7 @@ pub async fn listen_for_sys_msgs(
     loop {
         // async_std::task::spawn(async move {
         let evt = rpc_receiver.recv().await;
-        log::info!("Received event: ",);
+        // log::info!("Received event: ",);
         match evt {
             None => {
                 log::info!("Qaul 'sys' message channel closed. Shutting down gracefully.");
@@ -36,33 +36,33 @@ pub async fn listen_for_sys_msgs(
                             // let mut internal_sender_2 = local_sender_handle.clone();
                             // let
                             let qaul_id = Bytes::from(req.qaul_id);
-                            // let handle =
-                            //  async_std::task::spawn(async move {
+                            let handle =async_std::task::spawn(async move {
                             // let mut
-                            ble_service = svc
-                                .advertise_scan_listen(qaul_id, None, internal_sender_1.clone())
+                            let ble_service = svc
+                                .advertise_scan_listen(qaul_id, None, internal_sender_1.clone(), rpc_receiver.clone())
                                 .await;
                             log::info!("BLE Service started successfully");
+
                             match ble_service {
                                 QaulBleService::Idle(_) => {
                                     log::error!("Error occured in configuring BLE module");
                                 }
-                                QaulBleService::Started(ref mut svc) => {
+                                QaulBleService::Started(svc) => {
                                     // ble_service = QaulBleService::Started(svc);
                                     //  async_std::task::spawn(async move {
-                                    // ble_service = 
-                                        svc.spawn_handles().await;
-                                        // svc.join_handles.await;
+                                    // ble_service =
+                                    svc.spawn_handles().await;
+                                    // svc.join_handles.await;
                                     // });
                                 }
                             }
                             internal_sender_1.send_start_successful();
                             //     ble_service
-                            // });
-                            // ble_service = handle.await;
+                            });
+                            handle.await;
                             log::info!("BLE Service started successfully");
                             // continue;
-                            // break;
+                            break;
                         }
                         QaulBleService::Started(_) => {
                             log::warn!(

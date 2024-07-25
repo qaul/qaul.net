@@ -1,4 +1,5 @@
 use async_std::channel::Sender;
+use bluer::{Adapter, Address};
 
 use super::proto_sys::{self, BleDeviceDiscovered, BleError, BleStartResult, BleDeviceUnavailable};
 
@@ -49,7 +50,10 @@ impl BleResultSender {
         ))
     }
 
-    pub fn send_device_unavailable(&mut self, qaul_id: Vec<u8>) {
+    pub fn send_device_unavailable(&mut self, qaul_id: Vec<u8>, adapter: Adapter, mac_address: Address) {
+        async_std::task::spawn(async move {
+            let _ = adapter.remove_device(mac_address).await;
+        });
         self.send_ble_sys_msg(proto_sys::ble::Message::DeviceUnavailable(
             BleDeviceUnavailable { qaul_id },
         ))

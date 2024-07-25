@@ -1,5 +1,5 @@
 use crate::rpc::utils::*;
-use bluer::Address;
+use bluer::{Adapter, Address};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -126,8 +126,9 @@ pub fn current_time_millis() -> i64 {
 }
 
 /// Check if a device is out of range and remove it from the list of devices present nearby or Update the last found time of the device.
-pub fn out_of_range_checker(mut internal_sender: BleResultSender) {
+pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSender) {
     async_std::task::spawn(async move {
+        log::info!("Out of range checker started");
         loop {
             async_std::task::sleep(std::time::Duration::from_secs(2)).await;
             let ignore_list = IGNORE_LIST.lock().unwrap();
@@ -137,11 +138,17 @@ pub fn out_of_range_checker(mut internal_sender: BleResultSender) {
             }
             for device in ignore_list.iter() {
                 if device.last_found_time != 0 && device.last_found_time < current_time - 5000 {
+                    if device.qaul_id.is_empty() {
+                        log::error!("Qaul_id is empty");
+                    }
                     log::error!("Device out of range: {:?}", device.mac_address);
-                    internal_sender.send_device_unavailable(device.qaul_id.clone());
+                    internal_sender.send_device_unavailable(device.qaul_id.clone(), adapter.clone(), device.mac_address);
                     let mac_address: Address = device.mac_address;
                     remove_device_by_mac(mac_address);
                     remove_ignore_device_by_mac(mac_address);
+                    break;
+                } else {
+                    // log::info!("Device in range: {:?}", device.mac_address);
                 }
             }
         }
@@ -155,10 +162,10 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
     hex_chars.join("")
 }
 
-/// Bytes to String conversion.
-pub fn bytes_to_str(bytes: &[u8]) -> Result<&str, std::str::Utf8Error> {
-    std::str::from_utf8(bytes)
-}
+// /// Bytes to String conversion.
+// pub fn bytes_to_str(bytes: &[u8]) -> Result<&str, std::str::Utf8Error> {
+//     std::str::from_utf8(bytes)
+// }
 
 /// Hex to Byte conversion.
 pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
