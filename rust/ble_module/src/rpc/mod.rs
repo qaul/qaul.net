@@ -26,8 +26,9 @@ pub trait SysRpcReceiver {
     async fn recv(&mut self) -> Option<Ble>;
 }
 
+#[derive(Clone)]
 pub struct BleRpc {
-    receiver: async_std::channel::Receiver<Vec<u8>>,
+    pub receiver: async_std::channel::Receiver<Vec<u8>>,
 }
 
 #[async_trait]
