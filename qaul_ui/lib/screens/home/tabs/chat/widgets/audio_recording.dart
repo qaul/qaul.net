@@ -16,6 +16,14 @@ class _RecordAudioDialog extends StatefulHookConsumerWidget {
 }
 
 class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
+  static const kDefaultCodecSettings = RecordConfig(
+    numChannels: 1,
+    // 44100 / 2
+    sampleRate: 22050,
+    // 128000 / 2
+    bitRate: 64000,
+  );
+
   final audioPlayer = AudioPlayer();
   final audioRecorder = AudioRecorder();
 
@@ -170,7 +178,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
           isRecording = true;
         });
         final path = await getNewAudioFilePath();
-        await audioRecorder.start(const RecordConfig(), path: path);
+        await audioRecorder.start(kDefaultCodecSettings, path: path);
       }
     } catch (e) {
       return;

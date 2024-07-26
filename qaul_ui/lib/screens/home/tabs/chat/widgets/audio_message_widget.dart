@@ -39,10 +39,20 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
 
   Color get containerColor => Theme.of(context).colorScheme.primaryContainer;
 
-  Color get backgroundColor => Theme.of(context).colorScheme.background;
+  Color get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  bool _isReceivingFile() {
+    var isReceiving = false;
+    if (widget.message.metadata?.containsKey('messageState') ?? false) {
+      final s = MessageState.fromJson(widget.message.metadata!['messageState']);
+      isReceiving = s == MessageState.receiving;
+    }
+    return isReceiving;
+  }
 
   @override
   void initState() {
+    super.initState();
     _playerStateChangedSubscription =
         _audioPlayer.onPlayerComplete.listen((state) async {
       await stop();
@@ -57,11 +67,6 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
         _duration = duration;
       }),
     );
-
-    audioPath = widget.message.uri;
-    _getDuration();
-    _audioPlayer.setSource(_source);
-    super.initState();
   }
 
   @override
@@ -71,6 +76,18 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
     _durationChangedSubscription.cancel();
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant AudioMessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message == widget.message) return;
+
+    if (!_isReceivingFile()) {
+      audioPath = widget.message.uri;
+      _getDuration();
+      _audioPlayer.setSource(_source);
+    }
   }
 
   @override
@@ -85,24 +102,31 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(height: _controlSize / 2),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              audioControls(),
-              Expanded(child: audioSlider()),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 16),
-            child: Text(
-              '${_duration?.inSeconds ?? 0.0} Seconds',
-              style: ttheme.labelLarge?.copyWith(
-                color: backgroundColor,
-                fontStyle: FontStyle.italic,
+          if (_isReceivingFile())
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            )
+          else ...[
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                audioControls(),
+                Expanded(child: audioSlider()),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 16),
+              child: Text(
+                '${_duration?.inSeconds ?? 0.0} Seconds',
+                style: ttheme.labelLarge?.copyWith(
+                  color: backgroundColor,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
