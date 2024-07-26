@@ -114,7 +114,7 @@ parts:
     build-packages:
       - curl
       - tar
-    override-build:
+    override-build: |
       set -eux
       
       ARCH=$(uname -m)
