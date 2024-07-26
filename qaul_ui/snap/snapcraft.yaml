@@ -83,6 +83,10 @@ parts:
     plugin: nil
     after: [flutter-deps]
     source: .
+    build-packages:
+      # GStreamer: audioplayer dependency (https://pub.dev/packages/audioplayers_linux#setup-for-linux)
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
     override-build: |
       set -eux
                       
@@ -96,14 +100,37 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
       cp -r build/linux/*/release/bundle/* $SNAPCRAFT_PART_INSTALL/bin/
 
-  # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
   assets-and-dependencies:
     plugin: nil
     after:
       - qaul
     stage-packages:
-      - zenity
       - dmz-cursor-theme
       - fonts-dejavu
       - fonts-freefont-ttf
       - fonts-ubuntu
+      # zenity: is a File Picker dependency (https://github.com/miguelpruivo/flutter_file_picker)
+      - zenity
+    build-packages:
+      - curl
+      - tar
+    override-build:
+      # fmedia: is a "record" dependency (https://pub.dev/packages/record)
+      #         must be installed manually (https://stsaz.github.io/fmedia/)
+      URL="https://github.com/stsaz/fmedia/releases/download/v1.31/fmedia-1.31-linux-amd64.tar.xz"
+      TARGET_FILE="fmedia-1.31-linux-amd64.tar.xz"
+      INSTALL_DIR="$SNAPCRAFT_PART_INSTALL/bin/fmedia"
+  
+      mkdir -p $INSTALL_DIR
+      
+      curl -L $URL -o $TARGET_FILE
+      if [ $? -ne 0 ]; then
+        echo "fmedia download failed!"
+        exit 1
+      fi
+  
+      tar -xf $TARGET_FILE -C $INSTALL_DIR --strip-components=1
+      if [ $? -ne 0 ]; then
+        echo "fmedia extraction failed!"
+        exit 1
+      fi
