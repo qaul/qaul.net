@@ -115,6 +115,14 @@ parts:
       - curl
       - tar
     override-build:
+      set -eux
+      
+      ARCH=$(uname -m)
+      if [[ "$ARCH" == "armv7l" || "$ARCH" == "aarch64" ]]; then
+        echo "Skipping fmedia installation on ARM architecture"
+        exit 0
+      fi
+      
       # fmedia: is a "record" dependency (https://pub.dev/packages/record)
       #         must be installed manually (https://stsaz.github.io/fmedia/)
       URL="https://github.com/stsaz/fmedia/releases/download/v1.31/fmedia-1.31-linux-amd64.tar.xz"
@@ -123,14 +131,5 @@ parts:
   
       mkdir -p $INSTALL_DIR
       
-      curl -L $URL -o $TARGET_FILE
-      if [ $? -ne 0 ]; then
-        echo "fmedia download failed!"
-        exit 1
-      fi
-  
+      curl -L $URL -o $TARGET_FILE  
       tar -xf $TARGET_FILE -C $INSTALL_DIR --strip-components=1
-      if [ $? -ne 0 ]; then
-        echo "fmedia extraction failed!"
-        exit 1
-      fi
