@@ -1,6 +1,7 @@
 use crate::rpc::utils::*;
 use bluer::{Adapter, Address};
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -16,9 +17,24 @@ pub struct BleScanDevice {
     pub is_connected: bool,
 }
 
+impl BleScanDevice {
+    pub fn update_last_found(&mut self) {
+        self.last_found_time = current_time_millis();
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Message {
+    #[serde(rename = "qaul_id")]
+    pub qaul_id: Option<Vec<i8>>,
+
+    #[serde(rename = "message")]
+    pub message: Option<Vec<i8>>,
+}
+
 lazy_static! {
-    static ref IGNORE_LIST: Mutex<Vec<BleScanDevice>> = Mutex::new(Vec::new());
-    static ref DEVICE_LIST: Mutex<Vec<BleScanDevice>> = Mutex::new(Vec::new());
+    static ref IGNORE_LIST: Mutex<HashMap<Address, BleScanDevice>> = Mutex::new(HashMap::new());
+    static ref DEVICE_LIST: Mutex<HashMap<Address, BleScanDevice>> = Mutex::new(HashMap::new());
     static ref MSG_MAP: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
@@ -43,31 +59,37 @@ mod tests {
 /// Add a new device to list of all previously discovered devices.
 pub fn add_device(device: BleScanDevice) {
     let mut devices = DEVICE_LIST.lock().unwrap();
-    devices.push(device);
+    devices.insert(device.mac_address, device);
 }
 
 /// Key value lookup for previously discovered.
 pub fn find_device_by_mac(mac_address: Address) -> Option<BleScanDevice> {
     let devices = DEVICE_LIST.lock().unwrap();
-    match devices
-        .iter()
-        .find(|device| device.mac_address == mac_address)
-    {
-        Some(device) => Some(device.clone()),
-        None => None,
+    if devices.contains_key(&mac_address) {
+        Some(devices[&mac_address].clone())
+    } else {
+        None
     }
+    // match devices
+    //     .iter()
+    //     .find(|device| device.mac_address == mac_address)
+    // {
+    //     Some(device) => Some(device.clone()),
+    //     None => None,
+    // }
 }
 
+#[allow(dead_code)]
 /// Remove a device from the list of previously discovered devices.
 pub fn remove_device_by_mac(mac_address: Address) {
     let mut devices = DEVICE_LIST.lock().unwrap();
-    devices.retain(|device| device.mac_address != mac_address);
+    devices.remove(&mac_address);
 }
 
 /// Add a new message to the message map maintained by ble listner.
 pub fn add_msg_map(stringified_addr: String, hex_msg: String) {
     let mut msg_map = MSG_MAP.lock().unwrap();
-    msg_map.insert(stringified_addr.clone(), hex_msg.clone());
+    msg_map.insert(stringified_addr, hex_msg);
 }
 
 /// Key value lookup for message map maintained by ble listner.
@@ -85,35 +107,34 @@ pub fn remove_msg_map_by_mac(stringified_addr: String) {
 /// Add a new device to list of devices present nearby and maintain their last found time.
 pub fn add_ignore_device(device: BleScanDevice) {
     let mut ignore_devices = IGNORE_LIST.lock().unwrap();
-    ignore_devices.push(device);
+    ignore_devices.insert(device.mac_address, device);
 }
 
 /// Key value lookup for devices present nearby.
 pub fn find_ignore_device_by_mac(mac_address: Address) -> Option<BleScanDevice> {
-    let devices = IGNORE_LIST.lock().unwrap();
-    match devices
-        .iter()
-        .find(|device| device.mac_address == mac_address)
-    {
-        Some(device) => Some(device.clone()),
-        None => None,
+    let ignore_devices = IGNORE_LIST.lock().unwrap();
+    if ignore_devices.contains_key(&mac_address) {
+        Some(ignore_devices[&mac_address].clone())
+    } else {
+        None
     }
 }
 
 /// Update the last found time of a device present nearby.
 pub fn update_last_found(mac_address: Address) {
     let mut devices = IGNORE_LIST.lock().unwrap();
-    for device in devices.iter_mut() {
-        if device.mac_address == mac_address {
-            device.last_found_time = current_time_millis();
-        }
-    }
+    let k = devices.get_mut(&mac_address);
+    match k {
+        Some(device) => device.update_last_found(),
+        None => log::warn!("Device not discovered"),
+    };
 }
 
 /// Remove a device from the list of devices present nearby.
 pub fn remove_ignore_device_by_mac(mac_address: Address) {
-    let mut devices = DEVICE_LIST.lock().unwrap();
-    devices.retain(|device| device.mac_address != mac_address);
+    let mut devices = IGNORE_LIST.lock().unwrap();
+    // devices.retain(|device| device.mac_address != mac_address);
+    devices.remove(&mac_address);
 }
 
 /// Get the current time in milliseconds since UNIX_EPOCH.
@@ -136,16 +157,21 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
             if ignore_list.len() == 0 {
                 continue;
             }
-            for device in ignore_list.iter() {
+            for (_, device) in ignore_list.iter() {
                 if device.last_found_time != 0 && device.last_found_time < current_time - 5000 {
+                    let mac_address: Address = device.mac_address;
                     if device.qaul_id.is_empty() {
                         log::error!("Qaul_id is empty");
                     }
-                    log::error!("Device out of range: {:?}", device.mac_address);
-                    internal_sender.send_device_unavailable(device.qaul_id.clone(), adapter.clone(), device.mac_address);
-                    let mac_address: Address = device.mac_address;
-                    remove_device_by_mac(mac_address);
+                    log::error!("Device out of range: {:?}", mac_address);
+                    internal_sender.send_device_unavailable(
+                        device.qaul_id.clone(),
+                        adapter.clone(),
+                        mac_address,
+                    );
+                    // remove_device_by_mac(mac_address);
                     remove_ignore_device_by_mac(mac_address);
+                    drop(ignore_list);
                     break;
                 } else {
                     // log::info!("Device in range: {:?}", device.mac_address);
@@ -153,6 +179,37 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
             }
         }
     });
+}
+
+pub fn message_received(e: (String, Address), mut internal_sender: BleResultSender) {
+    let byte_encoded_message = hex_to_bytes(&e.0);
+    // log::error!("Byte array: {:?}", byte_encoded_message);
+    let json_message: String = match String::from_utf8(byte_encoded_message) {
+        Ok(v) => v,
+        Err(e) => {
+            println!("Failed to parse JSON: {}", e);
+            return;
+        }
+    };
+    // let json_message = String::from_utf8_lossy(&byte_encoded_message);
+    // log::error!("Received messages: {:?} ", json_message);
+    let msg_object: Message = match serde_json::from_str(&json_message) {
+        Ok(v) => v,
+        Err(e) => {
+            println!("Failed to parse JSON: {}", e);
+            return;
+        }
+    };
+    let message = msg_object.message.unwrap();
+    let qaul_id = msg_object.qaul_id.unwrap();
+    log::info!(
+        "Received {} bytes of data from {}",
+        message.len(),
+        mac_to_string(&e.1)
+    );
+    let unsigned_message: Vec<u8> = message.into_iter().map(|x| x as u8).collect();
+    let unsigned_qaul_id: Vec<u8> = qaul_id.into_iter().map(|x| x as u8).collect();
+    internal_sender.send_direct_received(unsigned_qaul_id, unsigned_message)
 }
 
 /// Byte to Hex conversion.
@@ -169,10 +226,13 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 
 /// Hex to Byte conversion.
 pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    for i in 0..hex.len() / 2 {
-        let byte = u8::from_str_radix(&hex[i * 2..i * 2 + 2], 16).unwrap();
-        bytes.push(byte);
+    if hex.len() % 2 != 0 {
+        log::error!("Must have an even length");
     }
-    bytes
+
+    let bytes_result: Result<Vec<u8>, _> = (0..hex.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&hex[i..i + 2], 16))
+        .collect();
+    bytes_result.unwrap()
 }

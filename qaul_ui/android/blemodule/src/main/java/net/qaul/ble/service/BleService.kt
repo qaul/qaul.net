@@ -444,7 +444,9 @@ class BleService : LifecycleService() {
                         val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
                             .removePrefix("$$")
                         if (!msgData.contains("$$")) {
+                        // AppLog.e(TAG, "Data in msgData:: $msgData")  
                             val msgObject = Gson().fromJson(msgData, Message::class.java)
+                        // AppLog.e(TAG, "Data in msg Object:: ${msgObject.message}")  
                             if (bleDevice == null) {
                                 bleDevice = BLEScanDevice.getDevice()
                                 bleDevice.macAddress = device.address
@@ -452,6 +454,7 @@ class BleService : LifecycleService() {
                                 bleDevice.bluetoothDevice = device
                                 receiveList.add(bleDevice)
                             }
+                        AppLog.e(TAG, " Final Data in hex:: $oldValue")
                             bleAdvertiseCallback!!.onMessageReceived(
                                 bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!
                             )
@@ -468,7 +471,9 @@ class BleService : LifecycleService() {
                         //Send Response of s
                         val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
                             .removePrefix("$$")
+                        // AppLog.e(TAG, "Data in msgData:: $msgData")   
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
+                        // AppLog.e(TAG, "Data in msg Object:: $msgObject.message")   
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address

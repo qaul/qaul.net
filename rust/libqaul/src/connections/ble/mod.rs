@@ -605,12 +605,12 @@ impl Ble {
         // send the message
         log::info!("BLE send feed message to {:?}", receiver_small_id.clone());
         Self::message_send(receiver_small_id, sender_id, buf);
-    }
+    }   
 
     /// BLE message received
     fn message_received(message: proto::BleDirectReceived) {
         log::info!("BLE message received");
-
+        log::info!("qaul: Data recieved {:?}", &message.data);
         // get node ID of sender
         let node_id: PeerId;
         if let Some(node) = Neighbours::node_from_small_id(message.from.clone()) {
@@ -691,7 +691,6 @@ impl Ble {
                     Self::module_stop_result(stop_result);
                 }
                 Some(proto::ble::Message::DeviceDiscovered(device)) => {
-                    log::info!("============================BLE device discovered");
                     Self::device_discovered(device);
                 }
                 Some(proto::ble::Message::DeviceUnavailable(device)) => {

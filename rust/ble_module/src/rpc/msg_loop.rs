@@ -86,13 +86,13 @@ pub async fn listen_for_sys_msgs(
                     },
                     DirectSend(req) => match ble_service {
                         QaulBleService::Started(ref mut svc) => {
-                            log::info!("Received Direct Send Request: {:#?}", req);
-                            let receiver_id = req.receiver_id.clone();
-                            match svc.direct_send(req).await {
-                                Ok(_) => local_sender_handle.send_direct_send_success(receiver_id),
-                                Err(err) => local_sender_handle
-                                    .send_direct_send_error(receiver_id, err.to_string()),
-                            }
+                            // log::info!("Received Direct Send Request: {:#?}", req);
+                            // let receiver_id = req.receiver_id.clone();
+                            // match svc.direct_send(req).await {
+                            //     Ok(_) => local_sender_handle.send_direct_send_success(receiver_id),
+                            //     Err(err) => local_sender_handle
+                            //         .send_direct_send_error(receiver_id, err.to_string()),
+                            // }
                         }
                         QaulBleService::Idle(_) => {
                             log::info!("Received Direct Send Request, but bluetooth service is not running!");
