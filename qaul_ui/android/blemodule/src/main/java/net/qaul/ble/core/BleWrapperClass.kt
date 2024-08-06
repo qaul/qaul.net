@@ -265,13 +265,17 @@ open class BleWrapperClass(context: Activity) {
                     }
 
                     override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
-                        // AppLog.e(TAG, "---->onMessageReceived---> ${BLEUtils.byteToHex(message)}")
+                        AppLog.e(TAG, "---->onMessageReceived1---> ${message.contentToString()}")
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
                         val msgData = String(message).removeSuffix("$$").removePrefix("$$")
+                        AppLog.e(TAG, "---->onMessageReceived2---> $msgData")   
+                        
                         val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        directReceived.from = ByteString.copyFrom(bleDevice.qaulId)
+                        directReceived.from = ByteString.copyFrom(bleDevice.qaulId) 
                         directReceived.data = ByteString.copyFrom(msgObject.message)
+
+                        AppLog.e(TAG, "---->onMessageReceived3---> ${directReceived.data}")
 //                            ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
                         // AppLog.e(TAG, "---->onMessageReceived msgObject $msgObject")
