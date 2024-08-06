@@ -36,11 +36,11 @@ protobuf {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
-        minSdk 26
-        targetSdk 31
+        minSdk 33   
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
