@@ -40,7 +40,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
   const _NetworkTypeFilterToolbar({Key? key}) : super(key: key);
 
   static final List<NetworkTypeFilter> availableFilters = [
-    if (Platform.isAndroid) NetworkTypeFilter.bluetooth,
+    if (Platform.isAndroid || Platform.isLinux) NetworkTypeFilter.bluetooth,
     NetworkTypeFilter.lan,
     NetworkTypeFilter.internet,
     NetworkTypeFilter.all,
