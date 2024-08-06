@@ -453,18 +453,18 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                         val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
                         if (characteristic != null) {
                             characteristic.value = data
-                            // val returnValue = mBluetoothGatt!!.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                            val returnValue = mBluetoothGatt!!.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                             // AppLog.e(
                             //     TAG,
                             //     "writeServiceData -----------> : data : ${data} , returnValue : $returnValue"
                             // )
-                            // return true
-                            val directSendResult = mBluetoothGatt!!.writeCharacteristic(characteristic)
+                            return true
+                            // val directSendResult =
                             // AppLog.e(
                             //     TAG,
                             //     "writeServiceData -----------> : data : ${data} , directSendResult : $directSendResult"
                             // )
-                            return directSendResult
+                            // return directSendResult
                         }
                     } else {
                         bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
