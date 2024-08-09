@@ -31,6 +31,5 @@
     "[proto3]": {
         "editor.defaultFormatter": "xaver.clang-format",
         "editor.formatOnSave": true
-    },
-    "java.configuration.updateBuildConfiguration": "interactive"
+    }
 }
