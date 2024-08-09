@@ -452,19 +452,23 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                     if (service != null) {
                         val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
                         if (characteristic != null) {
-                            characteristic.value = data
-                            val returnValue = mBluetoothGatt!!.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-                            // AppLog.e(
-                            //     TAG,
-                            //     "writeServiceData -----------> : data : ${data} , returnValue : $returnValue"
-                            // )
-                            return true
-                            // val directSendResult =
-                            // AppLog.e(
-                            //     TAG,
-                            //     "writeServiceData -----------> : data : ${data} , directSendResult : $directSendResult"
-                            // )
-                            // return directSendResult
+                            
+                            if (Build.VERSION.SDK_INT >= 33) {
+                                val returnValue = mBluetoothGatt!!.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                                // AppLog.e(
+                                //     TAG,
+                                //     "writeServiceData -----------> : data : ${data} , returnValue : $returnValue"
+                                // )
+                                return true
+                            } else {
+                                characteristic.value = data
+                                return mBluetoothGatt!!.writeCharacteristic(characteristic)
+                                // AppLog.e(
+                                //     TAG,
+                                //     "writeServiceData -----------> : data : ${data} , directSendResult : $directSendResult"
+                                // )
+                                // return directSendResult
+                            }
                         }
                     } else {
                         bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
