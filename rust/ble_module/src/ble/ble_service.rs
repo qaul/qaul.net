@@ -55,7 +55,7 @@ pub struct IdleBleService {
 }
 
 enum BleMainLoopEvent {
-    Stop,
+    // Stop,
     // MessageReceived((String, Address)),
     // MainCharEvent(CharacteristicControlEvent),
     // MsgCharEvent(CharacteristicControlEvent),
@@ -71,7 +71,7 @@ impl IdleBleService {
     pub async fn new() -> Result<QaulBleService, Box<dyn Error>> {
         let session = bluer::Session::new().await?;
         let agent = bluer::agent::Agent {
-            request_default: true,
+            request_default: false,
             ..Default::default()
         };
         let _ = session.register_agent(agent).await?;
@@ -132,7 +132,7 @@ impl IdleBleService {
             Err(err) => {
                 log::error!("{:#?}", err);
             }
-        }
+        }               
 
         // ==================================================================================
         // ------------------------- SET UP APPLICATION -------------------------------------
@@ -153,8 +153,8 @@ impl IdleBleService {
             control_handle: msg_chara_handle,
             ..Default::default()
         };
-        let adp = self.adapter.clone();
-        let cmd_tx2 = cmd_tx.clone();
+        // let adp = self.adapter.clone();
+        // let cmd_tx2 = cmd_tx.clone();
         let main_characterstic = Characteristic {
             uuid: read_char(),
             read: Some(CharacteristicRead {
@@ -169,26 +169,26 @@ impl IdleBleService {
                             utils::update_last_found(req.device_address);
                         }
                         None => {
-                            let adp2 = adp.clone();
-                            let cmd_tx2 = cmd_tx2.clone();
-                            async_std::task::spawn(async move {
-                                match adp2.device(req.device_address) {
-                                    Ok(device) => {
-                                        match cmd_tx2.send(BleMainLoopEvent::DeviceDiscovered(device)).await {
-                                            Ok(_) => {
-                                                log::info!("Device discovered event sent");
-                                            }
-                                            Err(err) => {
-                                                log::error!("Error sending device discovered event: {:#?}", err);
-                                            }
-                                        };
-                                        // self.on_device_discovered( &device, &mut internal_sender);
-                                    },
-                                    Err(e) => {
-                                        log::error!("Error: {:#?}", e);
-                                    }
-                                };
-                            });
+                            // let adp2 = adp.clone();
+                            // let cmd_tx2 = cmd_tx2.clone();
+                            // async_std::task::spawn(async move {
+                            //     match adp2.device(req.device_address) {
+                            //         Ok(device) => {
+                            //             match cmd_tx2.send(BleMainLoopEvent::DeviceDiscovered(device)).await {
+                            //                 Ok(_) => {
+                            //                     log::info!("Device discovered event sent");
+                            //                 }
+                            //                 Err(err) => {
+                            //                     log::error!("Error sending device discovered event: {:#?}", err);
+                            //                 }
+                            //             };
+                            //             // self.on_device_discovered( &device, &mut internal_sender);
+                            //         },
+                            //         Err(e) => {
+                            //             log::error!("Error: {:#?}", e);
+                            //         }
+                            //     };
+                            // });
                         
 
                         }
@@ -261,28 +261,39 @@ impl IdleBleService {
                 let mut device_result_sender = internal_sender.clone();
                 let device_stream = match adapter.discover_devices().await {
                     Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
-                        AdapterEvent::DeviceAdded(addr) => match utils::find_device_by_mac(addr) {
-                            Some(device) => {
-                                log::warn!("Device mac_addres {:?}", addr);
-                                utils::update_last_found(addr);
-                                None
-                                // Some(BleMainLoopEvent::DeviceDiscovered(device.device.clone()))
+                        AdapterEvent::DeviceAdded(addr) => {
+                            if self.device_block_list.contains(&addr) {
+                                return None;
                             }
-                            None => {
-                                log::warn!("Device mac_addres {:?}", addr);
-                                if self.device_block_list.contains(&addr) {
-                                    return None;
-                                }
-                                match adapter.device(addr) {
-                                    Ok(device) => {
-                                        Some(BleMainLoopEvent::DeviceDiscovered(device))
-                                    }
-                                    Err(_) => None,
-                                }
+                            match self.adapter.device(addr) {
+                                Ok(device) => Some(BleMainLoopEvent::DeviceDiscovered(device)),
+                                Err(_) => None,
                             }
                         },
+
+                        // match utils::find_device_by_mac(addr) {
+                        //     Some(_) => {
+                        //         log::warn!("Device mac_addres {:?}", addr);
+                        //         utils::update_last_found(addr);
+                        //         // None
+                        //         let device = self.adapter.device(addr)?;
+                        //         Some(BleMainLoopEvent::DeviceDiscovered(device))
+                        //     }
+                        //     None => {
+                        //         log::warn!("Device mac_addres {:?}", addr);
+                        //         if self.device_block_list.contains(&addr) {
+                        //             return None;
+                        //         }
+                        //         match adapter.device(addr) {
+                        //             Ok(device) => {
+                        //                 Some(BleMainLoopEvent::DeviceDiscovered(device))
+                        //             }
+                        //             Err(_) => None,
+                        //         }
+                        //     }
+                        // },
                         AdapterEvent::DeviceRemoved(addr) => {
-                            utils::find_ignore_device_by_mac(addr).map(|device| {
+                            utils::find_device_by_mac(addr).map(|device| {
                                 device_result_sender.send_device_unavailable(
                                     device.qaul_id.clone(),
                                     adapter.clone(),
@@ -329,17 +340,17 @@ impl IdleBleService {
                 // utils::out_of_range_checker(adapter.clone(), internal_sender.clone());
 
                 loop {
-                    log::warn!("Waiting for event...");
+                    log::warn!("Waiting for event... ");
                     match merged_ble_streams.next().await {
                         Some(evt) => {
                             log::info!("Received event:");
                             match evt {
-                                BleMainLoopEvent::Stop => {
-                                    log::info!(
-                                    "Received stop signal, stopping advertising, scanning, and listening."
-                                );
-                                    break;      
-                                }
+                                // BleMainLoopEvent::Stop => {
+                                //     log::info!(
+                                //     "Received stop signal, stopping advertising, scanning, and listening."
+                                // );
+                                //     break;      
+                                // }
                                 // BleMainLoopEvent::SendMessage((
                                 //     message_id,
                                 //     mut receiver_id,
@@ -854,10 +865,19 @@ impl IdleBleService {
             .ok_or("Could not find a device address for the given qaul ID!")?;
         let stringified_addr = utils::mac_to_string(mac_address);
 
-        match utils::find_ignore_device_by_mac(mac_address.clone()) {
-            Some(ble_device) => {
-                let device = ble_device.device.clone();
-
+        // match utils::find_ignore_device_by_mac(mac_address.clone()) {
+        //     Some(_) => {
+                // let device = ble_device.device.clone();
+                let device =  match self.adapter.device(*mac_address) {
+                    Ok(device) => device,
+                    Err(err) => {
+                        log::error!("Error: {:#?}", err);
+                        return Err("Error getting device".into());
+                    }
+                };
+                // if(ble_device.device  device) {
+                //     log::info!("Device found in ignore list");
+                // }
                 // let mainQueue : HashMap<String, VecDeque<(String, Vec<u8>, Vec<u8>)>> = HashMap::new();
                 let mut hash_map = HASH_MAP.lock().unwrap();
                 match hash_map.get(&stringified_addr) {
@@ -893,7 +913,7 @@ impl IdleBleService {
                             message: Some(i8_message),
                         };
                         let json_str = serde_json::to_string(&msg).unwrap();
-                        log::error!("json_str = {:?}", json_str);
+                        // log::error!("json_str = {:?}", json_str);
                         let bt_array = json_str.as_bytes();
                         let delimiter = vec![0x24, 0x24];
                         let temp = [delimiter.clone(), bt_array.to_vec(), delimiter].concat();
@@ -911,23 +931,24 @@ impl IdleBleService {
                 }
                 log::error!("{:}", device.is_connected().await?);
                 if !device.is_connected().await? {
-                    let mut retries = 2;
-                    loop {
+                    // let mut retries = 1;
+                    // loop {
                         match device.connect().await {
                             Ok(()) => {
                                 log::error!("Device connected");
-                                break;
+                                // break;
                             }
                             Err(err) => {
-                                if retries > 0 {
+                                // if retries > 0 {
                                     log::error!("    Connect error: {}", &err);
-                                    retries -= 1;
-                                } else {
-                                    self.adapter.remove_device(device.address()).await?;
-                                    return Err("Connection retries timeout.".into());
-                                }
+                                    return Err("Connection error".into());
+                                //     retries -= 1;
+                                // } else {
+                                //     self.adapter.remove_device(device.address()).await?;
+                                    // return Err("Connection retries timeout.".into());
+                                // }
                             }
-                        }
+                        // }
                     }
                 }
                 log::info!("Connected to device {}", &stringified_addr);
@@ -997,17 +1018,17 @@ impl IdleBleService {
                 }
 
                 log::info!("Message sent to device {}", &stringified_addr);
-                device.disconnect().await?;
+                // device.disconnect().await?;
                 if message_id != "" {
                     Ok(message_id)
                 } else {
                     Err("Message ID not found".into())
                 }
-            }
-            None => {
-                return Err("Device not found".into());
-            }
-        }
+            // }
+            // None => {
+            //     return Err("Device not found".into());
+            // }
+        // }
     }
 
     
@@ -1066,12 +1087,12 @@ impl StartedBleService {
     // }
 
     pub async fn stop(self, sender: &mut BleResultSender) -> QaulBleService {
-        if let Err(err) = self.cmd_handle.send(BleMainLoopEvent::Stop).await {
-            log::error!("Failed to stop bluetooth service: {:#?}", &err);
-            sender.send_stop_unsuccessful(err.to_string());
-            return QaulBleService::Started(self);
-        }
-        sender.send_stop_successful();
+        // if let Err(err) = self.cmd_handle.send(BleMainLoopEvent::Stop).await {
+        //     log::error!("Failed to stop bluetooth service: {:#?}", &err);
+        //     sender.send_stop_unsuccessful(err.to_string());
+        //     return QaulBleService::Started(self);
+        // }
+        // sender.send_stop_successful();
 
         QaulBleService::Idle(self.join_handle.unwrap().await)
     }
