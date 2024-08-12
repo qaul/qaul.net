@@ -1,11 +1,12 @@
 use crate::rpc::utils::*;
 use bluer::{Adapter, Address};
 use lazy_static::lazy_static;
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::iter;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
-
 #[derive(Debug, Clone)]
 pub struct BleScanDevice {
     pub qaul_id: Vec<u8>,
@@ -125,7 +126,10 @@ pub fn update_last_found(mac_address: Address) {
     let mut devices = IGNORE_LIST.lock().unwrap();
     let k = devices.get_mut(&mac_address);
     match k {
-        Some(device) => device.update_last_found(),
+        Some(device) => {
+            device.last_found_time = current_time_millis();
+            log::info!("Time updated");
+        }
         None => log::warn!("Device not discovered"),
     };
 }
@@ -135,6 +139,7 @@ pub fn remove_ignore_device_by_mac(mac_address: Address) {
     let mut devices = IGNORE_LIST.lock().unwrap();
     // devices.retain(|device| device.mac_address != mac_address);
     devices.remove(&mac_address);
+    log::info!("Device removed from ignore list");
 }
 
 /// Get the current time in milliseconds since UNIX_EPOCH.
@@ -158,6 +163,12 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
                 continue;
             }
             for (_, device) in ignore_list.iter() {
+                log::warn!(
+                    "Current time: {}, device last found {}",
+                    current_time,
+                    device.last_found_time
+                );
+
                 if device.last_found_time != 0 && device.last_found_time < current_time - 5000 {
                     let mac_address: Address = device.mac_address;
                     if device.qaul_id.is_empty() {
@@ -169,12 +180,12 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
                         adapter.clone(),
                         mac_address,
                     );
-                    // remove_device_by_mac(mac_address);
                     remove_ignore_device_by_mac(mac_address);
+                    // remove_device_by_mac(mac_address);
                     drop(ignore_list);
                     break;
                 } else {
-                    // log::info!("Device in range: {:?}", device.mac_address);
+                    log::info!("Device in range: {:?}", device.mac_address);
                 }
             }
         }
@@ -193,7 +204,7 @@ pub fn message_received(e: (String, Address), mut internal_sender: BleResultSend
     };
     // let json_message = String::from_utf8_lossy(&byte_encoded_message);
     // log::error!("Received messages: {:?} ", json_message);
-    let msg_object: Message = match serde_json::from_str(&json_message) {
+    let msg_object: Message = match serde_json::from_str(&json_message) {   
         Ok(v) => v,
         Err(e) => {
             println!("Failed to parse JSON: {}", e);
@@ -235,4 +246,13 @@ pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
         .map(|i| u8::from_str_radix(&hex[i..i + 2], 16))
         .collect();
     bytes_result.unwrap()
+}
+
+// Random string name generator
+pub fn get_random_string(length: usize) -> String {
+    let mut rng = thread_rng();
+    iter::repeat_with(|| rng.sample(Alphanumeric))
+        .take(length)
+        .map(char::from)
+        .collect()
 }
