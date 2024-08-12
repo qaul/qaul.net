@@ -1,4 +1,5 @@
 use super::super::BleRpc;
+use super::utils::find_device_by_mac;
 use crate::ble::ble_uuids::{main_service_uuid, msg_char, msg_service_uuid, read_char};
 // use crate::rpc::SysRpcReceiver;
 use crate::{
@@ -111,7 +112,7 @@ impl IdleBleService {
             .collect(),
             tx_power: advert_mode,
             discoverable: Some(true),
-            local_name: Some("qaul.net".to_string()),
+            local_name: Some(utils::get_random_string(5)),
             ..Default::default()
         };
         match self.adapter.advertise(le_advertisement).await {
@@ -163,7 +164,7 @@ impl IdleBleService {
                     log::info!(
                         "Read request received from device: {:?}",
                         &(req.device_address)
-                    );
+                    );      
                     match utils::find_ignore_device_by_mac(req.device_address) {
                         Some(_) => {
                             utils::update_last_found(req.device_address);
@@ -189,8 +190,6 @@ impl IdleBleService {
                             //         }
                             //     };
                             // });
-                        
-
                         }
                     }
                     let value = qaul_id.clone();
@@ -266,7 +265,10 @@ impl IdleBleService {
                                 return None;
                             }
                             match self.adapter.device(addr) {
-                                Ok(device) => Some(BleMainLoopEvent::DeviceDiscovered(device)),
+                                Ok(device) => {
+                                    log::warn!("Discovered device {:?}", addr);
+                                    Some(BleMainLoopEvent::DeviceDiscovered(device))
+                                },
                                 Err(_) => None,
                             }
                         },
@@ -555,7 +557,9 @@ impl IdleBleService {
                                                     }
                                                 // });
                                             }
-                                            _ => (),
+                                            _ => {
+                                                log::info!("Received unknown rpc event");
+                                            },
                                         }
                                     }
                                 }
@@ -591,18 +595,22 @@ impl IdleBleService {
         let mut read_char_uuid_found = false;
         let mut msg_receivers: Vec<CharacteristicReader> = vec![];
         let stringified_addr = utils::mac_to_string(&device.address());
+        let device_name = device.name().await.unwrap().unwrap_or_default();
+        if !(device_name.len() == 5 || device_name == "qaul") {
+            return Err("Not a Qaul device".into());
+        }
         log::info!(
             "Discovered device {} with name {:?}",
             &stringified_addr,
-            &device.name().await.unwrap().unwrap_or_default(),
+            &device_name,
         );
-        let mut retries = 2;
-        log::warn!("Device not connected. Trying to connect... {:?}", device.is_connected().await?);
+        let mut retries = 1;
         if !device.is_connected().await? {   
+            log::warn!("Device not connected. Trying to connect...");
             loop {
                 match device.connect().await {
                     Ok(()) => break,
-                    Err(err) => {
+                    Err(err) => {   
                         if retries > 0 {
                             log::error!("    Connect error: {}", &err);
                             retries -= 1;
@@ -616,6 +624,9 @@ impl IdleBleService {
         }
         let services_discovered = device.services().await?;
         for service in services_discovered {
+            if read_char_uuid_found {
+                break;
+            }
             let service_uuid = service.uuid().await?;
             log::info!(
                 "Service UUID: {:?} for device {:?}",
@@ -649,7 +660,7 @@ impl IdleBleService {
                         rssi,
                         mac_address: device.address(),
                         device: device.clone(),
-                        last_found_time: 0,
+                        last_found_time: utils::current_time_millis(),
                         name: device.name().await.unwrap().unwrap_or_default(),
                         is_connected: false,
                     };
@@ -666,7 +677,8 @@ impl IdleBleService {
                         .borrow_mut()
                         .insert(remote_qaul_id.clone(), device.address());
 
-                    sender.send_device_found(remote_qaul_id, rssi)
+                    sender.send_device_found(remote_qaul_id, rssi);
+                    break;
                 }
             }
         }
@@ -688,44 +700,12 @@ impl IdleBleService {
         &self,
         internal_sender: BleResultSender,
         mut msg_chara_ctrl: CharacteristicControl,
-        // mut reader_opt: Option<CharacteristicReader>,
-        // message_tx: Sender<BleMainLoopEvent>,
     ) {
         let (ble_msg_sender, ble_msg_reciever) = async_std::channel::unbounded::<(Address, Vec<u8>)>();
                 
         async_std::task::spawn(async move {
-
-            // read_res = async {
-            //     match &mut reader_opt {
-            //         Some(reader) => reader.read(&mut read_buf).await,
-            //         None => future::pending().await,
-            //     }
-            // } => {
-            //     match read_res {
-            //         Ok(0) => {
-            //             println!("Write stream ended");
-            //             reader_opt = None;
-            //         }
-            //         Ok(n) => {
-            //             value = read_buf[0..n].to_vec();
-            //             println!("Write request with {} bytes: {:x?}", n, &value);
-            //         }
-            //         Err(err) => {
-            //             println!("Write stream error: {}", &err);
-            //             reader_opt = None;
-            //         }
-            //     }
-            // }
-
-
-            log::info!("Spawned message listener for device.");
-            // let reader.read(&mut read_buf).await;
-            // let mut buffer = vec![0; 20];
-            // reader.
-            // log::info!("Reader size {:?}", reader.mtu());               
+            log::info!("Spawned message listener for device.");             
             loop {
-
-                // let msg_size = reader.read(&mut buffer).await;
                 if let Ok((mac_address, buffer)) = ble_msg_reciever.recv().await{
                     if buffer.len() == 0 {
                         log::info!("Write stream from device {:?} has ended", &mac_address);
@@ -737,7 +717,7 @@ impl IdleBleService {
                             let trimmed = hex_msg.trim_end_matches('0');
                             hex_msg = trimmed.to_string();
                         }
-                        // log::info!("Received message: {:?} ", hex_msg);
+                        log::info!("Received message: {:?} from {:?}", &hex_msg, &mac_address);
                         let stringified_addr = utils::mac_to_string(&mac_address);
 
                         match utils::find_msg_map_by_mac(stringified_addr.clone()) {
@@ -752,10 +732,6 @@ impl IdleBleService {
                                         hex_msg = trim_old_value.to_string();
 
                                         utils::message_received((hex_msg, mac_address), internal_sender.clone());
-                                        // let _ = message_tx
-                                        //     .send(BleMainLoopEvent::MessageReceived((hex_msg, mac_address)))
-                                        //     .await
-                                        //     .map_err(|err| log::error!("{:#?}", err));
                                         utils::remove_msg_map_by_mac(stringified_addr);
                                     }
                                 } else {
@@ -783,33 +759,7 @@ impl IdleBleService {
                                 }
                             }
                         }
-                        // let mut data = if let Some(stripped) = hex_msg.strip_prefix("2424") {
-                        //     stripped.to_string()
-                        // } else {
-                        //     hex_msg.to_string()
-                        // };
-
-                        // data = if let Some(stripped) = data.strip_suffix("2424") {
-                        //     stripped.to_string()
-                        // } else {
-                        //     data.to_string()
-                        // };
-                        
-                        // let msg_object: Message = serde_json::from_str(&data).unwrap();
-                        // let message = msg_object.message.unwrap();
-                        // log::error!("Received message: {:?} ", data);
-                        // let _ = message_tx
-                        //     .send(BleMainLoopEvent::MessageReceived((message, mac_address)))
-                        //     .await
-                        //     .map_err(|err| log::error!("{:#?}", err));
-                //     }
-                //     Err(err) => {
-                //         println!("Write stream error: {}", &err);
-                //         break;
-                //     }
-                // }
-            }
-                // buffer.clear();
+                }
             }
         });
 
@@ -817,8 +767,28 @@ impl IdleBleService {
         loop {
             match msg_chara_ctrl.next().await {
                 Some(CharacteristicControlEvent::Write(write)) => {
+                    let mut device_known: bool = true;
                     // log::info!("Accepting write event with MTU {} from {}", write.mtu(), write.device_address());
                     let mac_address = write.device_address();
+                    match find_device_by_mac(mac_address) {
+                        Some(_) => {
+                            utils::update_last_found(mac_address);
+                        }
+                        None => {
+                            device_known = false;
+                            log::warn!("Device not found in known devices");
+                            // // match self.adapter.device(mac_address) {
+                            //     Ok(device) => {
+                            //         // self.
+                                    // self.on_device_discovered(&device, &mut internal_sender.clone()).await.unwrap();
+                            //     },
+                            //     Err(_) => {
+                            //         // log::error!("Error:");
+                            //     }
+                            // };
+                            
+                        }
+                    }
                     let mut read_buf = vec![0; 20               ];
                     if let Ok(mut reader) = write.accept() {   
                         let k = reader.read(&mut read_buf).await;
@@ -828,23 +798,19 @@ impl IdleBleService {
                                 continue;
                             }
                             Ok(_) => {
-                                // log::error!("req {:?}  = {:?}", &read_buf, &read_buf.len());                              
-                                // let message_tx = message_tx.clone();
-                                let _ = ble_msg_sender.send((mac_address, read_buf)).await; 
+                                if device_known { 
+                                    let _ = ble_msg_sender.send((mac_address, read_buf)).await; 
+                                }
                             },
                             Err(err) => {
                                 log::error!("Write stream error: {}", &err);
                             }
                         }     
-                        // let _ = self
-                        //     .spawn_msg_listener(Some(reader), message_tx, mac_address)
-                        //     .await;
                     } else {
                         log::error!("Error accepting write request");
                     }
                 }
-                _ => break,
-                // CharacteristicControlEvent::Notify(_) => (),
+                _ => continue,
             }
         }
         }); 
@@ -855,7 +821,7 @@ impl IdleBleService {
         &self,
         message_id: String,
         receiver_id: &mut Vec<u8>,
-        sender_id: Vec<u8>,
+        sender_id: Vec<u8>,                     
         data: Vec<u8>,
     ) -> Result<String, Box<dyn Error>> {
         log::info!("Sending direct message to {:?}", &receiver_id);
@@ -871,7 +837,7 @@ impl IdleBleService {
                 let device =  match self.adapter.device(*mac_address) {
                     Ok(device) => device,
                     Err(err) => {
-                        log::error!("Error: {:#?}", err);
+                        log::error!("Error:: {:#?}", err);
                         return Err("Error getting device".into());
                     }
                 };
@@ -952,14 +918,19 @@ impl IdleBleService {
                     }
                 }
                 log::info!("Connected to device {}", &stringified_addr);
+                let mut read_char_found = false;
                 for service in device.services().await? {
+                    if read_char_found {
+                        break;
+                    }
                     log::info!("Service UUID: {:?}", service.uuid().await?);
                     if service.uuid().await? == main_service_uuid() {
                         for chara in service.characteristics().await? {
                             log::info!("chara = {}", chara.uuid().await?);
                             if chara.uuid().await? == msg_char() {
+                                utils::update_last_found(*mac_address);
                                 // chara.write(&data).await?;
-
+                                read_char_found = true;
                                 log::error!("queue length =  {}", send_queue.len());
                                 // let write_io = chara.write_io().await?;
                                 while send_queue.len() > 0 {
@@ -1136,12 +1107,12 @@ pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
 fn get_filter() -> bluer::DiscoveryFilter {
     let mut qaul_uuids = HashSet::new();
     qaul_uuids.insert(main_service_uuid());
-    qaul_uuids.insert(msg_service_uuid());
     // qaul_uuids.insert(read_char());
     // qaul_uuids.insert(msg_char());
 
     bluer::DiscoveryFilter {
         uuids: qaul_uuids,
+        transport: bluer::DiscoveryTransport::Le,
         ..Default::default()
     }
 }
