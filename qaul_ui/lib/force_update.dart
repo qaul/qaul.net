@@ -75,12 +75,15 @@ class ForceUpdateSystem {
 
   static Future<(bool required, Version? version)> shouldForceUpdate() async {
     final appDocumentDir = await _qaulRpcFilesDir();
+    if (!appDocumentDir.existsSync()) {
+      return (false, null);
+    }
+
     final entities = appDocumentDir.listSync();
     for (final e in entities) {
       if (!e.path.endsWith('version') || !_isFile(e)) {
         continue;
       }
-
       try {
         var versionFile = File.fromUri(e.uri).readAsStringSync();
         if (_invalidSemverFormat.hasMatch(versionFile)) {
