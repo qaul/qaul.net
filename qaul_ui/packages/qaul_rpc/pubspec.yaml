@@ -29,6 +29,7 @@ dependencies:
   fast_base58: ^0.2.1
   hooks_riverpod: ^1.0.4
   utils: { "path": "../utils" }
+  path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:

@@ -56,20 +56,7 @@ class ForceUpdateSystem {
     // On iOS, it's easiePr to use `getApplicationDocumentsDirectory`; however, the path returned would be:
     // /var/mobile/Containers/Data/Application/THE-DEVICE-ID/Library/Application Support
     final appDocumentDir = await getApplicationSupportDirectory();
-
-    if (Platform.isMacOS) {
-      var dir = Directory("${appDocumentDir.parent.path}/net.qaul.qaul");
-      assert(dir.existsSync());
-      return dir;
-    }
-    if (Platform.isWindows) {
-      var dir =
-          Directory("${appDocumentDir.parent.parent.path}\\qaul\\qaul\\config");
-      assert(dir.existsSync());
-      return dir;
-    }
-
-    // if Platform.isAndroid
+    // if Platform.isMacOS || Platform.isWindows || Platform.isAndroid
     return appDocumentDir;
   }
 
