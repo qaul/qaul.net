@@ -26,15 +26,12 @@ class LibqaulFFI extends LibqaulInterface {
 
     // load library
     if (Platform.isLinux) {
-      // find the library in the rust target build folder
-      // TODO: target Raspberry
       try {
         _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
       } catch (e) {
         debugPrint("$e");
       }
     } else if (Platform.isMacOS) {
-      // find the library in the rust target build folder
       _lib = DynamicLibrary.open('libqaul.dylib');
     } else if (Platform.isWindows) {
       var lib =
@@ -54,39 +51,43 @@ class LibqaulFFI extends LibqaulInterface {
 
   @override
   Future<void> start() async {
-    // check what system we are initializing
-    if (Platform.isLinux &&
-        Platform.environment.containsKey('SNAP_USER_COMMON')) {
-      _log.finer("flutter start snap libqaul");
-      // start libqaul with path to storage location
-      final start =
-          _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>('start');
+    _log.finer("flutter start snap libqaul");
+    final start = _lib!.lookupFunction<StartFunctionRust, StartFunctionDart>(
+      'start',
+    );
 
-      final path = '${Platform.environment['SNAP_USER_COMMON']}';
+    final path = await _getAppConfigStoragePath();
 
-      final pathBytes = Uint8List.fromList(path.codeUnits);
-      final buffer = malloc<Uint8>(pathBytes.length +1);
+    final pathBytes = Uint8List.fromList(path.codeUnits);
+    final buffer = malloc<Uint8>(pathBytes.length + 1);
 
-      try {
-        for (var i = 0; i < pathBytes.length; i++) {
-          buffer[i] = pathBytes[i];
-        }
-        buffer[pathBytes.length] = 0;
-
-        start(buffer);
-      } catch (e) {
-        debugPrint("$e");
-      } finally {
-        malloc.free(buffer);
+    try {
+      for (var i = 0; i < pathBytes.length; i++) {
+        buffer[i] = pathBytes[i];
       }
-    } else {
-      _log.finer("flutter start_desktop libqaul");
-      // start libqaul with finding paths to save the configuration files
-      final start = _lib!
-          .lookupFunction<StartDesktopFunctionRust, StartDesktopFunctionDart>(
-              'start_desktop');
-      start();
+      buffer[pathBytes.length] = 0;
+
+      start(buffer);
+    } catch (e) {
+      debugPrint("$e");
+    } finally {
+      malloc.free(buffer);
     }
+  }
+
+  Future<String> _getAppConfigStoragePath() async {
+    if (Platform.isLinux) {
+      final env = Platform.environment;
+      if (env.containsKey("SNAP_USER_COMMON")) {
+        return env['SNAP_USER_COMMON']!;
+      }
+      if (env.containsKey("FLUTTER_ROOT") &&
+          ["FLUTTER_ROOT"].contains('snap')) {
+        return '${env['HOME']}/snap/flutter/common/qaul';
+      }
+      return '${env['HOME']}/.config/qaul';
+    }
+    return (await getApplicationSupportDirectory()).path;
   }
 
   @override
