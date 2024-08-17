@@ -18,12 +18,6 @@ pub struct BleScanDevice {
     pub is_connected: bool,
 }
 
-impl BleScanDevice {
-    pub fn update_last_found(&mut self) {
-        self.last_found_time = current_time_millis();
-    }
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct Message {
     #[serde(rename = "qaul_id")]
@@ -60,7 +54,11 @@ mod tests {
 /// Add a new device to list of all previously discovered devices.
 pub fn add_device(device: BleScanDevice) {
     let mut devices = DEVICE_LIST.lock().unwrap();
-    devices.insert(device.mac_address, device);
+    if devices.contains_key(&device.mac_address) {
+        devices.get_mut(&device.mac_address).map(|val| { *val = device; });
+    }else {
+        devices.insert(device.mac_address, device);
+    }
 }
 
 /// Key value lookup for previously discovered.
@@ -90,7 +88,11 @@ pub fn remove_device_by_mac(mac_address: Address) {
 /// Add a new message to the message map maintained by ble listner.
 pub fn add_msg_map(stringified_addr: String, hex_msg: String) {
     let mut msg_map = MSG_MAP.lock().unwrap();
-    msg_map.insert(stringified_addr, hex_msg);
+    if msg_map.contains_key(stringified_addr.as_str()) {
+        msg_map.get_mut(&stringified_addr).map(|val| { *val = hex_msg; });
+    }else {
+        msg_map.insert(stringified_addr, hex_msg);
+    }
 }
 
 /// Key value lookup for message map maintained by ble listner.
@@ -108,7 +110,11 @@ pub fn remove_msg_map_by_mac(stringified_addr: String) {
 /// Add a new device to list of devices present nearby and maintain their last found time.
 pub fn add_ignore_device(device: BleScanDevice) {
     let mut ignore_devices = IGNORE_LIST.lock().unwrap();
-    ignore_devices.insert(device.mac_address, device);
+    if ignore_devices.contains_key(&device.mac_address) {
+        ignore_devices.get_mut(&device.mac_address).map(|val| { *val = device; });
+    }else {
+        ignore_devices.insert(device.mac_address, device);
+    }
 }
 
 /// Key value lookup for devices present nearby.
