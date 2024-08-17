@@ -154,8 +154,8 @@ impl IdleBleService {
             control_handle: msg_chara_handle,
             ..Default::default()
         };
-        // let adp = self.adapter.clone();
-        // let cmd_tx2 = cmd_tx.clone();
+        let adp = self.adapter.clone();
+        let cmd_tx2 = cmd_tx.clone();
         let main_characterstic = Characteristic {
             uuid: read_char(),
             read: Some(CharacteristicRead {
@@ -167,29 +167,42 @@ impl IdleBleService {
                     );      
                     match utils::find_ignore_device_by_mac(req.device_address) {
                         Some(_) => {
-                            utils::update_last_found(req.device_address);
+                            // utils::update_last_found(req.device_address);
                         }
                         None => {
-                            // let adp2 = adp.clone();
-                            // let cmd_tx2 = cmd_tx2.clone();
-                            // async_std::task::spawn(async move {
-                            //     match adp2.device(req.device_address) {
-                            //         Ok(device) => {
-                            //             match cmd_tx2.send(BleMainLoopEvent::DeviceDiscovered(device)).await {
-                            //                 Ok(_) => {
-                            //                     log::info!("Device discovered event sent");
-                            //                 }
-                            //                 Err(err) => {
-                            //                     log::error!("Error sending device discovered event: {:#?}", err);
-                            //                 }
-                            //             };
-                            //             // self.on_device_discovered( &device, &mut internal_sender);
-                            //         },
-                            //         Err(e) => {
-                            //             log::error!("Error: {:#?}", e);
-                            //         }
-                            //     };
-                            // });
+                            let adp2 = adp.clone();
+                            let cmd_tx2 = cmd_tx2.clone();
+                            async_std::task::spawn(async move {
+                                match adp2.device(req.device_address) {
+                                    Ok(device) => {
+                                        match cmd_tx2.send(BleMainLoopEvent::DeviceDiscovered(device.clone())).await {
+                                            Ok(_) => {
+
+                                                // Add a null ble_device to stop event from being sent again
+                                                // Will be update in func: on_device_discovered.
+                                                let ble_device = utils::BleScanDevice {
+                                                    qaul_id: vec![],
+                                                    rssi: 0,
+                                                    mac_address: device.address(),
+                                                    name: device.name().await.unwrap().unwrap_or_default(),
+                                                    device: device,
+                                                    last_found_time: utils::current_time_millis(),
+                                                    is_connected: false,
+                                                };
+                                                utils::add_ignore_device(ble_device);
+                                                log::info!("Device discovered event sent");
+                                            }
+                                            Err(err) => {
+                                                log::error!("Error sending device discovered event: {:#?}", err);
+                                            }
+                                        };
+                                        // self.on_device_discovered( &device, &mut internal_sender);
+                                    },
+                                    Err(e) => {
+                                        log::error!("Error: {:#?}", e);
+                                    }
+                                };
+                            });
                         }
                     }
                     let value = qaul_id.clone();
@@ -595,9 +608,9 @@ impl IdleBleService {
         let mut read_char_uuid_found = false;
         let mut msg_receivers: Vec<CharacteristicReader> = vec![];
         let stringified_addr = utils::mac_to_string(&device.address());
-        let device_name = device.name().await.unwrap().unwrap_or_default();
+        let device_name = device.name().await.unwrap_or_default().unwrap_or_default();
         if !(device_name.len() == 5 || device_name == "qaul") {
-            return Err("Not a Qaul device".into());
+            return Err("Not a Qaul device".into());     
         }
         log::info!(
             "Discovered device {} with name {:?}",
@@ -772,19 +785,19 @@ impl IdleBleService {
                     let mac_address = write.device_address();
                     match find_device_by_mac(mac_address) {
                         Some(_) => {
-                            utils::update_last_found(mac_address);
+                            // utils::update_last_found(mac_address);
                         }
                         None => {
                             device_known = false;
                             log::warn!("Device not found in known devices");
-                            // // match self.adapter.device(mac_address) {
+                            // match self.adapter.device(mac_address) {
                             //     Ok(device) => {
-                            //         // self.
+                                    // self.
                                     // self.on_device_discovered(&device, &mut internal_sender.clone()).await.unwrap();
-                            //     },
-                            //     Err(_) => {
-                            //         // log::error!("Error:");
-                            //     }
+                                // },
+                                // Err(_) => {
+                                //     // log::error!("Error:");
+                                // }
                             // };
                             
                         }
