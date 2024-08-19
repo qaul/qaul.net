@@ -17,9 +17,7 @@ pub async fn listen_for_sys_msgs(
 ) -> Result<(), Box<dyn Error>> {
     let mut local_sender_handle = internal_sender.clone();
     loop {
-        // async_std::task::spawn(async move {
         let evt = rpc_receiver.recv().await;
-        // log::info!("Received event: ",);
         match evt {
             None => {
                 log::info!("Qaul 'sys' message channel closed. Shutting down gracefully.");
@@ -32,36 +30,30 @@ pub async fn listen_for_sys_msgs(
                 match msg.message.unwrap() {
                     StartRequest(req) => match ble_service {
                         QaulBleService::Idle(svc) => {
-                            let mut internal_sender_1 = local_sender_handle.clone();
-                            // let mut internal_sender_2 = local_sender_handle.clone();
-                            // let
+                            let internal_sender_1 = local_sender_handle.clone();
                             let qaul_id = Bytes::from(req.qaul_id);
-                            let handle =async_std::task::spawn(async move {
-                            // let mut
-                            let ble_service = svc
-                                .advertise_scan_listen(qaul_id, None, internal_sender_1.clone(), rpc_receiver.clone())
-                                .await;
-                            log::info!("BLE Service started successfully");
+                            let handle = async_std::task::spawn(async move {
+                                let ble_service = svc
+                                    .advertise_scan_listen(
+                                        qaul_id,
+                                        None,
+                                        internal_sender_1,
+                                        rpc_receiver.clone(),
+                                    )
+                                    .await;
+                                log::info!("BLE Service started successfully");
 
-                            match ble_service {
-                                QaulBleService::Idle(_) => {
-                                    log::error!("Error occured in configuring BLE module");
+                                match ble_service {
+                                    QaulBleService::Idle(_) => {
+                                        log::error!("Error occured in configuring BLE module");
+                                    }
+                                    QaulBleService::Started(svc) => {
+                                        svc.spawn_handles().await;
+                                    }
                                 }
-                                QaulBleService::Started(svc) => {
-                                    // ble_service = QaulBleService::Started(svc);
-                                    //  async_std::task::spawn(async move {
-                                    // ble_service =
-                                    svc.spawn_handles().await;
-                                    // svc.join_handles.await;
-                                    // });
-                                }
-                            }
-                            internal_sender_1.send_start_successful();
-                            //     ble_service
+                                local_sender_handle.send_start_successful();
                             });
                             handle.await;
-                            log::info!("BLE Service started successfully");
-                            // continue;
                             break;
                         }
                         QaulBleService::Started(_) => {
@@ -69,26 +61,12 @@ pub async fn listen_for_sys_msgs(
                                 "Received Start Request, but bluetooth service is already running!"
                             );
                             local_sender_handle.send_result_already_running()
-                            // continue;
                         }
                     },
                     // This streams were mearged into IdleBleService stream.
-                    // The events are recieved by the main loop and handled there. 
-                    StopRequest(_) => {},
-                    DirectSend(_) => {},
-                            // log::info!("Received Direct Send Request: {:#?}", req);
-                            // let receiver_id = req.receiver_id.clone();
-                            // match svc.direct_send(req).await {
-                            //     Ok(_) => local_sender_handle.send_direct_send_success(receiver_id),
-                            //     Err(err) => local_sender_handle
-                            //         .send_direct_send_error(receiver_id, err.to_string()),
-                            // }
-                        
-                        // QaulBleService::Idle(_) => {
-                        //     log::info!("Received Direct Send Request, but bluetooth service is not running!");
-                        //     local_sender_handle.send_result_not_running()
-                        // }
-                    // },
+                    // The events are recieved by the main loop and handled there.
+                    StopRequest(_) => {}
+                    DirectSend(_) => {}
                     InfoRequest(_) => {
                         let mut sender_handle_clone = internal_sender.clone();
                         spawn(async move {
@@ -106,7 +84,6 @@ pub async fn listen_for_sys_msgs(
                 }
             }
         }
-        // });
     }
     Ok(())
 }

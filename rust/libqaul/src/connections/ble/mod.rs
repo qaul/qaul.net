@@ -119,7 +119,7 @@ impl Ble {
                 async_std::task::sleep(std::time::Duration::from_secs(5)).await;
             }            
             ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
-            
+
             // initialize local state
             {
                 // create node states
@@ -608,14 +608,12 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        log::info!("BLE send feed message to {:?}", receiver_small_id.clone());
         Self::message_send(receiver_small_id, sender_id, buf);
     }
 
     /// BLE message received
     fn message_received(message: proto::BleDirectReceived) {
         log::info!("BLE message received");
-        log::info!("qaul: Data recieved {:?}", &message.data);
         // get node ID of sender
         let node_id: PeerId;
         if let Some(node) = Neighbours::node_from_small_id(message.from.clone()) {
