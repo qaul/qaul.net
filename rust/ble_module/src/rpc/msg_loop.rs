@@ -12,7 +12,7 @@ use super::BleRpc;
 /// Manages all sys messages defined in the 'ble.proto' file.
 pub async fn listen_for_sys_msgs(
     mut rpc_receiver: BleRpc,
-    mut ble_service: QaulBleService,
+    ble_service: QaulBleService,
     internal_sender: BleResultSender,
 ) -> Result<(), Box<dyn Error>> {
     let mut local_sender_handle = internal_sender.clone();
@@ -72,20 +72,10 @@ pub async fn listen_for_sys_msgs(
                             // continue;
                         }
                     },
-                    StopRequest(_) => match ble_service {
-                        QaulBleService::Started(svc) => {
-                            log::info!("Received Stop Request");
-                            ble_service = svc.stop(&mut local_sender_handle).await;
-                        }
-                        QaulBleService::Idle(_) => {
-                            log::warn!(
-                                "Received Stop Request, but bluetooth service is not running!"
-                            );
-                            local_sender_handle.send_stop_successful(); // Is this really a success case?
-                        }
-                    },
-                    DirectSend(req) => match ble_service {
-                        QaulBleService::Started(ref mut svc) => {
+                    // This streams were mearged into IdleBleService stream.
+                    // The events are recieved by the main loop and handled there. 
+                    StopRequest(_) => {},
+                    DirectSend(_) => {},
                             // log::info!("Received Direct Send Request: {:#?}", req);
                             // let receiver_id = req.receiver_id.clone();
                             // match svc.direct_send(req).await {
@@ -93,12 +83,12 @@ pub async fn listen_for_sys_msgs(
                             //     Err(err) => local_sender_handle
                             //         .send_direct_send_error(receiver_id, err.to_string()),
                             // }
-                        }
-                        QaulBleService::Idle(_) => {
-                            log::info!("Received Direct Send Request, but bluetooth service is not running!");
-                            local_sender_handle.send_result_not_running()
-                        }
-                    },
+                        
+                        // QaulBleService::Idle(_) => {
+                        //     log::info!("Received Direct Send Request, but bluetooth service is not running!");
+                        //     local_sender_handle.send_result_not_running()
+                        // }
+                    // },
                     InfoRequest(_) => {
                         let mut sender_handle_clone = internal_sender.clone();
                         spawn(async move {
