@@ -19,7 +19,6 @@ pub mod rpc;
 pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
     let rpc_receiver = rpc::init();
 
-    // Spawn new thread
     thread::spawn(move || {
         let rt = runtime::Builder::new_current_thread()
             .enable_all()
@@ -27,7 +26,6 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
             .expect("Failed to create BLE module tokio runtime!");
 
         rt.block_on(async move {
-            // start BLE module main loop
             main_loop(sys_rpc_callback, rpc_receiver).await;
         });
 
