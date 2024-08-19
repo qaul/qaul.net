@@ -55,8 +55,10 @@ mod tests {
 pub fn add_device(device: BleScanDevice) {
     let mut devices = DEVICE_LIST.lock().unwrap();
     if devices.contains_key(&device.mac_address) {
-        devices.get_mut(&device.mac_address).map(|val| { *val = device; });
-    }else {
+        devices.get_mut(&device.mac_address).map(|val| {
+            *val = device;
+        });
+    } else {
         devices.insert(device.mac_address, device);
     }
 }
@@ -69,13 +71,6 @@ pub fn find_device_by_mac(mac_address: Address) -> Option<BleScanDevice> {
     } else {
         None
     }
-    // match devices
-    //     .iter()
-    //     .find(|device| device.mac_address == mac_address)
-    // {
-    //     Some(device) => Some(device.clone()),
-    //     None => None,
-    // }
 }
 
 #[allow(dead_code)]
@@ -89,8 +84,10 @@ pub fn remove_device_by_mac(mac_address: Address) {
 pub fn add_msg_map(stringified_addr: String, hex_msg: String) {
     let mut msg_map = MSG_MAP.lock().unwrap();
     if msg_map.contains_key(stringified_addr.as_str()) {
-        msg_map.get_mut(&stringified_addr).map(|val| { *val = hex_msg; });
-    }else {
+        msg_map.get_mut(&stringified_addr).map(|val| {
+            *val = hex_msg;
+        });
+    } else {
         msg_map.insert(stringified_addr, hex_msg);
     }
 }
@@ -111,8 +108,10 @@ pub fn remove_msg_map_by_mac(stringified_addr: String) {
 pub fn add_ignore_device(device: BleScanDevice) {
     let mut ignore_devices = IGNORE_LIST.lock().unwrap();
     if ignore_devices.contains_key(&device.mac_address) {
-        ignore_devices.get_mut(&device.mac_address).map(|val| { *val = device; });
-    }else {
+        ignore_devices.get_mut(&device.mac_address).map(|val| {
+            *val = device;
+        });
+    } else {
         ignore_devices.insert(device.mac_address, device);
     }
 }
@@ -134,7 +133,6 @@ pub fn update_last_found(mac_address: Address) {
     match k {
         Some(device) => {
             device.last_found_time = current_time_millis();
-            log::info!("Time updated");
         }
         None => log::warn!("Device not discovered"),
     };
@@ -143,9 +141,7 @@ pub fn update_last_found(mac_address: Address) {
 /// Remove a device from the list of devices present nearby.
 pub fn remove_ignore_device_by_mac(mac_address: Address) {
     let mut devices = IGNORE_LIST.lock().unwrap();
-    // devices.retain(|device| device.mac_address != mac_address);
     devices.remove(&mac_address);
-    log::info!("Device removed from ignore list");
 }
 
 /// Get the current time in milliseconds since UNIX_EPOCH.
@@ -187,7 +183,6 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
                         mac_address,
                     );
                     remove_ignore_device_by_mac(mac_address);
-                    // remove_device_by_mac(mac_address);
                     drop(ignore_list);
                     break;
                 } else {
@@ -198,9 +193,9 @@ pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSend
     });
 }
 
+// Proccess the message recieved and send it to libqaul.
 pub fn message_received(e: (String, Address), mut internal_sender: BleResultSender) {
     let byte_encoded_message = hex_to_bytes(&e.0);
-    // log::error!("Byte array: {:?}", byte_encoded_message);
     let json_message: String = match String::from_utf8(byte_encoded_message) {
         Ok(v) => v,
         Err(e) => {
@@ -208,9 +203,7 @@ pub fn message_received(e: (String, Address), mut internal_sender: BleResultSend
             return;
         }
     };
-    // let json_message = String::from_utf8_lossy(&byte_encoded_message);
-    // log::error!("Received messages: {:?} ", json_message);
-    let msg_object: Message = match serde_json::from_str(&json_message) {   
+    let msg_object: Message = match serde_json::from_str(&json_message) {
         Ok(v) => v,
         Err(e) => {
             println!("Failed to parse JSON: {}", e);
@@ -232,14 +225,8 @@ pub fn message_received(e: (String, Address), mut internal_sender: BleResultSend
 /// Byte to Hex conversion.
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
     let hex_chars: Vec<String> = bytes.iter().map(|byte| format!("{:02x}", byte)).collect();
-
     hex_chars.join("")
 }
-
-// /// Bytes to String conversion.
-// pub fn bytes_to_str(bytes: &[u8]) -> Result<&str, std::str::Utf8Error> {
-//     std::str::from_utf8(bytes)
-// }
 
 /// Hex to Byte conversion.
 pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
