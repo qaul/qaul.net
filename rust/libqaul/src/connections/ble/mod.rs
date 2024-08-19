@@ -112,27 +112,32 @@ impl Ble {
     pub fn init() {
         // get small BLE ID
         let ble_id = Node::get_small_id();
-
         #[cfg(target_os = "linux")]
-        ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
+        async_std::task::spawn(async move {
+            while !ble_module::is_ble_enabled().await {
+                log::error!("BLE not enabled, Please power on bluetooth on your device");
+                async_std::task::sleep(std::time::Duration::from_secs(5)).await;
+            }            
+            ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
+            
+            // initialize local state
+            {
+                // create node states
+                TO_CONFIRM.set(RwLock::new(BTreeMap::new()));
+                NODES.set(RwLock::new(BTreeMap::new()));
 
-        // initialize local state
-        {
-            // create node states
-            TO_CONFIRM.set(RwLock::new(BTreeMap::new()));
-            NODES.set(RwLock::new(BTreeMap::new()));
+                // set it to state
+                let ble = Ble {
+                    ble_id,
+                    status: ModuleStatus::Uninitalized,
+                    devices: Vec::new(),
+                };
+                BLE.set(RwLock::new(ble));
+            }
 
-            // set it to state
-            let ble = Ble {
-                ble_id,
-                status: ModuleStatus::Uninitalized,
-                devices: Vec::new(),
-            };
-            BLE.set(RwLock::new(ble));
-        }
-
-        //#[cfg(target_os = "android")]
-        Self::info_send_request();
+            //#[cfg(target_os = "android")]
+            Self::info_send_request();
+        });
     }
 
     /// set module status
@@ -605,7 +610,7 @@ impl Ble {
         // send the message
         log::info!("BLE send feed message to {:?}", receiver_small_id.clone());
         Self::message_send(receiver_small_id, sender_id, buf);
-    }   
+    }
 
     /// BLE message received
     fn message_received(message: proto::BleDirectReceived) {

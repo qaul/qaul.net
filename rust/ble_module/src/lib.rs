@@ -34,6 +34,10 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
     });
 }
 
+pub async fn is_ble_enabled() -> bool {
+    return IdleBleService::is_ble_enabled().await;
+}
+
 /// Start the setup and main loop of this library
 async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc_receiver: BleRpc) {
     let ble_service = IdleBleService::new().await.unwrap_or_else(|err| {
