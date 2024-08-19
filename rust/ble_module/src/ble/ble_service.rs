@@ -17,7 +17,7 @@ use bytes::Bytes;
 use futures::FutureExt;
 use futures_concurrency::stream::Merge;
 use lazy_static::lazy_static;
-use serde_json::{self, de};
+// use serde_json::{self, de};
 // use std::cmp::max_by_key;
 // use std::string;
 use std::{
@@ -67,7 +67,8 @@ enum BleMainLoopEvent {
 }
 
 impl IdleBleService {
-    /// Initialize a new BleService
+    /// Initialize a new BleService.    
+    /// 
     /// Gets default Bluetooth adapter and initializes a Bluer session
     pub async fn new() -> Result<QaulBleService, Box<dyn Error>> {
         let session = bluer::Session::new().await?;
@@ -354,7 +355,7 @@ impl IdleBleService {
                     .await; 
                 // utils::out_of_range_checker(adapter.clone(), internal_sender.clone());
 
-                loop {
+                'outer: loop {
                     log::warn!("Waiting for event... ");
                     match merged_ble_streams.next().await {
                         Some(evt) => {
@@ -489,22 +490,9 @@ impl IdleBleService {
                                                     );
                                             },
                                             StopRequest(_) => {
-                                                // QaulBleService::Started(svc) => {
                                                 log::info!("Received Stop Request");
-                                                log::info!(
-                                                    "Received stop signal, stopping advertising, scanning, and listening."
-                                                );
-                                                // cmd_sender.send(BleMainLoopEvent::Stop).await;
-                                                // internal_sender.send_stop_successful();
-                                                // break;
-                                                    // svc.stop(&mut local_sender_handle).await;
-                                                // }
-                                                // QaulBleService::Idle(_) => {
-                                                //     log::warn!(
-                                                //         "Received Stop Request, but bluetooth service is not running!"
-                                                //     );
-                                                    // Is this really a success case?
-                                                // }
+                                                internal_sender.send_stop_successful();
+                                                break 'outer;                                                
                                             },
                                             DirectSend(mut req) => {
                                                 // QaulBleService::Started(ref mut svc) => {
@@ -1015,35 +1003,19 @@ impl IdleBleService {
         // }
     }
 
+    /// Check if bluetooth is powered on by the device.
+    pub async fn is_ble_enabled() -> bool {
+        let session = bluer::Session::new().await.unwrap();
+        let adapter = session.default_adapter().await.unwrap();
+        let ble_enabled: bool = adapter.is_powered().await.unwrap();
+        drop(session);
+        return ble_enabled;
+    }
     
 }
 
 impl StartedBleService {
-    // pub async fn spawn_handles(&mut self)
-    // // -> QaulBleService
-    // {
-    //     // let join_handle = self.join_handle.take();
-    //     // self.join_handle = None;
-    //     match self.join_handle.take() {
-    //         Some(join_handles) => {
-    //             // async_std::task::spawn(async move {
-    //             log::info!("Here I am");
-    //             //     task::block_on(async move{
-    //             join_handles.await;
-    //             //     });
-    //             //     log::info!("Here I am 2");
-    //             // });
-    //         }
-    //         None => {
-    //             log::error!("No handle to spawn");
-    //         }
-    //     }
-    //     // QaulBleService::Started(StartedBleService {
-    //     //         join_handle: None,
-    //     //         cmd_handle: self.cmd_handle,
-    //     //     })
-    // }
-
+    /// Spawn the local thread created in IdleBleService
     pub async fn spawn_handles(self) {
         match self.join_handle {
             Some(join_handles) => {
@@ -1053,32 +1025,6 @@ impl StartedBleService {
                 log::error!("No handle to spawn");
             }
         }
-    }
-
-    // pub async fn direct_send(
-    //     &mut self,
-    //     direct_send_request: BleDirectSend,
-    // ) -> Result<(), Box<dyn Error>> {
-    //     self.cmd_handle
-    //         .send(BleMainLoopEvent::SendMessage((
-    //             direct_send_request.message_id,
-    //             direct_send_request.receiver_id,
-    //             direct_send_request.sender_id,
-    //             direct_send_request.data,
-    //         )))
-    //         .await?;
-    //     Ok(())
-    // }
-
-    pub async fn stop(self, sender: &mut BleResultSender) -> QaulBleService {
-        // if let Err(err) = self.cmd_handle.send(BleMainLoopEvent::Stop).await {
-        //     log::error!("Failed to stop bluetooth service: {:#?}", &err);
-        //     sender.send_stop_unsuccessful(err.to_string());
-        //     return QaulBleService::Started(self);
-        // }
-        // sender.send_stop_successful();
-
-        QaulBleService::Idle(self.join_handle.unwrap().await)
     }
 }
 
