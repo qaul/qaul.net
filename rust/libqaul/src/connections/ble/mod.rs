@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! BLE Connection Module
@@ -109,7 +109,7 @@ pub struct Ble {
 
 impl Ble {
     /// initialize the BLE module
-    pub fn init() {
+    pub async fn init() {
         // get small BLE ID
         let ble_id = Node::get_small_id();
         #[cfg(target_os = "linux")]
@@ -117,27 +117,27 @@ impl Ble {
             while !ble_module::is_ble_enabled().await {
                 log::error!("BLE not enabled, Please power on bluetooth on your device");
                 async_std::task::sleep(std::time::Duration::from_secs(5)).await;
-            }            
-            ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
-
-            // initialize local state
-            {
-                // create node states
-                TO_CONFIRM.set(RwLock::new(BTreeMap::new()));
-                NODES.set(RwLock::new(BTreeMap::new()));
-
-                // set it to state
-                let ble = Ble {
-                    ble_id,
-                    status: ModuleStatus::Uninitalized,
-                    devices: Vec::new(),
-                };
-                BLE.set(RwLock::new(ble));
             }
-
-            //#[cfg(target_os = "android")]
-            Self::info_send_request();
+            ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
         });
+
+        // initialize local state
+        {
+            // create node states
+            TO_CONFIRM.set(RwLock::new(BTreeMap::new()));
+            NODES.set(RwLock::new(BTreeMap::new()));
+
+            // set it to state
+            let ble = Ble {
+                ble_id,
+                status: ModuleStatus::Uninitalized,
+                devices: Vec::new(),
+            };
+            BLE.set(RwLock::new(ble));
+        }
+        async_std::task::sleep(std::time::Duration::from_secs(2)).await;
+        //#[cfg(target_os = "android")]
+        Self::info_send_request();
     }
 
     /// set module status

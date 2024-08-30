@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 package net.qaul.ble.service
@@ -53,13 +53,21 @@ class BleService : LifecycleService() {
     private var lastWriteTime = System.currentTimeMillis() + 60000
     private var executor = Executors.newSingleThreadExecutor()
 
-    //
     private val hashMap: HashMap<String, Queue<Triple<String, ByteArray, ByteArray>>> = hashMapOf()
     private val sharedPrefFile = "sharedpreference_qaul_ble"
     private lateinit var sharedPreferences: SharedPreferences
 
     companion
 
+    /**
+    * SERVICE_UUID is the main service advertised by GATT Server
+    * MSG_SERVICE_UUID is not used for normal advertisements(In current architecture)
+    * It is used with extended advertisements (Future Goals).
+    * READ_CHAR and MSG_CHAR are the characteristics inside SERVICE_UUID.
+    * READ_CHAR stores qaul ID for other device to read and confirm qaul device.
+    * MSG_CHAR is used to send and receive messages.
+    * GD_CHAR is unused right now.
+    */
     object {
         var bleService: BleService? = null
         var isAdvertisementRunning = false
@@ -121,22 +129,20 @@ class BleService : LifecycleService() {
                 mainChar.value = qaulId
                 mainService.addCharacteristic(mainChar)
 
-                val msgService = BluetoothGattService(
-                    UUID.fromString(MSG_SERVICE_UUID), BluetoothGattService.SERVICE_TYPE_PRIMARY
-                )
+                // val msgService = BluetoothGattService(
+                //     UUID.fromString(MSG_SERVICE_UUID), BluetoothGattService.SERVICE_TYPE_PRIMARY
+                // )
 
                 val msgChar = BluetoothGattCharacteristic(
                     UUID.fromString(MSG_CHAR),
                     BluetoothGattCharacteristic.PROPERTY_WRITE,
                     BluetoothGattCharacteristic.PERMISSION_WRITE
                 )
-//                msgChar.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-
-                msgService.addCharacteristic(msgChar)
+                // msgService.addCharacteristic(msgChar)
                 mainService.addCharacteristic(msgChar)
                 val serviceList = arrayListOf<BluetoothGattService>()
                 serviceList.add(mainService)
-                serviceList.add(msgService)
+                // serviceList.add(msgService)
                 startGattServer(services = serviceList)
 
                 val dataBuilder = AdvertiseData.Builder()
@@ -181,8 +187,6 @@ class BleService : LifecycleService() {
                 )
             }
         }
-//        t.start()
-
     }
 
     /**
@@ -291,10 +295,8 @@ class BleService : LifecycleService() {
        AppLog.e(TAG, "device : " + device.address + " Device.name = " + device.name )
         if (blackList.find { it.macAddress == device.address } == null) {
             val selectItem = devicesList.toMutableList().find { it.macAddress == device.address }
-//            handler.postDelayed({
             if (selectItem == null) {
 //                AppLog.e(TAG, "device : " + device.address)
-//                AppLog.e(TAG, "UUID : " + result.scanRecord!!.serviceUuids)
                 RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
                 val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
                 bleDevice.bluetoothDevice = device
@@ -303,36 +305,15 @@ class BleService : LifecycleService() {
                 bleDevice.deviceRSSI = rssi
                 bleDevice.macAddress = device.address
                 bleDevice.isConnectable = result.isConnectable
-                //bleDevice.lastFoundTime = System.currentTimeMillis()
+                bleDevice.lastFoundTime = System.currentTimeMillis()
                 devicesList.add(bleDevice)
 
-
-//                Handler(Looper.getMainLooper()).postDelayed({
                 if (result.isConnectable) {
                     connectDevice(bleDevice, isFromMessage = false)
                 }
-//                }, 1200)
-
             } else {
-//                val selectItemIgnore = ignoreList.find { it.macAddress == device.address }
-//                if (selectItemIgnore != null) {
-//                    selectItemIgnore.deviceRSSI = rssi
-//                    selectItemIgnore.scanResult = result
-//                    selectItemIgnore.name = device.name
-//                    selectItemIgnore.isConnectable = result.isConnectable
-//                    selectItemIgnore.lastFoundTime = System.currentTimeMillis()
-////                    if (!selectItemIgnore.isConnected) {
-////                        connectDevice(selectItemIgnore, isFromMessage = false)
-////                    }
-//                } else {
-////                    selectItem.isConnected = false
-////                    devicesList.remove(selectItem)
-//                    AppLog.e(TAG, "zzz device ignored: " + device.address)
-//                }
-                //AppLog.e(TAG, "-------------------> HERE FOR CONNECTION   parseBLEFrame ")
                 ignoreList.find { it.macAddress == device.address }?.lastFoundTime = System.currentTimeMillis()
             }
-//            }, 5000)
         } else {
             AppLog.e(TAG, "zzz device blacklisted: " + device.address)
         }
@@ -408,11 +389,17 @@ class BleService : LifecycleService() {
                 val `val` = ByteArray(characteristic.value.size)
                 System.arraycopy(
                     characteristic.value, 0, `val`, 0, characteristic.value.size
-                )
+                )   
 
                 return `val`
             }
 
+            /**
+            * This method receives write request from the client and manages the bytes written.
+            * The android gatt client can write only 20 or less bytes at a time. 
+            * So, here we use delimiters "$$" for every message before breaking into multiple and sending to the server
+            * On server side, it will concatenate the received bytes and check for the delimiters to form the complete message.
+            */
             override fun onCharacteristicWriteRequest(
                 device: BluetoothDevice,
                 requestId: Int,
@@ -435,7 +422,7 @@ class BleService : LifecycleService() {
                 gattServer!!.sendResponse(
                     device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
-//                Log.e(TAG, "Device Address:: ${device.address}")
+                // Follwing block is for Bytes of same message are coming in packets 
                 if (msgMap.containsKey(device.address)) {
                     var oldValue = msgMap[device.address]
                     if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
@@ -443,10 +430,8 @@ class BleService : LifecycleService() {
                         oldValue += s
                         val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
                             .removePrefix("$$")
-                        if (!msgData.contains("$$")) {
-                        // AppLog.e(TAG, "Data in msgData:: $msgData")  
+                        if (!msgData.contains("$$")) { 
                             val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        // AppLog.e(TAG, "Data in msg Object:: ${msgObject.message}")  
                             if (bleDevice == null) {
                                 bleDevice = BLEScanDevice.getDevice()
                                 bleDevice.macAddress = device.address
@@ -467,13 +452,12 @@ class BleService : LifecycleService() {
                         msgMap[device.address] = oldValue
                     }
                 } else {
+                    // Following block is for single message
                     if (s.startsWith("2424") && s.endsWith("2424")) {
-                        //Send Response of s
                         val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
                             .removePrefix("$$")
                         // AppLog.e(TAG, "Data in msgData:: $msgData")   
-                        val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        // AppLog.e(TAG, "Data in msg Object:: $msgObject.message")   
+                        val msgObject = Gson().fromJson(msgData, Message::class.java) 
                         if (bleDevice == null) {
                             bleDevice = BLEScanDevice.getDevice()
                             bleDevice.macAddress = device.address
@@ -492,6 +476,7 @@ class BleService : LifecycleService() {
                 }
             }
 
+            // Descriptor related methods (Useless for current architecture)
             override fun onDescriptorReadRequest(
                 device: BluetoothDevice,
                 requestId: Int,
@@ -502,6 +487,7 @@ class BleService : LifecycleService() {
                 AppLog.e(TAG, "onDescriptorReadRequest()")
             }
 
+            // Descriptor related methods (Useless for current architecture)
             override fun onDescriptorWriteRequest(
                 device: BluetoothDevice,
                 requestId: Int,
@@ -524,6 +510,7 @@ class BleService : LifecycleService() {
                 super.onExecuteWrite(device, requestId, execute)
             }
 
+            // Notif related methods (Useless for current architecture)
             override fun onNotificationSent(device: BluetoothDevice, status: Int) {
                 super.onNotificationSent(device, status)
             }
@@ -630,8 +617,6 @@ class BleService : LifecycleService() {
         }
         uuidList.clear()
         uuidList.add(ParcelUuid.fromString(SERVICE_UUID))
-        // uuidList.add(ParcelUuid.fromString(MSG_SERVICE_UUID))
-        // TODO: DK
         setFilter(uuidList)
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
@@ -639,17 +624,7 @@ class BleService : LifecycleService() {
 
                 // App.Log.e(TAG, "device : " + result!!.device.name + " Device.address = " + result!!.device.address)
                 RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result!!.device.address)
-                // var uuidsScanned = result!!.device!!.getUuids()
-                // AppLog.e(TAG, "UUID : " + uuidsScanned)
-                // for (uuid in uuidsScanned) {
-                //     // AppLog.e(TAG, "UUID : " + uuid)
-                //     if((uuid.toString().lowercase()).equals(SERVICE_UUID) || (uuid.toString()).lowercase().equals(MSG_SERVICE_UUID)) {
-                //         AppLog.e(TAG, "UUID : " + uuid)
-                    
-                        parseBLEFrame(result!!.device, result.rssi, result)
-                    //     break
-                    // }
-                // }
+                parseBLEFrame(result!!.device, result.rssi, result)
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -689,7 +664,6 @@ class BleService : LifecycleService() {
                 if (bLEDevice.lastFoundTime != null && (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000)) {
                     bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
                     AppLog.e(TAG, " outRangeRunnable-  REMOVE HERE  -> ${bLEDevice.macAddress} ")
-//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
                     devicesList.remove(bLEDevice)
                     ignoreList.remove(bLEDevice)
 //                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
@@ -715,8 +689,6 @@ class BleService : LifecycleService() {
 
             override fun onDisconnected(bleScanDevice: BLEScanDevice) {
                 AppLog.e(TAG, " onDisconnected : ${bleScanDevice.macAddress}")
-//                bleScanDevice.isConnected = false
-//                device.isConnected = false
                 if (!blackList.contains(bleScanDevice)) {
                     devicesList.remove(bleScanDevice)
 //                    ignoreList.remove(bleScanDevice)
@@ -746,18 +718,14 @@ class BleService : LifecycleService() {
                 AppLog.e(TAG, " onServiceDiscovered : $macAddress")
             }
 
+            // Descriptor related methods (Useless for current architecture)
             override fun onDescriptorWrite(bleScanDevice: BLEScanDevice, bleActor: BleActor) {
                 AppLog.e(TAG, " onDescriptorWrite : ${bleScanDevice.macAddress}")
-//                if (!bleActor.isFromMessage) {
                 bleActor.readServiceData(SERVICE_UUID, READ_CHAR)
-//            }
             }
 
             override fun onConnectionFailed(bleScanDevice: BLEScanDevice) {
                 AppLog.e(TAG, "zzz onConnectionFailed : ${bleScanDevice.macAddress}")
-//                bleScanDevice.isConnected = false
-//                device.isConnected = false
-//                ignoreList.removeConcurrent(bleScanDevice)
                 actorMap.remove(bleScanDevice.macAddress)
                 Log.e(
                     TAG,
@@ -815,18 +783,13 @@ class BleService : LifecycleService() {
 
             override fun addToBlackList(bleScanDevice: BLEScanDevice) {
                 blackList.add(bleScanDevice)
-                // AppLog.e(TAG, " addToBlackList : $blackList")
             }
 
             override fun addToIgnoreList(bleScanDevice: BLEScanDevice) {
                 ignoreList.add(bleScanDevice)
-                // AppLog.e(TAG, " addToIgnoreList : $ignoreList")
             }
 
         }
-
-//        device.isConnected = true
-
         val baseBleActor: BleActor? = when {
             isFromMessage -> {
                 if (actorMap[device.macAddress] == null) {
@@ -840,7 +803,6 @@ class BleService : LifecycleService() {
                 BleActor(this, BleConnectionListener())
             }
         }
-        AppLog.e(TAG, "device222222--> ${device.macAddress}")
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor!!
 
@@ -869,23 +831,20 @@ class BleService : LifecycleService() {
                 }
                 hashMap[it.macAddress!!] = queue!!
                 mainQueue = queue
-                // AppLog.d(TAG, " Manual send =======  Queue size was already 1 ")
             } else {
-                // AppLog.d(TAG, " Manual send =====  Queue size was empty ")
                 val queue: Queue<Triple<String, ByteArray, ByteArray>> = LinkedList()
                 queue.add(Triple(id, from, message))
                 hashMap[it.macAddress!!] = queue
                 mainQueue = queue
             }
-            // AppLog.e(TAG, "device--> ${it.macAddress} ${mainQueue?.size}")
             sendMessageFromQueu(it.macAddress!!, true)
 
         }
     }
-
-
+    /**
+    * This Method Will Be Used to add delimiters ""$$" and Send Data to Other Qaul-Device
+    */
     private fun sendMessageFromQueu(macAddress: String, isFromSendMessage: Boolean = false) {
-        //Thread.sleep(10)
         executor.execute {
             if (hashMap.isNotEmpty()) {
                 val queue = hashMap[macAddress]
@@ -912,7 +871,6 @@ class BleService : LifecycleService() {
                                 )
                                 val bleActor =
                                     connectDevice(device = bleDevice, isFromMessage = true)
-//                                Handler(Looper.getMainLooper()).postDelayed({
                                 bleActor.messageId = mesTrip.first
                                 val btArray = Gson().toJson(msg).toByteArray()
                                 val delimiter = ByteArray(2)
@@ -923,8 +881,6 @@ class BleService : LifecycleService() {
                                     TAG,
                                     "data------------>sendMessage Id: ${bleActor.messageId}  ${BLEUtils.byteToHex(bleActor.tempData)}"
                                 )
-//                                },500)
-
                             } else {
                                 AppLog.e(
                                     TAG, "data------------>onMessageSent Failed"
