@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 use crate::rpc::utils::*;
 use bluer::{Adapter, Address};
 use lazy_static::lazy_static;

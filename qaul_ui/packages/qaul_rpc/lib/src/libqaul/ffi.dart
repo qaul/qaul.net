@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 part of 'libqaul.dart';
 
@@ -28,7 +28,7 @@ class LibqaulFFI extends LibqaulInterface {
     if (Platform.isLinux) {
       // find the library in the rust target build folder
       // TODO: target Raspberry
-      try{
+      try {
         _lib = DynamicLibrary.open('../rust/target/$mode/liblibqaul.so');
       } catch (e) {
         debugPrint("$e");
@@ -54,7 +54,8 @@ class LibqaulFFI extends LibqaulInterface {
   @override
   Future<void> start() async {
     // check what system we are initializing
-    if (Platform.isLinux && Platform.environment.containsKey('SNAP_USER_COMMON')) {
+    if (Platform.isLinux &&
+        Platform.environment.containsKey('SNAP_USER_COMMON')) {
       _log.finer("flutter start snap libqaul");
       // start libqaul with path to storage location
       final start =

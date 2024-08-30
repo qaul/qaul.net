@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 package net.qaul.ble.core
@@ -276,7 +276,6 @@ open class BleWrapperClass(context: Activity) {
                         directReceived.data = ByteString.copyFrom(msgObject.message)
 
                         AppLog.e(TAG, "---->onMessageReceived3---> ${directReceived.data}")
-//                            ByteString.copyFrom(msgObject.message, Charset.defaultCharset())
                         bleRes.directReceived = directReceived.build()
                         // AppLog.e(TAG, "---->onMessageReceived msgObject $msgObject")
                         sendResponse(bleRes)
@@ -600,7 +599,6 @@ open class BleWrapperClass(context: Activity) {
     /**
      * Request User to Turn On Location
      */
-
     private fun enableLocation(context: Activity, locationReqCode: Int) {
         Log.i(TAG, "enableLocation()")
 
@@ -608,77 +606,6 @@ open class BleWrapperClass(context: Activity) {
             Settings.ACTION_LOCATION_SOURCE_SETTINGS
         )
         context.startActivityForResult(intent, locationReqCode)
-//
-//        val googleApiClient: GoogleApiClient = GoogleApiClient.Builder(context)
-//            .addApi(LocationServices.API).build()
-//        googleApiClient.connect()
-//
-//        val locationRequest: LocationRequest = LocationRequest.create()
-//        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-//        locationRequest.interval = 10000
-//        locationRequest.fastestInterval = (10000 / 2).toLong()
-//
-//        val builder: LocationSettingsRequest.Builder =
-//            LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-//        builder.setAlwaysShow(true)
-//        val activity1 = context
-//        val result: PendingResult<LocationSettingsResult> =
-//            LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build())
-//        result.setResultCallback { result ->
-//            val status = result.status
-//            when (status.statusCode) {
-//                LocationSettingsStatusCodes.SUCCESS -> AppLog.i(
-//                    TAG,
-//                    "All location settings are satisfied."
-//                )
-//                LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
-//                    AppLog.e(
-//                        TAG,
-//                        "Location settings are not satisfied. Show the user a dialog to upgrade location settings "
-//                    )
-//                    try {
-////                         Show the dialog by calling startResolutionForResult(), and check the result
-////                         in onActivityResult().
-//                        status.startResolutionForResult(activity1, locationReqCode)
-//                    } catch (e: IntentSender.SendIntentException) {
-//                        AppLog.e(
-//                            TAG,
-//                            "PendingIntent unable to execute request."
-//                        )
-//                    }
-//                }
-//                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> AppLog.e(
-//                    TAG,
-//                    "Location settings are inadequate, and cannot be fixed here. Dialog not created."
-//                )
-//            }
-//        }
-
-//        val locationRequest = LocationRequest.create()
-//            .setInterval(10 * 100000)
-//            .setFastestInterval(2 * 100000)
-//            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-//
-//        val builder = LocationSettingsRequest.Builder()
-//            .addLocationRequest(locationRequest)
-//
-//        LocationServices
-//            .getSettingsClient(context)
-//            .checkLocationSettings(builder.build())
-//            .addOnSuccessListener(context) { response: LocationSettingsResponse? -> }
-//            .addOnFailureListener(context) { ex ->
-//                if (ex is ResolvableApiException) {
-//                    try {
-//                        val intentSenderRequest =
-//                            IntentSenderRequest.Builder((ex as ResolvableApiException).resolution)
-//                                .build()
-//                        context.startActivityForResult(intentSenderRequest.fillInIntent, locationReqCode)
-//                     //   resolutionForResult.launch(intentSenderRequest)
-//                    } catch (exception: java.lang.Exception) {
-//                        Log.d(TAG, "enableLocationSettings: $exception")
-//                    }
-//                }
-//            }
     }
 
     /**
