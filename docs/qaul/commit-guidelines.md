@@ -51,6 +51,6 @@ For automated code documentation generation, use triple slashes `///` line comme
 Each code file needs to start with the qaul license:
 
 ```rs
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 ```

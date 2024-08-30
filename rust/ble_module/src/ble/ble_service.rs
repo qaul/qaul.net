@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 use super::super::BleRpc;
 use super::utils::find_device_by_mac;
 use crate::{

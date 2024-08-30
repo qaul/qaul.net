@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Qaul Connections Modules
@@ -93,7 +93,7 @@ impl Connections {
         let internet = Internet::init(&node_keys).await;
 
         // initialize BLE  module
-        Ble::init();
+        Ble::init().await;
 
         let conn = Connections {
             lan: Some(lan),

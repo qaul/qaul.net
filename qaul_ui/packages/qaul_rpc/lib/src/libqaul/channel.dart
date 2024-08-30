@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 part of 'libqaul.dart';
 
@@ -123,7 +123,8 @@ class LibqaulChannel extends LibqaulInterface {
   @override
   Future<Uint8List?> receiveRpc() async {
     try {
-      final Uint8List? result = await _channel.invokeMethod('receiveRpcMessage');
+      final Uint8List? result =
+          await _channel.invokeMethod('receiveRpcMessage');
 
       if (result == null) {
         _log.finest("channel receiveRpcMessage: null received");
