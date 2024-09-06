@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
 import android.graphics.Color
 import android.net.wifi.WifiManager
 import android.os.Build
@@ -14,6 +16,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -78,8 +81,6 @@ class FlutterBackgroundService : Service() {
         permissionHandler.checkAndRequestPermissions { permissionsGranted ->
             if (permissionsGranted) {
                 startService()
-            } else {
-                // Permissions not granted, handle the situation accordingly
             }
         }
     }
@@ -89,7 +90,29 @@ class FlutterBackgroundService : Service() {
         acquireWakeLock()
         val channelId = createNotificationChannel(CHANNEL_ID, CHANNEL_NAME)
         val notification = createNotification(channelId)
-        startForeground(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // For API level 29 and higher, include FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                // For API level 34 and higher, include both service types
+                ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    notification,
+                    FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                )
+            } else {
+                // For API level 29 to 33, only include CONNECTED_DEVICE
+                ServiceCompat.startForeground(
+                    this,
+                    NOTIFICATION_ID,
+                    notification,
+                    FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                )
+            }
+        } else {
+            // For API levels lower than 29, call startForeground without specifying service types
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 
     private fun stopService() {

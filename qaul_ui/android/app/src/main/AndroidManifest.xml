@@ -35,8 +35,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- Android 14 requires specific foreground service types to be defined; see: https://developer.android.com/about/versions/14/changes/fgs-types-required -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
 
     <!-- The queries element is required to open URLs, starting on Android 11 (API 30) -->
     <queries>
@@ -56,6 +59,7 @@
         <service
                 android:name=".FlutterBackgroundService"
                 android:enabled="true"
+                android:foregroundServiceType="connectedDevice|remoteMessaging"
                 android:exported="false"/>
 
         <service
