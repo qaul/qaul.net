@@ -13,7 +13,7 @@ dependencies:
 
   equatable: ^2.0.5
   flutter_app_badger: ^1.5.0
-  flutter_local_notifications: ^16.3.2
+  flutter_local_notifications: ^17.2.2
   logging: ^1.2.0
 
 dev_dependencies:
