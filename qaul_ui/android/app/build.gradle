@@ -40,6 +40,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    // https://developer.android.com/topic/libraries/view-binding/migration#kts
+    buildFeatures {
+        viewBinding = true
+    }
 
     kotlinOptions {
         jvmTarget = '1.8'
