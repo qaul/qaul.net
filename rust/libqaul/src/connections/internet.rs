@@ -92,7 +92,11 @@ impl QaulInternetBehaviour {
 
     fn identify_event(&mut self, event: identify::Event) {
         match event {
-            identify::Event::Received { peer_id, info } => {
+            identify::Event::Received {
+                peer_id,
+                info,
+                connection_id,
+            } => {
                 // add node to floodsub
                 self.floodsub.add_node_to_partial_view(peer_id);
 
@@ -105,15 +109,40 @@ impl QaulInternetBehaviour {
                 log::trace!("  listen addresses: {:?}", info.listen_addrs);
                 log::trace!("  protocols: {:?}", info.protocols);
                 log::trace!("  observed address: {:?}", info.observed_addr);
+                log::trace!("  connection ID: {:?}", connection_id);
             }
-            identify::Event::Sent { peer_id } => {
-                log::trace!("IdentifyEvent::Sent to {:?}", peer_id);
+            identify::Event::Sent {
+                peer_id,
+                connection_id,
+            } => {
+                log::trace!(
+                    "IdentifyEvent::Sent to {:?} via connection ID {:?}",
+                    peer_id,
+                    connection_id
+                );
             }
-            identify::Event::Pushed { peer_id, info: _ } => {
-                log::trace!("IdentifyEvent::Pushed {:?}", peer_id);
+            identify::Event::Pushed {
+                peer_id,
+                info: _,
+                connection_id,
+            } => {
+                log::trace!(
+                    "IdentifyEvent::Pushed {:?} via connection ID {:?}",
+                    peer_id,
+                    connection_id
+                );
             }
-            identify::Event::Error { peer_id, error } => {
-                log::trace!("IdentifyEvent::Error {:?} {:?}", peer_id, error);
+            identify::Event::Error {
+                peer_id,
+                error,
+                connection_id,
+            } => {
+                log::trace!(
+                    "IdentifyEvent::Error {:?} {:?} {:?}",
+                    peer_id,
+                    connection_id,
+                    error
+                );
             }
         }
     }

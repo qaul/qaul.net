@@ -11,7 +11,7 @@ pub mod types;
 
 pub use crate::types::{QaulMessagingData, QaulMessagingReceived, QaulMessagingSend};
 use libp2p::{
-    core::Multiaddr,
+    core::{transport::PortUse, Multiaddr},
     swarm::{
         ConnectionId, NetworkBehaviour, NotifyHandler, OneShotHandler, StreamUpgradeError, ToSwarm,
     },
@@ -121,6 +121,7 @@ impl NetworkBehaviour for QaulMessaging {
         _peer: libp2p::PeerId,
         _addr: &Multiaddr,
         _role_override: libp2p::core::Endpoint,
+        _port_use: PortUse,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
         Ok(Default::default())
     }

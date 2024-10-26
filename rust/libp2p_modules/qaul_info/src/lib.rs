@@ -13,7 +13,7 @@ pub mod protocol;
 pub mod types;
 
 use libp2p::{
-    core::Multiaddr,
+    core::{transport::PortUse, Multiaddr},
     swarm::{NetworkBehaviour, NotifyHandler, OneShotHandler, ToSwarm},
     PeerId,
 };
@@ -96,6 +96,7 @@ impl NetworkBehaviour for QaulInfo {
         _peer: libp2p::PeerId,
         _addr: &Multiaddr,
         _role_override: libp2p::core::Endpoint,
+        _port_use: PortUse,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
         Ok(Default::default())
     }
