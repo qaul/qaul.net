@@ -112,16 +112,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   final Map<String, String> _overflowMenuOptions = {};
 
-  /// Returns [true] if platform is Linux and arch is arm.
-  bool get isLinuxArm {
-    if (!Platform.isLinux) return false;
-
-    // Check 'uname -m' result
-    ProcessResult result = Process.runSync('uname', ['-m']);
-    final arch = result.stdout.trim();
-    return arch != null && (arch.contains('arm') || arch.contains('aarch'));
-  }
-
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
@@ -330,8 +320,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             );
                           }
                         },
-              // the record package is not supported on Linux arm
-              onSendAudioPressed: isLinuxArm
+              // the record package is not supported on Linux
+              onSendAudioPressed: Platform.isLinux
                   ? null
                   : (room.messages?.isEmpty ?? true)
                       ? null
