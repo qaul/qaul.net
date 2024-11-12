@@ -50,6 +50,12 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
     return isReceiving;
   }
 
+  void _loadAudioFile() {
+    audioPath = widget.message.uri;
+    _getDuration();
+    _audioPlayer.setSource(_source);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +73,10 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
         _duration = duration;
       }),
     );
+
+    if (!_isReceivingFile()) {
+      _loadAudioFile();
+    }
   }
 
   @override
@@ -82,11 +92,8 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
   void didUpdateWidget(covariant AudioMessageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.message == widget.message) return;
-
     if (!_isReceivingFile()) {
-      audioPath = widget.message.uri;
-      _getDuration();
-      _audioPlayer.setSource(_source);
+      _loadAudioFile();
     }
   }
 
