@@ -55,8 +55,9 @@ class SettingsScreen extends HookConsumerWidget {
               content: const _AndroidOptions(),
             ),
           ],
-
-          const SizedBox(height: 20,)
+          const SizedBox(
+            height: 20,
+          )
         ],
       ),
     );
@@ -326,9 +327,7 @@ class _AddNodeDialog extends HookWidget {
       child: Builder(builder: (context) {
         return AlertDialog(
           title: Text(l10n.addNodeCTA),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          content: ListView(
             children: [
               // used to force the dialog to fill the available horizontal space
               const Row(mainAxisSize: MainAxisSize.max, children: [
@@ -372,7 +371,8 @@ class _AddNodeDialog extends HookWidget {
                       },
                       keyboardType: isIPv6.value
                           ? TextInputType.text
-                          : const TextInputType.numberWithOptions(decimal: true),
+                          : const TextInputType.numberWithOptions(
+                              decimal: true),
                       enableInteractiveSelection: false,
                     ),
                   ),

@@ -12,7 +12,7 @@ class InternetNode extends Equatable {
     required this.name,
   })  : isIPv4 = address.contains('/ip4/'),
         isQuic = address.contains(_quicPathDescriptor),
-        ip = address.replaceAll('/ip4/', '').split('/').first,
+        ip = _extractIPFromAddress(address),
         port = _extractPortFromAddress(address);
 
   final String address;
@@ -25,6 +25,13 @@ class InternetNode extends Equatable {
   final bool isQuic;
 
   static const _quicPathDescriptor = 'quic-v1';
+
+  static String _extractIPFromAddress(String address) {
+    if (address.contains('/ip4')) {
+      return address.replaceAll('/ip4/', '').split('/').first;
+    }
+    return address.replaceAll('/ip6/', '').split('/').first;
+  }
 
   static String _extractPortFromAddress(String addr) {
     final addressSections = addr.split('/');
