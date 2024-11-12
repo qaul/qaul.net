@@ -371,8 +371,8 @@ class _AddNodeDialog extends HookWidget {
                         return l10n.invalidIPMessage;
                       },
                       keyboardType: isIPv6.value
-                          ? const TextInputType.numberWithOptions(decimal: true)
-                          : TextInputType.text,
+                          ? TextInputType.text
+                          : const TextInputType.numberWithOptions(decimal: true),
                       enableInteractiveSelection: false,
                     ),
                   ),
