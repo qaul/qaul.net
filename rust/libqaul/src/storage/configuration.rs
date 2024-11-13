@@ -101,11 +101,18 @@ impl Default for Internet {
 
         Internet {
             active: true,
-            peers: vec![InternetPeer {
-                address: String::from("/ip4/144.91.74.192/udp/9229/quic-v1"),
-                name: String::from("qaul Community Node"),
-                enabled: false,
-            }],
+            peers: vec![
+                InternetPeer {
+                    address: String::from("/ip4/144.91.74.192/udp/9229/quic-v1"),
+                    name: String::from("qaul Community Node [IPv4]"),
+                    enabled: false,
+                },
+                InternetPeer {
+                    address: String::from("/ip6/2a02:c207:3004:3887::1/udp/9229/quic-v1"),
+                    name: String::from("qaul Community Node [IPv6]"),
+                    enabled: false,
+                },
+            ],
             do_listen: false,
             #[cfg(any(target_os = "android", target_os = "ios"))]
             listen: vec![

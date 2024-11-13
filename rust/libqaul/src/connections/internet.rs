@@ -16,6 +16,9 @@
 //!   - address: /ip4/144.91.74.192/udp/9229/quic-v1
 //!     name: qaul Community Node
 //!     enabled: false
+//!   - address: /ip6/2a02:c207:3004:3887::1/udp/9229/quic-v1
+//!     name: qaul Community Node [IPv6]
+//!     enabled: false
 //!   do_listen: false
 //!   listen:
 //!   - /ip4/0.0.0.0/udp/9229/quic-v1
