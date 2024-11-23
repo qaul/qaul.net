@@ -29,12 +29,14 @@ static ROUTINGTABLE: InitCell<RwLock<RoutingTable>> = InitCell::new();
 #[derive(Debug, Clone)]
 pub struct RoutingUserEntry {
     /// user q8id, 8 Byte qaul user id
+    #[allow(dead_code)]
     pub id: Vec<u8>,
     /// propagation id
     pub pgid: u32,
     /// propagation id update time
     pub pgid_update: u64,
     /// shortest hop count for user within this propagation id
+    #[allow(dead_code)]
     pub pgid_update_hc: u8,
     //online time
     pub online_time: u64,

@@ -38,6 +38,7 @@ pub mod proto_net {
 #[derive(Clone)]
 pub struct RtcSession {
     // user id
+    #[allow(dead_code)]
     pub user_id: Vec<u8>,
     // group id
     pub group_id: Vec<u8>,

@@ -67,3 +67,7 @@ prost-build = "0.13"
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.14"
+
+# linting rules
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(emulate)'] }

@@ -14,7 +14,7 @@
 //!   active: true
 //!   peers:
 //!   - address: /ip4/144.91.74.192/udp/9229/quic-v1
-//!     name: qaul Community Node
+//!     name: qaul Community Node [IPv4]
 //!     enabled: false
 //!   - address: /ip6/2a02:c207:3004:3887::1/udp/9229/quic-v1
 //!     name: qaul Community Node [IPv6]
@@ -164,7 +164,9 @@ impl QaulInternetBehaviour {
 }
 
 pub struct InternetReConnection {
+    #[allow(dead_code)]
     pub address: Multiaddr,
+    #[allow(dead_code)]
     pub attempt: u32,
     pub last_try: u64,
 }
