@@ -16,13 +16,17 @@ class _RecordAudioDialog extends StatefulHookConsumerWidget {
 }
 
 class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
-  static const kDefaultCodecSettings = RecordConfig(
-    numChannels: 1,
-    // 44100 / 2
-    sampleRate: 22050,
-    // 128000 / 2
-    bitRate: 64000,
-  );
+  static final kDefaultCodecSettings = Platform.isWindows
+      ? const RecordConfig(numChannels: 1, bitRate: 96000, sampleRate: 44100)
+      : const RecordConfig(
+          numChannels: 1,
+          // 44100 / 2
+          sampleRate: 22050,
+          // 128000 / 2
+          bitRate: 64000,
+        );
+
+  final _log = Logger('RecordAudioDialog');
 
   final audioPlayer = AudioPlayer();
   final audioRecorder = AudioRecorder();
@@ -181,6 +185,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
         await audioRecorder.start(kDefaultCodecSettings, path: path);
       }
     } catch (e) {
+      _log.severe("could not start recording: ${e}", e, StackTrace.current);
       return;
     }
   }
@@ -193,6 +198,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
         audioPath = path!;
       });
     } catch (e) {
+      _log.severe("could not stop recording: ${e}", e, StackTrace.current);
       return;
     }
   }
