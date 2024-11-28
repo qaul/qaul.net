@@ -185,7 +185,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
         await audioRecorder.start(kDefaultCodecSettings, path: path);
       }
     } catch (e) {
-      _log.severe("could not start recording: ${e}", e, StackTrace.current);
+      _log.severe("could not start recording: $e", e, StackTrace.current);
       return;
     }
   }
@@ -198,7 +198,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
         audioPath = path!;
       });
     } catch (e) {
-      _log.severe("could not stop recording: ${e}", e, StackTrace.current);
+      _log.severe("could not stop recording: $e", e, StackTrace.current);
       return;
     }
   }
