@@ -153,14 +153,14 @@ executors:
             FLUTTER_VERSION: 3.24.4
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
-            image: ubuntu-2204:2024.11.1
+            image: ubuntu-2004:2024.11.1
         working_directory: ~/qaul.net/qaul_ui
     flutter-linux-arm:
         environment:
             FLUTTER_VERSION: 3.24.4
             REPO_URL: https://github.com/qaul/qaul.net
         machine:
-            image: ubuntu-2204:2024.11.1
+            image: ubuntu-2004:2024.11.1
         resource_class: arm.medium
         working_directory: ~/qaul.net/qaul_ui
     flutter-macos:
