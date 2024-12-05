@@ -2,16 +2,16 @@ executor: flutter-ios
 steps:
   - checkout:
       path: ~/qaul.net
-  - run:
-      name: Install CocoaPods/Ruby manually, uninstall rbenv/pyenv
-      command: |
-        # The reason these are being uninstalled is because they cause
-        # incompatibility issues. cocoapods/ruby installed manually.
-        brew uninstall rbenv pyenv
-        brew install cocoapods ruby
-        PODS_PATH="$(brew --prefix cocoapods)/bin"
-        RUBY_PATH="$(brew --prefix ruby)/bin"
-        echo "export PATH=${PODS_PATH}:${RUBY_PODS}:${PATH}" >> $BASH_ENV
+#  - run:
+#      name: Install CocoaPods/Ruby manually, uninstall rbenv/pyenv
+#      command: |
+#        # The reason these are being uninstalled is because they cause
+#        # incompatibility issues. cocoapods/ruby installed manually.
+#        brew uninstall rbenv pyenv
+#        brew install cocoapods ruby
+#        PODS_PATH="$(brew --prefix cocoapods)/bin"
+#        RUBY_PATH="$(brew --prefix ruby)/bin"
+#        echo "export PATH=${PODS_PATH}:${RUBY_PODS}:${PATH}" >> $BASH_ENV
   - run:
       name: Install Github CLI
       command: brew install gh
@@ -22,7 +22,6 @@ steps:
         VERSION=$(grep "version:" ../pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
         TAG="v${VERSION}"
         echo "Downloading assets from the release tag '$TAG'"
-        
         gh release download "$TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
   - install-flutter:
       version: "$FLUTTER_VERSION"
@@ -33,8 +32,7 @@ steps:
   - run:
       name: Install Bundle
       command: |
-        export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
-        
+        # export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
         echo "Running ruby $(which ruby) version $(ruby --version)"
         bundle check || sudo bundle install --path vendor/bundle
   - run:
@@ -48,8 +46,7 @@ steps:
   - run:
       name: fastlane
       command: |
-        export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
-        
+        # export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
         echo "Running ruby $(which ruby) version $(ruby --version)"
         bundle exec fastlane $FASTLANE_LANE
   - store_artifacts:

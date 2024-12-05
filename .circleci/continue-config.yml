@@ -292,16 +292,6 @@ jobs:
             - checkout:
                 path: ~/qaul.net
             - run:
-                command: |
-                    # The reason these are being uninstalled is because they cause
-                    # incompatibility issues. cocoapods/ruby installed manually.
-                    brew uninstall rbenv pyenv
-                    brew install cocoapods ruby
-                    PODS_PATH="$(brew --prefix cocoapods)/bin"
-                    RUBY_PATH="$(brew --prefix ruby)/bin"
-                    echo "export PATH=${PODS_PATH}:${RUBY_PODS}:${PATH}" >> $BASH_ENV
-                name: Install CocoaPods/Ruby manually, uninstall rbenv/pyenv
-            - run:
                 command: brew install gh
                 name: Install Github CLI
             - run:
@@ -309,7 +299,6 @@ jobs:
                     VERSION=$(grep "version:" ../pubspec.yaml | head -n1 | awk '{ print $2 }' | sed 's/+.*$//')
                     TAG="v${VERSION}"
                     echo "Downloading assets from the release tag '$TAG'"
-
                     gh release download "$TAG" --pattern "*.a" --repo "$REPO_URL" --dir ../../rust/target/universal/release
                 name: Download Libqaul *.a File from latest Github Release
             - install-flutter:
@@ -320,8 +309,7 @@ jobs:
                 name: Install Flutter Dependencies
             - run:
                 command: |
-                    export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
-
+                    # export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
                     echo "Running ruby $(which ruby) version $(ruby --version)"
                     bundle check || sudo bundle install --path vendor/bundle
                 name: Install Bundle
@@ -335,8 +323,7 @@ jobs:
                 name: Build Flutter iOS Configuration
             - run:
                 command: |
-                    export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
-
+                    # export PATH="$(brew --prefix ruby)/bin:$(brew --prefix cocoapods)/bin:$PATH"
                     echo "Running ruby $(which ruby) version $(ruby --version)"
                     bundle exec fastlane $FASTLANE_LANE
                 name: fastlane
