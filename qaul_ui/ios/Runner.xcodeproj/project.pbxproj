@@ -368,7 +368,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = VVYZ2Q8TUK;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = VVYZ2Q8TUK;
 				ENABLE_BITCODE = NO;
@@ -508,7 +508,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = VVYZ2Q8TUK;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = VVYZ2Q8TUK;
 				ENABLE_BITCODE = NO;
@@ -542,7 +542,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = VVYZ2Q8TUK;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = VVYZ2Q8TUK;
 				ENABLE_BITCODE = NO;
