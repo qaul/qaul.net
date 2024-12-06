@@ -7,11 +7,11 @@ group = "net.qaul.libqaul"
 version = "1.0.0"
 
 android {
-    compileSdk 31
+    compileSdk 34
 
     defaultConfig {
         minSdk 26
-        targetSdk 31
+        targetSdk 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
