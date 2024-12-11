@@ -80,7 +80,9 @@ class UsersTranslator extends RpcModuleTranslator {
     if (res.module != type) return;
     if (res.data is List<User>) {
       final provider = reader(usersProvider.notifier);
-      provider.updateMany(res.data);
+      for (final user in res.data) {
+        provider.contains(user) ? provider.update(user) : provider.add(user);
+      }
     }
     if (res.data is SecurityNumber) {
       reader(currentSecurityNoProvider.notifier).state = res.data;
