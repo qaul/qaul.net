@@ -419,7 +419,7 @@ jobs:
                 root: ~/qaul.net
     build-flutter-windows:
         environment:
-            FLUTTER_VERSION: 3.22.2
+            FLUTTER_VERSION: 3.24.2
             REPO_URL: https://github.com/qaul/qaul.net
         executor:
             name: win/server-2022
