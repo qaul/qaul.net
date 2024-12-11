@@ -327,81 +327,84 @@ class _AddNodeDialog extends HookWidget {
       child: Builder(builder: (context) {
         return AlertDialog(
           title: Text(l10n.addNodeCTA),
-          content: ListView(
-            children: [
-              // used to force the dialog to fill the available horizontal space
-              const Row(mainAxisSize: MainAxisSize.max, children: [
-                SizedBox(width: double.maxFinite),
-              ]),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // used to force the dialog to fill the available horizontal space
+                const Row(mainAxisSize: MainAxisSize.max, children: [
+                  SizedBox(width: double.maxFinite),
+                ]),
 
-              TextField(
-                autofocus: true,
-                controller: nameCtrl,
-                decoration: _decoration(l10n.name),
-                keyboardType: TextInputType.name,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isIPv6.value ? '/ip6/' : '/ip4/',
-                    style: _fixedTextStyle,
-                  ),
-                  _spacer,
-                  Expanded(
-                    child: TextFormField(
-                      controller: ipCtrl,
-                      inputFormatters: [
-                        isIPv6.value
-                            ? IPv6TextInputFormatter()
-                            : IPv4TextInputFormatter()
-                      ],
-                      decoration: _decoration(
-                        'ip',
-                        hint: isIPv6.value
-                            ? '0000:0000:0000:0000:0000:0000:0000:0000'
-                            : '000.000.000.000',
-                      ),
-                      validator: (v) {
-                        if (isIPv6.value ? isValidIPv6(v) : isValidIPv4(v)) {
-                          return null;
-                        }
-                        return l10n.invalidIPMessage;
-                      },
-                      keyboardType: isIPv6.value
-                          ? TextInputType.text
-                          : const TextInputType.numberWithOptions(
-                              decimal: true),
-                      enableInteractiveSelection: false,
-                    ),
-                  ),
-                  if (orientation == Orientation.landscape) ...tcpField,
-                ],
-              ),
-              if (orientation == Orientation.portrait) ...[
+                TextField(
+                  autofocus: true,
+                  controller: nameCtrl,
+                  decoration: _decoration(l10n.name),
+                  keyboardType: TextInputType.name,
+                ),
                 const SizedBox(height: 20),
-                Row(children: tcpField),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isIPv6.value ? '/ip6/' : '/ip4/',
+                      style: _fixedTextStyle,
+                    ),
+                    _spacer,
+                    Expanded(
+                      child: TextFormField(
+                        controller: ipCtrl,
+                        inputFormatters: [
+                          isIPv6.value
+                              ? IPv6TextInputFormatter()
+                              : IPv4TextInputFormatter()
+                        ],
+                        decoration: _decoration(
+                          'ip',
+                          hint: isIPv6.value
+                              ? '0000:0000:0000:0000:0000:0000:0000:0000'
+                              : '000.000.000.000',
+                        ),
+                        validator: (v) {
+                          if (isIPv6.value ? isValidIPv6(v) : isValidIPv4(v)) {
+                            return null;
+                          }
+                          return l10n.invalidIPMessage;
+                        },
+                        keyboardType: isIPv6.value
+                            ? TextInputType.text
+                            : const TextInputType.numberWithOptions(
+                                decimal: true),
+                        enableInteractiveSelection: false,
+                      ),
+                    ),
+                    if (orientation == Orientation.landscape) ...tcpField,
+                  ],
+                ),
+                if (orientation == Orientation.portrait) ...[
+                  const SizedBox(height: 20),
+                  Row(children: tcpField),
+                ],
+
+                const SizedBox(height: 8),
+                const Divider(),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(l10n.options, style: ttheme.titleMedium),
+                ),
+                SwitchListTile(
+                  value: isIPv6.value,
+                  onChanged: (v) => {isIPv6.value = v},
+                  title: Text(l10n.useIpv6),
+                ),
+                SwitchListTile(
+                  value: isQuic.value,
+                  onChanged: (v) => {isQuic.value = v},
+                  title: Text(l10n.useQuic),
+                ),
               ],
-
-              const SizedBox(height: 8),
-              const Divider(),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(l10n.options, style: ttheme.titleMedium),
-              ),
-              SwitchListTile(
-                value: isIPv6.value,
-                onChanged: (v) => {isIPv6.value = v},
-                title: Text(l10n.useIpv6),
-              ),
-              SwitchListTile(
-                value: isQuic.value,
-                onChanged: (v) => {isQuic.value = v},
-                title: Text(l10n.useQuic),
-              ),
-            ],
+            ),
           ),
           actions: [
             TextButton(
