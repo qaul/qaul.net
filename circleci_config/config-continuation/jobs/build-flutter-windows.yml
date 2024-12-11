@@ -4,7 +4,7 @@ executor:
   shell: bash.exe
 working_directory: ~/qaul.net/qaul_ui
 environment:
-  FLUTTER_VERSION: "3.22.2"
+  FLUTTER_VERSION: "3.24.2"
   REPO_URL: "https://github.com/qaul/qaul.net"
 steps:
   - checkout-project
