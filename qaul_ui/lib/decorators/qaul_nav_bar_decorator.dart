@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -136,7 +138,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 600 + safePadding),
       child: FractionallySizedBox(
-        heightFactor: 0.12 + safeFraction,
+        heightFactor: 0.13 + safeFraction,
         child: _barBackground(
           context,
           Padding(
