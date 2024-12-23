@@ -12,3 +12,6 @@ members = [
     "libp2p_modules/qaul_info",
     "libp2p_modules/qaul_messaging"
 ]
+
+[patch.crates-io]
+libp2p = { git = "https://github.com/brenodt/rust-libp2p.git", branch = "deps/update-system-configuration" }
