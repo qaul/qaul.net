@@ -46,7 +46,9 @@ class DynamicNetworkScreen extends HookConsumerWidget {
 
     return Scaffold(
       body: Stack(
-        alignment: AlignmentDirectional.bottomCenter,
+        alignment: Platform.isIOS
+            ? AlignmentDirectional.bottomCenter
+            : AlignmentDirectional.topEnd,
         children: [
           InteractiveViewer(child: GameWidget(game: gameEngine)),
           const Padding(
