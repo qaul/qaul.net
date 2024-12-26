@@ -46,10 +46,13 @@ class DynamicNetworkScreen extends HookConsumerWidget {
 
     return Scaffold(
       body: Stack(
-        alignment: AlignmentDirectional.topEnd,
+        alignment: AlignmentDirectional.bottomCenter,
         children: [
           InteractiveViewer(child: GameWidget(game: gameEngine)),
-          const _NetworkTypeFilterToolbar(),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: _NetworkTypeFilterToolbar(),
+          ),
         ],
       ),
     );
