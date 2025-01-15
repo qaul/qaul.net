@@ -184,6 +184,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButtonFactory(onPressed: closeChat),
         title: Row(
@@ -266,12 +267,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       if (result != null && result.files.single.path != null) {
                         File file = File(result.files.single.path!);
 
-                        // ignore: use_build_context_synchronously
                         if (!context.mounted) return;
                         showModalBottomSheet(
                           context: context,
-                          builder: (_) {
-                            return _SendFileDialog(
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            final dialog = _SendFileDialog(
                               file,
                               room: room,
                               partialMessage: text?.text,
@@ -283,6 +285,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   description: description.text,
                                 );
                               },
+                            );
+                            if (!Platform.isIOS) {
+                              return dialog;
+                            }
+
+                            final bottomPadding =
+                                MediaQuery.of(context).viewInsets.bottom;
+                            return SingleChildScrollView(
+                              child: Container(
+                                padding: EdgeInsets.only(bottom: bottomPadding),
+                                child: dialog,
+                              ),
                             );
                           },
                         );
@@ -299,12 +313,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           if (result != null) {
                             File file = File(result.path);
 
-                            // ignore: use_build_context_synchronously
                             if (!context.mounted) return;
                             showModalBottomSheet(
                               context: context,
-                              builder: (_) {
-                                return _SendFileDialog(
+                              useSafeArea: true,
+                              isScrollControlled: true,
+                              builder: (context) {
+                                final dialog = _SendFileDialog(
                                   file,
                                   room: room,
                                   partialMessage: text?.text,
@@ -316,6 +331,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       description: description.text,
                                     );
                                   },
+                                );
+                                if (!Platform.isIOS) {
+                                  return dialog;
+                                }
+
+                                final bottomPadding =
+                                    MediaQuery.of(context).viewInsets.bottom;
+                                return SingleChildScrollView(
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                      bottom: bottomPadding,
+                                    ),
+                                    child: dialog,
+                                  ),
                                 );
                               },
                             );
