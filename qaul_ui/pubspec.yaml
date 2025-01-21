@@ -56,7 +56,7 @@ dependencies:
   path_provider: ^2.0.15
   qaul_rpc: { "path": "packages/qaul_rpc" }
   responsive_framework: ^1.1.0
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.3.5
   uni_links: ^0.5.1
   url_launcher: ^6.1.14
   utils: { "path": "packages/utils" }
