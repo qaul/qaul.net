@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:uni_links/uni_links.dart' as uni_links;
 
 import '../helpers/navigation_helper.dart';
 import '../providers/providers.dart';
@@ -27,6 +27,8 @@ class DeepLinkWrapper extends StatefulHookConsumerWidget {
 class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   final _log = Logger('DeepLinkWrapper');
 
+  final links = AppLinks();
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +42,7 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   Widget build(BuildContext context) {
     useEffect(() {
       if (!_isSupported) return () {};
-      final subscription = uni_links.linkStream.listen(_parseDeepLink);
+      final subscription = links.uriLinkStream.listen(_parseDeepLink);
       return subscription.cancel;
     });
 
@@ -48,21 +50,21 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   }
 
   void _initializeUniLinks() async {
-    final initialLink = await uni_links.getInitialLink();
+    final initialLink = await links.getInitialLink();
     _log.config('initial link: $initialLink');
     if (initialLink != null) _parseDeepLink(initialLink);
   }
 
-  void _parseDeepLink(String? link) {
+  void _parseDeepLink(Uri? link) {
     _log.fine('processing link: $link');
     if (link == null) return;
-    if (link.startsWith("qaul://")) {
-      final linkCommand = link.replaceAll("qaul://", "");
+    if (link.scheme == "qaul") {
+      final linkCommand = link.host;
       if (linkCommand == 'public') {
         Navigator.popUntil(context, _reachedHomeScreen);
         ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.public);
-      } else if (linkCommand.startsWith("chat/")) {
-        final idBase58 = linkCommand.replaceAll("chat/", "");
+      } else if (linkCommand == "chat") {
+        final idBase58 = link.path.replaceAll("/", "");
         _navigateToChat(idBase58);
       }
 
