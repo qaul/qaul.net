@@ -96,9 +96,7 @@ class _LocalNotifications implements LocalNotifications {
             sound: true,
           );
     }
-
-    if (result == null) return false;
-    return result;
+    return result ?? false;
   }
 
   @override

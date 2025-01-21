@@ -24,7 +24,7 @@ dependencies:
   device_info_plus: ^9.1.1
   equatable: ^2.0.5
   ffi: ^2.0.2
-  file_picker: ^6.1.1
+  file_picker: ^8.0.7
   filesize: ^2.0.1
   fixnum: ^1.1.0
   flame: ^1.8.1

@@ -275,7 +275,7 @@ class _SecurityNumberDisplay extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.withOpacity(.5)),
+            border: Border.all(color: Colors.grey.withValues(alpha: .5)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),

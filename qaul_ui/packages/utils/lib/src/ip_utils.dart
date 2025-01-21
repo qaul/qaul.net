@@ -53,8 +53,9 @@ abstract class IPTextInputFormatter extends TextInputFormatter {
     if (lastSection.length > maxSectionLength) {
       lastSection = lastSection.substring(0, lastSection.length - 1);
     }
-    if (lastSection.length == maxSectionLength &&
-        sections.length < numberOfSections) lastSection += separator;
+    if (lastSection.length == maxSectionLength && sections.length < numberOfSections) {
+      lastSection += separator;
+    }
     return lastSection;
   }
 }
@@ -177,8 +178,9 @@ class IPv6TextInputFormatter extends IPTextInputFormatter {
     if (lastSection.length > maxSectionLength) {
       lastSection = lastSection.substring(0, lastSection.length - 1);
     }
-    if (lastSection.length == maxSectionLength &&
-        sections.length < numberOfSections) lastSection += separator;
+    if (lastSection.length == maxSectionLength && sections.length < numberOfSections) {
+      lastSection += separator;
+    }
 
     return lastSection;
   }

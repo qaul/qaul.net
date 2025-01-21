@@ -68,7 +68,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
       padding: const EdgeInsets.all(4.0),
       margin: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.blueGrey.withOpacity(.8),
+        color: Colors.blueGrey.withValues(alpha: .8),
         borderRadius: BorderRadius.circular(200.0),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: buttons),

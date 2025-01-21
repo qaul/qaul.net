@@ -8,7 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 bool isImage(String filePath) {
   String? mimeStr = lookupMimeType(filePath);
-  return (mimeStr != null && RegExp('image/.*').hasMatch(mimeStr));
+  if (mimeStr == null) return false;
+  return (RegExp('image/.*').hasMatch(mimeStr));
 }
 
 /// Resizes image to Full HD (maintaining aspect ratio) if width is greater than

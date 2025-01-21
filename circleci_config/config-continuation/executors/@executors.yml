@@ -10,7 +10,7 @@ rust-android:
   environment:
     ANDROID_NDK_HOME: /home/circleci/android-sdk/ndk/25.2.9519653
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
 rust-linux:
   docker:
     - image: cimg/rust:1.78.0
@@ -39,7 +39,7 @@ rust-macos:
 # --------------------
 flutter:
   docker:
-    - image: ghcr.io/cirruslabs/flutter:3.24.4
+    - image: ghcr.io/cirruslabs/flutter:3.27.2
   working_directory: ~/qaul.net/qaul_ui
 flutter-android:
   docker:
@@ -55,7 +55,7 @@ flutter-android:
     _JAVA_OPTIONS: "-Xmx2048m"
     GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
     SUPPLY_JSON_KEY: ~/qaul.net/qaul_ui/android/fastlane/google-credentials.json
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ios:
   macos:
@@ -66,7 +66,7 @@ flutter-ios:
   environment:
     FL_OUTPUT_DIR: output
     FASTLANE_LANE: upload_testflight
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
     REPO_URL: "https://github.com/qaul/qaul.net"
     HOMEBREW_NO_AUTO_UPDATE: 1
     HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -75,7 +75,7 @@ flutter-linux:
     image: ubuntu-2004:202111-02
   working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-linux-arm:
   machine:
@@ -83,7 +83,7 @@ flutter-linux-arm:
   resource_class: arm.medium
   working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-macos:
   macos:
@@ -92,7 +92,7 @@ flutter-macos:
   shell: /bin/bash --login -o pipefail
   working_directory: ~/qaul.net/qaul_ui
   environment:
-    FLUTTER_VERSION: "3.24.4"
+    FLUTTER_VERSION: "3.27.2"
     REPO_URL: "https://github.com/qaul/qaul.net"
 flutter-ubuntu-lean:
   working_directory: ~/qaul.net/qaul_ui
