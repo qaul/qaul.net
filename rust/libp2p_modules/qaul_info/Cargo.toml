@@ -7,7 +7,7 @@ authors = ["qaul community <contact@qaul.net>"]
 license = "AGPL"
 
 [dependencies]
-libp2p = { version = "0.54.1", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "websocket", "dns", "macros"] }
+libp2p = { version = "0.55", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "websocket", "dns", "macros"] }
 cuckoofilter = "0.5"
 fnv = "1.0"
 futures = "0.3"
@@ -15,7 +15,7 @@ log = "0.4"
 rand = "0.8"
 smallvec = "1.13"
 asynchronous-codec = "0.7"
-bytes = "1.6"
+bytes = "1.9"
 unsigned-varint = "0.8"
 
 # internal references
