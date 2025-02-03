@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 53;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -33,7 +33,7 @@
 		97640D3A2C0F74FD00742A91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		97640D3B2C0F7D0C00742A91 /* libqaul.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = libqaul.entitlements; sourceTree = "<group>"; };
 		CA00102577DC479D50D4B138 /* libqaul.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libqaul.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		CAF989BF31013EF4668187A5 /* Cargo.toml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cargo.toml; path = ../../rust/libqaul/Cargo.toml; sourceTree = "<group>"; };
+		CAF989BF31013EF4668187A5 /* Cargo.toml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cargo.toml; path = ../../../rust/libqaul/Cargo.toml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
