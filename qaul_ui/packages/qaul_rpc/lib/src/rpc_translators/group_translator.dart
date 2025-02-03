@@ -5,8 +5,8 @@ class GroupTranslator extends RpcModuleTranslator {
   Modules get type => Modules.GROUP;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
-    final users = reader(usersProvider);
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
+    final users = ref.read(usersProvider);
     final message = Group.fromBuffer(data);
 
     switch (message.whichMessage()) {
@@ -45,7 +45,7 @@ class GroupTranslator extends RpcModuleTranslator {
             .toList();
         return RpcTranslatorResponse(type, invites);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
@@ -55,13 +55,13 @@ class GroupTranslator extends RpcModuleTranslator {
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data == null) return;
 
     // Means GroupResult yielded a success message.
     if (res.data is bool && res.data == true) return;
 
-    final state = reader(chatRoomsProvider.notifier);
+    final state = ref.read(chatRoomsProvider.notifier);
     if (res.data is List<ChatRoom>) {
       for (final room in res.data) {
         if (!state.contains(room)) {
@@ -78,7 +78,7 @@ class GroupTranslator extends RpcModuleTranslator {
         state.update(res.data);
       }
     } else if (res.data is List<GroupInvite>) {
-      final invites = reader(groupInvitesProvider.notifier);
+      final invites = ref.read(groupInvitesProvider.notifier);
       for (final invite in res.data) {
         if (!invites.contains(invite)) {
           invites.add(invite);

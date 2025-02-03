@@ -38,7 +38,7 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  hooks_riverpod: ^1.0.4
+  hooks_riverpod: ^2.6.1
   image: ^4.1.3
   image_picker: ^0.8.9
   infinite_scroll_pagination: ^4.0.0

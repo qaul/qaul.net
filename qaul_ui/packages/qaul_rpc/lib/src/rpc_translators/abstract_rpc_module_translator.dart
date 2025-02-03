@@ -90,7 +90,7 @@ abstract class RpcModuleTranslator {
   Modules get type;
 
   @mustCallSuper
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     _log.severe(
       'Received libqaul message from module "$type" which could not be translated',
       UnhandledRpcMessageException(type.toString()),
@@ -99,7 +99,7 @@ abstract class RpcModuleTranslator {
     return null;
   }
 
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     _log.severe(
       'unprocessed response from module "$type": ${res.data.runtimeType}',
       UnhandledRpcMessageException(res.toString()),

@@ -36,16 +36,16 @@ class EmailLoggingCoordinator {
 
   String get _supportEmail => 'debug@qaul.net';
 
-  Future<void> initialize({Reader? reader}) async {
+  Future<void> initialize({ProviderContainer? container}) async {
     _reportLogMessages();
 
     _storageManager.initialize();
     _reportErrorsCaughtByFlutterFramework();
     await _reportUncaughtErrorsOfTheIsolate();
 
-    if (reader != null) {
-      await reader(qaulWorkerProvider).initialized;
-      await _initializeEnabledStatus(reader: reader);
+    if (container != null) {
+      await container.read(qaulWorkerProvider).initialized;
+      await _initializeEnabledStatus(container: container);
     }
   }
 
@@ -86,22 +86,30 @@ class EmailLoggingCoordinator {
   // ***************************************************************************
   static const _loggingEnabledKey = 'loggingEnabledKey';
 
-  Future<void> _initializeEnabledStatus({Reader? reader}) async {
+  Future<void> _initializeEnabledStatus(
+      {ProviderContainer? container, WidgetRef? ref}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(_loggingEnabledKey)) {
       _enabled = prefs.getBool(_loggingEnabledKey) ?? true;
     }
     _log.config('logger initialized with enabled status: $_enabled');
-    if (reader != null) _setLibqaulLoggingState(_enabled, reader: reader);
+    if (container != null) {
+      _setLibqaulLoggingState(_enabled, container: container);
+    }
+    if (ref != null) {
+      _setLibqaulLoggingState(_enabled, ref: ref);
+    }
   }
 
   bool get loggingEnabled => _enabled;
   bool _enabled = true;
 
-  void setLoggingEnabled(bool enabled, {Reader? reader}) {
+  void setLoggingEnabled(bool enabled, {WidgetRef? ref}) {
     _enabled = enabled;
     _storeLoggingOption();
-    if (reader != null) _setLibqaulLoggingState(enabled, reader: reader);
+    if (ref != null) {
+      _setLibqaulLoggingState(enabled, ref: ref);
+    }
   }
 
   void _storeLoggingOption() async {
@@ -110,8 +118,14 @@ class EmailLoggingCoordinator {
     prefs.setBool(_loggingEnabledKey, _enabled);
   }
 
-  void _setLibqaulLoggingState(bool enabled, {required Reader reader}) async {
-    reader(qaulWorkerProvider).setLibqaulLogging(enabled);
+  void _setLibqaulLoggingState(bool enabled,
+      {ProviderContainer? container, WidgetRef? ref}) async {
+    if (container != null) {
+      container.read(qaulWorkerProvider).setLibqaulLogging(enabled);
+    }
+    if (ref != null) {
+      ref.read(qaulWorkerProvider).setLibqaulLogging(enabled);
+    }
   }
 
   // ***************************************************************************
@@ -119,9 +133,9 @@ class EmailLoggingCoordinator {
   // ***************************************************************************
   final _storageManager = _LogStorageManager();
 
-  Future<bool> hasLogsStored({Reader? reader}) async {
-    if (reader != null && reader(libqaulLogsStoragePath) != null) {
-      var libqaulLogs = _getLibqaulLogs(reader(libqaulLogsStoragePath)!);
+  Future<bool> hasLogsStored({WidgetRef? ref}) async {
+    if (ref != null && ref.read(libqaulLogsStoragePath) != null) {
+      var libqaulLogs = _getLibqaulLogs(ref.read(libqaulLogsStoragePath)!);
       return libqaulLogs.isNotEmpty || !(await _storageManager.isEmpty);
     }
     return !(await _storageManager.isEmpty);
@@ -162,16 +176,16 @@ ${stack ?? 'Not available'}
   // ***************************************************************************
   // API
   // ***************************************************************************
-  Future<void> deleteLogs({Reader? reader}) async {
+  Future<void> deleteLogs({WidgetRef? ref}) async {
     _storageManager.deleteLogs(await _storageManager.logs);
-    if (reader != null) reader(qaulWorkerProvider).deleteLogs();
+    if (ref != null) ref.read(qaulWorkerProvider).deleteLogs();
   }
 
-  Future<void> sendLogs({Reader? reader}) async {
+  Future<void> sendLogs({WidgetRef? ref}) async {
     if (!loggingEnabled) return;
     List<FileSystemEntity>? libqaulLogs;
-    if (reader != null && reader(libqaulLogsStoragePath) != null) {
-      libqaulLogs = _getLibqaulLogs(reader(libqaulLogsStoragePath)!);
+    if (ref != null && ref.read(libqaulLogsStoragePath) != null) {
+      libqaulLogs = _getLibqaulLogs(ref.read(libqaulLogsStoragePath)!);
     }
     (Platform.isAndroid || Platform.isIOS)
         ? await _sendMobileLogs(libqaulAttachments: libqaulLogs)
@@ -256,7 +270,10 @@ class _NullEmailLoggingCoordinator implements EmailLoggingCoordinator {
   List<FileSystemEntity> _getLibqaulLogs(String path) => [];
 
   @override
-  Future<void> _initializeEnabledStatus({Reader? reader}) async {}
+  Future<void> _initializeEnabledStatus({
+    ProviderContainer? container,
+    WidgetRef? ref,
+  }) async {}
 
   @override
   Logger get _log => throw UnimplementedError();
@@ -286,7 +303,11 @@ class _NullEmailLoggingCoordinator implements EmailLoggingCoordinator {
       {List<FileSystemEntity>? libqaulAttachments}) async {}
 
   @override
-  void _setLibqaulLoggingState(bool enabled, {required Reader reader}) {}
+  void _setLibqaulLoggingState(
+    bool enabled, {
+    ProviderContainer? container,
+    WidgetRef? ref,
+  }) {}
 
   @override
   _LogStorageManager get _storageManager => throw UnimplementedError();
@@ -298,13 +319,13 @@ class _NullEmailLoggingCoordinator implements EmailLoggingCoordinator {
   String get _supportEmail => '';
 
   @override
-  Future<void> deleteLogs({Reader? reader}) async {}
+  Future<void> deleteLogs({WidgetRef? ref}) async {}
 
   @override
-  Future<bool> hasLogsStored({Reader? reader}) async => false;
+  Future<bool> hasLogsStored({WidgetRef? ref}) async => false;
 
   @override
-  Future<void> initialize({Reader? reader}) async {}
+  Future<void> initialize({ProviderContainer? container}) async {}
 
   @override
   Future<String> get logStorageSize async => '';
@@ -313,8 +334,8 @@ class _NullEmailLoggingCoordinator implements EmailLoggingCoordinator {
   bool get loggingEnabled => false;
 
   @override
-  Future<void> sendLogs({Reader? reader}) async {}
+  Future<void> sendLogs({WidgetRef? ref}) async {}
 
   @override
-  void setLoggingEnabled(bool enabled, {Reader? reader}) {}
+  void setLoggingEnabled(bool enabled, {WidgetRef? ref}) {}
 }

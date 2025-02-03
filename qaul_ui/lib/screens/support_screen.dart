@@ -24,7 +24,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       icon: FontAwesomeIcons.headset,
       title: l10n.support,
       body: FutureBuilder<bool>(
-          future: emailLogger.hasLogsStored(reader: ref.read),
+          future: emailLogger.hasLogsStored(ref: ref),
           builder: (context, snapshot) {
             final hasLogs = (snapshot.hasData && snapshot.data == true);
             return Column(
@@ -43,8 +43,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                             PlatformAwareSwitch(
                               value: emailLogger.loggingEnabled,
                               onChanged: (val) {
-                                emailLogger.setLoggingEnabled(val,
-                                    reader: ref.read);
+                                emailLogger.setLoggingEnabled(val, ref: ref);
                                 setState(() {});
                               },
                             ),
@@ -99,8 +98,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
                           TextButton(
                             onPressed: hasLogs
                                 ? () async {
-                                    await emailLogger.sendLogs(
-                                        reader: ref.read);
+                                    await emailLogger.sendLogs(ref: ref);
                                     await emailLogger.deleteLogs();
                                     if (!context.mounted) return;
                                     Navigator.pop(context);

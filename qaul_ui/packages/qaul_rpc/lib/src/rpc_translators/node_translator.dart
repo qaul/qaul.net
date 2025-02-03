@@ -5,7 +5,7 @@ class NodeTranslator extends RpcModuleTranslator {
   Modules get type => Modules.NODE;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     final message = Node.fromBuffer(data);
     switch (message.whichMessage()) {
       case Node_Message.info:
@@ -13,13 +13,13 @@ class NodeTranslator extends RpcModuleTranslator {
         final nodeInfo = NodeInfo(msg.idBase58, msg.addresses);
         return RpcTranslatorResponse(type, nodeInfo);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! NodeInfo) return;
-    reader(nodeInfoProvider.state).state = res.data;
+    ref.read(nodeInfoProvider.state).state = res.data;
   }
 }

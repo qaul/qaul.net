@@ -1,15 +1,15 @@
 part of 'chat_tab_test.dart';
 
 class StubLibqaulWorker implements LibqaulWorker {
-  StubLibqaulWorker(this.reader);
+  StubLibqaulWorker(this.ref);
 
-  final Reader reader;
+  final WidgetRef ref;
   final _logger = Logger('StubLibqaulWorker');
 
   @override
   void sendMessage(Uint8List chatId, String content) {
     _logger.info('sending message "$content" to chat id: "$chatId"');
-    final room = reader(currentOpenChatRoom);
+    final room = ref.read(currentOpenChatRoom);
 
     final index = (room?.messages?.length ?? 0) + 1;
     final message = Message(
@@ -25,7 +25,8 @@ class StubLibqaulWorker implements LibqaulWorker {
       room == null || room.messages == null ? [] : room.messages!,
     );
     msgs.add(message);
-    reader(currentOpenChatRoom.notifier).state = buildGroupChat(messages: msgs);
+    ref.read(currentOpenChatRoom.notifier).state =
+        buildGroupChat(messages: msgs);
   }
 
   @override

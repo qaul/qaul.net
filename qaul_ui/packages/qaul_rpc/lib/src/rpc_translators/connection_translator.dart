@@ -7,7 +7,7 @@ class ConnectionTranslator extends RpcModuleTranslator {
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(
     List<int> data,
-    Reader reader,
+    Ref ref,
   ) async {
     final message = Connections.fromBuffer(data);
     switch (message.whichMessage()) {
@@ -19,13 +19,13 @@ class ConnectionTranslator extends RpcModuleTranslator {
             .toList();
         return RpcTranslatorResponse(type, nodes);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! List<InternetNode>) return;
-    reader(connectedNodesProvider.notifier).state = res.data;
+    ref.read(connectedNodesProvider.notifier).state = res.data;
   }
 }

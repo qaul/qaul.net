@@ -6,14 +6,14 @@ class DTNTranslator extends RpcModuleTranslator {
 
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(
-      List<int> data, Reader reader) async {
+      List<int> data, Ref ref) async {
     final message = DTN.fromBuffer(data);
     switch (message.whichMessage()) {
       case DTN_Message.dtnStateResponse:
         // TODO
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
       case DTN_Message.dtnConfigResponse:
-        final users = reader(usersProvider);
+        final users = ref.read(usersProvider);
         final dtnConfiguration = DTNConfiguration.fromRpcConfigResponse(
           message.ensureDtnConfigResponse(),
           users,
@@ -29,7 +29,7 @@ class DTNTranslator extends RpcModuleTranslator {
         final res = message.ensureDtnSetTotalSizeResponse();
         return _receiveResultResponse(res.status, res.message);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
@@ -39,16 +39,16 @@ class DTNTranslator extends RpcModuleTranslator {
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data == null) return;
 
     // Means _receiveResultResponse yielded a success message.
     if (res.data is bool && res.data == true) return;
     if (res.data is DTNConfiguration) {
-      reader(dtnConfigurationProvider.notifier).state = res.data;
+      ref.read(dtnConfigurationProvider.notifier).state = res.data;
       return;
     }
 
-    return super.processResponse(res, reader);
+    return super.processResponse(res, ref);
   }
 }
