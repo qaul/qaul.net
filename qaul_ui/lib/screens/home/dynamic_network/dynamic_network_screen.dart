@@ -28,20 +28,35 @@ part 'widgets/network_node_info_bottom_sheet.dart';
 
 part 'widgets/network_type_filter.dart';
 
-class DynamicNetworkScreen extends HookConsumerWidget {
-  const DynamicNetworkScreen({Key? key}) : super(key: key);
+class DynamicNetworkScreen extends StatefulHookConsumerWidget {
+  const DynamicNetworkScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final nodes = ref.watch(_filteredNodes);
+  ConsumerState<DynamicNetworkScreen> createState() =>
+      _DynamicNetworkScreenState();
+}
 
-    var gameEngine = _DynamicNetworkGameEngine(root: nodes);
+class _DynamicNetworkScreenState extends ConsumerState<DynamicNetworkScreen> {
+  _DynamicNetworkGameEngine? _gameEngine;
 
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(_filteredNodes, (previous, next) {
+      if (previous == next) {
+        return;
+      }
+      setState(() => _gameEngine = _DynamicNetworkGameEngine(root: next));
+    }, fireImmediately: true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentTab = ref.watch(homeScreenControllerProvider);
     if (TabType.values[currentTab] == TabType.network) {
-      gameEngine.resumeEngine();
+      _gameEngine?.resumeEngine();
     } else {
-      gameEngine.pauseEngine();
+      _gameEngine?.pauseEngine();
     }
 
     return Scaffold(
@@ -50,7 +65,8 @@ class DynamicNetworkScreen extends HookConsumerWidget {
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.topEnd,
         children: [
-          InteractiveViewer(child: GameWidget(game: gameEngine)),
+          if (_gameEngine != null)
+            InteractiveViewer(child: GameWidget(game: _gameEngine!)),
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: _NetworkTypeFilterToolbar(),
