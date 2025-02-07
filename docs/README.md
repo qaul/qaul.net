@@ -4,11 +4,13 @@
 
 [![CircleCI](https://circleci.com/gh/qaul/qaul.net/tree/main.svg?style=shield)](https://circleci.com/gh/qaul/qaul.net/tree/main)
 
-![http://qaul.net/](_media/qaul-net.png)
+![qaul off-the-grid P2P mesh network](_media/qaul-mesh.png)
 
 [qaul.net](https://qaul.net)
 
 To install and run qaul please see the [Documentation](http://qaul.github.io/qaul.net/#/).
+
+![qaul features](_media/qaul-features.png)
 
 ## License
 
