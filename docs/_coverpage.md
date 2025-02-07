@@ -1,6 +1,6 @@
 <!-- _coverpage.md -->
 
-![logo](_media/qaul-net.png)
+![logo](_media/qaul-mesh.jpg)
 
 # qaul – قول
 
