@@ -8,7 +8,7 @@
 use libp2p::identity::PublicKey;
 use libp2p::PeerId;
 use noise_protocol::{Cipher, CipherState, HandshakeState, Hash, U8Array, DH};
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
 use super::{Crypto25519, CryptoAccount, CryptoProcessState, CryptoState};
 use crate::node::user_accounts::UserAccount;
@@ -407,8 +407,8 @@ impl CryptoNoise {
         D: DH,
     {
         // create a new random session id
-        let mut rng = thread_rng();
-        let session_id: u32 = rng.gen();
+        let mut rng = rand::rng();
+        let session_id: u32 = rng.random();
 
         // create private key
         let private_key = Crypto25519::private_key_to_montgomery(user_account.keys).unwrap();

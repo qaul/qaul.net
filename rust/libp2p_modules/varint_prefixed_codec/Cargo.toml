@@ -8,6 +8,6 @@ license = "AGPL"
 
 [dependencies]
 asynchronous-codec = "0.7"
-bytes = "1.6"
+bytes = "1.10"
 unsigned-varint = "0.8"
 log = "0.4"
