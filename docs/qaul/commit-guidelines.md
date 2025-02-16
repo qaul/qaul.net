@@ -1,17 +1,18 @@
 # Commit Guidelines
 
-This is best praxis guide for committing to the qaul project.
-We value every contributions!
+This is our best praxis guide for committing to the qaul project.
+We value every contribution to the project!
 
 ## Pull Request & Commit Structure
 
 * Please organize the commits by functionality.
+  * Please write your commit messages in accordance with the [Conventional Commits](https://www.conventionalcommits.org) specification.
 * Please structure your work in feature branches.
 * Make separate commits for comment typo & coding style fixes, if they are not directly in the functions you're working on.
 
 ### Before Pull Request
 
-Please always rebase
+Please always rebase your feature branch to the main branch before doing a pull request.
 
 #### How to Rebase your Branch against Main Branch
 
