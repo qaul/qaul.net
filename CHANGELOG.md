@@ -5,12 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0 Release Candidate 3] Unreleased
+## [2.0.0 Release Candidate 3] 2025-02-19
 
 Changed
 
 - Upgraded libp2p to current version 0.55.0
-- Upgraded all rust libraries to newest version
+- Upgraded all rust libraries to the newest version
+- UI: Upgraded riverpod to v2.6.1
+
+Fixed
+
+- Fixed UI flickering in 'Network View'
+- Fixed keyboard overlay issue on share content dialog on iOS
+- Fixed 'Network View' with unselectable filters on iOS
 
 ## [2.0.0 Release Candidate 2] 2024-11-28
 
