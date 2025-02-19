@@ -13,14 +13,14 @@ rust-android:
     FLUTTER_VERSION: "3.27.2"
 rust-linux:
   docker:
-    - image: cimg/rust:1.81.0
+    - image: cimg/rust:1.83.0
   working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
 rust-linux-arm:
   docker:
-    - image: cimg/rust:1.81.0
+    - image: cimg/rust:1.83.0
   resource_class: arm.medium
   working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
