@@ -7,6 +7,8 @@ group = "net.qaul.libqaul"
 version = "1.0.0"
 
 android {
+    namespace "net.qaul.libqaul"
+
     compileSdk 34
 
     defaultConfig {

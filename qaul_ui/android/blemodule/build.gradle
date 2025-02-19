@@ -35,6 +35,8 @@ protobuf {
 }
 
 android {
+    namespace "net.qaul.ble"
+
     compileSdk 34
 
     defaultConfig {

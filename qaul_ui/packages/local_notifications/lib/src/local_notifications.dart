@@ -2,16 +2,16 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logging/logging.dart';
 
 abstract class LocalNotifications {
-  static LocalNotifications instance =
-      Platform.isWindows || const bool.fromEnvironment('testing_mode', defaultValue: false)
-          ? _NullLocalNotifications()
-          : _LocalNotifications();
+  static LocalNotifications instance = Platform.isWindows ||
+          const bool.fromEnvironment('testing_mode', defaultValue: false)
+      ? _NullLocalNotifications()
+      : _LocalNotifications();
 
   Future<bool> initialize();
 
@@ -44,19 +44,21 @@ class LocalNotification extends Equatable {
 class _LocalNotifications implements LocalNotifications {
   final _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  final _messageStreamController = StreamController<LocalNotification>.broadcast();
+  final _messageStreamController =
+      StreamController<LocalNotification>.broadcast();
 
   @override
-  Stream<LocalNotification> get onNotificationOpened => _messageStreamController.stream;
+  Stream<LocalNotification> get onNotificationOpened =>
+      _messageStreamController.stream;
 
   @override
   Future<bool> initialize() async {
     final initializationSettings = InitializationSettings(
       android: const AndroidInitializationSettings('@drawable/ic_notification'),
       iOS: DarwinInitializationSettings(
-        onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
+        requestBadgePermission: true,
       ),
-      macOS: const DarwinInitializationSettings(),
+      macOS: const DarwinInitializationSettings(requestBadgePermission: true),
       linux: LinuxInitializationSettings(
         defaultActionName: 'qaul-app',
         defaultIcon: AssetsLinuxIcon('assets/logo/icon_android.png'),
@@ -81,7 +83,8 @@ class _LocalNotifications implements LocalNotifications {
     bool? result;
     if (Platform.isIOS) {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -89,7 +92,8 @@ class _LocalNotifications implements LocalNotifications {
           );
     } else {
       result = await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
@@ -101,8 +105,8 @@ class _LocalNotifications implements LocalNotifications {
 
   @override
   Future<void> displayNotification(LocalNotification message) async {
-    if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported())) {
-      FlutterAppBadger.updateBadgeCount(1);
+    if (!Platform.isLinux && (await AppBadgePlus.isSupported())) {
+      AppBadgePlus.updateBadge(1);
     }
     await _localNotificationsPlugin.show(
         message.id, message.title, message.body, _notificationDetails(),
@@ -110,18 +114,14 @@ class _LocalNotifications implements LocalNotifications {
   }
 
   @override
-  Future<void> removeNotifications() async => _localNotificationsPlugin.cancelAll();
+  Future<void> removeNotifications() async =>
+      _localNotificationsPlugin.cancelAll();
 
   // ***************************************************************************
-  void _onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
-    if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported()) ){
-      FlutterAppBadger.removeBadge();
-    }
-  }
-
-  Future<void> _handleNewLocalNotificationOpened(NotificationResponse payload) async {
-      if (!Platform.isLinux && (await FlutterAppBadger.isAppBadgeSupported()) ){
-      FlutterAppBadger.removeBadge();
+  Future<void> _handleNewLocalNotificationOpened(
+      NotificationResponse payload) async {
+    if (!Platform.isLinux && (await AppBadgePlus.isSupported())) {
+      AppBadgePlus.updateBadge(0);
     }
   }
 
@@ -149,7 +149,9 @@ class _LocalNotifications implements LocalNotifications {
         );
 
   DarwinNotificationDetails? get _darwinDetails =>
-      !(Platform.isIOS || Platform.isMacOS) ? null : const DarwinNotificationDetails();
+      !(Platform.isIOS || Platform.isMacOS)
+          ? null
+          : const DarwinNotificationDetails();
 
   LinuxNotificationDetails? get _linuxDetails =>
       !Platform.isLinux ? null : const LinuxNotificationDetails();
@@ -161,12 +163,14 @@ class _NullLocalNotifications implements LocalNotifications {
 
   @override
   Future<bool> initialize() {
-    Logger('LocalNotifications').config('(NullLocalNotifications): The package is initializing a Null implementation, either because it has been told to (with --dart-define=testing_mode=true), or because the host platform is not supported.');
+    Logger('LocalNotifications').config(
+        '(NullLocalNotifications): The package is initializing a Null implementation, either because it has been told to (with --dart-define=testing_mode=true), or because the host platform is not supported.');
     return Future.value(false);
   }
 
   @override
-  Stream<LocalNotification> get onNotificationOpened => throw UnimplementedError();
+  Stream<LocalNotification> get onNotificationOpened =>
+      throw UnimplementedError();
 
   @override
   Future<void> removeNotifications() async {}

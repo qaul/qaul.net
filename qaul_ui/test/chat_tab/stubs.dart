@@ -3,7 +3,7 @@ part of 'chat_tab_test.dart';
 class StubLibqaulWorker implements LibqaulWorker {
   StubLibqaulWorker(this.ref);
 
-  final WidgetRef ref;
+  final Ref ref;
   final _logger = Logger('StubLibqaulWorker');
 
   @override
