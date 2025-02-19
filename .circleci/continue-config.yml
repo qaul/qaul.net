@@ -188,14 +188,14 @@ executors:
         working_directory: ~/qaul.net
     rust-linux:
         docker:
-            - image: cimg/rust:1.78.0
+            - image: cimg/rust:1.81.0
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net
     rust-linux-arm:
         docker:
-            - image: cimg/rust:1.78.0
+            - image: cimg/rust:1.81.0
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         resource_class: arm.medium
