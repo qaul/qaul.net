@@ -1,6 +1,6 @@
 [package]
 name = "libqaul"
-version = "2.0.0-rc.2"
+version = "2.0.0-rc.3"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 license = "AGPL"
