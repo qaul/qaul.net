@@ -88,9 +88,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   const ChatScreen(
     this.room,
     this.user, {
-    Key? key,
+    super.key,
     this.otherUser,
-  }) : super(key: key);
+  });
 
   final ChatRoom room;
 

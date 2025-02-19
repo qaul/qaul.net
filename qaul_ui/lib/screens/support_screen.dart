@@ -8,7 +8,7 @@ import '../decorators/disabled_state_decorator.dart';
 import '../widgets/widgets.dart';
 
 class SupportScreen extends StatefulHookConsumerWidget {
-  const SupportScreen({Key? key}) : super(key: key);
+  const SupportScreen({super.key});
 
   @override
   ConsumerState<SupportScreen> createState() => _SupportScreenState();

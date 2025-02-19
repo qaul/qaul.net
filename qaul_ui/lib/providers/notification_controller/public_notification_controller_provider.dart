@@ -1,9 +1,12 @@
 part of '../providers.dart';
 
-final publicNotificationControllerProvider = Provider((ref) => PublicNotificationController(ref));
+final publicNotificationControllerProvider =
+    Provider((ref) => PublicNotificationController(ref));
 
-class PublicNotificationController extends NotificationController<List<PublicPost>>
+class PublicNotificationController
+    extends NotificationController<List<PublicPost>>
     with DataProcessingStrategy<PublicPost> {
+  // ignore: use_super_parameters
   PublicNotificationController(Ref ref) : super(ref);
 
   int _lastIndex = -1;
@@ -14,7 +17,7 @@ class PublicNotificationController extends NotificationController<List<PublicPos
   String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
 
   @override
-  MapEntry<AlwaysAliveProviderListenable<List<PublicPost>>,
+  MapEntry<StateNotifierProvider<PublicPostListNotifier, List<PublicPost>>,
           void Function(List<PublicPost>?, List<PublicPost>)>
       get strategy => MapEntry(publicMessagesProvider, execute);
 
@@ -38,10 +41,15 @@ class PublicNotificationController extends NotificationController<List<PublicPos
   Iterable<PublicPost> entriesToBeProcessed(List<PublicPost> values) {
     var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex).toList();
     if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
-      final verifiedIds =
-          ref.read(usersProvider).where((u) => u.isVerified ?? false).map((e) => e.id);
-      newPosts = newPosts.where((post) =>
-          post.senderId != null && verifiedIds.where((id) => id.equals(post.senderId!)).isNotEmpty).toList();
+      final verifiedIds = ref
+          .read(usersProvider)
+          .where((u) => u.isVerified ?? false)
+          .map((e) => e.id);
+      newPosts = newPosts
+          .where((post) =>
+              post.senderId != null &&
+              verifiedIds.where((id) => id.equals(post.senderId!)).isNotEmpty)
+          .toList();
     }
     if (newPosts.isEmpty) return [];
     _log.fine('Public posts updated. New ones are: $newPosts');

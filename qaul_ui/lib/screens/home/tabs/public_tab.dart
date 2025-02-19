@@ -1,8 +1,7 @@
 part of 'tab.dart';
 
 class _Public extends BaseTab {
-  const _Public({Key? key, required this.disablePageViewScroll})
-      : super(key: key);
+  const _Public({super.key, required this.disablePageViewScroll});
   final ValueNotifier<bool> disablePageViewScroll;
 
   @override
@@ -33,8 +32,7 @@ class _PublicState extends _BaseTabState<_Public> {
 }
 
 class _PublicTabView extends HookConsumerWidget {
-  const _PublicTabView(this.disablePageViewScroll, {Key? key})
-      : super(key: key);
+  const _PublicTabView(this.disablePageViewScroll);
   final ValueNotifier<bool> disablePageViewScroll;
 
   @override
@@ -145,7 +143,7 @@ class ExitScreenIntent extends Intent {
 }
 
 class _CreatePublicMessage extends HookConsumerWidget {
-  _CreatePublicMessage({Key? key}) : super(key: key);
+  _CreatePublicMessage();
 
   final _formKey = GlobalKey<FormFieldState>();
 
@@ -153,7 +151,6 @@ class _CreatePublicMessage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
     final loading = useState(false);
-    final isMounted = useIsMounted();
 
     final sendMessage = useCallback(() async {
       if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -161,7 +158,7 @@ class _CreatePublicMessage extends HookConsumerWidget {
       final worker = ref.read(qaulWorkerProvider);
       await worker.sendPublicMessage(controller.text.trim());
       loading.value = false;
-      if (!isMounted()) return;
+      if (!context.mounted) return;
       Navigator.pop(context); // ignore: use_build_context_synchronously
     }, [UniqueKey()]);
 

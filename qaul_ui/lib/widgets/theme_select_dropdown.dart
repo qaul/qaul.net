@@ -1,7 +1,7 @@
 part of 'widgets.dart';
 
 class ThemeSelectDropdown extends StatelessWidget {
-  const ThemeSelectDropdown({Key? key}) : super(key: key);
+  const ThemeSelectDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class ThemeSelectDropdown extends StatelessWidget {
 }
 
 class _ThemeDropdown extends StatelessWidget {
-  const _ThemeDropdown({Key? key}) : super(key: key);
+  const _ThemeDropdown();
 
   @override
   Widget build(BuildContext context) {

@@ -16,7 +16,7 @@ import '../helpers/user_prefs_helper.dart';
 import '../widgets/widgets.dart';
 
 class SettingsScreen extends HookConsumerWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,7 @@ class SettingsScreen extends HookConsumerWidget {
 }
 
 class _NotificationOptions extends StatefulWidget {
-  const _NotificationOptions({Key? key}) : super(key: key);
+  const _NotificationOptions();
 
   @override
   State<_NotificationOptions> createState() => _NotificationOptionsState();
@@ -248,13 +248,12 @@ class _AddNodeDialogResponse {
 
 class _AddNodeDialog extends HookWidget {
   const _AddNodeDialog({
-    Key? key,
     this.name,
     this.ip,
     this.port,
     this.isIPv4 = true,
     this.usesQuic = true,
-  }) : super(key: key);
+  });
 
   final String? name;
   final String? ip;
@@ -449,7 +448,7 @@ class _AddNodeDialog extends HookWidget {
 }
 
 class _AndroidOptions extends StatefulWidget {
-  const _AndroidOptions({Key? key}) : super(key: key);
+  const _AndroidOptions();
 
   @override
   State<_AndroidOptions> createState() => _AndroidOptionsState();

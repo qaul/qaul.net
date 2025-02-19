@@ -4,7 +4,7 @@ part of 'widgets.dart';
 ///
 /// Otherwise, the user found in [defaultUserProvider] is used.
 abstract class QaulAvatar extends ConsumerWidget {
-  const QaulAvatar({Key? key, this.user}) : super(key: key);
+  const QaulAvatar({super.key, this.user});
   final User? user;
 
   factory QaulAvatar.tiny({Key? key, User? user}) =>
@@ -67,7 +67,7 @@ abstract class QaulAvatar extends ConsumerWidget {
 }
 
 class _TinyQaulAvatar extends QaulAvatar {
-  const _TinyQaulAvatar({Key? key, User? user}) : super(key: key, user: user);
+  const _TinyQaulAvatar({super.key, super.user});
 
   @override
   double get radius => 14.0;
@@ -82,11 +82,11 @@ class _TinyQaulAvatar extends QaulAvatar {
 
 class _SmallQaulAvatar extends QaulAvatar {
   const _SmallQaulAvatar({
-    Key? key,
-    User? user,
+    super.key,
+    super.user,
     this.badgeEnabled = true,
     this.isGroup = false,
-  }) : super(key: key, user: user);
+  });
   final bool badgeEnabled;
   final bool isGroup;
 
@@ -129,11 +129,11 @@ class _SmallQaulAvatar extends QaulAvatar {
 
 class _LargeQaulAvatar extends QaulAvatar {
   const _LargeQaulAvatar({
-    Key? key,
-    User? user,
+    super.key,
+    super.user,
     this.isGroup = false,
     this.isBlankUser = false,
-  }) : super(key: key, user: user);
+  });
   final bool isGroup;
   final bool isBlankUser;
 

@@ -13,7 +13,7 @@ import 'helpers/user_prefs_helper.dart';
 import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
-  const QaulApp({Key? key, this.themeMode}) : super(key: key);
+  const QaulApp({super.key, this.themeMode});
   final AdaptiveThemeMode? themeMode;
 
   static final lightTheme = ThemeData(

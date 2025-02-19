@@ -2,8 +2,8 @@ part of 'widgets.dart';
 
 class LanguageSelectDropDown extends ConsumerWidget {
   const LanguageSelectDropDown({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +24,7 @@ class LanguageSelectDropDown extends ConsumerWidget {
 }
 
 class _LanguageDropdown extends StatelessWidget {
-  const _LanguageDropdown({Key? key}) : super(key: key);
+  const _LanguageDropdown();
 
   String _languageName(Locale l) => lookupAppLocalizations(l).languageName;
 

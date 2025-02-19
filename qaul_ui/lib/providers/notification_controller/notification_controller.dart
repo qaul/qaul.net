@@ -28,7 +28,7 @@ class NotificationController<T> {
 
   @protected
   @visibleForOverriding
-  MapEntry<AlwaysAliveProviderListenable<T>, void Function(T?, T)>
+  MapEntry<ProviderListenable<T>, void Function(T?, T)>
       get strategy =>
           throw UnimplementedError('Must be implemented by child class');
 

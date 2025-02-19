@@ -1,4 +1,4 @@
-library email_logging_coordinator;
+library;
 
 import 'dart:convert';
 import 'dart:io';

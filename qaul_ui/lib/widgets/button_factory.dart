@@ -2,10 +2,10 @@ part of 'widgets.dart';
 
 class IconButtonFactory extends StatelessWidget {
   const IconButtonFactory({
-    Key? key,
+    super.key,
     this.onPressed,
     this.icon = Icons.arrow_back_ios_rounded,
-  }) : super(key: key);
+  });
   final VoidCallback? onPressed;
   final IconData icon;
 
@@ -28,12 +28,12 @@ class IconButtonFactory extends StatelessWidget {
 
 class QaulButton extends StatelessWidget {
   const QaulButton({
-    Key? key,
+    super.key,
     required this.label,
     this.style,
     this.onPressed,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   final String label;
   final TextStyle? style;

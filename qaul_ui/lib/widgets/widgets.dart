@@ -1,5 +1,5 @@
 // Barrel file
-library widgets;
+library;
 
 import 'dart:io';
 import 'dart:math';

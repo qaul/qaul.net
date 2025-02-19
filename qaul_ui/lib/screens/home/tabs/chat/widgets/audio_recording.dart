@@ -2,11 +2,10 @@ part of 'chat.dart';
 
 class _RecordAudioDialog extends StatefulHookConsumerWidget {
   const _RecordAudioDialog({
-    Key? key,
     required this.room,
     required this.onSendPressed,
     this.partialMessage,
-  }) : super(key: key);
+  });
   final ChatRoom room;
   final String? partialMessage;
   final Function(File f, types.PartialText desc) onSendPressed;

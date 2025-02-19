@@ -37,7 +37,7 @@ final _filteredNodes = StateProvider<NetworkNode>((ref) {
 });
 
 class _NetworkTypeFilterToolbar extends HookConsumerWidget {
-  const _NetworkTypeFilterToolbar({Key? key}) : super(key: key);
+  const _NetworkTypeFilterToolbar();
 
   static final List<NetworkTypeFilter> availableFilters = [
     if (Platform.isAndroid) NetworkTypeFilter.bluetooth,

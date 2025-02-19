@@ -6,7 +6,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'widgets.dart';
 
 class UserDetailsHeading extends StatelessWidget {
-  const UserDetailsHeading(this.user, {Key? key}) : super(key: key);
+  const UserDetailsHeading(this.user, {super.key});
   final User user;
 
   @override

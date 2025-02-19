@@ -1,7 +1,7 @@
 part of 'tab.dart';
 
 class _Users extends BaseTab {
-  const _Users({Key? key}) : super(key: key);
+  const _Users({super.key});
 
   @override
   _UsersState createState() => _UsersState();
@@ -80,9 +80,8 @@ class _UsersState extends _BaseTabState<_Users> {
 
 class _AvailableConnections extends StatelessWidget {
   const _AvailableConnections({
-    Key? key,
     required this.user,
-  }) : super(key: key);
+  });
 
   final User user;
 

@@ -2,7 +2,7 @@
 part of '../../tab.dart';
 
 class _CreateNewRoomDialog extends StatelessWidget {
-  const _CreateNewRoomDialog({Key? key}) : super(key: key);
+  const _CreateNewRoomDialog();
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _CreateNewRoomDialog extends StatelessWidget {
 }
 
 class _CreateNewGroupDialog extends HookConsumerWidget {
-  _CreateNewGroupDialog({Key? key}) : super(key: key);
+  _CreateNewGroupDialog();
 
   final _nameKey = GlobalKey<FormFieldState>();
 
@@ -59,8 +59,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
     final loading = useState(false);
     final nameCtrl = useTextEditingController();
-
-    final isMounted = useIsMounted();
 
     final l10n = AppLocalizations.of(context)!;
 
@@ -105,7 +103,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
                   var name = nameCtrl.text;
                   await createChatGroup(name, worker, ref);
-                  if (!isMounted()) return;
+                  if (!context.mounted) return;
 
                   final group = ref
                       .read(chatRoomsProvider)
@@ -125,7 +123,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     ),
                   );
 
-                  if (!isMounted()) return;
+                  if (!context.mounted) return;
                   var chatRoom = ref
                       .read(chatRoomsProvider)
                       .firstWhereOrNull((g) => g.name == name);
@@ -162,9 +160,9 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
 class InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
   const InviteUsersToGroupDialog({
-    Key? key,
+    super.key,
     required this.room,
-  }) : super(key: key);
+  });
 
   final ChatRoom room;
 
@@ -237,7 +235,7 @@ class _InviteUsersToGroupDialogState
 }
 
 class _InviteDetailsDialog extends HookConsumerWidget {
-  const _InviteDetailsDialog(this.invite, {Key? key}) : super(key: key);
+  const _InviteDetailsDialog(this.invite);
 
   final GroupInvite invite;
 

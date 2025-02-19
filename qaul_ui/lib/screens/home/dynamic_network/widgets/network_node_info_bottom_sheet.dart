@@ -2,9 +2,8 @@ part of '../dynamic_network_screen.dart';
 
 class _NetworkNodeInfoBottomSheet extends StatelessWidget {
   const _NetworkNodeInfoBottomSheet({
-    Key? key,
     required this.node, this.onClosePressed,
-  }) : super(key: key);
+  });
   final NetworkNode node;
   final VoidCallback? onClosePressed;
 

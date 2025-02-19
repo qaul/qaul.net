@@ -8,7 +8,7 @@ import '../helpers/navigation_helper.dart';
 import '../widgets/widgets.dart';
 
 class AboutScreen extends StatelessWidget {
-  const AboutScreen({Key? key}) : super(key: key);
+  const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -125,11 +125,10 @@ class AboutScreen extends StatelessWidget {
 
 class _LinkButton extends StatelessWidget {
   const _LinkButton({
-    Key? key,
     required this.urlLabel,
     required this.url,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String urlLabel;
   final String url;

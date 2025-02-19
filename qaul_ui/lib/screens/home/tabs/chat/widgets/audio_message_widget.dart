@@ -2,11 +2,11 @@ part of 'chat.dart';
 
 class AudioMessageWidget extends StatefulWidget {
   const AudioMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     required this.messageWidth,
     this.isDefaultUser = false,
-  }) : super(key: key);
+  });
 
   final types.AudioMessage message;
 

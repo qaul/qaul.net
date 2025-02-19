@@ -195,7 +195,7 @@ class NullChatNotificationController implements ChatNotificationController {
   void removeNotifications() {}
 
   @override
-  MapEntry<AlwaysAliveProviderListenable<List<ChatRoom>>,
+  MapEntry<StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>,
           void Function(List<ChatRoom>? p1, List<ChatRoom> p2)>
       get strategy => throw UnimplementedError();
 

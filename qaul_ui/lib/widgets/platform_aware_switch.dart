@@ -2,10 +2,10 @@ part of 'widgets.dart';
 
 class PlatformAwareSwitch extends PlatformAwareBuilder {
   const PlatformAwareSwitch({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   final bool value;
 

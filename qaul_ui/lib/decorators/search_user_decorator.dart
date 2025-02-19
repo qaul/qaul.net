@@ -29,8 +29,7 @@ final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
 });
 
 class SearchUserDecorator extends HookConsumerWidget {
-  const SearchUserDecorator({Key? key, required this.builder, this.title})
-      : super(key: key);
+  const SearchUserDecorator({super.key, required this.builder, this.title});
   final String? title;
   final SearchUserResultBuilder builder;
 

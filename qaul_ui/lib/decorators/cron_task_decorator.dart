@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 /// when the app is active.
 class CronTaskDecorator extends StatefulWidget {
   const CronTaskDecorator({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.callback,
     required this.child,
-  }) : super(key: key);
+  });
   final Duration schedule;
   final VoidCallback callback;
   final Widget child;

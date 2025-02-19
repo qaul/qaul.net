@@ -2,7 +2,7 @@ part of 'widgets.dart';
 
 class QaulListTile extends StatelessWidget {
   const QaulListTile._({
-    Key? key,
+    super.key,
     this.user,
     this.room,
     this.content,
@@ -15,8 +15,7 @@ class QaulListTile extends StatelessWidget {
     this.avatarTapRoutesToDetailsScreen = true,
     this.isContentSelectable = false,
   })  : assert(trailingIcon == null || trailingMetadata == null),
-        assert(user != null || room != null),
-        super(key: key);
+        assert(user != null || room != null);
 
   factory QaulListTile.user(
     User user, {

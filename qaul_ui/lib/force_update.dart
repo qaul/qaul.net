@@ -103,12 +103,12 @@ class ForceUpdateSystem {
 
 class ForceUpdateDialog extends StatelessWidget {
   const ForceUpdateDialog({
-    Key? key,
+    super.key,
     required this.previous,
     required this.current,
     this.onLinkPressed,
     this.onDeleteAccountPressed,
-  }) : super(key: key);
+  });
 
   final String previous;
   final String current;
