@@ -21,15 +21,15 @@ Future<String?> findFolderWithFilesOfExtension(
 mixin FilePathResolverMixin {
   @protected
   String getFilePath(
-    Reader read, {
+    WidgetRef ref, {
     required String id,
     required String extension,
   }) {
-    var storagePath = read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
-    if (Platform.isWindows){
-      storagePath = read(libqaulLogsStoragePath)!.replaceAll('\\logs', '');  
+    var storagePath = ref.read(libqaulLogsStoragePath)!.replaceAll('/logs', '');
+    if (Platform.isWindows) {
+      storagePath = ref.read(libqaulLogsStoragePath)!.replaceAll('\\logs', '');
     }
-    var uuid = read(defaultUserProvider)!.idBase58;
+    var uuid = ref.read(defaultUserProvider)!.idBase58;
 
     final filePath = '$storagePath/$uuid/files/$id.$extension';
     if (Platform.isWindows) {

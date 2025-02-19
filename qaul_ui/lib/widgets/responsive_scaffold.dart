@@ -2,13 +2,13 @@ part of 'widgets.dart';
 
 class ResponsiveScaffold extends StatelessWidget {
   const ResponsiveScaffold({
-    Key? key,
+    super.key,
     required this.body,
     this.title,
     this.icon,
     this.hasAppBar = true,
     this.wrapWithScrollable = false,
-  }) : super(key: key);
+  });
   final Widget body;
   final bool hasAppBar;
   final String? title;

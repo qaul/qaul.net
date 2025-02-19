@@ -11,7 +11,7 @@ import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
-  const QaulNavBarDecorator({Key? key, required this.child}) : super(key: key);
+  const QaulNavBarDecorator({super.key, required this.child});
 
   /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
   /// lost when the window is resized.
@@ -201,7 +201,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 }
 
 class QaulNavBarItem extends HookConsumerWidget {
-  const QaulNavBarItem(this.tab, {Key? key}) : super(key: key);
+  const QaulNavBarItem(this.tab, {super.key});
   final TabType tab;
 
   final double _iconSize = 32.0;
@@ -312,12 +312,11 @@ class QaulNavBarItem extends HookConsumerWidget {
 
 class _SelectedIndicatorDecorator extends StatelessWidget {
   const _SelectedIndicatorDecorator({
-    Key? key,
     required this.isSelected,
     required this.label,
     required this.selectedColor,
     required this.child,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool> isSelected;
   final Widget child;
@@ -355,11 +354,10 @@ class _SelectedIndicatorDecorator extends StatelessWidget {
 
 class _TabNotificationBadge extends StatelessWidget {
   const _TabNotificationBadge({
-    Key? key,
     required this.notificationCount,
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
   final ValueNotifier<int?> notificationCount;
   final VoidCallback onPressed;
   final Widget child;

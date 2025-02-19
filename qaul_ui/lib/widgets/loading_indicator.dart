@@ -1,7 +1,7 @@
 part of 'widgets.dart';
 
 class LoadingIndicator extends PlatformAwareBuilder {
-  const LoadingIndicator({Key? key}) : super(key: key);
+  const LoadingIndicator({super.key});
 
   @override
   Widget defaultBuilder(BuildContext context, WidgetRef ref) {

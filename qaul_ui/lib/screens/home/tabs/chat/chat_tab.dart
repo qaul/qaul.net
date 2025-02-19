@@ -1,7 +1,7 @@
 part of '../tab.dart';
 
 class _Chat extends BaseTab {
-  const _Chat({Key? key}) : super(key: key);
+  const _Chat({super.key});
 
   @override
   _ChatState createState() => _ChatState();
@@ -314,9 +314,8 @@ class _ChatState extends _BaseTabState<_Chat> {
 
 class _GroupInviteTile extends HookConsumerWidget {
   const _GroupInviteTile({
-    Key? key,
     required this.invite,
-  }) : super(key: key);
+  });
 
   final GroupInvite invite;
 

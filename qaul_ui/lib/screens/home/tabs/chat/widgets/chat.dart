@@ -88,9 +88,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   const ChatScreen(
     this.room,
     this.user, {
-    Key? key,
+    super.key,
     this.otherUser,
-  }) : super(key: key);
+  });
 
   final ChatRoom room;
 
@@ -488,7 +488,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       {required AppLocalizations l10n}) {
     return room.messages
         ?.sorted()
-        .map((e) => e.toInternalMessage(_author(e), ref.read, l10n: l10n))
+        .map((e) => e.toInternalMessage(_author(e), ref, l10n: l10n))
         .toList();
   }
 
@@ -554,7 +554,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 extension _MessageExtension on Message {
-  types.Message toInternalMessage(User author, Reader read,
+  types.Message toInternalMessage(User author, WidgetRef ref,
       {required AppLocalizations l10n}) {
     var mappedState = status == MessageState.sent
         ? types.Status.sent
@@ -583,7 +583,7 @@ extension _MessageExtension on Message {
         status: mappedState,
       );
     } else if (content is FileShareContent) {
-      var filePath = (content as FileShareContent).filePath(read);
+      var filePath = (content as FileShareContent).filePath(ref);
 
       String? mimeStr = lookupMimeType(filePath);
       if (mimeStr != null &&

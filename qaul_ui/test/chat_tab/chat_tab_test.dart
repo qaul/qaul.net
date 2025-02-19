@@ -39,8 +39,8 @@ void main() {
   testResponsiveWidgets('empty state chat tab', (tester) async {
     final wut = ProviderScope(
       overrides: [
-        defaultUserProvider.overrideWithValue(
-          StateController(defaultUser),
+        defaultUserProvider.overrideWith(
+          (_) => defaultUser,
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -62,17 +62,17 @@ void main() {
   testResponsiveWidgets('chat tab with group chat', (tester) async {
     final wut = ProviderScope(
       overrides: [
-        defaultUserProvider.overrideWithValue(
-          StateController(defaultUser),
+        defaultUserProvider.overrideWith(
+          (_) => defaultUser,
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
         ),
-        chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        chatRoomsProvider.overrideWith(
+          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        qaulWorkerProvider.overrideWithProvider(
-          Provider((ref) => StubLibqaulWorker(ref.read)),
+        qaulWorkerProvider.overrideWith(
+          (ref) => StubLibqaulWorker(ref),
         ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
@@ -97,17 +97,17 @@ void main() {
   testResponsiveWidgets('opening a group chat', (tester) async {
     final wut = ProviderScope(
       overrides: [
-        defaultUserProvider.overrideWithValue(
-          StateController(defaultUser),
+        defaultUserProvider.overrideWith(
+          (_) => defaultUser,
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
         ),
-        chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        chatRoomsProvider.overrideWith(
+          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        qaulWorkerProvider.overrideWithProvider(
-          Provider((ref) => StubLibqaulWorker(ref.read)),
+        qaulWorkerProvider.overrideWith(
+          (ref) => StubLibqaulWorker(ref),
         ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
@@ -138,17 +138,17 @@ void main() {
       (tester) async {
     final wut = ProviderScope(
       overrides: [
-        defaultUserProvider.overrideWithValue(
-          StateController(defaultUser),
+        defaultUserProvider.overrideWith(
+          (_) => defaultUser,
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
         ),
-        chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        chatRoomsProvider.overrideWith(
+          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        qaulWorkerProvider.overrideWithProvider(
-          Provider((ref) => StubLibqaulWorker(ref.read)),
+        qaulWorkerProvider.overrideWith(
+          (ref) => StubLibqaulWorker(ref),
         ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
@@ -188,17 +188,17 @@ void main() {
       (tester) async {
     final wut = ProviderScope(
       overrides: [
-        defaultUserProvider.overrideWithValue(
-          StateController(defaultUser),
+        defaultUserProvider.overrideWith(
+          (_) => defaultUser,
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
         ),
-        chatRoomsProvider.overrideWithValue(
-          ChatRoomListNotifier(rooms: [buildGroupChat()]),
+        chatRoomsProvider.overrideWith(
+          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
         ),
-        qaulWorkerProvider.overrideWithProvider(
-          Provider((ref) => StubLibqaulWorker(ref.read)),
+        qaulWorkerProvider.overrideWith(
+          (ref) => StubLibqaulWorker(ref),
         ),
       ],
       child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
@@ -239,17 +239,17 @@ void main() {
     (tester) async {
       final wut = ProviderScope(
         overrides: [
-          defaultUserProvider.overrideWithValue(
-            StateController(defaultUser),
+          defaultUserProvider.overrideWith(
+            (_) => defaultUser,
           ),
           chatNotificationControllerProvider.overrideWithValue(
             NullChatNotificationController(),
           ),
-          chatRoomsProvider.overrideWithValue(
-            ChatRoomListNotifier(rooms: [buildGroupChat()]),
+          chatRoomsProvider.overrideWith(
+            (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
           ),
-          qaulWorkerProvider.overrideWithProvider(
-            Provider((ref) => StubLibqaulWorker(ref.read)),
+          qaulWorkerProvider.overrideWith(
+            (ref) => StubLibqaulWorker(ref),
           ),
         ],
         child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),

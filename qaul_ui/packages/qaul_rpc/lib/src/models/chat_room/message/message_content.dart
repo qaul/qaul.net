@@ -104,6 +104,6 @@ class FileShareContent extends MessageContent with FilePathResolverMixin {
 
   String get extension => fileName.split('.').last;
 
-  String filePath(Reader read) =>
-      getFilePath(read, id: fileId, extension: extension);
+  String filePath(WidgetRef ref) =>
+      getFilePath(ref, id: fileId, extension: extension);
 }

@@ -5,7 +5,7 @@ class DebugTranslator extends RpcModuleTranslator {
   Modules get type => Modules.DEBUG;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     final message = Debug.fromBuffer(data);
     switch (message.whichMessage()) {
       case Debug_Message.heartbeatResponse:
@@ -15,12 +15,12 @@ class DebugTranslator extends RpcModuleTranslator {
         final response = message.ensureStoragePathResponse();
         return RpcTranslatorResponse(type, response.storagePath);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     // handled within libqaul worker
   }
 }

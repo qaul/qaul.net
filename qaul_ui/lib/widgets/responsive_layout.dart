@@ -2,11 +2,11 @@ part of 'widgets.dart';
 
 class ResponsiveLayout extends StatelessWidget {
   const ResponsiveLayout({
-    Key? key,
+    super.key,
     required this.mobileBody,
     this.tabletBody,
     this.desktopBody,
-  }) : super(key: key);
+  });
 
   final Widget mobileBody;
   final Widget? tabletBody;
@@ -29,7 +29,7 @@ class ResponsiveLayout extends StatelessWidget {
 }
 
 class MaxWidthContainer extends StatelessWidget {
-  const MaxWidthContainer({Key? key, required this.child}) : super(key: key);
+  const MaxWidthContainer({super.key, required this.child});
 
   final Widget child;
 

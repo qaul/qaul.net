@@ -14,9 +14,9 @@ import '../screens/home/tabs/chat/widgets/chat.dart';
 
 class DeepLinkWrapper extends StatefulHookConsumerWidget {
   const DeepLinkWrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 

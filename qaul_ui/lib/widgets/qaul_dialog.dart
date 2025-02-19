@@ -5,14 +5,14 @@ import 'widgets.dart';
 
 class QaulDialog extends HookConsumerWidget {
   const QaulDialog({
-    Key? key,
+    super.key,
     required this.content,
     required this.button1Label,
     this.title,
     this.onButton1Pressed,
     this.button2Label,
     this.onButton2Pressed,
-  }) : super(key: key);
+  });
 
   final String? title;
   final Widget content;

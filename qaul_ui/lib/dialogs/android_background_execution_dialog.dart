@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AndroidBackgroundExecutionDialog extends StatelessWidget {
-  const AndroidBackgroundExecutionDialog({Key? key}) : super(key: key);
+  const AndroidBackgroundExecutionDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

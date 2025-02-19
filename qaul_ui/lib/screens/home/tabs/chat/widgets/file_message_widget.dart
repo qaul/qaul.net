@@ -2,10 +2,10 @@ part of 'chat.dart';
 
 class FileMessageWidget extends StatelessWidget {
   const FileMessageWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.isDefaultUser = false,
-  }) : super(key: key);
+  });
 
   final types.FileMessage message;
   final bool isDefaultUser;

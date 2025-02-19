@@ -5,7 +5,7 @@ class FeedTranslator extends RpcModuleTranslator {
   Modules get type => Modules.FEED;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     final message = Feed.fromBuffer(data);
     switch (message.whichMessage()) {
       case Feed_Message.received:
@@ -16,14 +16,14 @@ class FeedTranslator extends RpcModuleTranslator {
             .toList();
         return RpcTranslatorResponse(type, newMessages);
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! List<PublicPost>) return;
-    final provider = reader(publicMessagesProvider.notifier);
+    final provider = ref.read(publicMessagesProvider.notifier);
     for (final msg in res.data) {
       if (!provider.contains(msg)) provider.add(msg);
     }

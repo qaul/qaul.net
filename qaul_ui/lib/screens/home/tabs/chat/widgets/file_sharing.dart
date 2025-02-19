@@ -3,11 +3,10 @@ part of 'chat.dart';
 class _SendFileDialog extends HookConsumerWidget {
   const _SendFileDialog(
     this.file, {
-    Key? key,
     required this.room,
     required this.onSendPressed,
     this.partialMessage,
-  }) : super(key: key);
+  });
   final File file;
   final ChatRoom room;
   final String? partialMessage;

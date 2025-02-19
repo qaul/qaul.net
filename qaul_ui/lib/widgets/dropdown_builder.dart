@@ -2,12 +2,12 @@ part of 'widgets.dart';
 
 class DropdownBuilder<T> extends PlatformAwareBuilder {
   const DropdownBuilder({
-    Key? key,
+    super.key,
     required this.value,
     required this.itemsLength,
     required this.itemBuilder,
     this.onChanged,
-  }) : super(key: key);
+  });
   final T value;
   final int itemsLength;
   final DropdownMenuItem<T> Function(BuildContext, int) itemBuilder;

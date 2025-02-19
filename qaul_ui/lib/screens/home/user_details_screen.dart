@@ -16,15 +16,13 @@ import 'tabs/chat/widgets/chat.dart';
 
 class UserDetailsScreen extends HookConsumerWidget {
   const UserDetailsScreen({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
   final User user;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMounted = useIsMounted();
-
     final l10n = AppLocalizations.of(context)!;
 
     final onVerifyUserPressed = useCallback(() async {
@@ -33,9 +31,9 @@ class UserDetailsScreen extends HookConsumerWidget {
           ? await worker.unverifyUser(user)
           : await _verifyUser(context, user: user);
 
-      if (!isMounted()) return;
+      if (!context.mounted) return;
       Navigator.pop(context);
-    }, [ref, isMounted]);
+    }, [ref, context.mounted]);
 
     final onBlockUserPressed = useCallback(() async {
       final res = await _confirmAction(
@@ -49,9 +47,9 @@ class UserDetailsScreen extends HookConsumerWidget {
 
       final worker = ref.read(qaulWorkerProvider);
       blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
-      if (!isMounted()) return;
+      if (!context.mounted) return;
       Navigator.pop(context);
-    }, [l10n, ref, isMounted]);
+    }, [l10n, ref, context.mounted]);
 
     return Scaffold(
         appBar: AppBar(leading: const IconButtonFactory()),
@@ -192,7 +190,7 @@ Future<void> _verifyUser(BuildContext context, {required User user}) async {
 }
 
 class _VerifyUserDialog extends HookConsumerWidget {
-  const _VerifyUserDialog(this.user, {Key? key}) : super(key: key);
+  const _VerifyUserDialog(this.user);
   final User user;
 
   @override
@@ -257,9 +255,8 @@ class _VerifyUserDialog extends HookConsumerWidget {
 
 class _SecurityNumberDisplay extends StatelessWidget {
   const _SecurityNumberDisplay({
-    Key? key,
     required this.securityNo,
-  }) : super(key: key);
+  });
 
   final SecurityNumber securityNo;
 

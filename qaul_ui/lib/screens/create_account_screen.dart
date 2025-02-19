@@ -155,6 +155,6 @@ class CreateAccountScreen extends HookConsumerWidget {
     if (!valid) return;
 
     loading.value = true;
-    ref.read(_usernameProvider.state).state = nameCtrl.text;
+    ref.read(_usernameProvider.notifier).state = nameCtrl.text;
   }
 }

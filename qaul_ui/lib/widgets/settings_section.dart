@@ -2,11 +2,11 @@ part of 'widgets.dart';
 
 class SettingsSection extends StatelessWidget {
   const SettingsSection({
-    Key? key,
+    super.key,
     required this.name,
     required this.icon,
     required this.content,
-  }) : super(key: key);
+  });
 
   final String name;
   final Widget icon;

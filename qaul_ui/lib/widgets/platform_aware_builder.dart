@@ -8,7 +8,7 @@ part of 'widgets.dart';
 /// Overriding the [build] method would render this superclass useless, as it's there that
 /// the Platform selection occurs.
 abstract class PlatformAwareBuilder extends HookConsumerWidget {
-  const PlatformAwareBuilder({Key? key}) : super(key: key);
+  const PlatformAwareBuilder({super.key});
 
   Widget defaultBuilder(BuildContext context, WidgetRef ref);
 

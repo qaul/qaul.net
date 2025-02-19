@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class DisabledStateDecorator extends StatelessWidget {
   const DisabledStateDecorator({
-    Key? key,
+    super.key,
     required this.child,
     this.isDisabled = false,
     this.ignorePointer = true,
-  }) : super(key: key);
+  });
   final bool isDisabled;
   final bool ignorePointer;
   final Widget child;

@@ -7,7 +7,7 @@ class BleTranslator extends RpcModuleTranslator {
   Modules get type => Modules.BLE;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Reader reader) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     final message = Ble.fromBuffer(data);
     switch (message.whichMessage()) {
       case Ble_Message.infoResponse:
@@ -29,16 +29,16 @@ class BleTranslator extends RpcModuleTranslator {
       case Ble_Message.rightsRequest:
         return RpcTranslatorResponse(Modules.BLE, BleRightsRequest());
       default:
-        return super.decodeMessageBytes(data, reader);
+        return super.decodeMessageBytes(data, ref);
     }
   }
 
   @override
-  Future<void> processResponse(RpcTranslatorResponse res, Reader reader) async {
+  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! BleConnectionStatus) return;
     var newStatus = res.data as BleConnectionStatus;
     _log.finer('BLE Module: received new status $newStatus');
-    final currentStatus = reader(bleStatusProvider);
+    final currentStatus = ref.read(bleStatusProvider);
     if (currentStatus != null) {
       newStatus = currentStatus.copyWith(
         status: newStatus.status,
@@ -48,6 +48,6 @@ class BleTranslator extends RpcModuleTranslator {
       );
       _log.finest('BLE Module: Merged with previous status: $newStatus');
     }
-    reader(bleStatusProvider.state).state = newStatus;
+    ref.read(bleStatusProvider.notifier).state = newStatus;
   }
 }

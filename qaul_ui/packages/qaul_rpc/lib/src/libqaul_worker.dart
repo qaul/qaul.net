@@ -28,20 +28,19 @@ import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
-final qaulWorkerProvider =
-    Provider<LibqaulWorker>((ref) => LibqaulWorker(ref.read));
+final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref));
 
 final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);
 
 class LibqaulWorker {
-  LibqaulWorker(Reader reader) : _reader = reader {
+  LibqaulWorker(Ref ref) : _ref = ref {
     _init();
   }
 
-  final Reader _reader;
+  final Ref _ref;
   final _log = Logger('LibqaulWorker');
 
-  Libqaul get _lib => _reader(libqaulProvider);
+  Libqaul get _lib => _ref.read(libqaulProvider);
 
   Future<bool> get initialized => _initialized.future;
   final _initialized = Completer<bool>();
@@ -294,13 +293,13 @@ class LibqaulWorker {
 
       for (var i = 0; i < 5; i++) {
         await Future.delayed(Duration(milliseconds: (i + 1) * 500));
-        newItems = _reader(fileHistoryEntitiesProvider);
+        newItems = _ref.read(fileHistoryEntitiesProvider);
         if (newItems.isNotEmpty) break;
       }
     } catch (error) {
       _log.warning('error fetching file history', error, StackTrace.current);
     } finally {
-      _reader(fileHistoryEntitiesProvider.notifier).clear();
+      _ref.read(fileHistoryEntitiesProvider.notifier).clear();
     }
     return newItems;
   }
@@ -367,10 +366,10 @@ class LibqaulWorker {
       ..data = data.writeToBuffer()
       ..requestId = const Uuid().v4();
 
-    final user = _reader(defaultUserProvider);
+    final user = _ref.read(defaultUserProvider);
     if (user != null) message.userId = user.id;
 
-    await _reader(libqaulProvider).sendRpc(message.writeToBuffer());
+    await _ref.read(libqaulProvider).sendRpc(message.writeToBuffer());
   }
 
   Future<void> _receiveResponse() async {
@@ -379,7 +378,7 @@ class LibqaulWorker {
 
     final m = QaulRpc.fromBuffer(response);
     final translator = RpcModuleTranslator.translatorFactory(m.module);
-    final res = await translator.decodeMessageBytes(m.data, _reader);
+    final res = await translator.decodeMessageBytes(m.data, _ref);
     if (res == null) return;
 
     if (res.module == Modules.BLE && res.data is BleRightsRequest) {
@@ -387,7 +386,7 @@ class LibqaulWorker {
       return;
     }
     if (res.module != Modules.DEBUG) {
-      translator.processResponse(res, _reader);
+      translator.processResponse(res, _ref);
       return;
     }
 
@@ -399,7 +398,7 @@ class LibqaulWorker {
       final path =
           await findFolderWithFilesOfExtension(Directory(res.data), '.log');
       _log.info('libqaul log storage path: $path');
-      _reader(libqaulLogsStoragePath.state).state = path;
+      _ref.read(libqaulLogsStoragePath.notifier).state = path;
     }
   }
 }

@@ -2,7 +2,7 @@ part of 'widgets.dart';
 
 class QaulTable extends StatelessWidget {
   const QaulTable({
-    Key? key,
+    super.key,
     required this.titleIcon,
     required this.title,
     required this.rowCount,
@@ -11,7 +11,7 @@ class QaulTable extends StatelessWidget {
     required this.onAddRowPressed,
     this.emptyStateWidget,
     this.addButtonEnabled = true,
-  }) : super(key: key);
+  });
   final IconData titleIcon;
   final String title;
   final int rowCount;

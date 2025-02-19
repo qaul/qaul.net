@@ -1,7 +1,7 @@
 part of 'chat.dart';
 
 class _GroupSettingsPage extends HookConsumerWidget {
-  _GroupSettingsPage(this.room, {Key? key}) : super(key: key);
+  _GroupSettingsPage(this.room);
 
   final ChatRoom room;
 

@@ -37,6 +37,6 @@ class FileHistoryEntity with FilePathResolverMixin {
     );
   }
 
-  String filePath(Reader read) =>
-      getFilePath(read, id: id, extension: extension);
+  String filePath(WidgetRef ref) =>
+      getFilePath(ref, id: id, extension: extension);
 }

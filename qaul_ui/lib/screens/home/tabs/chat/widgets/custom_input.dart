@@ -15,7 +15,6 @@ class SendMessageIntent extends Intent {
 class _CustomInput extends StatefulWidget {
   /// Creates [_CustomInput] widget
   const _CustomInput({
-    Key? key,
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
     required this.hintText,
@@ -25,7 +24,7 @@ class _CustomInput extends StatefulWidget {
     this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
-  }) : super(key: key);
+  });
 
   final void Function(types.PartialText) onSendPressed;
 
@@ -236,8 +235,7 @@ class _CustomInputState extends State<_CustomInput> {
 }
 
 class SendMessageButton extends StatelessWidget {
-  const SendMessageButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const SendMessageButton({super.key, required this.onPressed});
 
   final void Function() onPressed;
 
@@ -259,11 +257,10 @@ class SendMessageButton extends StatelessWidget {
 
 class _AttachmentButton extends StatelessWidget {
   const _AttachmentButton({
-    Key? key,
     this.onPressed,
     this.icon = Icons.attach_file,
     this.tooltip,
-  }) : super(key: key);
+  });
 
   final void Function()? onPressed;
 

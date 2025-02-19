@@ -60,7 +60,7 @@ void main() async {
 }
 
 Future<void> _defaultAppEntrypoint() async {
-  await Initializer.initialize(_container.read);
+  await Initializer.initialize(_container);
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
@@ -90,9 +90,9 @@ class _CustomProviderScopeState extends State<_CustomProviderScope> {
 }
 
 class Initializer {
-  static Future<void> initialize(Reader read) async {
-    await read(qaulWorkerProvider).initialized;
-    await EmailLoggingCoordinator.instance.initialize(reader: read);
+  static Future<void> initialize(ProviderContainer container) async {
+    await _container.read(qaulWorkerProvider).initialized;
+    await EmailLoggingCoordinator.instance.initialize(container: container);
 
     await Hive.initFlutter();
     await Hive.openBox(UserPrefsHelper.hiveBoxName);

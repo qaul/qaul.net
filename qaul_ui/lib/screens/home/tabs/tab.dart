@@ -36,7 +36,7 @@ part 'network_tab.dart';
 part 'users_tab.dart';
 
 abstract class BaseTab extends StatefulHookConsumerWidget {
-  const BaseTab({Key? key}) : super(key: key);
+  const BaseTab({super.key});
 
   factory BaseTab.chat({Key? key}) => _Chat(key: key);
 

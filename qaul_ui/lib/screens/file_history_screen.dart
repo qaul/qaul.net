@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/widgets.dart';
 
 class FileHistoryScreen extends StatefulHookConsumerWidget {
-  const FileHistoryScreen({Key? key}) : super(key: key);
+  const FileHistoryScreen({super.key});
 
   @override
   ConsumerState<FileHistoryScreen> createState() => _FileHistoryScreenState();
@@ -79,7 +79,7 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
 }
 
 class _FileHistoryTile extends ConsumerWidget {
-  const _FileHistoryTile({Key? key, required this.file}) : super(key: key);
+  const _FileHistoryTile({required this.file});
   final FileHistoryEntity file;
 
   @override
@@ -98,7 +98,7 @@ class _FileHistoryTile extends ConsumerWidget {
 
     const imageExts = ['gif', 'png', 'jpg', 'jpeg'];
     if (imageExts.contains(file.extension)) {
-      final img = File.fromUri(Uri.file(file.filePath(ref.read)));
+      final img = File.fromUri(Uri.file(file.filePath(ref)));
       if (img.existsSync()) {
         image = DecorationImage(
           fit: BoxFit.cover,
@@ -124,11 +124,11 @@ class _FileHistoryTile extends ConsumerWidget {
 
   void _openFile(FileHistoryEntity file, WidgetRef ref) async {
     if (Platform.isIOS || Platform.isAndroid) {
-      OpenFile.open(file.filePath(ref.read));
+      OpenFile.open(file.filePath(ref));
       return;
     }
 
-    final fileUri = Uri.file(file.filePath(ref.read));
+    final fileUri = Uri.file(file.filePath(ref));
 
     final parentDirectory = File.fromUri(fileUri).parent.uri;
 

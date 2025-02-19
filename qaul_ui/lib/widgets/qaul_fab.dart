@@ -3,13 +3,13 @@ import 'package:flutter_svg/svg.dart';
 
 class QaulFAB extends StatelessWidget {
   const QaulFAB({
-    Key? key,
+    super.key,
     required this.svgAsset,
     required this.onPressed,
     this.heroTag,
     this.tooltip,
     this.size = 52,
-  }) : super(key: key);
+  });
 
   final String svgAsset;
   final VoidCallback onPressed;

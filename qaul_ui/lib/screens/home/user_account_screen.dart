@@ -12,7 +12,7 @@ import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
 
 class UserAccountScreen extends HookConsumerWidget {
-  const UserAccountScreen({Key? key}) : super(key: key);
+  const UserAccountScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,7 +129,7 @@ class _StorageUsersList extends HookConsumerWidget {
 }
 
 class _AddUserDialog extends HookConsumerWidget {
-  const _AddUserDialog({Key? key}) : super(key: key);
+  const _AddUserDialog();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

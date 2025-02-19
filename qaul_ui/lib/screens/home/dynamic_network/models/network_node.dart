@@ -13,7 +13,7 @@ class NetworkNode extends Equatable {
   final Set<NetworkNode>? children;
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, children];
 
   @override
   String toString() => 'NetworkNode(${user.name}, children: $children)';

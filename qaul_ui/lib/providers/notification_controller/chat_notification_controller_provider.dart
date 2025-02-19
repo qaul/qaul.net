@@ -5,6 +5,7 @@ final chatNotificationControllerProvider =
 
 class ChatNotificationController extends NotificationController<List<ChatRoom>>
     with DataProcessingStrategy<ChatRoom> {
+  // ignore: use_super_parameters
   ChatNotificationController(Ref ref) : super(ref);
 
   final _chats = <_ChatData>[];
@@ -15,7 +16,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   String get cacheKey => 'chatNotificationControllerChatDataKey';
 
   @override
-  MapEntry<AlwaysAliveProviderListenable<List<ChatRoom>>,
+  MapEntry<StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>,
           void Function(List<ChatRoom>?, List<ChatRoom>)>
       get strategy => MapEntry(chatRoomsProvider, execute);
 

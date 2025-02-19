@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class EmptyStateTextDecorator extends StatelessWidget {
   const EmptyStateTextDecorator(
     this.text, {
-    Key? key,
+    super.key,
     required this.child,
     this.isEmpty = false,
-  }) : super(key: key);
+  });
   final String text;
   final bool isEmpty;
   final Widget child;

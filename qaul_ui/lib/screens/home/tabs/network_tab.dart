@@ -1,7 +1,7 @@
 part of 'tab.dart';
 
 class _Network extends BaseTab {
-  const _Network({Key? key}) : super(key: key);
+  const _Network({super.key});
 
   @override
   _NetworkState createState() => _NetworkState();
@@ -41,7 +41,7 @@ class _NetworkState extends _BaseTabState<_Network> {
 }
 
 class _AvailableConnectionsTable extends ConsumerWidget {
-  const _AvailableConnectionsTable({Key? key, required this.type}) : super(key: key);
+  const _AvailableConnectionsTable({required this.type});
   final ConnectionType type;
 
   @override
