@@ -28,17 +28,16 @@ import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
 import 'utils.dart';
 
-final qaulWorkerProvider =
-    Provider<LibqaulWorker>((ref) => LibqaulWorker(ref));
+final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref));
 
 final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);
 
 class LibqaulWorker {
-  LibqaulWorker(ProviderRef<LibqaulWorker> ref) : _ref = ref {
+  LibqaulWorker(Ref ref) : _ref = ref {
     _init();
   }
 
-  final ProviderRef<LibqaulWorker> _ref;
+  final Ref _ref;
   final _log = Logger('LibqaulWorker');
 
   Libqaul get _lib => _ref.read(libqaulProvider);
@@ -399,7 +398,7 @@ class LibqaulWorker {
       final path =
           await findFolderWithFilesOfExtension(Directory(res.data), '.log');
       _log.info('libqaul log storage path: $path');
-      _ref.read(libqaulLogsStoragePath.state).state = path;
+      _ref.read(libqaulLogsStoragePath.notifier).state = path;
     }
   }
 }

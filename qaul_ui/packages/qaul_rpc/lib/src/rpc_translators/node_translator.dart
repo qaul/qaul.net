@@ -20,6 +20,6 @@ class NodeTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! NodeInfo) return;
-    ref.read(nodeInfoProvider.state).state = res.data;
+    ref.read(nodeInfoProvider.notifier).state = res.data;
   }
 }

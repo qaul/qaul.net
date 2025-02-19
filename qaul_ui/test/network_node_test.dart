@@ -427,18 +427,12 @@ void main() {
       NetworkNode(
         user: user,
         children: {
-          toNetworkNode(peer2, parent: user, children: {
-            toNetworkNode(peer1, parent: peer2, children: {
-              toNetworkNode(peer4, parent: peer1, children: {
-                toNetworkNode(peer3, parent: peer4),
-              }),
-            }),
-          }),
           toNetworkNode(peer1, parent: user, children: {
             toNetworkNode(peer4, parent: peer1, children: {
               toNetworkNode(peer3, parent: peer4),
             }),
           }),
+          toNetworkNode(peer2, parent: user),
 
           toNetworkNode(peer5, parent: user, children: {
             toNetworkNode(peer6, parent: peer5),

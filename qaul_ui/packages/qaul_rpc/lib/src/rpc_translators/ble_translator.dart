@@ -48,6 +48,6 @@ class BleTranslator extends RpcModuleTranslator {
       );
       _log.finest('BLE Module: Merged with previous status: $newStatus');
     }
-    ref.read(bleStatusProvider.state).state = newStatus;
+    ref.read(bleStatusProvider.notifier).state = newStatus;
   }
 }
