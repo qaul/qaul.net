@@ -24,6 +24,7 @@ class _CustomInput extends StatefulWidget {
     this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
+    this.isTextRequired = true,
   });
 
   final void Function(types.PartialText) onSendPressed;
@@ -43,6 +44,8 @@ class _CustomInput extends StatefulWidget {
   final String? disabledMessage;
 
   final String hintText;
+
+  final bool isTextRequired;
 
   @override
   _CustomInputState createState() => _CustomInputState();
@@ -77,7 +80,7 @@ class _CustomInputState extends State<_CustomInput> {
 
   void _handleSendPressed() {
     final trimmedText = _textController.text.trim();
-    if (trimmedText != '') {
+    if (trimmedText != '' || !widget.isTextRequired) {
       final partialText = types.PartialText(text: trimmedText);
       widget.onSendPressed(partialText);
       _textController.clear();

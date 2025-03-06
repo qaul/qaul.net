@@ -46,6 +46,7 @@ class _SendFileDialog extends HookConsumerWidget {
         const SizedBox(height: 8),
         _CustomInput(
           initialText: partialMessage,
+          isTextRequired: false,
           hintText: AppLocalizations.of(context)!.chatEmptyMessageHint,
           onSendPressed: (desc) {
             final worker = ref.read(qaulWorkerProvider);
