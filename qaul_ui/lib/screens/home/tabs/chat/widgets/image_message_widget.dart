@@ -173,7 +173,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         image,
-        if (description != null) ...[
+        if (description != null && description.isNotEmpty) ...[
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
