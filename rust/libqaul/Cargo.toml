@@ -13,7 +13,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 default = []
 
 [dependencies]
-libp2p = { version = "0.55", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "dns", "macros"] }
+libp2p = { version = "0.55", features = ["async-std", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic", "macros"] }
 async-std = { version = "1.13", features = ["attributes"] }
 futures = "0.3"
 serde = {version = "1.0", features = ["derive"] }
