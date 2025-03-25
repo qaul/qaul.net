@@ -26,6 +26,7 @@ class _CustomInput extends StatefulWidget {
     this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
+    this.isTextRequired = true,
   });
 
   final void Function(types.PartialText) onSendPressed;
@@ -49,6 +50,8 @@ class _CustomInput extends StatefulWidget {
   final String? disabledMessage;
 
   final String hintText;
+
+  final bool isTextRequired;
 
   @override
   _CustomInputState createState() => _CustomInputState();
