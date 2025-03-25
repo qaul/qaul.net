@@ -21,6 +21,8 @@ class _CustomInput extends StatefulWidget {
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
+    this.onSendEmojiPicker,
+    this.onSendLocationPressed,
     this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
@@ -33,6 +35,10 @@ class _CustomInput extends StatefulWidget {
   final Function({types.PartialText? text})? onPickImagePressed;
 
   final Function({types.PartialText? text})? onSendAudioPressed;
+
+  final Function({types.PartialText? text})? onSendLocationPressed;
+
+  final Function({types.PartialText? text})? onSendEmojiPicker;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
 
@@ -75,10 +81,11 @@ class _CustomInputState extends State<_CustomInput> {
     super.dispose();
   }
 
-  void _handleSendPressed() {
+  void _handleSendPressed({types.PartialText? locationMessage}) {
     final trimmedText = _textController.text.trim();
-    if (trimmedText != '') {
-      final partialText = types.PartialText(text: trimmedText);
+    if (trimmedText != '' || locationMessage != null) {
+      final partialText =
+          locationMessage ?? types.PartialText(text: trimmedText);
       widget.onSendPressed(partialText);
       _textController.clear();
     }
@@ -170,24 +177,65 @@ class _CustomInputState extends State<_CustomInput> {
                                   suffixIcon: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      if (widget.onSendLocationPressed != null)
+                                        _AttachmentButton(
+                                          icon: Icons.location_on,
+                                          onPressed: () async {
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => MapScreen(
+                                                  key: const ValueKey('map'),
+                                                  onLocationSelected:
+                                                      (position) {
+                                                    final roundedLat = position
+                                                        .latitude
+                                                        .toStringAsFixed(2);
+                                                    final roundedLng = position
+                                                        .longitude
+                                                        .toStringAsFixed(2);
+                                                    final locationMessage =
+                                                        types.PartialText(
+                                                      text:
+                                                          '📍 Location: $roundedLat, $roundedLng',
+                                                    );
+                                                    _handleSendPressed(
+                                                        locationMessage:
+                                                            locationMessage);
+                                                  },
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       if (widget.onAttachmentPressed != null)
                                         _AttachmentButton(
                                           onPressed: () => _sendFilePressed(
                                               widget.onAttachmentPressed),
-                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
+                                          tooltip: AppLocalizations.of(context)!
+                                              .sendFileTooltip,
+                                        ),
+                                      if (widget.onSendEmojiPicker != null)
+                                        _AttachmentButton(
+                                          icon: Icons.emoji_emotions,
+                                          onPressed: widget.onSendEmojiPicker,
+                                          tooltip: AppLocalizations.of(context)!
+                                              .sendFileTooltip,
                                         ),
                                       if (widget.onPickImagePressed != null)
                                         _AttachmentButton(
                                           icon: Icons.add_a_photo,
                                           onPressed: () => _sendFilePressed(
                                               widget.onPickImagePressed),
-                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
+                                          tooltip: AppLocalizations.of(context)!
+                                              .sendFileTooltip,
                                         ),
                                       if (widget.onSendAudioPressed != null)
                                         _AttachmentButton(
                                           icon: Icons.mic_none,
                                           onPressed: widget.onSendAudioPressed,
-                                          tooltip: AppLocalizations.of(context)!.sendAudioTooltip,
+                                          tooltip: AppLocalizations.of(context)!
+                                              .sendAudioTooltip,
                                         ),
                                     ],
                                   ),
