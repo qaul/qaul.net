@@ -32,9 +32,9 @@ dependencies:
   fluent_ui: ^4.9.1
   flutter_chat_types: ^3.6.2
   flutter_chat_ui: ^1.6.10
-  flutter_email_sender: ^6.0.2
-  flutter_hooks: ^0.20.5
-  flutter_svg: ^2.0.9
+  flutter_email_sender: ^7.0.0
+  flutter_hooks: ^0.21.2
+  flutter_svg: ^2.0.17
   font_awesome_flutter: ^10.6.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -61,9 +61,16 @@ dependencies:
   utils: { "path": "packages/utils" }
   version: ^3.0.2
   flutter_markdown: ^0.7.1
-  record: ^5.0.4
+  record: ^6.0.0
   audioplayers: ^6.1.1
   app_links: ^6.3.3
+  open_filex: ^4.7.0
+  emoji_picker_flutter: ^4.3.0
+
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
+  google_maps_flutter: ^2.11.0
+  geolocator: ^13.0.3
 
 dev_dependencies:
   flutter_test:
@@ -71,12 +78,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
-  build_runner: ^2.4.6
+  build_runner: ^2.4.15
   fast_base58: ^0.2.1
   flutter_launcher_icons: ^0.14.3
   flutter_lints: ^5.0.0
   hive_generator: ^2.0.1
-  uuid: ^3.0.7
+  uuid: ^4.5.1
 
 flutter_icons:
   ios: true
