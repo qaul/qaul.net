@@ -200,7 +200,7 @@ class _CustomInputState extends State<_CustomInput> {
                                                     final locationMessage =
                                                         types.PartialText(
                                                       text:
-                                                          '📍 Location: $roundedLat, $roundedLng',
+                                                          'https://www.google.com/maps?q=$roundedLat,$roundedLng',
                                                     );
                                                     _handleSendPressed(
                                                         locationMessage:
@@ -218,13 +218,76 @@ class _CustomInputState extends State<_CustomInput> {
                                           tooltip: AppLocalizations.of(context)!
                                               .sendFileTooltip,
                                         ),
-                                      if (widget.onSendEmojiPicker != null)
-                                        _AttachmentButton(
-                                          icon: Icons.emoji_emotions,
-                                          onPressed: widget.onSendEmojiPicker,
-                                          tooltip: AppLocalizations.of(context)!
-                                              .sendFileTooltip,
-                                        ),
+                                      _AttachmentButton(
+                                        icon: Icons.emoji_emotions,
+                                        onPressed: () async {
+                                          final scrollController =
+                                              ScrollController();
+                                          showModalBottomSheet(
+                                            context: context,
+                                            enableDrag: true,
+                                            isDismissible: true,
+                                            builder: (_) {
+                                              return SingleChildScrollView(
+                                                controller: scrollController,
+                                                child: EmojiPicker(
+                                                  onEmojiSelected:
+                                                      (category, emoji) {
+                                                    final currentText =
+                                                        _textController.text;
+                                                    final newText =
+                                                        '$currentText${emoji.emoji}';
+                                                    _textController.value =
+                                                        TextEditingValue(
+                                                      text: newText,
+                                                      selection: TextSelection
+                                                          .fromPosition(
+                                                        TextPosition(
+                                                            offset:
+                                                                newText.length),
+                                                      ),
+                                                    );
+                                                  },
+                                                  config: Config(
+                                                    height: 300,
+                                                    checkPlatformCompatibility:
+                                                        true,
+                                                    emojiSet:
+                                                        getDefaultEmojiLocale,
+                                                    locale: const Locale('en'),
+                                                    emojiTextStyle:
+                                                        const TextStyle(
+                                                            fontSize: 18),
+                                                    customBackspaceIcon:
+                                                        const Icon(
+                                                            Icons.backspace,
+                                                            color: Colors.blue),
+                                                    customSearchIcon:
+                                                        const Icon(Icons.search,
+                                                            color: Colors.blue),
+                                                    viewOrderConfig:
+                                                        const ViewOrderConfig(),
+                                                    emojiViewConfig:
+                                                        const EmojiViewConfig(),
+                                                    skinToneConfig:
+                                                        const SkinToneConfig(),
+                                                    categoryViewConfig:
+                                                        const CategoryViewConfig(),
+                                                    bottomActionBarConfig:
+                                                        const BottomActionBarConfig(),
+                                                    searchViewConfig:
+                                                        const SearchViewConfig(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ).whenComplete(() {
+                                            scrollController.dispose();
+                                          });
+                                        },
+                                        tooltip: AppLocalizations.of(context)!
+                                            .sendFileTooltip,
+                                      ),
                                       if (widget.onPickImagePressed != null)
                                         _AttachmentButton(
                                           icon: Icons.add_a_photo,

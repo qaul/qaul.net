@@ -70,7 +70,6 @@ dependencies:
   latlong2: ^0.9.1
   google_maps_flutter: ^2.11.0
   geolocator: ^13.0.3
-  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:

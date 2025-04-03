@@ -391,44 +391,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             },
                           );
                         },
-              onSendEmojiPicker: !(Platform.isAndroid ||
-                      Platform.isIOS ||
-                      Platform.isLinux)
-                  ? null
-                  : ({types.PartialText? text}) async {
-                      if (!context.mounted) return;
-                      showModalBottomSheet(
-                        context: context,
-                        enableDrag: true,
-                        isDismissible: true,
-                        builder: (_) {
-                          return EmojiPicker(
-                            onEmojiSelected: (category, emoji) {
-                              sendEmoji(emoji.emoji);
-                              Navigator.pop(context);
-                            },
-                            config: Config(
-                              height: 300,
-                              checkPlatformCompatibility: true,
-                              emojiSet: getDefaultEmojiLocale,
-                              locale: const Locale('en'),
-                              emojiTextStyle: const TextStyle(fontSize: 18),
-                              customBackspaceIcon: const Icon(Icons.backspace,
-                                  color: Colors.blue),
-                              customSearchIcon:
-                                  const Icon(Icons.search, color: Colors.blue),
-                              viewOrderConfig: const ViewOrderConfig(),
-                              emojiViewConfig: const EmojiViewConfig(),
-                              skinToneConfig: const SkinToneConfig(),
-                              categoryViewConfig: const CategoryViewConfig(),
-                              bottomActionBarConfig:
-                                  const BottomActionBarConfig(),
-                              searchViewConfig: const SearchViewConfig(),
-                            ),
-                          );
-                        },
-                      );
-                    },
               onSendLocationPressed:
                   !(Platform.isAndroid || Platform.isIOS || Platform.isLinux)
                       ? null
