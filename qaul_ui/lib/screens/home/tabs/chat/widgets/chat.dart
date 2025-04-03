@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:better_open_file/better_open_file.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
@@ -29,6 +28,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -439,7 +439,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 return;
               }
               if (Platform.isIOS || Platform.isAndroid) {
-                OpenFile.open(message.uri);
+                OpenFilex.open(message.uri);
                 return;
               }
 

@@ -17,7 +17,6 @@ dependencies:
   adaptive_theme: ^3.4.1
   archive: ^4.0.2
   badges: ^3.1.2
-  better_open_file: ^3.6.4
   bubble: ^1.2.1
   collection: ^1.17.1
   cupertino_icons: ^1.0.6
@@ -71,6 +70,7 @@ dependencies:
   latlong2: ^0.9.1
   google_maps_flutter: ^2.11.0
   geolocator: ^13.0.3
+  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:
