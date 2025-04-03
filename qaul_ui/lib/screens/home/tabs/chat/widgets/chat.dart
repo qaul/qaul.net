@@ -11,7 +11,7 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
     show
@@ -397,62 +397,62 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       : ({types.PartialText? text}) async {},
             ),
             onMessageTap: (context, message) async {
-              if (message is! types.FileMessage || _isReceivingFile(message)) {
-                return;
-              }
-              if (Platform.isIOS || Platform.isAndroid) {
-                OpenFilex.open(message.uri);
+              if (message is! types.FileMessage &&
+                  message is! types.TextMessage) {
                 return;
               }
 
-              final file = Uri.file(message.uri);
+              if (message is types.TextMessage &&
+                  message.text.startsWith('geo:')) {
+                final geoUri = Uri.parse(message.text);
+                if (await canLaunchUrl(geoUri)) {
+                  await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+                }
+                return;
+              }
 
-              final parentDirectory = File.fromUri(file).parent.uri;
-
-              for (final uri in [file, parentDirectory]) {
-                if (await canLaunchUrl(uri)) {
-                  launchUrl(uri);
+              if (message is types.FileMessage && !_isReceivingFile(message)) {
+                if (Platform.isIOS || Platform.isAndroid) {
+                  OpenFilex.open(message.uri);
                   return;
+                }
+
+                final file = Uri.file(message.uri);
+                final parentDirectory = File.fromUri(file).parent.uri;
+
+                for (final uri in [file, parentDirectory]) {
+                  if (await canLaunchUrl(uri)) {
+                    launchUrl(uri);
+                    return;
+                  }
                 }
               }
             },
             textMessageBuilder: (message,
                 {required int messageWidth, required bool showName}) {
-              final isMapLink =
-                  message.text.contains('https://www.google.com/maps?q=');
-              return GestureDetector(
-                onTap: isMapLink
-                    ? () async {
-                        final url = message.text.split('\n').last.trim();
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                          launchUrl(Uri.parse(url));
-                        }
-                      }
-                    : null,
-                child: TextMessage(
-                  message: message,
-                  usePreviewData: true,
-                  hideBackgroundOnEmojiMessages: true,
-                  showName: showName,
-                  emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                  nameBuilder: (usr) {
-                    var user = room.members
-                        .firstWhereOrNull((u) => usr.id == u.idBase58);
-                    if (user == null) return const SizedBox();
-                    final color = colorGenerationStrategy(user.idBase58);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: color,
-                          fontWeight: FontWeight.w600,
-                        ),
+              return TextMessage(
+                message: message,
+                usePreviewData: true,
+                hideBackgroundOnEmojiMessages: true,
+                showName: showName,
+                emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
+                nameBuilder: (usr) {
+                  var user = room.members
+                      .firstWhereOrNull((u) => usr.id == u.idBase58);
+                  if (user == null) return const SizedBox();
+                  final color = colorGenerationStrategy(user.idBase58);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text(
+                      user.name,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: color,
+                        fontWeight: FontWeight.w600,
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               );
             },
             fileMessageBuilder: (message, {required int messageWidth}) {

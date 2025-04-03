@@ -200,7 +200,7 @@ class _CustomInputState extends State<_CustomInput> {
                                                     final locationMessage =
                                                         types.PartialText(
                                                       text:
-                                                          'https://www.google.com/maps?q=$roundedLat,$roundedLng',
+                                                          'geo:${roundedLat},${roundedLng}',
                                                     );
                                                     _handleSendPressed(
                                                         locationMessage:
