@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
+import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
     show
@@ -19,6 +23,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         TextMessage;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
@@ -30,6 +35,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../providers/providers.dart';
@@ -37,6 +43,7 @@ import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
+import 'map_screen.dart';
 
 part 'audio_message_widget.dart';
 
@@ -51,6 +58,8 @@ part 'file_sharing.dart';
 part 'group_settings.dart';
 
 part 'image_message_widget.dart';
+
+part 'send_emoji.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
@@ -180,6 +189,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (!mounted) return;
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
+    }, [room]);
+
+    final sendEmoji = useCallback((String emoji) {
+      if (!mounted) return;
+      final worker = ref.read(qaulWorkerProvider);
+      worker.sendMessage(room.conversationId, emoji);
     }, [room]);
 
     final l10n = AppLocalizations.of(context)!;
@@ -350,13 +365,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             );
                           }
                         },
-              // the record package is not supported on Linux
               onSendAudioPressed: Platform.isLinux
                   ? null
                   : (room.messages?.isEmpty ?? true)
                       ? null
-                      : ({types.PartialText? text}) async {
-                          // ignore: use_build_context_synchronously
+                      : ({types.PartialText? text}) {
                           if (!context.mounted) return;
                           showModalBottomSheet(
                             context: context,
@@ -378,45 +391,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             },
                           );
                         },
+              onSendLocationPressed:
+                  !(Platform.isAndroid || Platform.isIOS || Platform.isLinux)
+                      ? null
+                      : ({types.PartialText? text}) async {},
             ),
             onMessageTap: (context, message) async {
-              if (message is! types.FileMessage || _isReceivingFile(message)) {
-                return;
-              }
-              if (Platform.isIOS || Platform.isAndroid) {
-                OpenFilex.open(message.uri);
+              if (message is! types.FileMessage &&
+                  message is! types.TextMessage) {
                 return;
               }
 
-              final file = Uri.file(message.uri);
+              if (message is types.TextMessage &&
+                  message.text.startsWith('geo:')) {
+                final geoUri = Uri.parse(message.text);
+                if (await canLaunchUrl(geoUri)) {
+                  await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+                }
+                return;
+              }
 
-              final parentDirectory = File.fromUri(file).parent.uri;
-
-              for (final uri in [file, parentDirectory]) {
-                if (await canLaunchUrl(uri)) {
-                  launchUrl(uri);
+              if (message is types.FileMessage && !_isReceivingFile(message)) {
+                if (Platform.isIOS || Platform.isAndroid) {
+                  OpenFilex.open(message.uri);
                   return;
+                }
+
+                final file = Uri.file(message.uri);
+                final parentDirectory = File.fromUri(file).parent.uri;
+
+                for (final uri in [file, parentDirectory]) {
+                  if (await canLaunchUrl(uri)) {
+                    launchUrl(uri);
+                    return;
+                  }
                 }
               }
             },
             textMessageBuilder: (message,
                 {required int messageWidth, required bool showName}) {
-              final msgIdx = room.messages!.indexWhere(
-                  (element) => element.messageIdBase58 == message.id);
-
-              var prevMsgWasFromSamePerson = false;
-              if (msgIdx > 0) {
-                final prevMsg = room.messages![msgIdx - 1];
-                prevMsgWasFromSamePerson =
-                    prevMsg.content is TextMessageContent &&
-                        prevMsg.senderIdBase58 == message.author.id;
-              }
-
               return TextMessage(
                 message: message,
                 usePreviewData: true,
                 hideBackgroundOnEmojiMessages: true,
-                showName: showName && !prevMsgWasFromSamePerson,
+                showName: showName,
                 emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
                 nameBuilder: (usr) {
                   var user = room.members
