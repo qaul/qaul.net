@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart'
     show
@@ -102,6 +103,75 @@ class ChatScreen extends StatefulHookConsumerWidget {
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
+
+  @visibleForTesting
+  static String translateGroupEventMessage(
+    GroupEventContent message,
+    User author, {
+    required AppLocalizations l10n,
+    ChatRoom? room,
+  }) {
+    if (message.type == GroupEventContentType.none) {
+      return '';
+    }
+
+    if (message.type == GroupEventContentType.created) {
+      return l10n.groupStateEventCreated;
+    } else if (message.type == GroupEventContentType.closed) {
+      return l10n.groupStateEventClosed;
+    } else {
+      String event = '';
+      switch (message.type) {
+        case GroupEventContentType.invited:
+          event = l10n.groupEventInvited(author.name);
+          break;
+        case GroupEventContentType.inviteAccepted:
+          event = l10n.groupEventInviteAccepted(author.name);
+          break;
+        case GroupEventContentType.joined:
+          // Only show "joined" message for users who actually accepted invitations
+          // Don't show for users who only had pending invites
+          if (room != null) {
+            final roomUser = room.members
+                .firstWhereOrNull((member) => member.id.equals(author.id));
+            if (roomUser?.invitationState == InvitationState.sent) {
+              // User only had a pending invite, don't show "joined" message
+              event = '';
+            } else {
+              event = l10n.groupEventJoined(author.name);
+            }
+          } else {
+            event = l10n.groupEventJoined(author.name);
+          }
+          break;
+        case GroupEventContentType.left:
+          // Only show "left" message for users who were actually in the group
+          // Don't show for users who only had pending invites
+          if (room != null) {
+            final roomUser = room.members
+                .firstWhereOrNull((member) => member.id.equals(author.id));
+            if (roomUser?.invitationState == InvitationState.sent) {
+              // User only had a pending invite, don't show "left" message
+              event = '';
+            } else {
+              event = l10n.groupEventLeft(author.name);
+            }
+          } else {
+            event = l10n.groupEventLeft(author.name);
+          }
+          break;
+        case GroupEventContentType.removed:
+          event = l10n.groupEventRemoved(author.name);
+          break;
+        case GroupEventContentType.none:
+        case GroupEventContentType.created:
+        case GroupEventContentType.closed:
+          break;
+      }
+
+      return event;
+    }
+  }
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
@@ -488,7 +558,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       {required AppLocalizations l10n}) {
     return room.messages
         ?.sorted()
-        .map((e) => e.toInternalMessage(_author(e), ref, l10n: l10n))
+        .map(
+            (e) => e.toInternalMessage(_author(e), ref, l10n: l10n, room: room))
         .toList();
   }
 
@@ -555,7 +626,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
 extension _MessageExtension on Message {
   types.Message toInternalMessage(User author, WidgetRef ref,
-      {required AppLocalizations l10n}) {
+      {required AppLocalizations l10n, ChatRoom? room}) {
     var mappedState = status == MessageState.sent
         ? types.Status.sent
         : status == MessageState.confirmedByAll ||
@@ -574,10 +645,11 @@ extension _MessageExtension on Message {
     } else if (content is GroupEventContent) {
       return types.SystemMessage(
         id: messageIdBase58,
-        text: _translateGroupEventMessage(
+        text: ChatScreen.translateGroupEventMessage(
           content as GroupEventContent,
           author,
           l10n: l10n,
+          room: room,
         ),
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedState,
@@ -641,44 +713,6 @@ extension _MessageExtension on Message {
       createdAt: receivedAt.millisecondsSinceEpoch,
       status: mappedState,
     );
-  }
-
-  String _translateGroupEventMessage(GroupEventContent message, User author,
-      {required AppLocalizations l10n}) {
-    if (message.type == GroupEventContentType.none) {
-      return '';
-    }
-
-    if (message.type == GroupEventContentType.created) {
-      return l10n.groupStateEventCreated;
-    } else if (message.type == GroupEventContentType.closed) {
-      return l10n.groupStateEventClosed;
-    } else {
-      String event = '';
-      switch (message.type) {
-        case GroupEventContentType.invited:
-          event = l10n.groupEventInvited(author.name);
-          break;
-        case GroupEventContentType.inviteAccepted:
-          event = l10n.groupEventInviteAccepted(author.name);
-          break;
-        case GroupEventContentType.joined:
-          event = l10n.groupEventJoined(author.name);
-          break;
-        case GroupEventContentType.left:
-          event = l10n.groupEventLeft(author.name);
-          break;
-        case GroupEventContentType.removed:
-          event = l10n.groupEventRemoved(author.name);
-          break;
-        case GroupEventContentType.none:
-        case GroupEventContentType.created:
-        case GroupEventContentType.closed:
-          break;
-      }
-
-      return event;
-    }
   }
 }
 
