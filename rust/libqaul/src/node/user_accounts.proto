@@ -9,12 +9,26 @@ message UserAccounts {
         CreateUserAccount create_user_account = 2;
         DefaultUserAccount default_user_account = 3;
         MyUserAccount my_user_account = 4;
+        SetPasswordRequest set_password_request = 5;
+        SetPasswordResponse set_password_response = 6;
     }
 }
 
 // create a new user on this node
 message CreateUserAccount {
     string name = 1;
+    optional string password = 2;
+}
+
+// set password request for existing user
+message SetPasswordRequest {
+    optional string password = 2;
+}
+
+// set password response
+message SetPasswordResponse {
+    bool success = 1;
+    string error_message = 2;
 }
 
 // Session Information
@@ -31,4 +45,5 @@ message MyUserAccount {
     bytes key = 4;
     string key_type = 5;
     string key_base58 = 6;
+    bool has_password = 7;
 }
