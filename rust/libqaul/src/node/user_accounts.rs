@@ -37,6 +37,7 @@ pub struct UserAccount {
     pub id: PeerId,
     pub keys: Keypair,
     pub name: String,
+    pub password_hash: Option<String>,
 }
 
 pub struct UserAccounts {
@@ -75,6 +76,7 @@ impl UserAccounts {
                 name: user.name.clone(),
                 id,
                 keys: keys.clone(),
+                password_hash: user.password_hash.clone(),
             });
         }
 
@@ -83,7 +85,7 @@ impl UserAccounts {
     }
 
     /// create a new user account with user name
-    pub fn create(name: String) -> UserAccount {
+    pub fn create(name: String, password: Option<String>) -> UserAccount {
         // create user
         let keys_ed25519 = Keypair::generate_ed25519();
         let keys_config = base64::engine::general_purpose::STANDARD
@@ -124,10 +126,22 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
+
+        let password_hash = match password {
+            Some(pwd) if !pwd.is_empty() => {
+                bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
+                    .map_err(
+                        |e| log::error!("Failed to hash the password: {}", e)
+                    ).ok()
+            }
+            _ => None
+        };
+
         let user = UserAccount {
             id,
             keys: keys_ed25519.clone(),
             name: name.clone(),
+            password_hash: password_hash.clone(),
         };
 
         // save it to state
@@ -141,6 +155,7 @@ impl UserAccounts {
                 name: name.clone(),
                 id: id.to_string(),
                 keys: keys_config,
+                password_hash: password_hash.clone(),
                 storage: configuration::StorageOptions::default(),
             });
         }
