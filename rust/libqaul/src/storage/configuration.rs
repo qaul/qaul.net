@@ -133,6 +133,7 @@ pub struct UserAccount {
     pub name: String,
     pub id: String,
     pub keys: String,
+    pub password_hash: Option<String>,
     pub storage: StorageOptions,
 }
 
@@ -142,6 +143,7 @@ impl Default for UserAccount {
             name: String::from(""),
             id: String::from(""),
             keys: String::from(""),
+            password_hash: None,
             storage: StorageOptions::default(),
         }
     }
