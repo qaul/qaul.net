@@ -79,7 +79,7 @@ impl IdleBleService {
         }))
     }
 
-    ///Starts BLE advertisement, scan, and listen.
+    /// Starts BLE advertisement, scan, and listen.
     /// Manages streams for BLE events and messages.
     pub async fn advertise_scan_listen(
         mut self,

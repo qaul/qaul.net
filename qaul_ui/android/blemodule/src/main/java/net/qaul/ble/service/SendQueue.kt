@@ -1,0 +1,343 @@
+// Copyright (c) 2025 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+package net.qaul.ble.service
+
+import android.bluetooth.BluetoothDevice
+import java.util.zip.CRC32
+import java.util.LinkedList
+import java.util.Queue
+import kotlin.time.TimeSource
+import kotlin.time.TimeSource.Monotonic.ValueTimeMark
+import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
+
+
+/**
+ * send queue state
+ */
+enum class SendQueueState {
+    NO_QAUL_ID,
+    NEW,
+    OK,
+    CONNECTION_LOST
+}
+
+/**
+ * SendQueue for BLE messages
+ * 
+ * Each discovered receiving device has a SendQueue, 
+ * which tracks the sending and creates the message chunks,
+ * according to the qaul BLE GATT messaging protocol.
+ */
+class SendQueue(qaulId: ByteArray) {
+    val TAG: String = "SendQueue"
+    // TODELETE:
+    // the qaul ID of our device (needed for Flow Control Messages)
+    //var qaulId: ByteArray = ByteArray(0)
+    var qaulIdKnown: Boolean = false
+    var sendId: Boolean = true
+    var chunkSize: Int = 20
+    var currentIndex: Byte = 0
+    var currentMessageId: String = ""
+    var state: SendQueueState = SendQueueState.NEW
+
+
+    // queue for Flow Control Messages (FLC) to send
+    // they have the first priority
+    var flcToSend: Queue<ByteArray> = LinkedList()
+    // queue of requested missing chunks
+    // they have the second sending priority
+    var missingChunksToSend: Queue<ByteArray> = LinkedList()
+    // queue of messages to send
+    // they have the third sending priority
+    var messagesToSend: Queue<Pair<ByteArray, String>> = LinkedList()
+
+    // A map of all send queues. 
+    // There are 14 queues (indexes: 1-14).
+    // The first messages starts with index 1, once the messages is sent
+    // the index is incremented by 1.
+    var sendQueues: MutableMap<Byte, SendQueueMessage> = mutableMapOf()
+
+    // A list of all missing chunks that are requested
+    // by the receiving device.
+    var missing: MutableList<ByteArray> = mutableListOf()
+
+    /**
+     * adds a new Message to the sending queue
+     * @param message the message to add
+     */
+    fun addMessage(message: ByteArray, messageId: String) {
+        messagesToSend.add(Pair(message, messageId))
+    }
+
+    /**
+     * Schedule a new message for sending and create the 
+     * message chunks.
+     * @param message the message to send
+     * @return a queue of message chunks
+     */
+    fun getChunks(): Triple<Queue<ByteArray>, Byte?, String> {
+        var chunks: Queue<ByteArray> = LinkedList()
+        // send qaul ID as first message
+        chunks.add(FlcCreate.createSendId(qaulId))
+        // add all FLC messages to the queue
+        chunks.addAll(flcToSend)
+        // add all missing chunks to the queue
+        chunks.addAll(missingChunksToSend)
+        // TODO: check if queues are emptied
+
+        // create a new message chunk
+        if (messagesToSend.isNotEmpty()) {
+            // get index
+            val messageIndex = getNextMessageIndex()
+            if (messageIndex == null) {
+                AppLog.e(TAG, "GattMessaging getChunks: No message index available. Cannot create message.")
+                return Triple(chunks, null, "")
+            }
+
+            // get the first message from the queue
+            val (message, messageId) = messagesToSend.remove()
+            val sendQueueMessage = SendQueueMessage(message, messageId, messageIndex, 20)
+            sendQueueMessage.state = SendQueueMessageState.SENDING
+            sendQueues[messageIndex] = sendQueueMessage
+
+            // add the message chunks to the queue
+            chunks.addAll(sendQueueMessage.getAllChunks())
+
+            return Triple(chunks, messageIndex, messageId)
+        }
+
+        return Triple(chunks, null, "")
+    }
+
+    /**
+     * get the next message queue index
+     */
+    fun getNextMessageIndex(): Byte? {
+        if (currentIndex == 0.toByte()) {
+            currentIndex = 1.toByte() // start with index 1
+            return currentIndex
+        } else {
+            var newIndex: Byte = (currentIndex + 1).toByte()
+            if (newIndex > 14.toByte()) {
+                // reset to 1 if index is greater than 14
+                currentIndex = 1.toByte()
+            } else {
+                currentIndex = newIndex
+            }
+
+            // check state of the send queue
+            if (sendQueues.containsKey(currentIndex)) {
+                var sendQueueMessage = sendQueues[currentIndex]
+                if (sendQueueMessage != null) {
+                    if (sendQueueMessage.state == SendQueueMessageState.SUCCESS || 
+                        sendQueueMessage.state == SendQueueMessageState.ERROR) {
+                    } else {
+                        // TODO: find better solution
+                        AppLog.e(TAG, "GattMessaging getNextMessageIndex: Message with index $currentIndex is still in state ${sendQueueMessage.state}. Cannot increment index.")
+                        return null // error
+                    }
+                }
+            }
+            return currentIndex
+        }
+    }
+
+    /**
+     * Message was sent
+     */
+    fun messageSent(messageId: String) {
+        // check if message is current message
+        if (currentMessageId == messageId) {
+            currentMessageId = ""
+        }
+
+        // check if message is in the send queue
+        for ((index, sendQueueMessage) in sendQueues) {
+            if (sendQueueMessage.messageId == messageId) {
+                // set state to SENT
+                sendQueueMessage.setSent()
+                return
+            }
+        }
+        AppLog.e(TAG, "GattMessaging messageSent: Message with ID $messageId not found in send queue.")
+    }
+
+    /**
+     * set connection lost
+     * This method is called when the connection to the device is lost.
+     * @return message ID that could not be sent
+     */
+    fun setConnectionLost(): String? {
+        state = SendQueueState.CONNECTION_LOST
+        // check state of the send queues
+        var sendQueueMessage = sendQueues[currentIndex]
+        if (sendQueueMessage != null &&
+            (sendQueueMessage.state == SendQueueMessageState.SENDING || 
+             sendQueueMessage.state == SendQueueMessageState.QUEUED)) {
+                // set state to ERROR
+                sendQueueMessage.state = SendQueueMessageState.ERROR
+                return sendQueueMessage.messageId
+        }
+        else if (messagesToSend.isNotEmpty()) {
+            // get the first message ID that could not be sent
+            val message = messagesToSend.poll()
+            val messageId = message.second
+            return messageId
+        } else {
+            return null
+        }
+        //flcToSend.clear()
+        //missingChunksToSend.clear()
+        //messagesToSend.clear()
+        //sendQueues.clear()
+    }
+}
+
+/**
+ * message sending state
+ */
+enum class SendQueueMessageState {
+    QUEUED,
+    SENDING, // the message is currently being sent
+    SENT,    // the message was sent
+    MISSING, // some chunks are missing
+    SUCCESS, // message was successfully received
+    ERROR    // an error occurred while sending the message
+}
+
+/**
+ * SendQueueMessage represents a single message in the send queue.
+ * It contains the message data and the messages sending state.
+ */
+class SendQueueMessage {
+    val TAG: String = "SendQueueMessage"
+    var messageId: String = ""
+    var messageIndex: Byte = 0
+    var state: SendQueueMessageState = SendQueueMessageState.QUEUED
+
+    var message: ByteArray = ByteArray(0)
+    var messageSize: Int = 0
+
+    var totalChunks: Short = 0
+    var chunkSize: Int = 20 // depends on GATT MTU size
+
+    var createdAt: ValueTimeMark = TimeSource.Monotonic.markNow()
+    var updatedAt: ValueTimeMark = TimeSource.Monotonic.markNow()
+
+    /**
+     * Create a new SendQueueMessage
+     * @param message the message to send
+     * @param chunkSize the size of each chunk
+     */
+    constructor(message: ByteArray, messageId: String, messageIndex: Byte, chunkSize: Int) {
+        this.message = message
+        this.messageId = messageId
+        this.chunkSize = chunkSize
+        this.messageSize = message.size
+        this.messageIndex = messageIndex
+        this.totalChunks = getChunkCount()
+    }
+
+    /**
+     * create all chunks for this message
+     * @return a queue of message chunks
+     */
+    fun getAllChunks(): Queue<ByteArray> {
+        var chunks: Queue<ByteArray> = LinkedList()
+
+        // create all chunks
+        for (i in 0..(totalChunks -1)) {
+            val chunk = getChunk(i.toShort())
+            chunks.add(chunk)
+        }
+
+        return chunks
+    }
+
+    /**
+     * Get specific chunk of the message
+     * @param chunkIndex the index of the chunk (0-based)
+     * @return the chunk as ByteArray
+     */
+    fun getChunk(chunkIndex: Short): ByteArray {
+        var header = getHeader(chunkIndex)
+        if (chunkIndex == 0.toShort()) {
+            header = getFirstHeader()
+        }
+
+        val payload = getPayload(chunkIndex)
+        val chunk = header + payload
+        return chunk
+    }
+
+    /**
+     * Message was sent, set the state to SENT
+     */
+    fun setSent() {
+        state = SendQueueMessageState.SENT
+        updatedAt = TimeSource.Monotonic.markNow()
+    }
+
+    /**
+     * Get the number of message chunks for this message
+     * @return the number of chunks
+     */
+    fun getChunkCount(): Short {
+        var count = Math.ceil((((messageSize - (chunkSize - FIRST_MESSAGE_HEADER)) / (chunkSize - HEADER_SIZE)) +1).toDouble())
+        return count.toInt().toShort()
+    }
+
+    /**
+     * Get the message header
+     * @param queueIndex the index of the queue (1-14)
+     * @param chunkIndex the index of the chunk (0-based)
+     * @return the header
+     */
+    fun getHeader(chunkIndex: Short): ByteArray {   
+        val headerInt: Int = (messageIndex.toInt() and 0xFF shl 12) or (chunkIndex.toInt() and 0xFFF)
+        val header: ByteArray = ByteArray(2)
+        header[0] = (headerInt shr 8).toByte() // high byte
+        header[1] = (headerInt and 0xFF).toByte() // low byte
+        return header
+    }
+
+    /**
+     * Get the first message header
+     * @return the first message header
+     */
+    fun getFirstHeader(): ByteArray {
+        // calculate CRC
+        val crc32 = CRC32()
+        crc32.update(message)
+        val crc32Value = crc32.value
+
+        val header = getHeader(0)
+        val headerMessageSize = BLEUtils.toByteArray(messageSize)
+        val headerTotalChunks = BLEUtils.toByteArray(totalChunks)
+        val crc32Bytes = BLEUtils.crc32ValueToByteArray(crc32Value)
+        val firstHeader: ByteArray = header + headerMessageSize + headerTotalChunks + crc32Bytes
+
+        return firstHeader
+    }
+
+    /**
+     * Get the message chunk payload
+     * @param index the index of the chunk
+     * @return the message chunk
+     */
+    fun getPayload(index: Short): ByteArray {
+        var start: Int = 0
+        var end: Int = 0
+        if (index == 0.toShort()) {
+            end = FIRST_MESSAGE_HEADER
+        } else {
+            start = FIRST_MESSAGE_HEADER + (index - 1) * chunkSize
+            end = Math.min(start + chunkSize, messageSize)
+        }
+
+        return message.sliceArray(start until end)
+    }
+}
+

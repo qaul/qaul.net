@@ -135,10 +135,10 @@ open class BleWrapperClass(context: Activity) {
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
                         BleService.bleService?.sendMessage(
-                            id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
-                            to = bleDirectSend.receiverId.toByteArray(),
+                            message_id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
+                            to_id = bleDirectSend.receiverId.toByteArray(),
                             message = bleDirectSend.data.toByteArray(),
-                            from = bleDirectSend.senderId.toByteArray()
+                            from_id = bleDirectSend.senderId.toByteArray()
                         )
                     }
                 }
