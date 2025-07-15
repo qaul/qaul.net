@@ -9,6 +9,7 @@
 //! * Public / private key
 //! * user name (optional)
 
+use std::fmt::format;
 use base64::Engine;
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
@@ -171,6 +172,57 @@ impl UserAccounts {
         log::trace!("created user account '{}' {:?}", name, id);
 
         user
+    }
+
+    /// set or update the password for existing user
+    pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
+        let password_hash = match password {
+            Some(pwd) if !pwd.is_empty() => {
+                Some(bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
+                    .map_err(|e| format!("Failed to hash password: {}", e))?
+                )
+            }
+            _ => None,
+        };
+
+        // update the configuration
+        {
+            let mut config = Configuration::get_mut();
+            if let Some(user_config) = config.user_accounts.iter_mut().find(|u| u.id == user_id.to_string()) {
+                user_config.password_hash = password_hash.clone();
+            }
+        }
+        Configuration::save();
+
+        // update the in-memory state
+        {
+            let mut users = USERACCOUNTS.get().write().unwrap();
+            if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
+                user.password_hash= password_hash;
+            }
+        }
+
+       Ok(())
+    }
+
+    /// verify password for user
+    pub fn verify_password (user_id: PeerId, password: String) -> Result<bool, String> {
+        let users = USERACCOUNTS.get().read().unwrap();
+        let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
+
+        match &user.password_hash {
+            Some(hash) => bcrypt::verify(&password, hash)
+                .map_err(|e| format!("Password verification error: {}", e)),
+            None => Ok(true)
+        }
+    }
+
+    /// check if a user has password set
+    pub fn has_password(user_id: PeerId) -> bool {
+        let users = USERACCOUNTS.get().read().unwrap();
+        users.users.iter()
+            .find(|u| u.id == user_id)
+            .map_or(false, |user| user.password_hash.is_some())
     }
 
     /// get user account by id
