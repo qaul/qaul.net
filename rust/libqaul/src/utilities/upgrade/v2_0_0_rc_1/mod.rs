@@ -104,6 +104,7 @@ impl VersionUpgrade {
                     name: user.name.clone(),
                     id: user.id.clone(),
                     keys: user.keys.clone(),
+                    password_hash: None,
                     storage: crate::storage::configuration::StorageOptions {
                         users: user.storage.users.clone(),
                         size_total: user.storage.size_total,
