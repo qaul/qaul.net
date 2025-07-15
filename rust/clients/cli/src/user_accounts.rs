@@ -81,7 +81,7 @@ impl UserAccounts {
         // create info request message
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::CreateUserAccount(
-                proto::CreateUserAccount { name: user_name },
+                proto::CreateUserAccount { name: user_name , password: None},
             )),
         };
 
