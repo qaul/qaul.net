@@ -9,7 +9,6 @@
 //! * Public / private key
 //! * user name (optional)
 
-use std::fmt::format;
 use base64::Engine;
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
@@ -390,6 +389,7 @@ impl UserAccounts {
                                     key: user_account.keys.public().encode_protobuf(),
                                     key_type,
                                     key_base58,
+                                    has_password: user_account.password_hash.is_some()
                                 },
                             )),
                         };
