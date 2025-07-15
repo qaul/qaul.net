@@ -71,17 +71,21 @@ impl UserAccounts {
             cmd if cmd.starts_with("create ") => {
                 Self::create_user_account(cmd.strip_prefix("create ").unwrap().to_string());
             }
+            cmd if cmd.starts_with("password") => {
+                Self::handle_password_change();
+            }
             // unknown command
             _ => log::error!("unknown account command"),
         }
     }
 
     /// Create new user account
-    fn create_user_account(user_name: String) {
+    fn create_user_account(args: String) {
+        let (username, password) = Self::parse_create_args(&args);
         // create info request message
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::CreateUserAccount(
-                proto::CreateUserAccount { name: user_name , password: None},
+                proto::CreateUserAccount { name: username, password},
             )),
         };
 
@@ -97,6 +101,59 @@ impl UserAccounts {
             super::rpc::proto::Modules::Useraccounts.into(),
             "".to_string(),
         );
+    }
+
+    fn parse_create_args(args_str: &str) -> (String, Option<String>) {
+        // Find password flag position
+        let flag_pos = args_str.find(" -p ").or_else(|| args_str.find(" --password "));
+
+        match flag_pos {
+            Some(pos) => {
+                let username = args_str[..pos].to_string();
+                let after_flag = &args_str[pos..];
+                let mut parts = after_flag.split_whitespace().skip(1); // Skip the flag itself
+
+                match parts.next() {
+                    Some(password) => (username, Some(password.to_string())),
+                    None => (username, Self::prompt_password()),
+                }
+            }
+            None => (args_str.to_string(), None),
+        }
+    }
+
+    fn prompt_password() -> Option<String> {
+        use std::io::{self, Write};
+
+        print!("Password: ");
+        io::stdout().flush().ok()?;
+
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                let password = input.trim().to_string();
+                (!password.is_empty()).then(|| password)
+            }
+            Err(_) => None,
+        }
+    }
+
+    fn handle_password_change() {
+        if Self::get_user_id().is_none() {
+            println!("No user account found.");
+            return;
+        }
+
+        let password = Self::prompt_password();
+        let proto_message = proto::UserAccounts {
+            message: Some(proto::user_accounts::Message::SetPasswordRequest(
+                proto::SetPasswordRequest {password}
+            ))
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).unwrap();
+        Rpc::send_message(buf, super::rpc::proto::Modules::Useraccounts.into(), "".to_string());
     }
 
     /// Request default user account
@@ -145,6 +202,11 @@ impl UserAccounts {
                                     my_user_account.name, my_user_account.id_base58
                                 );
                                 println!("    public key: {}", my_user_account.key_base58);
+                                if my_user_account.has_password {
+                                    println!("Your password is enabled");
+                                } else {
+                                    println!("Your password is disabled");
+                                }
 
                                 // save it to state
                                 user_accounts.my_user_account = Some(my_user_account);
@@ -181,6 +243,13 @@ impl UserAccounts {
                         // save it to state
                         user_accounts.my_user_account = Some(proto_myuseraccount);
                         user_accounts.initialiation = MyUserAccountInitialiation::Initialized;
+                    }
+                    Some(proto::user_accounts::Message::SetPasswordResponse(response)) => {
+                        if response.success {
+                            println!(" Password updated");
+                        } else {
+                            println!("{}", response.error_message);
+                        }
                     }
                     _ => {
                         log::error!("unprocessable RPC user accounts message");
