@@ -307,7 +307,7 @@ impl UserAccounts {
     }
 
     /// Process incoming RPC request messages for user accounts
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
         match proto::UserAccounts::decode(&data[..]) {
             Ok(user_accounts) => {
                 match user_accounts.message {
@@ -336,6 +336,7 @@ impl UserAccounts {
                                                         .encode_protobuf(),
                                                     key_type,
                                                     key_base58,
+                                                    has_password: user_account.password_hash.is_some()
                                                 }),
                                             },
                                         ),
@@ -373,7 +374,7 @@ impl UserAccounts {
                     }
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
-                        let user_account = Self::create(create_user_account.name);
+                        let user_account = Self::create(create_user_account.name, create_user_account.password);
 
                         // get RPC key values
                         let (key_type, key_base58) =
@@ -407,6 +408,24 @@ impl UserAccounts {
                             Vec::new(),
                         );
                     }
+                    Some(proto::user_accounts::Message::SetPasswordRequest(set_password_req)) => {
+                        let user_peer_id = match PeerId::from_bytes(&user_id) {
+                            Ok(id) => id,
+                            Err(_) => {
+                                Self::send_password_response(false, "Invalid user Id".to_string());
+                                return;
+                            }
+                        };
+
+                        match Self::set_password(user_peer_id, set_password_req.password) {
+                            Ok(()) => {
+                                Self::send_password_response(true, "Password updated successfully".to_string())
+                            }
+                            Err(error) => {
+                                Self::send_password_response(false, error);
+                            }
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -414,6 +433,26 @@ impl UserAccounts {
                 log::error!("{:?}", error);
             }
         }
+    }
+
+    fn send_password_response(success: bool, message: String) {
+        let proto_message = proto::UserAccounts {
+            message: Some(proto::user_accounts::Message::SetPasswordResponse(
+                proto::SetPasswordResponse {
+                    success,
+                    error_message: message
+                }
+            ))
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).unwrap();
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Useraccounts.into(),
+            "".to_string(),
+            Vec::new(),
+        );
     }
 
     /// create the qaul RPC definitions of a public key
