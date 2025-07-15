@@ -146,7 +146,7 @@ impl Rpc {
                         // TODO: authorisation
                     }
                     Ok(Modules::Useraccounts) => {
-                        UserAccounts::rpc(message.data);
+                        UserAccounts::rpc(message.data, message.user_id);
                     }
                     Ok(Modules::Users) => {
                         Users::rpc(message.data, message.user_id);
