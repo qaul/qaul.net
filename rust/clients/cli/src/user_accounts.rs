@@ -71,6 +71,7 @@ impl UserAccounts {
             cmd if cmd.starts_with("create ") => {
                 Self::create_user_account(cmd.strip_prefix("create ").unwrap().to_string());
             }
+            // set/reset password for an existing account
             cmd if cmd.starts_with("password") => {
                 Self::handle_password_change();
             }
@@ -103,18 +104,23 @@ impl UserAccounts {
         );
     }
 
+    /// parse 'create' command arguments to extract username and optional password
+    /// supports these variations: "name", "name -p password", "name -p", "name --password password"
     fn parse_create_args(args_str: &str) -> (String, Option<String>) {
-        // Find password flag position
+        // find password flag position
         let flag_pos = args_str.find(" -p ").or_else(|| args_str.find(" --password "));
 
         match flag_pos {
             Some(pos) => {
+                // extract username
                 let username = args_str[..pos].to_string();
                 let after_flag = &args_str[pos..];
-                let mut parts = after_flag.split_whitespace().skip(1); // Skip the flag itself
+                let mut parts = after_flag.split_whitespace().skip(1); // skip the flag itself
 
                 match parts.next() {
+                    // direct password provided
                     Some(password) => (username, Some(password.to_string())),
+                    // if there's no password after flag, prompt the user
                     None => (username, Self::prompt_password()),
                 }
             }
@@ -122,6 +128,7 @@ impl UserAccounts {
         }
     }
 
+    /// prompt user for password input, returns None for empty input
     fn prompt_password() -> Option<String> {
         use std::io::{self, Write};
 
@@ -132,27 +139,34 @@ impl UserAccounts {
         match io::stdin().read_line(&mut input) {
             Ok(_) => {
                 let password = input.trim().to_string();
+                // return Some only if password is not empty
                 (!password.is_empty()).then(|| password)
             }
             Err(_) => None,
         }
     }
 
+    /// handle the password change for current user
     fn handle_password_change() {
+        // check if user is logged in
         if Self::get_user_id().is_none() {
             println!("No user account found.");
             return;
         }
 
+        // prompt for new password (or empty to remove)
         let password = Self::prompt_password();
+        // create password change request
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordRequest(
                 proto::SetPasswordRequest {password}
             ))
         };
 
+        // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message.encode(&mut buf).unwrap();
+        // send message
         Rpc::send_message(buf, super::rpc::proto::Modules::Useraccounts.into(), "".to_string());
     }
 
@@ -202,6 +216,8 @@ impl UserAccounts {
                                     my_user_account.name, my_user_account.id_base58
                                 );
                                 println!("    public key: {}", my_user_account.key_base58);
+
+                                // display password status
                                 if my_user_account.has_password {
                                     println!("Your password is enabled");
                                 } else {
@@ -244,6 +260,7 @@ impl UserAccounts {
                         user_accounts.my_user_account = Some(proto_myuseraccount);
                         user_accounts.initialiation = MyUserAccountInitialiation::Initialized;
                     }
+                    // handle password change response
                     Some(proto::user_accounts::Message::SetPasswordResponse(response)) => {
                         if response.success {
                             println!(" Password updated");

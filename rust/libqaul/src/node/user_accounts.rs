@@ -84,7 +84,7 @@ impl UserAccounts {
         USERACCOUNTS.set(RwLock::new(accounts));
     }
 
-    /// create a new user account with user name
+    /// create a new user account with username and an optional password
     pub fn create(name: String, password: Option<String>) -> UserAccount {
         // create user
         let keys_ed25519 = Keypair::generate_ed25519();
@@ -126,7 +126,8 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
-
+        // hash the password if provided using bcrypt.
+        // Improvement: update the hashing mechanism as discussed
         let password_hash = match password {
             Some(pwd) if !pwd.is_empty() => {
                 bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
@@ -175,6 +176,7 @@ impl UserAccounts {
 
     /// set or update the password for existing user
     pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
+        // hash new password or set to None to remove
         let password_hash = match password {
             Some(pwd) if !pwd.is_empty() => {
                 Some(bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
@@ -210,8 +212,10 @@ impl UserAccounts {
         let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
 
         match &user.password_hash {
+            // verify password
             Some(hash) => bcrypt::verify(&password, hash)
                 .map_err(|e| format!("Password verification error: {}", e)),
+            // no password is set, so always allow
             None => Ok(true)
         }
     }
@@ -379,7 +383,7 @@ impl UserAccounts {
                         let (key_type, key_base58) =
                             Self::get_protobuf_public_key(user_account.keys.public());
 
-                        // return new user account
+                        // return new user account with password status
                         let proto_message = proto::UserAccounts {
                             message: Some(proto::user_accounts::Message::MyUserAccount(
                                 proto::MyUserAccount {
@@ -408,7 +412,9 @@ impl UserAccounts {
                             Vec::new(),
                         );
                     }
+                    // handle password change requests
                     Some(proto::user_accounts::Message::SetPasswordRequest(set_password_req)) => {
+                        // get user ID from outer RPC message
                         let user_peer_id = match PeerId::from_bytes(&user_id) {
                             Ok(id) => id,
                             Err(_) => {
@@ -417,6 +423,7 @@ impl UserAccounts {
                             }
                         };
 
+                        // attempt to set password and send response
                         match Self::set_password(user_peer_id, set_password_req.password) {
                             Ok(()) => {
                                 Self::send_password_response(true, "Password updated successfully".to_string())
@@ -435,6 +442,7 @@ impl UserAccounts {
         }
     }
 
+    /// send password operation response ot client
     fn send_password_response(success: bool, message: String) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordResponse(
