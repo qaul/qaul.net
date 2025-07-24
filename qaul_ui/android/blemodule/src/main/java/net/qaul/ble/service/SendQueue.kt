@@ -34,7 +34,7 @@ class SendQueue(qaulId: ByteArray) {
     val TAG: String = "SendQueue"
     // TODELETE:
     // the qaul ID of our device (needed for Flow Control Messages)
-    //var qaulId: ByteArray = ByteArray(0)
+    val qaulId: ByteArray = qaulId
     var qaulIdKnown: Boolean = false
     var sendId: Boolean = true
     var chunkSize: Int = 20
@@ -100,7 +100,7 @@ class SendQueue(qaulId: ByteArray) {
             val (message, messageId) = messagesToSend.remove()
             val sendQueueMessage = SendQueueMessage(message, messageId, messageIndex, 20)
             sendQueueMessage.state = SendQueueMessageState.SENDING
-            sendQueues[messageIndex] = sendQueueMessage
+            sendQueues.put(messageIndex, sendQueueMessage)
 
             // add the message chunks to the queue
             chunks.addAll(sendQueueMessage.getAllChunks())
@@ -129,7 +129,7 @@ class SendQueue(qaulId: ByteArray) {
 
             // check state of the send queue
             if (sendQueues.containsKey(currentIndex)) {
-                var sendQueueMessage = sendQueues[currentIndex]
+                var sendQueueMessage = sendQueues.get(currentIndex)
                 if (sendQueueMessage != null) {
                     if (sendQueueMessage.state == SendQueueMessageState.SUCCESS || 
                         sendQueueMessage.state == SendQueueMessageState.ERROR) {
@@ -172,7 +172,7 @@ class SendQueue(qaulId: ByteArray) {
     fun setConnectionLost(): String? {
         state = SendQueueState.CONNECTION_LOST
         // check state of the send queues
-        var sendQueueMessage = sendQueues[currentIndex]
+        var sendQueueMessage = sendQueues.get(currentIndex)
         if (sendQueueMessage != null &&
             (sendQueueMessage.state == SendQueueMessageState.SENDING || 
              sendQueueMessage.state == SendQueueMessageState.QUEUED)) {
