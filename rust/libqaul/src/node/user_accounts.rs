@@ -17,7 +17,9 @@ use libp2p::{
 use prost::Message;
 use state::InitCell;
 use std::sync::RwLock;
-
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
 use crate::router;
 use crate::rpc::Rpc;
 use crate::storage::configuration;
@@ -130,10 +132,16 @@ impl UserAccounts {
         // Improvement: update the hashing mechanism as discussed
         let password_hash = match password {
             Some(pwd) if !pwd.is_empty() => {
-                bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
-                    .map_err(
-                        |e| log::error!("Failed to hash the password: {}", e)
-                    ).ok()
+                let argon2  = Argon2::default();
+                let salt = SaltString::generate(&mut OsRng);
+
+                match argon2.hash_password(pwd.as_bytes(), &salt) {
+                    Ok(hash) => Some(hash.to_string()),
+                    Err(e) => {
+                        log::error!("Failed to hash the password: {}", e);
+                        None
+                    }
+                }
             }
             _ => None
         };
@@ -179,9 +187,12 @@ impl UserAccounts {
         // hash new password or set to None to remove
         let password_hash = match password {
             Some(pwd) if !pwd.is_empty() => {
-                Some(bcrypt::hash(pwd, bcrypt::DEFAULT_COST)
-                    .map_err(|e| format!("Failed to hash password: {}", e))?
-                )
+                let argon2 = Argon2::default();
+                let salt = SaltString::generate(&mut OsRng);
+
+                let hash = argon2.hash_password(pwd.as_bytes(), &salt)
+                    .map_err(|e| format!("Failed to hash password with Argon2: {}", e))?;
+                Some(hash.to_string())
             }
             _ => None,
         };
@@ -211,10 +222,18 @@ impl UserAccounts {
         let users = USERACCOUNTS.get().read().unwrap();
         let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
 
+        // verify password
         match &user.password_hash {
-            // verify password
-            Some(hash) => bcrypt::verify(&password, hash)
-                .map_err(|e| format!("Password verification error: {}", e)),
+            Some(hash) => {
+                let argon2 = Argon2::default();
+                let parsed_hash = PasswordHash::new(hash).map_err(
+                    |e| format!("Invalid stored ahsh format {}", e)
+                )?;
+                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
+                    Ok(()) => Ok(true),
+                    Err(_) => Ok(false)
+                }
+            }
             // no password is set, so always allow
             None => Ok(true)
         }
