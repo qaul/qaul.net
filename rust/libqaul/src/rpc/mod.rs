@@ -8,6 +8,7 @@
 
 pub mod debug;
 pub mod sys;
+mod auth;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
 use state::InitCell;
