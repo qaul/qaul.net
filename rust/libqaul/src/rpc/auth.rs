@@ -113,7 +113,7 @@ impl Authentication {
         authenticated.insert(qaul_id.to_bytes(), expires_at);
     }
 
-    pub fn is_autheticated(qaul_id: PeerId) -> bool {
+    pub fn is_authenticated(qaul_id: PeerId) -> bool {
         let now = Timestamp::get_timestamp();
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
 
@@ -122,7 +122,7 @@ impl Authentication {
         authenticated.contains_key(&qaul_id.to_bytes())
     }
 
-    pub fn logout(qaul_id: PeerId)  {
+    pub fn logout(qaul_id: PeerId) {
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
         authenticated.remove(&qaul_id.to_bytes());
     }
