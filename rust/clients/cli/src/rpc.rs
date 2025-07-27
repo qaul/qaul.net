@@ -112,6 +112,9 @@ impl Rpc {
                     Ok(proto::Modules::Dtn) => {
                         super::dtn::Dtn::rpc(message.data);
                     }
+                    Ok(proto::Modules::Auth) => {
+                        // TODO: implement auth cli handling
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }
