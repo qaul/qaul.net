@@ -3,14 +3,12 @@ use crate::utilities::timestamp::Timestamp;
 use libp2p::PeerId;
 use state::InitCell;
 use std::collections::BTreeMap;
-use std::fmt::format;
 use std::sync::RwLock;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use toml::to_string;
-use crate::utilities::qaul_id::QaulId;
-// pub mod proto {
-//     include!("qau.rpc.auth.rs");
-// }
+
+pub mod proto {
+    include!("qaul.rpc.auth.rs");
+}
 
 #[derive(Clone)]
 pub struct AuthChallenge {
@@ -133,7 +131,8 @@ impl Authentication {
         challenges.retain(|_, challenge| now < challenge.expires_at);
     }
 
-    pub fn rpc() {}
+    // pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    // }
 
     fn handle_auth_request() {}
 
