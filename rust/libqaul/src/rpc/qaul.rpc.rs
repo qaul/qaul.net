@@ -64,6 +64,8 @@ pub enum Modules {
     Rtc = 13,
     /// Delay Tolerant Networking
     Dtn = 14,
+    /// Authentication
+    Auth = 15,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -87,6 +89,7 @@ impl Modules {
             Self::Ble => "BLE",
             Self::Rtc => "RTC",
             Self::Dtn => "DTN",
+            Self::Auth => "AUTH",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -107,6 +110,7 @@ impl Modules {
             "BLE" => Some(Self::Ble),
             "RTC" => Some(Self::Rtc),
             "DTN" => Some(Self::Dtn),
+            "AUTH" => Some(Self::Auth),
             _ => None,
         }
     }
