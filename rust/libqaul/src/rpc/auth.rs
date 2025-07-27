@@ -12,6 +12,7 @@ pub mod proto {
     include!("qaul.rpc.auth.rs");
 }
 
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct AuthChallenge {
     pub nonce: u64,
@@ -26,6 +27,7 @@ static AUTHENTICATED_USERS: InitCell<RwLock<BTreeMap<Vec<u8>, u64>>> = InitCell:
 
 pub struct Authentication {}
 
+#[allow(dead_code)]
 impl Authentication {
     pub fn init() {
         NONCE_COUNTER.set(RwLock::new(1));
