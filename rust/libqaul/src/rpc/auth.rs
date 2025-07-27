@@ -1,10 +1,12 @@
 use crate::node::user_accounts::UserAccounts;
+use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use libp2p::PeerId;
+use prost::Message;
 use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
 
 pub mod proto {
     include!("qaul.rpc.auth.rs");
@@ -63,7 +65,7 @@ impl Authentication {
         Ok(nonce)
     }
 
-    pub fn verify_challenge(qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String>{
+    pub fn verify_challenge(qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
         let now = Timestamp::get_timestamp();
 
         let challenge = {
@@ -131,12 +133,96 @@ impl Authentication {
         challenges.retain(|_, challenge| now < challenge.expires_at);
     }
 
-    // pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
-    // }
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+        match proto::AuthRpc::decode(&data[..]) {
+            Ok(auth_rpc) => {
+                match auth_rpc.message {
+                    Some(proto::auth_rpc::Message::AuthRequest(auth_request)) => {
+                        match PeerId::from_bytes(&auth_request.qaul_id) {
+                            Ok(peer_id) => {
+                                match Self::create_challenge(peer_id) {
+                                    Ok(nonce) => {
+                                        let challenge = proto::AuthRpc {
+                                            message: Some(proto::auth_rpc::Message::AuthChallenge(
+                                                proto::AuthChallenge {
+                                                    nonce,
+                                                    expires_at: Timestamp::get_timestamp() + 300,
+                                                }
+                                            )),
+                                        };
 
-    fn handle_auth_request() {}
+                                        let mut buf = Vec::with_capacity(challenge.encoded_len());
+                                        challenge.encode(&mut buf).unwrap();
 
-    fn handle_auth_response() {}
+                                        Rpc::send_message(
+                                            buf,
+                                            crate::rpc::proto::Modules::Auth.into(),
+                                            "".to_string(),
+                                            Vec::new(),
+                                        );
+                                    }
+                                    Err(e) => {
+                                        Self::send_auth_result(false, e);
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                Self::send_auth_result(false, "Invalid qaul ID".to_string());
+                            }
+                        }
+                    }
+                    Some(proto::auth_rpc::Message::AuthResponse(auth_response)) => {
+                        match PeerId::from_bytes(&user_id) {
+                            Ok(peer_id) => {
+                                match Self::verify_challenge(
+                                    peer_id, auth_response.challenge_hash,
+                                ) {
+                                    Ok(success) => {
+                                        if success {
+                                            Self::send_auth_result(true, "Authentication successful".to_string());
+                                        } else {
+                                            Self::send_auth_result(false, "Invalid credentials".to_string());
+                                        }
+                                    }
+                                    Err(e) => {
+                                        Self::send_auth_result(false, e);
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                Self::send_auth_result(false, "Invalid user ID".to_string());
+                            }
+                        }
+                    }
+                    _ => {
+                        log::error!("Unsupported auth RPC message");
+                    }
+                }
+            }
+            Err(e) => {
+                log::error!("Failed to decode: {:}", e);
+            }
+        }
+    }
 
-    fn send_auth_result() {}
+    fn send_auth_result(success: bool, message: String) {
+        let result = proto::AuthRpc {
+            message: Some(proto::auth_rpc::Message::AuthResult(
+                proto::AuthResult {
+                    success,
+                    error_message: message,
+                }
+            )),
+        };
+
+        let mut buf = Vec::with_capacity(result.encoded_len());
+        result.encode(&mut buf).unwrap();
+
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Auth.into(),
+            "".to_string(),
+            Vec::new(),
+        )
+    }
 }
