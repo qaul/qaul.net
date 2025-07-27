@@ -60,4 +60,6 @@ enum Modules {
     RTC = 13;
     // Delay Tolerant Networking
     DTN = 14;
+    // Authentication
+    AUTH = 15;
 }
