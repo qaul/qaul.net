@@ -8,6 +8,7 @@
 
 pub mod debug;
 pub mod sys;
+pub mod auth;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
 use state::InitCell;
@@ -146,7 +147,7 @@ impl Rpc {
                         // TODO: authorisation
                     }
                     Ok(Modules::Useraccounts) => {
-                        UserAccounts::rpc(message.data);
+                        UserAccounts::rpc(message.data, message.user_id);
                     }
                     Ok(Modules::Users) => {
                         Users::rpc(message.data, message.user_id);
@@ -184,6 +185,10 @@ impl Rpc {
                     Ok(Modules::Dtn) => {
                         log::trace!("Message Modules::Group received");
                         Dtn::rpc(message.data, message.user_id);
+                    }
+                    Ok(Modules::Auth) => {
+                        // TODO: implement auth cli handling
+                        log::trace!("Auth message received in CLI");
                     }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
