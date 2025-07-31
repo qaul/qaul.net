@@ -37,9 +37,7 @@ message Ble {
 }
 
 // device information request message
-message BleInfoRequest {
-
-}
+message BleInfoRequest {}
 
 // device information response message
 message BleInfoResponse {
@@ -49,14 +47,14 @@ message BleInfoResponse {
 
 // BLE device information
 message BleDeviceInfo {
-    // Check if Bluetooth / Bluetooth Low Energy is supported 
+    // Check if Bluetooth / Bluetooth Low Energy is supported
     //
     // Android: check if a bluetooth adapter is found
     bool ble_support = 1;
     // Bluetooth device address
     // 48 bit unique Bluetooth device addr
     // e.g. 80:86:F2:08:C7:98
-    // 
+    //
     // Android: BluetoothAdapter getAddress()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
     string id = 2;
@@ -69,7 +67,7 @@ message BleDeviceInfo {
     // Bluetooth is enable / powered on
     //
     // Android: BluetoothAdapter isEnabled()
-    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled() 
+    // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isEnabled()
     bool bluetooth_on = 4;
     // Is extended advertisement supported?
     //
@@ -78,7 +76,7 @@ message BleDeviceInfo {
     bool adv_extended = 5;
     // what is the maximal amount of bytes sendable via advertising?
     //
-    // Android: BluetoothAdapter getLeMaximumAdvertisingDataLength() 
+    // Android: BluetoothAdapter getLeMaximumAdvertisingDataLength()
     // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
     uint32 adv_extended_bytes = 6;
     // Is 2M phy supported?
@@ -113,7 +111,7 @@ message BleDeviceInfo {
     // Is multi advertisement supported?
     //
     // When multi advertisement is supported one can have different
-    // advertisement types parallely. Each advertisement has a 
+    // advertisement types parallely. Each advertisement has a
     // different device address.
     // For scanning devices it looks, as if multiple devices devices
     // would advertise themselves.
@@ -126,7 +124,7 @@ message BleDeviceInfo {
     // Android Specific: is Offloaded Filtering Supported?
     //
     // Android: BluetoothAdapter isOffloadedFilteringSupported()
-    // 
+    //
     bool offload_filter_support = 16;
     // Android Specific: is Offloaded Scan Batching Supported?
     //
@@ -143,15 +141,15 @@ message BleDeviceInfo {
 message BleStartRequest {
     // qaul ID
     //
-    // The small 16 byte qaul id
+    // The small 8 byte qaul id
     // to be used to identify this node
     bytes qaul_id = 1;
-    // power settings 
+    // power settings
     BlePowerSetting power_setting = 2;
 }
 
 // power settings
-// 
+//
 // These power settings relate to the android
 // power modes.
 enum BlePowerSetting {
@@ -171,7 +169,7 @@ enum BlePowerSetting {
 
 // Start device result message
 //
-// Feedback from the 
+// Feedback from the
 message BleStartResult {
     // whether the device was successfully started
     bool success = 1;
@@ -184,7 +182,7 @@ message BleStartResult {
 // BLE Error Reasons
 //
 // TODO: this list needs to be completed
-//       if none of the reasons apply, use 
+//       if none of the reasons apply, use
 //       UNKNOWN_ERROR
 enum BleError {
     // undefined error
@@ -199,9 +197,7 @@ enum BleError {
 }
 
 // Stop Bluetooth Device
-message BleStopRequest {
-
-}
+message BleStopRequest {}
 
 // Stop Result
 //
@@ -227,7 +223,7 @@ message BleDeviceDiscovered {
 
 // Device Unavailable
 //
-// A formerly discovered device has become 
+// A formerly discovered device has become
 // unavailable. No messages can be sent to it.
 message BleDeviceUnavailable {
     // qaul id of the device that

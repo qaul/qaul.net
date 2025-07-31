@@ -7,29 +7,35 @@ import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.math.BigInteger
+import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 import net.qaul.ble.model.FlowControlMessageType
 
 /**
  * Helper object to create Flow Control Messages (FLC)
  */
 object FlcCreate {
+    private val TAG: String = "FlcCreate"
+
     /**
      * Create an ID request message
      * @return FLC message ByteArray
      */
     fun createIdRequest(): ByteArray {
         val message = byteArrayOf(FlowControlMessageType.REQUEST_QAUL_ID.value.toByte())
+        AppLog.e(TAG, "createIdRequest: ${BLEUtils.toBinaryString(message)}")
         return message
     }
 
     /**
      * Create a send ID message
-     * @param qaulId The 16 Byte qaul ID to send
+     * @param qaulId The 8 Byte qaul ID to send
      * @return FLC message ByteArray
      */
     fun createSendId(qaulId: ByteArray): ByteArray {
         val header = byteArrayOf(FlowControlMessageType.SEND_QAUL_ID.value.toByte())
         val message = header + qaulId
+        AppLog.e(TAG, "createSendId: ${BLEUtils.toBinaryString(message)}")
         return message
     }
 
@@ -47,6 +53,7 @@ object FlcCreate {
             message[index] = (value shr 0).toByte() // high byte
             message[index + 1] = (value shr 8).toByte() // low byte
         }
+        AppLog.e(TAG, "createRequestChunk: ${BLEUtils.toBinaryString(message)}")
         return message
     }
 
@@ -65,6 +72,7 @@ object FlcCreate {
             message[0] = FlowControlMessageType.ACK_ERROR.value.toByte()
             message[1] = queueIndex.toByte()
             message[2] = errorCode.toByte() // reason for failure
+            AppLog.e(TAG, "createAck: ${BLEUtils.toBinaryString(message)}")
             return message
         }
     }
@@ -77,6 +85,7 @@ object FlcCreate {
         val message = ByteArray(2)
         message[0] = FlowControlMessageType.MISSING_ACK_MESSAGES.value.toByte()
         message[1] = queueIndex.toByte()
+        AppLog.e(TAG, "createAckRequest: ${BLEUtils.toBinaryString(message)}")
         return message
     }
 }

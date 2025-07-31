@@ -1,6 +1,14 @@
 // Copyright (c) 2025 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
+/**
+ * This File contains the protocol logic of the qaul GATT Messaging send queue.
+ * The classes are used in BleService.kt to manage the sending of messages:
+ *
+ * - chop the messages into chunks
+ * - manage the sending queues
+ */
+
 package net.qaul.ble.service
 
 import android.bluetooth.BluetoothDevice
@@ -104,6 +112,10 @@ class SendQueue(qaulId: ByteArray) {
 
             // add the message chunks to the queue
             chunks.addAll(sendQueueMessage.getAllChunks())
+
+            // DEBUG
+            AppLog.e(TAG, "Total chunks in queue: ${chunks.size}")
+
 
             return Triple(chunks, messageIndex, messageId)
         }
@@ -247,9 +259,18 @@ class SendQueueMessage {
     fun getAllChunks(): Queue<ByteArray> {
         var chunks: Queue<ByteArray> = LinkedList()
 
+        // DEBUG
+        AppLog.e(TAG, "getAllChunks: message: ${BLEUtils.toBinaryString(message)}")
+        AppLog.e(TAG, "getAllChunks: messageSize: $messageSize")
+        AppLog.e(TAG, "getAllChunks: $totalChunks chunks:")
+
         // create all chunks
         for (i in 0..(totalChunks -1)) {
             val chunk = getChunk(i.toShort())
+
+            // DEBUG
+            AppLog.e(TAG, "$i: ${BLEUtils.toBinaryString(chunk)}")
+
             chunks.add(chunk)
         }
 
@@ -284,8 +305,8 @@ class SendQueueMessage {
      * Get the number of message chunks for this message
      * @return the number of chunks
      */
-    fun getChunkCount(): Short {
-        var count = Math.ceil((((messageSize - (chunkSize - FIRST_MESSAGE_HEADER)) / (chunkSize - HEADER_SIZE)) +1).toDouble())
+    private fun getChunkCount(): Short {
+        var count = Math.ceil((messageSize - (chunkSize - FIRST_CHUNK_HEADER_SIZE)).toDouble() / (chunkSize - CHUNK_HEADER_SIZE)) +1
         return count.toInt().toShort()
     }
 
@@ -295,7 +316,7 @@ class SendQueueMessage {
      * @param chunkIndex the index of the chunk (0-based)
      * @return the header
      */
-    fun getHeader(chunkIndex: Short): ByteArray {   
+    private fun getHeader(chunkIndex: Short): ByteArray {   
         val headerInt: Int = (messageIndex.toInt() and 0xFF shl 12) or (chunkIndex.toInt() and 0xFFF)
         val header: ByteArray = ByteArray(2)
         header[0] = (headerInt shr 8).toByte() // high byte
@@ -307,7 +328,7 @@ class SendQueueMessage {
      * Get the first message header
      * @return the first message header
      */
-    fun getFirstHeader(): ByteArray {
+    private fun getFirstHeader(): ByteArray {
         // calculate CRC
         val crc32 = CRC32()
         crc32.update(message)
@@ -331,10 +352,11 @@ class SendQueueMessage {
         var start: Int = 0
         var end: Int = 0
         if (index == 0.toShort()) {
-            end = FIRST_MESSAGE_HEADER
+            end = Math.min(chunkSize - FIRST_CHUNK_HEADER_SIZE, messageSize)
         } else {
-            start = FIRST_MESSAGE_HEADER + (index - 1) * chunkSize
-            end = Math.min(start + chunkSize, messageSize)
+            val payloadSize = chunkSize - CHUNK_HEADER_SIZE
+            start = (chunkSize - FIRST_CHUNK_HEADER_SIZE) + (index - 1) * payloadSize
+            end = Math.min(start + payloadSize, messageSize)
         }
 
         return message.sliceArray(start until end)

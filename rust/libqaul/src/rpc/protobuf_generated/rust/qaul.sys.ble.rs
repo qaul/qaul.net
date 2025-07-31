@@ -166,7 +166,7 @@ pub struct BleDeviceInfo {
 pub struct BleStartRequest {
     /// qaul ID
     ///
-    /// The small 16 byte qaul id
+    /// The small 8 byte qaul id
     /// to be used to identify this node
     #[prost(bytes = "vec", tag = "1")]
     pub qaul_id: ::prost::alloc::vec::Vec<u8>,
