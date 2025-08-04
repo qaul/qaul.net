@@ -23,7 +23,7 @@ use crate::types::QaulInfoData;
 /// define maximal message length in bytes
 ///
 /// This length must not be exceeded. Packages exceeding this size will be discarded.
-const MAX_MESSAGE_LEN_BYTES: usize = 65536;
+const MAX_MESSAGE_LEN_BYTES: usize = 65535;
 
 /// create protocol name
 pub const PROTOCOL_NAME: StreamProtocol = StreamProtocol::new("/qaul_info/1.0.0");
