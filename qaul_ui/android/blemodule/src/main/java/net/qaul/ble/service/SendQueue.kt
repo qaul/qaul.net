@@ -40,16 +40,14 @@ enum class SendQueueState {
  */
 class SendQueue(qaulId: ByteArray) {
     val TAG: String = "SendQueue"
-    // TODELETE:
-    // the qaul ID of our device (needed for Flow Control Messages)
-    val qaulId: ByteArray = qaulId
+    val qaulId = qaulId
+    var qaulIdSent: Boolean = false
     var qaulIdKnown: Boolean = false
     var sendId: Boolean = true
     var chunkSize: Int = 20
     var currentIndex: Byte = 0
     var currentMessageId: String = ""
     var state: SendQueueState = SendQueueState.NEW
-
 
     // queue for Flow Control Messages (FLC) to send
     // they have the first priority
@@ -88,7 +86,10 @@ class SendQueue(qaulId: ByteArray) {
     fun getChunks(): Triple<Queue<ByteArray>, Byte?, String> {
         var chunks: Queue<ByteArray> = LinkedList()
         // send qaul ID as first message
-        chunks.add(FlcCreate.createSendId(qaulId))
+        if (!qaulIdSent) {
+            chunks.add(FlcCreate.createSendId(qaulId))
+            qaulIdSent = true
+        }
         // add all FLC messages to the queue
         chunks.addAll(flcToSend)
         // add all missing chunks to the queue
@@ -100,13 +101,13 @@ class SendQueue(qaulId: ByteArray) {
             // get index
             val messageIndex = getNextMessageIndex()
             if (messageIndex == null) {
-                AppLog.e(TAG, "GattMessaging getChunks: No message index available. Cannot create message.")
+                AppLog.e(TAG, "getChunks: No message index available. Cannot create message.")
                 return Triple(chunks, null, "")
             }
 
             // get the first message from the queue
             val (message, messageId) = messagesToSend.remove()
-            val sendQueueMessage = SendQueueMessage(message, messageId, messageIndex, 20)
+            val sendQueueMessage = SendQueueMessage(qaulId, message, messageId, messageIndex, 20)
             sendQueueMessage.state = SendQueueMessageState.SENDING
             sendQueues.put(messageIndex, sendQueueMessage)
 
@@ -114,7 +115,7 @@ class SendQueue(qaulId: ByteArray) {
             chunks.addAll(sendQueueMessage.getAllChunks())
 
             // DEBUG
-            AppLog.e(TAG, "Total chunks in queue: ${chunks.size}")
+            AppLog.e(TAG, "getChunks: Total chunks in queue: ${chunks.size}")
 
 
             return Triple(chunks, messageIndex, messageId)
@@ -124,9 +125,23 @@ class SendQueue(qaulId: ByteArray) {
     }
 
     /**
-     * get the next message queue index
+     * schedule a FLC ACK message
      */
-    fun getNextMessageIndex(): Byte? {
+    fun addFlcAck(queueIndex: Byte, success: Boolean, errorCode: Byte) {
+        // create FLC ACK message
+        val flcAck = FlcCreate.createAck(queueIndex, success, errorCode)
+        // add to the FLC queue
+        flcToSend.add(flcAck)
+    }
+
+    /**
+     * get the next message queue index
+     *
+     * TODO: implement the new queue solution:
+     * - set new index to free index
+     * - set next two index also to free index
+     */
+    private fun getNextMessageIndex(): Byte? {
         if (currentIndex == 0.toByte()) {
             currentIndex = 1.toByte() // start with index 1
             return currentIndex
@@ -141,10 +156,11 @@ class SendQueue(qaulId: ByteArray) {
 
             // check state of the send queue
             if (sendQueues.containsKey(currentIndex)) {
-                var sendQueueMessage = sendQueues.get(currentIndex)
+                var sendQueueMessage = sendQueues[currentIndex]
                 if (sendQueueMessage != null) {
                     if (sendQueueMessage.state == SendQueueMessageState.SUCCESS || 
                         sendQueueMessage.state == SendQueueMessageState.ERROR) {
+
                     } else {
                         // TODO: find better solution
                         AppLog.e(TAG, "GattMessaging getNextMessageIndex: Message with index $currentIndex is still in state ${sendQueueMessage.state}. Cannot increment index.")
@@ -157,7 +173,39 @@ class SendQueue(qaulId: ByteArray) {
     }
 
     /**
-     * Message was sent
+     * FLC ACK received
+     * This method is called when an ACK for a Flow Control Message (FLC) is received.
+     * @param queueIndex the index of the queue (1-14)
+     * @param success true if the ACK was successful, false if there was an error
+     * @param errorCode the error code, if any
+     * @return String indicating the message ID. Return empty string, if queue index is invalid or message is not found.
+     */
+    fun flcAckReceived(queueIndex: Byte, success: Boolean, errorCode: Byte): String {
+        // check if queue index is valid
+        if (queueIndex < 1 || queueIndex > 14) {
+            AppLog.e(TAG, "GattMessaging FlcAckReceived: Invalid queue index $queueIndex. Must be between 1 and 14.")
+            return ""
+        }
+
+        AppLog.e(TAG, "GattMessaging FlcAckReceived: queueIndex: $queueIndex, success: $success, errorCode: $errorCode")
+
+        // check if message is in the send queue
+        val sendQueueMessage = sendQueues[queueIndex]
+        if (sendQueueMessage == null) {
+            AppLog.e(TAG, "FlcAckReceived: Message with queue index $queueIndex not found in send queue.")
+            return ""
+        }
+
+        val result = sendQueueMessage.ackReceived(success, errorCode)
+        sendQueues[queueIndex] = sendQueueMessage
+
+        return result
+    }
+
+    /**
+     * This Message chunk queue was sent
+     *
+     * TODO: would be better to use the queue index instead of the message ID
      */
     fun messageSent(messageId: String) {
         // check if message is current message
@@ -173,6 +221,7 @@ class SendQueue(qaulId: ByteArray) {
                 return
             }
         }
+
         AppLog.e(TAG, "GattMessaging messageSent: Message with ID $messageId not found in send queue.")
     }
 
@@ -225,6 +274,7 @@ enum class SendQueueMessageState {
  */
 class SendQueueMessage {
     val TAG: String = "SendQueueMessage"
+    var qaulId: ByteArray = ByteArray(0)
     var messageId: String = ""
     var messageIndex: Byte = 0
     var state: SendQueueMessageState = SendQueueMessageState.QUEUED
@@ -243,7 +293,8 @@ class SendQueueMessage {
      * @param message the message to send
      * @param chunkSize the size of each chunk
      */
-    constructor(message: ByteArray, messageId: String, messageIndex: Byte, chunkSize: Int) {
+    constructor(qaulId: ByteArray, message: ByteArray, messageId: String, messageIndex: Byte, chunkSize: Int) {
+        this.qaulId = qaulId
         this.message = message
         this.messageId = messageId
         this.chunkSize = chunkSize
@@ -302,6 +353,29 @@ class SendQueueMessage {
     }
 
     /**
+     * ACK received for this message chunk
+     * @param success true if the ACK was successful, false if there was an error
+     * @param errorCode the error code, if any
+     * @return String indicating the message ID. Return empty string, if state is invalid.
+     */
+    fun ackReceived(success: Boolean, errorCode: Byte): String {
+        if (state == SendQueueMessageState.SENDING || state == SendQueueMessageState.QUEUED) {
+            AppLog.e(TAG, "ACK received in invalid state: $state")
+            return ""
+        }
+
+        if (success) {
+            state = SendQueueMessageState.SUCCESS
+        } else {
+            state = SendQueueMessageState.ERROR
+            AppLog.e(TAG, "ACK received with error code: $errorCode")
+        }
+        updatedAt = TimeSource.Monotonic.markNow()
+
+        return messageId
+    }
+
+    /**
      * Get the number of message chunks for this message
      * @return the number of chunks
      */
@@ -325,7 +399,15 @@ class SendQueueMessage {
     }
 
     /**
-     * Get the first message header
+     * Get the first chunk header
+     * Header size is 18 Bytes and contains:
+     *
+     * - 2 Bytes Chunk Header
+     * - 2 Bytes message size
+     * - 2 Bytes total chunks
+     * - 4 Bytes CRC32 
+     * - 8 Bytes qaulId.
+     *
      * @return the first message header
      */
     private fun getFirstHeader(): ByteArray {
@@ -335,10 +417,10 @@ class SendQueueMessage {
         val crc32Value = crc32.value
 
         val header = getHeader(0)
-        val headerMessageSize = BLEUtils.toByteArray(messageSize)
+        val headerMessageSize = BLEUtils.toByteArray(messageSize).sliceArray(2..3)
         val headerTotalChunks = BLEUtils.toByteArray(totalChunks)
         val crc32Bytes = BLEUtils.crc32ValueToByteArray(crc32Value)
-        val firstHeader: ByteArray = header + headerMessageSize + headerTotalChunks + crc32Bytes
+        val firstHeader: ByteArray = header + headerMessageSize + headerTotalChunks + crc32Bytes + qaulId
 
         return firstHeader
     }

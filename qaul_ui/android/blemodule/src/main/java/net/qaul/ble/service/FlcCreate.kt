@@ -70,8 +70,8 @@ object FlcCreate {
         } else {
             val message = ByteArray(3)
             message[0] = FlowControlMessageType.ACK_ERROR.value.toByte()
-            message[1] = queueIndex.toByte()
-            message[2] = errorCode.toByte() // reason for failure
+            message[1] = queueIndex
+            message[2] = errorCode // reason for failure
             AppLog.e(TAG, "createAck: ${BLEUtils.toBinaryString(message)}")
             return message
         }

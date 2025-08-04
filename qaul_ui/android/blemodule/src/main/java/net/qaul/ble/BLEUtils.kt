@@ -160,7 +160,8 @@ object BLEUtils {
      * Convert ByteArray to crc32 value
      * @param data ByteArray (4 Byte UInt) to convert
      * @return Long CRC32 value
-     */    fun byteArrayToCrc32Value(data: ByteArray): Long {
+     */
+    fun byteArrayToCrc32Value(data: ByteArray): Long {
         if (data.size == 4) {
             return data[0].toLong() and 0xFF shl 24 or (data[1].toLong() and 0xFF shl 16) or (data[2].toLong() and 0xFF shl 8) or (data[3].toLong() and 0xFF)
         }

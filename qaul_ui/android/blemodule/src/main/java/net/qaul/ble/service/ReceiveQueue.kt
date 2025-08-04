@@ -9,6 +9,7 @@
 package net.qaul.ble.service
 
 import android.bluetooth.BluetoothDevice
+import java.util.zip.CRC32
 import kotlin.time.TimeSource
 import kotlin.time.TimeSource.Monotonic.ValueTimeMark
 import net.qaul.ble.AppLog
@@ -20,7 +21,7 @@ import net.qaul.ble.model.FlowControlMessageType
  * Helper Objects
  */
 class FlcRequestChunks(val messageIndex: Byte, val chunkIndex: List<Short>)
-class FlcAck(val messageIndex: Byte, val success: Boolean)
+class FlcAck(val messageIndex: Byte, val success: Boolean = false, val errorCode: Byte = 0)
 class ReceivedMessage(val qaulId: ByteArray, val message: ByteArray)
 
 /**
@@ -31,7 +32,8 @@ class ReceiveQueueResult {
     var qaulIdRequestReceived: Boolean = false
     var qaulIdReceived: ByteArray? = null
     var flcRequestChunks: FlcRequestChunks? = null
-    var flcRequestAck: FlcAck? = null
+    var flcSendAck: FlcAck? = null
+    var flcRequestAck: Byte? = null
     var flcAckReceived: FlcAck? = null
     var receivedMessage: ReceivedMessage? = null
 }
@@ -77,7 +79,7 @@ class ReceiveQueue {
 
         // analyze message header
         val (type, index, payload) = messageHeader(chunk)
-        var result: ReceiveQueueResult;
+        var receiveQueueResult: ReceiveQueueResult;
 
         // display message Type
         binaryString = BLEUtils.toBinaryString(type)
@@ -87,21 +89,21 @@ class ReceiveQueue {
         if (type == 0x00.toByte()) {
             // Flow Control Message
             AppLog.e(TAG, "GattMessaging incomingMessage flow control message")
-            result = incomingFlowControlMessage(index.toByte(), payload)
+            receiveQueueResult = incomingFlowControlMessage(index.toByte(), payload)
         } else {
             // Chunk Content Message
             AppLog.e(TAG, "GattMessaging incomingMessage chunk content message")
-            result = incomingMessageChunk(type, index, payload)
+            receiveQueueResult = incomingMessageChunk(type, index, payload)
         }
 
-        return result
+        return receiveQueueResult
     }
 
     /**
      * Analyze message header
      * @return message type, index, payload
      */
-    fun messageHeader(chunk: ByteArray): Triple<Byte, Short, ByteArray> {
+    private fun messageHeader(chunk: ByteArray): Triple<Byte, Short, ByteArray> {
         var binaryString = BLEUtils.toBinaryString(chunk)
 
         // get message Type
@@ -140,8 +142,11 @@ class ReceiveQueue {
     /**
      * Handle incoming flow control messages
      */
-    fun incomingFlowControlMessage(flcType: Byte, payload: ByteArray): ReceiveQueueResult {
-        var result = ReceiveQueueResult()
+    private fun incomingFlowControlMessage(flcType: Byte, payload: ByteArray): ReceiveQueueResult {
+        var receiveQueueResult = ReceiveQueueResult()
+        if (!qaulIdKnown) {
+            receiveQueueResult.qaulIdMissing = true
+        }
 
         AppLog.e(TAG, "GattMessaging incomingFlowControlMessage type: $flcType, payload size: ${payload.size}")
         var binaryString = BLEUtils.toBinaryString(payload)
@@ -151,19 +156,19 @@ class ReceiveQueue {
             FlowControlMessageType.REQUEST_QAUL_ID.value -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: REQUEST_QAUL_ID")
                 // fill in ReceiveQueueResult
-                result.qaulIdRequestReceived = true
+                receiveQueueResult.qaulIdRequestReceived = true
             }
             FlowControlMessageType.SEND_QAUL_ID.value -> {
+                AppLog.e(TAG, "incomingFlowControlMessage: SEND_QAUL_ID")
                 // check payload size
                 if (payload.size != 8) {
-                    AppLog.e(TAG, "GattMessaging incomingFlowControlMessage payload size is not 8")
-                    if(!qaulIdKnown) {
-                        result.qaulIdMissing = true
-                    }
+                    AppLog.e(TAG, "SEND_QAUL_ID payload size is not 8")
                 } else {
                     // set qaul_id
                     qaulIdKnown = true
-                    result.qaulIdReceived = payload
+                    receiveQueueResult.qaulIdReceived = payload
+                    receiveQueueResult.qaulIdMissing = false
+                    AppLog.e(TAG, "incomingFlowControlMessage:received qaul_id: ${BLEUtils.toBinaryString(payload)}")
                 }
             }
             // Missing chunks
@@ -172,9 +177,18 @@ class ReceiveQueue {
             }
             FlowControlMessageType.ACK_SUCCESS.value -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: ACK_SUCCESS")
+                receiveQueueResult.flcAckReceived = FlcAck(
+                    payload[0],
+                    true
+                )
             }
             FlowControlMessageType.ACK_ERROR.value -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: ACK_ERROR")
+                receiveQueueResult.flcAckReceived = FlcAck(
+                    payload[0],
+                    false,
+                    payload[1]
+                )
             }
             FlowControlMessageType.MISSING_ACK_MESSAGES.value -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: MISSING_ACK_MESSAGES")
@@ -195,15 +209,14 @@ class ReceiveQueue {
                 AppLog.e(TAG, "incomingFlowControlMessage: unknown")
             }
         }
-        return result
+        return receiveQueueResult
     }
 
     /**
      * Handle incoming message chunks
      */
-    fun incomingMessageChunk(queue: Byte, index: Short, payload: ByteArray): ReceiveQueueResult {
-        AppLog.e(TAG, "GattMessaging incomingMessageChunk")
-        AppLog.e(TAG, "queue: $queue, index: $index, payload size: ${payload.size}")
+    private fun incomingMessageChunk(queue: Byte, index: Short, payload: ByteArray): ReceiveQueueResult {
+        AppLog.e(TAG, "incomingMessageChunk: queue: $queue, index: $index, payload size: ${payload.size}")
         var binaryString = BLEUtils.toBinaryString(payload)
         AppLog.e(TAG, "payload: $binaryString")
 
@@ -212,7 +225,7 @@ class ReceiveQueue {
 
         when (chunkState) {
             ReceiveChunkState.CURRENT_QUEUE -> {
-                AppLog.e(TAG, "GattMessaging incomingMessageChunk current queue")
+                AppLog.e(TAG, "incomingMessageChunk: current queue")
 
                 // get ReceiveQueueMessage
                 var receiveQueueMessage: ReceiveQueueMessage? = receiveQueues.get(queue)
@@ -226,13 +239,13 @@ class ReceiveQueue {
                 }
 
                 // add chunk to queue
-                val result = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
+                val receiveQueueResult = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
                 receiveQueues.put(queue, receiveQueueMessage)
 
-                return result
+                return receiveQueueResult
             }
             ReceiveChunkState.NEW_QUEUE -> {
-                AppLog.e(TAG, "GattMessaging incomingMessageChunk new queue")
+                AppLog.e(TAG, "incomingMessageChunk: new queue")
                 currentMessageQueueIndex = queue
 
                 // create new ReceiveQueueMessage
@@ -240,14 +253,14 @@ class ReceiveQueue {
                 receiveQueueMessage.messageQueueIndex = queue
 
                 // add chunk to queue
-                var result = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
+                var receiveQueueResult = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
                 receiveQueues.put(queue, receiveQueueMessage)
 
                 // check if qaulId is known
                 if (!qaulIdKnown) {
-                    result.qaulIdMissing = true
+                    receiveQueueResult.qaulIdMissing = true
                 }
-                return result
+                return receiveQueueResult
             }
             ReceiveChunkState.MISSING_CHUNK -> {
                 AppLog.e(TAG, "GattMessaging incomingMessageChunk missing chunk")
@@ -263,10 +276,10 @@ class ReceiveQueue {
                 }
 
                 // add chunk to queue
-                val result = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
+                val receiveQueueResult = receiveQueueMessage.addReceivedChunk(index, payload, qaulIdKnown)
                 receiveQueues.put(queue, receiveQueueMessage)
 
-                return result
+                return receiveQueueResult
             }
             ReceiveChunkState.INVALID_CHUNK -> {
                 AppLog.e(TAG, "GattMessaging incomingMessageChunk invalid chunk")
@@ -278,7 +291,7 @@ class ReceiveQueue {
     /**
      * Check Chunk State
      */
-    fun checkChunkState(queue: Byte): ReceiveChunkState {
+    private fun checkChunkState(queue: Byte): ReceiveChunkState {
         // check if current queue
         if (queue == currentMessageQueueIndex) {
             return ReceiveChunkState.CURRENT_QUEUE
@@ -313,7 +326,7 @@ enum class ReceiveQueueMessageState {
 // Chunk Header Size in Bytes
 const val CHUNK_HEADER_SIZE = 2
 // First Chunk Header Size in Bytes
-const val FIRST_CHUNK_HEADER_SIZE = 12
+const val FIRST_CHUNK_HEADER_SIZE = 18
 // Maximum number of missing chunks in one gap.
 // If the gap is larger, an error is issued.
 const val MAX_MISSING_GAP = 12      
@@ -340,13 +353,13 @@ data class MissingChunk(val index: Short) {
  */
 class ReceiveQueueMessage {
     val TAG: String = "ReceiveQueueMessage"
-    var firstMessageReceived: Boolean = false
+    var firstChunkReceived: Boolean = false
     var state: ReceiveQueueMessageState = ReceiveQueueMessageState.RECEIVING
     var createdAt: ValueTimeMark = TimeSource.Monotonic.markNow()
     var receivedAt: ValueTimeMark = TimeSource.Monotonic.markNow()
     var sentAt: ValueTimeMark? = null
 
-    // TO DELETE:
+    var qaulId: ByteArray = ByteArray(0)
     var messageQueueIndex: Byte = 0
     var messageSize: Int? = null
     var totalChunks: Short? = null
@@ -372,13 +385,13 @@ class ReceiveQueueMessage {
         // check if this is the first message
         if (index == 0.toShort()) {
             AppLog.e(TAG, "GattMessaging addChunk first message received")
-            firstMessageReceived = true
+            firstChunkReceived = true
 
             // get payload & and set message information
-            val firstMessagePayload = analyzeFirstMessage(payload)
+            val firstChunkPayload = analyzeFirstChunk(payload)
 
             // add payload to receivedChunks
-            receivedChunks.put(index, firstMessagePayload)
+            receivedChunks.put(index, firstChunkPayload)
         } else {
             // add payload to received chunks
             receivedChunks.put(index, payload)
@@ -395,26 +408,32 @@ class ReceiveQueueMessage {
      * @param chunk ByteArray
      * @return ByteArray with First Message Payload
      */
-    private fun analyzeFirstMessage(chunk: ByteArray): ByteArray {
+    private fun analyzeFirstChunk(chunk: ByteArray): ByteArray {
         // check if chunk is large enough
         if (chunk.size < FIRST_CHUNK_HEADER_SIZE - CHUNK_HEADER_SIZE) {
-            AppLog.e(TAG, "GattMessaging analyzeFirstMessagePayload chunk size is too small")
+            AppLog.e(TAG, "analyzeFirstChunk: chunk size is too small: ${chunk.size}")
             return ByteArray(0)
         }
 
         // get message size
-        messageSize = BLEUtils.byteArrayToInt(chunk.sliceArray(0 until 1))
+        messageSize = BLEUtils.byteArrayToInt(chunk.sliceArray(0..1))
 
         // get total chunks
-        totalChunks = BLEUtils.byteArrayToInt(chunk.sliceArray(2 until 3)).toShort()
+        totalChunks = BLEUtils.byteArrayToInt(chunk.sliceArray(2..3)).toShort()
 
         // get crc32 checksum
-        crc32Checksum = BLEUtils.byteArrayToCrc32Value(chunk.sliceArray(4 until 7))
+        crc32Checksum = BLEUtils.byteArrayToCrc32Value(chunk.sliceArray(4..7))
+
+        // get qaulId
+        val receivedQaulId = chunk.sliceArray(8..15)
+        if (!qaulId.size.equals(8)) {
+            qaulId = receivedQaulId
+        }
 
         // get payload
         val payload: ByteArray
-        if (chunk.size > 8) {
-            payload = chunk.sliceArray(8 until chunk.size)
+        if (chunk.size > FIRST_CHUNK_HEADER_SIZE - CHUNK_HEADER_SIZE) {
+            payload = chunk.sliceArray(FIRST_CHUNK_HEADER_SIZE - CHUNK_HEADER_SIZE until chunk.size)
         } else {
             payload = ByteArray(0)
         }
@@ -429,12 +448,19 @@ class ReceiveQueueMessage {
      * @return ReceiveQueueResult
      */
     fun updateMessageIndex(index: Short, qaulIdKnown: Boolean): ReceiveQueueResult {
-        var result = ReceiveQueueResult()
-
+        var receivedQueueResult = ReceiveQueueResult()
+        if (!qaulIdKnown) {
+            receivedQueueResult.qaulIdMissing = true
+        }
+        
         // update index and check if we have missing chunks
         if (index == 0.toShort()) {
             // handle first chunk
             // don't update current chunk index
+            if (!qaulIdKnown) {
+                receivedQueueResult.qaulIdReceived = qaulId
+                receivedQueueResult.qaulIdMissing = false
+            }
         } else if (index < currentChunkIndex) {
             // this is a missing chunk update
             // don't update current message index
@@ -467,13 +493,91 @@ class ReceiveQueueMessage {
         // check if all chunks are received
         if (totalChunks != null && 
             receivedChunks.size == totalChunks!!.toInt()) {
-            state = ReceiveQueueMessageState.RECEIVED
-            AppLog.e(TAG, "GattMessaging addChunk all chunks received")
-
-            // TODO: create final message from received chunks
-            //receivedQueueResult.receivedMessage = ReceivedMessage(qaulId, receivedChunks.values.reduce { acc, bytes -> acc + bytes })
+            // Create final message from received chunks
+            receivedQueueResult = assembleMessage(receivedQueueResult)
         }
 
-        return result
+        return receivedQueueResult
+    }
+
+    /**
+     * Assemble the final message from received chunks
+     * @param result ReceiveQueueResult
+     * @return ReceivedMessage
+     */
+    private fun assembleMessage(receivedQueueResult: ReceiveQueueResult): ReceiveQueueResult {
+        var error = false
+        var message = ByteArray(0)
+
+        // check if all chunks are received
+        if (totalChunks == null || receivedChunks.size != totalChunks!!.toInt()) {
+            AppLog.e(TAG, "assembleMessage not all chunks received")
+            error = true
+        }
+
+        // put all received chunks together
+        if (!error) {
+            for (i in 0 until totalChunks!!) {
+                if (!receivedChunks.containsKey(i.toShort())) {
+                    AppLog.e(TAG, "assembleMessage missing chunk: $i")
+                    error = true
+                    break
+                } else {
+                    // append chunk to message
+                    message += receivedChunks[i.toShort()]!!
+                    AppLog.e(TAG, "assembleMessage chunk $i, size: ${receivedChunks[i.toShort()]!!.size}")
+                    AppLog.e(TAG, "assembleMessage message size: ${message.size}")
+                }
+            }
+
+            // check if message size matches
+            AppLog.e(TAG, "assembleMessage: total message size: ${message.size}, expected size: $messageSize")
+            if (message.size != messageSize) {
+                AppLog.e(TAG, "GattMessaging assembleMessage message size does not match")
+                error = true
+            }
+        }
+
+        // check CRC32 checksum
+        if (!error) {
+            // calculate CRC
+            val crc32 = CRC32()
+            crc32.update(message)
+            val crc32Value = crc32.value
+
+            if (crc32Value != crc32Checksum) {
+                AppLog.e(TAG, "GattMessaging createFinalMessage CRC32 checksum does not match")
+                error = true
+            } else {
+                receivedQueueResult.receivedMessage = ReceivedMessage(
+                    qaulId,
+                    message
+                )
+            }
+        }
+
+        // Set queue state & create response
+        if (error) {
+            // on error
+            // set queue state
+            state = ReceiveQueueMessageState.ERROR
+            // create FLC message with error
+            receivedQueueResult.flcSendAck = FlcAck(
+                messageQueueIndex,
+                false,
+                0
+            )
+        } else {
+            // on success
+            // set queue state
+            state = ReceiveQueueMessageState.RECEIVED
+            // create FLC message with success
+            receivedQueueResult.flcSendAck = FlcAck(
+                messageQueueIndex,
+                true
+            )
+        }
+
+        return receivedQueueResult
     }
 }
