@@ -29,6 +29,7 @@ mod rpc;
 mod rtc;
 mod user_accounts;
 mod users;
+mod auth;
 
 use cli::Cli;
 use rpc::Rpc;
