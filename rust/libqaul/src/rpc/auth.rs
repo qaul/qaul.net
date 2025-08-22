@@ -43,6 +43,7 @@ impl Authentication {
     }
 
     pub fn create_challenge(qaul_id: PeerId) -> Result<u64, String> {
+        println!("LIBQAUL: Creating challenge for qaul_id: {:?}", qaul_id.to_bytes());
         if UserAccounts::get_by_id(qaul_id).is_none() {
             return Err("User not found".to_string());
         }
@@ -68,10 +69,13 @@ impl Authentication {
     }
 
     pub fn verify_challenge(qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
+        println!("LIBQAUL: Verifying challenge for qaul_id: {:?}", qaul_id.to_bytes());
+
         let now = Timestamp::get_timestamp();
 
         let challenge = {
             let mut challenges = ACTIVE_CHALLENGES.get().write().unwrap();
+            println!("LIBQAUL: Active challenges: {:?}", challenges.keys().collect::<Vec<_>>());
             Self::cleanup_expired_challenge(&mut challenges, now);
             challenges.remove(&qaul_id.to_bytes())
         };
@@ -136,10 +140,12 @@ impl Authentication {
     }
 
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+        println!("LIBQAUL DEBUG: Auth::rpc() called with {} bytes", data.len()); // ADD THIS
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => {
                 match auth_rpc.message {
                     Some(proto::auth_rpc::Message::AuthRequest(auth_request)) => {
+                        println!("LIBQAUL: AuthRequest for qaul_id: {:?}", auth_request.qaul_id);
                         match PeerId::from_bytes(&auth_request.qaul_id) {
                             Ok(peer_id) => {
                                 match Self::create_challenge(peer_id) {
@@ -174,6 +180,7 @@ impl Authentication {
                         }
                     }
                     Some(proto::auth_rpc::Message::AuthResponse(auth_response)) => {
+                        println!("LIBQAUL: AuthResponse from user_id: {:?}", user_id);
                         match PeerId::from_bytes(&user_id) {
                             Ok(peer_id) => {
                                 match Self::verify_challenge(

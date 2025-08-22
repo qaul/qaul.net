@@ -65,9 +65,11 @@ impl Rpc {
 
     /// receive an rpc message from libqaul
     pub fn received_message(data: Vec<u8>) {
+        println!("DEBUG: RPC::received_message() called with {} bytes", data.len());
         match proto::QaulRpc::decode(&data[..]) {
             Ok(message) => {
                 log::trace!("qaul rpc message received");
+                println!("DEBUG: Module: {}, Module enum: {:?}", message.module, proto::Modules::try_from(message.module));
 
                 match proto::Modules::try_from(message.module) {
                     Ok(proto::Modules::Node) => {
@@ -113,7 +115,7 @@ impl Rpc {
                         super::dtn::Dtn::rpc(message.data);
                     }
                     Ok(proto::Modules::Auth) => {
-                        // TODO: implement auth cli handling
+                        super::auth::Auth::rpc(message.data);
                     }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}

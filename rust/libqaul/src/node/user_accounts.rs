@@ -128,22 +128,24 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
-        // hash the password if provided using bcrypt.
-        // Improvement: update the hashing mechanism as discussed
-        let password_hash = match password {
+        // hash the password with some salt
+        let (password_hash, password_salt) = match password {
             Some(pwd) if !pwd.is_empty() => {
-                let argon2  = Argon2::default();
+                let argon2 = Argon2::default();
                 let salt = SaltString::generate(&mut OsRng);
 
                 match argon2.hash_password(pwd.as_bytes(), &salt) {
-                    Ok(hash) => Some(hash.to_string()),
+                    Ok(hash) => {
+                        // store both hash and salt
+                        (Some(hash.to_string()), Some(salt.to_string()))
+                    }
                     Err(e) => {
                         log::error!("Failed to hash the password: {}", e);
-                        None
+                        (None, None)
                     }
                 }
             }
-            _ => None
+            _ => (None, None)
         };
 
         let user = UserAccount {
@@ -165,6 +167,7 @@ impl UserAccounts {
                 id: id.to_string(),
                 keys: keys_config,
                 password_hash: password_hash.clone(),
+                password_salt: password_salt.clone(),
                 storage: configuration::StorageOptions::default(),
             });
         }

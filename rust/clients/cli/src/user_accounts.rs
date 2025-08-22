@@ -7,6 +7,7 @@ use super::rpc::Rpc;
 use prost::Message;
 use state::InitCell;
 use std::sync::RwLock;
+use serde::{Deserialize, Serialize};
 
 /// include generated protobuf RPC rust definition file
 mod proto {
@@ -26,10 +27,24 @@ pub enum MyUserAccountInitialiation {
     Initialized,
 }
 
+/// Authentication State
+pub struct AuthState {
+    pub session_token: Option<String>,
+    pub pending_auth: Option<PendingAuth>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PendingAuth {
+    pub username: String,
+    pub password: String,
+    pub salt: Option<String>,
+}
+
 /// user accounts module function handling
 pub struct UserAccounts {
     initialiation: MyUserAccountInitialiation,
     my_user_account: Option<proto::MyUserAccount>,
+    auth: AuthState
 }
 
 impl UserAccounts {
@@ -39,11 +54,17 @@ impl UserAccounts {
         let user_accounts = UserAccounts {
             initialiation: MyUserAccountInitialiation::Uninitialized,
             my_user_account: None,
+            auth: AuthState {
+                session_token : None,
+                pending_auth: None,
+            }
         };
         USERACCOUNTS.set(RwLock::new(user_accounts));
 
         // request default user
         Self::request_default_account();
+        // check for existing session
+        super::auth::Auth::restore_session();
     }
 
     /// return user id
@@ -74,6 +95,18 @@ impl UserAccounts {
             // set/reset password for an existing account
             cmd if cmd.starts_with("password") => {
                 Self::handle_password_change();
+            }
+            // login command
+            cmd if cmd.starts_with("login ") => {
+                Self::handle_login(cmd.strip_prefix("login ").unwrap().to_string());
+            }
+            // logout command
+            "logout" => {
+                Self::handle_logout();
+            }
+            // check authentication status
+            "status" => {
+                Self::check_auth_status();
             }
             // unknown command
             _ => log::error!("unknown account command"),
@@ -189,6 +222,86 @@ impl UserAccounts {
             super::rpc::proto::Modules::Useraccounts.into(),
             "".to_string(),
         );
+    }
+
+    /// Handle user login
+    fn handle_login(args: String) {
+        let (username, password) = Self::parse_create_args(&args);
+        match password {
+            Some(pwd) => {
+                let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+                // push this user to the pending auth list which is handled by auth module
+                user_accounts.auth.pending_auth = Some(PendingAuth {
+                    username: username.clone(),
+                    password: pwd,
+                    salt: None
+                });
+                drop(user_accounts);
+
+                println!("authentication user : {}", username);
+                // actual logic of login is present in auth module
+                super::auth::Auth::initiate_login(username);
+            }
+            None => {
+                println!("password not found");
+            }
+        }
+    }
+
+    /// Handle logout
+    fn handle_logout() {
+        let user_accounts = USERACCOUNTS.get().read().unwrap();
+
+        if user_accounts.auth.session_token.is_some() {
+            if let Some(ref account) = user_accounts.my_user_account {
+                // send logout request
+                super::auth::Auth::logout(account.id.clone());
+                println!("logging out");
+            }
+        } else {
+            println!("not logged in");
+        }
+    }
+
+    /// Check authentication Status
+    fn check_auth_status() {
+        let user_accounts = USERACCOUNTS.get().read().unwrap();
+        if let Some(session) = super::auth::Auth::get_session_info() {
+            println!("authentication status: Logged In");
+            println!("User: {}", session.username);
+
+            if let Some(ref account) = user_accounts.my_user_account {
+                println!("User id is : {}", account.id_base58);
+            }
+        } else {
+            println!("authentication session not found");
+        }
+    }
+
+    /// Store pending auth info (called by auth module)
+    pub fn set_pending_auth_salt(salt: String) {
+        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+        if let Some(ref mut pending) = user_accounts.auth.pending_auth {
+            pending.salt = Some(salt);
+        }
+    }
+
+    /// Get pending auth info
+    pub fn get_pending_auth() -> Option<PendingAuth> {
+        let user_accounts = USERACCOUNTS.get().read().unwrap();
+        user_accounts.auth.pending_auth.clone()
+    }
+
+    /// Clear pending auth
+    pub fn clear_pending_auth() {
+        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+        user_accounts.auth.pending_auth = None;
+    }
+
+    /// Set session token
+    pub fn set_session_token(token: Option<String>) {
+        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+        user_accounts.auth.session_token = token;
     }
 
     /// Process received RPC message
