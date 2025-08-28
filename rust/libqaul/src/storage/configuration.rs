@@ -351,7 +351,7 @@ impl Configuration {
         let config = CONFIG.get();
 
         // create yaml configuration format
-        let yaml = serde_yaml::to_string(config).expect("Couldn't encode into YAML values.");
+        let yaml = serde_yaml_ng::to_string(config).expect("Couldn't encode into YAML values.");
 
         // create path to config file
         let path_string = super::Storage::get_path();

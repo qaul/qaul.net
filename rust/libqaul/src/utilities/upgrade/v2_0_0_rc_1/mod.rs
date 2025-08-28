@@ -135,7 +135,7 @@ impl VersionUpgrade {
             };
 
             // save new configuration to file
-            if let Ok(yaml) = serde_yaml::to_string(&new_config) {
+            if let Ok(yaml) = serde_yaml_ng::to_string(&new_config) {
                 if let Err(_) = std::fs::write(Path::new(new_path).join("config.yaml"), yaml) {
                     println!("Error: creating config.yaml");
                     return false;

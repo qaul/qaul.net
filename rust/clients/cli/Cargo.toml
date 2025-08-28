@@ -1,6 +1,6 @@
 [package]
 name = "qaul-cli"
-version = "2.0.0-rc.3"
+version = "2.0.0-rc.4"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 
@@ -12,7 +12,7 @@ async-std = { version = "1.13", features = ["attributes"] }
 futures = "0.3"
 log = "0.4"
 pretty_env_logger = "0.5"
-prost = "0.13"
+prost = "0.14"
 futures-ticker = "0.0.3"
 state = "0.6"
 bs58 = "0.5"

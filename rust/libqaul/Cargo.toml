@@ -24,10 +24,10 @@ pretty_env_logger = "0.5"
 simplelog = "0.12"
 multi_log = "0.1"
 filetime = "0.2"
-bincode = "1.3"
+bincode = "1.3.3"
 config = "0.15"
 lazy_static = "1.5"
-toml = "0.8"
+toml = "0.9"
 base64 ="0.22"
 state = "0.6"
 humantime = "2.1"
@@ -35,13 +35,13 @@ tracing = "0.1"
 void = "1.0"
 wasm-timer = "0.2"
 rand = "0.9"
-prost = "0.13"
+prost = "0.14"
 libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.5"
 futures-ticker = "0.0.3"
 jni = "0.21"
-serde_yaml = "0.9"
+serde_yaml_ng = "0.10"
 sled = "0.34.7"
 uuid = { version = "1.13", features = ["v4"] }
 ed25519-dalek = "2.1.1"
@@ -62,11 +62,11 @@ qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 [build-dependencies]
-prost-build = "0.13"
+prost-build = "0.14"
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]
-android_logger = "0.14"
+android_logger = "0.15"
 
 # linting rules
 [lints.rust]
