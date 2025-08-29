@@ -37,7 +37,7 @@ pub mod chat_file {
 /// Send File Request
 ///
 /// UI requests libqaul to send a file
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SendFileRequest {
     /// file path with file name to send
     #[prost(string, tag = "1")]
@@ -52,7 +52,7 @@ pub struct SendFileRequest {
 /// Send File Response
 ///
 /// sends the result of the file send request to the UI
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SendFileResponse {
     /// was the file processing successful
     ///
@@ -68,7 +68,7 @@ pub struct SendFileResponse {
     pub file_id: u64,
 }
 /// File History Request
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FileHistoryRequest {
     /// offset
     #[prost(uint32, tag = "1")]
@@ -78,7 +78,7 @@ pub struct FileHistoryRequest {
     pub limit: u32,
 }
 /// File History Entry
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FileHistoryEntry {
     /// file id
     #[prost(uint64, tag = "1")]

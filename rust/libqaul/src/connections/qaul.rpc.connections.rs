@@ -36,7 +36,7 @@ pub mod connections {
     }
 }
 /// UI request for Internet nodes list
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InternetNodesRequest {}
 /// Internet Nodes List
 ///
@@ -61,7 +61,7 @@ pub struct InternetNodesList {
 ///
 /// Contains a node address as a libp2p multiaddress.
 /// e.g. "/ip4/144.91.74.192/udp/9229/quic-v1"
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InternetNodesEntry {
     /// address
     #[prost(string, tag = "1")]

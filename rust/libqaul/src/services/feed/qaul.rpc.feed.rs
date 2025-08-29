@@ -23,7 +23,7 @@ pub mod feed {
     }
 }
 /// request feed messages
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FeedMessageRequest {
     /// DEPRECATED
     #[prost(bytes = "vec", tag = "1")]
@@ -47,7 +47,7 @@ pub struct FeedMessageList {
     pub feed_message: ::prost::alloc::vec::Vec<FeedMessage>,
 }
 /// A single feed message
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FeedMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub sender_id: ::prost::alloc::vec::Vec<u8>,
@@ -75,7 +75,7 @@ pub struct FeedMessage {
     pub index: u64,
 }
 /// send feed message
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SendMessage {
     #[prost(string, tag = "1")]
     pub content: ::prost::alloc::string::String,

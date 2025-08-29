@@ -23,7 +23,7 @@ pub mod chat {
     }
 }
 /// request messages of a specific chat conversation
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ChatConversationRequest {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
@@ -81,7 +81,7 @@ pub struct ChatMessage {
 }
 /// message reception confirmed
 #[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MessageReceptionConfirmed {
     /// user id
     #[prost(bytes = "vec", tag = "1")]
@@ -91,14 +91,14 @@ pub struct MessageReceptionConfirmed {
     pub confirmed_at: u64,
 }
 /// chat content message
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ChatContentMessage {
     #[prost(oneof = "chat_content_message::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<chat_content_message::Message>,
 }
 /// Nested message and enum types in `ChatContentMessage`.
 pub mod chat_content_message {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
     pub enum Message {
         /// a chat content message
         #[prost(message, tag = "1")]
@@ -112,14 +112,14 @@ pub mod chat_content_message {
     }
 }
 /// chat content
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ChatContent {
     /// message text
     #[prost(string, tag = "1")]
     pub text: ::prost::alloc::string::String,
 }
 /// file content
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FileContent {
     /// file id
     #[prost(uint64, tag = "1")]
@@ -139,7 +139,7 @@ pub struct FileContent {
 }
 /// Group event information
 /// this message is purely informational
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GroupEvent {
     /// group event type
     #[prost(enumeration = "GroupEventType", tag = "1")]
@@ -149,7 +149,7 @@ pub struct GroupEvent {
     pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// send chat message
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ChatMessageSend {
     /// group id to which this message is sent
     #[prost(bytes = "vec", tag = "1")]

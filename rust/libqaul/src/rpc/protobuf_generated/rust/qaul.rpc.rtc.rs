@@ -35,21 +35,21 @@ pub mod rtc_rpc {
     }
 }
 /// rtc session request
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcSessionRequest {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc session response
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcSessionResponse {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
     pub group_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc session management
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcSessionManagement {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
@@ -59,7 +59,7 @@ pub struct RtcSessionManagement {
     pub option: u32,
 }
 /// rtc outgoing
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcOutgoing {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
@@ -69,7 +69,7 @@ pub struct RtcOutgoing {
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc incoming
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcIncoming {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
@@ -79,10 +79,10 @@ pub struct RtcIncoming {
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc sessions
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcSessionListRequest {}
 /// rtc session
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RtcSession {
     /// group id
     #[prost(bytes = "vec", tag = "1")]

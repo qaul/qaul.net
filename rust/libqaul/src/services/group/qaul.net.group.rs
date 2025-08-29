@@ -32,7 +32,7 @@ pub struct InviteMember {
 }
 /// Group member
 #[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GroupMember {
     /// user id
     #[prost(bytes = "vec", tag = "1")]
@@ -73,7 +73,7 @@ pub struct GroupInfo {
 /// Reply to Invite
 ///
 /// Accept / Reject invitation
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ReplyInvite {
     /// group id
     #[prost(bytes = "vec", tag = "1")]
@@ -83,7 +83,7 @@ pub struct ReplyInvite {
     pub accept: bool,
 }
 /// Removed member
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RemovedMember {
     /// group id
     #[prost(bytes = "vec", tag = "1")]

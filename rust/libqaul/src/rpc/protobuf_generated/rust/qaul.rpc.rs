@@ -2,7 +2,7 @@
 /// The main libqaul RPC message container.
 /// All RPC messages from and to libqaul are packed
 /// into this container.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct QaulRpc {
     /// which module to approach
     #[prost(enumeration = "Modules", tag = "1")]

@@ -24,7 +24,7 @@ pub mod router {
     }
 }
 /// UI request for routing table list
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RoutingTableRequest {}
 /// Routing table list
 /// This table presents the best view for each user.
@@ -47,7 +47,7 @@ pub struct RoutingTableEntry {
 }
 /// Routing table connection entry.
 /// This message contains a connection to a specific user.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RoutingTableConnection {
     /// the connection module (LAN, Internet, BLE, etc.)
     #[prost(enumeration = "ConnectionModule", tag = "2")]
@@ -63,7 +63,7 @@ pub struct RoutingTableConnection {
     pub via: ::prost::alloc::vec::Vec<u8>,
 }
 /// UI request for connections list
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ConnectionsRequest {}
 /// Connections list per module.
 /// All connections per user per module.
@@ -93,7 +93,7 @@ pub struct ConnectionsUserEntry {
     pub connections: ::prost::alloc::vec::Vec<ConnectionEntry>,
 }
 /// all connections of this user
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ConnectionEntry {
     /// round trip time in milli seconds
     #[prost(uint32, tag = "1")]
@@ -107,7 +107,7 @@ pub struct ConnectionEntry {
     pub via: ::prost::alloc::vec::Vec<u8>,
 }
 /// UI request for neighbours list
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NeighboursRequest {}
 /// neighbours list per module
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -120,7 +120,7 @@ pub struct NeighboursList {
     pub ble: ::prost::alloc::vec::Vec<NeighboursEntry>,
 }
 /// neighbours entry
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NeighboursEntry {
     /// the ID of the neighbour node
     #[prost(bytes = "vec", tag = "1")]

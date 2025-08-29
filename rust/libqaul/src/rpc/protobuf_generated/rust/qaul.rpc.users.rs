@@ -56,10 +56,10 @@ pub mod users {
     }
 }
 /// UI request for some users
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserRequest {}
 /// UI request for some online users
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserOnlineRequest {}
 /// user list
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -100,7 +100,7 @@ pub struct UserEntry {
 }
 /// Routing table connection entry.
 /// This message contains a connection to a specific user.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RoutingTableConnection {
     /// the connection module (LAN, Internet, BLE, etc.)
     #[prost(enumeration = "ConnectionModule", tag = "2")]
@@ -116,14 +116,14 @@ pub struct RoutingTableConnection {
     pub via: ::prost::alloc::vec::Vec<u8>,
 }
 /// security number request
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SecurityNumberRequest {
     /// user id
     #[prost(bytes = "vec", tag = "1")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
 }
 /// security number response
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SecurityNumberResponse {
     /// the user id of the remote user
     #[prost(bytes = "vec", tag = "1")]
