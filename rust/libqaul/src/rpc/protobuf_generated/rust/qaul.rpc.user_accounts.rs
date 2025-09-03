@@ -2,7 +2,7 @@
 /// user account rpc message container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserAccounts {
-    #[prost(oneof = "user_accounts::Message", tags = "1, 2, 3, 4")]
+    #[prost(oneof = "user_accounts::Message", tags = "1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<user_accounts::Message>,
 }
 /// Nested message and enum types in `UserAccounts`.
@@ -17,6 +17,10 @@ pub mod user_accounts {
         DefaultUserAccount(super::DefaultUserAccount),
         #[prost(message, tag = "4")]
         MyUserAccount(super::MyUserAccount),
+        #[prost(message, tag = "5")]
+        SetPasswordRequest(super::SetPasswordRequest),
+        #[prost(message, tag = "6")]
+        SetPasswordResponse(super::SetPasswordResponse),
     }
 }
 /// create a new user on this node
@@ -24,6 +28,22 @@ pub mod user_accounts {
 pub struct CreateUserAccount {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "2")]
+    pub password: ::core::option::Option<::prost::alloc::string::String>,
+}
+/// set password request for existing user
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetPasswordRequest {
+    #[prost(string, optional, tag = "2")]
+    pub password: ::core::option::Option<::prost::alloc::string::String>,
+}
+/// set password response
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetPasswordResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub error_message: ::prost::alloc::string::String,
 }
 /// Session Information
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
@@ -48,4 +68,6 @@ pub struct MyUserAccount {
     pub key_type: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub key_base58: ::prost::alloc::string::String,
+    #[prost(bool, tag = "7")]
+    pub has_password: bool,
 }
