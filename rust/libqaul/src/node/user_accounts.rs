@@ -152,7 +152,7 @@ impl UserAccounts {
             keys: keys_ed25519.clone(),
             name: name.clone(),
             password_hash: password_hash.clone(),
-            password_salt: password_salt.clone(), // Store salt
+            password_salt: password_salt.clone(),
         };
 
         // save it to state
