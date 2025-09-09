@@ -187,8 +187,8 @@ impl Rpc {
                         Dtn::rpc(message.data, message.user_id);
                     }
                     Ok(Modules::Auth) => {
-                        // TODO: implement auth cli handling
                         log::trace!("Auth message received in CLI");
+                        auth::Authentication::rpc(message.data, message.user_id);
                     }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
