@@ -1,3 +1,12 @@
+// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! # Authentication Module
+//!
+//! This module handles authentication on the libqaul node side.
+//! It manages challenge-response authentication using Argon2 password verification,
+//! tracks active authentication challenges, and maintains authenticated sessions.
+
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
@@ -8,10 +17,12 @@ use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
+/// Protobuf message definitions for authentication RPC
 pub mod proto {
     include!("qaul.rpc.auth.rs");
 }
 
+/// Active authentication challenge for a user
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct AuthChallenge {
@@ -21,20 +32,28 @@ pub struct AuthChallenge {
     pub expires_at: u64,
 }
 
+/// Global counter for generating unique nonces
+/// Monotonically increasing to ensure each challenge has a unique identifier
 static NONCE_COUNTER: InitCell<RwLock<u64>> = InitCell::new();
+/// Map of active authentication challenges indexed by user ID
 static ACTIVE_CHALLENGES: InitCell<RwLock<BTreeMap<Vec<u8>, AuthChallenge>>> = InitCell::new();
+/// Map of authenticated users with their session expiration times
 static AUTHENTICATED_USERS: InitCell<RwLock<BTreeMap<Vec<u8>, u64>>> = InitCell::new();
 
 pub struct Authentication {}
 
 #[allow(dead_code)]
 impl Authentication {
+    /// Initialize the authentication system
+    /// Sets up the global state for nonce generation, challenge tracking,
+    /// and authenticated user sessions.
     pub fn init() {
         NONCE_COUNTER.set(RwLock::new(1));
         ACTIVE_CHALLENGES.set(RwLock::new(BTreeMap::new()));
         AUTHENTICATED_USERS.set(RwLock::new(BTreeMap::new()));
     }
 
+    /// Generate the next unique nonce
     fn next_nonce() -> u64 {
         let mut counter = NONCE_COUNTER.get().write().unwrap();
         let nonce = *counter;
@@ -42,11 +61,13 @@ impl Authentication {
         nonce
     }
 
+    /// Create an authentication challenge for a user
     pub fn create_challenge(qaul_id: PeerId) -> Result<u64, String> {
         println!(
             "LIBQAUL: Creating challenge for qaul_id: {:?}",
             qaul_id.to_bytes()
         );
+        // Verify user exists in the system
         if UserAccounts::get_by_id(qaul_id).is_none() {
             return Err("User not found".to_string());
         }
@@ -61,9 +82,10 @@ impl Authentication {
             nonce,
             qaul_id: qaul_id_bytes.clone(),
             created_at: now,
-            expires_at: now + 600, // I need to confirm this
+            expires_at: now + 600 // Change to never expired(as discussed)
         };
 
+        // Store challenge and cleanup any expired ones
         let mut challenges = ACTIVE_CHALLENGES.get().write().unwrap();
         // Debug: print what we're storing
         log::info!("Storing challenge with key: {:?}", qaul_id_bytes);
@@ -74,6 +96,11 @@ impl Authentication {
         Ok(nonce)
     }
 
+    /// Verify a challenge response from the client
+    // Validates that:
+    // 1. An active challenge exists for the user
+    // 2. The challenge hasn't expired
+    // 3. The response correctly incorporates the password hash and nonce
     pub fn verify_challenge(qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
         let now = Timestamp::get_timestamp();
         let qaul_id_bytes = qaul_id.to_bytes();
@@ -97,7 +124,7 @@ impl Authentication {
                 );
             }
 
-            // Clone the challenge instead of removing it
+            // Clone the challenge to avoid holding the lock
             challenges.get(&qaul_id_bytes).cloned()
         };
 
@@ -149,12 +176,15 @@ impl Authentication {
         }
     }
 
+    /// Mark a user as authenticated with a session
     fn mark_authenticated(qaul_id: PeerId) {
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
         let expires_at = Timestamp::get_timestamp() + 86400; // Qs. is 1 hr enough?
         authenticated.insert(qaul_id.to_bytes(), expires_at);
     }
 
+    /// Check if a user has an active authenticated session
+    /// Also performs cleanup of expired sessions
     pub fn is_authenticated(qaul_id: PeerId) -> bool {
         let now = Timestamp::get_timestamp();
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
@@ -164,15 +194,22 @@ impl Authentication {
         authenticated.contains_key(&qaul_id.to_bytes())
     }
 
+    /// Logout a user by removing their authenticated session
     pub fn logout(qaul_id: PeerId) {
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
         authenticated.remove(&qaul_id.to_bytes());
     }
 
+    /// Remove expired challenges from the active challenges map
     fn cleanup_expired_challenge(challenges: &mut BTreeMap<Vec<u8>, AuthChallenge>, now: u64) {
         challenges.retain(|_, challenge| now < challenge.expires_at);
     }
 
+    /// Process incoming authentication RPC messages
+    // Routes messages to appropriate handlers based on message type:
+    // - UsersRequest: Send list of available users
+    // - AuthRequest: Create and send authentication challenge
+    // - AuthResponse: Verify challenge response and authenticate
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => match auth_rpc.message {
@@ -250,6 +287,7 @@ impl Authentication {
         }
     }
 
+    /// Send authentication result to the client
     fn send_auth_result(success: bool, message: String) {
         let result = proto::AuthRpc {
             message: Some(proto::auth_rpc::Message::AuthResult(proto::AuthResult {
@@ -269,11 +307,13 @@ impl Authentication {
         )
     }
 
+    /// Handle request for list of users
     fn handle_users_request() {
         let config = crate::storage::configuration::Configuration::get();
 
         let mut users_list = Vec::new();
 
+        // Build list of users from configuration
         for user_config in &config.user_accounts {
             let user_id = match user_config.id.parse::<PeerId>() {
                 Ok(id) => id.to_bytes(),
