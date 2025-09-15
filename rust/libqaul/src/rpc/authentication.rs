@@ -19,7 +19,7 @@ use std::sync::RwLock;
 
 /// Protobuf message definitions for authentication RPC
 pub mod proto {
-    include!("qaul.rpc.auth.rs");
+    include!("qaul.rpc.authentication.rs");
 }
 
 /// Active authentication challenge for a user

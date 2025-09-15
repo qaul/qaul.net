@@ -67,7 +67,7 @@ impl UserAccounts {
         // request default user
         Self::request_default_account();
         // check for existing session
-        super::auth::Auth::restore_session();
+        super::authentication::Auth::restore_session();
     }
 
     /// return user id
@@ -262,7 +262,7 @@ impl UserAccounts {
             Some(pwd) => {
                 println!("Authenticating user: {}", username);
                 Self::set_pending_auth(username.clone(), pwd);
-                super::auth::Auth::initiate_login(username);
+                super::authentication::Auth::initiate_login(username);
             }
             None => {
                 println!("Password required. Use: account login <username> -p <password>");
@@ -272,7 +272,7 @@ impl UserAccounts {
 
     fn handle_logout() {
         if let Some(ref account) = Self::get_my_account() {
-            super::auth::Auth::logout(account.id.clone());
+            super::authentication::Auth::logout(account.id.clone());
             println!("Logging out...");
         } else {
             println!("Not logged in");
@@ -280,7 +280,7 @@ impl UserAccounts {
     }
 
     fn check_auth_status() {
-        if let Some(session) = super::auth::Auth::get_session_info() {
+        if let Some(session) = super::authentication::Auth::get_session_info() {
             println!("Authentication Status: Logged In");
             println!("  User: {}", session.username);
             println!("  Session created: {}", session.created_at);
