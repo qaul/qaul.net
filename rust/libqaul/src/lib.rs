@@ -14,7 +14,7 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
-use crate::rpc::auth::Authentication;
+use crate::rpc::authentication::Authentication;
 
 // crate modules
 pub mod api;

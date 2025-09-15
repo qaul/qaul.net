@@ -23,7 +23,7 @@ pub mod auth_rpc {
     }
 }
 /// requesting all users, so empty
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UsersRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UsersResponse {
@@ -32,7 +32,7 @@ pub struct UsersResponse {
     #[prost(string, tag = "2")]
     pub error_message: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserInfo {
     #[prost(string, tag = "1")]
     pub username: ::prost::alloc::string::String,
@@ -43,24 +43,24 @@ pub struct UserInfo {
     #[prost(bool, tag = "4")]
     pub has_password: bool,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AuthRequest {
     #[prost(bytes = "vec", tag = "1")]
     pub qaul_id: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AuthChallenge {
     #[prost(uint64, tag = "1")]
     pub nonce: u64,
     #[prost(uint64, tag = "2")]
     pub expires_at: u64,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AuthResponse {
     #[prost(bytes = "vec", tag = "1")]
     pub challenge_hash: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AuthResult {
     #[prost(bool, tag = "1")]
     pub success: bool,

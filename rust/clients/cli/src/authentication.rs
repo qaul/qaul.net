@@ -19,7 +19,7 @@ use std::path::PathBuf;
 
 /// protobuf message definitions for authentication RPC
 pub mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.auth.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.authentication.rs");
 }
 
 /// Session information persisted to filesystem
@@ -113,8 +113,8 @@ impl Auth {
     }
 
     /// Initiate the login process for a user
-    // Starts authentication by requesting the list of users from the node
-    // to validate the username and retrieve salt for password hashing.
+    /// Starts authentication by requesting the list of users from the node
+    /// to validate the username and retrieve salt for password hashing.
     pub fn initiate_login(username: String) {
         println!("Requesting users list...");
 
@@ -141,10 +141,10 @@ impl Auth {
     }
 
     /// Process incoming authentication RPC messages
-    // Routes different message types to appropriate handlers:
-    // - UsersResponse: Validates user and requests authentication
-    // - AuthChallenge: Computes challenge response
-    // - AuthResult: Handles authentication success/failure
+    /// Routes different message types to appropriate handlers:
+    /// - UsersResponse: Validates user and requests authentication
+    /// - AuthChallenge: Computes challenge response
+    /// - AuthResult: Handles authentication success/failure
     pub fn rpc(data: Vec<u8>) {
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => match auth_rpc.message {
@@ -168,8 +168,8 @@ impl Auth {
     }
 
     /// Handle users list response from node
-    // validates that the requested user exists and has a password set,
-    // then initiates the authentication challenge if valid.
+    /// validates that the requested user exists and has a password set,
+    /// then initiates the authentication challenge if valid.
     fn handle_users_response(response: proto::UsersResponse) {
         if let Some(pending_username) = UserAccounts::get_pending_username() {
             // find the user in the response
@@ -227,9 +227,9 @@ impl Auth {
     }
 
     /// Handle authentication challenge from server
-    // Computes the challenge response using a double Argon2 hash:
-    // 1. Hash the password with the user's salt
-    // 2. Combine with nonce and hash again with a new salt
+    /// Computes the challenge response using a double Argon2 hash:
+    /// 1. Hash the password with the user's salt
+    /// 2. Combine with nonce and hash again with a new salt
     fn handle_auth_challenge(challenge: proto::AuthChallenge) {
         if let Some(pending) = UserAccounts::get_pending_auth() {
             if let Some(salt_str) = pending.salt {
@@ -290,8 +290,8 @@ impl Auth {
     }
 
     /// Handle authentication result from server
-    // On success, generates a random session token and persists the session.
-    // On failure, displays error message and clears pending authentication.
+    /// On success, generates a random session token and persists the session.
+    /// On failure, displays error message and clears pending authentication.
     fn handle_auth_result(result: proto::AuthResult) {
         if result.success {
             println!("Authentication successful!");

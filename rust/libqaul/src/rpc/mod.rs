@@ -8,7 +8,7 @@
 
 pub mod debug;
 pub mod sys;
-pub mod auth;
+pub mod authentication;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
 use state::InitCell;
@@ -188,7 +188,7 @@ impl Rpc {
                     }
                     Ok(Modules::Auth) => {
                         log::trace!("Auth message received in CLI");
-                        auth::Authentication::rpc(message.data, message.user_id);
+                        authentication::Authentication::rpc(message.data, message.user_id);
                     }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");

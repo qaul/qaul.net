@@ -1,5 +1,5 @@
 syntax = "proto3";
-package qaul.rpc.auth;
+package qaul.rpc.authentication;
 
 message AuthRpc {
   oneof message {
