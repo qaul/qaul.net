@@ -82,7 +82,7 @@ impl Authentication {
             nonce,
             qaul_id: qaul_id_bytes.clone(),
             created_at: now,
-            expires_at: now + 600 // Change to never expired(as discussed)
+            expires_at: now + 9999999999 // Change to never expired(as discussed)
         };
 
         // Store challenge and cleanup any expired ones
@@ -129,12 +129,12 @@ impl Authentication {
         };
 
         let challenge = challenge.ok_or("No active challenge or challenge expired".to_string())?;
-        if now > challenge.expires_at {
+        /*if now > challenge.expires_at {
             // Remove expired challenge
             let mut challenges = ACTIVE_CHALLENGES.get().write().unwrap();
             challenges.remove(&qaul_id.to_bytes());
             return Err("Challenge is expired".to_string());
-        }
+        }*/
 
         let user = UserAccounts::get_by_id(qaul_id).ok_or("User not found".to_string())?;
 
@@ -164,8 +164,9 @@ impl Authentication {
         match argon2.verify_password(combined.as_bytes(), &received_hash) {
             Ok(()) => {
                 // Remove challenge after successful verification
-                let mut challenges = ACTIVE_CHALLENGES.get().write().unwrap();
-                challenges.remove(&qaul_id.to_bytes());
+                // let challenges = ACTIVE_CHALLENGES.get().write().unwrap();
+                // keep the challenge for retry instead of removing
+                // challenges.remove(&qaul_id.to_bytes());
                 Self::mark_authenticated(qaul_id);
                 Ok(true)
             }
@@ -179,7 +180,7 @@ impl Authentication {
     /// Mark a user as authenticated with a session
     fn mark_authenticated(qaul_id: PeerId) {
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
-        let expires_at = Timestamp::get_timestamp() + 86400; // Qs. is 1 hr enough?
+        let expires_at = Timestamp::get_timestamp() + (86400 * 365 * 100);
         authenticated.insert(qaul_id.to_bytes(), expires_at);
     }
 
