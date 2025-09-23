@@ -263,16 +263,16 @@ impl UserAccounts {
             password = Self::prompt_password();
         }
 
-        match password {
-            Some(pwd) => {
-                println!("Authenticating user: {}", username);
-                Self::set_pending_auth(username.clone(), pwd);
-                super::authentication::Auth::initiate_login(username);
-            }
-            None => {
-                println!("Password required. Use: account login <username> -p <password>");
-            }
+        println!("Authenticating user: {}", username);
+
+        if let Some(pwd) = password {
+            Self::set_pending_auth(username.clone(), pwd);
+        } else {
+            // for passwordless logins
+            Self::set_pending_auth(username.clone(), String::new());
         }
+
+        super::authentication::Auth::initiate_login(username);
     }
 
     fn handle_logout() {
