@@ -148,8 +148,8 @@ impl UserAccounts {
     fn parse_create_args(args_str: &str) -> (String, Option<String>) {
         // find password flag position
         let flag_pos = args_str
-            .find(" -p ")
-            .or_else(|| args_str.find(" --password "));
+            .find(" -p")
+            .or_else(|| args_str.find(" --password"));
 
         match flag_pos {
             Some(pos) => {
