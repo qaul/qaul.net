@@ -211,9 +211,26 @@ impl Auth {
                         UserAccounts::clear_pending_auth();
                     }
                 } else {
-                    println!("User has no password set");
+                    println!("User has no password set, so authenticating without password");
+                    // this would be improved as the token implementation is completed
+                    let session_id = bs58::encode(rand::random::<[u8; 32]>()).into_string();
+
+                    let session = SessionInfo {
+                        user_id: user_info.user_id.clone(),
+                        username: pending_username.clone(),
+                        session_token: session_id.clone(),
+                        created_at: std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs(),
+                    };
+
+                    // save session and mark as authenticated
+                    Self::save_session(session);
+                    UserAccounts::set_session_token(Some(session_id));
                     UserAccounts::clear_pending_auth();
-                }
+
+                    println!("Authentication successful!");                }
             } else {
                 // user not found, show available users for debugging
                 println!("User '{}' not found", pending_username);
