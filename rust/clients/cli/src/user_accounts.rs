@@ -118,6 +118,11 @@ impl UserAccounts {
 
     /// Create new user account
     fn create_user_account(args: String) {
+        // logout any existing session before creating new account
+        if let Some(_session) = super::authentication::Auth::get_session_info() {
+            super::authentication::Auth::clear_session();
+        }
+
         let (username, password) = Self::parse_create_args(&args);
         // create info request message
         let proto_message = proto::UserAccounts {
@@ -190,8 +195,8 @@ impl UserAccounts {
     /// handle the password change for current user
     fn handle_password_change() {
         // check if user is logged in
-        if Self::get_user_id().is_none() {
-            println!("No user account found.");
+        if super::authentication::Auth::get_session_info().is_none() {
+            println!("You are not logged in, please log into a user account first.");
             return;
         }
 
