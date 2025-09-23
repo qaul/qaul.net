@@ -12,10 +12,9 @@ use super::user_accounts::UserAccounts;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHasher};
+use libqaul::storage::configuration::Configuration;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::PathBuf;
 
 /// protobuf message definitions for authentication RPC
 pub mod proto {
@@ -39,76 +38,86 @@ pub struct SessionInfo {
 pub struct Auth;
 
 impl Auth {
-    /// Get the platform-specific path for session file storage
-    fn get_session_file_path() -> PathBuf {
-        #[cfg(any(target_os = "linux", target_os = "macos"))]
-        {
-            let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-            PathBuf::from(home).join(".qaul_session")
-        }
+    /// Generate a simple token using Argon2
+    fn generate_token(user_id: &str, username: &str) -> String {
+        use argon2::password_hash::rand_core::OsRng;
 
-        #[cfg(target_os = "windows")]
-        {
-            let home = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
-            PathBuf::from(home).join(".qaul_session")
-        }
+        let input = format!("{}:{}", user_id, username);
+        let argon2 = Argon2::default();
 
-        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
-        {
-            PathBuf::from(".qaul_session")
+        // Generate a salt once or use a fixed valid one
+        let salt = SaltString::generate(&mut OsRng);
+
+        match argon2.hash_password(input.as_bytes(), &salt) {
+            Ok(hash) => {
+                hash.to_string()
+            },
+            Err(_) => {
+                bs58::encode(input.as_bytes()).into_string()
+            }
         }
     }
 
-    /// Save session to file
-    pub fn save_session(session: SessionInfo) {
-        let path = Self::get_session_file_path();
-        let json = serde_json::to_string_pretty(&session).unwrap();
-
-        if let Err(e) = fs::write(&path, json) {
-            log::error!("Failed to save session: {}", e);
-        } else {
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                if let Ok(metadata) = fs::metadata(&path) {
-                    let mut perms = metadata.permissions();
-                    perms.set_mode(0o600);
-                    let _ = fs::set_permissions(&path, perms);
+    /// Save token to config
+    fn save_token_to_config(user_id: String, token: String) {
+        {
+            let mut config = Configuration::get_mut();
+            for user in &mut config.user_accounts {
+                if user.id == user_id {
+                    user.session_token = Some(token);
+                    break;
                 }
             }
-            println!("Session saved");
         }
-    }
-
-    /// Load session from file
-    pub fn load_session() -> Option<SessionInfo> {
-        let path = Self::get_session_file_path();
-
-        if path.exists() {
-            fs::read_to_string(&path)
-                .ok()
-                .and_then(|content| serde_json::from_str(&content).ok())
-        } else {
-            None
-        }
+        Configuration::save();
     }
 
     /// Get session info
+    /// Load token from config instead of file
     pub fn get_session_info() -> Option<SessionInfo> {
-        Self::load_session()
+        let config = Configuration::get();
+
+        // Find first user with a token
+        for user in &config.user_accounts {
+            if let Some(token) = &user.session_token {
+                return Some(SessionInfo {
+                    user_id: user.id.as_bytes().to_vec(),
+                    username: user.name.clone(),
+                    session_token: token.clone(),
+                    created_at: 0,
+                });
+            }
+        }
+        None
     }
 
-    /// Clear session
+    /// Clear session - just remove token from config
     pub fn clear_session() {
-        let path = Self::get_session_file_path();
-        let _ = fs::remove_file(path);
+        // Find and clear the active session token
+        {
+            let mut config = Configuration::get_mut();
+            for user in &mut config.user_accounts {
+                if user.session_token.is_some() {
+                    user.session_token = None;
+                    break;
+                }
+            }
+        }
+        Configuration::save();
+        UserAccounts::set_session_token(None);
     }
 
-    /// Restore session on startup
+    /// Restore session on startup - load from config
     pub fn restore_session() {
-        if let Some(session) = Self::load_session() {
-            log::info!("Restored session for user: {}", session.username);
-            UserAccounts::set_session_token(Some(session.session_token));
+        let config = Configuration::get();
+
+        // Find user with token and restore
+        for user in &config.user_accounts {
+            if let Some(token) = &user.session_token {
+                log::info!("Restored session for user: {}", user.name);
+                UserAccounts::set_session_token(Some(token.clone()));
+                break; // Only one active session
+            }
         }
     }
 
@@ -136,7 +145,6 @@ impl Auth {
     /// Handle logout
     pub fn logout(_user_id: Vec<u8>) {
         Self::clear_session();
-        UserAccounts::set_session_token(None);
         println!("Logged out successfully");
     }
 
@@ -213,24 +221,15 @@ impl Auth {
                 } else {
                     println!("User has no password set, so authenticating without password");
                     // this would be improved as the token implementation is completed
-                    let session_id = bs58::encode(rand::random::<[u8; 32]>()).into_string();
+                    let user_id_str = bs58::encode(&user_info.user_id).into_string();
+                    let token = Self::generate_token(&user_id_str, &pending_username);
+                    Self::save_token_to_config(user_id_str, token.clone());
 
-                    let session = SessionInfo {
-                        user_id: user_info.user_id.clone(),
-                        username: pending_username.clone(),
-                        session_token: session_id.clone(),
-                        created_at: std::time::SystemTime::now()
-                            .duration_since(std::time::UNIX_EPOCH)
-                            .unwrap()
-                            .as_secs(),
-                    };
-
-                    // save session and mark as authenticated
-                    Self::save_session(session);
-                    UserAccounts::set_session_token(Some(session_id));
+                    UserAccounts::set_session_token(Some(token));
                     UserAccounts::clear_pending_auth();
 
-                    println!("Authentication successful!");                }
+                    println!("Authentication successful!");
+                }
             } else {
                 // user not found, show available users for debugging
                 println!("User '{}' not found", pending_username);
@@ -315,21 +314,12 @@ impl Auth {
 
             if let Some(pending) = UserAccounts::get_pending_auth() {
                 if let Some(user_id) = pending.user_id {
+                    let user_id_str = bs58::encode(&user_id).into_string();
                     // Generate random session token
-                    let session_token = bs58::encode(rand::random::<[u8; 32]>()).into_string();
+                    let token = Self::generate_token(&user_id_str, &pending.username);
+                    Self::save_token_to_config(user_id_str, token.clone());
 
-                    let session = SessionInfo {
-                        user_id,
-                        username: pending.username,
-                        session_token: session_token.clone(),
-                        created_at: std::time::SystemTime::now()
-                            .duration_since(std::time::UNIX_EPOCH)
-                            .unwrap()
-                            .as_secs(),
-                    };
-                    // Persist session and set as active
-                    Self::save_session(session);
-                    UserAccounts::set_session_token(Some(session_token));
+                    UserAccounts::set_session_token(Some(token));
                 }
             }
 
