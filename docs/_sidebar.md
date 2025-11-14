@@ -27,4 +27,6 @@
             * [Qaul Routing Protocol](qaul/rust/routing.md)
             * [Connecting Nodes Statically](qaul/rust/connecting-nodes-statically.md)
             * [Security](qaul/rust/security.md)
+        * **Test Qaul**
             * [Testing](qaul/rust/testing.md)
+            * [qaul-cli Usage](qaul/rust/qaul-cli-usage.md)

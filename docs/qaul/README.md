@@ -26,6 +26,7 @@ and how you can build it for the supported operating systems.
 * [Configuring qaul](qaul/rust/configuration.md)
 * [Connect nodes statically](qaul/rust/connecting-nodes-statically.md)
 * [Testing tipps](qaul/rust/testing.md)
+* [qaul-cli tutorial](qaul/rust/qaul-cli-usage.md)
 
 ## Join Development
 
