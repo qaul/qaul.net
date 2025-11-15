@@ -65,6 +65,7 @@ fn main() {
     match prost_build.compile_protos(
         &[
             "rpc/qaul_rpc.proto",
+            "rpc/authentication.proto",
             "rpc/debug.proto",
             "connections/connections.proto",
             "node/node.proto",
@@ -100,6 +101,11 @@ fn main() {
             fs::copy(
                 Path::new(&out_dir).join("qaul.rpc.rs"),
                 to.join("qaul.rpc.rs"),
+            )
+            .unwrap();
+            fs::copy(
+                &Path::new(&out_dir).join("qaul.rpc.authentication.rs"),
+                to.join("qaul.rpc.authentication.rs"),
             )
             .unwrap();
             fs::copy(
@@ -220,6 +226,11 @@ fn main() {
             fs::copy(
                 &Path::new(&out_dir).join("qaul.rpc.rs"),
                 Path::new("src/rpc/qaul.rpc.rs"),
+            )
+            .unwrap();
+            fs::copy(
+                &Path::new(&out_dir).join("qaul.rpc.authentication.rs"),
+                Path::new("src/rpc/qaul.rpc.authentication.rs"),
             )
             .unwrap();
             fs::copy(

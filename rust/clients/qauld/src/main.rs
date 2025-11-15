@@ -72,7 +72,7 @@ async fn main() {
         } else {
             user_name = create_default_named();
         }
-        libqaul::node::user_accounts::UserAccounts::create(user_name.clone());
+        libqaul::node::user_accounts::UserAccounts::create(user_name.clone(), None);
     }
 
     // loop

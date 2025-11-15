@@ -112,6 +112,9 @@ impl Rpc {
                     Ok(proto::Modules::Dtn) => {
                         super::dtn::Dtn::rpc(message.data);
                     }
+                    Ok(proto::Modules::Auth) => {
+                        super::authentication::Auth::rpc(message.data);
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

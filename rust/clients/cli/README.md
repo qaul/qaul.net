@@ -26,6 +26,13 @@ The following commands are available:
 * user accounts
   * `account default` - get's and displays the default user account
   * `account create {User Name}` - create a new user account with the name {User Name}
+  * `account create {User Name} -p {password}` - create a new user account with a password
+  * `account create {User Name} -p` - create a new user account and prompt for password
+  * `account password` - set or change password for the current user account (prompts for input)
+  * `account login {username} -p {password}` - login to an existing user account
+  * `account login {username} -p` - login and prompt for password
+  * `account logout` - logout from the current user session
+  * `account status` - check current authentication status (logged in/out, session info)
 * users - Functions for all users known by your node
   * `users list` - display all users known to this router
   * `users online` - display all online users known to this router
