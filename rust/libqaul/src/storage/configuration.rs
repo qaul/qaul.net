@@ -133,6 +133,9 @@ pub struct UserAccount {
     pub name: String,
     pub id: String,
     pub keys: String,
+    pub password_hash: Option<String>,
+    pub password_salt: Option<String>,
+    pub session_token : Option<String>,
     pub storage: StorageOptions,
 }
 
@@ -142,6 +145,9 @@ impl Default for UserAccount {
             name: String::from(""),
             id: String::from(""),
             keys: String::from(""),
+            password_hash: None,
+            password_salt: None,
+            session_token: None,
             storage: StorageOptions::default(),
         }
     }
