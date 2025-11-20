@@ -15,10 +15,12 @@
         "libp2p",
         "libqaul",
         "mdns",
+        "Merkle",
         "multiaddress",
         "peerid",
         "protobuf",
         "qaul",
+        "qauld",
         "quic"
     ],
     "[rust]": {
