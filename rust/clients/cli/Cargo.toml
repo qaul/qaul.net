@@ -1,6 +1,6 @@
 [package]
 name = "qaul-cli"
-version = "2.0.0-rc.4"
+version = "2.0.0-rc.5"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 

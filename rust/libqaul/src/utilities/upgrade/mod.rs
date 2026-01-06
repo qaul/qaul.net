@@ -16,6 +16,7 @@ use crate::utilities::upgrade::backup::Backup;
 
 pub mod backup;
 pub mod v2_0_0_rc_1;
+pub mod v2_0_0_rc_5;
 
 /// upgrade module
 pub struct Upgrade {}
@@ -104,6 +105,21 @@ impl Upgrade {
                 }
                 Err(e) => {
                     println!("Upgrade to 2.0.0-rc.1 failed: {}", e);
+                    return false;
+                }
+            }
+        }
+
+        // upgrade to version 2.0.0-rc.5
+        if version < Version::parse("2.0.0-rc.5").unwrap() {
+            match v2_0_0_rc_5::VersionUpgrade::upgrade(storage_path, &backup_path) {
+                Ok((new_version, new_path)) => {
+                    // update values
+                    version = Version::parse(&new_version).unwrap();
+                    backup_path = new_path;
+                }
+                Err(e) => {
+                    println!("Upgrade to 2.0.0-rc.5 failed: {}", e);
                     return false;
                 }
             }
