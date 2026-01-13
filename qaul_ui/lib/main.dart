@@ -4,7 +4,6 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:logging/logging.dart';
@@ -94,8 +93,7 @@ class Initializer {
     await _container.read(qaulWorkerProvider).initialized;
     await EmailLoggingCoordinator.instance.initialize(container: container);
 
-    await Hive.initFlutter();
-    await Hive.openBox(UserPrefsHelper.hiveBoxName);
+    await UserPrefsHelper.initialize();
 
     await LocalNotifications.instance.initialize();
   }

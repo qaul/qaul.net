@@ -1,12 +1,31 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsHelper {
-  UserPrefsHelper() : _prefsBox = Hive.box(hiveBoxName);
-  final Box<dynamic>? _prefsBox;
-
-  static String get hiveBoxName => 'UserPreferencesBox';
+  UserPrefsHelper._internal(this._prefs);
+  
+  static UserPrefsHelper? _instance;
+  final SharedPreferencesWithCache _prefs;
+  final ValueNotifier<int> _changeNotifier = ValueNotifier(0);
+  
+  static Future<void> initialize() async {
+    final prefs = await SharedPreferencesWithCache.create(
+      cacheOptions: const SharedPreferencesWithCacheOptions(),
+    );
+    _instance = UserPrefsHelper._internal(prefs);
+  }
+  
+  factory UserPrefsHelper() {
+    assert(_instance != null, 'Call UserPrefsHelper.initialize() first!');
+    return _instance!;
+  }
+  
+  ValueListenable<int> get listenable => _changeNotifier;
+  
+  void _notifyChange() {
+    _changeNotifier.value++;
+  }
 
   String get _defaultLocaleKey => 'cached_default_locale';
 
@@ -19,7 +38,7 @@ class UserPrefsHelper {
   String get _verifyNTFKey => 'cached_verified_users_only';
 
   Locale? get defaultLocale {
-    String? completeCode = _prefsBox?.get(_defaultLocaleKey);
+    String? completeCode = _prefs.getString(_defaultLocaleKey);
     if (completeCode == null) return null;
     final cs = completeCode.split('_');
 
@@ -28,31 +47,45 @@ class UserPrefsHelper {
   }
 
   set defaultLocale(Locale? l) {
-    String? code;
-    if (l != null) code = '${l.languageCode}_${l.countryCode}';
-    _prefsBox?.put(_defaultLocaleKey, code);
+    if (l == null) {
+      _prefs.remove(_defaultLocaleKey);
+    } else {
+      String code = '${l.languageCode}_${l.countryCode}';
+      _prefs.setString(_defaultLocaleKey, code);
+    }
+    _notifyChange();
   }
 
   ThemeMode get defaultTheme {
-    int? theme = _prefsBox?.get(_defaultThemeKey);
+    int? theme = _prefs.getInt(_defaultThemeKey);
     if (theme == null) return ThemeMode.system;
 
     return ThemeMode.values[theme.clamp(0, ThemeMode.values.length - 1)];
   }
 
   set defaultTheme(ThemeMode theme) {
-    _prefsBox?.put(_defaultThemeKey, ThemeMode.values.indexOf(theme));
+    _prefs.setInt(_defaultThemeKey, ThemeMode.values.indexOf(theme));
+    _notifyChange();
   }
 
-  bool get publicTabNotificationsEnabled => _prefsBox?.get(_publicNTFYKey) ?? true;
+  bool get publicTabNotificationsEnabled => _prefs.getBool(_publicNTFYKey) ?? true;
 
-  set publicTabNotificationsEnabled(bool val) => _prefsBox?.put(_publicNTFYKey, val);
+  set publicTabNotificationsEnabled(bool val) {
+    _prefs.setBool(_publicNTFYKey, val);
+    _notifyChange();
+  }
 
-  bool get chatNotificationsEnabled => _prefsBox?.get(_chatNTFYKey) ?? true;
+  bool get chatNotificationsEnabled => _prefs.getBool(_chatNTFYKey) ?? true;
 
-  set chatNotificationsEnabled(bool val) => _prefsBox?.put(_chatNTFYKey, val);
+  set chatNotificationsEnabled(bool val) {
+    _prefs.setBool(_chatNTFYKey, val);
+    _notifyChange();
+  }
 
-  bool get notifyOnlyForVerifiedUsers => _prefsBox?.get(_verifyNTFKey) ?? false;
+  bool get notifyOnlyForVerifiedUsers => _prefs.getBool(_verifyNTFKey) ?? false;
 
-  set notifyOnlyForVerifiedUsers(bool v) => _prefsBox?.put(_verifyNTFKey, v);
+  set notifyOnlyForVerifiedUsers(bool v) {
+    _prefs.setBool(_verifyNTFKey, v);
+    _notifyChange();
+  }
 }

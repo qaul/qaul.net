@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -125,8 +124,8 @@ class QaulApp extends PlatformAwareBuilder {
       initial: themeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) {
         return ValueListenableBuilder(
-          valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
-          builder: (context, box, _) {
+          valueListenable: UserPrefsHelper().listenable,
+          builder: (context, _, __) {
             return MaterialApp(
               theme: theme,
               darkTheme: darkTheme,
