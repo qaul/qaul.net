@@ -123,9 +123,9 @@ class QaulApp extends PlatformAwareBuilder {
       light: lightTheme,
       initial: themeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) {
-        return ValueListenableBuilder(
-          valueListenable: UserPrefsHelper().listenable,
-          builder: (context, _, __) {
+        return ValueListenableBuilder<Locale?>(
+          valueListenable: UserPrefsHelper().localeNotifier,
+          builder: (context, currentLocale, _) {
             return MaterialApp(
               theme: theme,
               darkTheme: darkTheme,

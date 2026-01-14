@@ -1,19 +1,49 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsHelper {
-  UserPrefsHelper._internal(this._prefs);
+  UserPrefsHelper._internal(this._prefs) {
+    _localeNotifier = ValueNotifier(_loadLocaleFromPrefs());
+    _publicTabNotificationsNotifier = _createBoolNotifier(_publicNTFYKey, defaultValue: true);
+    _chatNotificationsNotifier = _createBoolNotifier(_chatNTFYKey, defaultValue: true);
+    _verifiedUsersOnlyNotifier = _createBoolNotifier(_verifyNTFKey, defaultValue: false);
+  }
+  
+  ValueNotifier<bool> _createBoolNotifier(String key, {required bool defaultValue}) {
+    return ValueNotifier(_prefs.getBool(key) ?? defaultValue);
+  }
   
   static UserPrefsHelper? _instance;
+  static final Completer<void> _readyCompleter = Completer();
+  
   final SharedPreferencesWithCache _prefs;
-  final ValueNotifier<int> _changeNotifier = ValueNotifier(0);
+  
+  late final ValueNotifier<Locale?> _localeNotifier;
+  late final ValueNotifier<bool> _publicTabNotificationsNotifier;
+  late final ValueNotifier<bool> _chatNotificationsNotifier;
+  late final ValueNotifier<bool> _verifiedUsersOnlyNotifier;
+  
+  static Future<void> get ready => _readyCompleter.future;
   
   static Future<void> initialize() async {
+    if (_instance != null) return;
+    
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: const SharedPreferencesWithCacheOptions(),
     );
     _instance = UserPrefsHelper._internal(prefs);
+    
+    if (!_readyCompleter.isCompleted) {
+      _readyCompleter.complete();
+    }
+  }
+  
+  @visibleForTesting
+  static void resetForTesting() {
+    _instance = null;
   }
   
   factory UserPrefsHelper() {
@@ -21,15 +51,15 @@ class UserPrefsHelper {
     return _instance!;
   }
   
-  ValueListenable<int> get listenable => _changeNotifier;
-  
-  void _notifyChange() {
-    _changeNotifier.value++;
-  }
+  ValueListenable<Locale?> get localeNotifier => _localeNotifier;
+  ValueListenable<bool> get publicTabNotificationsNotifier => 
+      _publicTabNotificationsNotifier;
+  ValueListenable<bool> get chatNotificationsNotifier => 
+      _chatNotificationsNotifier;
+  ValueListenable<bool> get verifiedUsersOnlyNotifier => 
+      _verifiedUsersOnlyNotifier;
 
   String get _defaultLocaleKey => 'cached_default_locale';
-
-  String get _defaultThemeKey => 'cached_default_theme';
 
   String get _publicNTFYKey => 'cached_public_notification_enabled';
 
@@ -37,7 +67,7 @@ class UserPrefsHelper {
 
   String get _verifyNTFKey => 'cached_verified_users_only';
 
-  Locale? get defaultLocale {
+  Locale? _loadLocaleFromPrefs() {
     String? completeCode = _prefs.getString(_defaultLocaleKey);
     if (completeCode == null) return null;
     final cs = completeCode.split('_');
@@ -46,6 +76,8 @@ class UserPrefsHelper {
     return Locale.fromSubtags(languageCode: cs.first, countryCode: cs.last);
   }
 
+  Locale? get defaultLocale => _localeNotifier.value;
+
   set defaultLocale(Locale? l) {
     if (l == null) {
       _prefs.remove(_defaultLocaleKey);
@@ -53,39 +85,28 @@ class UserPrefsHelper {
       String code = '${l.languageCode}_${l.countryCode}';
       _prefs.setString(_defaultLocaleKey, code);
     }
-    _notifyChange();
+    _localeNotifier.value = l;
   }
 
-  ThemeMode get defaultTheme {
-    int? theme = _prefs.getInt(_defaultThemeKey);
-    if (theme == null) return ThemeMode.system;
-
-    return ThemeMode.values[theme.clamp(0, ThemeMode.values.length - 1)];
-  }
-
-  set defaultTheme(ThemeMode theme) {
-    _prefs.setInt(_defaultThemeKey, ThemeMode.values.indexOf(theme));
-    _notifyChange();
-  }
-
-  bool get publicTabNotificationsEnabled => _prefs.getBool(_publicNTFYKey) ?? true;
+  bool get publicTabNotificationsEnabled => 
+      _publicTabNotificationsNotifier.value;
 
   set publicTabNotificationsEnabled(bool val) {
     _prefs.setBool(_publicNTFYKey, val);
-    _notifyChange();
+    _publicTabNotificationsNotifier.value = val;
   }
 
-  bool get chatNotificationsEnabled => _prefs.getBool(_chatNTFYKey) ?? true;
+  bool get chatNotificationsEnabled => _chatNotificationsNotifier.value;
 
   set chatNotificationsEnabled(bool val) {
     _prefs.setBool(_chatNTFYKey, val);
-    _notifyChange();
+    _chatNotificationsNotifier.value = val;
   }
 
-  bool get notifyOnlyForVerifiedUsers => _prefs.getBool(_verifyNTFKey) ?? false;
+  bool get notifyOnlyForVerifiedUsers => _verifiedUsersOnlyNotifier.value;
 
   set notifyOnlyForVerifiedUsers(bool v) {
     _prefs.setBool(_verifyNTFKey, v);
-    _notifyChange();
+    _verifiedUsersOnlyNotifier.value = v;
   }
 }

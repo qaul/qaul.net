@@ -8,6 +8,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
+    UserPrefsHelper.resetForTesting();
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
     await UserPrefsHelper.initialize();
   });
@@ -26,12 +27,6 @@ void main() {
     test('reads and writes preferences correctly with updates', () {
       final helper = UserPrefsHelper();
 
-      helper.defaultTheme = ThemeMode.dark;
-      expect(helper.defaultTheme, ThemeMode.dark);
-
-      helper.defaultTheme = ThemeMode.light;
-      expect(helper.defaultTheme, ThemeMode.light);
-
       helper.defaultLocale = const Locale('pt', 'BR');
       expect(helper.defaultLocale, equals(const Locale('pt', 'BR')));
 
@@ -47,24 +42,30 @@ void main() {
 
     test('notifies listeners when preferences change', () {
       final helper = UserPrefsHelper();
-      int notificationCount = 0;
+      int localeChanges = 0;
+      int chatNotifChanges = 0;
 
-      helper.listenable.addListener(() {
-        notificationCount++;
+      helper.localeNotifier.addListener(() {
+        localeChanges++;
+      });
+      
+      helper.chatNotificationsNotifier.addListener(() {
+        chatNotifChanges++;
       });
 
       helper.defaultLocale = const Locale('en', 'US');
-      helper.defaultTheme = ThemeMode.light;
-      helper.chatNotificationsEnabled = false;
+      expect(localeChanges, 1);
+      expect(chatNotifChanges, 0);
 
-      expect(notificationCount, 3);
+      helper.chatNotificationsEnabled = false;
+      expect(localeChanges, 1);
+      expect(chatNotifChanges, 1);
     });
 
     test('uses correct default values', () {
       final helper = UserPrefsHelper();
 
       expect(helper.defaultLocale, isNull);
-      expect(helper.defaultTheme, ThemeMode.system);
       expect(helper.publicTabNotificationsEnabled, true);
       expect(helper.chatNotificationsEnabled, true);
       expect(helper.notifyOnlyForVerifiedUsers, false);
