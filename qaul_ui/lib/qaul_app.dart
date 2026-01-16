@@ -132,14 +132,13 @@ class QaulApp extends PlatformAwareBuilder {
               debugShowCheckedModeBanner: false,
               initialRoute: NavigationHelper.initial,
               onGenerateRoute: NavigationHelper.onGenerateRoute,
-              locale: UserPrefsHelper().defaultLocale,
+              locale: currentLocale,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               localeResolutionCallback: (locale, supportedLocales) {
-                final defaultLocale = UserPrefsHelper().defaultLocale;
-                if (defaultLocale != null) {
-                  Intl.defaultLocale = defaultLocale.toLanguageTag();
-                  return defaultLocale;
+                if (currentLocale != null) {
+                  Intl.defaultLocale = currentLocale.toLanguageTag();
+                  return currentLocale;
                 }
                 if (locale != null && supportedLocales.contains(locale)) {
                   Intl.defaultLocale = locale.toLanguageTag();

@@ -13,7 +13,7 @@ void main() {
     await UserPrefsHelper.initialize();
   });
 
-  group('Hive to SharedPreferences migration', () {
+  group('UserPrefsHelper', () {
     test('initializes with SharedPreferencesWithCache', () {
       expect(() => UserPrefsHelper(), returnsNormally);
     });

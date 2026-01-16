@@ -79,13 +79,15 @@ class UserPrefsHelper {
   Locale? get defaultLocale => _localeNotifier.value;
 
   set defaultLocale(Locale? l) {
+    _localeNotifier.value = l;
+    
     if (l == null) {
       _prefs.remove(_defaultLocaleKey);
-    } else {
-      String code = '${l.languageCode}_${l.countryCode}';
-      _prefs.setString(_defaultLocaleKey, code);
+      return;
     }
-    _localeNotifier.value = l;
+    
+    String code = '${l.languageCode}_${l.countryCode}';
+    _prefs.setString(_defaultLocaleKey, code);
   }
 
   bool get publicTabNotificationsEnabled => 
