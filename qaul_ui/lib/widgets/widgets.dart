@@ -4,7 +4,6 @@ library;
 import 'dart:io';
 import 'dart:math';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Badge;

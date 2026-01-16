@@ -20,45 +20,35 @@ class _ThemeDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return ValueListenableBuilder<AdaptiveThemeMode>(
-      valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
-      builder: (_, mode, child) {
-        return DropdownBuilder<AdaptiveThemeMode>(
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: UserPrefsHelper().themeModeNotifier,
+      builder: (context, mode, child) {
+        return DropdownBuilder<ThemeMode>(
           value: mode,
-          itemsLength: AdaptiveThemeMode.values.length,
+          itemsLength: ThemeMode.values.length,
           itemBuilder: (context, i) {
-            final val = AdaptiveThemeMode.values[i];
+            final val = ThemeMode.values[i];
             var label = '';
             switch (val) {
-              case AdaptiveThemeMode.light:
+              case ThemeMode.light:
                 label = l10n.lightTheme;
                 break;
-              case AdaptiveThemeMode.dark:
+              case ThemeMode.dark:
                 label = l10n.darkTheme;
                 break;
-              case AdaptiveThemeMode.system:
+              case ThemeMode.system:
                 label = l10n.useSystemDefaultMessage;
                 break;
             }
 
-            return DropdownMenuItem<AdaptiveThemeMode>(
+            return DropdownMenuItem<ThemeMode>(
               value: val,
               child: Text(label),
             );
           },
-          onChanged: (chosenMode) {
-            switch (chosenMode) {
-              case AdaptiveThemeMode.light:
-                AdaptiveTheme.of(context).setLight();
-                break;
-              case AdaptiveThemeMode.dark:
-                AdaptiveTheme.of(context).setDark();
-                break;
-              case AdaptiveThemeMode.system:
-              default:
-                AdaptiveTheme.of(context).setSystem();
-                break;
-            }
+          onChanged: (chosenMode) async {
+            if (chosenMode == null) return;
+            await UserPrefsHelper().setThemeMode(chosenMode);
           },
         );
       },

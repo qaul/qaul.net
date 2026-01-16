@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,7 +12,7 @@ import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
   const QaulApp({super.key, this.themeMode});
-  final AdaptiveThemeMode? themeMode;
+  final ThemeMode? themeMode;
 
   static final lightTheme = ThemeData(
     useMaterial3: true,
@@ -118,66 +117,65 @@ class QaulApp extends PlatformAwareBuilder {
 
   @override
   Widget defaultBuilder(BuildContext context, WidgetRef ref) {
-    return AdaptiveTheme(
-      dark: darkTheme,
-      light: lightTheme,
-      initial: themeMode ?? AdaptiveThemeMode.system,
-      builder: (theme, darkTheme) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: UserPrefsHelper().themeModeNotifier,
+      builder: (context, currentThemeMode, _) {
         return ValueListenableBuilder<Locale?>(
           valueListenable: UserPrefsHelper().localeNotifier,
           builder: (context, currentLocale, _) {
             return MaterialApp(
-              theme: theme,
+              theme: lightTheme,
               darkTheme: darkTheme,
-              debugShowCheckedModeBanner: false,
-              initialRoute: NavigationHelper.initial,
-              onGenerateRoute: NavigationHelper.onGenerateRoute,
-              locale: currentLocale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localeResolutionCallback: (locale, supportedLocales) {
-                if (currentLocale != null) {
-                  Intl.defaultLocale = currentLocale.toLanguageTag();
-                  return currentLocale;
-                }
-                if (locale != null && supportedLocales.contains(locale)) {
-                  Intl.defaultLocale = locale.toLanguageTag();
-                  return locale;
-                }
+              themeMode: currentThemeMode,
+                  debugShowCheckedModeBanner: false,
+                  initialRoute: NavigationHelper.initial,
+                  onGenerateRoute: NavigationHelper.onGenerateRoute,
+                  locale: currentLocale,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localeResolutionCallback: (locale, supportedLocales) {
+                    if (currentLocale != null) {
+                      Intl.defaultLocale = currentLocale.toLanguageTag();
+                      return currentLocale;
+                    }
+                    if (locale != null && supportedLocales.contains(locale)) {
+                      Intl.defaultLocale = locale.toLanguageTag();
+                      return locale;
+                    }
 
-                final List<Locale> systemLocales =
-                    View.of(context).platformDispatcher.locales;
-                for (final systemLocale in systemLocales) {
-                  final lang = Locale.fromSubtags(
-                      languageCode: systemLocale.languageCode);
-                  if (supportedLocales.contains(systemLocale)) {
-                    Intl.defaultLocale = systemLocale.toLanguageTag();
-                    return systemLocale;
-                  } else if (supportedLocales.contains(lang)) {
-                    Intl.defaultLocale = lang.toLanguageTag();
-                    return lang;
-                  }
-                }
+                    final List<Locale> systemLocales =
+                        View.of(context).platformDispatcher.locales;
+                    for (final systemLocale in systemLocales) {
+                      final lang = Locale.fromSubtags(
+                          languageCode: systemLocale.languageCode);
+                      if (supportedLocales.contains(systemLocale)) {
+                        Intl.defaultLocale = systemLocale.toLanguageTag();
+                        return systemLocale;
+                      } else if (supportedLocales.contains(lang)) {
+                        Intl.defaultLocale = lang.toLanguageTag();
+                        return lang;
+                      }
+                    }
 
-                return const Locale.fromSubtags(languageCode: 'en');
-              },
-              builder: (context, child) {
-                if (Platform.isLinux || Platform.isMacOS) {
-                  return child ?? const SizedBox();
-                }
+                    return const Locale.fromSubtags(languageCode: 'en');
+                  },
+                  builder: (context, child) {
+                    if (Platform.isLinux || Platform.isMacOS) {
+                      return child ?? const SizedBox();
+                    }
 
-                return ResponsiveBreakpoints.builder(
-                  child: child!,
-                  breakpoints: const [
-                    Breakpoint(start: 0, end: 350, name: "ANDROID"),
-                    Breakpoint(start: 351, end: 480, name: MOBILE),
-                    Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
-                    Breakpoint(start: 681, end: 800, name: TABLET),
-                    Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                  ],
+                    return ResponsiveBreakpoints.builder(
+                      child: child!,
+                      breakpoints: const [
+                        Breakpoint(start: 0, end: 350, name: "ANDROID"),
+                        Breakpoint(start: 351, end: 480, name: MOBILE),
+                        Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
+                        Breakpoint(start: 681, end: 800, name: TABLET),
+                        Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                      ],
+                    );
+                  },
                 );
-              },
-            );
           },
         );
       },

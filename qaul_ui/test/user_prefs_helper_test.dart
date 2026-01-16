@@ -8,7 +8,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    UserPrefsHelper.resetForTesting();
+    await UserPrefsHelper.resetForTesting();
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
     await UserPrefsHelper.initialize();
   });
@@ -24,23 +24,23 @@ void main() {
       expect(identical(helper1, helper2), true);
     });
 
-    test('reads and writes preferences correctly with updates', () {
+    test('reads and writes preferences correctly with updates', () async {
       final helper = UserPrefsHelper();
 
-      helper.defaultLocale = const Locale('pt', 'BR');
+      await helper.setDefaultLocale(const Locale('pt', 'BR'));
       expect(helper.defaultLocale, equals(const Locale('pt', 'BR')));
 
-      helper.defaultLocale = const Locale('en', 'US');
+      await helper.setDefaultLocale(const Locale('en', 'US'));
       expect(helper.defaultLocale, equals(const Locale('en', 'US')));
 
-      helper.publicTabNotificationsEnabled = false;
+      await helper.setPublicTabNotificationsEnabled(false);
       expect(helper.publicTabNotificationsEnabled, false);
 
-      helper.publicTabNotificationsEnabled = true;
+      await helper.setPublicTabNotificationsEnabled(true);
       expect(helper.publicTabNotificationsEnabled, true);
     });
 
-    test('notifies listeners when preferences change', () {
+    test('notifies listeners when preferences change', () async {
       final helper = UserPrefsHelper();
       int localeChanges = 0;
       int chatNotifChanges = 0;
@@ -53,11 +53,11 @@ void main() {
         chatNotifChanges++;
       });
 
-      helper.defaultLocale = const Locale('en', 'US');
+      await helper.setDefaultLocale(const Locale('en', 'US'));
       expect(localeChanges, 1);
       expect(chatNotifChanges, 0);
 
-      helper.chatNotificationsEnabled = false;
+      await helper.setChatNotificationsEnabled(false);
       expect(localeChanges, 1);
       expect(chatNotifChanges, 1);
     });
@@ -66,9 +66,23 @@ void main() {
       final helper = UserPrefsHelper();
 
       expect(helper.defaultLocale, isNull);
+      expect(helper.themeMode, ThemeMode.system);
       expect(helper.publicTabNotificationsEnabled, true);
       expect(helper.chatNotificationsEnabled, true);
       expect(helper.notifyOnlyForVerifiedUsers, false);
+    });
+
+    test('reads and writes theme mode correctly', () async {
+      final helper = UserPrefsHelper();
+
+      await helper.setThemeMode(ThemeMode.dark);
+      expect(helper.themeMode, equals(ThemeMode.dark));
+
+      await helper.setThemeMode(ThemeMode.light);
+      expect(helper.themeMode, equals(ThemeMode.light));
+
+      await helper.setThemeMode(ThemeMode.system);
+      expect(helper.themeMode, equals(ThemeMode.system));
     });
   });
 }

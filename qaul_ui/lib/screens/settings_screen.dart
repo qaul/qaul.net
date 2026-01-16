@@ -92,14 +92,14 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
             label: l10n.publicNotificationsEnabled,
             value: UserPrefsHelper().publicTabNotificationsEnabled,
             onValueChanged: (val) =>
-                UserPrefsHelper().publicTabNotificationsEnabled = val,
+                UserPrefsHelper().setPublicTabNotificationsEnabled(val),
           ),
           const SizedBox(height: 20),
           _buildConfigurationOption(
             label: l10n.chatNotificationsEnabled,
             value: UserPrefsHelper().chatNotificationsEnabled,
             onValueChanged: (val) =>
-                UserPrefsHelper().chatNotificationsEnabled = val,
+                UserPrefsHelper().setChatNotificationsEnabled(val),
           ),
           if (_notificationsAreEnabled) ...[
             const SizedBox(height: 20),
@@ -107,7 +107,7 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
               label: l10n.notifyOnlyForVerifiedUsers,
               value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
               onValueChanged: (val) =>
-                  UserPrefsHelper().notifyOnlyForVerifiedUsers = val,
+                  UserPrefsHelper().setNotifyOnlyForVerifiedUsers(val),
             ),
           ],
         ],
@@ -118,7 +118,7 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
   Widget _buildConfigurationOption(
       {required String label,
       required bool value,
-      required Function(bool newValue) onValueChanged}) {
+      required void Function(bool newValue) onValueChanged}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

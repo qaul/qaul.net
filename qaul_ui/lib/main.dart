@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -29,27 +28,22 @@ void main() async {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
       runApp(
-        AdaptiveTheme(
-            light: QaulApp.lightTheme,
-            dark: QaulApp.darkTheme,
-            initial: AdaptiveThemeMode.system,
-            builder: (theme, darkTheme) {
-              return MaterialApp(
-                theme: theme,
-                darkTheme: darkTheme,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                home: ForceUpdateDialog(
-                  current: packageInfo.version,
-                  previous: previousVersion?.toString() ?? '',
-                  onLinkPressed: ForceUpdateSystem.openQaulRepo,
-                  onDeleteAccountPressed: () async {
-                    await ForceUpdateSystem.deleteAccount();
-                    await _defaultAppEntrypoint();
-                  },
-                ),
-              );
-            }),
+        MaterialApp(
+          theme: QaulApp.lightTheme,
+          darkTheme: QaulApp.darkTheme,
+          themeMode: ThemeMode.system,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ForceUpdateDialog(
+            current: packageInfo.version,
+            previous: previousVersion?.toString() ?? '',
+            onLinkPressed: ForceUpdateSystem.openQaulRepo,
+            onDeleteAccountPressed: () async {
+              await ForceUpdateSystem.deleteAccount();
+              await _defaultAppEntrypoint();
+            },
+          ),
+        ),
       );
       return;
     }
@@ -61,7 +55,7 @@ void main() async {
 Future<void> _defaultAppEntrypoint() async {
   await Initializer.initialize(_container);
 
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  final savedThemeMode = UserPrefsHelper().themeMode;
   runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 }
 
