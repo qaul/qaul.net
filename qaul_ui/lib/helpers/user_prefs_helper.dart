@@ -8,8 +8,7 @@ class UserPrefsHelper {
   UserPrefsHelper._internal();
   
   static UserPrefsHelper? _instance;
-  static final Completer<void> _readyCompleter = Completer();
-  
+
   final _prefs = SharedPreferencesAsync();
   
   final _localeNotifier = ValueNotifier<Locale?>(null);
@@ -17,18 +16,12 @@ class UserPrefsHelper {
   final _publicTabNotificationsNotifier = ValueNotifier<bool>(true);
   final _chatNotificationsNotifier = ValueNotifier<bool>(true);
   final _verifiedUsersOnlyNotifier = ValueNotifier<bool>(false);
-  
-  static Future<void> get ready => _readyCompleter.future;
-  
+
   static Future<void> initialize() async {
     if (_instance != null) return;
     
     _instance = UserPrefsHelper._internal();
     await _instance!._loadInitialValues();
-    
-    if (!_readyCompleter.isCompleted) {
-      _readyCompleter.complete();
-    }
   }
   
   Future<void> _loadInitialValues() async {
