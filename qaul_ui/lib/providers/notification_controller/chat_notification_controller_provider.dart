@@ -45,7 +45,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     var newMessages =
         List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
           ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
-    if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
+    if (UserPrefsHelper.instance.notifyOnlyForVerifiedUsers) {
       final verifiedIds = ref
           .read(usersProvider)
           .where((u) => u.isVerified ?? false)
@@ -73,7 +73,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   LocalNotification? process(ChatRoom value) {
     _updateLocalCachedChatWith(value);
     if (currentVisibleHomeTab == TabType.chat) return null;
-    if (!UserPrefsHelper().chatNotificationsEnabled ||
+    if (!UserPrefsHelper.instance.chatNotificationsEnabled ||
         _lastMessageIsFromLocalUser(value)) {
       return null;
     }

@@ -32,13 +32,13 @@ class _LanguageDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <Locale?>[null, ...AppLocalizations.supportedLocales];
 
-    return ValueListenableBuilder(
-      valueListenable: Hive.box(UserPrefsHelper.hiveBoxName).listenable(),
-      builder: (context, box, _) {
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: UserPrefsHelper.instance.localeNotifier,
+      builder: (context, currentLocale, _) {
         return DropdownBuilder<Locale?>(
-          value: UserPrefsHelper().defaultLocale,
+          value: currentLocale,
           itemsLength: items.length,
-          onChanged: (val) => UserPrefsHelper().defaultLocale = val,
+          onChanged: (val) => UserPrefsHelper.instance.setDefaultLocale(val),
           itemBuilder: (c, i) {
             final value = items[i];
             return DropdownMenuItem<Locale?>(

@@ -14,7 +14,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  adaptive_theme: ^3.4.1
   archive: ^4.0.2
   badges: ^3.1.2
   bubble: ^1.2.1
@@ -35,8 +34,6 @@ dependencies:
   flutter_hooks: ^0.20.5
   flutter_svg: ^2.0.9
   font_awesome_flutter: ^10.6.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   hooks_riverpod: ^2.6.1
   image: ^4.1.3
   image_picker: ^1.1.2
@@ -75,7 +72,6 @@ dev_dependencies:
   fast_base58: ^0.2.1
   flutter_launcher_icons: ^0.14.3
   flutter_lints: ^5.0.0
-  hive_generator: ^2.0.1
   uuid: ^3.0.7
 
 flutter_icons:
