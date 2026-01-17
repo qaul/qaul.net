@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsHelper {
-  UserPrefsHelper._internal();
+  UserPrefsHelper._internal(this._prefs);
 
   static UserPrefsHelper? _instance;
 
@@ -14,7 +12,7 @@ class UserPrefsHelper {
     return _instance!;
   }
 
-  final _prefs = SharedPreferencesAsync();
+  final SharedPreferencesAsync _prefs;
 
   final _localeNotifier = ValueNotifier<Locale?>(null);
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
@@ -22,12 +20,19 @@ class UserPrefsHelper {
   final _chatNotificationsNotifier = ValueNotifier<bool>(true);
   final _verifiedUsersOnlyNotifier = ValueNotifier<bool>(false);
 
-  static Future<void> initialize() async {
+  /// Initializes the singleton.
+  ///
+  /// If [prefs] is not provided, a default [SharedPreferencesAsync] is used.
+  /// Returns immediately if already initialized.
+  static Future<void> initialize({SharedPreferencesAsync? prefs}) async {
     if (_instance != null) return;
 
-    _instance = UserPrefsHelper._internal();
+    _instance = UserPrefsHelper._internal(prefs ?? SharedPreferencesAsync());
     await _instance!._loadInitialValues();
   }
+
+  /// Reload all internal state values from preferences.
+  Future<void> refresh() => _loadInitialValues();
 
   Future<void> _loadInitialValues() async {
     _localeNotifier.value = await _loadLocaleFromPrefs();
@@ -50,14 +55,6 @@ class UserPrefsHelper {
         await legacyPrefs.remove('adaptive_theme_preferences');
       }
     } catch (e) {}
-  }
-
-  @visibleForTesting
-  static Future<void> resetForTesting() async {
-    if (_instance != null) {
-      await _instance!._prefs.clear();
-    }
-    _instance = null;
   }
 
   ValueListenable<Locale?> get localeNotifier => _localeNotifier;
