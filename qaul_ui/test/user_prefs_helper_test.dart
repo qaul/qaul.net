@@ -52,23 +52,23 @@ void main() {
     test('notifies listeners when preferences change', () async {
       final helper = UserPrefsHelper.instance;
       int localeChanges = 0;
-      int chatNotifChanges = 0;
+      int themeChanges = 0;
 
       helper.localeNotifier.addListener(() {
         localeChanges++;
       });
-      
-      helper.chatNotificationsNotifier.addListener(() {
-        chatNotifChanges++;
+
+      helper.themeModeNotifier.addListener(() {
+        themeChanges++;
       });
 
       await helper.setDefaultLocale(const Locale('en', 'US'));
       expect(localeChanges, 1);
-      expect(chatNotifChanges, 0);
+      expect(themeChanges, 0);
 
-      await helper.setChatNotificationsEnabled(false);
+      await helper.setThemeMode(ThemeMode.dark);
       expect(localeChanges, 1);
-      expect(chatNotifChanges, 1);
+      expect(themeChanges, 1);
     });
 
     test('uses correct default values', () {

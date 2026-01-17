@@ -14,11 +14,18 @@ class UserPrefsHelper {
 
   final SharedPreferencesAsync _prefs;
 
+  static const _defaultLocaleKey = 'cached_default_locale';
+  static const _themeModeKey = 'cached_theme_mode';
+  static const _publicNTFYKey = 'cached_public_notification_enabled';
+  static const _chatNTFYKey = 'cached_chat_notification_enabled';
+  static const _verifyNTFKey = 'cached_verified_users_only';
+
   final _localeNotifier = ValueNotifier<Locale?>(null);
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
-  final _publicTabNotificationsNotifier = ValueNotifier<bool>(true);
-  final _chatNotificationsNotifier = ValueNotifier<bool>(true);
-  final _verifiedUsersOnlyNotifier = ValueNotifier<bool>(false);
+
+  bool _publicTabNotificationsEnabled = true;
+  bool _chatNotificationsEnabled = true;
+  bool _notifyOnlyForVerifiedUsers = false;
 
   /// Initializes the singleton.
   ///
@@ -38,12 +45,10 @@ class UserPrefsHelper {
     _localeNotifier.value = await _loadLocaleFromPrefs();
     _themeModeNotifier.value = await _loadThemeModeFromPrefs();
 
-    _publicTabNotificationsNotifier.value =
+    _publicTabNotificationsEnabled =
         await _prefs.getBool(_publicNTFYKey) ?? true;
-    _chatNotificationsNotifier.value =
-        await _prefs.getBool(_chatNTFYKey) ?? true;
-    _verifiedUsersOnlyNotifier.value =
-        await _prefs.getBool(_verifyNTFKey) ?? false;
+    _chatNotificationsEnabled = await _prefs.getBool(_chatNTFYKey) ?? true;
+    _notifyOnlyForVerifiedUsers = await _prefs.getBool(_verifyNTFKey) ?? false;
 
     await _cleanLegacyAdaptiveThemeKey();
   }
@@ -60,25 +65,6 @@ class UserPrefsHelper {
   ValueListenable<Locale?> get localeNotifier => _localeNotifier;
 
   ValueListenable<ThemeMode> get themeModeNotifier => _themeModeNotifier;
-
-  ValueListenable<bool> get publicTabNotificationsNotifier =>
-      _publicTabNotificationsNotifier;
-
-  ValueListenable<bool> get chatNotificationsNotifier =>
-      _chatNotificationsNotifier;
-
-  ValueListenable<bool> get verifiedUsersOnlyNotifier =>
-      _verifiedUsersOnlyNotifier;
-
-  String get _defaultLocaleKey => 'cached_default_locale';
-
-  String get _themeModeKey => 'cached_theme_mode';
-
-  String get _publicNTFYKey => 'cached_public_notification_enabled';
-
-  String get _chatNTFYKey => 'cached_chat_notification_enabled';
-
-  String get _verifyNTFKey => 'cached_verified_users_only';
 
   Future<Locale?> _loadLocaleFromPrefs() async {
     String? completeCode = await _prefs.getString(_defaultLocaleKey);
@@ -133,25 +119,24 @@ class UserPrefsHelper {
     _themeModeNotifier.value = mode;
   }
 
-  bool get publicTabNotificationsEnabled =>
-      _publicTabNotificationsNotifier.value;
+  bool get publicTabNotificationsEnabled => _publicTabNotificationsEnabled;
 
   Future<void> setPublicTabNotificationsEnabled(bool val) async {
     await _prefs.setBool(_publicNTFYKey, val);
-    _publicTabNotificationsNotifier.value = val;
+    _publicTabNotificationsEnabled = val;
   }
 
-  bool get chatNotificationsEnabled => _chatNotificationsNotifier.value;
+  bool get chatNotificationsEnabled => _chatNotificationsEnabled;
 
   Future<void> setChatNotificationsEnabled(bool val) async {
     await _prefs.setBool(_chatNTFYKey, val);
-    _chatNotificationsNotifier.value = val;
+    _chatNotificationsEnabled = val;
   }
 
-  bool get notifyOnlyForVerifiedUsers => _verifiedUsersOnlyNotifier.value;
+  bool get notifyOnlyForVerifiedUsers => _notifyOnlyForVerifiedUsers;
 
-  Future<void> setNotifyOnlyForVerifiedUsers(bool v) async {
-    await _prefs.setBool(_verifyNTFKey, v);
-    _verifiedUsersOnlyNotifier.value = v;
+  Future<void> setNotifyOnlyForVerifiedUsers(bool val) async {
+    await _prefs.setBool(_verifyNTFKey, val);
+    _notifyOnlyForVerifiedUsers = val;
   }
 }
