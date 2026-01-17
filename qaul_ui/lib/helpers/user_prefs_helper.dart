@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsHelper {
@@ -50,16 +53,28 @@ class UserPrefsHelper {
     _chatNotificationsEnabled = await _prefs.getBool(_chatNTFYKey) ?? true;
     _notifyOnlyForVerifiedUsers = await _prefs.getBool(_verifyNTFKey) ?? false;
 
-    await _cleanLegacyAdaptiveThemeKey();
+    await _cleanLegacyData();
   }
 
-  Future<void> _cleanLegacyAdaptiveThemeKey() async {
-    try {
-      final legacyPrefs = await SharedPreferences.getInstance();
-      if (legacyPrefs.containsKey('adaptive_theme_preferences')) {
-        await legacyPrefs.remove('adaptive_theme_preferences');
-      }
-    } catch (e) {}
+  /// Cleans up legacy data from previous app versions.
+  ///
+  /// This includes:
+  /// - adaptive_theme SharedPreferences key
+  /// - Hive box files (UserPreferencesBox.hive and .lock)
+  ///
+  /// Can be removed in a later release.
+  Future<void> _cleanLegacyData() async {
+    if (await _prefs.containsKey('adaptive_theme_preferences')) {
+      await _prefs.remove('adaptive_theme_preferences');
+    }
+    final appDir = await getApplicationDocumentsDirectory();
+    final boxName = 'UserPreferencesBox';
+    for (final box in [boxName, boxName.toLowerCase()]) {
+      final hiveBoxFile = File('${appDir.path}/$box.hive');
+      final hiveLockFile = File('${appDir.path}/$box.lock');
+      if (await hiveBoxFile.exists()) await hiveBoxFile.delete();
+      if (await hiveLockFile.exists()) await hiveLockFile.delete();
+    }
   }
 
   ValueListenable<Locale?> get localeNotifier => _localeNotifier;

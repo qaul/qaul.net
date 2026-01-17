@@ -1,20 +1,43 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:qaul_ui/helpers/user_prefs_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
+class _FakePathProviderPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements PathProviderPlatform {
+  _FakePathProviderPlatform(this._tempDir);
+
+  final Directory _tempDir;
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async => _tempDir.path;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late SharedPreferencesAsync testPrefs;
+  late Directory tempDir;
 
   setUpAll(() async {
+    tempDir = await Directory.systemTemp.createTemp('user_prefs_test_');
+    PathProviderPlatform.instance = _FakePathProviderPlatform(tempDir);
+
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
     testPrefs = SharedPreferencesAsync();
     await UserPrefsHelper.initialize(prefs: testPrefs);
+  });
+
+  tearDownAll(() async {
+    await tempDir.delete(recursive: true);
   });
 
   setUp(() async {
