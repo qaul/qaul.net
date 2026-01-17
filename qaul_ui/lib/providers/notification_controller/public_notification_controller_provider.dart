@@ -40,7 +40,7 @@ class PublicNotificationController
   @override
   Iterable<PublicPost> entriesToBeProcessed(List<PublicPost> values) {
     var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex).toList();
-    if (UserPrefsHelper().notifyOnlyForVerifiedUsers) {
+    if (UserPrefsHelper.instance.notifyOnlyForVerifiedUsers) {
       final verifiedIds = ref
           .read(usersProvider)
           .where((u) => u.isVerified ?? false)
@@ -72,7 +72,7 @@ class PublicNotificationController
       _log.finer('currently in Public tab, filtering notifications');
       return null;
     }
-    if (!UserPrefsHelper().publicTabNotificationsEnabled) {
+    if (!UserPrefsHelper.instance.publicTabNotificationsEnabled) {
       _log.finer('public notifications disabled, filtering notifications');
       return null;
     }

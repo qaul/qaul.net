@@ -33,12 +33,12 @@ class _LanguageDropdown extends StatelessWidget {
     final items = <Locale?>[null, ...AppLocalizations.supportedLocales];
 
     return ValueListenableBuilder<Locale?>(
-      valueListenable: UserPrefsHelper().localeNotifier,
+      valueListenable: UserPrefsHelper.instance.localeNotifier,
       builder: (context, currentLocale, _) {
         return DropdownBuilder<Locale?>(
           value: currentLocale,
           itemsLength: items.length,
-          onChanged: (val) => UserPrefsHelper().setDefaultLocale(val),
+          onChanged: (val) => UserPrefsHelper.instance.setDefaultLocale(val),
           itemBuilder: (c, i) {
             final value = items[i];
             return DropdownMenuItem<Locale?>(

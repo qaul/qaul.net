@@ -21,7 +21,7 @@ class _ThemeDropdown extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: UserPrefsHelper().themeModeNotifier,
+      valueListenable: UserPrefsHelper.instance.themeModeNotifier,
       builder: (context, mode, child) {
         return DropdownBuilder<ThemeMode>(
           value: mode,
@@ -48,7 +48,7 @@ class _ThemeDropdown extends StatelessWidget {
           },
           onChanged: (chosenMode) async {
             if (chosenMode == null) return;
-            await UserPrefsHelper().setThemeMode(chosenMode);
+            await UserPrefsHelper.instance.setThemeMode(chosenMode);
           },
         );
       },

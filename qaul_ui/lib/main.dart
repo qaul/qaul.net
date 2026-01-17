@@ -55,7 +55,7 @@ void main() async {
 Future<void> _defaultAppEntrypoint() async {
   await Initializer.initialize(_container);
 
-  final savedThemeMode = UserPrefsHelper().themeMode;
+  final savedThemeMode = UserPrefsHelper.instance.themeMode;
   runApp(_CustomProviderScope(QaulApp(themeMode: savedThemeMode)));
 }
 

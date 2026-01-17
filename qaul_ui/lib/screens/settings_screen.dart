@@ -73,8 +73,8 @@ class _NotificationOptions extends StatefulWidget {
 
 class _NotificationOptionsState extends State<_NotificationOptions> {
   bool get _notificationsAreEnabled =>
-      UserPrefsHelper().chatNotificationsEnabled ||
-      UserPrefsHelper().publicTabNotificationsEnabled;
+      UserPrefsHelper.instance.chatNotificationsEnabled ||
+      UserPrefsHelper.instance.publicTabNotificationsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -90,24 +90,24 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
         children: [
           _buildConfigurationOption(
             label: l10n.publicNotificationsEnabled,
-            value: UserPrefsHelper().publicTabNotificationsEnabled,
+            value: UserPrefsHelper.instance.publicTabNotificationsEnabled,
             onValueChanged: (val) =>
-                UserPrefsHelper().setPublicTabNotificationsEnabled(val),
+                UserPrefsHelper.instance.setPublicTabNotificationsEnabled(val),
           ),
           const SizedBox(height: 20),
           _buildConfigurationOption(
             label: l10n.chatNotificationsEnabled,
-            value: UserPrefsHelper().chatNotificationsEnabled,
+            value: UserPrefsHelper.instance.chatNotificationsEnabled,
             onValueChanged: (val) =>
-                UserPrefsHelper().setChatNotificationsEnabled(val),
+                UserPrefsHelper.instance.setChatNotificationsEnabled(val),
           ),
           if (_notificationsAreEnabled) ...[
             const SizedBox(height: 20),
             _buildConfigurationOption(
               label: l10n.notifyOnlyForVerifiedUsers,
-              value: UserPrefsHelper().notifyOnlyForVerifiedUsers,
+              value: UserPrefsHelper.instance.notifyOnlyForVerifiedUsers,
               onValueChanged: (val) =>
-                  UserPrefsHelper().setNotifyOnlyForVerifiedUsers(val),
+                  UserPrefsHelper.instance.setNotifyOnlyForVerifiedUsers(val),
             ),
           ],
         ],

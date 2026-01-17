@@ -118,10 +118,10 @@ class QaulApp extends PlatformAwareBuilder {
   @override
   Widget defaultBuilder(BuildContext context, WidgetRef ref) {
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: UserPrefsHelper().themeModeNotifier,
+      valueListenable: UserPrefsHelper.instance.themeModeNotifier,
       builder: (context, currentThemeMode, _) {
         return ValueListenableBuilder<Locale?>(
-          valueListenable: UserPrefsHelper().localeNotifier,
+          valueListenable: UserPrefsHelper.instance.localeNotifier,
           builder: (context, currentLocale, _) {
             return MaterialApp(
               theme: lightTheme,

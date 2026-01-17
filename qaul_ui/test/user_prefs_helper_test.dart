@@ -15,17 +15,17 @@ void main() {
 
   group('UserPrefsHelper', () {
     test('initializes with SharedPreferencesWithCache', () {
-      expect(() => UserPrefsHelper(), returnsNormally);
+      expect(() => UserPrefsHelper.instance, returnsNormally);
     });
 
     test('returns same singleton instance', () {
-      final helper1 = UserPrefsHelper();
-      final helper2 = UserPrefsHelper();
+      final helper1 = UserPrefsHelper.instance;
+      final helper2 = UserPrefsHelper.instance;
       expect(identical(helper1, helper2), true);
     });
 
     test('reads and writes preferences correctly with updates', () async {
-      final helper = UserPrefsHelper();
+      final helper = UserPrefsHelper.instance;
 
       await helper.setDefaultLocale(const Locale('pt', 'BR'));
       expect(helper.defaultLocale, equals(const Locale('pt', 'BR')));
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('notifies listeners when preferences change', () async {
-      final helper = UserPrefsHelper();
+      final helper = UserPrefsHelper.instance;
       int localeChanges = 0;
       int chatNotifChanges = 0;
 
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('uses correct default values', () {
-      final helper = UserPrefsHelper();
+      final helper = UserPrefsHelper.instance;
 
       expect(helper.defaultLocale, isNull);
       expect(helper.themeMode, ThemeMode.system);
@@ -73,7 +73,7 @@ void main() {
     });
 
     test('reads and writes theme mode correctly', () async {
-      final helper = UserPrefsHelper();
+      final helper = UserPrefsHelper.instance;
 
       await helper.setThemeMode(ThemeMode.dark);
       expect(helper.themeMode, equals(ThemeMode.dark));
