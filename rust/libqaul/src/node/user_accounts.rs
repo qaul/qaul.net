@@ -17,7 +17,9 @@ use libp2p::{
 use prost::Message;
 use state::InitCell;
 use std::sync::RwLock;
-
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
 use crate::router;
 use crate::rpc::Rpc;
 use crate::storage::configuration;
@@ -37,6 +39,7 @@ pub struct UserAccount {
     pub id: PeerId,
     pub keys: Keypair,
     pub name: String,
+    pub password_hash: Option<String>,
 }
 
 pub struct UserAccounts {
@@ -75,6 +78,7 @@ impl UserAccounts {
                 name: user.name.clone(),
                 id,
                 keys: keys.clone(),
+                password_hash: user.password_hash.clone(),
             });
         }
 
@@ -82,8 +86,8 @@ impl UserAccounts {
         USERACCOUNTS.set(RwLock::new(accounts));
     }
 
-    /// create a new user account with user name
-    pub fn create(name: String) -> UserAccount {
+    /// create a new user account with username and an optional password
+    pub fn create(name: String, password: Option<String>) -> UserAccount {
         // create user
         let keys_ed25519 = Keypair::generate_ed25519();
         let keys_config = base64::engine::general_purpose::STANDARD
@@ -124,10 +128,13 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
+        let password_hash = Self::hash_password(password);
+
         let user = UserAccount {
             id,
             keys: keys_ed25519.clone(),
             name: name.clone(),
+            password_hash: password_hash.clone(),
         };
 
         // save it to state
@@ -141,6 +148,7 @@ impl UserAccounts {
                 name: name.clone(),
                 id: id.to_string(),
                 keys: keys_config,
+                password_hash: password_hash.clone(),
                 storage: configuration::StorageOptions::default(),
             });
         }
@@ -156,6 +164,57 @@ impl UserAccounts {
         log::trace!("created user account '{}' {:?}", name, id);
 
         user
+    }
+
+    /// set or update the password for existing user
+    pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
+        let password_hash = Self::hash_password(password);
+
+        {
+            let mut config = Configuration::get_mut();
+            if let Some(user_config) = config.user_accounts.iter_mut().find(|u| u.id == user_id.to_string()) {
+                user_config.password_hash = password_hash.clone();
+            }
+        }
+        Configuration::save();
+
+        {
+            let mut users = USERACCOUNTS.get().write().unwrap();
+            if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
+                user.password_hash= password_hash;
+            }
+        }
+
+       Ok(())
+    }
+
+    /// verify password for user
+    pub fn verify_password (user_id: PeerId, password: String) -> Result<bool, String> {
+        let users = USERACCOUNTS.get().read().unwrap();
+        let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
+
+        match &user.password_hash {
+            Some(hash) => {
+                let argon2 = Argon2::default();
+                let parsed_hash = PasswordHash::new(hash).map_err(
+                    |e| format!("Invalid stored hash format {}", e)
+                )?;
+                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
+                    Ok(()) => Ok(true),
+                    Err(_) => Ok(false)
+                }
+            }
+            // no password is set, so always allow
+            None => Ok(true)
+        }
+    }
+
+    /// check if a user has password set
+    pub fn has_password(user_id: PeerId) -> bool {
+        let users = USERACCOUNTS.get().read().unwrap();
+        users.users.iter()
+            .find(|u| u.id == user_id)
+            .map_or(false, |user| user.password_hash.is_some())
     }
 
     /// get user account by id
@@ -240,7 +299,7 @@ impl UserAccounts {
     }
 
     /// Process incoming RPC request messages for user accounts
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
         match proto::UserAccounts::decode(&data[..]) {
             Ok(user_accounts) => {
                 match user_accounts.message {
@@ -269,6 +328,7 @@ impl UserAccounts {
                                                         .encode_protobuf(),
                                                     key_type,
                                                     key_base58,
+                                                    has_password: user_account.password_hash.is_some()
                                                 }),
                                             },
                                         ),
@@ -306,13 +366,13 @@ impl UserAccounts {
                     }
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
-                        let user_account = Self::create(create_user_account.name);
+                        let user_account = Self::create(create_user_account.name, create_user_account.password);
 
                         // get RPC key values
                         let (key_type, key_base58) =
                             Self::get_protobuf_public_key(user_account.keys.public());
 
-                        // return new user account
+                        // return new user account with password status
                         let proto_message = proto::UserAccounts {
                             message: Some(proto::user_accounts::Message::MyUserAccount(
                                 proto::MyUserAccount {
@@ -322,6 +382,7 @@ impl UserAccounts {
                                     key: user_account.keys.public().encode_protobuf(),
                                     key_type,
                                     key_base58,
+                                    has_password: user_account.password_hash.is_some()
                                 },
                             )),
                         };
@@ -340,6 +401,27 @@ impl UserAccounts {
                             Vec::new(),
                         );
                     }
+                    // handle password change requests
+                    Some(proto::user_accounts::Message::SetPasswordRequest(set_password_req)) => {
+                        // get user ID from outer RPC message
+                        let user_peer_id = match PeerId::from_bytes(&user_id) {
+                            Ok(id) => id,
+                            Err(_) => {
+                                Self::send_password_response(false, "Invalid user Id".to_string());
+                                return;
+                            }
+                        };
+
+                        // attempt to set password and send response
+                        match Self::set_password(user_peer_id, set_password_req.password) {
+                            Ok(()) => {
+                                Self::send_password_response(true, "Password updated successfully".to_string())
+                            }
+                            Err(error) => {
+                                Self::send_password_response(false, error);
+                            }
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -347,6 +429,27 @@ impl UserAccounts {
                 log::error!("{:?}", error);
             }
         }
+    }
+
+    /// send password operation response ot client
+    fn send_password_response(success: bool, message: String) {
+        let proto_message = proto::UserAccounts {
+            message: Some(proto::user_accounts::Message::SetPasswordResponse(
+                proto::SetPasswordResponse {
+                    success,
+                    error_message: message
+                }
+            ))
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message.encode(&mut buf).unwrap();
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Useraccounts.into(),
+            "".to_string(),
+            Vec::new(),
+        );
     }
 
     /// create the qaul RPC definitions of a public key
@@ -371,5 +474,24 @@ impl UserAccounts {
         }
 
         (key_type, key_base58)
+    }
+
+    fn hash_password(password: Option<String>) -> Option<String> {
+        let password_hash = match password {
+            Some(pwd) if !pwd.is_empty() => {
+                let argon2 = Argon2::default();
+                let salt = SaltString::generate(&mut OsRng);
+
+                match argon2.hash_password(pwd.as_bytes(), &salt) {
+                    Ok(hash) => Some(hash.to_string()),
+                    Err(e) => {
+                        log::error!("Failed to hash the password: {}", e);
+                        None
+                    }
+                }
+            }
+            _ => None
+        };
+        password_hash
     }
 }
