@@ -26,8 +26,8 @@ dependencies:
   filesize: ^2.0.1
   fixnum: ^1.1.0
   flame: ^1.8.1
-  flame_forge2d: ^0.18.2+5
-  fluent_ui: ^4.9.1
+  flame_forge2d: ^0.19.0
+  fluent_ui: 4.9.1
   flutter_chat_types: ^3.6.2
   flutter_chat_ui: ^1.6.10
   flutter_email_sender: ^6.0.2
@@ -57,7 +57,7 @@ dependencies:
   utils: { "path": "packages/utils" }
   version: ^3.0.2
   flutter_markdown: ^0.7.1
-  record: ^5.0.4
+  record: ^6.0.0
   audioplayers: ^6.1.1
   app_links: ^6.3.3
   open_filex: ^4.7.0
