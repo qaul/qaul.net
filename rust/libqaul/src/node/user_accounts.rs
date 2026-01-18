@@ -128,23 +128,7 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
-        // hash the password if provided using bcrypt.
-        // Improvement: update the hashing mechanism as discussed
-        let password_hash = match password {
-            Some(pwd) if !pwd.is_empty() => {
-                let argon2  = Argon2::default();
-                let salt = SaltString::generate(&mut OsRng);
-
-                match argon2.hash_password(pwd.as_bytes(), &salt) {
-                    Ok(hash) => Some(hash.to_string()),
-                    Err(e) => {
-                        log::error!("Failed to hash the password: {}", e);
-                        None
-                    }
-                }
-            }
-            _ => None
-        };
+        let password_hash = Self::hash_password(password);
 
         let user = UserAccount {
             id,
@@ -184,20 +168,8 @@ impl UserAccounts {
 
     /// set or update the password for existing user
     pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
-        // hash new password or set to None to remove
-        let password_hash = match password {
-            Some(pwd) if !pwd.is_empty() => {
-                let argon2 = Argon2::default();
-                let salt = SaltString::generate(&mut OsRng);
+        let password_hash = Self::hash_password(password);
 
-                let hash = argon2.hash_password(pwd.as_bytes(), &salt)
-                    .map_err(|e| format!("Failed to hash password with Argon2: {}", e))?;
-                Some(hash.to_string())
-            }
-            _ => None,
-        };
-
-        // update the configuration
         {
             let mut config = Configuration::get_mut();
             if let Some(user_config) = config.user_accounts.iter_mut().find(|u| u.id == user_id.to_string()) {
@@ -206,7 +178,6 @@ impl UserAccounts {
         }
         Configuration::save();
 
-        // update the in-memory state
         {
             let mut users = USERACCOUNTS.get().write().unwrap();
             if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
@@ -222,12 +193,11 @@ impl UserAccounts {
         let users = USERACCOUNTS.get().read().unwrap();
         let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
 
-        // verify password
         match &user.password_hash {
             Some(hash) => {
                 let argon2 = Argon2::default();
                 let parsed_hash = PasswordHash::new(hash).map_err(
-                    |e| format!("Invalid stored ahsh format {}", e)
+                    |e| format!("Invalid stored hash format {}", e)
                 )?;
                 match argon2.verify_password(password.as_bytes(), &parsed_hash) {
                     Ok(()) => Ok(true),
@@ -504,5 +474,24 @@ impl UserAccounts {
         }
 
         (key_type, key_base58)
+    }
+
+    fn hash_password(password: Option<String>) -> Option<String> {
+        let password_hash = match password {
+            Some(pwd) if !pwd.is_empty() => {
+                let argon2 = Argon2::default();
+                let salt = SaltString::generate(&mut OsRng);
+
+                match argon2.hash_password(pwd.as_bytes(), &salt) {
+                    Ok(hash) => Some(hash.to_string()),
+                    Err(e) => {
+                        log::error!("Failed to hash the password: {}", e);
+                        None
+                    }
+                }
+            }
+            _ => None
+        };
+        password_hash
     }
 }

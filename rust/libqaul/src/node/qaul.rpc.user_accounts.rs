@@ -32,13 +32,13 @@ pub struct CreateUserAccount {
     pub password: ::core::option::Option<::prost::alloc::string::String>,
 }
 /// set password request for existing user
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SetPasswordRequest {
     #[prost(string, optional, tag = "2")]
     pub password: ::core::option::Option<::prost::alloc::string::String>,
 }
 /// set password response
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SetPasswordResponse {
     #[prost(bool, tag = "1")]
     pub success: bool,
