@@ -1,6 +1,6 @@
 executor: flutter-ubuntu-lean
 environment:
-  FLUTTER_VERSION: "3.3.1"
+  FLUTTER_VERSION: "3.38.7"
   REPO_URL: "https://github.com/qaul/qaul.net"
 steps:
   - checkout-project
