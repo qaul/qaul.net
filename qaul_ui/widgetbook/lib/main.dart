@@ -24,12 +24,11 @@ class WidgetbookApp extends StatelessWidget {
       // it will be generated in the next step
       directories: directories,
       addons: [
-        DeviceFrameAddon(devices: [
-          Devices.android.smallPhone,
-          Devices.android.mediumPhone,
-          Devices.android.bigPhone,
-          Devices.linux.laptop,
-          Devices.macOS.macBookPro,
+        ViewportAddon([
+          Viewports.none,
+          AndroidViewports.samsungGalaxyS20,
+          AndroidViewports.samsungGalaxyNote20,
+          LinuxViewports.desktop,
         ]),
         LocalizationAddon(
           locales: AppLocalizations.supportedLocales,

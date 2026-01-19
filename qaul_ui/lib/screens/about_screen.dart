@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../helpers/navigation_helper.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 class AboutScreen extends StatelessWidget {

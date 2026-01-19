@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:logging/logging.dart';
@@ -12,7 +11,9 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'coordinators/email_logging_coordinator/email_logging_coordinator.dart';
 import 'force_update.dart';
 import 'helpers/user_prefs_helper.dart';
+import 'l10n/app_localizations.dart';
 import 'qaul_app.dart';
+
 
 final _container = ProviderContainer();
 

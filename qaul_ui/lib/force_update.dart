@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:version/version.dart';
+
+import 'l10n/app_localizations.dart';
 
 /// forceUpdateRequired returns true if current is not compatible with target.
 bool forceUpdateRequired(Version current, Version target) {

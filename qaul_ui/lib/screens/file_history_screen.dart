@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -11,6 +10,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 class FileHistoryScreen extends StatefulHookConsumerWidget {
