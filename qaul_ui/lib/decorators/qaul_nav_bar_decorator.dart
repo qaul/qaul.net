@@ -1,14 +1,15 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../helpers/navigation_helper.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
+
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({super.key, required this.child});

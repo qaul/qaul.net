@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
+import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 class LicenseScreen extends StatelessWidget {

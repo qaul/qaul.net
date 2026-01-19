@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_ui/l10n/app_localizations.dart';
 
 import 'package:qaul_ui/screens/home/tabs/chat/widgets/chat.dart';
 

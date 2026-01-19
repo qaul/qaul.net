@@ -17,7 +17,6 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         InputOptions,
         SendButtonVisibilityMode,
         TextMessage;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,6 +31,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
+import '../../../../../../l10n/app_localizations.dart';
 import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';

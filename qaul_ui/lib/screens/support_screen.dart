@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../coordinators/email_logging_coordinator/email_logging_coordinator.dart';
 import '../decorators/disabled_state_decorator.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 class SupportScreen extends StatefulHookConsumerWidget {

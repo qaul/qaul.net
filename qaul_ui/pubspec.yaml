@@ -6,7 +6,7 @@ publish_to: "none"
 version: 2.0.0-rc.4+1383
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.9.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -17,29 +17,29 @@ dependencies:
   archive: ^4.0.2
   badges: ^3.1.2
   bubble: ^1.2.1
-  collection: ^1.17.1
+  collection: ^1.19.1
   cupertino_icons: ^1.0.6
   device_info_plus: ^11.3.0
   equatable: ^2.0.7
-  ffi: ^2.0.2
+  ffi: ^2.1.5
   file_picker: ^8.0.7
   filesize: ^2.0.1
   fixnum: ^1.1.0
-  flame: ^1.8.1
-  flame_forge2d: ^0.19.0
+  flame: ^1.34.0
+  flame_forge2d: ^0.19.2+2
   fluent_ui: 4.9.1
   flutter_chat_types: ^3.6.2
   flutter_chat_ui: ^1.6.10
   flutter_email_sender: ^6.0.2
-  flutter_hooks: ^0.20.5
-  flutter_svg: ^2.0.9
-  font_awesome_flutter: ^10.6.0
+  flutter_hooks: ^0.21.3+1
+  flutter_svg: ^2.2.3
+  font_awesome_flutter: ^10.12.0
   hooks_riverpod: ^2.6.1
   image: ^4.1.3
-  image_picker: ^1.1.2
+  image_picker: ^1.2.1
   infinite_scroll_pagination: ^4.0.0
   intersperse: ^2.0.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   local_notifications: { "path": "packages/local_notifications" }
   logging: ^1.2.0
   mailto: ^2.0.0
@@ -48,15 +48,15 @@ dependencies:
   neat_periodic_task: ^2.0.1
   open_simplex_2: ^0.2.1
   package_info_plus: ^8.2.1
-  path: ^1.8.3
+  path: ^1.9.1
   path_provider: ^2.0.15
   qaul_rpc: { "path": "packages/qaul_rpc" }
   responsive_framework: ^1.1.0
-  shared_preferences: ^2.3.5
+  shared_preferences: ^2.5.4
   url_launcher: ^6.1.14
   utils: { "path": "packages/utils" }
   version: ^3.0.2
-  flutter_markdown: ^0.7.1
+  flutter_markdown_plus: ^1.0.0
   record: ^6.0.0
   audioplayers: ^6.1.1
   app_links: ^6.3.3

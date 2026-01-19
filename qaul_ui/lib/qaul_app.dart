@@ -1,14 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
+import 'l10n/app_localizations.dart';
 import 'widgets/widgets.dart';
+
 
 class QaulApp extends PlatformAwareBuilder {
   const QaulApp({super.key, this.themeMode});
@@ -35,7 +36,7 @@ class QaulApp extends PlatformAwareBuilder {
     iconTheme: IconThemeData(color: Colors.grey.shade600),
     appBarTheme: AppBarTheme(
       toolbarHeight: 72,
-      color: Colors.transparent,
+      backgroundColor: Colors.transparent,
       elevation: 0.0,
       // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
       shadowColor: Colors.grey.shade300,
@@ -89,7 +90,7 @@ class QaulApp extends PlatformAwareBuilder {
     appBarTheme: const AppBarTheme(
       toolbarHeight: 72,
       elevation: 0.0,
-      color: Color(0xff212121),
+      backgroundColor: Color(0xff212121),
       shadowColor: Color(0xff212121),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../helpers/navigation_helper.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 class CreateAccountScreen extends HookConsumerWidget {
