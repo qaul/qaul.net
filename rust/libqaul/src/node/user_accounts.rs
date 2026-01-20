@@ -130,22 +130,7 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
-        // hash the password with some salt
-        let (password_hash, password_salt) = match password {
-            Some(pwd) if !pwd.is_empty() => {
-                let argon2 = Argon2::default();
-                let salt = SaltString::generate(&mut OsRng);
-
-                match argon2.hash_password(pwd.as_bytes(), &salt) {
-                    Ok(hash) => (Some(hash.to_string()), Some(salt.as_str().to_string())),
-                    Err(e) => {
-                        log::error!("Failed to hash password: {}", e);
-                        (None, None)
-                    }
-                }
-            }
-            _ => (None, None),
-        };
+        let (password_hash, password_salt) = Self::hash_password(password);
 
         let user = UserAccount {
             id,
@@ -187,7 +172,7 @@ impl UserAccounts {
 
     /// set or update the password for existing user
     pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
-        let password_hash = Self::hash_password(password);
+        let (password_hash, password_salt) = Self::hash_password(password);
 
         // update the configuration
         {
@@ -198,6 +183,7 @@ impl UserAccounts {
                 .find(|u| u.id == user_id.to_string())
             {
                 user_config.password_hash = password_hash.clone();
+                user_config.password_salt = password_salt.clone();
             }
         }
         Configuration::save();
@@ -206,6 +192,7 @@ impl UserAccounts {
             let mut users = USERACCOUNTS.get().write().unwrap();
             if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
                 user.password_hash = password_hash;
+                user.password_salt = password_salt;
             }
         }
 
@@ -515,22 +502,22 @@ impl UserAccounts {
         (key_type, key_base58)
     }
 
-    fn hash_password(password: Option<String>) -> Option<String> {
-        let password_hash = match password {
+    fn hash_password(password: Option<String>) -> (Option<String>, Option<String>) {
+        let (password_hash, password_salt) = match password {
             Some(pwd) if !pwd.is_empty() => {
                 let argon2 = Argon2::default();
                 let salt = SaltString::generate(&mut OsRng);
 
                 match argon2.hash_password(pwd.as_bytes(), &salt) {
-                    Ok(hash) => Some(hash.to_string()),
+                    Ok(hash) => (Some(hash.to_string()), Some(salt.as_str().to_string())),
                     Err(e) => {
                         log::error!("Failed to hash the password: {}", e);
-                        None
+                        (None, None)
                     }
                 }
             }
-            _ => None
+            _ => (None, None),
         };
-        password_hash
+        (password_hash, password_salt)
     }
 }
