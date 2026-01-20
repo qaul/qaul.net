@@ -1,0 +1,47 @@
+syntax = "proto3";
+package qaul.rpc.authentication;
+
+message AuthRpc {
+  oneof message {
+    AuthRequest auth_request = 1;
+    AuthChallenge auth_challenge = 2;
+    AuthResponse auth_response = 3;
+    AuthResult auth_result = 4;
+    UsersRequest users_request = 5;
+    UsersResponse users_response = 6;
+  }
+}
+
+message UsersRequest {
+  // requesting all users, so empty
+}
+
+message UsersResponse {
+  repeated UserInfo users = 1;
+  string error_message = 2;
+}
+
+message UserInfo {
+  string username = 1;
+  bytes user_id = 2;
+  optional string salt = 3;
+  bool has_password = 4;
+}
+
+message AuthRequest {
+  bytes qaul_id = 1;
+}
+
+message AuthChallenge {
+  uint64 nonce = 1;
+  uint64 expires_at = 2;
+}
+
+message AuthResponse {
+  bytes challenge_hash = 1;
+}
+
+message AuthResult {
+  bool success = 1;
+  string error_message = 2;
+}

@@ -40,6 +40,7 @@ pub struct UserAccount {
     pub keys: Keypair,
     pub name: String,
     pub password_hash: Option<String>,
+    pub password_salt: Option<String>,
 }
 
 pub struct UserAccounts {
@@ -79,6 +80,7 @@ impl UserAccounts {
                 id,
                 keys: keys.clone(),
                 password_hash: user.password_hash.clone(),
+                password_salt: user.password_salt.clone(),
             });
         }
 
@@ -128,13 +130,14 @@ impl UserAccounts {
         }
          */
         let id = PeerId::from(keys_ed25519.public());
-        let password_hash = Self::hash_password(password);
+        let (password_hash, password_salt) = Self::hash_password(password);
 
         let user = UserAccount {
             id,
             keys: keys_ed25519.clone(),
             name: name.clone(),
             password_hash: password_hash.clone(),
+            password_salt: password_salt.clone(),
         };
 
         // save it to state
@@ -149,6 +152,7 @@ impl UserAccounts {
                 id: id.to_string(),
                 keys: keys_config,
                 password_hash: password_hash.clone(),
+                password_salt: password_salt.clone(),
                 storage: configuration::StorageOptions::default(),
             });
         }
@@ -168,12 +172,18 @@ impl UserAccounts {
 
     /// set or update the password for existing user
     pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
-        let password_hash = Self::hash_password(password);
+        let (password_hash, password_salt) = Self::hash_password(password);
 
+        // update the configuration
         {
             let mut config = Configuration::get_mut();
-            if let Some(user_config) = config.user_accounts.iter_mut().find(|u| u.id == user_id.to_string()) {
+            if let Some(user_config) = config
+                .user_accounts
+                .iter_mut()
+                .find(|u| u.id == user_id.to_string())
+            {
                 user_config.password_hash = password_hash.clone();
+                user_config.password_salt = password_salt.clone();
             }
         }
         Configuration::save();
@@ -181,17 +191,22 @@ impl UserAccounts {
         {
             let mut users = USERACCOUNTS.get().write().unwrap();
             if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
-                user.password_hash= password_hash;
+                user.password_hash = password_hash;
+                user.password_salt = password_salt;
             }
         }
 
-       Ok(())
+        Ok(())
     }
 
     /// verify password for user
-    pub fn verify_password (user_id: PeerId, password: String) -> Result<bool, String> {
+    pub fn verify_password(user_id: PeerId, password: String) -> Result<bool, String> {
         let users = USERACCOUNTS.get().read().unwrap();
-        let user = users.users.iter().find(|u| u.id == user_id).ok_or("User not found")?;
+        let user = users
+            .users
+            .iter()
+            .find(|u| u.id == user_id)
+            .ok_or("User not found")?;
 
         match &user.password_hash {
             Some(hash) => {
@@ -201,18 +216,20 @@ impl UserAccounts {
                 )?;
                 match argon2.verify_password(password.as_bytes(), &parsed_hash) {
                     Ok(()) => Ok(true),
-                    Err(_) => Ok(false)
+                    Err(_) => Ok(false),
                 }
             }
             // no password is set, so always allow
-            None => Ok(true)
+            None => Ok(true),
         }
     }
 
     /// check if a user has password set
     pub fn has_password(user_id: PeerId) -> bool {
         let users = USERACCOUNTS.get().read().unwrap();
-        users.users.iter()
+        users
+            .users
+            .iter()
             .find(|u| u.id == user_id)
             .map_or(false, |user| user.password_hash.is_some())
     }
@@ -280,6 +297,11 @@ impl UserAccounts {
         user_info
     }
 
+    pub fn get_all_users() -> Vec<UserAccount> {
+        let accounts = USERACCOUNTS.get().read().unwrap();
+        accounts.users.clone()
+    }
+
     /// checks if user account exists
     ///
     /// returns true if a user account with the given ID exists
@@ -328,7 +350,9 @@ impl UserAccounts {
                                                         .encode_protobuf(),
                                                     key_type,
                                                     key_base58,
-                                                    has_password: user_account.password_hash.is_some()
+                                                    has_password: user_account
+                                                        .password_hash
+                                                        .is_some(),
                                                 }),
                                             },
                                         ),
@@ -366,7 +390,8 @@ impl UserAccounts {
                     }
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
-                        let user_account = Self::create(create_user_account.name, create_user_account.password);
+                        let user_account =
+                            Self::create(create_user_account.name, create_user_account.password);
 
                         // get RPC key values
                         let (key_type, key_base58) =
@@ -382,7 +407,7 @@ impl UserAccounts {
                                     key: user_account.keys.public().encode_protobuf(),
                                     key_type,
                                     key_base58,
-                                    has_password: user_account.password_hash.is_some()
+                                    has_password: user_account.password_hash.is_some(),
                                 },
                             )),
                         };
@@ -414,9 +439,10 @@ impl UserAccounts {
 
                         // attempt to set password and send response
                         match Self::set_password(user_peer_id, set_password_req.password) {
-                            Ok(()) => {
-                                Self::send_password_response(true, "Password updated successfully".to_string())
-                            }
+                            Ok(()) => Self::send_password_response(
+                                true,
+                                "Password updated successfully".to_string(),
+                            ),
                             Err(error) => {
                                 Self::send_password_response(false, error);
                             }
@@ -437,9 +463,9 @@ impl UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordResponse(
                 proto::SetPasswordResponse {
                     success,
-                    error_message: message
-                }
-            ))
+                    error_message: message,
+                },
+            )),
         };
 
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
@@ -476,22 +502,22 @@ impl UserAccounts {
         (key_type, key_base58)
     }
 
-    fn hash_password(password: Option<String>) -> Option<String> {
-        let password_hash = match password {
+    fn hash_password(password: Option<String>) -> (Option<String>, Option<String>) {
+        let (password_hash, password_salt) = match password {
             Some(pwd) if !pwd.is_empty() => {
                 let argon2 = Argon2::default();
                 let salt = SaltString::generate(&mut OsRng);
 
                 match argon2.hash_password(pwd.as_bytes(), &salt) {
-                    Ok(hash) => Some(hash.to_string()),
+                    Ok(hash) => (Some(hash.to_string()), Some(salt.as_str().to_string())),
                     Err(e) => {
                         log::error!("Failed to hash the password: {}", e);
-                        None
+                        (None, None)
                     }
                 }
             }
-            _ => None
+            _ => (None, None),
         };
-        password_hash
+        (password_hash, password_salt)
     }
 }
