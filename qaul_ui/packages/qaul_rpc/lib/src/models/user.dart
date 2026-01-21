@@ -4,11 +4,12 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/legacy.dart';
 
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
-final usersProvider = StateNotifierProvider<UserListNotifier, List<User>>(
-  (ref) => UserListNotifier(users: const []),
+final usersProvider = NotifierProvider<UserListNotifier, List<User>>(
+  UserListNotifier.new,
 );
 
 enum ConnectionStatus { online, reachable, offline }
@@ -86,8 +87,9 @@ class ConnectionInfo extends Equatable {
   List<Object?> get props => [ping, hopCount, nodeID, nodeIDBase58];
 }
 
-class UserListNotifier extends StateNotifier<List<User>> {
-  UserListNotifier({List<User>? users}) : super(users ?? []);
+class UserListNotifier extends Notifier<List<User>> {
+  @override
+  List<User> build() => [];
 
   void add(User u) {
     state = [...state, u];

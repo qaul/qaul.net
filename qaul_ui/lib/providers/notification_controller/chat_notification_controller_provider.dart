@@ -16,8 +16,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   String get cacheKey => 'chatNotificationControllerChatDataKey';
 
   @override
-  MapEntry<StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>,
-          void Function(List<ChatRoom>?, List<ChatRoom>)>
+  MapEntry<dynamic, void Function(List<ChatRoom>?, List<ChatRoom>)>
       get strategy => MapEntry(chatRoomsProvider, execute);
 
   @override

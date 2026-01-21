@@ -213,9 +213,11 @@ class QaulNavBarItem extends HookConsumerWidget {
     var selected = useState(false);
 
     useEffect(() {
-      void updateSelected(int i) => selected.value = TabType.values[i] == tab;
-      return controller.addListener(updateSelected);
-    });
+      ref.listenManual(homeScreenControllerProvider, (previous, next) {
+        selected.value = TabType.values[next] == tab;
+      });
+      return null;
+    }, []);
 
     var theme = Theme.of(context);
     final l18ns = AppLocalizations.of(context);

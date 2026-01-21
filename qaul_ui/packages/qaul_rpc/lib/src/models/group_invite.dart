@@ -8,8 +8,8 @@ import '../../qaul_rpc.dart';
 import '../generated/services/group/group_rpc.pb.dart';
 
 final groupInvitesProvider =
-    StateNotifierProvider<GroupInviteListNotifier, List<GroupInvite>>(
-        (_) => GroupInviteListNotifier());
+    NotifierProvider<GroupInviteListNotifier, List<GroupInvite>>(
+        GroupInviteListNotifier.new);
 
 class GroupInvite extends Equatable {
   GroupInvite({
@@ -36,8 +36,9 @@ class GroupInvite extends Equatable {
   List<Object?> get props => [senderIdBase58, groupDetails.idBase58];
 }
 
-class GroupInviteListNotifier extends StateNotifier<List<GroupInvite>> {
-  GroupInviteListNotifier({List<GroupInvite>? invites}) : super(invites ?? []);
+class GroupInviteListNotifier extends Notifier<List<GroupInvite>> {
+  @override
+  List<GroupInvite> build() => [];
 
   void add(GroupInvite invite) => state = [invite, ...state];
 

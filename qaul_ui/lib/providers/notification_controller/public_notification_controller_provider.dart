@@ -17,8 +17,7 @@ class PublicNotificationController
   String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
 
   @override
-  MapEntry<StateNotifierProvider<PublicPostListNotifier, List<PublicPost>>,
-          void Function(List<PublicPost>?, List<PublicPost>)>
+  MapEntry<dynamic, void Function(List<PublicPost>?, List<PublicPost>)>
       get strategy => MapEntry(publicMessagesProvider, execute);
 
   @override
