@@ -37,7 +37,7 @@ pub fn create_default_named() -> String {
     user_name
 }
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     // get current working directory
     let path = std::env::current_dir().unwrap();

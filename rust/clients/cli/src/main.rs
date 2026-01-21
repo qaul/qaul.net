@@ -6,7 +6,7 @@
 //! This client uses all the functionality of the qaul
 //! RPC system and
 
-use async_std::io;
+use tokio::io::{self, AsyncBufReadExt, BufReader};
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
@@ -41,7 +41,7 @@ enum EventType {
     Rpc,
 }
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     // get current working directory
     let path = std::env::current_dir().unwrap();
@@ -60,7 +60,9 @@ async fn main() {
     UserAccounts::init();
 
     // listen for new commands from CLI
-    let mut stdin = io::BufReader::new(io::stdin()).lines();
+    let stdin = io::stdin();
+    let reader = BufReader::new(stdin);
+    let mut lines = reader.lines();
 
     // check RPC once every 10 milliseconds
     // TODO: interval is only in unstable. Use it once it is stable.
@@ -71,7 +73,7 @@ async fn main() {
     // loop and poll CLI and RPC
     loop {
         let evt = {
-            let line_fut = stdin.next().fuse();
+            let line_fut = lines.next_line().fuse();
             let rpc_fut = futures_ticker.next().fuse();
 
             // This Macro is shown wrong by Rust-Language-Server > 0.2.400
@@ -80,7 +82,13 @@ async fn main() {
             pin_mut!(rpc_fut);
 
             select! {
-                line = line_fut => Some(EventType::Cli(line.expect("can get line").expect("can read line from stdin"))),
+                line = line_fut => {
+                    match line {
+                        Ok(Some(line_str)) => Some(EventType::Cli(line_str)),
+                        Ok(None) => None,  // EOF
+                        Err(_) => None,    // Error reading
+                    }
+                },
                 _rpc_ticker = rpc_fut => Some(EventType::Rpc),
             }
         };

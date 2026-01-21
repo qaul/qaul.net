@@ -42,7 +42,7 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 #[behaviour(to_swarm = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
     pub floodsub: Floodsub,
-    pub mdns: mdns::async_io::Behaviour,
+    pub mdns: mdns::tokio::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     pub qaul_messaging: QaulMessaging,
@@ -175,7 +175,7 @@ impl Lan {
 
         // create MDNS behaviour
         // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-        let mdns = mdns::async_io::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
+        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
@@ -188,7 +188,7 @@ impl Lan {
         behaviour.floodsub.subscribe(Node::get_topic());
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
-            .with_async_std()
+            .with_tokio()
             .with_tcp(
                 tcp::Config::new().nodelay(true),
                 noise::Config::new,

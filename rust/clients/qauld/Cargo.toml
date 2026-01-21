@@ -13,7 +13,7 @@ repository = "https://github.com/qaul/qaul.net"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
-async-std = { version = "1.13", features = ["attributes"] }
+tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 log = "0.4"
 pretty_env_logger = "0.5"
