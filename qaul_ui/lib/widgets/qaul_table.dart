@@ -48,7 +48,7 @@ class QaulTable extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: rowCount,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              separatorBuilder: (_, _) => const Divider(height: 12.0),
               itemBuilder: rowBuilder,
             ),
           ),

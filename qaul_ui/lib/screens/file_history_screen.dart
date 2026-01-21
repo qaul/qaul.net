@@ -23,12 +23,25 @@ class FileHistoryScreen extends StatefulHookConsumerWidget {
 class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
   static const _pageSize = 20;
 
-  final _controller = PagingController<int, FileHistoryEntity>(firstPageKey: 0);
+  late final PagingController<int, FileHistoryEntity> _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller.addPageRequestListener((pageKey) => _fetchPage(pageKey));
+    _controller = PagingController<int, FileHistoryEntity>(
+      getNextPageKey: (state) {
+        if (state.lastPageIsEmpty) {
+          return null;
+        }
+        final keys = state.keys;
+        if (keys == null || keys.isEmpty) {
+          return 0;
+        }
+        final lastKey = keys.last;
+        return lastKey + 1;
+      },
+      fetchPage: (pageKey) => _fetchPage(pageKey),
+    );
   }
 
   @override
@@ -44,37 +57,32 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
     return ResponsiveScaffold(
       icon: Icons.history,
       title: l10n.fileHistory,
-      body: PagedListView<int, FileHistoryEntity>(
-        pagingController: _controller,
-        builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(
-          noItemsFoundIndicatorBuilder: (_) => Text(l10n.noneAvailableMessage),
-          itemBuilder: (context, file, index) {
-            return Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: _FileHistoryTile(file: file),
-            );
-          },
-        ),
+      body: PagingListener(
+        controller: _controller,
+        builder: (context, state, fetchNextPage) {
+          return PagedListView<int, FileHistoryEntity>(
+            state: state,
+            fetchNextPage: fetchNextPage,
+            builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(
+              noItemsFoundIndicatorBuilder: (_) => Text(l10n.noneAvailableMessage),
+              itemBuilder: (context, file, index) {
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: _FileHistoryTile(file: file),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
 
-  Future<void> _fetchPage(int page) async {
-    try {
-      final items = await ref
-          .read(qaulWorkerProvider)
-          .getFileHistory(page: page, itemsPerPage: _pageSize);
-
-      final isLastPage = items.length < _pageSize;
-      if (isLastPage) {
-        _controller.appendLastPage(items);
-      } else {
-        final nextPageKey = page + items.length;
-        _controller.appendPage(items, nextPageKey);
-      }
-    } catch (error) {
-      _controller.error = error;
-    }
+  Future<List<FileHistoryEntity>> _fetchPage(int pageKey) async {
+    final items = await ref
+        .read(qaulWorkerProvider)
+        .getFileHistory(page: pageKey, itemsPerPage: _pageSize);
+    return items;
   }
 }
 
@@ -100,10 +108,7 @@ class _FileHistoryTile extends ConsumerWidget {
     if (imageExts.contains(file.extension)) {
       final img = File.fromUri(Uri.file(file.filePath(ref)));
       if (img.existsSync()) {
-        image = DecorationImage(
-          fit: BoxFit.cover,
-          image: FileImage(img),
-        );
+        image = DecorationImage(fit: BoxFit.cover, image: FileImage(img));
       }
     }
 

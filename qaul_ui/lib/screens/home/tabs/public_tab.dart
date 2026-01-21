@@ -100,7 +100,7 @@ class _PublicTabView extends HookConsumerWidget {
               controller: ScrollController(),
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: filteredMessages.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              separatorBuilder: (_, _) => const Divider(height: 12.0),
               itemBuilder: (_, i) {
                 final msg = filteredMessages[i];
                 var theme = Theme.of(context).textTheme;

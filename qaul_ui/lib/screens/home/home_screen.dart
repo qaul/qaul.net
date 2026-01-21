@@ -26,7 +26,7 @@ class HomeScreen extends HookConsumerWidget {
     final disablePageViewScroll = useState(false);
 
     return PopScope(
-      onPopInvokedWithResult: (_, __) async {
+      onPopInvokedWithResult: (_, _) async {
         if (Platform.isAndroid) gotoToPubTab();
       },
       child: Scaffold(

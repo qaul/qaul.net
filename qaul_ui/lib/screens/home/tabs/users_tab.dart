@@ -31,7 +31,7 @@ class _UsersState extends _BaseTabState<_Users> {
                 controller: ScrollController(),
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: users.length,
-                separatorBuilder: (_, __) => const Divider(height: 12.0),
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
                 itemBuilder: (_, i) {
                   final user = users[i];
                   var theme = Theme.of(context).textTheme;
