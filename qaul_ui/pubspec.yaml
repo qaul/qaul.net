@@ -34,7 +34,7 @@ dependencies:
   flutter_hooks: ^0.21.3+1
   flutter_svg: ^2.2.3
   font_awesome_flutter: ^10.12.0
-  hooks_riverpod: ^2.6.1
+  hooks_riverpod: ^3.2.0
   image: ^4.1.3
   image_picker: ^1.2.1
   infinite_scroll_pagination: ^5.1.1
