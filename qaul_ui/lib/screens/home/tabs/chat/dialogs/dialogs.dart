@@ -13,7 +13,7 @@ class _CreateNewRoomDialog extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.all(8),
           itemCount: users.length + 1,
-          separatorBuilder: (_, __) => const Divider(height: 12.0),
+          separatorBuilder: (_, _) => const Divider(height: 12.0),
           itemBuilder: (context, i) {
             if (i == 0) {
               return ListTile(
@@ -186,7 +186,7 @@ class _InviteUsersToGroupDialogState
             ListView.separated(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 40),
               itemCount: users.length,
-              separatorBuilder: (_, __) => const Divider(height: 12.0),
+              separatorBuilder: (_, _) => const Divider(height: 12.0),
               itemBuilder: (context, i) {
                 final usr = users[i];
                 return QaulListTile.user(

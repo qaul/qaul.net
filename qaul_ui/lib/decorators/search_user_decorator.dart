@@ -76,7 +76,7 @@ class SearchUserDecorator extends HookConsumerWidget {
               bottom: searchBar,
             ),
       body: Consumer(
-        builder: (context, ref, ___) {
+        builder: (context, ref, _) {
           final users = ref.watch(_userSearchProvider.notifier).state;
           return builder(context, users);
         },

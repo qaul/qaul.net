@@ -81,7 +81,7 @@ class _ChatState extends _BaseTabState<_Chat> {
             controller: ScrollController(),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: groupInvites.length + filteredRooms.length,
-            separatorBuilder: (_, __) => const Divider(height: 12.0),
+            separatorBuilder: (_, _) => const Divider(height: 12.0),
             itemBuilder: (_, i) {
               var theme = Theme.of(context).textTheme;
 

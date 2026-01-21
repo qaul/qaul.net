@@ -78,68 +78,11 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
     );
   }
 
-  static const _totalMockItems = 25;
-
   Future<List<FileHistoryEntity>> _fetchPage(int pageKey) async {
-    List<FileHistoryEntity> items = await ref
+    final items = await ref
         .read(qaulWorkerProvider)
         .getFileHistory(page: pageKey, itemsPerPage: _pageSize);
-
-    if (items.isEmpty) {
-      final offset = pageKey * _pageSize;
-      if (offset < _totalMockItems) {
-        items = _generateMockData(offset: offset, itemsPerPage: _pageSize);
-      }
-    }
-
     return items;
-  }
-
-  List<FileHistoryEntity> _generateMockData({
-    required int offset,
-    required int itemsPerPage,
-  }) {
-    final now = DateTime.now();
-    final mockFiles = <FileHistoryEntity>[];
-
-    final fileTypes = [
-      {'name': 'document', 'ext': 'pdf', 'size': 1024 * 512},
-      {'name': 'image', 'ext': 'png', 'size': 1024 * 2048},
-      {'name': 'video', 'ext': 'mp4', 'size': 1024 * 1024 * 50},
-      {'name': 'audio', 'ext': 'mp3', 'size': 1024 * 5120},
-      {'name': 'archive', 'ext': 'zip', 'size': 1024 * 1024 * 10},
-      {'name': 'code', 'ext': 'dart', 'size': 1024 * 128},
-      {'name': 'spreadsheet', 'ext': 'xlsx', 'size': 1024 * 256},
-      {'name': 'presentation', 'ext': 'pptx', 'size': 1024 * 1024 * 5},
-    ];
-
-    final startIndex = offset;
-    final endIndex = (startIndex + itemsPerPage).clamp(0, _totalMockItems);
-
-    if (startIndex >= endIndex) {
-      return mockFiles;
-    }
-
-    for (var i = startIndex; i < endIndex; i++) {
-      final fileType = fileTypes[i % fileTypes.length];
-      final time = now.subtract(Duration(hours: i * 2));
-
-      mockFiles.add(
-        FileHistoryEntity(
-          id: 'mock_file_$i',
-          name: '${fileType['name']}_$i.${fileType['ext']}',
-          extension: fileType['ext'] as String,
-          size: fileType['size'] as int,
-          description:
-              'Mock file ${i + 1} - ${fileType['name']} file for testing',
-          time: time,
-          senderId: 'mock_sender_${i % 5}',
-          groupId: 'mock_group_${i % 3}',
-        ),
-      );
-    }
-
-    return mockFiles;
   }
 }
 

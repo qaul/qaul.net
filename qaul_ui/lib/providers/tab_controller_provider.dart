@@ -19,7 +19,7 @@ class HomeScreenTabController extends StateNotifier<int> {
   PageController get pageController => _pageController;
   final _pageController = PageController(initialPage: 1);
 
-  get initialTab => _initialTab;
+  int get initialTab => _initialTab;
   final int _initialTab;
 
   void _initialize() {

@@ -80,7 +80,7 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
     openChat(room, ref: ref, context: context, user: usr, otherUser: otherUser);
   }
 
-  bool _reachedHomeScreen(r) => r.settings.name == NavigationHelper.home;
+  bool _reachedHomeScreen(Route<dynamic> r) => r.settings.name == NavigationHelper.home;
 
   ChatRoom? _roomWithId(String id) =>
       ref.read(chatRoomsProvider).firstWhereOrNull((r) => r.idBase58 == id);
