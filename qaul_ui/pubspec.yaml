@@ -19,10 +19,10 @@ dependencies:
   bubble: ^1.2.1
   collection: ^1.19.1
   cupertino_icons: ^1.0.6
-  device_info_plus: ^11.3.0
+  device_info_plus: ^12.3.0
   equatable: ^2.0.7
   ffi: ^2.1.5
-  file_picker: ^8.0.7
+  file_picker: ^10.3.8
   filesize: ^2.0.1
   fixnum: ^1.1.0
   flame: ^1.34.0
@@ -30,24 +30,24 @@ dependencies:
   fluent_ui: 4.9.1
   flutter_chat_types: ^3.6.2
   flutter_chat_ui: ^1.6.10
-  flutter_email_sender: ^6.0.2
+  flutter_email_sender: ^8.0.0
   flutter_hooks: ^0.21.3+1
   flutter_svg: ^2.2.3
   font_awesome_flutter: ^10.12.0
   hooks_riverpod: ^2.6.1
   image: ^4.1.3
   image_picker: ^1.2.1
-  infinite_scroll_pagination: ^4.0.0
+  infinite_scroll_pagination: ^5.1.1
   intersperse: ^2.0.0
   intl: ^0.20.2
   local_notifications: { "path": "packages/local_notifications" }
   logging: ^1.2.0
   mailto: ^2.0.0
   meta: ^1.9.1
-  mime: ^1.0.4
+  mime: ^2.0.0
   neat_periodic_task: ^2.0.1
   open_simplex_2: ^0.2.1
-  package_info_plus: ^8.2.1
+  package_info_plus: ^9.0.0
   path: ^1.9.1
   path_provider: ^2.0.15
   qaul_rpc: { "path": "packages/qaul_rpc" }
@@ -59,7 +59,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.0
   record: ^6.0.0
   audioplayers: ^6.1.1
-  app_links: ^6.3.3
+  app_links: ^7.0.0
   open_filex: ^4.7.0
 
 dev_dependencies:
@@ -71,8 +71,8 @@ dev_dependencies:
   build_runner: ^2.4.6
   fast_base58: ^0.2.1
   flutter_launcher_icons: ^0.14.3
-  flutter_lints: ^5.0.0
-  uuid: ^3.0.7
+  flutter_lints: ^6.0.0
+  uuid: ^4.5.2
 
 flutter_icons:
   ios: true

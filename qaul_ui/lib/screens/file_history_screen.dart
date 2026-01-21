@@ -23,12 +23,25 @@ class FileHistoryScreen extends StatefulHookConsumerWidget {
 class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
   static const _pageSize = 20;
 
-  final _controller = PagingController<int, FileHistoryEntity>(firstPageKey: 0);
+  late final PagingController<int, FileHistoryEntity> _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller.addPageRequestListener((pageKey) => _fetchPage(pageKey));
+    _controller = PagingController<int, FileHistoryEntity>(
+      getNextPageKey: (state) {
+        if (state.lastPageIsEmpty) {
+          return null;
+        }
+        final keys = state.keys;
+        if (keys == null || keys.isEmpty) {
+          return 0;
+        }
+        final lastKey = keys.last;
+        return lastKey + 1;
+      },
+      fetchPage: (pageKey) => _fetchPage(pageKey),
+    );
   }
 
   @override
@@ -44,37 +57,89 @@ class _FileHistoryScreenState extends ConsumerState<FileHistoryScreen> {
     return ResponsiveScaffold(
       icon: Icons.history,
       title: l10n.fileHistory,
-      body: PagedListView<int, FileHistoryEntity>(
-        pagingController: _controller,
-        builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(
-          noItemsFoundIndicatorBuilder: (_) => Text(l10n.noneAvailableMessage),
-          itemBuilder: (context, file, index) {
-            return Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: _FileHistoryTile(file: file),
-            );
-          },
-        ),
+      body: PagingListener(
+        controller: _controller,
+        builder: (context, state, fetchNextPage) {
+          return PagedListView<int, FileHistoryEntity>(
+            state: state,
+            fetchNextPage: fetchNextPage,
+            builderDelegate: PagedChildBuilderDelegate<FileHistoryEntity>(
+              noItemsFoundIndicatorBuilder: (_) => Text(l10n.noneAvailableMessage),
+              itemBuilder: (context, file, index) {
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: _FileHistoryTile(file: file),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
 
-  Future<void> _fetchPage(int page) async {
-    try {
-      final items = await ref
-          .read(qaulWorkerProvider)
-          .getFileHistory(page: page, itemsPerPage: _pageSize);
+  static const _totalMockItems = 25;
 
-      final isLastPage = items.length < _pageSize;
-      if (isLastPage) {
-        _controller.appendLastPage(items);
-      } else {
-        final nextPageKey = page + items.length;
-        _controller.appendPage(items, nextPageKey);
+  Future<List<FileHistoryEntity>> _fetchPage(int pageKey) async {
+    List<FileHistoryEntity> items = await ref
+        .read(qaulWorkerProvider)
+        .getFileHistory(page: pageKey, itemsPerPage: _pageSize);
+
+    if (items.isEmpty) {
+      final offset = pageKey * _pageSize;
+      if (offset < _totalMockItems) {
+        items = _generateMockData(offset: offset, itemsPerPage: _pageSize);
       }
-    } catch (error) {
-      _controller.error = error;
     }
+
+    return items;
+  }
+
+  List<FileHistoryEntity> _generateMockData({
+    required int offset,
+    required int itemsPerPage,
+  }) {
+    final now = DateTime.now();
+    final mockFiles = <FileHistoryEntity>[];
+
+    final fileTypes = [
+      {'name': 'document', 'ext': 'pdf', 'size': 1024 * 512},
+      {'name': 'image', 'ext': 'png', 'size': 1024 * 2048},
+      {'name': 'video', 'ext': 'mp4', 'size': 1024 * 1024 * 50},
+      {'name': 'audio', 'ext': 'mp3', 'size': 1024 * 5120},
+      {'name': 'archive', 'ext': 'zip', 'size': 1024 * 1024 * 10},
+      {'name': 'code', 'ext': 'dart', 'size': 1024 * 128},
+      {'name': 'spreadsheet', 'ext': 'xlsx', 'size': 1024 * 256},
+      {'name': 'presentation', 'ext': 'pptx', 'size': 1024 * 1024 * 5},
+    ];
+
+    final startIndex = offset;
+    final endIndex = (startIndex + itemsPerPage).clamp(0, _totalMockItems);
+
+    if (startIndex >= endIndex) {
+      return mockFiles;
+    }
+
+    for (var i = startIndex; i < endIndex; i++) {
+      final fileType = fileTypes[i % fileTypes.length];
+      final time = now.subtract(Duration(hours: i * 2));
+
+      mockFiles.add(
+        FileHistoryEntity(
+          id: 'mock_file_$i',
+          name: '${fileType['name']}_$i.${fileType['ext']}',
+          extension: fileType['ext'] as String,
+          size: fileType['size'] as int,
+          description:
+              'Mock file ${i + 1} - ${fileType['name']} file for testing',
+          time: time,
+          senderId: 'mock_sender_${i % 5}',
+          groupId: 'mock_group_${i % 3}',
+        ),
+      );
+    }
+
+    return mockFiles;
   }
 }
 
@@ -100,10 +165,7 @@ class _FileHistoryTile extends ConsumerWidget {
     if (imageExts.contains(file.extension)) {
       final img = File.fromUri(Uri.file(file.filePath(ref)));
       if (img.existsSync()) {
-        image = DecorationImage(
-          fit: BoxFit.cover,
-          image: FileImage(img),
-        );
+        image = DecorationImage(fit: BoxFit.cover, image: FileImage(img));
       }
     }
 
