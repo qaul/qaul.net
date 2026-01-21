@@ -1,15 +1,19 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # Upgrade to new version 2.0.0-rc.1
+//! # Upgrade to new version 2.0.0-rc.5
 //!
 //! Changes to be upgraded:
 //!
-//! * configuration file: change all TCP peer entries to UDP/QUIC entries
-//!   - config.internet.peers
+//! * configuration file: add user authentication fields
+//!   - config.user_accounts.password_hash
+//!   - config.user_accounts.password_salt
+//!   - config.user_accounts.session_token
 
 use libp2p::multiaddr::{Multiaddr, Protocol};
 use std::path::{Path, PathBuf};
+
+pub mod old_config;
 
 use super::backup;
 
@@ -20,7 +24,7 @@ impl VersionUpgrade {
     ///
     /// Returns a result, containing a tuple with ( new_version, new_path )
     pub fn upgrade(storage_path: &Path, old_path: &Path) -> Result<(String, PathBuf), String> {
-        let version = "2.0.0-rc.1";
+        let version = "2.0.0-rc.5";
         println!("upgrade to version {}", version);
         let new_path = storage_path.join("backup").join(version);
 
@@ -60,28 +64,28 @@ impl VersionUpgrade {
     /// upgrade config structure
     fn upgrade_config(old_path: &Path, new_path: &Path) -> bool {
         // load old config
-        if let Some(old_cfg) = super::v2_0_0_rc_5::old_config::Configuration::load(
-            old_path.join("config.yaml").to_str().unwrap(),
-        ) {
-            let node = super::v2_0_0_rc_5::old_config::Node {
+        if let Some(old_cfg) =
+            old_config::Configuration::load(old_path.join("config.yaml").to_str().unwrap())
+        {
+            let node = crate::storage::configuration::Node {
                 initialized: old_cfg.node.initialized,
                 id: old_cfg.node.id.clone(),
                 keys: old_cfg.node.keys.clone(),
             };
 
             // Copy LAN section
-            let lan = super::v2_0_0_rc_5::old_config::Lan {
+            let lan = crate::storage::configuration::Lan {
                 active: old_cfg.lan.active,
                 listen: old_cfg.lan.listen.clone(),
             };
 
             // Internet section update
             // change TCP peer addresses to QUIC addresses
-            let mut peers: Vec<super::v2_0_0_rc_5::old_config::InternetPeer> = vec![];
+            let mut peers: Vec<crate::storage::configuration::InternetPeer> = vec![];
             for peer in &old_cfg.internet.peers {
                 match Self::multiaddr_to_quic(&peer.address) {
                     Some(multiaddr) => {
-                        peers.push(super::v2_0_0_rc_5::old_config::InternetPeer {
+                        peers.push(crate::storage::configuration::InternetPeer {
                             address: multiaddr.to_string(),
                             name: peer.name.clone(),
                             enabled: peer.enabled,
@@ -90,7 +94,7 @@ impl VersionUpgrade {
                     None => {}
                 }
             }
-            let internet = super::v2_0_0_rc_5::old_config::Internet {
+            let internet = crate::storage::configuration::Internet {
                 active: old_cfg.internet.active,
                 peers,
                 do_listen: old_cfg.internet.do_listen,
@@ -98,13 +102,16 @@ impl VersionUpgrade {
             };
 
             // copy user account
-            let mut user_accounts: Vec<super::v2_0_0_rc_5::old_config::UserAccount> = vec![];
+            let mut user_accounts: Vec<crate::storage::configuration::UserAccount> = vec![];
             for user in &old_cfg.user_accounts {
-                user_accounts.push(super::v2_0_0_rc_5::old_config::UserAccount {
+                user_accounts.push(crate::storage::configuration::UserAccount {
                     name: user.name.clone(),
                     id: user.id.clone(),
                     keys: user.keys.clone(),
-                    storage: super::v2_0_0_rc_5::old_config::StorageOptions {
+                    password_hash: None,
+                    password_salt: None,
+                    session_token: None,
+                    storage: crate::storage::configuration::StorageOptions {
                         users: user.storage.users.clone(),
                         size_total: user.storage.size_total,
                     },
@@ -112,12 +119,12 @@ impl VersionUpgrade {
             }
 
             // copy debug configuration
-            let debug = super::v2_0_0_rc_5::old_config::DebugOption {
+            let debug = crate::storage::configuration::DebugOption {
                 log: old_cfg.debug.log,
             };
 
             // copy routing configuration
-            let routing = super::v2_0_0_rc_5::old_config::RoutingOptions {
+            let routing = crate::storage::configuration::RoutingOptions {
                 sending_table_period: old_cfg.routing.sending_table_period,
                 ping_neighbour_period: old_cfg.routing.ping_neighbour_period,
                 hop_count_penalty: old_cfg.routing.hop_count_penalty,
@@ -125,7 +132,7 @@ impl VersionUpgrade {
             };
 
             // create new configuration structure
-            let new_config = super::v2_0_0_rc_5::old_config::Configuration {
+            let new_config = crate::storage::configuration::Configuration {
                 node,
                 lan,
                 internet,

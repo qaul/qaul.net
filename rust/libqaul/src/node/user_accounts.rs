@@ -153,6 +153,7 @@ impl UserAccounts {
                 keys: keys_config,
                 password_hash: password_hash.clone(),
                 password_salt: password_salt.clone(),
+                session_token: None,
                 storage: configuration::StorageOptions::default(),
             });
         }
