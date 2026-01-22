@@ -3,8 +3,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intersperse/intersperse.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:utils/utils.dart';
 
 import '../../decorators/disabled_state_decorator.dart';
 import '../../decorators/loading_decorator.dart';
