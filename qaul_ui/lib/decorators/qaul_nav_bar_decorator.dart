@@ -214,7 +214,7 @@ class QaulNavBarItem extends HookConsumerWidget {
 
     useEffect(() {
       ref.listenManual(homeScreenControllerProvider, (previous, next) {
-        selected.value = TabType.values[next] == tab;
+        selected.value = next == tab;
       });
       return null;
     }, []);

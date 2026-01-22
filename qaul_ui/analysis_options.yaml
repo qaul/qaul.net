@@ -9,6 +9,10 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+plugins:
+  # Latest: https://pub.dev/packages/riverpod_lint
+  riverpod_lint: ^3.1.2
+
 analyzer:
   exclude:
     - "**/*generated/**"
