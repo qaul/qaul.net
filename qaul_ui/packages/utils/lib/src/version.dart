@@ -49,7 +49,7 @@ class Version implements Comparable<Version> {
             "preRelease segments must only contain [0-9A-Za-z-]");
       }
     }
-    if (this.build.isNotEmpty && !_buildRegex.hasMatch(this.build)) {
+    if (build.isNotEmpty && !_buildRegex.hasMatch(build)) {
       throw FormatException("build must only contain [0-9A-Za-z-.]");
     }
 
