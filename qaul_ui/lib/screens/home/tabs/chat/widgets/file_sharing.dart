@@ -27,7 +27,7 @@ class _SendFileDialog extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(filesize(file.lengthSync())),
+                  Text(fileSize(file.lengthSync())),
                   Text(
                     basename(file.path),
                     maxLines: 2,

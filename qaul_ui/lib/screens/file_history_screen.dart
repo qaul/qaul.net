@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:utils/utils.dart';
 
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
@@ -158,7 +158,7 @@ class _FileHistoryTile extends ConsumerWidget {
         Text(file.description),
         const SizedBox(height: 8),
         Text(
-          '${DateFormat('EEEE, MMMM d yyyy, h:mm a').format(file.time)} · Size: ${filesize(file.size)}',
+          '${DateFormat('EEEE, MMMM d yyyy, h:mm a').format(file.time)} · Size: ${fileSize(file.size)}',
           style: const TextStyle(fontStyle: FontStyle.italic),
         ),
       ],

@@ -141,7 +141,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
                         top: 4,
                       ),
                       child: Text(
-                        filesize(widget.message.size.truncate()),
+                        fileSize(widget.message.size.truncate()),
                         style: style,
                       ),
                     ),

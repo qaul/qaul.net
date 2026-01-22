@@ -23,7 +23,6 @@ dependencies:
   equatable: ^2.0.7
   ffi: ^2.1.5
   file_picker: ^10.3.8
-  filesize: ^2.0.1
   fixnum: ^1.1.0
   flame: ^1.34.0
   flame_forge2d: ^0.19.2+2

@@ -136,7 +136,7 @@ class _RecordAudioDialogState extends ConsumerState<_RecordAudioDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(filesize(file!.lengthSync())),
+                      Text(fileSize(file!.lengthSync())),
                       Text(
                         _messageDuration,
                         maxLines: 2,

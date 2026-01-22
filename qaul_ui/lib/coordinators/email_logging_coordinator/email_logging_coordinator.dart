@@ -6,7 +6,6 @@ import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:filesize/filesize.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -143,7 +142,7 @@ class EmailLoggingCoordinator {
 
   Future<String> get logStorageSize async {
     final size = await _storageManager.logFolderSize;
-    return filesize(size);
+    return fileSize(size);
   }
 
   Future<void> _logError(Object e, {StackTrace? stack, String? message}) async {

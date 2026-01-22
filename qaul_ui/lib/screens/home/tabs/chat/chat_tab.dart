@@ -236,7 +236,7 @@ class _ChatState extends _BaseTabState<_Chat> {
       return _contentFromGroupEvent(message, theme, users: users, l10n: l10n);
     } else if (message is FileShareContent) {
       return Text(
-        '${message.fileName} · ${filesize(message.size)}',
+        '${message.fileName} · ${fileSize(message.size)}',
         maxLines: 2,
         style: theme.bodyLarge!.copyWith(fontStyle: FontStyle.italic),
         overflow: TextOverflow.ellipsis,
