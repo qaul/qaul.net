@@ -3,7 +3,7 @@ description: RPC Connection between the Flutter app & qaul-rpc.
 version: 0.0.1
 
 publish_to: "none"
-# Why is this empty?
+
 flutter:
 
 environment:
