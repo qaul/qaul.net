@@ -23,8 +23,7 @@ class NotificationController<T> {
   late final User _user;
 
   @protected
-  TabType get currentVisibleHomeTab =>
-      ref.read(homeScreenControllerProvider.notifier).currentTab;
+  TabType get currentVisibleHomeTab => ref.read(homeScreenControllerProvider);
 
   @protected
   @visibleForOverriding

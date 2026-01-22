@@ -54,7 +54,7 @@ class _DynamicNetworkScreenState extends ConsumerState<DynamicNetworkScreen> {
   @override
   Widget build(BuildContext context) {
     final currentTab = ref.watch(homeScreenControllerProvider);
-    if (TabType.values[currentTab] == TabType.network) {
+    if (currentTab == TabType.network) {
       _gameEngine?.resumeEngine();
     } else {
       _gameEngine?.pauseEngine();
