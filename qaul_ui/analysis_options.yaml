@@ -9,19 +9,10 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-plugins:
-  # Latest: https://pub.dev/packages/riverpod_lint
-  riverpod_lint: ^3.1.2
-
 analyzer:
   exclude:
     - "**/*generated/**"
     - "**/*.pb*.dart"
-  errors:
-    # Disabled because we use UncontrolledProviderScope with a custom
-    # ProviderContainer that's shared with the qaul_rpc library
-    missing_provider_scope: ignore
-
 
 linter:
   # The lint rules applied to this project can be customized in the
