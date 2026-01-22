@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:version/version.dart';
+import 'package:utils/utils.dart';
 
 import 'l10n/app_localizations.dart';
 
