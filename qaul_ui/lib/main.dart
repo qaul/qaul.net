@@ -1,3 +1,5 @@
+// We prefer ProviderContainer so it can be passed to the qaul_rpc library.
+// ignore_for_file: missing_provider_scope
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
