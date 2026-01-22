@@ -17,6 +17,10 @@ analyzer:
   exclude:
     - "**/*generated/**"
     - "**/*.pb*.dart"
+  errors:
+    # Disabled because we use UncontrolledProviderScope with a custom
+    # ProviderContainer that's shared with the qaul_rpc library
+    missing_provider_scope: ignore
 
 
 linter:
