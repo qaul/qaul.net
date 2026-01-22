@@ -1,6 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 /// Added as a separate package as running tests on root project instantiates a libqaul shell for some reason, which in return fails the tests.
-library color_generator;
+library;
 
 import 'dart:async';
 

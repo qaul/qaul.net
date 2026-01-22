@@ -3,13 +3,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../qaul_rpc.dart';
 
 final fileHistoryEntitiesProvider =
-StateNotifierProvider<FileHistoryEntityNotifier, List<FileHistoryEntity>>(
-      (ref) => FileHistoryEntityNotifier(files: const []),
+NotifierProvider<FileHistoryEntityNotifier, List<FileHistoryEntity>>(
+      FileHistoryEntityNotifier.new,
 );
 
-class FileHistoryEntityNotifier extends StateNotifier<List<FileHistoryEntity>> {
-  FileHistoryEntityNotifier({List<FileHistoryEntity>? files})
-      : super(files ?? []);
+class FileHistoryEntityNotifier extends Notifier<List<FileHistoryEntity>> {
+  @override
+  List<FileHistoryEntity> build() => [];
 
   void add(FileHistoryEntity file) => state = [file, ...state];
 

@@ -1,7 +1,8 @@
 part of 'chat_room.dart';
 
-class ChatRoomListNotifier extends StateNotifier<List<ChatRoom>> {
-  ChatRoomListNotifier({List<ChatRoom>? rooms}) : super(rooms ?? []);
+class ChatRoomListNotifier extends Notifier<List<ChatRoom>> {
+  @override
+  List<ChatRoom> build() => [];
 
   void add(ChatRoom room) => state = [room, ...state];
 

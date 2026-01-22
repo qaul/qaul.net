@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/legacy.dart';
 
 import '../generated/connections/connections.pb.dart';
 

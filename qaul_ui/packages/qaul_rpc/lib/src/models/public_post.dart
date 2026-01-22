@@ -6,8 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../generated/services/feed/feed.pb.dart';
 
 final publicMessagesProvider =
-    StateNotifierProvider<PublicPostListNotifier, List<PublicPost>>(
-  (_) => PublicPostListNotifier(messages: []),
+    NotifierProvider<PublicPostListNotifier, List<PublicPost>>(
+  PublicPostListNotifier.new,
 );
 
 class PublicPost extends Equatable {
@@ -49,8 +49,9 @@ extension FMExtension on FeedMessage {
       );
 }
 
-class PublicPostListNotifier extends StateNotifier<List<PublicPost>> {
-  PublicPostListNotifier({List<PublicPost>? messages}) : super(messages ?? []);
+class PublicPostListNotifier extends Notifier<List<PublicPost>> {
+  @override
+  List<PublicPost> build() => [];
 
   void add(PublicPost message) {
     state = [message, ...state];

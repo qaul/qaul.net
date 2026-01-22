@@ -27,7 +27,7 @@ dependencies:
   rxdart: ^0.27.7
   equatable: ^2.0.5
   fast_base58: ^0.2.1
-  hooks_riverpod: ^2.6.1
+  hooks_riverpod: ^3.2.0
   utils: { "path": "../utils" }
   path_provider: ^2.1.4
 

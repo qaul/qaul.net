@@ -19,6 +19,11 @@ part 'fixtures.dart';
 
 part 'stubs.dart';
 
+class TestChatRoomListNotifier extends ChatRoomListNotifier {
+  @override
+  List<ChatRoom> build() => [buildGroupChat()];
+}
+
 void main() {
   late Key chatKey;
 
@@ -69,7 +74,7 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWith(
-          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
+          TestChatRoomListNotifier.new,
         ),
         qaulWorkerProvider.overrideWith(
           (ref) => StubLibqaulWorker(ref),
@@ -104,7 +109,7 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWith(
-          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
+          TestChatRoomListNotifier.new,
         ),
         qaulWorkerProvider.overrideWith(
           (ref) => StubLibqaulWorker(ref),
@@ -145,7 +150,7 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWith(
-          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
+          TestChatRoomListNotifier.new,
         ),
         qaulWorkerProvider.overrideWith(
           (ref) => StubLibqaulWorker(ref),
@@ -195,7 +200,7 @@ void main() {
           NullChatNotificationController(),
         ),
         chatRoomsProvider.overrideWith(
-          (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
+          TestChatRoomListNotifier.new,
         ),
         qaulWorkerProvider.overrideWith(
           (ref) => StubLibqaulWorker(ref),
@@ -246,7 +251,7 @@ void main() {
             NullChatNotificationController(),
           ),
           chatRoomsProvider.overrideWith(
-            (_) => ChatRoomListNotifier(rooms: [buildGroupChat()]),
+            TestChatRoomListNotifier.new,
           ),
           qaulWorkerProvider.overrideWith(
             (ref) => StubLibqaulWorker(ref),

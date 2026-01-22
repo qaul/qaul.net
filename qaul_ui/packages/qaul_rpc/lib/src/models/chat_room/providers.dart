@@ -1,7 +1,7 @@
 part of 'chat_room.dart';
 
 final chatRoomsProvider =
-    StateNotifierProvider<ChatRoomListNotifier, List<ChatRoom>>(
-        (ref) => ChatRoomListNotifier());
+    NotifierProvider<ChatRoomListNotifier, List<ChatRoom>>(
+        ChatRoomListNotifier.new);
 
 final currentOpenChatRoom = StateProvider<ChatRoom?>((ref) => null);
