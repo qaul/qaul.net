@@ -1,11 +1,8 @@
 // Copyright (c) 2021, Matthew Barbour. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-/// Provides version objects to enforce conformance to the Semantic Versioning 2.0 spec. The spec can be read at http://semver.org/
-library;
-
 /// Provides immutable storage and comparison of semantic version numbers.
-class Version implements Comparable<Version> {
+class Version {
   static final RegExp _versionRegex =
       RegExp(r"^([\d.]+)(-([0-9A-Za-z\-.]+))?(\+([0-9A-Za-z\-.]+))?$");
   static final RegExp _buildRegex = RegExp(r"^[0-9A-Za-z\-.]+$");
@@ -25,8 +22,6 @@ class Version implements Comparable<Version> {
 
   final List<String> _preRelease;
 
-  /// Indicates that the version is a pre-release. Returns true if preRelease has any segments, otherwise false
-  bool get isPreRelease => _preRelease.isNotEmpty;
 
   /// Creates a new instance of [Version].
   ///
@@ -61,14 +56,6 @@ class Version implements Comparable<Version> {
   @override
   int get hashCode => toString().hashCode;
 
-  /// Pre-release information segments.
-  List<String> get preRelease => List<String>.from(_preRelease);
-
-  /// Determines whether the left-hand [Version] represents a lower precedence than the right-hand [Version].
-  bool operator <(dynamic o) => o is Version && _compare(this, o) < 0;
-
-  /// Determines whether the left-hand [Version] represents an equal or lower precedence than the right-hand [Version].
-  bool operator <=(dynamic o) => o is Version && _compare(this, o) <= 0;
 
   /// Determines whether the left-hand [Version] represents an equal precedence to the right-hand [Version].
   @override
@@ -76,65 +63,7 @@ class Version implements Comparable<Version> {
     if (identical(this, other)) return true;
     return other is Version && _compare(this, other) == 0;
   }
-  /// Determines whether the left-hand [Version] represents a greater precedence than the right-hand [Version].
-  bool operator >(dynamic o) => o is Version && _compare(this, o) > 0;
 
-  /// Determines whether the left-hand [Version] represents an equal or greater precedence than the right-hand [Version].
-  bool operator >=(dynamic o) => o is Version && _compare(this, o) >= 0;
-
-  @override
-  int compareTo(Version? other) {
-    if (other == null) {
-      throw ArgumentError.notNull("other");
-    }
-
-    return _compare(this, other);
-  }
-
-  /// Creates a new [Version] with the [major] version number incremented.
-  ///
-  /// Also resets the [minor] and [patch] numbers to 0, and clears the [build] and [preRelease] information.
-  Version incrementMajor() => Version(major + 1, 0, 0);
-
-  /// Creates a new [Version] with the [minor] version number incremented.
-  ///
-  /// Also resets the [patch] number to 0, and clears the [build] and [preRelease] information.
-  Version incrementMinor() => Version(major, minor + 1, 0);
-
-  /// Creates a new [Version] with the [patch] version number incremented.
-  ///
-  /// Also clears the [build] and [preRelease] information.
-  Version incrementPatch() => Version(major, minor, patch + 1);
-
-  /// Creates a new [Version] with the right-most numeric [preRelease] segment incremented.
-  /// If no numeric segment is found, one will be added with the value "1".
-  ///
-  /// If this [Version] is not a pre-release version, an Exception will be thrown.
-  Version incrementPreRelease() {
-    if (!isPreRelease) {
-      throw Exception(
-          "Cannot increment pre-release on a non-pre-release [Version]");
-    }
-    var newPreRelease = preRelease;
-
-    var found = false;
-    for (var i = newPreRelease.length - 1; i >= 0; i--) {
-      var segment = newPreRelease[i];
-      if (Version._isNumeric(segment)) {
-        var intVal = int.parse(segment);
-        intVal++;
-        newPreRelease[i] = intVal.toString();
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      newPreRelease.add("1");
-    }
-
-    return Version(major, minor, patch,
-        preRelease: newPreRelease);
-  }
 
   /// Returns a [String] representation of the [Version].
   ///
@@ -208,35 +137,35 @@ class Version implements Comparable<Version> {
     if (a.patch > b.patch) return 1;
     if (a.patch < b.patch) return -1;
 
-    if (a.preRelease.isEmpty) {
-      if (b.preRelease.isEmpty) {
+    if (a._preRelease.isEmpty) {
+      if (b._preRelease.isEmpty) {
         return 0;
       } else {
         return 1;
       }
-    } else if (b.preRelease.isEmpty) {
+    } else if (b._preRelease.isEmpty) {
       return -1;
     } else {
-      int preReleaseMax = a.preRelease.length;
-      if (b.preRelease.length > a.preRelease.length) {
-        preReleaseMax = b.preRelease.length;
+      int preReleaseMax = a._preRelease.length;
+      if (b._preRelease.length > a._preRelease.length) {
+        preReleaseMax = b._preRelease.length;
       }
 
       for (int i = 0; i < preReleaseMax; i++) {
-        if (b.preRelease.length <= i) {
+        if (b._preRelease.length <= i) {
           return 1;
-        } else if (a.preRelease.length <= i) {
+        } else if (a._preRelease.length <= i) {
           return -1;
         }
 
-        if (a.preRelease[i] == b.preRelease[i]) continue;
+        if (a._preRelease[i] == b._preRelease[i]) continue;
 
-        final bool aNumeric = _isNumeric(a.preRelease[i]);
-        final bool bNumeric = _isNumeric(b.preRelease[i]);
+        final bool aNumeric = _isNumeric(a._preRelease[i]);
+        final bool bNumeric = _isNumeric(b._preRelease[i]);
 
         if (aNumeric && bNumeric) {
-          final double aNumber = double.parse(a.preRelease[i]);
-          final double bNumber = double.parse(b.preRelease[i]);
+          final double aNumber = double.parse(a._preRelease[i]);
+          final double bNumber = double.parse(b._preRelease[i]);
           if (aNumber > bNumber) {
             return 1;
           } else {
@@ -247,7 +176,7 @@ class Version implements Comparable<Version> {
         } else if (aNumeric) {
           return -1;
         } else {
-          return a.preRelease[i].compareTo(b.preRelease[i]);
+          return a._preRelease[i].compareTo(b._preRelease[i]);
         }
       }
     }
