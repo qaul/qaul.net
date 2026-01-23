@@ -16,6 +16,8 @@ export 'src/file_size.dart';
 export 'src/image_manipulation.dart';
 export 'src/intersperse.dart';
 export 'src/ip_utils.dart';
+export 'src/open_simplex_2.dart';
+export 'src/open_simplex_2f.dart';
 export 'src/version.dart';
 
 Color colorGenerationStrategy(String first) {
