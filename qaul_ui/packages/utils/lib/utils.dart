@@ -206,3 +206,81 @@ class LoopTimer {
     _zoneTick = _zone.createPeriodicTimer(tenMs, (_) => _invoke(_onTick));
   }
 }
+
+/// Encodes a mailto URI according to RFC 6068.
+///
+/// Creates a properly encoded mailto: URI string from the provided parameters.
+///
+/// Example:
+/// ```dart
+/// final uri = encodeMailto(
+///   to: ['user@example.com'],
+///   subject: 'Hello World',
+///   body: 'This is a test email',
+/// );
+/// // Returns: "mailto:user@example.com?subject=Hello%20World&body=This%20is%20a%20test%20email"
+/// ```
+///
+/// The email address part before the '@' is percent-encoded, while the domain
+/// part remains unencoded. All query parameters (subject, body, cc, bcc) are
+/// percent-encoded.
+String encodeMailto({
+  List<String>? to,
+  List<String>? cc,
+  List<String>? bcc,
+  String? subject,
+  String? body,
+}) {
+  final buffer = StringBuffer('mailto:');
+
+  if (to != null && to.isNotEmpty) {
+    buffer.write(to.map(_encodeEmailAddress).join(','));
+  }
+
+  var hasParams = false;
+  final params = <String, String>{};
+
+  if (subject != null && subject.isNotEmpty) {
+    params['subject'] = subject;
+    hasParams = true;
+  }
+  if (body != null && body.isNotEmpty) {
+    params['body'] = body;
+    hasParams = true;
+  }
+  if (cc != null && cc.isNotEmpty) {
+    params['cc'] = cc.map(_encodeEmailAddress).join(',');
+    hasParams = true;
+  }
+  if (bcc != null && bcc.isNotEmpty) {
+    params['bcc'] = bcc.map(_encodeEmailAddress).join(',');
+    hasParams = true;
+  }
+
+  if (hasParams) {
+    var first = true;
+    for (final entry in params.entries) {
+      buffer.write(first ? '?' : '&');
+      buffer.write(entry.key);
+      buffer.write('=');
+      if (entry.key == 'cc' || entry.key == 'bcc') {
+        buffer.write(entry.value);
+      } else {
+        buffer.write(Uri.encodeComponent(entry.value));
+      }
+      first = false;
+    }
+  }
+
+  return buffer.toString();
+}
+
+String _encodeEmailAddress(String email) {
+  final atIndex = email.lastIndexOf('@');
+  if (atIndex == -1) {
+    return Uri.encodeComponent(email);
+  }
+  final localPart = email.substring(0, atIndex);
+  final domain = email.substring(atIndex + 1);
+  return '${Uri.encodeComponent(localPart)}@$domain';
+}

@@ -217,12 +217,12 @@ ${stack ?? 'Not available'}
   Future<void> _sendDesktopLogs(
       {List<FileSystemEntity>? libqaulAttachments}) async {
     _log.fine('(DESKTOP) sending logs via mailto link');
-    final mailtoLink = Mailto(
+    final mailtoLink = encodeMailto(
       to: [_supportEmail],
       body: await _buildDesktopEmail(libqaulAttachments: libqaulAttachments),
       subject: 'Customer Feedback - Error/Exception Logs',
     );
-    await launchUrl(Uri.parse('$mailtoLink'));
+    await launchUrl(Uri.parse(mailtoLink));
   }
 
   Future<String> _buildDesktopEmail(
