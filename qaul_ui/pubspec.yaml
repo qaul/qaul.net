@@ -16,7 +16,6 @@ dependencies:
 
   archive: ^4.0.2
   badges: ^3.1.2
-  bubble: ^1.2.1
   collection: ^1.19.1
   cupertino_icons: ^1.0.6
   device_info_plus: ^12.3.0
