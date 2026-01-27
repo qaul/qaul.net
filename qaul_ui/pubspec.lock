@@ -987,14 +987,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.7.0"
-  open_simplex_2:
-    dependency: "direct main"
-    description:
-      name: open_simplex_2
-      sha256: "1c424efdf1bae7ae055b7f74d2e89d3ecfb780d88a2e48baf50e50716c581f00"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
   ordered_set:
     dependency: transitive
     description:
