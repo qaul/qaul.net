@@ -14,7 +14,6 @@ import 'package:flutter/material.dart' hide Draggable;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
-import 'package:intersperse/intersperse.dart';
 import 'package:open_simplex_2/open_simplex_2.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';

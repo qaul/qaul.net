@@ -13,6 +13,7 @@ import 'src/emoji_string_manipulator.dart';
 
 export 'src/file_size_descriptor.dart';
 export 'src/image_manipulation.dart';
+export 'src/intersperse.dart';
 export 'src/ip_utils.dart';
 
 Color colorGenerationStrategy(String first) {
