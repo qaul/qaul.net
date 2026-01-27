@@ -1,5 +1,6 @@
-// Copyright (c) 2021, Matthew Barbour. All rights reserved. Use of this source code
-// is governed by a BSD-style license that can be found in the LICENSE file.
+// From https://github.com/dartninja/version
+// Copyright (c) 2021, Matthew Barbour.
+// Licensed under BSD-3-Clause. See docs/licenses/THIRD_PARTY_LICENSES.md
 
 /// Provides immutable storage and comparison of semantic version numbers.
 class Version {
