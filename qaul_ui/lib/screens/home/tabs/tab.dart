@@ -2,7 +2,6 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:filesize/filesize.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -12,7 +11,6 @@ import 'package:intl/locale.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
-
 
 import '../../../decorators/cron_task_decorator.dart';
 import '../../../decorators/disabled_state_decorator.dart';

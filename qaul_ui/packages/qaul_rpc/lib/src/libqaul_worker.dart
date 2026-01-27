@@ -264,7 +264,8 @@ class LibqaulWorker {
     required String description,
   }) async {
     var file = File(pathName);
-    if (isImage(file.path) && file.statSync().size >= 150.kb) {
+    final maxUncompressedSizeKB = 150 * 1000;
+    if (isImage(file.path) && file.statSync().size >= maxUncompressedSizeKB) {
       final compressed = await processImage(file);
       if (compressed != null) file = compressed;
     }

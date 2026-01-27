@@ -62,7 +62,7 @@ class FileMessageWidget extends StatelessWidget {
                   children: [
                     Text(message.name, style: style),
                     const SizedBox(height: 4),
-                    Text(filesize(message.size), style: style),
+                    Text(fileSize(message.size), style: style),
                   ],
                 ),
               ),
