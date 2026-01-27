@@ -41,7 +41,6 @@ dependencies:
   intl: ^0.20.2
   local_notifications: { "path": "packages/local_notifications" }
   logging: ^1.2.0
-  mailto: ^2.0.0
   meta: ^1.9.1
   mime: ^2.0.0
   neat_periodic_task: ^2.0.1

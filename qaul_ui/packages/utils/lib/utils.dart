@@ -24,7 +24,7 @@ Color colorGenerationStrategy(String first) {
   }
   final colors = <Color>[
     ...Colors.primaries.map((e) => e.shade700),
-    ...Colors.accents.map((e) => e.shade700)
+    ...Colors.accents.map((e) => e.shade700),
   ];
   return colors[first.hashCode % colors.length];
 }
@@ -47,7 +47,10 @@ String initials(String name) {
   }
   if (name.replaceAll(' ', '').isEmpty) {
     throw ArgumentError.value(
-        name, 'Name', 'not enough characters to form initials string');
+      name,
+      'Name',
+      'not enough characters to form initials string',
+    );
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
@@ -127,9 +130,9 @@ timeago.LookupMessages _fromLocale(Locale l) {
 /// ```
 class LoopTimer {
   LoopTimer(Duration duration)
-      : _stopwatch = Stopwatch(),
-        _loopDuration = duration,
-        _zone = Zone.current;
+    : _stopwatch = Stopwatch(),
+      _loopDuration = duration,
+      _zone = Zone.current;
 
   final Stopwatch _stopwatch;
 
@@ -205,4 +208,58 @@ class LoopTimer {
   void _scheduleTickCallback() {
     _zoneTick = _zone.createPeriodicTimer(tenMs, (_) => _invoke(_onTick));
   }
+}
+
+/// Encodes a mailto URI according to RFC 6068.
+///
+/// Creates a properly encoded mailto: URI string from the provided parameters.
+///
+/// Example:
+/// ```dart
+/// final uri = encodeMailto(
+///   to: ['user@example.com'],
+///   subject: 'Hello World',
+///   body: 'This is a test email',
+/// );
+/// // Returns: "mailto:user@example.com?subject=Hello%20World&body=This%20is%20a%20test%20email"
+/// ```
+///
+/// The email address part before the '@' is percent-encoded, while the domain
+/// part remains unencoded. All query parameters (subject, body, cc, bcc) are
+/// percent-encoded.
+String encodeMailto({
+  List<String>? to,
+  List<String>? cc,
+  List<String>? bcc,
+  String? subject,
+  String? body,
+}) {
+  String encodeEmail(String e) => Uri.encodeComponent(e).replaceAll('%40', '@');
+
+  var result = 'mailto:';
+
+  if (to != null && to.isNotEmpty) {
+    result += to.map(encodeEmail).join(',');
+  }
+
+  final queryParts = <String>[];
+
+  if (subject != null && subject.isNotEmpty) {
+    queryParts.add('subject=${Uri.encodeComponent(subject)}');
+  }
+  if (body != null && body.isNotEmpty) {
+    queryParts.add('body=${Uri.encodeComponent(body)}');
+  }
+  if (cc != null && cc.isNotEmpty) {
+    queryParts.add('cc=${cc.map(encodeEmail).join(',')}');
+  }
+  if (bcc != null && bcc.isNotEmpty) {
+    queryParts.add('bcc=${bcc.map(encodeEmail).join(',')}');
+  }
+
+  if (queryParts.isNotEmpty) {
+    result += '?${queryParts.join('&')}';
+  }
+
+  return result;
 }

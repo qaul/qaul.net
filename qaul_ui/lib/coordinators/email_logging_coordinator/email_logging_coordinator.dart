@@ -11,13 +11,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:mailto/mailto.dart';
 import 'package:neat_periodic_task/neat_periodic_task.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:utils/utils.dart';
 
 part 'info_provider.dart';
 
@@ -217,12 +217,12 @@ ${stack ?? 'Not available'}
   Future<void> _sendDesktopLogs(
       {List<FileSystemEntity>? libqaulAttachments}) async {
     _log.fine('(DESKTOP) sending logs via mailto link');
-    final mailtoLink = Mailto(
+    final mailtoLink = encodeMailto(
       to: [_supportEmail],
       body: await _buildDesktopEmail(libqaulAttachments: libqaulAttachments),
       subject: 'Customer Feedback - Error/Exception Logs',
     );
-    await launchUrl(Uri.parse('$mailtoLink'));
+    await launchUrl(Uri.parse(mailtoLink));
   }
 
   Future<String> _buildDesktopEmail(

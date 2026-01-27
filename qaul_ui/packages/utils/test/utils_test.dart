@@ -136,4 +136,85 @@ void main() {
       );
     }
   });
+
+  group('encodeMailto', () {
+    test('encodes email addresses correctly', () {
+      expect(encodeMailto(to: ['user@example.com']), 'mailto:user@example.com');
+      expect(encodeMailto(to: ['user+test@example.com']), 'mailto:user%2Btest@example.com');
+      expect(encodeMailto(to: ['user name@example.com']), 'mailto:user%20name@example.com');
+      expect(encodeMailto(to: ['user.name+tag@example.co.uk']), 'mailto:user.name%2Btag@example.co.uk');
+      expect(encodeMailto(to: ['invalid-email']), 'mailto:invalid-email');
+    });
+
+    test('encodes multiple recipients', () {
+      expect(
+        encodeMailto(to: ['user1@example.com', 'user2@example.com']),
+        'mailto:user1@example.com,user2@example.com',
+      );
+    });
+
+    test('encodes query parameters', () {
+      expect(
+        encodeMailto(to: ['user@example.com'], subject: 'Hello World'),
+        'mailto:user@example.com?subject=Hello%20World',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], body: 'This is a test email'),
+        'mailto:user@example.com?body=This%20is%20a%20test%20email',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], subject: 'Hello', body: 'World'),
+        'mailto:user@example.com?subject=Hello&body=World',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], body: 'Line 1\nLine 2'),
+        'mailto:user@example.com?body=Line%201%0ALine%202',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], body: 'Hello & World?'),
+        'mailto:user@example.com?body=Hello%20%26%20World%3F',
+      );
+    });
+
+    test('encodes cc and bcc parameters', () {
+      expect(
+        encodeMailto(to: ['user@example.com'], cc: ['cc@example.com']),
+        'mailto:user@example.com?cc=cc@example.com',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], bcc: ['bcc@example.com']),
+        'mailto:user@example.com?bcc=bcc@example.com',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], cc: ['user+tag@example.com']),
+        'mailto:user@example.com?cc=user%2Btag@example.com',
+      );
+      expect(
+        encodeMailto(to: ['user@example.com'], cc: ['cc1@example.com', 'cc2@example.com']),
+        'mailto:user@example.com?cc=cc1@example.com,cc2@example.com',
+      );
+    });
+
+    test('encodes all parameters together', () {
+      final result = encodeMailto(
+        to: ['user@example.com'],
+        cc: ['cc@example.com'],
+        bcc: ['bcc@example.com'],
+        subject: 'Subject',
+        body: 'Body',
+      );
+      expect(result, contains('mailto:user@example.com'));
+      expect(result, contains('subject=Subject'));
+      expect(result, contains('body=Body'));
+      expect(result, contains('cc=cc@example.com'));
+      expect(result, contains('bcc=bcc@example.com'));
+    });
+
+    test('handles empty and null values', () {
+      expect(encodeMailto(to: []), 'mailto:');
+      expect(encodeMailto(), 'mailto:');
+      expect(encodeMailto(to: ['user@example.com'], subject: ''), 'mailto:user@example.com');
+      expect(encodeMailto(to: ['user@example.com'], body: ''), 'mailto:user@example.com');
+    });
+  });
 }
