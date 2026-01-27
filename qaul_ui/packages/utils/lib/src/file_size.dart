@@ -1,18 +1,17 @@
-String fileSize(dynamic size) {
+String fileSize(num size) {
   const divider = 1024;
-  final parsedSize = int.parse(size.toString());
 
-  if (parsedSize < divider) {
-    return '$parsedSize B';
+  if (size < divider) {
+    return '$size B';
   }
 
-  if (parsedSize < divider * divider) {
-    return '${(parsedSize / divider).toStringAsFixed(2)} KB';
+  if (size < divider * divider) {
+    return '${(size / divider).toStringAsFixed(2)} KB';
   }
 
-  if (parsedSize < divider * divider * divider) {
-    return '${(parsedSize / (divider * divider)).toStringAsFixed(2)} MB';
+  if (size < divider * divider * divider) {
+    return '${(size / (divider * divider)).toStringAsFixed(2)} MB';
   }
 
-  return '${(parsedSize / (divider * divider * divider)).toStringAsFixed(2)} GB';
+  return '${(size / (divider * divider * divider)).toStringAsFixed(2)} GB';
 }

@@ -3,7 +3,7 @@ import 'package:utils/utils.dart';
 
 void main() {
   group('fileSize', () {
-    final testcases = <MapEntry<dynamic, String>>[
+    final testcases = <MapEntry<num, String>>[
       MapEntry(0, '0 B'),
       MapEntry(1, '1 B'),
       MapEntry(512, '512 B'),
@@ -20,10 +20,6 @@ void main() {
       MapEntry(1073741824, '1.00 GB'),
       MapEntry(1610612736, '1.50 GB'),
       MapEntry(10737418240, '10.00 GB'),
-      MapEntry('0', '0 B'),
-      MapEntry('1024', '1.00 KB'),
-      MapEntry('1048576', '1.00 MB'),
-      MapEntry('1073741824', '1.00 GB'),
     ];
 
     for (final tc in testcases) {
