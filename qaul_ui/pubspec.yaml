@@ -54,7 +54,6 @@ dependencies:
   shared_preferences: ^2.5.4
   url_launcher: ^6.1.14
   utils: { "path": "packages/utils" }
-  version: ^3.0.2
   flutter_markdown_plus: ^1.0.0
   record: ^6.0.0
   audioplayers: ^6.1.1

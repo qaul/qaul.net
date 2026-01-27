@@ -15,6 +15,7 @@ export 'src/file_size_descriptor.dart';
 export 'src/image_manipulation.dart';
 export 'src/intersperse.dart';
 export 'src/ip_utils.dart';
+export 'src/version.dart';
 
 Color colorGenerationStrategy(String first) {
   // defined using --dart-define=testing_mode=true when running tests
