@@ -11,6 +11,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'src/emoji_string_manipulator.dart';
 
+export 'src/bubble.dart';
 export 'src/file_size.dart';
 export 'src/image_manipulation.dart';
 export 'src/intersperse.dart';

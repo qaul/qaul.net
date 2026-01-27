@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:bubble/bubble.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -587,8 +586,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         nipWidth: 0.1,
         nipHeight: radius,
         radius: const Radius.circular(radius),
-        padding: const BubbleEdges.all(0),
-        margin: const BubbleEdges.symmetric(horizontal: 4),
+        padding: EdgeInsets.zero,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         color: user.toInternalUser().id != message.author.id
             ? Colors.grey.shade200
             : Colors.lightBlue.shade700,
