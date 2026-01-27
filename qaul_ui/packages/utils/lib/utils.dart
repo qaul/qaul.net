@@ -24,7 +24,7 @@ Color colorGenerationStrategy(String first) {
   }
   final colors = <Color>[
     ...Colors.primaries.map((e) => e.shade700),
-    ...Colors.accents.map((e) => e.shade700)
+    ...Colors.accents.map((e) => e.shade700),
   ];
   return colors[first.hashCode % colors.length];
 }
@@ -47,7 +47,10 @@ String initials(String name) {
   }
   if (name.replaceAll(' ', '').isEmpty) {
     throw ArgumentError.value(
-        name, 'Name', 'not enough characters to form initials string');
+      name,
+      'Name',
+      'not enough characters to form initials string',
+    );
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
@@ -127,9 +130,9 @@ timeago.LookupMessages _fromLocale(Locale l) {
 /// ```
 class LoopTimer {
   LoopTimer(Duration duration)
-      : _stopwatch = Stopwatch(),
-        _loopDuration = duration,
-        _zone = Zone.current;
+    : _stopwatch = Stopwatch(),
+      _loopDuration = duration,
+      _zone = Zone.current;
 
   final Stopwatch _stopwatch;
 
@@ -231,56 +234,32 @@ String encodeMailto({
   String? subject,
   String? body,
 }) {
-  final buffer = StringBuffer('mailto:');
+  String encodeEmail(String e) => Uri.encodeComponent(e).replaceAll('%40', '@');
+
+  var result = 'mailto:';
 
   if (to != null && to.isNotEmpty) {
-    buffer.write(to.map(_encodeEmailAddress).join(','));
+    result += to.map(encodeEmail).join(',');
   }
 
-  var hasParams = false;
-  final params = <String, String>{};
+  final queryParts = <String>[];
 
   if (subject != null && subject.isNotEmpty) {
-    params['subject'] = subject;
-    hasParams = true;
+    queryParts.add('subject=${Uri.encodeComponent(subject)}');
   }
   if (body != null && body.isNotEmpty) {
-    params['body'] = body;
-    hasParams = true;
+    queryParts.add('body=${Uri.encodeComponent(body)}');
   }
   if (cc != null && cc.isNotEmpty) {
-    params['cc'] = cc.map(_encodeEmailAddress).join(',');
-    hasParams = true;
+    queryParts.add('cc=${cc.map(encodeEmail).join(',')}');
   }
   if (bcc != null && bcc.isNotEmpty) {
-    params['bcc'] = bcc.map(_encodeEmailAddress).join(',');
-    hasParams = true;
+    queryParts.add('bcc=${bcc.map(encodeEmail).join(',')}');
   }
 
-  if (hasParams) {
-    var first = true;
-    for (final entry in params.entries) {
-      buffer.write(first ? '?' : '&');
-      buffer.write(entry.key);
-      buffer.write('=');
-      if (entry.key == 'cc' || entry.key == 'bcc') {
-        buffer.write(entry.value);
-      } else {
-        buffer.write(Uri.encodeComponent(entry.value));
-      }
-      first = false;
-    }
+  if (queryParts.isNotEmpty) {
+    result += '?${queryParts.join('&')}';
   }
 
-  return buffer.toString();
-}
-
-String _encodeEmailAddress(String email) {
-  final atIndex = email.lastIndexOf('@');
-  if (atIndex == -1) {
-    return Uri.encodeComponent(email);
-  }
-  final localPart = email.substring(0, atIndex);
-  final domain = email.substring(atIndex + 1);
-  return '${Uri.encodeComponent(localPart)}@$domain';
+  return result;
 }
