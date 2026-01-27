@@ -1,26 +1,8 @@
-Iterable<T> _intersperseImpl<T>(T element, Iterable<T> iterable) sync* {
-  final iterator = iterable.iterator;
-  if (iterator.moveNext()) {
-    yield iterator.current;
-    while (iterator.moveNext()) {
-      yield element;
-      yield iterator.current;
-    }
-  }
-}
+// From https://github.com/modulovalue/dart_intersperse
+// Copyright (c) 2019 Modestas Valauskas
+// Licensed under MIT. See docs/licenses/THIRD_PARTY_LICENSES.md
 
-/// Puts [element] between every element in [iterable].
-///
-/// Example:
-///
-///     final list1 = intersperse(2, <int>[]); // [];
-///     final list2 = intersperse(2, [0]); // [0];
-///     final list3 = intersperse(2, [0, 0]); // [0, 2, 0];
-///
-Iterable<T> intersperse<T>(T element, Iterable<T> iterable) =>
-    _intersperseImpl(element, iterable);
-
-extension IntersperseExtensions<T> on Iterable<T> {
+extension IntersperseExtension<T> on Iterable<T> {
   /// Puts [element] between every element in [list].
   ///
   /// Example:
@@ -29,7 +11,14 @@ extension IntersperseExtensions<T> on Iterable<T> {
   ///     final list2 = [0].intersperse(2); // [0];
   ///     final list3 = [0, 0].intersperse(2); // [0, 2, 0];
   ///
-  Iterable<T> intersperse(T element) {
-    return _intersperseImpl(element, this);
+  Iterable<T> intersperse(T element) sync* {
+    final iterator = this.iterator;
+    if (iterator.moveNext()) {
+      yield iterator.current;
+      while (iterator.moveNext()) {
+        yield element;
+        yield iterator.current;
+      }
+    }
   }
 }
