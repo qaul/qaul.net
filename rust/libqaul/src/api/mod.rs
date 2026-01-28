@@ -12,7 +12,6 @@
 
 use crossbeam_channel::TryRecvError;
 use directories::ProjectDirs;
-use futures::executor::block_on;
 use std::collections::BTreeMap;
 use std::thread;
 
@@ -43,10 +42,11 @@ pub fn start(storage_path: String) {
 pub fn start_with_config(storage_path: String, config: Option<BTreeMap<String, String>>) {
     // Spawn new thread
     thread::spawn(move || {
-        block_on(async move {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async move {
             // start libqaul
             crate::start(storage_path, config).await;
-        })
+        });
     });
 }
 
