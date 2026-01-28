@@ -8,6 +8,8 @@ final currentSecurityNoProvider =
 class CurrentSecurityNoNotifier extends Notifier<SecurityNumber?> {
   @override
   SecurityNumber? build() => null;
+
+  void setSecurityNumber(SecurityNumber? value) => state = value;
 }
 
 class SecurityNumber {

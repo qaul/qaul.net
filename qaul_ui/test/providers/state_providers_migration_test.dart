@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/services/dtn/dtn_rpc.pb.dart';
-import 'package:qaul_rpc/src/models/user.dart';
 
 class _OverrideDefaultUserNotifier extends DefaultUserNotifier {
   _OverrideDefaultUserNotifier(this._value);
@@ -32,7 +31,7 @@ void main() {
         name: 'test',
         id: Uint8List.fromList([1, 2, 3]),
       );
-      container.read(defaultUserProvider.notifier).state = user;
+      container.read(defaultUserProvider.notifier).setUser(user);
       expect(container.read(defaultUserProvider), user);
     });
 
@@ -44,7 +43,7 @@ void main() {
         fireImmediately: false,
       );
       final user = User(name: 'a', id: Uint8List.fromList([1]));
-      container.read(defaultUserProvider.notifier).state = user;
+      container.read(defaultUserProvider.notifier).setUser(user);
       expect(stateChanges, [user]);
     });
 
@@ -75,7 +74,7 @@ void main() {
         securityHash: Uint8List.fromList([2]),
         securityNumberBlocks: [11111, 22222],
       );
-      container.read(currentSecurityNoProvider.notifier).state = sn;
+      container.read(currentSecurityNoProvider.notifier).setSecurityNumber(sn);
       expect(container.read(currentSecurityNoProvider), sn);
     });
   });
@@ -87,7 +86,7 @@ void main() {
 
     test('notifier.state can be set and read', () {
       final info = NodeInfo('id', ['addr1']);
-      container.read(nodeInfoProvider.notifier).state = info;
+      container.read(nodeInfoProvider.notifier).setNodeInfo(info);
       expect(container.read(nodeInfoProvider), info);
     });
   });
@@ -102,7 +101,7 @@ void main() {
         InternetNode('/ip4/1.2.3.4/udp/1234/quic-v1',
             isActive: true, name: 'n1'),
       ];
-      container.read(connectedNodesProvider.notifier).state = nodes;
+      container.read(connectedNodesProvider.notifier).setNodes(nodes);
       expect(container.read(connectedNodesProvider), nodes);
     });
   });
@@ -115,7 +114,7 @@ void main() {
     test('notifier.state can be set and read', () {
       final res = DtnConfigResponse()..totalSize = 100;
       final config = DTNConfiguration.fromRpcConfigResponse(res, []);
-      container.read(dtnConfigurationProvider.notifier).state = config;
+      container.read(dtnConfigurationProvider.notifier).setConfiguration(config);
       expect(container.read(dtnConfigurationProvider), config);
     });
   });
@@ -129,7 +128,7 @@ void main() {
       final room = ChatRoom(
         conversationId: Uint8List.fromList([1, 2, 3]),
       );
-      container.read(currentOpenChatRoom.notifier).state = room;
+      container.read(currentOpenChatRoom.notifier).setRoom(room);
       expect(container.read(currentOpenChatRoom), room);
     });
   });
@@ -141,7 +140,7 @@ void main() {
 
     test('notifier.state can be set and read', () {
       final status = BleConnectionStatus(bleId: Uint8List.fromList([1]));
-      container.read(bleStatusProvider.notifier).state = status;
+      container.read(bleStatusProvider.notifier).setStatus(status);
       expect(container.read(bleStatusProvider), status);
     });
   });
@@ -152,7 +151,7 @@ void main() {
     });
 
     test('notifier.state can be set and read', () {
-      container.read(libqaulLogsStoragePath.notifier).state = '/tmp/logs';
+      container.read(libqaulLogsStoragePath.notifier).setPath('/tmp/logs');
       expect(container.read(libqaulLogsStoragePath), '/tmp/logs');
     });
   });

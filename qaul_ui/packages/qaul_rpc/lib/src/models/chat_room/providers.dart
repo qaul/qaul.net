@@ -11,4 +11,6 @@ final currentOpenChatRoom =
 class CurrentOpenChatRoomNotifier extends Notifier<ChatRoom?> {
   @override
   ChatRoom? build() => null;
+
+  void setRoom(ChatRoom? room) => state = room;
 }

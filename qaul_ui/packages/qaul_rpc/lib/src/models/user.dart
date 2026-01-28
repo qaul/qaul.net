@@ -90,6 +90,8 @@ class ConnectionInfo extends Equatable {
 class DefaultUserNotifier extends Notifier<User?> {
   @override
   User? build() => null;
+
+  void setUser(User? value) => state = value;
 }
 
 class UserListNotifier extends Notifier<List<User>> {

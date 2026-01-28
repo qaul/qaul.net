@@ -11,6 +11,8 @@ import '../widgets/widgets.dart';
 class _UsernameNotifier extends Notifier<String?> {
   @override
   String? build() => null;
+
+  void setUsername(String? value) => state = value;
 }
 
 class CreateAccountScreen extends HookConsumerWidget {
@@ -161,6 +163,6 @@ class CreateAccountScreen extends HookConsumerWidget {
     if (!valid) return;
 
     loading.value = true;
-    ref.read(_usernameProvider.notifier).state = nameCtrl.text;
+    ref.read(_usernameProvider.notifier).setUsername(nameCtrl.text);
   }
 }

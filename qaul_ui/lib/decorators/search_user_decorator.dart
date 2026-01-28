@@ -14,6 +14,8 @@ typedef SearchUserResultBuilder = Widget Function(
 class _SearchKeyNotifier extends Notifier<String> {
   @override
   String build() => '';
+
+  void setKey(String value) => state = value;
 }
 
 final _searchKeyProvider =
@@ -45,8 +47,6 @@ class SearchUserDecorator extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
-    final searchKeyNotifier = _searchKeyProvider.notifier;
-
     final l10n = AppLocalizations.of(context)!;
     final searchBar = PreferredSize(
       preferredSize: const Size(double.maxFinite, 40),
@@ -64,13 +64,13 @@ class SearchUserDecorator extends HookConsumerWidget {
             suffixIcon: IconButton(
               onPressed: () {
                 controller.clear();
-                ref.read(searchKeyNotifier).state = '';
+                ref.read(_searchKeyProvider.notifier).setKey('');
               },
               splashRadius: 16,
               icon: const Icon(Icons.clear_rounded),
             ),
           ),
-          onChanged: (val) => ref.read(searchKeyNotifier).state = val,
+          onChanged: (val) => ref.read(_searchKeyProvider.notifier).setKey(val),
         ),
       ),
     );
@@ -85,7 +85,7 @@ class SearchUserDecorator extends HookConsumerWidget {
             ),
       body: Consumer(
         builder: (context, ref, _) {
-          final users = ref.watch(_userSearchProvider.notifier).state;
+          final users = ref.watch(_userSearchProvider);
           return builder(context, users);
         },
       ),

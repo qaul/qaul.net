@@ -10,6 +10,8 @@ final connectedNodesProvider =
 class ConnectedNodesNotifier extends Notifier<List<InternetNode>> {
   @override
   List<InternetNode> build() => [];
+
+  void setNodes(List<InternetNode> value) => state = value;
 }
 
 class InternetNode extends Equatable {

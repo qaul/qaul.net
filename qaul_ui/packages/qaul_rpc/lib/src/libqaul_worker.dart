@@ -37,6 +37,8 @@ final libqaulLogsStoragePath =
 class LibqaulLogsStoragePathNotifier extends Notifier<String?> {
   @override
   String? build() => null;
+
+  void setPath(String? value) => state = value;
 }
 
 class LibqaulWorker {
@@ -406,7 +408,7 @@ class LibqaulWorker {
       final path =
           await findFolderWithFilesOfExtension(Directory(res.data), '.log');
       _log.info('libqaul log storage path: $path');
-      _ref.read(libqaulLogsStoragePath.notifier).state = path;
+      _ref.read(libqaulLogsStoragePath.notifier).setPath(path);
     }
   }
 }

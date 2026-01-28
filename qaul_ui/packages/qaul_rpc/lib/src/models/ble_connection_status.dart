@@ -11,6 +11,8 @@ final bleStatusProvider =
 class BleStatusNotifier extends Notifier<BleConnectionStatus?> {
   @override
   BleConnectionStatus? build() => null;
+
+  void setStatus(BleConnectionStatus? value) => state = value;
 }
 
 class BleConnectionStatus {

@@ -6,6 +6,8 @@ final nodeInfoProvider =
 class NodeInfoNotifier extends Notifier<NodeInfo?> {
   @override
   NodeInfo? build() => null;
+
+  void setNodeInfo(NodeInfo? value) => state = value;
 }
 
 class NodeInfo {

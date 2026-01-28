@@ -20,17 +20,18 @@ class ChatTranslator extends RpcModuleTranslator {
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data == null) return;
     if (res.data is ChatConversationList) {
-      final state = ref.read(chatRoomsProvider.notifier);
+      final chatRoomsNotifier = ref.read(chatRoomsProvider.notifier);
       final room = ref.read(chatRoomsProvider)
           .firstWhereOrNull((r) => r.conversationId.equals(res.data.groupId));
-      final currentOpenRoom = ref.read(currentOpenChatRoom.notifier);
+      final currentOpenRoom = ref.read(currentOpenChatRoom);
 
       if (room != null) {
         final roomWithMessages = room.mergeWithConversationList(res.data);
-        state.update(roomWithMessages);
+        chatRoomsNotifier.update(roomWithMessages);
 
-        if (_currentOpenRoomEqualsChatConversationList(currentOpenRoom, res)) {
-          currentOpenRoom.state = roomWithMessages;
+        if (_currentOpenRoomEqualsChatConversationList(
+            currentOpenRoom, res.data as ChatConversationList)) {
+          ref.read(currentOpenChatRoom.notifier).setRoom(roomWithMessages);
         }
       }
     } else {
@@ -39,10 +40,9 @@ class ChatTranslator extends RpcModuleTranslator {
   }
 
   bool _currentOpenRoomEqualsChatConversationList(
-    Notifier<ChatRoom?> currentOpenRoomNotifier,
-    RpcTranslatorResponse res,
+    ChatRoom? currentOpenRoom,
+    ChatConversationList resData,
   ) =>
-      currentOpenRoomNotifier.state != null &&
-      currentOpenRoomNotifier.state!.conversationId
-          .equals((res.data as ChatConversationList).groupId);
+      currentOpenRoom != null &&
+      currentOpenRoom.conversationId.equals(resData.groupId);
 }

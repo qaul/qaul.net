@@ -11,6 +11,8 @@ final dtnConfigurationProvider =
 class DtnConfigurationNotifier extends Notifier<DTNConfiguration?> {
   @override
   DTNConfiguration? build() => null;
+
+  void setConfiguration(DTNConfiguration? value) => state = value;
 }
 
 class DTNConfiguration {

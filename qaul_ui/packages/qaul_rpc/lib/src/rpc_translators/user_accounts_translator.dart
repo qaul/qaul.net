@@ -35,6 +35,6 @@ class UserAccountsTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! User) return;
-    ref.read(defaultUserProvider.notifier).state = res.data;
+    ref.read(defaultUserProvider.notifier).setUser(res.data);
   }
 }
