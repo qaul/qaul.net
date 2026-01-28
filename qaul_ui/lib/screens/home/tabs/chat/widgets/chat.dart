@@ -61,7 +61,7 @@ Future<void> openChat(
   required User user,
   User? otherUser,
 }) async {
-  ref.read(currentOpenChatRoom.notifier).state = room;
+  ref.read(currentOpenChatRoom.notifier).setRoom(room);
 
   bool isMobile =
       MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
@@ -192,7 +192,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _scheduleUpdateCurrentOpenChat() =>
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(currentOpenChatRoom.notifier).state = room;
+        ref.read(currentOpenChatRoom.notifier).setRoom(room);
         ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
       });
 
@@ -237,7 +237,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final closeChat = useCallback(() {
       if (!mounted) return;
-      ref.read(currentOpenChatRoom.notifier).state = null;
+      ref.read(currentOpenChatRoom.notifier).setRoom(null);
       if (_kChatRouteName == ModalRoute.of(context)?.settings.name) {
         Navigator.pop(context);
       }

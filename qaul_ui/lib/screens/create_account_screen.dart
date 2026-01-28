@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
+
+class _UsernameNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void setUsername(String? value) => state = value;
+}
 
 class CreateAccountScreen extends HookConsumerWidget {
   CreateAccountScreen() : super(key: widgetKey);
@@ -20,7 +26,8 @@ class CreateAccountScreen extends HookConsumerWidget {
 
   static final _log = Logger('CreateAccountScreen');
 
-  static final _usernameProvider = StateProvider<String?>((ref) => null);
+  static final _usernameProvider =
+      NotifierProvider<_UsernameNotifier, String?>(_UsernameNotifier.new);
 
   final _sendRequestProvider = FutureProvider<bool?>((ref) async {
     final name = ref.watch(_usernameProvider);
@@ -156,6 +163,6 @@ class CreateAccountScreen extends HookConsumerWidget {
     if (!valid) return;
 
     loading.value = true;
-    ref.read(_usernameProvider.notifier).state = nameCtrl.text;
+    ref.read(_usernameProvider.notifier).setUsername(nameCtrl.text);
   }
 }

@@ -85,7 +85,7 @@ class UsersTranslator extends RpcModuleTranslator {
       }
     }
     if (res.data is SecurityNumber) {
-      ref.read(currentSecurityNoProvider.notifier).state = res.data;
+      ref.read(currentSecurityNoProvider.notifier).setSecurityNumber(res.data);
     }
   }
 }

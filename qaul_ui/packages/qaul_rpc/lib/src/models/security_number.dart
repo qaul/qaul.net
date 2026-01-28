@@ -1,7 +1,16 @@
 import 'package:flutter/foundation.dart';
-import 'package:hooks_riverpod/legacy.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final currentSecurityNoProvider = StateProvider<SecurityNumber?>((_) => null);
+final currentSecurityNoProvider =
+    NotifierProvider<CurrentSecurityNoNotifier, SecurityNumber?>(
+        CurrentSecurityNoNotifier.new);
+
+class CurrentSecurityNoNotifier extends Notifier<SecurityNumber?> {
+  @override
+  SecurityNumber? build() => null;
+
+  void setSecurityNumber(SecurityNumber? value) => state = value;
+}
 
 class SecurityNumber {
   SecurityNumber({

@@ -4,9 +4,9 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 
-final defaultUserProvider = StateProvider<User?>((ref) => null);
+final defaultUserProvider =
+    NotifierProvider<DefaultUserNotifier, User?>(DefaultUserNotifier.new);
 
 final usersProvider = NotifierProvider<UserListNotifier, List<User>>(
   UserListNotifier.new,
@@ -85,6 +85,13 @@ class ConnectionInfo extends Equatable {
 
   @override
   List<Object?> get props => [ping, hopCount, nodeID, nodeIDBase58];
+}
+
+class DefaultUserNotifier extends Notifier<User?> {
+  @override
+  User? build() => null;
+
+  void setUser(User? value) => state = value;
 }
 
 class UserListNotifier extends Notifier<List<User>> {

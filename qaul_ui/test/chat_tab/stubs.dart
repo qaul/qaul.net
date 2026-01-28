@@ -25,8 +25,8 @@ class StubLibqaulWorker implements LibqaulWorker {
       room == null || room.messages == null ? [] : room.messages!,
     );
     msgs.add(message);
-    ref.read(currentOpenChatRoom.notifier).state =
-        buildGroupChat(messages: msgs);
+    ref.read(currentOpenChatRoom.notifier).setRoom(
+        buildGroupChat(messages: msgs));
   }
 
   @override
