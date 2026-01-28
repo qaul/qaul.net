@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../l10n/app_localizations.dart';
@@ -12,23 +11,31 @@ import '../widgets/widgets.dart';
 typedef SearchUserResultBuilder = Widget Function(
     BuildContext context, List<User> users);
 
-final _searchKeyProvider = StateProvider.autoDispose<String>((ref) {
-  return '';
-});
+class _SearchKeyNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+}
 
-final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
-  final defaultUser = ref.watch(defaultUserProvider)!;
-  final users = ref
-      .watch(usersProvider)
-      .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
-      .toList()
-    ..sort();
+final _searchKeyProvider =
+    NotifierProvider.autoDispose<_SearchKeyNotifier, String>(_SearchKeyNotifier.new);
 
-  final key = ref.watch(_searchKeyProvider).toLowerCase();
-  if (key.isEmpty) return users;
+class _UserSearchNotifier extends Notifier<List<User>> {
+  @override
+  List<User> build() {
+    final defaultUser = ref.watch(defaultUserProvider)!;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
+        .toList()
+      ..sort();
+    final key = ref.watch(_searchKeyProvider).toLowerCase();
+    if (key.isEmpty) return users;
+    return users.where((user) => user.name.toLowerCase().contains(key)).toList();
+  }
+}
 
-  return users.where((user) => user.name.toLowerCase().contains(key)).toList();
-});
+final _userSearchProvider =
+    NotifierProvider.autoDispose<_UserSearchNotifier, List<User>>(_UserSearchNotifier.new);
 
 class SearchUserDecorator extends HookConsumerWidget {
   const SearchUserDecorator({super.key, required this.builder, this.title});

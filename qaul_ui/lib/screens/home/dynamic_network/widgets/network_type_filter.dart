@@ -20,21 +20,33 @@ ConnectionType _mapFilter(NetworkTypeFilter t) {
   }
 }
 
-/// The currently active filter.
-final _networkTypeFilter = StateProvider((_) => NetworkTypeFilter.all);
+class _NetworkTypeFilterNotifier extends Notifier<NetworkTypeFilter> {
+  @override
+  NetworkTypeFilter build() => NetworkTypeFilter.all;
 
-/// Nodes that fit the current filter criteria
-final _filteredNodes = StateProvider<NetworkNode>((ref) {
-  final filter = ref.watch(_networkTypeFilter);
-  final defaultUser = ref.watch(defaultUserProvider)!;
-  final users = ref
-      .watch(usersProvider)
-      .where((u) => !(u.isBlocked ?? false))
-      .where((u) => u.idBase58 != defaultUser.idBase58)
-      .toList();
+  void select(NetworkTypeFilter value) => state = value;
+}
 
-  return NetworkNode.fromUserData(defaultUser, users, filter);
-});
+final _networkTypeFilter =
+    NotifierProvider<_NetworkTypeFilterNotifier, NetworkTypeFilter>(
+        _NetworkTypeFilterNotifier.new);
+
+class _FilteredNodesNotifier extends Notifier<NetworkNode> {
+  @override
+  NetworkNode build() {
+    final filter = ref.watch(_networkTypeFilter);
+    final defaultUser = ref.watch(defaultUserProvider)!;
+    final users = ref
+        .watch(usersProvider)
+        .where((u) => !(u.isBlocked ?? false))
+        .where((u) => u.idBase58 != defaultUser.idBase58)
+        .toList();
+    return NetworkNode.fromUserData(defaultUser, users, filter);
+  }
+}
+
+final _filteredNodes =
+    NotifierProvider<_FilteredNodesNotifier, NetworkNode>(_FilteredNodesNotifier.new);
 
 class _NetworkTypeFilterToolbar extends HookConsumerWidget {
   const _NetworkTypeFilterToolbar();
@@ -60,7 +72,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
         context,
         filter: filter,
         backgroundColor: bgColorFor(filter),
-        onTap: () => ref.read(_networkTypeFilter.notifier).state = filter,
+        onTap: () => ref.read(_networkTypeFilter.notifier).select(filter),
       );
     }).intersperse(const SizedBox(width: 8)).toList();
 
