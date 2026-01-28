@@ -2,9 +2,16 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
-import 'package:hooks_riverpod/legacy.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final bleStatusProvider = StateProvider<BleConnectionStatus?>((_) => null);
+final bleStatusProvider =
+    NotifierProvider<BleStatusNotifier, BleConnectionStatus?>(
+        BleStatusNotifier.new);
+
+class BleStatusNotifier extends Notifier<BleConnectionStatus?> {
+  @override
+  BleConnectionStatus? build() => null;
+}
 
 class BleConnectionStatus {
   final Uint8List bleId;

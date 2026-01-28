@@ -39,7 +39,7 @@ class ChatTranslator extends RpcModuleTranslator {
   }
 
   bool _currentOpenRoomEqualsChatConversationList(
-    StateController<ChatRoom?> currentOpenRoomNotifier,
+    Notifier<ChatRoom?> currentOpenRoomNotifier,
     RpcTranslatorResponse res,
   ) =>
       currentOpenRoomNotifier.state != null &&

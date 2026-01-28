@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart' as pb;
 import 'package:utils/utils.dart';
@@ -31,7 +30,14 @@ import 'utils.dart';
 
 final qaulWorkerProvider = Provider<LibqaulWorker>((ref) => LibqaulWorker(ref));
 
-final libqaulLogsStoragePath = StateProvider<String?>((ref) => null);
+final libqaulLogsStoragePath =
+    NotifierProvider<LibqaulLogsStoragePathNotifier, String?>(
+        LibqaulLogsStoragePathNotifier.new);
+
+class LibqaulLogsStoragePathNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+}
 
 class LibqaulWorker {
   LibqaulWorker(Ref ref) : _ref = ref {
