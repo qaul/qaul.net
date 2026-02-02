@@ -44,15 +44,13 @@ pub struct UserAccounts {
 }
 
 impl UserAccounts {
-    pub fn init() {
+    /// Create a new UserAccounts instance from configuration (instance-based)
+    ///
+    /// This is the new API for creating UserAccounts without global state.
+    pub fn create_from_config(config: &Configuration) -> Self {
         let mut accounts = UserAccounts { users: Vec::new() };
 
-        // check if there are users defined in configuration
-        let config = Configuration::get();
-        let config_users = config.user_accounts.clone();
-        let mut iter = IntoIterator::into_iter(config_users);
-
-        while let Some(user) = iter.next() {
+        for user in &config.user_accounts {
             let mut basedecode = base64::engine::general_purpose::STANDARD
                 .decode(&user.keys)
                 .unwrap();
@@ -77,6 +75,16 @@ impl UserAccounts {
                 keys: keys.clone(),
             });
         }
+
+        accounts
+    }
+
+    /// Initialize from global configuration (global state - for backward compatibility)
+    ///
+    /// Note: This uses global state. For new code, prefer using `create_from_config()`.
+    pub fn init() {
+        let config = Configuration::get();
+        let accounts = Self::create_from_config(&config);
 
         // save users to state
         USERACCOUNTS.set(RwLock::new(accounts));
