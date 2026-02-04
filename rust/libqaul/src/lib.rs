@@ -129,10 +129,8 @@ impl Libqaul {
         let sys_receiver = Sys::init();
 
         // initialize storage module (instance-based)
+        // This also sets up global state for backward compatibility
         let storage = Arc::new(StorageModule::new(storage_path.clone()));
-
-        // Also initialize global state for backward compatibility
-        storage::Storage::init(storage_path.clone());
 
         // Initialize logger
         Self::init_logger(&storage_path);

@@ -38,13 +38,23 @@ pub struct StorageModule {
 impl StorageModule {
     /// Create a new StorageModule instance
     ///
-    /// This initializes configuration and database without using global state.
+    /// This initializes configuration and database via global state,
+    /// then wraps references to them. This ensures backward compatibility
+    /// with code that uses `Storage::get_path()`, `Configuration::get()`, etc.
     pub fn new(path: String) -> Self {
-        // Load or create configuration
-        let config = Configuration::load_or_create(&path);
+        // Initialize global state - this opens the database once
+        Storage::init(path.clone());
 
-        // Create database
-        let database = DataBase::create(&path);
+        // Clone configuration from global state
+        let config = Configuration::get().clone();
+
+        // Get the database handle from global state (don't open again!)
+        let db = DataBase::get_node_db();
+        let database = DataBase {
+            path: path.clone(),
+            node: db,
+            users: std::collections::BTreeMap::new(),
+        };
 
         Self {
             path,
