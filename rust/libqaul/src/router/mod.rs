@@ -46,8 +46,7 @@ static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
 ///
 /// This struct wraps the router configuration and provides instance-based
 /// access to routing functionality. The actual routing tables are still
-/// stored in global state for backward compatibility - they will be migrated
-/// in future phases.
+/// stored in global state for backward compatibility
 pub struct RouterModule {
     /// Router configuration
     pub configuration: RoutingOptions,
