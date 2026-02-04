@@ -51,10 +51,6 @@ static DEFCONFIGS: InitCell<BTreeMap<String, String>> = InitCell::new();
 
 /// Libqaul - Main library instance
 ///
-/// This struct holds all the state for a single libqaul instance.
-/// Phase 7: All major modules now use instance-based state.
-/// Phase 8-9 will remove global state and enable multi-instance support.
-///
 /// # Usage
 ///
 /// ```rust,ignore
@@ -135,7 +131,6 @@ impl Libqaul {
         let storage = Arc::new(StorageModule::new(storage_path.clone()));
 
         // Also initialize global state for backward compatibility
-        // This will be removed in later phases
         storage::Storage::init(storage_path.clone());
 
         // Initialize logger
@@ -150,7 +145,6 @@ impl Libqaul {
         };
 
         // Also initialize global state for backward compatibility
-        // This will be removed in later phases
         Node::init();
 
         // initialize router module (instance-based)

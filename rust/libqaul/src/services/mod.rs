@@ -23,8 +23,6 @@ pub mod rtc;
 /// Services Module - holds all services state for a single instance
 ///
 /// This struct wraps the services and provides instance-based access.
-/// The actual service states are still stored in global state for backward
-/// compatibility - they will be migrated in future phases.
 pub struct ServicesModule {
     /// Whether services have been initialized
     initialized: bool,
