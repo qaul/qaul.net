@@ -46,14 +46,17 @@ async fn main() {
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
-    // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start_with_config(storage_path, None);
+    // start libqaul in new thread and get instance
+    let instance = libqaul::api::start_instance_in_thread(storage_path, None);
 
     // wait until libqaul finished initializing
-    while libqaul::api::initialization_finished() == false {
+    while !instance.is_initialized() {
         // wait a little while
         std::thread::sleep(Duration::from_millis(10));
     }
+
+    // Print node info
+    println!("Node ID: {}", instance.node_id());
 
     // initialize user accounts
     UserAccounts::init();
