@@ -113,7 +113,7 @@ class ChatRoom with EquatableMixin implements Comparable {
   }
 
   @override
-  List<Object?> get props => [idBase58];
+  List<Object?> get props => [idBase58, lastMessageIndex];
 
   @override
   String toString() {

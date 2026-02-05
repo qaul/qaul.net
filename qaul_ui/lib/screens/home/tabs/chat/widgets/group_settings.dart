@@ -10,7 +10,7 @@ class _GroupSettingsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultUser = ref.watch(defaultUserProvider)!;
-    final group = ref.watch(chatRoomsProvider).firstWhere((r) => r == room);
+    final group = ref.watch(chatRoomsProvider).firstWhere((r) => r.idBase58 == room.idBase58);
 
     final nameCtrl = useTextEditingController(text: room.name);
 
