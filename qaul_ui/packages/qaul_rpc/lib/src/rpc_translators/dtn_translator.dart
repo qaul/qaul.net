@@ -45,7 +45,7 @@ class DTNTranslator extends RpcModuleTranslator {
     // Means _receiveResultResponse yielded a success message.
     if (res.data is bool && res.data == true) return;
     if (res.data is DTNConfiguration) {
-      ref.read(dtnConfigurationProvider.notifier).state = res.data;
+      ref.read(dtnConfigurationProvider.notifier).setConfiguration(res.data);
       return;
     }
 

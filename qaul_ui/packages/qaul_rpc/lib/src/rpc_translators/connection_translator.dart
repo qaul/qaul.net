@@ -26,6 +26,6 @@ class ConnectionTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type || res.data is! List<InternetNode>) return;
-    ref.read(connectedNodesProvider.notifier).state = res.data;
+    ref.read(connectedNodesProvider.notifier).setNodes(res.data);
   }
 }

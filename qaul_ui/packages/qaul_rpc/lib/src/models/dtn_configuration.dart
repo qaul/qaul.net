@@ -1,10 +1,19 @@
 import 'package:collection/collection.dart';
-import 'package:hooks_riverpod/legacy.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/dtn/dtn_rpc.pb.dart';
 import 'models.dart';
 
-final dtnConfigurationProvider = StateProvider<DTNConfiguration?>((_) => null);
+final dtnConfigurationProvider =
+    NotifierProvider<DtnConfigurationNotifier, DTNConfiguration?>(
+        DtnConfigurationNotifier.new);
+
+class DtnConfigurationNotifier extends Notifier<DTNConfiguration?> {
+  @override
+  DTNConfiguration? build() => null;
+
+  void setConfiguration(DTNConfiguration? value) => state = value;
+}
 
 class DTNConfiguration {
   DTNConfiguration._(this.totalSize, this.users);

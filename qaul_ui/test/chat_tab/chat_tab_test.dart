@@ -19,6 +19,13 @@ part 'fixtures.dart';
 
 part 'stubs.dart';
 
+class _OverrideDefaultUserNotifier extends DefaultUserNotifier {
+  _OverrideDefaultUserNotifier(this._value);
+  final User? _value;
+  @override
+  User? build() => _value;
+}
+
 class TestChatRoomListNotifier extends ChatRoomListNotifier {
   @override
   List<ChatRoom> build() => [buildGroupChat()];
@@ -45,7 +52,7 @@ void main() {
     final wut = ProviderScope(
       overrides: [
         defaultUserProvider.overrideWith(
-          (_) => defaultUser,
+          () => _OverrideDefaultUserNotifier(defaultUser),
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -68,7 +75,7 @@ void main() {
     final wut = ProviderScope(
       overrides: [
         defaultUserProvider.overrideWith(
-          (_) => defaultUser,
+          () => _OverrideDefaultUserNotifier(defaultUser),
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -103,7 +110,7 @@ void main() {
     final wut = ProviderScope(
       overrides: [
         defaultUserProvider.overrideWith(
-          (_) => defaultUser,
+          () => _OverrideDefaultUserNotifier(defaultUser),
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -144,7 +151,7 @@ void main() {
     final wut = ProviderScope(
       overrides: [
         defaultUserProvider.overrideWith(
-          (_) => defaultUser,
+          () => _OverrideDefaultUserNotifier(defaultUser),
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -194,7 +201,7 @@ void main() {
     final wut = ProviderScope(
       overrides: [
         defaultUserProvider.overrideWith(
-          (_) => defaultUser,
+          () => _OverrideDefaultUserNotifier(defaultUser),
         ),
         chatNotificationControllerProvider.overrideWithValue(
           NullChatNotificationController(),
@@ -245,7 +252,7 @@ void main() {
       final wut = ProviderScope(
         overrides: [
           defaultUserProvider.overrideWith(
-            (_) => defaultUser,
+            () => _OverrideDefaultUserNotifier(defaultUser),
           ),
           chatNotificationControllerProvider.overrideWithValue(
             NullChatNotificationController(),

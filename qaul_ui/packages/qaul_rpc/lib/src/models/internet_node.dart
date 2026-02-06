@@ -1,9 +1,18 @@
 import 'package:equatable/equatable.dart';
-import 'package:hooks_riverpod/legacy.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/connections/connections.pb.dart';
 
-final connectedNodesProvider = StateProvider<List<InternetNode>>((ref) => []);
+final connectedNodesProvider =
+    NotifierProvider<ConnectedNodesNotifier, List<InternetNode>>(
+        ConnectedNodesNotifier.new);
+
+class ConnectedNodesNotifier extends Notifier<List<InternetNode>> {
+  @override
+  List<InternetNode> build() => [];
+
+  void setNodes(List<InternetNode> value) => state = value;
+}
 
 class InternetNode extends Equatable {
   InternetNode(

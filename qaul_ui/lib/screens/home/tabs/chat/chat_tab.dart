@@ -50,7 +50,7 @@ class _ChatState extends _BaseTabState<_Chat> {
             user: defaultUser,
             otherUser: otherUser);
       } else {
-        ref.read(currentOpenChatRoom.notifier).state = room;
+        ref.read(currentOpenChatRoom.notifier).setRoom(room);
       }
     }, [mobile]);
 
