@@ -8,7 +8,7 @@
 
 use prost::Message;
 use state::InitCell;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 pub mod connections;
 pub mod feed_requester;
@@ -39,8 +39,39 @@ pub mod router_net_proto {
 }
 
 /// mutable state of router,
-/// used for storing the router configuration
+/// used for storing the router configuration (global state - deprecated)
 static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
+
+/// Router Module - holds all router state for a single instance
+///
+/// This struct wraps the router configuration and provides instance-based
+/// access to routing functionality. The actual routing tables are still
+/// stored in global state for backward compatibility - they will be migrated
+/// in future phases.
+pub struct RouterModule {
+    /// Router configuration
+    pub configuration: RoutingOptions,
+    /// Sending table period in seconds
+    pub sending_table_period: u64,
+}
+
+impl RouterModule {
+    /// Create a new RouterModule from configuration (instance-based)
+    ///
+    /// Note: This creates the instance but the actual routing tables
+    /// are still initialized via global state for backward compatibility.
+    pub fn new(config: &Configuration) -> Self {
+        Self {
+            configuration: config.routing.clone(),
+            sending_table_period: config.routing.sending_table_period,
+        }
+    }
+
+    /// Get router configuration
+    pub fn get_configuration(&self) -> &RoutingOptions {
+        &self.configuration
+    }
+}
 
 /// qaul community router access
 #[derive(Clone)]

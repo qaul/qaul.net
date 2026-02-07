@@ -29,12 +29,12 @@ pub struct DataBase {
 }
 
 impl DataBase {
-    /// Initialize data base,
-    /// open data base from disk and set it to global state.
-    pub fn init() {
-        // create node data base path
-        let path_string = super::Storage::get_path();
-        let path = Path::new(path_string.as_str());
+    /// Create a new DataBase instance (instance-based, no global state)
+    ///
+    /// This is the new API for creating DataBase instances without global state.
+    /// Use this when creating a `StorageModule` or `Libqaul` instance.
+    pub fn create(storage_path: &str) -> DataBase {
+        let path = Path::new(storage_path);
         let db_path = path.join("node.db");
 
         // open node data base
@@ -43,18 +43,58 @@ impl DataBase {
             .open()
             .expect("Failed to open sled db");
 
-        // create data base structure
-        let database = DataBase {
-            path: path_string,
+        DataBase {
+            path: storage_path.to_string(),
             node,
             users: BTreeMap::new(),
-        };
+        }
+    }
+
+    /// Initialize data base,
+    /// open data base from disk and set it to global state.
+    ///
+    /// Note: This uses global state. For new code, prefer using `DataBase::create()`.
+    pub fn init() {
+        // create node data base path
+        let path_string = super::Storage::get_path();
+        let database = Self::create(&path_string);
 
         // put data base structure to state
         DATABASE.set(RwLock::new(database));
     }
 
-    /// get node DB
+    /// Get the node database from this instance
+    pub fn node_db(&self) -> sled::Db {
+        self.node.clone()
+    }
+
+    /// Get a user account database from this instance
+    pub fn user_db(&mut self, account_id: PeerId) -> sled::Db {
+        // check if user account data base is already open
+        if let Some(db) = self.users.get(&account_id.to_bytes()) {
+            return db.clone();
+        }
+
+        // otherwise open it from disk
+        let path = Path::new(self.path.as_str());
+        let db_folder = path.join(account_id.to_base58());
+        let db_path = db_folder.join("user.db");
+
+        // open data base from disk
+        let db = sled::Config::default()
+            .path(db_path)
+            .open()
+            .expect("Failed to open sled db");
+
+        // save data base to state
+        self.users.insert(account_id.to_bytes(), db.clone());
+
+        db
+    }
+
+    /// get node DB (global state - for backward compatibility)
+    ///
+    /// Note: This uses global state. For new code, prefer using `DataBase::node_db()`.
     pub fn get_node_db() -> sled::Db {
         let database = DATABASE.get().read().unwrap();
         database.node.clone()
