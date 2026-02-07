@@ -9,9 +9,11 @@
 
 use clap::Parser;
 use std::collections::BTreeMap;
+use std::path::PathBuf;
 use std::{thread, time::Duration};
 
 use libqaul;
+mod socket;
 
 /// qauld - qaul daemon : CLI Arguments
 #[derive(Parser)]
@@ -56,7 +58,7 @@ async fn main() {
     }
 
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start_with_config(storage_path, Some(def_config.clone()));
+    libqaul::api::start_with_config(storage_path.clone(), Some(def_config.clone()));
 
     // wait until libqaul finished initializing
     while libqaul::api::initialization_finished() == false {
@@ -75,8 +77,9 @@ async fn main() {
         libqaul::node::user_accounts::UserAccounts::create(user_name.clone(), None);
     }
 
-    // loop
-    loop {
-        thread::sleep(Duration::from_millis(10));
+    // since we're now starting a socket server, the main thread now has work to do,
+    // so, we can get rid of the loop
+    if let Err(err) = socket::start_server(PathBuf::from(storage_path)).await {
+        eprintln!("Err: {err}")
     }
 }
