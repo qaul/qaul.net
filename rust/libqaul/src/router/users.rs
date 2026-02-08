@@ -143,7 +143,7 @@ impl Users {
                 res.push(id.clone());
             }
         }
-        return res;
+        res
     }
 
     /// get the public key of a known user
@@ -287,10 +287,18 @@ impl Users {
             Ok(users) => {
                 match users.message {
                     Some(proto::users::Message::UserRequest(user_request)) => {
-                        Self::build_users_list(false, user_request.offset, user_request.limit);
+                        Self::build_user_list(
+                            UserFilter::All,
+                            user_request.offset,
+                            user_request.limit,
+                        );
                     }
                     Some(proto::users::Message::UserOnlineRequest(user_online_request)) => {
-                        Self::build_users_list(true, user_online_request.offset, user_online_request.limit);
+                        Self::build_user_list(
+                            UserFilter::OnlineOnly,
+                            user_online_request.offset,
+                            user_online_request.limit,
+                        );
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
@@ -409,84 +417,25 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    ///
-    /// Optionally pass `online_only` to filter out offline users.
-    fn build_users_list(online_only: bool, offset: u32, limit: u32) {
+    fn build_user_list(filter: UserFilter, offset: u32, limit: u32) {
         let users = USERS.get().read().unwrap();
 
-        let mut user_list = proto::UserList {
-            user: Vec::new(),
-            pagination: None,
-        };
-
-        if let Some(account) = UserAccounts::get_default_user() {
+        let user_list = if let Some(account) = UserAccounts::get_default_user() {
             let online_users = RoutingTable::get_online_users_info();
-
-            let total = if online_only {
-                online_users.len() as u32
-            } else {
-                users.users.len() as u32
-            };
-
-            let has_more = limit > 0 && (offset + limit) < total;
-
-            let mut skipped: u32 = 0;
-
-            for (id, user) in &users.users {
-                // Filter out offline users when only online users are requested
-                if online_only && !online_users.contains_key(id) {
-                    continue;
-                }
-
-                // Skip entries until we reach the offset
-                if skipped < offset {
-                    skipped += 1;
-                    continue;
-                }
-
-                // Stop once we've collected enough entries
-                if limit > 0 && user_list.user.len() >= limit as usize {
-                    break;
-                }
-
-                let mut connectivity: i32 = 0;
-                let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
-
-                if let Some(entries) = online_users.get(id) {
-                    for entry in entries {
-                        connections.push(proto::RoutingTableConnection {
-                            module: entry.module.as_int(),
-                            hop_count: entry.hc as u32,
-                            rtt: entry.rtt,
-                            via: entry.node.to_bytes(),
-                        });
-                    }
-                    connectivity = 1;
-                }
-
-                let (_key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
-
-                let group_id = GroupId::from_peers(&account.id, &user.id).to_bytes();
-
-                user_list.user.push(proto::UserEntry {
-                    name: user.name.clone(),
-                    id: user.id.to_bytes(),
-                    group_id,
-                    key_base58,
-                    connectivity,
-                    verified: user.verified,
-                    blocked: user.blocked,
-                    connections,
-                });
-            }
-
-            user_list.pagination = Some(proto::PaginationMetadata {
-                has_more,
-                total,
+            build_user_list_from(
+                &users.users,
+                &online_users,
+                &account.id,
+                filter,
                 offset,
                 limit,
-            });
-        }
+            )
+        } else {
+            proto::UserList {
+                user: Vec::new(),
+                pagination: None,
+            }
+        };
 
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserList(user_list)),
@@ -506,6 +455,15 @@ impl Users {
     }
 }
 
+/// Describes what users to include when building the users list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UserFilter {
+    /// Include all known users.
+    All,
+    /// Include only users present in the routing table (online).
+    OnlineOnly,
+}
+
 /// user structure
 pub struct User {
     pub id: PeerId,
@@ -523,4 +481,364 @@ pub struct UserData {
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+}
+
+/// Build a paginated user list from a set of users and online users,
+/// optionally filtering out offline users.
+fn build_user_list_from(
+    users: &BTreeMap<Vec<u8>, User>,
+    online_users: &BTreeMap<Vec<u8>, Vec<super::table::RoutingConnectionEntry>>,
+    account_id: &PeerId,
+    filter: UserFilter,
+    offset: u32,
+    limit: u32,
+) -> proto::UserList {
+    let mut user_list = proto::UserList {
+        user: Vec::new(),
+        pagination: None,
+    };
+
+    let online_only = filter == UserFilter::OnlineOnly;
+
+    let mut total = if online_only {
+        online_users.len() as u32
+    } else {
+        users.len() as u32
+    };
+
+    let mut skipped: u32 = 0;
+
+    for (id, user) in users {
+        if online_only && !online_users.contains_key(id) {
+            continue;
+        }
+
+        if skipped < offset {
+            skipped += 1;
+            continue;
+        }
+
+        if limit > 0 && user_list.user.len() >= limit as usize {
+            break;
+        }
+
+        let mut connectivity: i32 = 0;
+        let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
+
+        if let Some(entries) = online_users.get(id) {
+            for entry in entries {
+                connections.push(proto::RoutingTableConnection {
+                    module: entry.module.as_int(),
+                    hop_count: entry.hc as u32,
+                    rtt: entry.rtt,
+                    via: entry.node.to_bytes(),
+                });
+            }
+            connectivity = 1;
+        }
+
+        let (_key_type, key_base58) = Users::get_protobuf_public_key(user.key.clone());
+
+        let group_id = GroupId::from_peers(account_id, &user.id).to_bytes();
+
+        user_list.user.push(proto::UserEntry {
+            name: user.name.clone(),
+            id: user.id.to_bytes(),
+            group_id,
+            key_base58,
+            connectivity,
+            verified: user.verified,
+            blocked: user.blocked,
+            connections,
+        });
+    }
+
+    // When online_only is true, total was estimated from the routing table which
+    // may contain peers absent from the users store. If we didn't break early
+    // (i.e. we exhausted all matching entries), we know the exact count.
+    let exhausted = limit == 0 || (user_list.user.len() as u32) < limit;
+    if online_only && exhausted {
+        total = skipped + user_list.user.len() as u32;
+    }
+
+    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+
+    user_list.pagination = Some(proto::PaginationMetadata {
+        has_more,
+        total,
+        offset,
+        limit,
+    });
+
+    user_list
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::table::RoutingConnectionEntry;
+    use super::*;
+    use crate::connections::ConnectionModule;
+    use libp2p::identity::Keypair;
+
+    /// Helper: generate a (PeerId, PublicKey) pair from a fresh Ed25519 keypair.
+    fn gen_peer() -> (PeerId, PublicKey) {
+        let kp = Keypair::generate_ed25519();
+        let pk = kp.public();
+        let id = pk.to_peer_id();
+        (id, pk)
+    }
+
+    /// Helper: build a `BTreeMap<Vec<u8>, User>` with `n` users and return
+    /// the generated PeerIds (in insertion order) for later use.
+    fn make_users(n: usize) -> (BTreeMap<Vec<u8>, User>, Vec<PeerId>) {
+        let mut map = BTreeMap::new();
+        let mut ids = Vec::new();
+        for i in 0..n {
+            let (id, key) = gen_peer();
+            let q8id = QaulId::to_q8id(id);
+            map.insert(
+                q8id,
+                User {
+                    id,
+                    key,
+                    name: format!("user_{}", i),
+                    verified: false,
+                    blocked: false,
+                },
+            );
+            ids.push(id);
+        }
+        (map, ids)
+    }
+
+    /// Helper: build online_users map for specified q8ids.
+    fn make_online(
+        users: &BTreeMap<Vec<u8>, User>,
+        count: usize,
+    ) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
+        let mut online = BTreeMap::new();
+        let via_peer = gen_peer().0;
+        for (i, (q8id, _user)) in users.iter().enumerate() {
+            if i >= count {
+                break;
+            }
+            online.insert(
+                q8id.clone(),
+                vec![RoutingConnectionEntry {
+                    module: ConnectionModule::Lan,
+                    node: via_peer,
+                    rtt: 10,
+                    hc: 1,
+                    lq: 100,
+                    last_update: 0,
+                }],
+            );
+        }
+        online
+    }
+
+    /// Helper: a dummy account_id for the "self" user in the list builder.
+    fn account_id() -> PeerId {
+        gen_peer().0
+    }
+
+    // ---------------------------------------------------------------
+    // Test cases
+    // ---------------------------------------------------------------
+
+    #[test]
+    fn no_pagination_backwards_compat() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 0, 0);
+
+        assert_eq!(list.user.len(), 5);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn empty_users() {
+        let users = BTreeMap::new();
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 0, 10);
+
+        assert_eq!(list.user.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 0);
+    }
+
+    #[test]
+    fn pagination_echoes_offset_and_limit() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 3, 7);
+
+        let p = list.pagination.unwrap();
+        assert_eq!(p.offset, 3);
+        assert_eq!(p.limit, 7);
+    }
+
+    #[test]
+    fn first_page() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 0, 2);
+
+        assert_eq!(list.user.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn middle_page() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 2, 2);
+
+        assert_eq!(list.user.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn last_page_partial() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 4, 2);
+
+        assert_eq!(list.user.len(), 1);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn offset_beyond_total() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 10, 2);
+
+        assert_eq!(list.user.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn limit_larger_than_total() {
+        let (users, _ids) = make_users(5);
+        let online = BTreeMap::new();
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::All, 0, 100);
+
+        assert_eq!(list.user.len(), 5);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn online_only_filtering() {
+        let (users, _ids) = make_users(5);
+        let online = make_online(&users, 2);
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::OnlineOnly, 0, 0);
+
+        assert_eq!(list.user.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 2);
+    }
+
+    #[test]
+    fn online_only_with_pagination() {
+        let (users, _ids) = make_users(5);
+        let online = make_online(&users, 3);
+        let acc = account_id();
+
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::OnlineOnly, 0, 1);
+
+        assert_eq!(list.user.len(), 1);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 3);
+    }
+
+    /// When the routing table contains peers that are absent from the users
+    /// store, the initial `total` estimate (from `online_users.len()`) is
+    /// higher than the real count of renderable entries.
+    ///
+    /// - On the **last** page (or when limit=0) the code corrects `total` to
+    ///   the exact count because it exhausted all matching entries.
+    /// - On a **non-final** page (broke out early due to limit) the correction
+    ///   cannot kick in, so `total` may overestimate.
+    ///
+    /// In practice, this should never happen, but this test documents the known gap.
+    #[test]
+    fn online_only_with_phantom_routing_peers() {
+        let (users, _ids) = make_users(3);
+        // 2 of the 3 users are online
+        let mut online = make_online(&users, 2);
+
+        // add 2 phantom peers that exist in the routing table but NOT in
+        // the users store to simulate stale/unknown entries.
+        let via_peer = gen_peer().0;
+        for _ in 0..2 {
+            let phantom_id = gen_peer().0;
+            let phantom_q8id = QaulId::to_q8id(phantom_id);
+            online.insert(
+                phantom_q8id,
+                vec![RoutingConnectionEntry {
+                    module: ConnectionModule::Lan,
+                    node: via_peer,
+                    rtt: 5,
+                    hc: 1,
+                    lq: 100,
+                    last_update: 0,
+                }],
+            );
+        }
+        // Now, online_users.len() == 4, but only 2 have matching User entries.
+
+        let acc = account_id();
+
+        // Case 1: no limit — exhausts all entries, total is corrected to 2.
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::OnlineOnly, 0, 0);
+        assert_eq!(list.user.len(), 2);
+        let p = list.pagination.unwrap();
+        assert_eq!(
+            p.total, 2,
+            "total should be corrected when all entries are exhausted"
+        );
+        assert!(!p.has_more);
+
+        // Case 2: limit = 1 — breaks early, total stays at the routing-table
+        // estimate (4) because we can't know better without scanning further.
+        let list = build_user_list_from(&users, &online, &acc, UserFilter::OnlineOnly, 0, 1);
+        assert_eq!(list.user.len(), 1);
+        let p = list.pagination.unwrap();
+        assert_eq!(p.total, 4, "total is an overestimate on non-final pages");
+        assert!(p.has_more);
+    }
 }
