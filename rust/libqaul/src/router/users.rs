@@ -286,157 +286,11 @@ impl Users {
         match proto::Users::decode(&data[..]) {
             Ok(users) => {
                 match users.message {
-                    Some(proto::users::Message::UserRequest(_user_request)) => {
-                        // get users store
-                        let users = USERS.get().read().unwrap();
-
-                        // create empty user list
-                        let mut user_list = proto::UserList { user: Vec::new() };
-
-                        // get user account
-                        if let Some(account) = UserAccounts::get_default_user() {
-                            // get online users
-                            let online_users = super::RoutingTable::get_online_users_info();
-
-                            // fill them into the list
-                            for (id, user) in &users.users {
-                                // get RPC key values
-                                let (_key_type, key_base58) =
-                                    Self::get_protobuf_public_key(user.key.clone());
-
-                                // create group id
-                                let group_id =
-                                    GroupId::from_peers(&account.id, &user.id).to_bytes();
-
-                                let mut connectivity: i32 = 0;
-                                let mut connections: Vec<proto::RoutingTableConnection> =
-                                    Vec::new();
-
-                                if let Some(entries) = online_users.get(id) {
-                                    for entry in entries {
-                                        connections.push(proto::RoutingTableConnection {
-                                            module: entry.module.as_int(),
-                                            hop_count: entry.hc as u32,
-                                            rtt: entry.rtt,
-                                            via: entry.node.to_bytes(),
-                                        });
-                                    }
-                                    connectivity = 1;
-                                }
-
-                                // create user entry message
-                                let user_entry = proto::UserEntry {
-                                    name: user.name.clone(),
-                                    id: user.id.to_bytes(),
-                                    group_id,
-                                    key_base58,
-                                    connectivity: connectivity,
-                                    verified: user.verified,
-                                    blocked: user.blocked,
-                                    connections,
-                                };
-
-                                // add entry to list
-                                user_list.user.push(user_entry);
-                            }
-                        }
-
-                        // create message
-                        let proto_message = proto::Users {
-                            message: Some(proto::users::Message::UserList(user_list)),
-                        };
-
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
-                        // send message
-                        Rpc::send_message(
-                            buf,
-                            crate::rpc::proto::Modules::Users.into(),
-                            "".to_string(),
-                            Vec::new(),
-                        );
+                    Some(proto::users::Message::UserRequest(user_request)) => {
+                        Self::build_users_list(false, user_request.offset, user_request.limit);
                     }
-                    Some(proto::users::Message::UserOnlineRequest(_user_online_request)) => {
-                        // get users store
-                        let users = USERS.get().read().unwrap();
-
-                        // get all online user ids by passing last_sent=0
-                        let online_user_ids = RoutingTable::get_online_user_ids(0);
-
-                        // create empty user list
-                        let mut user_list = proto::UserList { user: Vec::new() };
-
-                        // get user account
-                        if let Some(account) = UserAccounts::get_default_user() {
-                            // get online uses info
-                            let online_users = super::RoutingTable::get_online_users_info();
-                            // fill them into the list
-                            for id in &online_user_ids {
-                                if let Some(user) = users.users.get(id) {
-                                    // get RPC key values
-                                    let (_key_type, key_base58) =
-                                        Self::get_protobuf_public_key(user.key.clone());
-
-                                    // create group id
-                                    let group_id =
-                                        GroupId::from_peers(&account.id, &user.id).to_bytes();
-
-                                    let mut connectivity: i32 = 0;
-                                    let mut connections: Vec<proto::RoutingTableConnection> =
-                                        vec![];
-                                    if online_users.contains_key(id) {
-                                        connectivity = 1;
-                                        let cnns = online_users.get(id).unwrap();
-                                        for cnn in cnns {
-                                            connections.push(proto::RoutingTableConnection {
-                                                module: cnn.module.as_int(),
-                                                hop_count: cnn.hc as u32,
-                                                rtt: cnn.rtt,
-                                                via: cnn.node.to_bytes(),
-                                            });
-                                        }
-                                    }
-
-                                    // create user entry message
-                                    let user_entry = proto::UserEntry {
-                                        name: user.name.clone(),
-                                        id: user.id.to_bytes(),
-                                        group_id,
-                                        key_base58,
-                                        connectivity,
-                                        verified: user.verified,
-                                        blocked: user.blocked,
-                                        connections,
-                                    };
-
-                                    // add entry to list
-                                    user_list.user.push(user_entry);
-                                }
-                            }
-                        }
-
-                        // create message
-                        let proto_message = proto::Users {
-                            message: Some(proto::users::Message::UserList(user_list)),
-                        };
-
-                        // encode message
-                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
-
-                        // send message
-                        Rpc::send_message(
-                            buf,
-                            crate::rpc::proto::Modules::Users.into(),
-                            "".to_string(),
-                            Vec::new(),
-                        );
+                    Some(proto::users::Message::UserOnlineRequest(user_online_request)) => {
+                        Self::build_users_list(true, user_online_request.offset, user_online_request.limit);
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
@@ -549,6 +403,106 @@ impl Users {
         }
 
         (key_type, key_base58)
+    }
+
+    /// Build users list from those found in the users store.
+    ///
+    /// Only completes successfully if there is a default user account, otherwise it always returns
+    /// an empty list.
+    ///
+    /// Optionally pass `online_only` to filter out offline users.
+    fn build_users_list(online_only: bool, offset: u32, limit: u32) {
+        let users = USERS.get().read().unwrap();
+
+        let mut user_list = proto::UserList {
+            user: Vec::new(),
+            pagination: None,
+        };
+
+        if let Some(account) = UserAccounts::get_default_user() {
+            let online_users = RoutingTable::get_online_users_info();
+
+            let total = if online_only {
+                online_users.len() as u32
+            } else {
+                users.users.len() as u32
+            };
+
+            let has_more = limit > 0 && (offset + limit) < total;
+
+            let mut skipped: u32 = 0;
+
+            for (id, user) in &users.users {
+                // Filter out offline users when only online users are requested
+                if online_only && !online_users.contains_key(id) {
+                    continue;
+                }
+
+                // Skip entries until we reach the offset
+                if skipped < offset {
+                    skipped += 1;
+                    continue;
+                }
+
+                // Stop once we've collected enough entries
+                if limit > 0 && user_list.user.len() >= limit as usize {
+                    break;
+                }
+
+                let mut connectivity: i32 = 0;
+                let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
+
+                if let Some(entries) = online_users.get(id) {
+                    for entry in entries {
+                        connections.push(proto::RoutingTableConnection {
+                            module: entry.module.as_int(),
+                            hop_count: entry.hc as u32,
+                            rtt: entry.rtt,
+                            via: entry.node.to_bytes(),
+                        });
+                    }
+                    connectivity = 1;
+                }
+
+                let (_key_type, key_base58) = Self::get_protobuf_public_key(user.key.clone());
+
+                let group_id = GroupId::from_peers(&account.id, &user.id).to_bytes();
+
+                user_list.user.push(proto::UserEntry {
+                    name: user.name.clone(),
+                    id: user.id.to_bytes(),
+                    group_id,
+                    key_base58,
+                    connectivity,
+                    verified: user.verified,
+                    blocked: user.blocked,
+                    connections,
+                });
+            }
+
+            user_list.pagination = Some(proto::PaginationMetadata {
+                has_more,
+                total,
+                offset,
+                limit,
+            });
+        }
+
+        let proto_message = proto::Users {
+            message: Some(proto::users::Message::UserList(user_list)),
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        Rpc::send_message(
+            buf,
+            crate::rpc::proto::Modules::Users.into(),
+            "".to_string(),
+            Vec::new(),
+        );
     }
 }
 

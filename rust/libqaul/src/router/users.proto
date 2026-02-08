@@ -46,14 +46,28 @@ message Users {
 }
 
 // UI request for some users
-message UserRequest {}
+message UserRequest {
+    uint32 offset = 10;
+    uint32 limit = 20;
+}
 
 // UI request for some online users
-message UserOnlineRequest {}
+message UserOnlineRequest {
+    uint32 offset = 10;
+    uint32 limit = 20;
+}
+
+message PaginationMetadata {
+    bool has_more = 10;
+    uint32 total = 20;
+    uint32 offset = 30;
+    uint32 limit = 40;
+}
 
 // user list
 message UserList {
     repeated UserEntry user = 1;
+    PaginationMetadata pagination = 2;
 }
 
 // user entry

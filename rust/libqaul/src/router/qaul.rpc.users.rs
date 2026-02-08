@@ -57,15 +57,38 @@ pub mod users {
 }
 /// UI request for some users
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct UserRequest {}
+pub struct UserRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
 /// UI request for some online users
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct UserOnlineRequest {}
+pub struct UserOnlineRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PaginationMetadata {
+    #[prost(bool, tag = "10")]
+    pub has_more: bool,
+    #[prost(uint32, tag = "20")]
+    pub total: u32,
+    #[prost(uint32, tag = "30")]
+    pub offset: u32,
+    #[prost(uint32, tag = "40")]
+    pub limit: u32,
+}
 /// user list
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserList {
     #[prost(message, repeated, tag = "1")]
     pub user: ::prost::alloc::vec::Vec<UserEntry>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<PaginationMetadata>,
 }
 /// user entry
 #[derive(Clone, PartialEq, ::prost::Message)]
