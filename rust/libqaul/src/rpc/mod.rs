@@ -6,9 +6,9 @@
 //! The RPC messages are defined in the protobuf format.
 //! The format is then translated to rust program code.
 
+pub mod authentication;
 pub mod debug;
 pub mod sys;
-pub mod authentication;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
 use state::InitCell;

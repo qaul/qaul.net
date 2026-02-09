@@ -82,7 +82,7 @@ impl Authentication {
             nonce,
             qaul_id: qaul_id_bytes.clone(),
             created_at: now,
-            expires_at: now + 9999999999 // Change to never expired(as discussed)
+            expires_at: now + 9999999999, // Change to never expired(as discussed)
         };
 
         // Store challenge and cleanup any expired ones
