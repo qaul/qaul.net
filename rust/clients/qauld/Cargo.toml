@@ -22,7 +22,8 @@ futures-ticker = "0.0.3"
 state = "0.6"
 bs58 = "0.5"
 clap = { version = "4.5", features = ["derive"]}
-
+tokio-util = { version = "0.7.18", features = ["codec"] }
+uuid = { version = "1.13", features = ["v4"] }
 
 [package.metadata.deb]
 maintainer = "Open Community Projects Association <develop@ocpa.ch>"
