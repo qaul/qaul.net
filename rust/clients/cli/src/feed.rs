@@ -67,21 +67,12 @@ impl Feed {
     fn request_feed_list(last_index: u64) {
         // create feed list request message
         let proto_message = proto::Feed {
-<<<<<<< HEAD
-            message: Some(proto::feed::Message::Request(
-                proto::FeedMessageRequest{
-                    last_received: Vec::new(),
-                    last_index,
-                    offset: 0,
-                    limit: 0,
-                }
-            )),
-=======
             message: Some(proto::feed::Message::Request(proto::FeedMessageRequest {
                 last_received: Vec::new(),
                 last_index,
+                offset: 0,
+                limit: 0,
             })),
->>>>>>> 23f003cf (feat(server): #541 handled reading and writing to socket server)
         };
 
         // encode message
