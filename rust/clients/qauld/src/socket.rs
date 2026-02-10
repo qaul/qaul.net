@@ -3,12 +3,25 @@
 
 //! Unix socket server for qauld
 
-use futures::{stream::StreamExt, FutureExt, SinkExt};
+use futures::{stream::StreamExt, SinkExt};
 use futures_ticker::Ticker;
+use prost::Message;
 use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
-use tokio::{net::UnixListener, signal, sync::Mutex, time::Duration};
-use tokio_util::codec::LengthDelimitedCodec;
-use uuid::Uuid;
+use tokio::{
+    net::UnixListener,
+    signal,
+    sync::{
+        mpsc::{self, Sender},
+        Mutex,
+    },
+    time::Duration,
+};
+use tokio_util::{bytes::Bytes, codec::LengthDelimitedCodec};
+
+/// include generated protobuf RPC rust definition file
+pub mod proto {
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
+}
 
 /// Starts the qauld unix socket server.
 /// Runs infinitely until a shutdown signal is receibed.
@@ -23,7 +36,39 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
     let listener = UnixListener::bind(&socket_path)?;
     println!("qauld unix socket server started");
 
-    let client_request_register = Arc::new(Mutex::new(HashMap::new()));
+    let client_request_register: Arc<Mutex<HashMap<String, Sender<Bytes>>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+
+    //  Central RPC poller. Polls libqaul for a response
+    let register_clone = client_request_register.clone();
+    tokio::spawn(async move {
+        let mut futures_ticker = Ticker::new(Duration::from_millis(10));
+        loop {
+            futures_ticker.next().await;
+            match libqaul::api::receive_rpc() {
+                Ok(data) => match proto::QaulRpc::decode(&data[..]) {
+                    Ok(msg) => {
+                        let client_id = msg.request_id;
+                        let sender;
+                        {
+                            let register = register_clone.lock().await;
+                            sender = register.get(&client_id).cloned();
+                        }
+                        if let Some(rx) = sender {
+                            if let Err(err) = rx.send(data.into()).await {
+                                log::error!("failed to send data to receiver: {err:#?}");
+                            }
+                        } else {
+                            log::warn!("client ID not found in register");
+                        };
+                    }
+                    _ => {}
+                },
+                // move on to the next tick
+                _ => {}
+            }
+        }
+    });
 
     loop {
         tokio::select! {
@@ -31,41 +76,45 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                 let (stream, addr) = res?;
                 let register_clone = client_request_register.clone();
                 tokio::spawn(async move {
-                    println!("client connected");
+                    println!("client connected: {addr:#?}");
 
-                    let client_request_id = Uuid::new_v4().to_string();
-
-                    {
-                        let mut register = register_clone.lock().await;
-                        register.insert(client_request_id.clone(), addr);
-                    }
+                    let (tx, mut rx) = mpsc::channel(100);
 
                     let framed_stream = LengthDelimitedCodec::builder().length_field_offset(0)
                         .length_field_type::<u16>()
                         .length_adjustment(0)
                         .new_framed(stream);
                     let (mut writer, mut reader) = framed_stream.split();
-                    let mut futures_ticker = Ticker::new(Duration::from_millis(10));
 
                     loop {
-                        let rpc_fut = futures_ticker.next().fuse();
                         tokio::select! {
                             message = reader.next() => {
                                 match message {
                                     Some(msg) => {
-                                        let msg = msg?.to_vec();
-                                        libqaul::api::send_rpc(msg);
+                                        let data = msg?.to_vec();
+                                        match proto::QaulRpc::decode(&data[..]) {
+                                            Ok(rpc_msg) => {
+                                                let client_request_id = rpc_msg.request_id;
+                                                {
+                                                    let mut register = register_clone.lock().await;
+                                                    register.insert(client_request_id.clone(), tx.clone());
+                                                }
+                                            }
+                                            Err(error) => {
+                                                log::error!("{:?}", error);
+                                            }
+                                        }
+                                        libqaul::api::send_rpc(data);
                                     }
                                     None => { break; }
                                 }
 
                             },
-                            _rpc_ticker = rpc_fut => {
-                                match libqaul::api::receive_rpc() {
-                                    Ok(data) => {
-                                        writer.send(data.into()).await?;
-                                    }
-                                    _ => {}
+                            res = rx.recv() => {
+                                if let Some(data) = res {
+                                    writer.send(data.into()).await?;
+                                } else {
+                                    break;
                                 }
                             }
                         };

@@ -10,7 +10,7 @@
 use clap::Parser;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
-use std::{thread, time::Duration};
+use std::time::Duration;
 
 use libqaul;
 mod socket;
