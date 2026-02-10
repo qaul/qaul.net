@@ -92,7 +92,6 @@ impl Neighbours {
     /// If the node does not yet exist, it creates it.
     pub fn update_node(module: ConnectionModule, node_id: PeerId, rtt: u32) {
         log::trace!("update_node node {:?}", node_id);
-        log::debug!("update_node rtt {:?} at connection module {:#?}", rtt, module);
         // get table
         let mut neighbours;
         match module {
@@ -110,7 +109,6 @@ impl Neighbours {
             node.updated_at = Timestamp::get_timestamp();
         } else {
             log::trace!("add node {:?} to neighbours table", node_id);
-            log::debug!("add node {:?} to neighbours table", node_id);
             neighbours.nodes.insert(
                 node_id,
                 Neighbour {
@@ -226,11 +224,9 @@ impl Neighbours {
     ///
     /// Returns node if it exists in the data base,
     /// otherwise it returns None.
-    #[allow(dead_code)]
     #[deprecated(since = "2.0.0-rc.4", note = "Use `node_from_q8id` instead.")]
     pub fn node_from_small_id(small_id: Vec<u8>) -> Option<Node> {
         // create search key
-        #[allow(deprecated)]
         let prefix = QaulId::small_to_search_prefix(small_id);
 
         // get data base tree
@@ -306,7 +302,7 @@ impl Neighbours {
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_neighbours_list(request_id: String) {
+    pub fn rpc_send_neighbours_list() {
         // create lists per module
         let mut lan_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
         let mut internet_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
@@ -369,7 +365,7 @@ impl Neighbours {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Router.into(),
-            request_id,
+            "".to_string(),
             Vec::new(),
         );
     }

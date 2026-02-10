@@ -21,14 +21,13 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleService
 import com.google.android.gms.location.*
-import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
 import net.qaul.ble.model.BLEScanDevice
-import net.qaul.ble.model.Message
+//import net.qaul.ble.model.Message
 import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
 import java.nio.charset.Charset
@@ -111,7 +110,7 @@ open class BleWrapperClass(context: Activity) {
                 }
                 BleOuterClass.Ble.MessageCase.START_REQUEST -> {
                     qaulId = bleReq.startRequest.qaulId.toByteArray()
-                    AppLog.e(TAG, "qaulid : " + qaulId?.size)
+                    Log.i(TAG, "qaulid (${qaulId?.size}): ${BLEUtils.byteToHex(qaulId)}")
                     advertMode = bleReq.startRequest.powerSetting.toString()
                     if (qaulId != null) {
                         startService(context = context)
@@ -135,10 +134,10 @@ open class BleWrapperClass(context: Activity) {
                     val bleDirectSend = bleReq.directSend
                     if (BleService().isRunning()) {
                         BleService.bleService?.sendMessage(
-                            id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
-                            to = bleDirectSend.receiverId.toByteArray(),
+                            message_id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
+                            to_id = bleDirectSend.receiverId.toByteArray(),
                             message = bleDirectSend.data.toByteArray(),
-                            from = bleDirectSend.senderId.toByteArray()
+                            from_id = bleDirectSend.senderId.toByteArray()
                         )
                     }
                 }
@@ -151,16 +150,13 @@ open class BleWrapperClass(context: Activity) {
      * This Method Will send response message to App & libqaul library
      */
     private fun sendResponse(bleRes: BleOuterClass.Ble.Builder) {
-//        AppLog.e("TAG", "sendResponse()-----------> ${bleRes.messageCase} $bleRes")
         mHandler?.post {
             //callback response for App
-
             bleCallback?.bleResponse(bleRes.build().toByteString())
-//            AppLog.e(TAG, "sendResponse:: $bleRes")
+
             //callback response for libqaul
             net.qaul.libqaul.syssend(bleRes.build().toByteArray())
         }
-
     }
 
     /**
@@ -264,20 +260,13 @@ open class BleWrapperClass(context: Activity) {
                         sendResponse(bleRes)
                     }
 
-                    override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
-                        AppLog.e(TAG, "---->onMessageReceived1---> ${message.contentToString()}")
+                    override fun onMessageReceived(qaulId: ByteArray, message: ByteArray) {
+                        AppLog.e(TAG, "onMessageReceived from qaulId: ${BLEUtils.byteToHex(qaulId)}")
                         val bleRes = BleOuterClass.Ble.newBuilder()
                         val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
-                        val msgData = String(message).removeSuffix("$$").removePrefix("$$")
-                        AppLog.e(TAG, "---->onMessageReceived2---> $msgData")   
-                        
-                        val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        directReceived.from = ByteString.copyFrom(bleDevice.qaulId) 
-                        directReceived.data = ByteString.copyFrom(msgObject.message)
-
-                        AppLog.e(TAG, "---->onMessageReceived3---> ${directReceived.data}")
+                        directReceived.from = ByteString.copyFrom(qaulId) 
+                        directReceived.data = ByteString.copyFrom(message)
                         bleRes.directReceived = directReceived.build()
-                        // AppLog.e(TAG, "---->onMessageReceived msgObject $msgObject")
                         sendResponse(bleRes)
                     }
                 })
