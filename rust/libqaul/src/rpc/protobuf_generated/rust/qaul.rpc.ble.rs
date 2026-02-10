@@ -39,9 +39,9 @@ pub struct InfoRequest {}
 /// as well as all available BLE devices
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InfoResponse {
-    /// the small 16 byte BLE id
+    /// the small 8 byte BLE id
     #[prost(bytes = "vec", tag = "1")]
-    pub small_id: ::prost::alloc::vec::Vec<u8>,
+    pub q8id: ::prost::alloc::vec::Vec<u8>,
     /// status of the module
     #[prost(string, tag = "2")]
     pub status: ::prost::alloc::string::String,
