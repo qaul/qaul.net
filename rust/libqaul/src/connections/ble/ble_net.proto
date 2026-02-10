@@ -17,9 +17,9 @@ message BleMessage {
     }
 }
 
-// Identfication Request
+// Identification Request
 message Identification {
-    bool request = 1;
+    bool request            = 1;
     NodeIdentification node = 2;
 }
 

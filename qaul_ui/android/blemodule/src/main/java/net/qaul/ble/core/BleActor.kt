@@ -35,7 +35,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     var attempt = 0
 
     private var isWriting = false
-    private var sendQueue: Queue<String> = ConcurrentLinkedDeque<String>()
+    var sendChunkQueue: Queue<ByteArray> = ConcurrentLinkedDeque<ByteArray>()
 
 
     /**
@@ -144,20 +144,25 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                 TAG,
                 "onCharacteristicRead : " + characteristic.uuid.toString() + " , value ->  $data"
             )
-            if (isFromMessage) {
-                send(BLEUtils.byteToHex(tempData))
-                return
-            }
 
-            if (listener != null) {
-                listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
-            }
+            // don't do anything if $data is null
+            // TODO: does this device need to be removed?
+            if(data != null) {
+                if (isFromMessage) {
+                    send(BLEUtils.byteToHex(tempData))
+                    return
+                }
+
+                if (listener != null) {
+                    listener!!.onCharacteristicRead(bleDevice!!, gatt, characteristic)
+                }
 
 
-            if (characteristic.uuid.toString()
-                    .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
-            ) {
-//                disConnectedDevice()
+                if (characteristic.uuid.toString()
+                        .lowercase() == BleService.READ_CHAR.lowercase() && !isFromMessage
+                ) {
+    //                disConnectedDevice()
+                }
             }
         }
 
@@ -244,31 +249,25 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
     }
 
     /**
-    * This method sends data to GATT Server and manages the bytes written.
+    * This method sends data to the GATT Server and manages the bytes written.
     * The android gatt client can write only 20 or less bytes at a time. 
-    * So, here we use delimiters "$$" for every message before breaking into multiple and sending to the server
-    * On server side, it will concatenate the received bytes and check for the delimiters to form the complete message.
+    * On the server side, it will concatenate the received bytes and check for the delimiters to form the complete message.
     */
     fun send(data: String): Int {
-       AppLog.e(TAG, "send data-----------------> data $data")
-        var data = data
-        while (data.length > 40) {
-            sendQueue.add(data.substring(0, 40))
-            data = data.substring(40)
-        }
-        if (data.isNotEmpty()) sendQueue.add(data)
-        if(sendQueue.size > 0) {
+        //AppLog.e(TAG, "send data-----------------> data $data")
+        if(sendChunkQueue.size > 0) {
             if (!isWriting) _send()
         }
         return 0
     }
 
     private fun _send(): Boolean {
-        if (sendQueue.isEmpty()) {
+        if (sendChunkQueue.isEmpty()) {
             AppLog.e(TAG, "_send(): EMPTY QUEUE")
             return false
         }
-        val tx = BLEUtils.hexToByteArray(sendQueue.poll())
+        val tx = sendChunkQueue.poll()
+        //AppLog.e(TAG, "_send(): tx: ${BLEUtils.toBinaryString(tx)}")
         isWriting = true // Set the write in progress flag
         if (!writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx, attempt)) {
             return false;

@@ -224,6 +224,7 @@ impl Neighbours {
     ///
     /// Returns node if it exists in the data base,
     /// otherwise it returns None.
+    #[deprecated(since = "2.0.0-rc.4", note = "Use `node_from_q8id` instead.")]
     pub fn node_from_small_id(small_id: Vec<u8>) -> Option<Node> {
         // create search key
         let prefix = QaulId::small_to_search_prefix(small_id);
@@ -246,9 +247,9 @@ impl Neighbours {
     ///
     /// Returns node if it exists in the data base,
     /// otherwise it returns None.
-    pub fn _node_from_q8id(small_id: Vec<u8>) -> Option<Node> {
+    pub fn node_from_q8id(q8id: Vec<u8>) -> Option<Node> {
         // create search key
-        let prefix = QaulId::q8id_to_search_prefix(small_id);
+        let prefix = QaulId::q8id_to_search_prefix(q8id);
 
         // get data base tree
         let tree = NODES.get();

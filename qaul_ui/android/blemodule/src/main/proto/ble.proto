@@ -37,9 +37,7 @@ message Ble {
 }
 
 // device information request message
-message BleInfoRequest {
-
-}
+message BleInfoRequest {}
 
 // device information response message
 message BleInfoResponse {
@@ -59,13 +57,15 @@ message BleDeviceInfo {
     //
     // Android: BluetoothAdapter getAddress()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
-    string id = 2;  //We can not get macAddress of device because of permission issue.
+    // We can not get macAddress of device because of permission issue.
+    string id = 2;
     // Get Bluetooth Name
     // this is field is purely informative
     //
     // Android: BluetoothAdapter getName()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
-    string name = 3; //On Android 12+ if user not granted permission we can not get adapter name
+    string name = 3;  // On Android 12+ if user not granted permission we can
+                      // not get adapter name
     // Bluetooth is enable / powered on
     //
     // Android: BluetoothAdapter isEnabled()
@@ -143,7 +143,7 @@ message BleDeviceInfo {
 message BleStartRequest {
     // qaul ID
     //
-    // The small 16 byte qaul id
+    // The small 8 byte qaul id
     // to be used to identify this node
     bytes qaul_id = 1;
     // power settings
@@ -196,13 +196,10 @@ enum BleError {
     RIGHTS_MISSING = 1;
     // there was a module timeout
     TIMEOUT = 2;
-
 }
 
 // Stop Bluetooth Device
-message BleStopRequest {
-
-}
+message BleStopRequest {}
 
 // Stop Result
 //
