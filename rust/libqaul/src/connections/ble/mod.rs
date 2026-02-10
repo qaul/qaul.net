@@ -23,7 +23,7 @@ use crate::rpc::{sys::Sys, Rpc};
 use crate::services::{feed, messaging};
 use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
 
-mod crypto;
+pub mod crypto;
 use crypto::BleCrypto;
 
 /// Protobuf BLE system communication with BLE module
