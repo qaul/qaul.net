@@ -72,8 +72,8 @@ fn test_storage_accessible() {
 
 #[test]
 fn test_rpc_channel_functional() {
-    // Note: We don't use the shared INSTANCE here to avoid conflicts with RPC state
-    // Instead we just test the RPC functions don't panic
+    // Ensure the instance is started so RPC channels are initialized
+    let (_instance, _) = &*INSTANCE;
 
     // send_rpc should not panic (even with empty message)
     // We send an empty message which won't be valid, but the channel should accept it
