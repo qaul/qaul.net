@@ -57,11 +57,9 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                         }
                         if let Some(rx) = sender {
                             if let Err(err) = rx.send(data.into()).await {
-                                eprintln!("failed to send data to receiver: {err:#?}");
                                 log::error!("failed to send data to receiver: {err:#?}");
                             }
                         } else {
-                            eprintln!("client ID not found in register");
                             log::warn!("client ID not found in register");
                         };
                     }
@@ -105,7 +103,6 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                                                 }
                                             }
                                             Err(error) => {
-                                                eprintln!("{error:?}");
                                                 log::error!("{:?}", error);
                                             }
                                         }
