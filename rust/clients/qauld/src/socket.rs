@@ -50,18 +50,16 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                     Ok(msg) => {
                         let client_id = msg.request_id;
                         let sender;
-                        println!("received response for client: {client_id}");
+                        log::info!("received response for client: {client_id}");
                         {
                             let register = register_clone.lock().await;
                             sender = register.get(&client_id).cloned();
                         }
                         if let Some(rx) = sender {
                             if let Err(err) = rx.send(data.into()).await {
-                                eprintln!("failed to send data to receiver: {err:#?}");
                                 log::error!("failed to send data to receiver: {err:#?}");
                             }
                         } else {
-                            eprintln!("client ID not found in register");
                             log::warn!("client ID not found in register");
                         };
                     }
@@ -79,7 +77,7 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                 let (stream, addr) = res?;
                 let register_clone = client_request_register.clone();
                 tokio::spawn(async move {
-                    println!("client connected: {addr:#?}");
+                    log::info!("client connected: {addr:#?}");
 
                     let (tx, mut rx) = mpsc::channel(100);
 
@@ -98,14 +96,13 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                                         match proto::QaulRpc::decode(&data[..]) {
                                             Ok(rpc_msg) => {
                                                 let client_request_id = rpc_msg.request_id;
-                                                println!("message received from client: {client_request_id}");
+                                                log::trace!("message received from client: {client_request_id}");
                                                 {
                                                     let mut register = register_clone.lock().await;
                                                     register.insert(client_request_id.clone(), tx.clone());
                                                 }
                                             }
                                             Err(error) => {
-                                                eprintln!("{error:?}");
                                                 log::error!("{:?}", error);
                                             }
                                         }
@@ -129,7 +126,7 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                 });
             },
             _ = signal::ctrl_c() => {
-                println!("shutdown triggered");
+                log::info!("shutdown triggered");
                 break;
             }
         }

@@ -6,11 +6,12 @@
 
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use futures::{SinkExt, StreamExt};
 use prost::Message;
 use tokio::net::UnixStream;
 use tokio_util::codec::LengthDelimitedCodec;
+use uuid::Uuid;
 
 /// include generated protobuf RPC rust definition file
 pub mod proto {
@@ -28,10 +29,33 @@ struct Cli {
     /// Specify a directory to look for qauld.sock in
     #[arg(short, long)]
     dir: Option<String>,
+
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// node details
+    Node(NodeArgs),
+}
+
+#[derive(Args, Debug)]
+struct NodeArgs {
+    #[command(subcommand)]
+    command: NodeSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+enum NodeSubcmd {
+    /// prints the local node id
+    Info,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+
     let cli = Cli::parse();
     let qauld_sock = if let Some(socket) = cli.socket {
         socket
@@ -52,22 +76,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .length_field_type::<u16>()
         .length_adjustment(0)
         .new_framed(client);
+    let request_id = Uuid::new_v4().to_string();
 
-    // create info request message
-    let node_proto_message = proto::Node {
-        message: Some(proto::node::Message::GetNodeInfo(true)),
+    let command_proto_message = match cli.command {
+        Commands::Node(c) => match c.command {
+            NodeSubcmd::Info => {
+                let node_proto_message = proto::Node {
+                    message: Some(proto::node::Message::GetNodeInfo(true)),
+                };
+                node_proto_message
+            }
+        },
     };
 
     // encode message
-    let mut buf = Vec::with_capacity(node_proto_message.encoded_len());
-    node_proto_message
+    let mut buf = Vec::with_capacity(command_proto_message.encoded_len());
+    command_proto_message
         .encode(&mut buf)
         .expect("Vec<u8> provides capacity as needed");
 
     // Create RPC message container
     let proto_message = proto::QaulRpc {
         module: proto::Modules::Node.into(),
-        request_id: String::from("test-id"),
+        request_id,
         user_id: Vec::new(),
         data: buf,
     };
