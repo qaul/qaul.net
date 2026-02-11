@@ -255,7 +255,7 @@ impl Internet {
         behaviour.floodsub.subscribe(Node::get_topic());
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
-            .with_tokio()
+            .with_async_std()
             .with_tcp(
                 tcp::Config::new().nodelay(true),
                 noise::Config::new,

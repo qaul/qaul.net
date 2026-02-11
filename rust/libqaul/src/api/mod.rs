@@ -62,8 +62,7 @@ pub fn start_instance_in_thread(
 
     // Spawn new thread
     thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async move {
+        async_std::task::block_on(async move {
             // Create the instance
             let instance = crate::start_instance(storage_path, config).await;
 
