@@ -89,6 +89,13 @@ fn test_multiple_modules_are_independent() {
 }
 
 #[test]
+fn test_has_pending_session_returns_false_for_unknown() {
+    let module = BleCryptoModule::new();
+    let small_id = vec![1, 2, 3, 4];
+    assert!(!module.has_pending_session(&small_id));
+}
+
+#[test]
 fn test_encrypt_fails_without_session() {
     let mut module = BleCryptoModule::new();
     let small_id = vec![1, 2, 3, 4];
