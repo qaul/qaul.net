@@ -134,7 +134,7 @@ impl RoutingTable {
         table
     }
 
-    /// get online users and hope count    
+    /// get online users and hope count
     pub fn get_online_users() -> BTreeMap<Vec<u8>, u8> {
         let mut user_ids: BTreeMap<Vec<u8>, u8> = BTreeMap::new();
 
@@ -150,7 +150,7 @@ impl RoutingTable {
         user_ids
     }
 
-    /// get online users and hope count    
+    /// get online users and hope count
     pub fn get_online_users_info() -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
         let mut users: BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> = BTreeMap::new();
 
@@ -167,7 +167,7 @@ impl RoutingTable {
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_routing_table() {
+    pub fn rpc_send_routing_table(request_id: String) {
         // create list
         let mut table_list: Vec<proto::RoutingTableEntry> = Vec::new();
 
@@ -225,7 +225,7 @@ impl RoutingTable {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Router.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }
