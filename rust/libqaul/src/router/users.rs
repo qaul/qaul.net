@@ -280,7 +280,7 @@ impl Users {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto::Users::decode(&data[..]) {
@@ -356,7 +356,7 @@ impl Users {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Users.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

@@ -147,32 +147,44 @@ impl Rpc {
                         // TODO: authorisation
                     }
                     Ok(Modules::Useraccounts) => {
-                        UserAccounts::rpc(message.data, message.user_id);
+                        UserAccounts::rpc(message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Users) => {
-                        Users::rpc(message.data, message.user_id);
+                        Users::rpc(message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Router) => {
-                        Router::rpc(message.data);
+                        Router::rpc(message.data, message.request_id);
                     }
                     Ok(Modules::Feed) => {
-                        Feed::rpc(message.data, message.user_id, lan, internet);
+                        Feed::rpc(
+                            message.data,
+                            message.user_id,
+                            lan,
+                            internet,
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::Connections) => {
-                        Connections::rpc(message.data, internet);
+                        Connections::rpc(message.data, internet, message.request_id);
                     }
                     Ok(Modules::Ble) => {
-                        Ble::rpc(message.data);
+                        Ble::rpc(message.data, message.request_id);
                     }
                     Ok(Modules::Debug) => {
-                        Debug::rpc(message.data, message.user_id);
+                        Debug::rpc(message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Chat) => {
-                        Chat::rpc(message.data, message.user_id, lan, internet);
+                        Chat::rpc(
+                            message.data,
+                            message.user_id,
+                            lan,
+                            internet,
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::Chatfile) => {
                         log::trace!("Message Modules::Chatfile received");
-                        ChatFile::rpc(message.data, message.user_id).await;
+                        ChatFile::rpc(message.data, message.user_id, message.request_id).await;
                     }
                     Ok(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
@@ -180,15 +192,19 @@ impl Rpc {
                     }
                     Ok(Modules::Rtc) => {
                         log::trace!("Message Modules::Group received");
-                        Rtc::rpc(message.data, message.user_id);
+                        Rtc::rpc(message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Dtn) => {
                         log::trace!("Message Modules::Group received");
-                        Dtn::rpc(message.data, message.user_id);
+                        Dtn::rpc(message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Auth) => {
                         log::trace!("Auth message received in CLI");
-                        authentication::Authentication::rpc(message.data, message.user_id);
+                        authentication::Authentication::rpc(
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");

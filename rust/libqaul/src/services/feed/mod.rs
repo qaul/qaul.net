@@ -544,6 +544,7 @@ impl Feed {
         user_id: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        request_id: String,
     ) {
         match proto::Feed::decode(&data[..]) {
             Ok(feed) => {
@@ -567,7 +568,7 @@ impl Feed {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Feed.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

@@ -211,11 +211,11 @@ impl Authentication {
     // - UsersRequest: Send list of available users
     // - AuthRequest: Create and send authentication challenge
     // - AuthResponse: Verify challenge response and authenticate
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => match auth_rpc.message {
                 Some(proto::auth_rpc::Message::UsersRequest(_)) => {
-                    Self::handle_users_request();
+                    Self::handle_users_request(request_id);
                 }
                 Some(proto::auth_rpc::Message::AuthRequest(auth_request)) => {
                     match PeerId::from_bytes(&auth_request.qaul_id) {
@@ -236,16 +236,20 @@ impl Authentication {
                                 Rpc::send_message(
                                     buf,
                                     crate::rpc::proto::Modules::Auth.into(),
-                                    "".to_string(),
+                                    request_id,
                                     Vec::new(),
                                 );
                             }
                             Err(e) => {
-                                Self::send_auth_result(false, e);
+                                Self::send_auth_result(false, e, request_id);
                             }
                         },
                         Err(_) => {
-                            Self::send_auth_result(false, "Invalid qaul ID".to_string());
+                            Self::send_auth_result(
+                                false,
+                                "Invalid qaul ID".to_string(),
+                                request_id,
+                            );
                         }
                     }
                 }
@@ -260,21 +264,27 @@ impl Authentication {
                                         Self::send_auth_result(
                                             true,
                                             "Authentication successful".to_string(),
+                                            request_id,
                                         );
                                     } else {
                                         Self::send_auth_result(
                                             false,
                                             "Invalid credentials".to_string(),
+                                            request_id,
                                         );
                                     }
                                 }
                                 Err(e) => {
-                                    Self::send_auth_result(false, e);
+                                    Self::send_auth_result(false, e, request_id);
                                 }
                             }
                         }
                         Err(_) => {
-                            Self::send_auth_result(false, "Invalid user ID".to_string());
+                            Self::send_auth_result(
+                                false,
+                                "Invalid user ID".to_string(),
+                                request_id,
+                            );
                         }
                     }
                 }
@@ -289,7 +299,7 @@ impl Authentication {
     }
 
     /// Send authentication result to the client
-    fn send_auth_result(success: bool, message: String) {
+    fn send_auth_result(success: bool, message: String, request_id: String) {
         let result = proto::AuthRpc {
             message: Some(proto::auth_rpc::Message::AuthResult(proto::AuthResult {
                 success,
@@ -303,13 +313,13 @@ impl Authentication {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Auth.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         )
     }
 
     /// Handle request for list of users
-    fn handle_users_request() {
+    fn handle_users_request(request_id: String) {
         let config = crate::storage::configuration::Configuration::get();
 
         let mut users_list = Vec::new();
@@ -357,7 +367,7 @@ impl Authentication {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Auth.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }
