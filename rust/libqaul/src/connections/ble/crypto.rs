@@ -42,28 +42,28 @@ pub struct BleCryptoModule {
 /// State of a BLE crypto session
 pub struct BleCryptoState {
     /// Session identifier (random 4 byte number)
-    pub session_id: u32,
+    pub(crate) session_id: u32,
     /// Current state of the session
-    pub state: BleSessionState,
+    pub(crate) state: BleSessionState,
     /// Are we the initiator of the handshake?
     #[allow(dead_code)]
-    pub initiator: bool,
+    pub(crate) initiator: bool,
     /// Local static key (X25519 private key in montgomery form)
-    pub s: Vec<u8>,
+    pub(crate) s: Vec<u8>,
     /// Remote static key (X25519 public key in montgomery form)
-    pub rs: Vec<u8>,
+    pub(crate) rs: Vec<u8>,
     /// Local ephemeral key
-    pub e: Vec<u8>,
+    pub(crate) e: Vec<u8>,
     /// Remote ephemeral key (received during handshake)
-    pub re: Option<Vec<u8>>,
+    pub(crate) re: Option<Vec<u8>>,
     /// Cipher key for outgoing messages
-    pub cipher_out: Option<Vec<u8>>,
+    pub(crate) cipher_out: Option<Vec<u8>>,
     /// Cipher key for incoming messages
-    pub cipher_in: Option<Vec<u8>>,
+    pub(crate) cipher_in: Option<Vec<u8>>,
     /// Nonce counter for outgoing messages
-    pub nonce_out: u64,
+    pub(crate) nonce_out: u64,
     /// Highest nonce seen for incoming messages (for out-of-order handling)
-    pub nonce_in_highest: u64,
+    pub(crate) nonce_in_highest: u64,
 }
 
 /// State of a BLE encryption session
@@ -95,6 +95,14 @@ impl BleCryptoModule {
     #[allow(dead_code)]
     pub fn get_session_id(&self, small_id: &[u8]) -> Option<u32> {
         self.sessions.get(small_id).map(|s| s.session_id)
+    }
+
+    /// Check if there is a pending (not yet established) session for the given small_id
+    pub fn has_pending_session(&self, small_id: &[u8]) -> bool {
+        if let Some(session) = self.sessions.get(small_id) {
+            return session.state == BleSessionState::HandshakePending;
+        }
+        false
     }
 
     /// Initiate a handshake with a remote node
@@ -547,6 +555,12 @@ impl BleCrypto {
     pub fn get_session_id(small_id: &[u8]) -> Option<u32> {
         let crypto = BLE_CRYPTO.get().read().unwrap();
         crypto.get_session_id(small_id)
+    }
+
+    /// Check if there is a pending session for the given small_id
+    pub fn has_pending_session(small_id: &[u8]) -> bool {
+        let crypto = BLE_CRYPTO.get().read().unwrap();
+        crypto.has_pending_session(small_id)
     }
 
     /// Initiate a handshake with a remote node

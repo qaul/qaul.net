@@ -829,6 +829,30 @@ impl Ble {
     fn handle_handshake(from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
         match handshake.message_number {
             1 => {
+                // Check for simultaneous handshake initiation (race condition).
+                // If we also have a pending handshake to this peer, use a
+                // deterministic tiebreaker: the peer with the lexicographically
+                // lower small_id becomes the initiator.
+                if BleCrypto::has_pending_session(&from) {
+                    let local_id = Node::get_small_id();
+                    if local_id < from.to_vec() {
+                        // We have the lower ID, so we stay as initiator.
+                        // Ignore the remote's handshake 1; they will process
+                        // our handshake 1 and respond with handshake 2.
+                        log::info!(
+                            "BLE: simultaneous handshake detected with {:?}, we win tiebreaker (initiator)",
+                            from
+                        );
+                        return;
+                    }
+                    // Remote has the lower ID, so they are the initiator.
+                    // Drop our pending session and become the responder.
+                    log::info!(
+                        "BLE: simultaneous handshake detected with {:?}, they win tiebreaker (we become responder)",
+                        from
+                    );
+                }
+
                 // Received first handshake, respond with second
                 log::info!("BLE: processing handshake 1 from {:?}", from);
                 match BleCrypto::process_handshake_1(&from, handshake, remote_id) {
