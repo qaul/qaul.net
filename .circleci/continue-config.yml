@@ -102,6 +102,16 @@ commands:
                 name: Save sccache cache
                 paths:
                     - ~/.cache/sccache
+    pin-rust-deps:
+        description: Pin dependency versions to be compatible with the CI rustc version
+        steps:
+            - run:
+                command: |
+                    cd rust
+                    cargo update time --precise 0.3.45
+                    cargo update time-core --precise 0.1.7
+                    cargo update time-macros --precise 0.2.25
+                name: Pin dependencies for rustc compatibility
     setup-sccache:
         description: Installs and configures sccache as a wrapper for rustc
         steps:
@@ -473,6 +483,7 @@ jobs:
                 name: Install Rust
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
                 name: Install build targets for android in rust
@@ -504,6 +515,7 @@ jobs:
                 name: Install protoc
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: cd rust && cargo build --release
                 name: Build Libqaul for Linux on arm
@@ -537,6 +549,7 @@ jobs:
                 name: Install Rust
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: rustup target add aarch64-apple-ios x86_64-apple-ios
                 name: Install build targets for iOS in rust
@@ -563,6 +576,7 @@ jobs:
                 name: Install protoc
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: cd rust && cargo build --release
                 name: Build Libqaul for Linux
@@ -597,6 +611,7 @@ jobs:
                 name: Install Rust
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: |
                     cd rust/libqaul
@@ -683,6 +698,7 @@ jobs:
                 name: Install protoc
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: cd rust && cargo install cargo-deb
                 name: Install cargo-deb package
@@ -707,6 +723,7 @@ jobs:
                 name: Install protoc
             - setup-sccache
             - restore-sccache-cache
+            - pin-rust-deps
             - run:
                 command: cd rust && cargo install cargo-deb
                 name: Install cargo-deb package
