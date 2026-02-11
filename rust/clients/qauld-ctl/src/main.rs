@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let client = UnixStream::connect(&qauld_sock).await?;
-    log::info!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
+    println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
 
     let mut framed_client = LengthDelimitedCodec::builder()
         .length_field_offset(0)
@@ -76,12 +76,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     proto_message
         .encode(&mut rpc_msg)
         .expect("Vec<u8> provides capacity as needed");
-    framed_client.send(rpc_msg).await?;
+    framed_client.send(rpc_msg.into()).await?;
 
     if let Some(Ok(data)) = framed_client.next().await {
+        // TODO; this is still just testing it with basic node info rpc message
         match proto::QaulRpc::decode(&data[..]) {
             Ok(msg) => {
-                println!("{msg:#?}")
+                match proto::Node::decode(&msg.data[..]) {
+                    Ok(node) => {
+                        match node.message {
+                            Some(proto::node::Message::Info(proto_nodeinformation)) => {
+                                // print information
+                                println!("Node ID is: {}", proto_nodeinformation.id_base58);
+                                println!("Node Addresses are:");
+                                for address in proto_nodeinformation.addresses {
+                                    println!("    {}", address);
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    Err(error) => {
+                        eprintln!("{:?}", error);
+                        log::error!("{:?}", error);
+                    }
+                }
             }
             _ => {}
         }

@@ -140,7 +140,7 @@ impl Rpc {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
                         Self::increase_message_counter();
-                        Node::rpc(message.data, lan, internet);
+                        Node::rpc(message.data, lan, internet, message.request_id);
                     }
                     Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
