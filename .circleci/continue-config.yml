@@ -107,7 +107,7 @@ commands:
         steps:
             - run:
                 command: |
-                    cargo install sccache
+                    cargo install sccache --locked
                     # This configures Rust to use sccache.
                     echo 'export "RUSTC_WRAPPER"="sccache"' >> $BASH_ENV
                     # This is the maximum space sccache cache will use on disk.
