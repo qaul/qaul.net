@@ -326,7 +326,7 @@ impl UserAccounts {
     }
 
     /// Process incoming RPC request messages for user accounts
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         match proto::UserAccounts::decode(&data[..]) {
             Ok(user_accounts) => {
                 match user_accounts.message {
@@ -389,7 +389,7 @@ impl UserAccounts {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Useraccounts.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
