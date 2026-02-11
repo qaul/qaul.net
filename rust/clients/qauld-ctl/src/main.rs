@@ -86,6 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .length_field_type::<u16>()
         .length_adjustment(0)
         .new_framed(client);
+    let request_id = Uuid::new_v4().to_string();
 
     let request_id = Uuid::new_v4().to_string();
     let user_id = preflight_request(&mut framed_client).await?;
