@@ -501,7 +501,7 @@ impl ConnectionTable {
     }
 
     /// send protobuf RPC connections list
-    pub fn rpc_send_connections_list() {
+    pub fn rpc_send_connections_list(request_id: String) {
         // create connections list
         let connections_list = proto::ConnectionsList {
             lan: Self::rpc_create_connection_module_list(ConnectionModule::Lan),
@@ -525,7 +525,7 @@ impl ConnectionTable {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Router.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }

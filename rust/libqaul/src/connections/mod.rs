@@ -104,14 +104,14 @@ impl Connections {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, internet_opt: Option<&mut Internet>) {
+    pub fn rpc(data: Vec<u8>, internet_opt: Option<&mut Internet>, request_id: String) {
         match proto::Connections::decode(&data[..]) {
             Ok(connections) => {
                 match connections.message {
                     Some(proto::connections::Message::InternetNodesRequest(
                         _internet_nodes_request,
                     )) => {
-                        Self::rpc_send_node_list(proto::Info::Request);
+                        Self::rpc_send_node_list(proto::Info::Request, request_id);
                     }
                     Some(proto::connections::Message::InternetNodesAdd(nodes_entry)) => {
                         // check if we have a valid address
@@ -163,7 +163,7 @@ impl Connections {
                         }
 
                         // send response message
-                        Self::rpc_send_node_list(info);
+                        Self::rpc_send_node_list(info, request_id);
                     }
 
                     Some(proto::connections::Message::InternetNodesRename(nodes_entry)) => {
@@ -200,7 +200,7 @@ impl Connections {
                             Configuration::save();
                         }
                         // send response
-                        Self::rpc_send_node_list(info);
+                        Self::rpc_send_node_list(info, request_id);
                     }
 
                     Some(proto::connections::Message::InternetNodesRemove(nodes_entry)) => {
@@ -242,7 +242,7 @@ impl Connections {
                         }
 
                         // send response
-                        Self::rpc_send_node_list(info);
+                        Self::rpc_send_node_list(info, request_id);
                     }
                     Some(proto::connections::Message::InternetNodesState(nodes_entry)) => {
                         let mut info = proto::Info::RemoveErrorNotFound;
@@ -313,7 +313,7 @@ impl Connections {
                         }
 
                         // send response
-                        Self::rpc_send_node_list(info);
+                        Self::rpc_send_node_list(info, request_id);
                     }
                     _ => {}
                 }
@@ -325,7 +325,7 @@ impl Connections {
     }
 
     /// create and send a node list message
-    fn rpc_send_node_list(info: proto::Info) {
+    fn rpc_send_node_list(info: proto::Info, request_id: String) {
         let mut nodes: Vec<proto::InternetNodesEntry> = Vec::new();
 
         // get list of peer nodes from config
@@ -351,11 +351,11 @@ impl Connections {
         };
 
         // send the message
-        Self::rpc_send_message(proto_message);
+        Self::rpc_send_message(proto_message, request_id);
     }
 
     /// encode and send connections RPC message to UI
-    fn rpc_send_message(message: proto::Connections) {
+    fn rpc_send_message(message: proto::Connections, request_id: String) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
         message
@@ -366,7 +366,7 @@ impl Connections {
         Rpc::send_message(
             buf,
             super::rpc::proto::Modules::Connections.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }
