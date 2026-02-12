@@ -6,12 +6,15 @@
 
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::Parser;
+use cli::{Cli, Commands};
 use futures::{SinkExt, StreamExt};
 use prost::Message;
 use tokio::net::UnixStream;
 use tokio_util::codec::LengthDelimitedCodec;
 use uuid::Uuid;
+
+use crate::commands::RpcCommand;
 
 /// include generated protobuf RPC rust definition file
 pub mod proto {
@@ -19,38 +22,8 @@ pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
 }
 
-/// qauld-ctl CLI: Control a running qauld daemon instance
-#[derive(Debug, Parser)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    /// Explicit path to qauld sock. e.g /path/to/qauld.sock
-    #[arg(short, long, env = "QAULD_SOCKET")]
-    socket: Option<String>,
-    /// Specify a directory to look for qauld.sock in
-    #[arg(short, long)]
-    dir: Option<String>,
-
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-    /// node details
-    Node(NodeArgs),
-}
-
-#[derive(Args, Debug)]
-struct NodeArgs {
-    #[command(subcommand)]
-    command: NodeSubcmd,
-}
-
-#[derive(Debug, Subcommand)]
-enum NodeSubcmd {
-    /// prints the local node id
-    Info,
-}
+mod cli;
+mod commands;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -76,31 +49,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .length_field_type::<u16>()
         .length_adjustment(0)
         .new_framed(client);
-    let request_id = Uuid::new_v4().to_string();
 
-    let command_proto_message = match cli.command {
-        Commands::Node(c) => match c.command {
-            NodeSubcmd::Info => {
-                let node_proto_message = proto::Node {
-                    message: Some(proto::node::Message::GetNodeInfo(true)),
-                };
-                node_proto_message
-            }
-        },
+    let rpc_command: Box<dyn RpcCommand> = match cli.command {
+        Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
     };
 
-    // encode message
-    let mut buf = Vec::with_capacity(command_proto_message.encoded_len());
-    command_proto_message
-        .encode(&mut buf)
-        .expect("Vec<u8> provides capacity as needed");
-
+    let request_id = Uuid::new_v4().to_string();
+    let (data, module) = rpc_command.encode_request()?;
     // Create RPC message container
     let proto_message = proto::QaulRpc {
-        module: proto::Modules::Node.into(),
+        module: module.into(),
         request_id,
         user_id: Vec::new(),
-        data: buf,
+        data,
     };
 
     let mut rpc_msg = Vec::with_capacity(proto_message.encoded_len());
@@ -110,29 +71,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     framed_client.send(rpc_msg.into()).await?;
 
     if let Some(Ok(data)) = framed_client.next().await {
-        // TODO; this is still just testing it with basic node info rpc message
         match proto::QaulRpc::decode(&data[..]) {
-            Ok(msg) => {
-                match proto::Node::decode(&msg.data[..]) {
-                    Ok(node) => {
-                        match node.message {
-                            Some(proto::node::Message::Info(proto_nodeinformation)) => {
-                                // print information
-                                println!("Node ID is: {}", proto_nodeinformation.id_base58);
-                                println!("Node Addresses are:");
-                                for address in proto_nodeinformation.addresses {
-                                    println!("    {}", address);
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                    Err(error) => {
-                        eprintln!("{:?}", error);
-                        log::error!("{:?}", error);
-                    }
-                }
-            }
+            Ok(msg) => rpc_command.decode_response(&msg.data[..])?,
             _ => {}
         }
     }
