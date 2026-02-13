@@ -33,7 +33,7 @@ pub extern "C" fn start(s: *const c_char) {
 
     let r_str = c_str.to_str().unwrap();
     println!("{}", r_str.to_string());
-    super::start(r_str.to_string());
+    let _instance = super::start_instance_in_thread(r_str.to_string(), None);
 }
 
 /// start libqaul on desktop operating systems
@@ -46,7 +46,7 @@ pub extern "C" fn start(s: *const c_char) {
 /// to be provided.
 #[no_mangle]
 pub extern "C" fn start_desktop() {
-    super::start_desktop();
+    let _instance = super::start_desktop();
 }
 
 /// check if libqaul finished initializing

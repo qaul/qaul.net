@@ -51,14 +51,47 @@ pub struct MessageCounter {
 /// state of message counter
 static EXTERN_SEND_COUNT: InitCell<RwLock<MessageCounter>> = InitCell::new();
 
-/// receiving end of the mpsc channel
+/// receiving end of the mpsc channel (global state - deprecated)
 static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
-/// sending end of the mpsc channel
+/// sending end of the mpsc channel (global state - deprecated)
 static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
-/// sending end of th mpsc channel for libqaul to send
+/// sending end of th mpsc channel for libqaul to send (global state - deprecated)
 static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 
-/// Handling of RPC messages of libqaul
+/// RPC Module - wrapper for instance-based RPC channel management
+///
+/// This struct provides instance-based access to RPC channels.
+/// The channels are created during initialization and the receiver
+/// is stored in the `Libqaul` struct.
+pub struct RpcModule {
+    /// Whether RPC module has been initialized
+    initialized: bool,
+}
+
+impl RpcModule {
+    /// Create a new RpcModule (instance-based)
+    pub fn new() -> Self {
+        Self { initialized: false }
+    }
+
+    /// Check if RPC module is initialized
+    pub fn is_initialized(&self) -> bool {
+        self.initialized
+    }
+
+    /// Mark as initialized
+    pub fn set_initialized(&mut self) {
+        self.initialized = true;
+    }
+}
+
+impl Default for RpcModule {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Handling of RPC messages of libqaul (global state - for backward compatibility)
 pub struct Rpc {}
 
 impl Rpc {
