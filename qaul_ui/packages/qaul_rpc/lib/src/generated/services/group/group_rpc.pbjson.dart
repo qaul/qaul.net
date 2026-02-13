@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/group/group_rpc.proto
-//
-// @dart = 2.12
+// Generated from services/group/group_rpc.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -36,8 +38,8 @@ const GroupMemberRole$json = {
 };
 
 /// Descriptor for `GroupMemberRole`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List groupMemberRoleDescriptor = $convert.base64Decode(
-    'Cg9Hcm91cE1lbWJlclJvbGUSCAoEVXNlchAAEgoKBUFkbWluEP8B');
+final $typed_data.Uint8List groupMemberRoleDescriptor = $convert
+    .base64Decode('Cg9Hcm91cE1lbWJlclJvbGUSCAoEVXNlchAAEgoKBUFkbWluEP8B');
 
 @$core.Deprecated('Use groupStatusDescriptor instead')
 const GroupStatus$json = {
@@ -58,22 +60,150 @@ final $typed_data.Uint8List groupStatusDescriptor = $convert.base64Decode(
 const Group$json = {
   '1': 'Group',
   '2': [
-    {'1': 'group_create_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupCreateRequest', '9': 0, '10': 'groupCreateRequest'},
-    {'1': 'group_create_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupCreateResponse', '9': 0, '10': 'groupCreateResponse'},
-    {'1': 'group_rename_request', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRenameRequest', '9': 0, '10': 'groupRenameRequest'},
-    {'1': 'group_rename_response', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRenameResponse', '9': 0, '10': 'groupRenameResponse'},
-    {'1': 'group_invite_member_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInviteMemberRequest', '9': 0, '10': 'groupInviteMemberRequest'},
-    {'1': 'group_invite_member_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInviteMemberResponse', '9': 0, '10': 'groupInviteMemberResponse'},
-    {'1': 'group_remove_member_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRemoveMemberRequest', '9': 0, '10': 'groupRemoveMemberRequest'},
-    {'1': 'group_remove_member_response', '3': 8, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupRemoveMemberResponse', '9': 0, '10': 'groupRemoveMemberResponse'},
-    {'1': 'group_info_request', '3': 9, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfoRequest', '9': 0, '10': 'groupInfoRequest'},
-    {'1': 'group_info_response', '3': 10, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '9': 0, '10': 'groupInfoResponse'},
-    {'1': 'group_reply_invite_request', '3': 11, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupReplyInviteRequest', '9': 0, '10': 'groupReplyInviteRequest'},
-    {'1': 'group_reply_invite_response', '3': 12, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupReplyInviteResponse', '9': 0, '10': 'groupReplyInviteResponse'},
-    {'1': 'group_list_request', '3': 13, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupListRequest', '9': 0, '10': 'groupListRequest'},
-    {'1': 'group_list_response', '3': 14, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupListResponse', '9': 0, '10': 'groupListResponse'},
-    {'1': 'group_invited_request', '3': 15, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInvitedRequest', '9': 0, '10': 'groupInvitedRequest'},
-    {'1': 'group_invited_response', '3': 16, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInvitedResponse', '9': 0, '10': 'groupInvitedResponse'},
+    {
+      '1': 'group_create_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupCreateRequest',
+      '9': 0,
+      '10': 'groupCreateRequest'
+    },
+    {
+      '1': 'group_create_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupCreateResponse',
+      '9': 0,
+      '10': 'groupCreateResponse'
+    },
+    {
+      '1': 'group_rename_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupRenameRequest',
+      '9': 0,
+      '10': 'groupRenameRequest'
+    },
+    {
+      '1': 'group_rename_response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupRenameResponse',
+      '9': 0,
+      '10': 'groupRenameResponse'
+    },
+    {
+      '1': 'group_invite_member_request',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInviteMemberRequest',
+      '9': 0,
+      '10': 'groupInviteMemberRequest'
+    },
+    {
+      '1': 'group_invite_member_response',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInviteMemberResponse',
+      '9': 0,
+      '10': 'groupInviteMemberResponse'
+    },
+    {
+      '1': 'group_remove_member_request',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupRemoveMemberRequest',
+      '9': 0,
+      '10': 'groupRemoveMemberRequest'
+    },
+    {
+      '1': 'group_remove_member_response',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupRemoveMemberResponse',
+      '9': 0,
+      '10': 'groupRemoveMemberResponse'
+    },
+    {
+      '1': 'group_info_request',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInfoRequest',
+      '9': 0,
+      '10': 'groupInfoRequest'
+    },
+    {
+      '1': 'group_info_response',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInfo',
+      '9': 0,
+      '10': 'groupInfoResponse'
+    },
+    {
+      '1': 'group_reply_invite_request',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupReplyInviteRequest',
+      '9': 0,
+      '10': 'groupReplyInviteRequest'
+    },
+    {
+      '1': 'group_reply_invite_response',
+      '3': 12,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupReplyInviteResponse',
+      '9': 0,
+      '10': 'groupReplyInviteResponse'
+    },
+    {
+      '1': 'group_list_request',
+      '3': 13,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupListRequest',
+      '9': 0,
+      '10': 'groupListRequest'
+    },
+    {
+      '1': 'group_list_response',
+      '3': 14,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupListResponse',
+      '9': 0,
+      '10': 'groupListResponse'
+    },
+    {
+      '1': 'group_invited_request',
+      '3': 15,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInvitedRequest',
+      '9': 0,
+      '10': 'groupInvitedRequest'
+    },
+    {
+      '1': 'group_invited_response',
+      '3': 16,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInvitedResponse',
+      '9': 0,
+      '10': 'groupInvitedResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -134,15 +264,23 @@ const GroupCreateRequest$json = {
 };
 
 /// Descriptor for `GroupCreateRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupCreateRequestDescriptor = $convert.base64Decode(
-    'ChJHcm91cENyZWF0ZVJlcXVlc3QSHQoKZ3JvdXBfbmFtZRgBIAEoCVIJZ3JvdXBOYW1l');
+final $typed_data.Uint8List groupCreateRequestDescriptor =
+    $convert.base64Decode(
+        'ChJHcm91cENyZWF0ZVJlcXVlc3QSHQoKZ3JvdXBfbmFtZRgBIAEoCVIJZ3JvdXBOYW1l');
 
 @$core.Deprecated('Use groupCreateResponseDescriptor instead')
 const GroupCreateResponse$json = {
   '1': 'GroupCreateResponse',
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    {'1': 'result', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
+    {
+      '1': 'result',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupResult',
+      '10': 'result'
+    },
   ],
 };
 
@@ -171,7 +309,14 @@ const GroupRenameResponse$json = {
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'group_name', '3': 2, '4': 1, '5': 9, '10': 'groupName'},
-    {'1': 'result', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
+    {
+      '1': 'result',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupResult',
+      '10': 'result'
+    },
   ],
 };
 
@@ -191,9 +336,10 @@ const GroupInviteMemberRequest$json = {
 };
 
 /// Descriptor for `GroupInviteMemberRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInviteMemberRequestDescriptor = $convert.base64Decode(
-    'ChhHcm91cEludml0ZU1lbWJlclJlcXVlc3QSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSFw'
-    'oHdXNlcl9pZBgCIAEoDFIGdXNlcklk');
+final $typed_data.Uint8List groupInviteMemberRequestDescriptor =
+    $convert.base64Decode(
+        'ChhHcm91cEludml0ZU1lbWJlclJlcXVlc3QSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSFw'
+        'oHdXNlcl9pZBgCIAEoDFIGdXNlcklk');
 
 @$core.Deprecated('Use groupInviteMemberResponseDescriptor instead')
 const GroupInviteMemberResponse$json = {
@@ -201,7 +347,14 @@ const GroupInviteMemberResponse$json = {
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'user_id', '3': 2, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'result', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
+    {
+      '1': 'result',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupResult',
+      '10': 'result'
+    },
   ],
 };
 
@@ -221,23 +374,32 @@ const GroupReplyInviteRequest$json = {
 };
 
 /// Descriptor for `GroupReplyInviteRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupReplyInviteRequestDescriptor = $convert.base64Decode(
-    'ChdHcm91cFJlcGx5SW52aXRlUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIWCg'
-    'ZhY2NlcHQYAyABKAhSBmFjY2VwdA==');
+final $typed_data.Uint8List groupReplyInviteRequestDescriptor =
+    $convert.base64Decode(
+        'ChdHcm91cFJlcGx5SW52aXRlUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIWCg'
+        'ZhY2NlcHQYAyABKAhSBmFjY2VwdA==');
 
 @$core.Deprecated('Use groupReplyInviteResponseDescriptor instead')
 const GroupReplyInviteResponse$json = {
   '1': 'GroupReplyInviteResponse',
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    {'1': 'result', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
+    {
+      '1': 'result',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupResult',
+      '10': 'result'
+    },
   ],
 };
 
 /// Descriptor for `GroupReplyInviteResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupReplyInviteResponseDescriptor = $convert.base64Decode(
-    'ChhHcm91cFJlcGx5SW52aXRlUmVzcG9uc2USGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSMw'
-    'oGcmVzdWx0GAMgASgLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZXN1bHRSBnJlc3VsdA==');
+final $typed_data.Uint8List groupReplyInviteResponseDescriptor =
+    $convert.base64Decode(
+        'ChhHcm91cFJlcGx5SW52aXRlUmVzcG9uc2USGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSMw'
+        'oGcmVzdWx0GAMgASgLMhsucWF1bC5ycGMuZ3JvdXAuR3JvdXBSZXN1bHRSBnJlc3VsdA==');
 
 @$core.Deprecated('Use groupRemoveMemberRequestDescriptor instead')
 const GroupRemoveMemberRequest$json = {
@@ -249,9 +411,10 @@ const GroupRemoveMemberRequest$json = {
 };
 
 /// Descriptor for `GroupRemoveMemberRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupRemoveMemberRequestDescriptor = $convert.base64Decode(
-    'ChhHcm91cFJlbW92ZU1lbWJlclJlcXVlc3QSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSFw'
-    'oHdXNlcl9pZBgCIAEoDFIGdXNlcklk');
+final $typed_data.Uint8List groupRemoveMemberRequestDescriptor =
+    $convert.base64Decode(
+        'ChhHcm91cFJlbW92ZU1lbWJlclJlcXVlc3QSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSFw'
+        'oHdXNlcl9pZBgCIAEoDFIGdXNlcklk');
 
 @$core.Deprecated('Use groupRemoveMemberResponseDescriptor instead')
 const GroupRemoveMemberResponse$json = {
@@ -259,7 +422,14 @@ const GroupRemoveMemberResponse$json = {
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'user_id', '3': 2, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'result', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupResult', '10': 'result'},
+    {
+      '1': 'result',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupResult',
+      '10': 'result'
+    },
   ],
 };
 
@@ -286,10 +456,30 @@ const GroupMember$json = {
   '1': 'GroupMember',
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'role', '3': 2, '4': 1, '5': 14, '6': '.qaul.rpc.group.GroupMemberRole', '10': 'role'},
+    {
+      '1': 'role',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.group.GroupMemberRole',
+      '10': 'role'
+    },
     {'1': 'joined_at', '3': 3, '4': 1, '5': 4, '10': 'joinedAt'},
-    {'1': 'state', '3': 4, '4': 1, '5': 14, '6': '.qaul.rpc.group.GroupMemberState', '10': 'state'},
-    {'1': 'last_message_index', '3': 5, '4': 1, '5': 13, '10': 'lastMessageIndex'},
+    {
+      '1': 'state',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.group.GroupMemberState',
+      '10': 'state'
+    },
+    {
+      '1': 'last_message_index',
+      '3': 5,
+      '4': 1,
+      '5': 13,
+      '10': 'lastMessageIndex'
+    },
   ],
 };
 
@@ -307,14 +497,34 @@ const GroupInfo$json = {
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'group_name', '3': 2, '4': 1, '5': 9, '10': 'groupName'},
     {'1': 'created_at', '3': 3, '4': 1, '5': 4, '10': 'createdAt'},
-    {'1': 'status', '3': 4, '4': 1, '5': 14, '6': '.qaul.rpc.group.GroupStatus', '10': 'status'},
+    {
+      '1': 'status',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.group.GroupStatus',
+      '10': 'status'
+    },
     {'1': 'revision', '3': 5, '4': 1, '5': 13, '10': 'revision'},
     {'1': 'is_direct_chat', '3': 6, '4': 1, '5': 8, '10': 'isDirectChat'},
-    {'1': 'members', '3': 7, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupMember', '10': 'members'},
+    {
+      '1': 'members',
+      '3': 7,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupMember',
+      '10': 'members'
+    },
     {'1': 'unread_messages', '3': 8, '4': 1, '5': 13, '10': 'unreadMessages'},
     {'1': 'last_message_at', '3': 9, '4': 1, '5': 4, '10': 'lastMessageAt'},
     {'1': 'last_message', '3': 10, '4': 1, '5': 12, '10': 'lastMessage'},
-    {'1': 'last_message_sender_id', '3': 11, '4': 1, '5': 12, '10': 'lastMessageSenderId'},
+    {
+      '1': 'last_message_sender_id',
+      '3': 11,
+      '4': 1,
+      '5': 12,
+      '10': 'lastMessageSenderId'
+    },
   ],
 };
 
@@ -335,14 +545,21 @@ const GroupListRequest$json = {
 };
 
 /// Descriptor for `GroupListRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupListRequestDescriptor = $convert.base64Decode(
-    'ChBHcm91cExpc3RSZXF1ZXN0');
+final $typed_data.Uint8List groupListRequestDescriptor =
+    $convert.base64Decode('ChBHcm91cExpc3RSZXF1ZXN0');
 
 @$core.Deprecated('Use groupListResponseDescriptor instead')
 const GroupListResponse$json = {
   '1': 'GroupListResponse',
   '2': [
-    {'1': 'groups', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '10': 'groups'},
+    {
+      '1': 'groups',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInfo',
+      '10': 'groups'
+    },
   ],
 };
 
@@ -357,7 +574,14 @@ const GroupInvited$json = {
   '2': [
     {'1': 'sender_id', '3': 1, '4': 1, '5': 12, '10': 'senderId'},
     {'1': 'received_at', '3': 2, '4': 1, '5': 4, '10': 'receivedAt'},
-    {'1': 'group', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.group.GroupInfo', '10': 'group'},
+    {
+      '1': 'group',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInfo',
+      '10': 'group'
+    },
   ],
 };
 
@@ -373,14 +597,21 @@ const GroupInvitedRequest$json = {
 };
 
 /// Descriptor for `GroupInvitedRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInvitedRequestDescriptor = $convert.base64Decode(
-    'ChNHcm91cEludml0ZWRSZXF1ZXN0');
+final $typed_data.Uint8List groupInvitedRequestDescriptor =
+    $convert.base64Decode('ChNHcm91cEludml0ZWRSZXF1ZXN0');
 
 @$core.Deprecated('Use groupInvitedResponseDescriptor instead')
 const GroupInvitedResponse$json = {
   '1': 'GroupInvitedResponse',
   '2': [
-    {'1': 'invited', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.group.GroupInvited', '10': 'invited'},
+    {
+      '1': 'invited',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupInvited',
+      '10': 'invited'
+    },
   ],
 };
 
@@ -388,4 +619,3 @@ const GroupInvitedResponse$json = {
 final $typed_data.Uint8List groupInvitedResponseDescriptor = $convert.base64Decode(
     'ChRHcm91cEludml0ZWRSZXNwb25zZRI2CgdpbnZpdGVkGAEgAygLMhwucWF1bC5ycGMuZ3JvdX'
     'AuR3JvdXBJbnZpdGVkUgdpbnZpdGVk');
-

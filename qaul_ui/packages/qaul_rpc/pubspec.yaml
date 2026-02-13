@@ -21,7 +21,7 @@ dependencies:
   fixnum: ^1.1.0
   convert: ^3.1.1
   meta: ^1.9.1
-  protobuf: ^2.1.0
+  protobuf: ^6.0.0
 
   uuid: ^4.5.2
   rxdart: ^0.27.7

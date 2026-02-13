@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/chat/chatfile_rpc.proto
-//
-// @dart = 2.12
+// Generated from services/chat/chatfile_rpc.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -17,10 +19,42 @@ import 'dart:typed_data' as $typed_data;
 const ChatFile$json = {
   '1': 'ChatFile',
   '2': [
-    {'1': 'send_file_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.chatfile.SendFileRequest', '9': 0, '10': 'sendFileRequest'},
-    {'1': 'send_file_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.chatfile.SendFileResponse', '9': 0, '10': 'sendFileResponse'},
-    {'1': 'file_history', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.chatfile.FileHistoryRequest', '9': 0, '10': 'fileHistory'},
-    {'1': 'file_history_response', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.chatfile.FileHistoryResponse', '9': 0, '10': 'fileHistoryResponse'},
+    {
+      '1': 'send_file_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chatfile.SendFileRequest',
+      '9': 0,
+      '10': 'sendFileRequest'
+    },
+    {
+      '1': 'send_file_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chatfile.SendFileResponse',
+      '9': 0,
+      '10': 'sendFileResponse'
+    },
+    {
+      '1': 'file_history',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chatfile.FileHistoryRequest',
+      '9': 0,
+      '10': 'fileHistory'
+    },
+    {
+      '1': 'file_history_response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chatfile.FileHistoryResponse',
+      '9': 0,
+      '10': 'fileHistoryResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -111,7 +145,14 @@ const FileHistoryResponse$json = {
     {'1': 'offset', '3': 1, '4': 1, '5': 13, '10': 'offset'},
     {'1': 'limit', '3': 2, '4': 1, '5': 13, '10': 'limit'},
     {'1': 'total', '3': 3, '4': 1, '5': 4, '10': 'total'},
-    {'1': 'histories', '3': 4, '4': 3, '5': 11, '6': '.qaul.rpc.chatfile.FileHistoryEntry', '10': 'histories'},
+    {
+      '1': 'histories',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.chatfile.FileHistoryEntry',
+      '10': 'histories'
+    },
   ],
 };
 
@@ -120,4 +161,3 @@ final $typed_data.Uint8List fileHistoryResponseDescriptor = $convert.base64Decod
     'ChNGaWxlSGlzdG9yeVJlc3BvbnNlEhYKBm9mZnNldBgBIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GA'
     'IgASgNUgVsaW1pdBIUCgV0b3RhbBgDIAEoBFIFdG90YWwSQQoJaGlzdG9yaWVzGAQgAygLMiMu'
     'cWF1bC5ycGMuY2hhdGZpbGUuRmlsZUhpc3RvcnlFbnRyeVIJaGlzdG9yaWVz');
-

@@ -57,7 +57,7 @@ impl Users {
     fn request_user_list() {
         // create request message
         let proto_message = proto::Users {
-            message: Some(proto::users::Message::UserRequest(proto::UserRequest {})),
+            message: Some(proto::users::Message::UserRequest(proto::UserRequest { offset: 0, limit: 0 })),
         };
 
         // encode message
@@ -78,7 +78,7 @@ impl Users {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserOnlineRequest(
-                proto::UserOnlineRequest {},
+                proto::UserOnlineRequest { offset: 0, limit: 0 },
             )),
         };
 

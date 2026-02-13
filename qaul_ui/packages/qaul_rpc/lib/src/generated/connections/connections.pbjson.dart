@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: connections/connections.proto
-//
-// @dart = 2.12
+// Generated from connections/connections.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -36,12 +38,60 @@ final $typed_data.Uint8List infoDescriptor = $convert.base64Decode(
 const Connections$json = {
   '1': 'Connections',
   '2': [
-    {'1': 'internet_nodes_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesRequest', '9': 0, '10': 'internetNodesRequest'},
-    {'1': 'internet_nodes_list', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesList', '9': 0, '10': 'internetNodesList'},
-    {'1': 'internet_nodes_add', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesAdd'},
-    {'1': 'internet_nodes_remove', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesRemove'},
-    {'1': 'internet_nodes_state', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesState'},
-    {'1': 'internet_nodes_rename', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '9': 0, '10': 'internetNodesRename'},
+    {
+      '1': 'internet_nodes_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesRequest',
+      '9': 0,
+      '10': 'internetNodesRequest'
+    },
+    {
+      '1': 'internet_nodes_list',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesList',
+      '9': 0,
+      '10': 'internetNodesList'
+    },
+    {
+      '1': 'internet_nodes_add',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesEntry',
+      '9': 0,
+      '10': 'internetNodesAdd'
+    },
+    {
+      '1': 'internet_nodes_remove',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesEntry',
+      '9': 0,
+      '10': 'internetNodesRemove'
+    },
+    {
+      '1': 'internet_nodes_state',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesEntry',
+      '9': 0,
+      '10': 'internetNodesState'
+    },
+    {
+      '1': 'internet_nodes_rename',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesEntry',
+      '9': 0,
+      '10': 'internetNodesRename'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -68,15 +118,29 @@ const InternetNodesRequest$json = {
 };
 
 /// Descriptor for `InternetNodesRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List internetNodesRequestDescriptor = $convert.base64Decode(
-    'ChRJbnRlcm5ldE5vZGVzUmVxdWVzdA==');
+final $typed_data.Uint8List internetNodesRequestDescriptor =
+    $convert.base64Decode('ChRJbnRlcm5ldE5vZGVzUmVxdWVzdA==');
 
 @$core.Deprecated('Use internetNodesListDescriptor instead')
 const InternetNodesList$json = {
   '1': 'InternetNodesList',
   '2': [
-    {'1': 'info', '3': 1, '4': 1, '5': 14, '6': '.qaul.rpc.connections.Info', '10': 'info'},
-    {'1': 'nodes', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.connections.InternetNodesEntry', '10': 'nodes'},
+    {
+      '1': 'info',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.connections.Info',
+      '10': 'info'
+    },
+    {
+      '1': 'nodes',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.connections.InternetNodesEntry',
+      '10': 'nodes'
+    },
   ],
 };
 
@@ -100,4 +164,3 @@ const InternetNodesEntry$json = {
 final $typed_data.Uint8List internetNodesEntryDescriptor = $convert.base64Decode(
     'ChJJbnRlcm5ldE5vZGVzRW50cnkSGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIYCgdlbmFibG'
     'VkGAIgASgIUgdlbmFibGVkEhIKBG5hbWUYAyABKAlSBG5hbWU=');
-

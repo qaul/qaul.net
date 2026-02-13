@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/feed/feed.proto
-//
-// @dart = 2.12
+// Generated from services/feed/feed.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -17,9 +19,33 @@ import 'dart:typed_data' as $typed_data;
 const Feed$json = {
   '1': 'Feed',
   '2': [
-    {'1': 'received', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.feed.FeedMessageList', '9': 0, '10': 'received'},
-    {'1': 'send', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.feed.SendMessage', '9': 0, '10': 'send'},
-    {'1': 'request', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.feed.FeedMessageRequest', '9': 0, '10': 'request'},
+    {
+      '1': 'received',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.feed.FeedMessageList',
+      '9': 0,
+      '10': 'received'
+    },
+    {
+      '1': 'send',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.feed.SendMessage',
+      '9': 0,
+      '10': 'send'
+    },
+    {
+      '1': 'request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.feed.FeedMessageRequest',
+      '9': 0,
+      '10': 'request'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -51,7 +77,14 @@ final $typed_data.Uint8List feedMessageRequestDescriptor = $convert.base64Decode
 const FeedMessageList$json = {
   '1': 'FeedMessageList',
   '2': [
-    {'1': 'feed_message', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.feed.FeedMessage', '10': 'feedMessage'},
+    {
+      '1': 'feed_message',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.feed.FeedMessage',
+      '10': 'feedMessage'
+    },
   ],
 };
 
@@ -71,7 +104,13 @@ const FeedMessage$json = {
     {'1': 'time_sent', '3': 5, '4': 1, '5': 9, '10': 'timeSent'},
     {'1': 'timestamp_sent', '3': 9, '4': 1, '5': 4, '10': 'timestampSent'},
     {'1': 'time_received', '3': 6, '4': 1, '5': 9, '10': 'timeReceived'},
-    {'1': 'timestamp_received', '3': 10, '4': 1, '5': 4, '10': 'timestampReceived'},
+    {
+      '1': 'timestamp_received',
+      '3': 10,
+      '4': 1,
+      '5': 4,
+      '10': 'timestampReceived'
+    },
     {'1': 'content', '3': 7, '4': 1, '5': 9, '10': 'content'},
     {'1': 'index', '3': 8, '4': 1, '5': 4, '10': 'index'},
   ],
@@ -96,6 +135,5 @@ const SendMessage$json = {
 };
 
 /// Descriptor for `SendMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sendMessageDescriptor = $convert.base64Decode(
-    'CgtTZW5kTWVzc2FnZRIYCgdjb250ZW50GAEgASgJUgdjb250ZW50');
-
+final $typed_data.Uint8List sendMessageDescriptor = $convert
+    .base64Decode('CgtTZW5kTWVzc2FnZRIYCgdjb250ZW50GAEgASgJUgdjb250ZW50');
