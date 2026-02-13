@@ -18,7 +18,7 @@ use crate::rpc::authentication::Authentication;
 
 // crate modules
 pub mod api;
-mod connections;
+pub mod connections;
 pub mod node;
 mod router;
 mod rpc;

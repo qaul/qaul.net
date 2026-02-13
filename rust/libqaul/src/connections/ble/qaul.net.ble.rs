@@ -3,7 +3,7 @@
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BleMessage {
     /// message type
-    #[prost(oneof = "ble_message::Message", tags = "1, 2, 3, 4")]
+    #[prost(oneof = "ble_message::Message", tags = "1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<ble_message::Message>,
 }
 /// Nested message and enum types in `BleMessage`.
@@ -23,6 +23,12 @@ pub mod ble_message {
         /// identification request
         #[prost(message, tag = "4")]
         Identification(super::Identification),
+        /// encrypted transport message
+        #[prost(message, tag = "5")]
+        Encrypted(super::EncryptedBleTransport),
+        /// noise handshake message
+        #[prost(message, tag = "6")]
+        Handshake(super::NoiseHandshake),
     }
 }
 /// Identfication Request
@@ -39,4 +45,30 @@ pub struct NodeIdentification {
     /// Node ID
     #[prost(bytes = "vec", tag = "1")]
     pub id: ::prost::alloc::vec::Vec<u8>,
+}
+/// Encrypted transport wrapper for BLE messages
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct EncryptedBleTransport {
+    /// Session identifier
+    #[prost(uint32, tag = "1")]
+    pub session_id: u32,
+    /// Message nonce (counter)
+    #[prost(uint64, tag = "2")]
+    pub nonce: u64,
+    /// Encrypted ciphertext
+    #[prost(bytes = "vec", tag = "3")]
+    pub ciphertext: ::prost::alloc::vec::Vec<u8>,
+}
+/// Noise protocol handshake message
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct NoiseHandshake {
+    /// Session identifier
+    #[prost(uint32, tag = "1")]
+    pub session_id: u32,
+    /// Handshake message number (1 or 2)
+    #[prost(uint32, tag = "2")]
+    pub message_number: u32,
+    /// Handshake payload
+    #[prost(bytes = "vec", tag = "3")]
+    pub payload: ::prost::alloc::vec::Vec<u8>,
 }

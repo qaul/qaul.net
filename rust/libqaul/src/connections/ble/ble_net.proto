@@ -14,6 +14,10 @@ message BleMessage {
         bytes messaging = 3;
         // identification request
         Identification identification = 4;
+        // encrypted transport message
+        EncryptedBleTransport encrypted = 5;
+        // noise handshake message
+        NoiseHandshake handshake = 6;
     }
 }
 
@@ -27,4 +31,24 @@ message Identification {
 message NodeIdentification {
     // Node ID
     bytes id = 1;
+}
+
+// Encrypted transport wrapper for BLE messages
+message EncryptedBleTransport {
+    // Session identifier
+    uint32 session_id = 1;
+    // Message nonce (counter)
+    uint64 nonce = 2;
+    // Encrypted ciphertext
+    bytes ciphertext = 3;
+}
+
+// Noise protocol handshake message
+message NoiseHandshake {
+    // Session identifier
+    uint32 session_id = 1;
+    // Handshake message number (1 or 2)
+    uint32 message_number = 2;
+    // Handshake payload
+    bytes payload = 3;
 }
