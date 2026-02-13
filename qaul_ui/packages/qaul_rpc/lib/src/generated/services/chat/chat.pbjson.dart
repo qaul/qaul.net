@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/chat/chat.proto
-//
-// @dart = 2.12
+// Generated from services/chat/chat.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -56,9 +58,33 @@ final $typed_data.Uint8List groupEventTypeDescriptor = $convert.base64Decode(
 const Chat$json = {
   '1': 'Chat',
   '2': [
-    {'1': 'conversation_request', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.chat.ChatConversationRequest', '9': 0, '10': 'conversationRequest'},
-    {'1': 'conversation_list', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.chat.ChatConversationList', '9': 0, '10': 'conversationList'},
-    {'1': 'send', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.chat.ChatMessageSend', '9': 0, '10': 'send'},
+    {
+      '1': 'conversation_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatConversationRequest',
+      '9': 0,
+      '10': 'conversationRequest'
+    },
+    {
+      '1': 'conversation_list',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatConversationList',
+      '9': 0,
+      '10': 'conversationList'
+    },
+    {
+      '1': 'send',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatMessageSend',
+      '9': 0,
+      '10': 'send'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -83,16 +109,24 @@ const ChatConversationRequest$json = {
 };
 
 /// Descriptor for `ChatConversationRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatConversationRequestDescriptor = $convert.base64Decode(
-    'ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIdCg'
-    'psYXN0X2luZGV4GAIgASgEUglsYXN0SW5kZXg=');
+final $typed_data.Uint8List chatConversationRequestDescriptor =
+    $convert.base64Decode(
+        'ChdDaGF0Q29udmVyc2F0aW9uUmVxdWVzdBIZCghncm91cF9pZBgBIAEoDFIHZ3JvdXBJZBIdCg'
+        'psYXN0X2luZGV4GAIgASgEUglsYXN0SW5kZXg=');
 
 @$core.Deprecated('Use chatConversationListDescriptor instead')
 const ChatConversationList$json = {
   '1': 'ChatConversationList',
   '2': [
     {'1': 'group_id', '3': 1, '4': 1, '5': 12, '10': 'groupId'},
-    {'1': 'message_list', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.chat.ChatMessage', '10': 'messageList'},
+    {
+      '1': 'message_list',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatMessage',
+      '10': 'messageList'
+    },
   ],
 };
 
@@ -109,8 +143,22 @@ const ChatMessage$json = {
     {'1': 'index', '3': 1, '4': 1, '5': 4, '10': 'index'},
     {'1': 'sender_id', '3': 2, '4': 1, '5': 12, '10': 'senderId'},
     {'1': 'message_id', '3': 3, '4': 1, '5': 12, '10': 'messageId'},
-    {'1': 'status', '3': 4, '4': 1, '5': 14, '6': '.qaul.rpc.chat.MessageStatus', '10': 'status'},
-    {'1': 'message_reception_confirmed', '3': 10, '4': 3, '5': 11, '6': '.qaul.rpc.chat.MessageReceptionConfirmed', '10': 'messageReceptionConfirmed'},
+    {
+      '1': 'status',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.chat.MessageStatus',
+      '10': 'status'
+    },
+    {
+      '1': 'message_reception_confirmed',
+      '3': 10,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.chat.MessageReceptionConfirmed',
+      '10': 'messageReceptionConfirmed'
+    },
     {'1': 'group_id', '3': 5, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'sent_at', '3': 6, '4': 1, '5': 4, '10': 'sentAt'},
     {'1': 'received_at', '3': 7, '4': 1, '5': 4, '10': 'receivedAt'},
@@ -138,17 +186,42 @@ const MessageReceptionConfirmed$json = {
 };
 
 /// Descriptor for `MessageReceptionConfirmed`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List messageReceptionConfirmedDescriptor = $convert.base64Decode(
-    'ChlNZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkEhcKB3VzZXJfaWQYASABKAxSBnVzZXJJZBIhCg'
-    'xjb25maXJtZWRfYXQYAiABKARSC2NvbmZpcm1lZEF0');
+final $typed_data.Uint8List messageReceptionConfirmedDescriptor =
+    $convert.base64Decode(
+        'ChlNZXNzYWdlUmVjZXB0aW9uQ29uZmlybWVkEhcKB3VzZXJfaWQYASABKAxSBnVzZXJJZBIhCg'
+        'xjb25maXJtZWRfYXQYAiABKARSC2NvbmZpcm1lZEF0');
 
 @$core.Deprecated('Use chatContentMessageDescriptor instead')
 const ChatContentMessage$json = {
   '1': 'ChatContentMessage',
   '2': [
-    {'1': 'chat_content', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.chat.ChatContent', '9': 0, '10': 'chatContent'},
-    {'1': 'file_content', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.chat.FileContent', '9': 0, '10': 'fileContent'},
-    {'1': 'group_event', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.chat.GroupEvent', '9': 0, '10': 'groupEvent'},
+    {
+      '1': 'chat_content',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatContent',
+      '9': 0,
+      '10': 'chatContent'
+    },
+    {
+      '1': 'file_content',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.FileContent',
+      '9': 0,
+      '10': 'fileContent'
+    },
+    {
+      '1': 'group_event',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.GroupEvent',
+      '9': 0,
+      '10': 'groupEvent'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -172,8 +245,8 @@ const ChatContent$json = {
 };
 
 /// Descriptor for `ChatContent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatContentDescriptor = $convert.base64Decode(
-    'CgtDaGF0Q29udGVudBISCgR0ZXh0GAEgASgJUgR0ZXh0');
+final $typed_data.Uint8List chatContentDescriptor =
+    $convert.base64Decode('CgtDaGF0Q29udGVudBISCgR0ZXh0GAEgASgJUgR0ZXh0');
 
 @$core.Deprecated('Use fileContentDescriptor instead')
 const FileContent$json = {
@@ -198,7 +271,14 @@ final $typed_data.Uint8List fileContentDescriptor = $convert.base64Decode(
 const GroupEvent$json = {
   '1': 'GroupEvent',
   '2': [
-    {'1': 'event_type', '3': 1, '4': 1, '5': 14, '6': '.qaul.rpc.chat.GroupEventType', '10': 'eventType'},
+    {
+      '1': 'event_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.chat.GroupEventType',
+      '10': 'eventType'
+    },
     {'1': 'user_id', '3': 2, '4': 1, '5': 12, '10': 'userId'},
   ],
 };
@@ -221,4 +301,3 @@ const ChatMessageSend$json = {
 final $typed_data.Uint8List chatMessageSendDescriptor = $convert.base64Decode(
     'Cg9DaGF0TWVzc2FnZVNlbmQSGQoIZ3JvdXBfaWQYASABKAxSB2dyb3VwSWQSGAoHY29udGVudB'
     'gCIAEoCVIHY29udGVudA==');
-

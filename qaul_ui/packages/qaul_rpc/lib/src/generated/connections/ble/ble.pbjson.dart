@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: connections/ble/ble.proto
-//
-// @dart = 2.12
+// Generated from connections/ble/ble.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -47,17 +49,105 @@ final $typed_data.Uint8List bleErrorDescriptor = $convert.base64Decode(
 const Ble$json = {
   '1': 'Ble',
   '2': [
-    {'1': 'info_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleInfoRequest', '9': 0, '10': 'infoRequest'},
-    {'1': 'info_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleInfoResponse', '9': 0, '10': 'infoResponse'},
-    {'1': 'start_request', '3': 3, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleStartRequest', '9': 0, '10': 'startRequest'},
-    {'1': 'start_result', '3': 4, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleStartResult', '9': 0, '10': 'startResult'},
-    {'1': 'stop_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleStopRequest', '9': 0, '10': 'stopRequest'},
-    {'1': 'stop_result', '3': 6, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleStopResult', '9': 0, '10': 'stopResult'},
-    {'1': 'device_discovered', '3': 7, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDeviceDiscovered', '9': 0, '10': 'deviceDiscovered'},
-    {'1': 'device_unavailable', '3': 8, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDeviceUnavailable', '9': 0, '10': 'deviceUnavailable'},
-    {'1': 'direct_send', '3': 9, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDirectSend', '9': 0, '10': 'directSend'},
-    {'1': 'direct_send_result', '3': 10, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDirectSendResult', '9': 0, '10': 'directSendResult'},
-    {'1': 'direct_received', '3': 11, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDirectReceived', '9': 0, '10': 'directReceived'},
+    {
+      '1': 'info_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleInfoRequest',
+      '9': 0,
+      '10': 'infoRequest'
+    },
+    {
+      '1': 'info_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleInfoResponse',
+      '9': 0,
+      '10': 'infoResponse'
+    },
+    {
+      '1': 'start_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleStartRequest',
+      '9': 0,
+      '10': 'startRequest'
+    },
+    {
+      '1': 'start_result',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleStartResult',
+      '9': 0,
+      '10': 'startResult'
+    },
+    {
+      '1': 'stop_request',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleStopRequest',
+      '9': 0,
+      '10': 'stopRequest'
+    },
+    {
+      '1': 'stop_result',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleStopResult',
+      '9': 0,
+      '10': 'stopResult'
+    },
+    {
+      '1': 'device_discovered',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDeviceDiscovered',
+      '9': 0,
+      '10': 'deviceDiscovered'
+    },
+    {
+      '1': 'device_unavailable',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDeviceUnavailable',
+      '9': 0,
+      '10': 'deviceUnavailable'
+    },
+    {
+      '1': 'direct_send',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDirectSend',
+      '9': 0,
+      '10': 'directSend'
+    },
+    {
+      '1': 'direct_send_result',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDirectSendResult',
+      '9': 0,
+      '10': 'directSendResult'
+    },
+    {
+      '1': 'direct_received',
+      '3': 11,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDirectReceived',
+      '9': 0,
+      '10': 'directReceived'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -88,14 +178,21 @@ const BleInfoRequest$json = {
 };
 
 /// Descriptor for `BleInfoRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List bleInfoRequestDescriptor = $convert.base64Decode(
-    'Cg5CbGVJbmZvUmVxdWVzdA==');
+final $typed_data.Uint8List bleInfoRequestDescriptor =
+    $convert.base64Decode('Cg5CbGVJbmZvUmVxdWVzdA==');
 
 @$core.Deprecated('Use bleInfoResponseDescriptor instead')
 const BleInfoResponse$json = {
   '1': 'BleInfoResponse',
   '2': [
-    {'1': 'device', '3': 1, '4': 1, '5': 11, '6': '.qaul.sys.ble.BleDeviceInfo', '10': 'device'},
+    {
+      '1': 'device',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.sys.ble.BleDeviceInfo',
+      '10': 'device'
+    },
   ],
 };
 
@@ -113,14 +210,44 @@ const BleDeviceInfo$json = {
     {'1': 'name', '3': 3, '4': 1, '5': 9, '10': 'name'},
     {'1': 'bluetooth_on', '3': 4, '4': 1, '5': 8, '10': 'bluetoothOn'},
     {'1': 'adv_extended', '3': 5, '4': 1, '5': 8, '10': 'advExtended'},
-    {'1': 'adv_extended_bytes', '3': 6, '4': 1, '5': 13, '10': 'advExtendedBytes'},
+    {
+      '1': 'adv_extended_bytes',
+      '3': 6,
+      '4': 1,
+      '5': 13,
+      '10': 'advExtendedBytes'
+    },
     {'1': 'le_2m', '3': 7, '4': 1, '5': 8, '10': 'le2m'},
     {'1': 'le_coded', '3': 8, '4': 1, '5': 8, '10': 'leCoded'},
     {'1': 'le_audio', '3': 9, '4': 1, '5': 8, '10': 'leAudio'},
-    {'1': 'le_periodic_adv_support', '3': 14, '4': 1, '5': 8, '10': 'lePeriodicAdvSupport'},
-    {'1': 'le_multiple_adv_support', '3': 15, '4': 1, '5': 8, '10': 'leMultipleAdvSupport'},
-    {'1': 'offload_filter_support', '3': 16, '4': 1, '5': 8, '10': 'offloadFilterSupport'},
-    {'1': 'offload_scan_batching_support', '3': 17, '4': 1, '5': 8, '10': 'offloadScanBatchingSupport'},
+    {
+      '1': 'le_periodic_adv_support',
+      '3': 14,
+      '4': 1,
+      '5': 8,
+      '10': 'lePeriodicAdvSupport'
+    },
+    {
+      '1': 'le_multiple_adv_support',
+      '3': 15,
+      '4': 1,
+      '5': 8,
+      '10': 'leMultipleAdvSupport'
+    },
+    {
+      '1': 'offload_filter_support',
+      '3': 16,
+      '4': 1,
+      '5': 8,
+      '10': 'offloadFilterSupport'
+    },
+    {
+      '1': 'offload_scan_batching_support',
+      '3': 17,
+      '4': 1,
+      '5': 8,
+      '10': 'offloadScanBatchingSupport'
+    },
   ],
 };
 
@@ -142,7 +269,14 @@ const BleStartRequest$json = {
   '1': 'BleStartRequest',
   '2': [
     {'1': 'qaul_id', '3': 1, '4': 1, '5': 12, '10': 'qaulId'},
-    {'1': 'power_setting', '3': 2, '4': 1, '5': 14, '6': '.qaul.sys.ble.BlePowerSetting', '10': 'powerSetting'},
+    {
+      '1': 'power_setting',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.sys.ble.BlePowerSetting',
+      '10': 'powerSetting'
+    },
   ],
 };
 
@@ -156,7 +290,14 @@ const BleStartResult$json = {
   '1': 'BleStartResult',
   '2': [
     {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
-    {'1': 'error_reason', '3': 2, '4': 1, '5': 14, '6': '.qaul.sys.ble.BleError', '10': 'errorReason'},
+    {
+      '1': 'error_reason',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.sys.ble.BleError',
+      '10': 'errorReason'
+    },
     {'1': 'error_message', '3': 3, '4': 1, '5': 9, '10': 'errorMessage'},
   ],
 };
@@ -173,15 +314,22 @@ const BleStopRequest$json = {
 };
 
 /// Descriptor for `BleStopRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List bleStopRequestDescriptor = $convert.base64Decode(
-    'Cg5CbGVTdG9wUmVxdWVzdA==');
+final $typed_data.Uint8List bleStopRequestDescriptor =
+    $convert.base64Decode('Cg5CbGVTdG9wUmVxdWVzdA==');
 
 @$core.Deprecated('Use bleStopResultDescriptor instead')
 const BleStopResult$json = {
   '1': 'BleStopResult',
   '2': [
     {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
-    {'1': 'error_reason', '3': 2, '4': 1, '5': 14, '6': '.qaul.sys.ble.BleError', '10': 'errorReason'},
+    {
+      '1': 'error_reason',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.sys.ble.BleError',
+      '10': 'errorReason'
+    },
     {'1': 'error_message', '3': 3, '4': 1, '5': 9, '10': 'errorMessage'},
   ],
 };
@@ -215,8 +363,9 @@ const BleDeviceUnavailable$json = {
 };
 
 /// Descriptor for `BleDeviceUnavailable`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List bleDeviceUnavailableDescriptor = $convert.base64Decode(
-    'ChRCbGVEZXZpY2VVbmF2YWlsYWJsZRIXCgdxYXVsX2lkGAEgASgMUgZxYXVsSWQ=');
+final $typed_data.Uint8List bleDeviceUnavailableDescriptor =
+    $convert.base64Decode(
+        'ChRCbGVEZXZpY2VVbmF2YWlsYWJsZRIXCgdxYXVsX2lkGAEgASgMUgZxYXVsSWQ=');
 
 @$core.Deprecated('Use bleDirectSendDescriptor instead')
 const BleDirectSend$json = {
@@ -263,4 +412,3 @@ const BleDirectReceived$json = {
 final $typed_data.Uint8List bleDirectReceivedDescriptor = $convert.base64Decode(
     'ChFCbGVEaXJlY3RSZWNlaXZlZBISCgRmcm9tGAEgASgMUgRmcm9tEhIKBGRhdGEYBCABKAxSBG'
     'RhdGE=');
-

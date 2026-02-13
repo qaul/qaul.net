@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: rpc/debug.proto
-//
-// @dart = 2.12
+// Generated from rpc/debug.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -17,13 +19,69 @@ import 'dart:typed_data' as $typed_data;
 const Debug$json = {
   '1': 'Debug',
   '2': [
-    {'1': 'heartbeat_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.debug.HeartbeatRequest', '9': 0, '10': 'heartbeatRequest'},
-    {'1': 'heartbeat_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.debug.HeartbeatResponse', '9': 0, '10': 'heartbeatResponse'},
-    {'1': 'panic', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.debug.Panic', '9': 0, '10': 'panic'},
-    {'1': 'log_to_file', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.debug.LogToFile', '9': 0, '10': 'logToFile'},
-    {'1': 'storage_path_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathRequest', '9': 0, '10': 'storagePathRequest'},
-    {'1': 'storage_path_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.debug.StoragePathResponse', '9': 0, '10': 'storagePathResponse'},
-    {'1': 'delete_libqaul_logs_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.debug.DeleteLibqaulLogsRequest', '9': 0, '10': 'deleteLibqaulLogsRequest'},
+    {
+      '1': 'heartbeat_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.HeartbeatRequest',
+      '9': 0,
+      '10': 'heartbeatRequest'
+    },
+    {
+      '1': 'heartbeat_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.HeartbeatResponse',
+      '9': 0,
+      '10': 'heartbeatResponse'
+    },
+    {
+      '1': 'panic',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.Panic',
+      '9': 0,
+      '10': 'panic'
+    },
+    {
+      '1': 'log_to_file',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.LogToFile',
+      '9': 0,
+      '10': 'logToFile'
+    },
+    {
+      '1': 'storage_path_request',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.StoragePathRequest',
+      '9': 0,
+      '10': 'storagePathRequest'
+    },
+    {
+      '1': 'storage_path_response',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.StoragePathResponse',
+      '9': 0,
+      '10': 'storagePathResponse'
+    },
+    {
+      '1': 'delete_libqaul_logs_request',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.debug.DeleteLibqaulLogsRequest',
+      '9': 0,
+      '10': 'deleteLibqaulLogsRequest'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -50,8 +108,8 @@ const HeartbeatRequest$json = {
 };
 
 /// Descriptor for `HeartbeatRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List heartbeatRequestDescriptor = $convert.base64Decode(
-    'ChBIZWFydGJlYXRSZXF1ZXN0');
+final $typed_data.Uint8List heartbeatRequestDescriptor =
+    $convert.base64Decode('ChBIZWFydGJlYXRSZXF1ZXN0');
 
 @$core.Deprecated('Use heartbeatResponseDescriptor instead')
 const HeartbeatResponse$json = {
@@ -59,8 +117,8 @@ const HeartbeatResponse$json = {
 };
 
 /// Descriptor for `HeartbeatResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List heartbeatResponseDescriptor = $convert.base64Decode(
-    'ChFIZWFydGJlYXRSZXNwb25zZQ==');
+final $typed_data.Uint8List heartbeatResponseDescriptor =
+    $convert.base64Decode('ChFIZWFydGJlYXRSZXNwb25zZQ==');
 
 @$core.Deprecated('Use panicDescriptor instead')
 const Panic$json = {
@@ -68,8 +126,8 @@ const Panic$json = {
 };
 
 /// Descriptor for `Panic`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List panicDescriptor = $convert.base64Decode(
-    'CgVQYW5pYw==');
+final $typed_data.Uint8List panicDescriptor =
+    $convert.base64Decode('CgVQYW5pYw==');
 
 @$core.Deprecated('Use logToFileDescriptor instead')
 const LogToFile$json = {
@@ -80,8 +138,8 @@ const LogToFile$json = {
 };
 
 /// Descriptor for `LogToFile`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List logToFileDescriptor = $convert.base64Decode(
-    'CglMb2dUb0ZpbGUSFgoGZW5hYmxlGAEgASgIUgZlbmFibGU=');
+final $typed_data.Uint8List logToFileDescriptor =
+    $convert.base64Decode('CglMb2dUb0ZpbGUSFgoGZW5hYmxlGAEgASgIUgZlbmFibGU=');
 
 @$core.Deprecated('Use storagePathRequestDescriptor instead')
 const StoragePathRequest$json = {
@@ -89,8 +147,8 @@ const StoragePathRequest$json = {
 };
 
 /// Descriptor for `StoragePathRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List storagePathRequestDescriptor = $convert.base64Decode(
-    'ChJTdG9yYWdlUGF0aFJlcXVlc3Q=');
+final $typed_data.Uint8List storagePathRequestDescriptor =
+    $convert.base64Decode('ChJTdG9yYWdlUGF0aFJlcXVlc3Q=');
 
 @$core.Deprecated('Use storagePathResponseDescriptor instead')
 const StoragePathResponse$json = {
@@ -111,6 +169,5 @@ const DeleteLibqaulLogsRequest$json = {
 };
 
 /// Descriptor for `DeleteLibqaulLogsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List deleteLibqaulLogsRequestDescriptor = $convert.base64Decode(
-    'ChhEZWxldGVMaWJxYXVsTG9nc1JlcXVlc3Q=');
-
+final $typed_data.Uint8List deleteLibqaulLogsRequestDescriptor =
+    $convert.base64Decode('ChhEZWxldGVMaWJxYXVsTG9nc1JlcXVlc3Q=');

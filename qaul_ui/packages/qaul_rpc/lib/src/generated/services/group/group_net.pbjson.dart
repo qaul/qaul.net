@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/group/group_net.proto
-//
-// @dart = 2.12
+// Generated from services/group/group_net.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -36,17 +38,49 @@ const GroupMemberRole$json = {
 };
 
 /// Descriptor for `GroupMemberRole`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List groupMemberRoleDescriptor = $convert.base64Decode(
-    'Cg9Hcm91cE1lbWJlclJvbGUSCAoEVXNlchAAEgoKBUFkbWluEP8B');
+final $typed_data.Uint8List groupMemberRoleDescriptor = $convert
+    .base64Decode('Cg9Hcm91cE1lbWJlclJvbGUSCAoEVXNlchAAEgoKBUFkbWluEP8B');
 
 @$core.Deprecated('Use groupContainerDescriptor instead')
 const GroupContainer$json = {
   '1': 'GroupContainer',
   '2': [
-    {'1': 'invite_member', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.group.InviteMember', '9': 0, '10': 'inviteMember'},
-    {'1': 'reply_invite', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.group.ReplyInvite', '9': 0, '10': 'replyInvite'},
-    {'1': 'group_info', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.group.GroupInfo', '9': 0, '10': 'groupInfo'},
-    {'1': 'removed', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.group.RemovedMember', '9': 0, '10': 'removed'},
+    {
+      '1': 'invite_member',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.group.InviteMember',
+      '9': 0,
+      '10': 'inviteMember'
+    },
+    {
+      '1': 'reply_invite',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.group.ReplyInvite',
+      '9': 0,
+      '10': 'replyInvite'
+    },
+    {
+      '1': 'group_info',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.group.GroupInfo',
+      '9': 0,
+      '10': 'groupInfo'
+    },
+    {
+      '1': 'removed',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.group.RemovedMember',
+      '9': 0,
+      '10': 'removed'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -66,7 +100,14 @@ final $typed_data.Uint8List groupContainerDescriptor = $convert.base64Decode(
 const InviteMember$json = {
   '1': 'InviteMember',
   '2': [
-    {'1': 'group', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.group.GroupInfo', '10': 'group'},
+    {
+      '1': 'group',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.group.GroupInfo',
+      '10': 'group'
+    },
   ],
 };
 
@@ -80,10 +121,30 @@ const GroupMember$json = {
   '1': 'GroupMember',
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'role', '3': 2, '4': 1, '5': 14, '6': '.qaul.net.group.GroupMemberRole', '10': 'role'},
+    {
+      '1': 'role',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.group.GroupMemberRole',
+      '10': 'role'
+    },
     {'1': 'joined_at', '3': 3, '4': 1, '5': 4, '10': 'joinedAt'},
-    {'1': 'state', '3': 4, '4': 1, '5': 14, '6': '.qaul.net.group.GroupMemberState', '10': 'state'},
-    {'1': 'last_message_index', '3': 5, '4': 1, '5': 13, '10': 'lastMessageIndex'},
+    {
+      '1': 'state',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.group.GroupMemberState',
+      '10': 'state'
+    },
+    {
+      '1': 'last_message_index',
+      '3': 5,
+      '4': 1,
+      '5': 13,
+      '10': 'lastMessageIndex'
+    },
   ],
 };
 
@@ -102,7 +163,14 @@ const GroupInfo$json = {
     {'1': 'group_name', '3': 2, '4': 1, '5': 9, '10': 'groupName'},
     {'1': 'created_at', '3': 3, '4': 1, '5': 4, '10': 'createdAt'},
     {'1': 'revision', '3': 4, '4': 1, '5': 13, '10': 'revision'},
-    {'1': 'members', '3': 5, '4': 3, '5': 11, '6': '.qaul.net.group.GroupMember', '10': 'members'},
+    {
+      '1': 'members',
+      '3': 5,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.net.group.GroupMember',
+      '10': 'members'
+    },
   ],
 };
 
@@ -136,6 +204,5 @@ const RemovedMember$json = {
 };
 
 /// Descriptor for `RemovedMember`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List removedMemberDescriptor = $convert.base64Decode(
-    'Cg1SZW1vdmVkTWVtYmVyEhkKCGdyb3VwX2lkGAEgASgMUgdncm91cElk');
-
+final $typed_data.Uint8List removedMemberDescriptor = $convert
+    .base64Decode('Cg1SZW1vdmVkTWVtYmVyEhkKCGdyb3VwX2lkGAEgASgMUgdncm91cElk');

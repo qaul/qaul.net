@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/crypto/crypto_net.proto
-//
-// @dart = 2.12
+// Generated from services/crypto/crypto_net.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -17,7 +19,15 @@ import 'dart:typed_data' as $typed_data;
 const CryptoserviceContainer$json = {
   '1': 'CryptoserviceContainer',
   '2': [
-    {'1': 'second_handshake', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.crypto.SecondHandshake', '9': 0, '10': 'secondHandshake'},
+    {
+      '1': 'second_handshake',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.crypto.SecondHandshake',
+      '9': 0,
+      '10': 'secondHandshake'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -43,4 +53,3 @@ const SecondHandshake$json = {
 final $typed_data.Uint8List secondHandshakeDescriptor = $convert.base64Decode(
     'Cg9TZWNvbmRIYW5kc2hha2USHAoJc2lnbmF0dXJlGAEgASgMUglzaWduYXR1cmUSHwoLcmVjZW'
     'l2ZWRfYXQYAiABKARSCnJlY2VpdmVkQXQ=');
-

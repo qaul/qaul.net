@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: router/router_net_info.proto
-//
-// @dart = 2.12
+// Generated from router/router_net_info.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -49,7 +51,14 @@ const RouterInfoContent$json = {
   '1': 'RouterInfoContent',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 12, '10': 'id'},
-    {'1': 'routerInfoModule', '3': 2, '4': 1, '5': 14, '6': '.qaul.net.router_net_info.RouterInfoModule', '10': 'routerInfoModule'},
+    {
+      '1': 'routerInfoModule',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.router_net_info.RouterInfoModule',
+      '10': 'routerInfoModule'
+    },
     {'1': 'content', '3': 3, '4': 1, '5': 12, '10': 'content'},
     {'1': 'time', '3': 4, '4': 1, '5': 4, '10': 'time'},
   ],
@@ -67,8 +76,22 @@ const RouterInfoMessage$json = {
   '1': 'RouterInfoMessage',
   '2': [
     {'1': 'node', '3': 1, '4': 1, '5': 12, '10': 'node'},
-    {'1': 'routes', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.RoutingInfoTable', '10': 'routes'},
-    {'1': 'feeds', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.FeedIdsTable', '10': 'feeds'},
+    {
+      '1': 'routes',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.RoutingInfoTable',
+      '10': 'routes'
+    },
+    {
+      '1': 'feeds',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.FeedIdsTable',
+      '10': 'feeds'
+    },
     {'1': 'timestamp', '3': 5, '4': 1, '5': 4, '10': 'timestamp'},
   ],
 };
@@ -84,7 +107,14 @@ final $typed_data.Uint8List routerInfoMessageDescriptor = $convert.base64Decode(
 const RoutingInfoTable$json = {
   '1': 'RoutingInfoTable',
   '2': [
-    {'1': 'entry', '3': 1, '4': 3, '5': 11, '6': '.qaul.net.router_net_info.RoutingInfoEntry', '10': 'entry'},
+    {
+      '1': 'entry',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.RoutingInfoEntry',
+      '10': 'entry'
+    },
   ],
 };
 
@@ -118,14 +148,21 @@ const UserIdTable$json = {
 };
 
 /// Descriptor for `UserIdTable`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userIdTableDescriptor = $convert.base64Decode(
-    'CgtVc2VySWRUYWJsZRIQCgNpZHMYASADKAxSA2lkcw==');
+final $typed_data.Uint8List userIdTableDescriptor =
+    $convert.base64Decode('CgtVc2VySWRUYWJsZRIQCgNpZHMYASADKAxSA2lkcw==');
 
 @$core.Deprecated('Use userInfoTableDescriptor instead')
 const UserInfoTable$json = {
   '1': 'UserInfoTable',
   '2': [
-    {'1': 'info', '3': 1, '4': 3, '5': 11, '6': '.qaul.net.router_net_info.UserInfo', '10': 'info'},
+    {
+      '1': 'info',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.UserInfo',
+      '10': 'info'
+    },
   ],
 };
 
@@ -158,14 +195,21 @@ const FeedIdsTable$json = {
 };
 
 /// Descriptor for `FeedIdsTable`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List feedIdsTableDescriptor = $convert.base64Decode(
-    'CgxGZWVkSWRzVGFibGUSEAoDaWRzGAEgAygMUgNpZHM=');
+final $typed_data.Uint8List feedIdsTableDescriptor =
+    $convert.base64Decode('CgxGZWVkSWRzVGFibGUSEAoDaWRzGAEgAygMUgNpZHM=');
 
 @$core.Deprecated('Use feedRequestMessageDescriptor instead')
 const FeedRequestMessage$json = {
   '1': 'FeedRequestMessage',
   '2': [
-    {'1': 'feeds', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.FeedIdsTable', '10': 'feeds'},
+    {
+      '1': 'feeds',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.FeedIdsTable',
+      '10': 'feeds'
+    },
   ],
 };
 
@@ -178,7 +222,14 @@ final $typed_data.Uint8List feedRequestMessageDescriptor = $convert.base64Decode
 const FeedResponseMessage$json = {
   '1': 'FeedResponseMessage',
   '2': [
-    {'1': 'feeds', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.router_net_info.FeedResponseTable', '10': 'feeds'},
+    {
+      '1': 'feeds',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.FeedResponseTable',
+      '10': 'feeds'
+    },
   ],
 };
 
@@ -191,7 +242,14 @@ final $typed_data.Uint8List feedResponseMessageDescriptor = $convert.base64Decod
 const FeedResponseTable$json = {
   '1': 'FeedResponseTable',
   '2': [
-    {'1': 'messages', '3': 1, '4': 3, '5': 11, '6': '.qaul.net.router_net_info.FeedMessage', '10': 'messages'},
+    {
+      '1': 'messages',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.net.router_net_info.FeedMessage',
+      '10': 'messages'
+    },
   ],
 };
 
@@ -216,4 +274,3 @@ final $typed_data.Uint8List feedMessageDescriptor = $convert.base64Decode(
     'CgtGZWVkTWVzc2FnZRIdCgptZXNzYWdlX2lkGAEgASgMUgltZXNzYWdlSWQSGwoJc2VuZGVyX2'
     'lkGAIgASgMUghzZW5kZXJJZBIYCgdjb250ZW50GAMgASgJUgdjb250ZW50EhIKBHRpbWUYBCAB'
     'KARSBHRpbWU=');
-

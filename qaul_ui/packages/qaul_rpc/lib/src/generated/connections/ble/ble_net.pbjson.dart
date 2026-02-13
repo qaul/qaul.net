@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: connections/ble/ble_net.proto
-//
-// @dart = 2.12
+// Generated from connections/ble/ble_net.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -20,7 +22,15 @@ const BleMessage$json = {
     {'1': 'info', '3': 1, '4': 1, '5': 12, '9': 0, '10': 'info'},
     {'1': 'feed', '3': 2, '4': 1, '5': 12, '9': 0, '10': 'feed'},
     {'1': 'messaging', '3': 3, '4': 1, '5': 12, '9': 0, '10': 'messaging'},
-    {'1': 'identification', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.ble.Identification', '9': 0, '10': 'identification'},
+    {
+      '1': 'identification',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.ble.Identification',
+      '9': 0,
+      '10': 'identification'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -39,7 +49,14 @@ const Identification$json = {
   '1': 'Identification',
   '2': [
     {'1': 'request', '3': 1, '4': 1, '5': 8, '10': 'request'},
-    {'1': 'node', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.ble.NodeIdentification', '10': 'node'},
+    {
+      '1': 'node',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.ble.NodeIdentification',
+      '10': 'node'
+    },
   ],
 };
 
@@ -57,6 +74,5 @@ const NodeIdentification$json = {
 };
 
 /// Descriptor for `NodeIdentification`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List nodeIdentificationDescriptor = $convert.base64Decode(
-    'ChJOb2RlSWRlbnRpZmljYXRpb24SDgoCaWQYASABKAxSAmlk');
-
+final $typed_data.Uint8List nodeIdentificationDescriptor =
+    $convert.base64Decode('ChJOb2RlSWRlbnRpZmljYXRpb24SDgoCaWQYASABKAxSAmlk');
