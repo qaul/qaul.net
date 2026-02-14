@@ -44,6 +44,47 @@ class StubLibqaulWorker implements LibqaulWorker {
     _logger.info('requested group invites fetch; ignoring...');
   }
 
+  static const int _mockTotalUsers = 125;
+  static const int _defaultPageSize = 50;
+
+  @override
+  Future<void> getUsers({int? offset, int? limit}) async {
+    final requestedOffset = offset ?? 0;
+    final requestedLimit = limit ?? _defaultPageSize;
+    _logger.info(
+      'getUsers (mock): offset=$requestedOffset limit=$requestedLimit '
+      'total=$_mockTotalUsers',
+    );
+    await Future.delayed(const Duration(milliseconds: 50));
+    final start = requestedOffset.clamp(0, _mockTotalUsers);
+    final end = (requestedOffset + requestedLimit).clamp(0, _mockTotalUsers);
+    final count = end - start;
+    final mockUsers = List<User>.generate(
+      count,
+      (index) {
+        final globalIndex = start + index;
+        return User(
+          name: 'Mock User ${globalIndex + 1}',
+          id: Uint8List.fromList('mock_user_$globalIndex'.codeUnits),
+        );
+      },
+    );
+    final hasMore = end < _mockTotalUsers;
+    final pagination = UsersPaginationState(
+      hasMore: hasMore,
+      total: _mockTotalUsers,
+      offset: requestedOffset,
+      limit: requestedLimit,
+    );
+    final notifier = ref.read(usersProvider.notifier);
+    if (requestedOffset == 0) {
+      notifier.state = mockUsers;
+    } else {
+      notifier.appendMany(mockUsers);
+    }
+    ref.read(usersPaginationStateProvider.notifier).state = pagination;
+  }
+
   // -------------------------------------------
   // Unimplemented methods
   // -------------------------------------------
@@ -87,10 +128,7 @@ class StubLibqaulWorker implements LibqaulWorker {
   void getUserSecurityNumber(User u) => throw UnimplementedError();
 
   @override
-  Future<void> getUsers() => throw UnimplementedError();
-
-  @override
-  Future<bool> get initialized => throw UnimplementedError();
+  Future<bool> get initialized => Future.value(true);
 
   @override
   void inviteUserToGroup(User user, ChatRoom room) =>

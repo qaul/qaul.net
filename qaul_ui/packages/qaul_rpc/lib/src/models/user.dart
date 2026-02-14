@@ -12,6 +12,8 @@ final usersProvider = NotifierProvider<UserListNotifier, List<User>>(
   UserListNotifier.new,
 );
 
+final usersPaginationStateProvider = StateProvider<UsersPaginationState?>((ref) => null);
+
 enum ConnectionStatus { online, reachable, offline }
 
 enum ConnectionType { lan, internet, ble, local }
@@ -132,26 +134,55 @@ class UserListNotifier extends Notifier<List<User>> {
   }
 
   void update(User u) {
-    state = [
-      for (final usr in state)
-        if (usr.id == u.id || usr.idBase58 == u.idBase58)
-          User(
-            name: usr.name == 'Name Undefined' ? u.name : usr.name,
-            id: u.id,
-            conversationId: u.conversationId ?? usr.conversationId,
-            status:
-                u.status == ConnectionStatus.offline ? usr.status : u.status,
-            keyBase58: u.keyBase58 ?? usr.keyBase58,
-            isBlocked: u.isBlocked ?? usr.isBlocked,
-            isVerified: u.isVerified ?? usr.isVerified,
-            availableTypes: u.availableTypes ?? usr.availableTypes,
-          )
-        else
-          usr,
-    ];
+    state = state.map((usr) {
+      if (usr.id != u.id && usr.idBase58 != u.idBase58) {
+        return usr;
+      }
+      return User(
+        name: usr.name == 'Name Undefined' ? u.name : usr.name,
+        id: u.id,
+        conversationId: u.conversationId ?? usr.conversationId,
+        status: u.status == ConnectionStatus.offline ? usr.status : u.status,
+        keyBase58: u.keyBase58 ?? usr.keyBase58,
+        isBlocked: u.isBlocked ?? usr.isBlocked,
+        isVerified: u.isVerified ?? usr.isVerified,
+        availableTypes: u.availableTypes ?? usr.availableTypes,
+      );
+    }).toList();
   }
 
   bool contains(User usr) => !state
       .indexWhere((u) => u.id == usr.id || u.idBase58 == usr.idBase58)
       .isNegative;
+
+  void appendMany(List<User> users) {
+    final existingIds = state.map((u) => u.idBase58).toSet();
+    final newUsers = users.where((u) => !existingIds.contains(u.idBase58)).toList();
+    if (newUsers.isEmpty) return;
+    state = [...state, ...newUsers];
+  }
+}
+
+class PaginatedUsers {
+  PaginatedUsers({
+    required this.users,
+    this.pagination,
+  });
+
+  final List<User> users;
+  final UsersPaginationState? pagination;
+}
+
+class UsersPaginationState {
+  const UsersPaginationState({
+    required this.hasMore,
+    required this.total,
+    required this.offset,
+    required this.limit,
+  });
+
+  final bool hasMore;
+  final int total;
+  final int offset;
+  final int limit;
 }
