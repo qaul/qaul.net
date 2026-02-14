@@ -10,8 +10,8 @@ class UsersTranslator extends RpcModuleTranslator {
     final message = Users.fromBuffer(data);
     switch (message.whichMessage()) {
       case Users_Message.userList:
-        final users = message
-            .ensureUserList()
+        final userList = message.ensureUserList();
+        final users = userList
             .user
             .map((u) => User(
                   name: u.name,
@@ -25,7 +25,20 @@ class UsersTranslator extends RpcModuleTranslator {
                 ))
             .toList();
 
-        return RpcTranslatorResponse(type, users);
+        UsersPaginationState? pagination;
+        if (userList.hasPagination()) {
+          final paginationMetadata = userList.pagination;
+          pagination = UsersPaginationState(
+            hasMore: paginationMetadata.hasMore,
+            total: paginationMetadata.total,
+            offset: paginationMetadata.offset,
+            limit: paginationMetadata.limit,
+          );
+        }
+        return RpcTranslatorResponse(
+          type,
+          PaginatedUsers(users: users, pagination: pagination),
+        );
       case Users_Message.securityNumberResponse:
         final res = message.ensureSecurityNumberResponse();
         final secNo = SecurityNumber(
@@ -78,12 +91,30 @@ class UsersTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type) return;
+    
+    if (res.data is PaginatedUsers) {
+      final paginatedUsers = res.data as PaginatedUsers;
+      final provider = ref.read(usersProvider.notifier);
+      final isFirstPage = paginatedUsers.pagination?.offset == 0;
+      if (isFirstPage) {
+        provider.state = paginatedUsers.users;
+      }
+      if (!isFirstPage) {
+        provider.appendMany(paginatedUsers.users);
+      }
+      ref.read(usersPaginationStateProvider.notifier).state =
+          paginatedUsers.pagination;
+      return;
+    }
+    
     if (res.data is List<User>) {
       final provider = ref.read(usersProvider.notifier);
       for (final user in res.data) {
         provider.contains(user) ? provider.update(user) : provider.add(user);
       }
+      return;
     }
+    
     if (res.data is SecurityNumber) {
       ref.read(currentSecurityNoProvider.notifier).state = res.data;
     }
