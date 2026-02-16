@@ -243,6 +243,14 @@ class UserListNotifier extends PaginatedDataNotifier<User> {
       pagination: state.pagination,
     );
   }
+
+  @override
+  void replaceAll(List<User> users, {PaginationState? pagination}) {
+    state = PaginatedData(
+      data: users,
+      pagination: pagination ?? state.pagination,
+    );
+  }
 }
 
 class PaginatedUsers {
