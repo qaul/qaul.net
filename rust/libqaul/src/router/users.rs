@@ -302,44 +302,28 @@ impl Users {
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
+                        // attempt to find the user with the associated id
+                        Self::with_resolved_user(&updated_user.id, |user_id, _q8id, user_result| {
+                            // update user entity
+                            let user = User {
+                                id: user_id,
+                                key: user_result.key.clone(),
+                                name: user_result.name.clone(),
+                                verified: updated_user.verified,
+                                blocked: updated_user.blocked,
+                            };
 
-                        // create user id from bytes
-                        if let Ok(user_id) = PeerId::from_bytes(&updated_user.id) {
-                            // get users store
-                            let mut users = USERS.get().write().unwrap();
+                            *user_result = user;
 
-                            let q8id = QaulId::to_q8id(user_id);
-
-                            // search for user in list and update entry
-                            match users.users.get_mut(&q8id) {
-                                Some(user_result) => {
-                                    let user = User {
-                                        id: user_id,
-                                        key: user_result.key.clone(),
-                                        name: user_result.name.clone(),
-                                        verified: updated_user.verified,
-                                        blocked: updated_user.blocked,
-                                    };
-
-                                    // update list
-                                    *user_result = user;
-
-                                    // save to data base
-                                    DbUsers::add_user(UserData {
-                                        id: user_id.to_bytes(),
-                                        key: user_result.key.clone().encode_protobuf(),
-                                        name: user_result.name.clone(),
-                                        verified: updated_user.verified,
-                                        blocked: updated_user.blocked,
-                                    });
-                                }
-                                None => {
-                                    log::error!("updated user is unknown: {}", user_id.to_base58())
-                                }
-                            }
-                        } else {
-                            log::error!("PeerId couldn't be created");
-                        }
+                            // persist the updated entity
+                            DbUsers::add_user(UserData {
+                                id: user_id.to_bytes(),
+                                key: user_result.key.clone().encode_protobuf(),
+                                name: user_result.name.clone(),
+                                verified: updated_user.verified,
+                                blocked: updated_user.blocked,
+                            });
+                        });
                     }
                     Some(proto::users::Message::SecurityNumberRequest(secure_req)) => {
                         match Self::get_security_number(&account_id, &secure_req.user_id) {
@@ -380,6 +364,37 @@ impl Users {
                             }
                         }
                     }
+                    Some(proto::users::Message::GetUserByIdRequest(req)) => {
+                        log::trace!("GetByIdRequest protobuf RPC message");
+                        // attempt to find the user with the associated id
+                        Self::with_resolved_user(&req.user_id, |_, q8id, user| {
+                            let online_users = RoutingTable::get_online_users_info();
+                            let entry = build_user_entry(user, &online_users, &account_id, q8id);
+
+                            let proto_message = proto::Users {
+                                message: Some(
+                                    proto::users::Message::GetUserByIdResponse(
+                                        proto::GetUserByIdResponse {
+                                            user: Some(entry),
+                                        },
+                                    ),
+                                ),
+                            };
+
+                            let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                            proto_message
+                                .encode(&mut buf)
+                                .expect("Vec<u8> provides capacity as needed");
+
+                            // send encoded rpc message containing found user entity
+                            Rpc::send_message(
+                                buf,
+                                crate::rpc::proto::Modules::Users.into(),
+                                "".to_string(),
+                                Vec::new(),
+                            );
+                        });
+                    }
                     _ => {}
                 }
             }
@@ -411,6 +426,32 @@ impl Users {
         }
 
         (key_type, key_base58)
+    }
+
+    /// helper function that, given a set of user id bytes, will attempt to find that user entity and pass it to a closure
+    fn with_resolved_user<F>(user_id_bytes: &[u8], f: F)
+    where
+        F: FnOnce(PeerId, &Vec<u8>, &mut User),
+    {
+        // resolve a user id from raw bytes
+        let (user_id, q8id) = match PeerId::from_bytes(user_id_bytes) {
+            Ok(id) => {
+                let q8id = QaulId::to_q8id(id);
+                (id, q8id)
+            }
+            Err(_) => {
+                log::error!("invalid PeerId");
+                return;
+            }
+        };
+
+        // acquire a lock to lookup the user entry
+        let mut store = USERS.get().write().unwrap();
+        match store.users.get_mut(&q8id) {
+            // pass found user to f
+            Some(user) => f(user_id, &q8id, user),
+            None => log::error!("user not found: {}", user_id.to_base58()),
+        }
     }
 
     /// Build users list from those found in the users store.
@@ -483,6 +524,43 @@ pub struct UserData {
     pub blocked: bool,
 }
 
+/// Build a single `proto::UserEntry` for the given user.
+fn build_user_entry(
+    user: &User,
+    online_users: &BTreeMap<Vec<u8>, Vec<super::table::RoutingConnectionEntry>>,
+    account_id: &PeerId,
+    q8id: &Vec<u8>,
+) -> proto::UserEntry {
+    let mut connectivity: i32 = 0;
+    let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
+
+    if let Some(entries) = online_users.get(q8id) {
+        for entry in entries {
+            connections.push(proto::RoutingTableConnection {
+                module: entry.module.as_int(),
+                hop_count: entry.hc as u32,
+                rtt: entry.rtt,
+                via: entry.node.to_bytes(),
+            });
+        }
+        connectivity = 1;
+    }
+
+    let (_key_type, key_base58) = Users::get_protobuf_public_key(user.key.clone());
+    let group_id = GroupId::from_peers(account_id, &user.id).to_bytes();
+
+    proto::UserEntry {
+        name: user.name.clone(),
+        id: user.id.to_bytes(),
+        group_id,
+        key_base58,
+        connectivity,
+        verified: user.verified,
+        blocked: user.blocked,
+        connections,
+    }
+}
+
 /// Build a paginated user list from a set of users and online users,
 /// optionally filtering out offline users.
 fn build_user_list_from(
@@ -522,35 +600,8 @@ fn build_user_list_from(
             break;
         }
 
-        let mut connectivity: i32 = 0;
-        let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
-
-        if let Some(entries) = online_users.get(id) {
-            for entry in entries {
-                connections.push(proto::RoutingTableConnection {
-                    module: entry.module.as_int(),
-                    hop_count: entry.hc as u32,
-                    rtt: entry.rtt,
-                    via: entry.node.to_bytes(),
-                });
-            }
-            connectivity = 1;
-        }
-
-        let (_key_type, key_base58) = Users::get_protobuf_public_key(user.key.clone());
-
-        let group_id = GroupId::from_peers(account_id, &user.id).to_bytes();
-
-        user_list.user.push(proto::UserEntry {
-            name: user.name.clone(),
-            id: user.id.to_bytes(),
-            group_id,
-            key_base58,
-            connectivity,
-            verified: user.verified,
-            blocked: user.blocked,
-            connections,
-        });
+        let entry = build_user_entry(user, online_users, account_id, id);
+        user_list.user.push(entry);
     }
 
     // When online_only is true, total was estimated from the routing table which
@@ -840,5 +891,41 @@ mod tests {
         let p = list.pagination.unwrap();
         assert_eq!(p.total, 4, "total is an overestimate on non-final pages");
         assert!(p.has_more);
+    }
+
+    #[test]
+    fn build_user_entry_offline() {
+        let (users, _ids) = make_users(1);
+        let online: BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> = BTreeMap::new();
+        let acc = account_id();
+
+        let (q8id, user) = users.iter().next().unwrap();
+        let entry = build_user_entry(user, &online, &acc, q8id);
+
+        assert_eq!(entry.name, "user_0");
+        assert_eq!(entry.id, user.id.to_bytes());
+        assert_eq!(entry.connectivity, 0);
+        assert!(entry.connections.is_empty());
+        assert!(!entry.key_base58.is_empty());
+        assert!(!entry.group_id.is_empty());
+        assert_eq!(entry.verified, user.verified);
+        assert_eq!(entry.blocked, user.blocked);
+    }
+
+    #[test]
+    fn build_user_entry_online() {
+        let (users, _ids) = make_users(1);
+        let online = make_online(&users, 1);
+        let acc = account_id();
+
+        let (q8id, user) = users.iter().next().unwrap();
+        let entry = build_user_entry(user, &online, &acc, q8id);
+
+        assert_eq!(entry.connectivity, 1);
+        assert_eq!(entry.connections.len(), 1);
+
+        let conn = &entry.connections[0];
+        assert_eq!(conn.hop_count, 1);
+        assert_eq!(conn.rtt, 10);
     }
 }
