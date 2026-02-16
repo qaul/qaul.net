@@ -18,6 +18,7 @@ pub mod dtn;
 pub mod feed;
 pub mod group;
 pub mod messaging;
+#[allow(unused)]
 pub mod rtc;
 
 /// qaul Services
