@@ -4,7 +4,7 @@
 use crate::rpc::utils::*;
 use bluer::{Adapter, Address};
 use lazy_static::lazy_static;
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rand::{distr::Alphanumeric, prelude::*, rng};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::iter;
@@ -246,9 +246,8 @@ pub fn hex_to_bytes(hex: &str) -> Vec<u8> {
 
 // Random string name generator
 pub fn get_random_string(length: usize) -> String {
-    let mut rng = thread_rng();
-    iter::repeat_with(|| rng.sample(Alphanumeric))
+    let mut rng = rng();
+    iter::repeat_with(|| rng.sample(Alphanumeric) as char)
         .take(length)
-        .map(char::from)
         .collect()
 }
