@@ -158,10 +158,10 @@ pub fn current_time_millis() -> i64 {
 
 /// Check if a device is out of range and remove it from the list of devices present nearby or Update the last found time of the device.
 pub fn out_of_range_checker(adapter: Adapter, mut internal_sender: BleResultSender) {
-    async_std::task::spawn(async move {
+    tokio::task::spawn_local(async move {
         log::info!("Out of range checker started");
         loop {
-            async_std::task::sleep(std::time::Duration::from_secs(2)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
             let ignore_list = IGNORE_LIST.lock().unwrap();
             let current_time = current_time_millis();
             if ignore_list.len() == 0 {

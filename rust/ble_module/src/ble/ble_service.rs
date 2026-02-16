@@ -8,7 +8,8 @@ use crate::{
     ble::utils,
     rpc::{process_received_message, proto_sys::ble::Message::*, proto_sys::*, utils::*},
 };
-use async_std::{channel::Sender, prelude::*, task::JoinHandle};
+use futures::StreamExt;
+use tokio::task::JoinHandle;
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
     gatt::{local::*, CharacteristicReader},
@@ -41,7 +42,7 @@ enum QaulBleHandle {
 
 pub struct StartedBleService {
     join_handle: Option<JoinHandle<IdleBleService>>,
-    cmd_handle: Sender<BleMainLoopEvent>,
+    cmd_handle: tokio::sync::mpsc::Sender<BleMainLoopEvent>,
 }
 
 pub struct IdleBleService {
@@ -122,10 +123,10 @@ impl IdleBleService {
         let (_, main_chara_handle) = characteristic_control();
         let (msg_chara_ctrl, msg_chara_handle) = characteristic_control();
 
-        let (cmd_tx, cmd_rx) = async_std::channel::bounded::<BleMainLoopEvent>(8);
-        let (adp_send, adp_recv) = async_std::channel::unbounded::<Adapter>();
+        let (cmd_tx, cmd_rx) = tokio::sync::mpsc::channel::<BleMainLoopEvent>(8);
+        let (adp_send, mut adp_recv) = tokio::sync::mpsc::unbounded_channel::<Adapter>();
 
-        match adp_send.try_send(self.adapter.clone()) {
+        match adp_send.send(self.adapter.clone()) {
             Ok(_) => {
                 log::debug!("Adapter sent to channel");
             }
@@ -168,7 +169,7 @@ impl IdleBleService {
                         None => {
                             let adp2 = adp.clone();
                             let cmd_tx2 = cmd_tx2.clone();
-                            async_std::task::spawn(async move {
+                            tokio::task::spawn_local(async move {
                                 match adp2.device(req.device_address) {
                                     Ok(device) => {
                                         match cmd_tx2.send(BleMainLoopEvent::DeviceDiscovered(device.clone())).await {
@@ -233,12 +234,10 @@ impl IdleBleService {
         // ------------------------- MAIN BLE LOOP ------------------------------------------
         // ==================================================================================
 
-        let join_handle = async_std::task::Builder::new()
-            .name("main-ble-loop".into())
-            .local(async move {
-                
-                let adapter: Adapter = adp_recv.recv().await.unwrap_or_else(|err| {
-                    log::error!("{:#?}", err);
+        let join_handle = tokio::task::spawn_local(async move {
+
+                let adapter: Adapter = adp_recv.recv().await.unwrap_or_else(|| {
+                    log::error!("Adapter channel closed");
                     self.adapter.clone()
                 });
 
@@ -246,30 +245,34 @@ impl IdleBleService {
                 let _ = adapter.set_discovery_filter(get_filter()).await;
                 let mut device_result_sender = internal_sender.clone();
                 let device_stream = match adapter.discover_devices().await {
-                    Ok(addr_stream) => addr_stream.filter_map(|evt| match evt {
-                        AdapterEvent::DeviceAdded(addr) => {
-                            if self.device_block_list.contains(&addr) {
-                                return None;
-                            }
-                            match self.adapter.device(addr) {
-                                Ok(device) => {
-                                    log::warn!("Discovered device {:?}", addr);
-                                    Some(BleMainLoopEvent::DeviceDiscovered(device))
-                                },
-                                Err(_) => None,
-                            }
-                        },
-                        AdapterEvent::DeviceRemoved(addr) => {
-                            utils::find_device_by_mac(addr).map(|device| {
-                                device_result_sender.send_device_unavailable(
-                                    device.qaul_id.clone(),
-                                    adapter.clone(),
-                                    addr,
-                                );
-                            });
-                            return None;
-                        }, 
-                        AdapterEvent::PropertyChanged(_) => None,
+                    Ok(addr_stream) => addr_stream.filter_map(|evt| {
+                        let result = match evt {
+                            AdapterEvent::DeviceAdded(addr) => {
+                                if self.device_block_list.contains(&addr) {
+                                    None
+                                } else {
+                                    match self.adapter.device(addr) {
+                                        Ok(device) => {
+                                            log::warn!("Discovered device {:?}", addr);
+                                            Some(BleMainLoopEvent::DeviceDiscovered(device))
+                                        },
+                                        Err(_) => None,
+                                    }
+                                }
+                            },
+                            AdapterEvent::DeviceRemoved(addr) => {
+                                utils::find_device_by_mac(addr).map(|device| {
+                                    device_result_sender.send_device_unavailable(
+                                        device.qaul_id.clone(),
+                                        adapter.clone(),
+                                        addr,
+                                    );
+                                });
+                                None
+                            },
+                            AdapterEvent::PropertyChanged(_) => None,
+                        };
+                        std::future::ready(result)
                     }),
                     Err(err) => {
                         log::error!("Error: {:#?}", err);
@@ -285,9 +288,10 @@ impl IdleBleService {
                 // TODO: Setup out of range checker. 
                 // utils::out_of_range_checker(adapter.clone(), internal_sender.clone());
 
-                let rpc_reciever_stream = rpc_receiver.receiver.map(BleMainLoopEvent::RpcEvent);
+                let cmd_rx_stream = tokio_stream::wrappers::ReceiverStream::new(cmd_rx);
+                let rpc_reciever_stream = tokio_stream::wrappers::ReceiverStream::new(rpc_receiver.receiver).map(BleMainLoopEvent::RpcEvent);
                 let mut merged_ble_streams = (
-                    cmd_rx,
+                    cmd_rx_stream,
                     device_stream,
                     rpc_reciever_stream,
                 )
@@ -391,8 +395,7 @@ impl IdleBleService {
                     drop(handle)
                 }
                 self
-            })
-            .expect("Unable to spawn BLE main loop!");
+            });
 
         QaulBleService::Started(StartedBleService {
             join_handle: Some(join_handle),
@@ -519,12 +522,12 @@ impl IdleBleService {
         internal_sender: BleResultSender,
         mut msg_chara_ctrl: CharacteristicControl,
     ) {
-        let (ble_msg_sender, ble_msg_reciever) = async_std::channel::unbounded::<(Address, Vec<u8>)>();
-                
-        async_std::task::spawn(async move {
+        let (ble_msg_sender, mut ble_msg_reciever) = tokio::sync::mpsc::unbounded_channel::<(Address, Vec<u8>)>();
+
+        tokio::task::spawn_local(async move {
             log::info!("Spawned message listener for device.");             
             loop {
-                if let Ok((mac_address, buffer)) = ble_msg_reciever.recv().await{
+                if let Some((mac_address, buffer)) = ble_msg_reciever.recv().await {
                     if buffer.len() == 0 {
                         log::info!("Write stream from device {:?} has ended", &mac_address);
                         continue;
@@ -575,7 +578,7 @@ impl IdleBleService {
             }
         });
 
-        async_std::task::spawn(async move {                        
+        tokio::task::spawn_local(async move {
             loop {
                 match msg_chara_ctrl.next().await {
                     Some(CharacteristicControlEvent::Write(write)) => {
@@ -599,8 +602,8 @@ impl IdleBleService {
                                     continue;
                                 }
                                 Ok(_) => {
-                                    if device_known { 
-                                        let _ = ble_msg_sender.send((mac_address, read_buf)).await; 
+                                    if device_known {
+                                        let _ = ble_msg_sender.send((mac_address, read_buf));
                                     }
                                 },
                                 Err(err) => {
@@ -767,7 +770,7 @@ impl StartedBleService {
     pub async fn spawn_handles(self) {
         match self.join_handle {
             Some(join_handles) => {
-                join_handles.await;
+                let _ = join_handles.await;
             }
             None => {
                 log::error!("No handle to spawn");

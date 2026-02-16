@@ -1,7 +1,6 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-use async_std::task::spawn;
 use bytes::Bytes;
 use std::error::Error;
 
@@ -35,13 +34,13 @@ pub async fn listen_for_sys_msgs(
                         QaulBleService::Idle(svc) => {
                             let internal_sender_1 = local_sender_handle.clone();
                             let qaul_id = Bytes::from(req.qaul_id);
-                            let handle = async_std::task::spawn(async move {
+                            let handle = tokio::task::spawn_local(async move {
                                 let ble_service = svc
                                     .advertise_scan_listen(
                                         qaul_id,
                                         None,
                                         internal_sender_1,
-                                        rpc_receiver.clone(),
+                                        rpc_receiver,
                                     )
                                     .await;
                                 log::info!("BLE Service started successfully");
@@ -56,7 +55,7 @@ pub async fn listen_for_sys_msgs(
                                 }
                                 local_sender_handle.send_start_successful();
                             });
-                            handle.await;
+                            let _ = handle.await;
                             break;
                         }
                         QaulBleService::Started(_) => {
@@ -72,7 +71,7 @@ pub async fn listen_for_sys_msgs(
                     DirectSend(_) => {}
                     InfoRequest(_) => {
                         let mut sender_handle_clone = internal_sender.clone();
-                        spawn(async move {
+                        tokio::task::spawn_local(async move {
                             match get_device_info().await {
                                 Ok(info) => {
                                     sender_handle_clone.send_ble_sys_msg(InfoResponse(info))
