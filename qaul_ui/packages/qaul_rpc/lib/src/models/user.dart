@@ -12,7 +12,19 @@ final usersProvider = NotifierProvider<UserListNotifier, List<User>>(
   UserListNotifier.new,
 );
 
-final usersPaginationStateProvider = StateProvider<UsersPaginationState?>((ref) => null);
+class UsersPaginationStateNotifier extends Notifier<UsersPaginationState?> {
+  @override
+  UsersPaginationState? build() => null;
+
+  void setPagination(UsersPaginationState? value) {
+    state = value;
+  }
+}
+
+final usersPaginationStateProvider =
+    NotifierProvider<UsersPaginationStateNotifier, UsersPaginationState?>(
+  UsersPaginationStateNotifier.new,
+);
 
 enum ConnectionStatus { online, reachable, offline }
 
@@ -160,6 +172,10 @@ class UserListNotifier extends Notifier<List<User>> {
     final newUsers = users.where((u) => !existingIds.contains(u.idBase58)).toList();
     if (newUsers.isEmpty) return;
     state = [...state, ...newUsers];
+  }
+
+  void replaceAll(List<User> users) {
+    state = users;
   }
 }
 

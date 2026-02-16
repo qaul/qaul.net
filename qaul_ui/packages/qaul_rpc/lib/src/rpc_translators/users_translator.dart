@@ -94,16 +94,17 @@ class UsersTranslator extends RpcModuleTranslator {
     
     if (res.data is PaginatedUsers) {
       final paginatedUsers = res.data as PaginatedUsers;
-      final provider = ref.read(usersProvider.notifier);
+      final usersNotifier = ref.read(usersProvider.notifier);
       final isFirstPage = paginatedUsers.pagination?.offset == 0;
       if (isFirstPage) {
-        provider.state = paginatedUsers.users;
+        usersNotifier.replaceAll(paginatedUsers.users);
       }
       if (!isFirstPage) {
-        provider.appendMany(paginatedUsers.users);
+        usersNotifier.appendMany(paginatedUsers.users);
       }
-      ref.read(usersPaginationStateProvider.notifier).state =
-          paginatedUsers.pagination;
+      ref.read(usersPaginationStateProvider.notifier).setPagination(
+            paginatedUsers.pagination,
+          );
       return;
     }
     

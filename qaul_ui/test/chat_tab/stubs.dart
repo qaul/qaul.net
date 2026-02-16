@@ -82,7 +82,7 @@ class StubLibqaulWorker implements LibqaulWorker {
     } else {
       notifier.appendMany(mockUsers);
     }
-    ref.read(usersPaginationStateProvider.notifier).state = pagination;
+    ref.read(usersPaginationStateProvider.notifier).setPagination(pagination);
   }
 
   // -------------------------------------------
