@@ -112,7 +112,7 @@ impl Ble {
     pub async fn init() {
         // get small BLE ID
         let ble_id = Node::get_small_id();
-        #[cfg(target_os = "linux")]
+        #[cfg(all(target_os = "linux", feature = "ble"))]
         tokio::spawn(async move {
             while !ble_module::is_ble_enabled().await {
                 log::error!("BLE not enabled, Please power on bluetooth on your device");

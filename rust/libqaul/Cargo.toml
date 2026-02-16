@@ -11,6 +11,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 
 [features]
 default = []
+ble = ["ble_module"]
 
 [dependencies]
 libp2p = { version = "0.56.0", features = ["tokio", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic"] }
@@ -64,7 +65,7 @@ qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 
 # Linux BLE module
 [target.'cfg(target_os = "linux")'.dependencies]
-ble_module = { path = "../ble_module" }
+ble_module = { path = "../ble_module", optional = true }
 
 [build-dependencies]
 prost-build = "0.14"
