@@ -13,6 +13,7 @@ mod proto {
 }
 
 /// include chat protobuf RPC file
+#[allow(unused)]
 mod proto_chat {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
 }
