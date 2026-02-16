@@ -19,16 +19,15 @@ use state::InitCell;
 use proto_sys::Ble;
 
 /// sender of the mpsc channel: libqaul ---> ble_module
-static EXTERN_SEND: InitCell<async_std::channel::Sender<Vec<u8>>> = InitCell::new();
+static EXTERN_SEND: InitCell<tokio::sync::mpsc::Sender<Vec<u8>>> = InitCell::new();
 
 #[async_trait]
 pub trait SysRpcReceiver {
     async fn recv(&mut self) -> Option<Ble>;
 }
 
-#[derive(Clone)]
 pub struct BleRpc {
-    pub receiver: async_std::channel::Receiver<Vec<u8>>,
+    pub receiver: tokio::sync::mpsc::Receiver<Vec<u8>>,
 }
 
 #[async_trait]
@@ -37,9 +36,7 @@ impl SysRpcReceiver for BleRpc {
         self.receiver
             .recv()
             .await
-            .ok()
-            .map(&process_received_message)
-            .flatten()
+            .and_then(process_received_message)
     }
 }
 
@@ -48,7 +45,7 @@ impl SysRpcReceiver for BleRpc {
 /// Return the receiver for the channel libqaul ---> ble_module
 pub fn init() -> BleRpc {
     // create channels
-    let (libqaul_send, ble_rec) = async_std::channel::bounded(32);
+    let (libqaul_send, ble_rec) = tokio::sync::mpsc::channel(32);
     // save to state
     EXTERN_SEND.set(libqaul_send);
 

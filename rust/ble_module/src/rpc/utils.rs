@@ -1,23 +1,23 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-use async_std::channel::Sender;
 use bluer::{Adapter, Address};
+use tokio::sync::mpsc::UnboundedSender;
 
 use super::proto_sys::{self, BleDeviceDiscovered, BleError, BleStartResult, BleDeviceUnavailable};
 
 #[derive(Clone)]
-pub struct BleResultSender(Sender<Vec<u8>>);
+pub struct BleResultSender(UnboundedSender<Vec<u8>>);
 
 impl BleResultSender {
-    pub fn new(sender: Sender<Vec<u8>>) -> Self {
+    pub fn new(sender: UnboundedSender<Vec<u8>>) -> Self {
         BleResultSender(sender)
     }
 
     pub fn send_ble_sys_msg(&mut self, msg: proto_sys::ble::Message) {
         let mut buf = Vec::with_capacity(msg.encoded_len());
         msg.encode(&mut buf);
-        if let Err(err) = self.0.try_send(buf) {
+        if let Err(err) = self.0.send(buf) {
             log::error!("{:?}", err);
         }
     }
@@ -54,7 +54,7 @@ impl BleResultSender {
     }
 
     pub fn send_device_unavailable(&mut self, qaul_id: Vec<u8>, adapter: Adapter, mac_address: Address) {
-        async_std::task::spawn(async move {
+        tokio::task::spawn_local(async move {
             let _ = adapter.remove_device(mac_address).await;
         });
         self.send_ble_sys_msg(proto_sys::ble::Message::DeviceUnavailable(

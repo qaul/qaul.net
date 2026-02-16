@@ -7,7 +7,6 @@
 #[macro_use]
 extern crate log;
 use crate::ble::ble_service::IdleBleService;
-use async_std::{stream::StreamExt, task::spawn};
 use rpc::{msg_loop::listen_for_sys_msgs, utils::BleResultSender, BleRpc};
 use std::thread;
 use tokio::runtime;
@@ -25,7 +24,8 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
             .build()
             .expect("Failed to create BLE module tokio runtime!");
 
-        rt.block_on(async move {
+        let local = tokio::task::LocalSet::new();
+        local.block_on(&rt, async move {
             main_loop(sys_rpc_callback, rpc_receiver).await;
         });
 
@@ -43,10 +43,10 @@ async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc
         std::process::exit(1);
     });
 
-    let (tx, mut rx) = async_std::channel::unbounded::<Vec<u8>>();
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
 
-    spawn(async move {
-        while let Some(result) = rx.next().await {
+    tokio::task::spawn_local(async move {
+        while let Some(result) = rx.recv().await {
             sys_rpc_callback(result)
         }
     });
