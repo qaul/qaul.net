@@ -99,7 +99,7 @@ impl Sys {
     #[allow(unused_variables)]
     pub fn send_message(data: Vec<u8>) {
         // send to linux BLE module
-        #[cfg(target_os = "linux")]
+        #[cfg(all(target_os = "linux", feature = "ble"))]
         ble_module::rpc::send_to_ble_module(data);
 
         // send to android BLE module
