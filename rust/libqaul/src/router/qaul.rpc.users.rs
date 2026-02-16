@@ -2,7 +2,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -53,6 +53,16 @@ pub mod users {
         /// 12142 31101 09874 34545
         #[prost(message, tag = "6")]
         SecurityNumberResponse(super::SecurityNumberResponse),
+        /// Get user by id request
+        ///
+        /// Retrieves a single user matching the provided id, if existing.
+        #[prost(message, tag = "7")]
+        GetUserByIdRequest(super::GetUserByIdRequest),
+        /// Get user by id response
+        ///
+        /// Message output for a GetUserByIDRequest
+        #[prost(message, tag = "8")]
+        GetUserByIdResponse(super::GetUserByIdResponse),
     }
 }
 /// UI request for some users
@@ -159,6 +169,16 @@ pub struct SecurityNumberResponse {
     /// u32.
     #[prost(uint32, repeated, tag = "3")]
     pub security_number_blocks: ::prost::alloc::vec::Vec<u32>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetUserByIdRequest {
+    #[prost(bytes = "vec", tag = "10")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetUserByIdResponse {
+    #[prost(message, optional, tag = "10")]
+    pub user: ::core::option::Option<UserEntry>,
 }
 /// Connection modules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
