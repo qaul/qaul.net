@@ -11,6 +11,7 @@ use std::fmt;
 mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rtc.rs");
 }
+#[allow(unused)]
 mod proto_net {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.rtc.rs");
 }
