@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
