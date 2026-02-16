@@ -95,7 +95,7 @@ impl fmt::Display for ModuleStatus {
 pub struct Ble {
     /// qaul BLE id
     ///
-    /// 16 Byte short form of qaul node ID
+    /// 8 Bytes short form of qaul node ID
     ///
     /// The BLE id is a smaller representation of the qaul
     /// node id to exchange it in a legacy BLE message with
@@ -113,10 +113,10 @@ impl Ble {
         // get small BLE ID
         let ble_id = Node::get_small_id();
         #[cfg(target_os = "linux")]
-        async_std::task::spawn(async move {
+        tokio::spawn(async move {
             while !ble_module::is_ble_enabled().await {
                 log::error!("BLE not enabled, Please power on bluetooth on your device");
-                async_std::task::sleep(std::time::Duration::from_secs(5)).await;
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             }
             ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
         });
@@ -135,7 +135,7 @@ impl Ble {
             };
             BLE.set(RwLock::new(ble));
         }
-        async_std::task::sleep(std::time::Duration::from_secs(2)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         //#[cfg(target_os = "android")]
         Self::info_send_request();
     }
