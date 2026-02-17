@@ -98,25 +98,13 @@ class UsersTranslator extends RpcModuleTranslator {
       final isFirstPage = paginatedUsers.pagination?.offset == 0;
       if (isFirstPage) {
         usersNotifier.replaceAll(paginatedUsers.users);
-      }
-      if (!isFirstPage) {
+      } else {
         usersNotifier.appendMany(paginatedUsers.users);
       }
       ref.read(usersPaginationStateProvider.notifier).setPagination(
             paginatedUsers.pagination,
           );
-      return;
-    }
-    
-    if (res.data is List<User>) {
-      final provider = ref.read(usersProvider.notifier);
-      for (final user in res.data) {
-        provider.contains(user) ? provider.update(user) : provider.add(user);
-      }
-      return;
-    }
-    
-    if (res.data is SecurityNumber) {
+    } else if (res.data is SecurityNumber) {
       ref.read(currentSecurityNoProvider.notifier).state = res.data;
     }
   }
