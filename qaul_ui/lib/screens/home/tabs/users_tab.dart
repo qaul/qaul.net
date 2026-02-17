@@ -83,18 +83,9 @@ class _UsersState extends _BaseTabState<_Users> {
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: CronTaskDecorator(
-        schedule: const Duration(milliseconds: 1000),
-        callback: () async {
-          final currentUsersCount = ref.read(usersProvider).length;
-          if (currentUsersCount > 0) {
-            final worker = ref.read(qaulWorkerProvider);
-            await worker.getUsers(offset: 0, limit: currentUsersCount);
-          }
-        },
-        child: RefreshIndicator(
-          onRefresh: () async => await _refreshUsers(),
-          child: SearchUserDecorator(builder: (_, users) {
+      body: RefreshIndicator(
+        onRefresh: () async => await _refreshUsers(),
+        child: SearchUserDecorator(builder: (_, users) {
             return EmptyStateTextDecorator(
               l10n.emptyUsersList,
               isEmpty: users.isEmpty,
@@ -111,7 +102,7 @@ class _UsersState extends _BaseTabState<_Users> {
                         if (isLoading) {
                           return const Padding(
                             padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: LoadingIndicator()),
                           );
                         }
                         return const SizedBox.shrink();
@@ -157,8 +148,7 @@ class _UsersState extends _BaseTabState<_Users> {
                 },
               ),
             );
-          }),
-        ),
+        }),
       ),
     );
   }
