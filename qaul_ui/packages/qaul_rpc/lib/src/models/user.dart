@@ -214,13 +214,16 @@ class UserListNotifier extends PaginatedDataNotifier<User> {
 
   @override
   void update(User item) {
+    final data = <User>[];
+    for (final usr in state.data) {
+      if (usr.id != item.id && usr.idBase58 != item.idBase58) {
+        data.add(usr);
+      } else {
+        data.add(_mergeUser(usr, item));
+      }
+    }
     state = PaginatedData(
-      data: state.data.map((usr) {
-        if (usr.id != item.id && usr.idBase58 != item.idBase58) {
-          return usr;
-        }
-        return _mergeUser(usr, item);
-      }).toList(),
+      data: data,
       pagination: state.pagination,
     );
   }
