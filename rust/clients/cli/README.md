@@ -38,7 +38,8 @@ The following commands are available:
   * `users online` - display all online users known to this router
   * `users verify {User ID}` - verify user with {User ID}
   * `users block {User ID}` - block user with {User ID}
-  * `users secure {User ID}` - get the security number for a specific user  
+  * `users secure {User ID}` - get the security number for a specific user
+  * `users get {User ID}` - get detailed information for a single user by their {User ID}
 * router
   * `router table list` - request and display routing table with per module connectivity per user.
   * `router neighbours list` - request and display neighbours list of all neighbouring nodes.

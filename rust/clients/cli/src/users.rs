@@ -48,6 +48,11 @@ impl Users {
                 let user_id = cmd.strip_prefix("secure ").unwrap();
                 Self::send_user_secure_number(user_id);
             }
+            // get a single user by id
+            cmd if cmd.starts_with("get ") => {
+                let user_id = cmd.strip_prefix("get ").unwrap();
+                Self::request_user_by_id(user_id);
+            }
             // unknown command
             _ => log::error!("unknown users command"),
         }
@@ -104,6 +109,31 @@ impl Users {
         let proto_message = proto::Users {
             message: Some(proto::users::Message::SecurityNumberRequest(
                 proto::SecurityNumberRequest { user_id },
+            )),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(
+            buf,
+            super::rpc::proto::Modules::Users.into(),
+            "".to_string(),
+        );
+    }
+
+    /// create rpc request to get a single user by id
+    fn request_user_by_id(user_id_base58: &str) {
+        let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+
+        // create request message
+        let proto_message = proto::Users {
+            message: Some(proto::users::Message::GetUserByIdRequest(
+                proto::GetUserByIdRequest { user_id },
             )),
         };
 
@@ -221,6 +251,60 @@ impl Users {
                     }
 
                     println!("");
+                }
+                Some(proto::users::Message::GetUserByIdResponse(resp)) => {
+                    match resp.user {
+                        Some(user) => {
+                            let mut verified = "N";
+                            let mut blocked = "N";
+                            let mut onlined = "Offline";
+
+                            if user.verified {
+                                verified = "Y";
+                            }
+                            if user.blocked {
+                                blocked = "Y";
+                            }
+                            if user.connectivity == 1 {
+                                onlined = "Online";
+                            }
+
+                            println!("");
+                            println!("User Info");
+                            println!("Name: {}", user.name);
+                            println!("ID: {}", bs58::encode(&user.id).into_string());
+                            println!("Verified: {} | Blocked: {} | Connectivity: {}", verified, blocked, onlined);
+
+                            match Uuid::from_slice(&user.group_id) {
+                                Ok(uuid) => {
+                                    println!("Group ID: {}", uuid.hyphenated().to_string());
+                                }
+                                Err(e) => log::error!("{}", e),
+                            }
+
+                            println!("Public Key: {}", user.key_base58);
+
+                            if user.connections.len() > 0 {
+                                println!("Connections: module | hc | rtt | via");
+                                for cnn in user.connections {
+                                    let module = proto::ConnectionModule::try_from(cnn.module)
+                                        .unwrap()
+                                        .as_str_name();
+                                    println!(
+                                        "  {} | {} | {} | {}",
+                                        module,
+                                        cnn.hop_count,
+                                        cnn.rtt,
+                                        bs58::encode(cnn.via.clone()).into_string()
+                                    );
+                                }
+                            }
+                            println!("");
+                        }
+                        None => {
+                            println!("User not found.");
+                        }
+                    }
                 }
                 Some(proto::users::Message::SecurityNumberResponse(resp)) => {
                     println!("Security Number:");
