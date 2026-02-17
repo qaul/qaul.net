@@ -8,22 +8,32 @@ import 'package:hooks_riverpod/legacy.dart';
 
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
-final usersProvider = NotifierProvider<UserListNotifier, List<User>>(
-  UserListNotifier.new,
-);
+class PaginationState {
+  const PaginationState({
+    required this.hasMore,
+    required this.total,
+    required this.offset,
+    required this.limit,
+  });
 
-class UsersPaginationStateNotifier extends Notifier<UsersPaginationState?> {
-  @override
-  UsersPaginationState? build() => null;
-
-  void setPagination(UsersPaginationState? value) {
-    state = value;
-  }
+  final bool hasMore;
+  final int total;
+  final int offset;
+  final int limit;
 }
 
-final usersPaginationStateProvider =
-    NotifierProvider<UsersPaginationStateNotifier, UsersPaginationState?>(
-  UsersPaginationStateNotifier.new,
+class PaginatedData<T> {
+  const PaginatedData({
+    required this.data,
+    this.pagination,
+  });
+
+  final List<T> data;
+  final PaginationState? pagination;
+}
+
+final usersProvider = NotifierProvider<PaginatedDataNotifier<User>, PaginatedData<User>>(
+  PaginatedDataNotifier.new,
 );
 
 enum ConnectionStatus { online, reachable, offline }
@@ -101,30 +111,81 @@ class ConnectionInfo extends Equatable {
   List<Object?> get props => [ping, hopCount, nodeID, nodeIDBase58];
 }
 
-class UserListNotifier extends Notifier<List<User>> {
+class PaginatedDataNotifier<T> extends Notifier<PaginatedData<T>> {
   @override
-  List<User> build() => [];
+  PaginatedData<T> build() => const PaginatedData(data: []);
 
-  void add(User u) {
-    state = [...state, u];
+  void add(T item) {
+    state = PaginatedData(
+      data: [...state.data, item],
+      pagination: state.pagination,
+    );
   }
 
-  /// [updateMany] safely assigns [users] to this notifier's state.
-  ///
-  /// If [users] and [state] are deeply equal, will do nothing. As a result, it
-  /// avoids re-rendering UI code that depends on the [List<User>] that this
-  /// notifier exposes.
-  ///
-  /// New users get appended to the list, whilst existing ones get their data
-  /// updated.
-  void updateMany(List<User> users) {
-    if (const ListEquality().equals(state, users)) {
+  void updateMany(List<T> items) {
+    if (const ListEquality().equals(state.data, items)) {
       return;
     }
 
-    final usrs = [...state];
-    for (final u in users) {
-      final idx = usrs.indexOf(u);
+    final updatedItems = [...state.data];
+    for (final item in items) {
+      final idx = updatedItems.indexOf(item);
+      if (idx == -1) {
+        updatedItems.add(item);
+        continue;
+      }
+      updatedItems[idx] = item;
+    }
+    state = PaginatedData(
+      data: updatedItems,
+      pagination: state.pagination,
+    );
+  }
+
+  void update(T item) {
+    state = PaginatedData(
+      data: state.data.map((existing) => existing == item ? item : existing).toList(),
+      pagination: state.pagination,
+    );
+  }
+
+  bool contains(T item) => state.data.contains(item);
+
+  void appendMany(List<T> items) {
+    final existingIds = state.data.toSet();
+    final newItems = items.where((item) => !existingIds.contains(item)).toList();
+    if (newItems.isEmpty) return;
+    state = PaginatedData(
+      data: [...state.data, ...newItems],
+      pagination: state.pagination,
+    );
+  }
+
+  void replaceAll(List<T> items, {PaginationState? pagination}) {
+    state = PaginatedData(
+      data: items,
+      pagination: pagination ?? state.pagination,
+    );
+  }
+
+  void setPagination(PaginationState? pagination) {
+    state = PaginatedData(
+      data: state.data,
+      pagination: pagination,
+    );
+  }
+}
+
+class UserListNotifier extends PaginatedDataNotifier<User> {
+  @override
+  void updateMany(List<User> items) {
+    if (const ListEquality().equals(state.data, items)) {
+      return;
+    }
+
+    final usrs = [...state.data];
+    for (final u in items) {
+      final idx = usrs.indexWhere((usr) => usr.id == u.id || usr.idBase58 == u.idBase58);
       if (idx == -1) {
         usrs.add(u);
         continue;
@@ -134,48 +195,55 @@ class UserListNotifier extends Notifier<List<User>> {
         name: current.name == 'Name Undefined' ? u.name : current.name,
         id: u.id,
         conversationId: u.conversationId ?? current.conversationId,
-        status:
-            u.status == ConnectionStatus.offline ? current.status : u.status,
+        status: u.status == ConnectionStatus.offline ? current.status : u.status,
         keyBase58: u.keyBase58 ?? current.keyBase58,
         isBlocked: u.isBlocked ?? current.isBlocked,
         isVerified: u.isVerified ?? current.isVerified,
         availableTypes: u.availableTypes ?? current.availableTypes,
       );
     }
-    state = usrs;
+    state = PaginatedData(
+      data: usrs,
+      pagination: state.pagination,
+    );
   }
 
-  void update(User u) {
-    state = state.map((usr) {
-      if (usr.id != u.id && usr.idBase58 != u.idBase58) {
-        return usr;
-      }
-      return User(
-        name: usr.name == 'Name Undefined' ? u.name : usr.name,
-        id: u.id,
-        conversationId: u.conversationId ?? usr.conversationId,
-        status: u.status == ConnectionStatus.offline ? usr.status : u.status,
-        keyBase58: u.keyBase58 ?? usr.keyBase58,
-        isBlocked: u.isBlocked ?? usr.isBlocked,
-        isVerified: u.isVerified ?? usr.isVerified,
-        availableTypes: u.availableTypes ?? usr.availableTypes,
-      );
-    }).toList();
+  @override
+  void update(User item) {
+    state = PaginatedData(
+      data: state.data.map((usr) {
+        if (usr.id != item.id && usr.idBase58 != item.idBase58) {
+          return usr;
+        }
+        return User(
+          name: usr.name == 'Name Undefined' ? item.name : usr.name,
+          id: item.id,
+          conversationId: item.conversationId ?? usr.conversationId,
+          status: item.status == ConnectionStatus.offline ? usr.status : item.status,
+          keyBase58: item.keyBase58 ?? usr.keyBase58,
+          isBlocked: item.isBlocked ?? usr.isBlocked,
+          isVerified: item.isVerified ?? usr.isVerified,
+          availableTypes: item.availableTypes ?? usr.availableTypes,
+        );
+      }).toList(),
+      pagination: state.pagination,
+    );
   }
 
-  bool contains(User usr) => !state
-      .indexWhere((u) => u.id == usr.id || u.idBase58 == usr.idBase58)
-      .isNegative;
+  @override
+  bool contains(User item) => state.data
+      .indexWhere((u) => u.id == item.id || u.idBase58 == item.idBase58)
+      .isNegative == false;
 
-  void appendMany(List<User> users) {
-    final existingIds = state.map((u) => u.idBase58).toSet();
-    final newUsers = users.where((u) => !existingIds.contains(u.idBase58)).toList();
+  @override
+  void appendMany(List<User> items) {
+    final existingIds = state.data.map((u) => u.idBase58).toSet();
+    final newUsers = items.where((u) => !existingIds.contains(u.idBase58)).toList();
     if (newUsers.isEmpty) return;
-    state = [...state, ...newUsers];
-  }
-
-  void replaceAll(List<User> users) {
-    state = users;
+    state = PaginatedData(
+      data: [...state.data, ...newUsers],
+      pagination: state.pagination,
+    );
   }
 }
 
@@ -186,19 +254,5 @@ class PaginatedUsers {
   });
 
   final List<User> users;
-  final UsersPaginationState? pagination;
-}
-
-class UsersPaginationState {
-  const UsersPaginationState({
-    required this.hasMore,
-    required this.total,
-    required this.offset,
-    required this.limit,
-  });
-
-  final bool hasMore;
-  final int total;
-  final int offset;
-  final int limit;
+  final PaginationState? pagination;
 }

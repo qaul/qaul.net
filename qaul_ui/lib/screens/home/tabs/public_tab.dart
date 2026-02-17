@@ -42,7 +42,7 @@ class _PublicTabView extends HookConsumerWidget {
       return () {};
     }, []);
 
-    final users = ref.watch(usersProvider);
+    final users = ref.watch(usersProvider).data;
     final messages = ref.watch(publicMessagesProvider);
 
     final blockedIds =

@@ -35,7 +35,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    final users = container.read(usersProvider);
+    final users = container.read(usersProvider).data;
     expect(users.length, 50);
     expect(users.first.name, 'Mock User 1');
     expect(find.byType(ListView), findsOneWidget);
@@ -61,8 +61,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    expect(container.read(usersProvider).length, 50);
-    expect(container.read(usersProvider).first.name, 'Mock User 1');
+    expect(container.read(usersProvider).data.length, 50);
+    expect(container.read(usersProvider).data.first.name, 'Mock User 1');
 
     for (int i = 0; i < 6; i++) {
       await tester.drag(find.byType(ListView), const Offset(0, -500));
@@ -71,7 +71,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    final usersAfterScroll = container.read(usersProvider);
+    final usersAfterScroll = container.read(usersProvider).data;
     expect(usersAfterScroll.length, greaterThan(50));
     expect(
       usersAfterScroll.any((user) => user.name == 'Mock User 51'),
@@ -98,14 +98,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    final pagination = container.read(usersPaginationStateProvider);
+    final pagination = container.read(usersProvider).pagination;
     expect(pagination, isNotNull);
     expect(pagination!.hasMore, isTrue);
     expect(pagination.total, 125);
     expect(pagination.offset, 0);
     expect(pagination.limit, 50);
 
-    final users = container.read(usersProvider);
+    final users = container.read(usersProvider).data;
     expect(users.length, 50);
   });
 }

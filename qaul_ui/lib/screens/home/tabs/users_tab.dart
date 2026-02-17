@@ -41,7 +41,7 @@ class _UsersState extends _BaseTabState<_Users> {
   }
 
   void _updatePaginationState() {
-    final paginationState = ref.read(usersPaginationStateProvider);
+    final paginationState = ref.read(usersProvider).pagination;
     if (paginationState != null) {
       _hasMore.value = paginationState.hasMore;
       _currentOffset = paginationState.offset + paginationState.limit;
@@ -75,8 +75,8 @@ class _UsersState extends _BaseTabState<_Users> {
   Widget build(BuildContext context) {
     super.build(context);
 
-    ref.listen(usersPaginationStateProvider, (previous, next) {
-      if (next != null && !next.hasMore) {
+    ref.listen(usersProvider, (previous, next) {
+      if (next.pagination != null && !next.pagination!.hasMore) {
         _hasMore.value = false;
       }
     });
