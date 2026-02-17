@@ -195,9 +195,6 @@ fn test_config_user_accounts_persistence() {
         name: "TestUser".to_string(),
         id: "user-id-12345".to_string(),
         keys: "user-keys-base64".to_string(),
-        password_hash: None,
-        password_salt: None,
-        session_token: None,
         storage: StorageOptions {
             users: vec!["friend1".to_string(), "friend2".to_string()],
             size_total: 2048,
