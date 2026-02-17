@@ -70,7 +70,7 @@ class StubLibqaulWorker implements LibqaulWorker {
       },
     );
     final hasMore = end < _mockTotalUsers;
-    final pagination = UsersPaginationState(
+    final pagination = PaginationState(
       hasMore: hasMore,
       total: _mockTotalUsers,
       offset: requestedOffset,
@@ -78,11 +78,11 @@ class StubLibqaulWorker implements LibqaulWorker {
     );
     final notifier = ref.read(usersProvider.notifier);
     if (requestedOffset == 0) {
-      notifier.state = mockUsers;
+      notifier.replaceAll(mockUsers, pagination: pagination);
     } else {
       notifier.appendMany(mockUsers);
+      notifier.setPagination(pagination);
     }
-    ref.read(usersPaginationStateProvider.notifier).setPagination(pagination);
   }
 
   // -------------------------------------------

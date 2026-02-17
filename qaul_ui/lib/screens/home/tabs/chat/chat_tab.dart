@@ -22,7 +22,7 @@ class _ChatState extends _BaseTabState<_Chat> {
     super.build(context);
 
     final defaultUser = ref.watch(defaultUserProvider)!;
-    final users = ref.watch(usersProvider);
+    final users = ref.watch(usersProvider).data;
     final chatRooms = ref.watch(chatRoomsProvider);
     final groupInvites = ref.watch(groupInvitesProvider);
     final currentOpenChat = ref.watch(currentOpenChatRoom);

@@ -85,5 +85,5 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   ChatRoom? _roomWithId(String id) =>
       ref.read(chatRoomsProvider).firstWhereOrNull((r) => r.idBase58 == id);
 
-  User? _userWithId(String id) => ref.read(usersProvider).firstWhereOrNull((u) => u.idBase58 == id);
+  User? _userWithId(String id) => ref.read(usersProvider).data.firstWhereOrNull((u) => u.idBase58 == id);
 }
