@@ -5,6 +5,7 @@
 /// the container contains the entire message with signature
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Container {
     /// signed by sending user
     #[prost(bytes = "vec", tag = "1")]
@@ -16,6 +17,7 @@ pub struct Container {
 /// message envelop with sender and receiver
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Envelope {
     /// the qaul ID of the sender
     #[prost(bytes = "vec", tag = "1")]
@@ -29,6 +31,7 @@ pub struct Envelope {
 }
 /// envelop payload
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[allow(dead_code)]
 pub struct EnvelopPayload {
     #[prost(oneof = "envelop_payload::Payload", tags = "1, 2")]
     pub payload: ::core::option::Option<envelop_payload::Payload>,
@@ -48,6 +51,7 @@ pub mod envelop_payload {
 /// encrypted message data
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Encrypted {
     /// state of the crypto session
     #[prost(enumeration = "CryptoState", tag = "1")]
@@ -63,6 +67,7 @@ pub struct Encrypted {
 /// encrypted message data
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Data {
     /// message nonce for encryption
     ///
@@ -78,6 +83,7 @@ pub struct Data {
 }
 /// messaging unified message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Messaging {
     #[prost(oneof = "messaging::Message", tags = "1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<messaging::Message>,
@@ -113,6 +119,7 @@ pub mod messaging {
 /// to confirm the receive.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Confirmation {
     /// message ID
     #[prost(bytes = "vec", tag = "1")]
@@ -126,6 +133,7 @@ pub struct Confirmation {
 /// This message is for crypto specific tasks,
 /// such as completing a handshake.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct CryptoService {
     /// message data
     #[prost(bytes = "vec", tag = "1")]
@@ -133,18 +141,21 @@ pub struct CryptoService {
 }
 /// rtc stream mesasge
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct RtcStreamMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// group invite message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct GroupInviteMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// common message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct CommonMessage {
     /// message ID
     #[prost(bytes = "vec", tag = "1")]
@@ -181,6 +192,7 @@ pub mod common_message {
 /// chat content
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct ChatMessage {
     /// content
     #[prost(string, tag = "1")]
@@ -188,24 +200,28 @@ pub struct ChatMessage {
 }
 /// file message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct FileMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// group message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct GroupMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// rtc message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct RtcMessage {
     #[prost(bytes = "vec", tag = "1")]
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// DTN message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct Dtn {
     #[prost(oneof = "dtn::Message", tags = "1, 2")]
     pub message: ::core::option::Option<dtn::Message>,
@@ -224,6 +240,7 @@ pub mod dtn {
 }
 /// DTN response
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[allow(dead_code)]
 pub struct DtnResponse {
     /// the type of the message
     #[prost(enumeration = "dtn_response::ResponseType", tag = "1")]
@@ -327,6 +344,7 @@ pub mod dtn_response {
 /// state of the crypto session
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
+#[allow(dead_code)]
 pub enum CryptoState {
     /// no crypto at all
     None = 0,

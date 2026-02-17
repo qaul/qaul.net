@@ -12,6 +12,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 [features]
 default = []
 ble = ["ble_module"]
+rtc = []
 
 [dependencies]
 libp2p = { version = "0.56.0", features = ["tokio", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic"] }
