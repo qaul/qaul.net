@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -123,10 +122,6 @@ class PaginatedDataNotifier<T> extends Notifier<PaginatedData<T>> {
   }
 
   void updateMany(List<T> items) {
-    if (const ListEquality().equals(state.data, items)) {
-      return;
-    }
-
     final updatedItems = [...state.data];
     for (final item in items) {
       final idx = updatedItems.indexOf(item);
@@ -177,30 +172,39 @@ class PaginatedDataNotifier<T> extends Notifier<PaginatedData<T>> {
 }
 
 class UserListNotifier extends PaginatedDataNotifier<User> {
+  static Map<String, int> _indexById(List<User> users) {
+    final indexById = <String, int>{};
+    for (var i = 0; i < users.length; i++) {
+      indexById[users[i].idBase58] = i;
+    }
+    return indexById;
+  }
+
+  static User _mergeUser(User current, User incoming) {
+    return User(
+      name: current.name == 'Name Undefined' ? incoming.name : current.name,
+      id: incoming.id,
+      conversationId: incoming.conversationId ?? current.conversationId,
+      status: incoming.status == ConnectionStatus.offline ? current.status : incoming.status,
+      keyBase58: incoming.keyBase58 ?? current.keyBase58,
+      isBlocked: incoming.isBlocked ?? current.isBlocked,
+      isVerified: incoming.isVerified ?? current.isVerified,
+      availableTypes: incoming.availableTypes ?? current.availableTypes,
+    );
+  }
+
   @override
   void updateMany(List<User> items) {
-    if (const ListEquality().equals(state.data, items)) {
-      return;
-    }
-
     final usrs = [...state.data];
+    final indexById = _indexById(usrs);
     for (final u in items) {
-      final idx = usrs.indexWhere((usr) => usr.id == u.id || usr.idBase58 == u.idBase58);
-      if (idx == -1) {
+      final idx = indexById[u.idBase58];
+      if (idx == null) {
         usrs.add(u);
+        indexById[u.idBase58] = usrs.length - 1;
         continue;
       }
-      final current = usrs.elementAt(idx);
-      usrs[idx] = User(
-        name: current.name == 'Name Undefined' ? u.name : current.name,
-        id: u.id,
-        conversationId: u.conversationId ?? current.conversationId,
-        status: u.status == ConnectionStatus.offline ? current.status : u.status,
-        keyBase58: u.keyBase58 ?? current.keyBase58,
-        isBlocked: u.isBlocked ?? current.isBlocked,
-        isVerified: u.isVerified ?? current.isVerified,
-        availableTypes: u.availableTypes ?? current.availableTypes,
-      );
+      usrs[idx] = _mergeUser(usrs[idx], u);
     }
     state = PaginatedData(
       data: usrs,
@@ -215,16 +219,7 @@ class UserListNotifier extends PaginatedDataNotifier<User> {
         if (usr.id != item.id && usr.idBase58 != item.idBase58) {
           return usr;
         }
-        return User(
-          name: usr.name == 'Name Undefined' ? item.name : usr.name,
-          id: item.id,
-          conversationId: item.conversationId ?? usr.conversationId,
-          status: item.status == ConnectionStatus.offline ? usr.status : item.status,
-          keyBase58: item.keyBase58 ?? usr.keyBase58,
-          isBlocked: item.isBlocked ?? usr.isBlocked,
-          isVerified: item.isVerified ?? usr.isVerified,
-          availableTypes: item.availableTypes ?? usr.availableTypes,
-        );
+        return _mergeUser(usr, item);
       }).toList(),
       pagination: state.pagination,
     );
