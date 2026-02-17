@@ -16,8 +16,10 @@ use crate::services::crypto::sessionmanager::CryptoSessionManager;
 use crate::services::crypto::Crypto;
 use crate::services::dtn;
 use crate::services::group::{self, Group, GroupId};
-use crate::services::rtc;
 use crate::utilities::timestamp::Timestamp;
+
+#[cfg(feature = "rtc")]
+use crate::services::rtc;
 
 /// Qaul Messaging Structure
 pub struct MessagingProcess {}
@@ -178,9 +180,16 @@ impl MessagingProcess {
                         // process group message
                         group::Group::net(&sender_id, &user_account.id, &group_message.content);
                     }
-                    Some(super::proto::common_message::Payload::RtcMessage(ref rtc_message)) => {
-                        // process message in RTC module
-                        rtc::Rtc::net(sender_id, &user_account.id, &rtc_message.content);
+                    Some(super::proto::common_message::Payload::RtcMessage(ref _rtc_message)) => {
+                        #[cfg(feature = "rtc")]
+                        {
+                            // process message in RTC module
+                            rtc::Rtc::net(sender_id, &user_account.id, &_rtc_message.content);
+                        }
+                        #[cfg(not(feature = "rtc"))]
+                        {
+                            log::warn!("Received RtcMessage, but the 'rtc' feature is not enabled");
+                        }
                     }
                     _ => {
                         log::error!("process_direct_message: unknown common message type");

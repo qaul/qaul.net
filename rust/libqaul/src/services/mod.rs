@@ -18,7 +18,8 @@ pub mod dtn;
 pub mod feed;
 pub mod group;
 pub mod messaging;
-#[allow(unused)]
+
+#[cfg(feature = "rtc")]
 pub mod rtc;
 
 /// Services Module - holds all services state for a single instance
@@ -49,6 +50,7 @@ impl ServicesModule {
             messaging::Messaging::init();
             chat::Chat::init();
             group::Group::init();
+            #[cfg(feature = "rtc")]
             rtc::Rtc::init();
             dtn::Dtn::init();
             self.initialized = true;
@@ -82,7 +84,9 @@ impl Services {
         messaging::Messaging::init();
         chat::Chat::init();
         group::Group::init();
-        rtc::Rtc::init();
         dtn::Dtn::init();
+
+        #[cfg(feature = "rtc")]
+        rtc::Rtc::init();
     }
 }
