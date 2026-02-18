@@ -2,7 +2,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -53,19 +53,52 @@ pub mod users {
         /// 12142 31101 09874 34545
         #[prost(message, tag = "6")]
         SecurityNumberResponse(super::SecurityNumberResponse),
+        /// Get user by id request
+        ///
+        /// Retrieves a single user matching the provided id, if existing.
+        #[prost(message, tag = "7")]
+        GetUserByIdRequest(super::GetUserByIdRequest),
+        /// Get user by id response
+        ///
+        /// Message output for a GetUserByIDRequest
+        #[prost(message, tag = "8")]
+        GetUserByIdResponse(super::GetUserByIdResponse),
     }
 }
 /// UI request for some users
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct UserRequest {}
+pub struct UserRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
 /// UI request for some online users
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct UserOnlineRequest {}
+pub struct UserOnlineRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PaginationMetadata {
+    #[prost(bool, tag = "10")]
+    pub has_more: bool,
+    #[prost(uint32, tag = "20")]
+    pub total: u32,
+    #[prost(uint32, tag = "30")]
+    pub offset: u32,
+    #[prost(uint32, tag = "40")]
+    pub limit: u32,
+}
 /// user list
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserList {
     #[prost(message, repeated, tag = "1")]
     pub user: ::prost::alloc::vec::Vec<UserEntry>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<PaginationMetadata>,
 }
 /// user entry
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -136,6 +169,16 @@ pub struct SecurityNumberResponse {
     /// u32.
     #[prost(uint32, repeated, tag = "3")]
     pub security_number_blocks: ::prost::alloc::vec::Vec<u32>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetUserByIdRequest {
+    #[prost(bytes = "vec", tag = "10")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetUserByIdResponse {
+    #[prost(message, optional, tag = "10")]
+    pub user: ::core::option::Option<UserEntry>,
 }
 /// Connection modules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

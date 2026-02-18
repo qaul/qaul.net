@@ -6,6 +6,7 @@
 use crate::proto;
 
 mod node;
+mod user_accounts;
 
 pub trait RpcCommand {
     fn encode_request(&self) -> Result<(Vec<u8>, proto::Modules), Box<dyn std::error::Error>>;

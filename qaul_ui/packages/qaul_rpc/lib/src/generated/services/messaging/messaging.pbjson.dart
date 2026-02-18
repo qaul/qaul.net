@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/messaging/messaging.proto
-//
-// @dart = 2.12
+// Generated from services/messaging/messaging.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -32,7 +34,14 @@ const Container$json = {
   '1': 'Container',
   '2': [
     {'1': 'signature', '3': 1, '4': 1, '5': 12, '10': 'signature'},
-    {'1': 'envelope', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.Envelope', '10': 'envelope'},
+    {
+      '1': 'envelope',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.Envelope',
+      '10': 'envelope'
+    },
   ],
 };
 
@@ -60,7 +69,15 @@ final $typed_data.Uint8List envelopeDescriptor = $convert.base64Decode(
 const EnvelopPayload$json = {
   '1': 'EnvelopPayload',
   '2': [
-    {'1': 'encrypted', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.messaging.Encrypted', '9': 0, '10': 'encrypted'},
+    {
+      '1': 'encrypted',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.Encrypted',
+      '9': 0,
+      '10': 'encrypted'
+    },
     {'1': 'dtn', '3': 2, '4': 1, '5': 12, '9': 0, '10': 'dtn'},
   ],
   '8': [
@@ -77,9 +94,23 @@ final $typed_data.Uint8List envelopPayloadDescriptor = $convert.base64Decode(
 const Encrypted$json = {
   '1': 'Encrypted',
   '2': [
-    {'1': 'state', '3': 1, '4': 1, '5': 14, '6': '.qaul.net.messaging.CryptoState', '10': 'state'},
+    {
+      '1': 'state',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.messaging.CryptoState',
+      '10': 'state'
+    },
     {'1': 'session_id', '3': 2, '4': 1, '5': 13, '10': 'sessionId'},
-    {'1': 'data', '3': 3, '4': 3, '5': 11, '6': '.qaul.net.messaging.Data', '10': 'data'},
+    {
+      '1': 'data',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.net.messaging.Data',
+      '10': 'data'
+    },
   ],
 };
 
@@ -106,12 +137,60 @@ final $typed_data.Uint8List dataDescriptor = $convert.base64Decode(
 const Messaging$json = {
   '1': 'Messaging',
   '2': [
-    {'1': 'confirmation_message', '3': 1, '4': 1, '5': 11, '6': '.qaul.net.messaging.Confirmation', '9': 0, '10': 'confirmationMessage'},
-    {'1': 'dtn_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.DtnResponse', '9': 0, '10': 'dtnResponse'},
-    {'1': 'crypto_service', '3': 3, '4': 1, '5': 11, '6': '.qaul.net.messaging.CryptoService', '9': 0, '10': 'cryptoService'},
-    {'1': 'rtc_stream_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.RtcStreamMessage', '9': 0, '10': 'rtcStreamMessage'},
-    {'1': 'group_invite_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupInviteMessage', '9': 0, '10': 'groupInviteMessage'},
-    {'1': 'common_message', '3': 6, '4': 1, '5': 11, '6': '.qaul.net.messaging.CommonMessage', '9': 0, '10': 'commonMessage'},
+    {
+      '1': 'confirmation_message',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.Confirmation',
+      '9': 0,
+      '10': 'confirmationMessage'
+    },
+    {
+      '1': 'dtn_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.DtnResponse',
+      '9': 0,
+      '10': 'dtnResponse'
+    },
+    {
+      '1': 'crypto_service',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.CryptoService',
+      '9': 0,
+      '10': 'cryptoService'
+    },
+    {
+      '1': 'rtc_stream_message',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.RtcStreamMessage',
+      '9': 0,
+      '10': 'rtcStreamMessage'
+    },
+    {
+      '1': 'group_invite_message',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.GroupInviteMessage',
+      '9': 0,
+      '10': 'groupInviteMessage'
+    },
+    {
+      '1': 'common_message',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.CommonMessage',
+      '9': 0,
+      '10': 'commonMessage'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -154,8 +233,8 @@ const CryptoService$json = {
 };
 
 /// Descriptor for `CryptoService`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List cryptoServiceDescriptor = $convert.base64Decode(
-    'Cg1DcnlwdG9TZXJ2aWNlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
+final $typed_data.Uint8List cryptoServiceDescriptor = $convert
+    .base64Decode('Cg1DcnlwdG9TZXJ2aWNlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
 
 @$core.Deprecated('Use rtcStreamMessageDescriptor instead')
 const RtcStreamMessage$json = {
@@ -178,8 +257,9 @@ const GroupInviteMessage$json = {
 };
 
 /// Descriptor for `GroupInviteMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInviteMessageDescriptor = $convert.base64Decode(
-    'ChJHcm91cEludml0ZU1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
+final $typed_data.Uint8List groupInviteMessageDescriptor =
+    $convert.base64Decode(
+        'ChJHcm91cEludml0ZU1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
 
 @$core.Deprecated('Use commonMessageDescriptor instead')
 const CommonMessage$json = {
@@ -188,10 +268,42 @@ const CommonMessage$json = {
     {'1': 'message_id', '3': 1, '4': 1, '5': 12, '10': 'messageId'},
     {'1': 'group_id', '3': 2, '4': 1, '5': 12, '10': 'groupId'},
     {'1': 'sent_at', '3': 3, '4': 1, '5': 4, '10': 'sentAt'},
-    {'1': 'chat_message', '3': 4, '4': 1, '5': 11, '6': '.qaul.net.messaging.ChatMessage', '9': 0, '10': 'chatMessage'},
-    {'1': 'file_message', '3': 5, '4': 1, '5': 11, '6': '.qaul.net.messaging.FileMessage', '9': 0, '10': 'fileMessage'},
-    {'1': 'group_message', '3': 6, '4': 1, '5': 11, '6': '.qaul.net.messaging.GroupMessage', '9': 0, '10': 'groupMessage'},
-    {'1': 'rtc_message', '3': 7, '4': 1, '5': 11, '6': '.qaul.net.messaging.RtcMessage', '9': 0, '10': 'rtcMessage'},
+    {
+      '1': 'chat_message',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.ChatMessage',
+      '9': 0,
+      '10': 'chatMessage'
+    },
+    {
+      '1': 'file_message',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.FileMessage',
+      '9': 0,
+      '10': 'fileMessage'
+    },
+    {
+      '1': 'group_message',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.GroupMessage',
+      '9': 0,
+      '10': 'groupMessage'
+    },
+    {
+      '1': 'rtc_message',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.RtcMessage',
+      '9': 0,
+      '10': 'rtcMessage'
+    },
   ],
   '8': [
     {'1': 'payload'},
@@ -218,8 +330,8 @@ const ChatMessage$json = {
 };
 
 /// Descriptor for `ChatMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatMessageDescriptor = $convert.base64Decode(
-    'CgtDaGF0TWVzc2FnZRIYCgdjb250ZW50GAEgASgJUgdjb250ZW50');
+final $typed_data.Uint8List chatMessageDescriptor = $convert
+    .base64Decode('CgtDaGF0TWVzc2FnZRIYCgdjb250ZW50GAEgASgJUgdjb250ZW50');
 
 @$core.Deprecated('Use fileMessageDescriptor instead')
 const FileMessage$json = {
@@ -230,8 +342,8 @@ const FileMessage$json = {
 };
 
 /// Descriptor for `FileMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List fileMessageDescriptor = $convert.base64Decode(
-    'CgtGaWxlTWVzc2FnZRIYCgdjb250ZW50GAEgASgMUgdjb250ZW50');
+final $typed_data.Uint8List fileMessageDescriptor = $convert
+    .base64Decode('CgtGaWxlTWVzc2FnZRIYCgdjb250ZW50GAEgASgMUgdjb250ZW50');
 
 @$core.Deprecated('Use groupMessageDescriptor instead')
 const GroupMessage$json = {
@@ -242,8 +354,8 @@ const GroupMessage$json = {
 };
 
 /// Descriptor for `GroupMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupMessageDescriptor = $convert.base64Decode(
-    'CgxHcm91cE1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
+final $typed_data.Uint8List groupMessageDescriptor = $convert
+    .base64Decode('CgxHcm91cE1lc3NhZ2USGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
 
 @$core.Deprecated('Use rtcMessageDescriptor instead')
 const RtcMessage$json = {
@@ -254,15 +366,23 @@ const RtcMessage$json = {
 };
 
 /// Descriptor for `RtcMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rtcMessageDescriptor = $convert.base64Decode(
-    'CgpSdGNNZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
+final $typed_data.Uint8List rtcMessageDescriptor = $convert
+    .base64Decode('CgpSdGNNZXNzYWdlEhgKB2NvbnRlbnQYASABKAxSB2NvbnRlbnQ=');
 
 @$core.Deprecated('Use dtnDescriptor instead')
 const Dtn$json = {
   '1': 'Dtn',
   '2': [
     {'1': 'container', '3': 1, '4': 1, '5': 12, '9': 0, '10': 'container'},
-    {'1': 'response', '3': 2, '4': 1, '5': 11, '6': '.qaul.net.messaging.DtnResponse', '9': 0, '10': 'response'},
+    {
+      '1': 'response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.net.messaging.DtnResponse',
+      '9': 0,
+      '10': 'response'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -278,9 +398,23 @@ final $typed_data.Uint8List dtnDescriptor = $convert.base64Decode(
 const DtnResponse$json = {
   '1': 'DtnResponse',
   '2': [
-    {'1': 'response_type', '3': 1, '4': 1, '5': 14, '6': '.qaul.net.messaging.DtnResponse.ResponseType', '10': 'responseType'},
+    {
+      '1': 'response_type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.messaging.DtnResponse.ResponseType',
+      '10': 'responseType'
+    },
     {'1': 'signature', '3': 2, '4': 1, '5': 12, '10': 'signature'},
-    {'1': 'reason', '3': 3, '4': 1, '5': 14, '6': '.qaul.net.messaging.DtnResponse.Reason', '10': 'reason'},
+    {
+      '1': 'reason',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.net.messaging.DtnResponse.Reason',
+      '10': 'reason'
+    },
   ],
   '4': [DtnResponse_ResponseType$json, DtnResponse_Reason$json],
 };
@@ -313,4 +447,3 @@ final $typed_data.Uint8List dtnResponseDescriptor = $convert.base64Decode(
     '5SZXNwb25zZS5SZWFzb25SBnJlYXNvbiIqCgxSZXNwb25zZVR5cGUSDAoIQUNDRVBURUQQABIM'
     'CghSRUpFQ1RFRBABIkwKBlJlYXNvbhIICgROT05FEAASFQoRVVNFUl9OT1RfQUNDRVBURUQQAR'
     'IRCg1PVkVSQUxMX1FVT1RBEAISDgoKVVNFUl9RVU9UQRAD');
-

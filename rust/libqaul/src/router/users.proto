@@ -42,18 +42,40 @@ message Users {
         // 13246 42369 46193 12484
         // 12142 31101 09874 34545
         SecurityNumberResponse security_number_response = 6;
+        // Get user by id request
+        //
+        // Retrieves a single user matching the provided id, if existing.
+        GetUserByIDRequest get_user_by_id_request = 7;
+        // Get user by id response
+        //
+        // Message output for a GetUserByIDRequest
+        GetUserByIDResponse get_user_by_id_response = 8;
     }
 }
 
 // UI request for some users
-message UserRequest {}
+message UserRequest {
+    uint32 offset = 10;
+    uint32 limit = 20;
+}
 
 // UI request for some online users
-message UserOnlineRequest {}
+message UserOnlineRequest {
+    uint32 offset = 10;
+    uint32 limit = 20;
+}
+
+message PaginationMetadata {
+    bool has_more = 10;
+    uint32 total = 20;
+    uint32 offset = 30;
+    uint32 limit = 40;
+}
 
 // user list
 message UserList {
     repeated UserEntry user = 1;
+    PaginationMetadata pagination = 2;
 }
 
 // user entry
@@ -132,4 +154,12 @@ message SecurityNumberResponse {
     // uint16 data type does not exist in protobuf, just fill them in the u16 as
     // u32.
     repeated uint32 security_number_blocks = 3;
+}
+
+message GetUserByIDRequest {
+    bytes user_id = 10;
+}
+
+message GetUserByIDResponse {
+    UserEntry user = 10;
 }

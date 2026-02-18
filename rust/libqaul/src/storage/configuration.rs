@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Configuration
@@ -248,14 +248,15 @@ impl Default for Configuration {
 
 /// Configuration implementation of libqaul
 impl Configuration {
-    /// Initialize configuration
-    pub fn init() {
-        // create configuration path
-        let path_string = super::Storage::get_path();
-        let path = Path::new(path_string.as_str());
+    /// Load or create configuration from a path (instance-based, no global state)
+    ///
+    /// This is the new API for creating Configuration instances without global state.
+    /// Use this when creating a `StorageModule` or `Libqaul` instance.
+    pub fn load_or_create(storage_path: &str) -> Configuration {
+        let path = Path::new(storage_path);
         let config_path = path.join("config.yaml");
 
-        let config: Configuration = match Config::builder()
+        match Config::builder()
             .add_source(File::with_name(&config_path.to_str().unwrap()))
             .build()
         {
@@ -264,7 +265,31 @@ impl Configuration {
                 Configuration::default()
             }
             Ok(c) => c.try_deserialize::<Configuration>().unwrap(),
-        };
+        }
+    }
+
+    /// Save configuration to a specific path (instance-based)
+    pub fn save_to_path(&self, storage_path: &str) {
+        // create yaml configuration format
+        let yaml = serde_yaml_ng::to_string(self).expect("Couldn't encode into YAML values.");
+
+        // create path to config file
+        let path = Path::new(storage_path);
+        let config_path = path.join("config.yaml");
+
+        log::trace!("Writing to Path {:?}, {:?}", path, config_path);
+
+        fs::write(config_path.clone(), yaml)
+            .expect(&format!("Could not write config to {:?}.", config_path));
+    }
+
+    /// Initialize configuration (global state - for backward compatibility)
+    ///
+    /// Note: This uses global state. For new code, prefer using `Configuration::load_or_create()`.
+    pub fn init() {
+        // create configuration path
+        let path_string = super::Storage::get_path();
+        let config = Self::load_or_create(&path_string);
 
         // put configuration to state
         CONFIG.set(RwLock::new(config));

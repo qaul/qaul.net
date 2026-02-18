@@ -2,7 +2,6 @@
 // This software is published under the AGPLv3 license.
 
 //! # qauld-ctl - CLI client for controlling a running qauld daemon instance via Unix socket
-//!
 
 use std::path::PathBuf;
 
@@ -20,6 +19,7 @@ use crate::commands::RpcCommand;
 pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
 }
 
 mod cli;
@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
+        Commands::Account(a) => Box::new(a.command) as Box<dyn RpcCommand>,
     };
 
     let request_id = Uuid::new_v4().to_string();

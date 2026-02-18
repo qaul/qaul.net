@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: services/dtn/dtn_rpc.proto
-//
-// @dart = 2.12
+// Generated from services/dtn/dtn_rpc.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -17,16 +19,96 @@ import 'dart:typed_data' as $typed_data;
 const DTN$json = {
   '1': 'DTN',
   '2': [
-    {'1': 'dtn_state_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnStateRequest', '9': 0, '10': 'dtnStateRequest'},
-    {'1': 'dtn_state_response', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnStateResponse', '9': 0, '10': 'dtnStateResponse'},
-    {'1': 'dtn_config_request', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnConfigRequest', '9': 0, '10': 'dtnConfigRequest'},
-    {'1': 'dtn_config_response', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnConfigResponse', '9': 0, '10': 'dtnConfigResponse'},
-    {'1': 'dtn_add_user_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnAddUserRequest', '9': 0, '10': 'dtnAddUserRequest'},
-    {'1': 'dtn_add_user_response', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnAddUserResponse', '9': 0, '10': 'dtnAddUserResponse'},
-    {'1': 'dtn_remove_user_request', '3': 7, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnRemoveUserRequest', '9': 0, '10': 'dtnRemoveUserRequest'},
-    {'1': 'dtn_remove_user_response', '3': 8, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnRemoveUserResponse', '9': 0, '10': 'dtnRemoveUserResponse'},
-    {'1': 'dtn_set_total_size_request', '3': 9, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnSetTotalSizeRequest', '9': 0, '10': 'dtnSetTotalSizeRequest'},
-    {'1': 'dtn_set_total_size_response', '3': 10, '4': 1, '5': 11, '6': '.qaul.rpc.dtn.DtnSetTotalSizeResponse', '9': 0, '10': 'dtnSetTotalSizeResponse'},
+    {
+      '1': 'dtn_state_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnStateRequest',
+      '9': 0,
+      '10': 'dtnStateRequest'
+    },
+    {
+      '1': 'dtn_state_response',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnStateResponse',
+      '9': 0,
+      '10': 'dtnStateResponse'
+    },
+    {
+      '1': 'dtn_config_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnConfigRequest',
+      '9': 0,
+      '10': 'dtnConfigRequest'
+    },
+    {
+      '1': 'dtn_config_response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnConfigResponse',
+      '9': 0,
+      '10': 'dtnConfigResponse'
+    },
+    {
+      '1': 'dtn_add_user_request',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnAddUserRequest',
+      '9': 0,
+      '10': 'dtnAddUserRequest'
+    },
+    {
+      '1': 'dtn_add_user_response',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnAddUserResponse',
+      '9': 0,
+      '10': 'dtnAddUserResponse'
+    },
+    {
+      '1': 'dtn_remove_user_request',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnRemoveUserRequest',
+      '9': 0,
+      '10': 'dtnRemoveUserRequest'
+    },
+    {
+      '1': 'dtn_remove_user_response',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnRemoveUserResponse',
+      '9': 0,
+      '10': 'dtnRemoveUserResponse'
+    },
+    {
+      '1': 'dtn_set_total_size_request',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnSetTotalSizeRequest',
+      '9': 0,
+      '10': 'dtnSetTotalSizeRequest'
+    },
+    {
+      '1': 'dtn_set_total_size_response',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.dtn.DtnSetTotalSizeResponse',
+      '9': 0,
+      '10': 'dtnSetTotalSizeResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -59,16 +141,28 @@ const DtnStateRequest$json = {
 };
 
 /// Descriptor for `DtnStateRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnStateRequestDescriptor = $convert.base64Decode(
-    'Cg9EdG5TdGF0ZVJlcXVlc3Q=');
+final $typed_data.Uint8List dtnStateRequestDescriptor =
+    $convert.base64Decode('Cg9EdG5TdGF0ZVJlcXVlc3Q=');
 
 @$core.Deprecated('Use dtnStateResponseDescriptor instead')
 const DtnStateResponse$json = {
   '1': 'DtnStateResponse',
   '2': [
     {'1': 'used_size', '3': 1, '4': 1, '5': 4, '10': 'usedSize'},
-    {'1': 'dtn_message_count', '3': 2, '4': 1, '5': 13, '10': 'dtnMessageCount'},
-    {'1': 'unconfirmed_count', '3': 3, '4': 1, '5': 13, '10': 'unconfirmedCount'},
+    {
+      '1': 'dtn_message_count',
+      '3': 2,
+      '4': 1,
+      '5': 13,
+      '10': 'dtnMessageCount'
+    },
+    {
+      '1': 'unconfirmed_count',
+      '3': 3,
+      '4': 1,
+      '5': 13,
+      '10': 'unconfirmedCount'
+    },
   ],
 };
 
@@ -84,8 +178,8 @@ const DtnConfigRequest$json = {
 };
 
 /// Descriptor for `DtnConfigRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnConfigRequestDescriptor = $convert.base64Decode(
-    'ChBEdG5Db25maWdSZXF1ZXN0');
+final $typed_data.Uint8List dtnConfigRequestDescriptor =
+    $convert.base64Decode('ChBEdG5Db25maWdSZXF1ZXN0');
 
 @$core.Deprecated('Use dtnConfigResponseDescriptor instead')
 const DtnConfigResponse$json = {
@@ -136,8 +230,9 @@ const DtnRemoveUserRequest$json = {
 };
 
 /// Descriptor for `DtnRemoveUserRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnRemoveUserRequestDescriptor = $convert.base64Decode(
-    'ChREdG5SZW1vdmVVc2VyUmVxdWVzdBIXCgd1c2VyX2lkGAEgASgMUgZ1c2VySWQ=');
+final $typed_data.Uint8List dtnRemoveUserRequestDescriptor =
+    $convert.base64Decode(
+        'ChREdG5SZW1vdmVVc2VyUmVxdWVzdBIXCgd1c2VyX2lkGAEgASgMUgZ1c2VySWQ=');
 
 @$core.Deprecated('Use dtnRemoveUserResponseDescriptor instead')
 const DtnRemoveUserResponse$json = {
@@ -162,9 +257,10 @@ const DtnSetTotalSizeRequest$json = {
 };
 
 /// Descriptor for `DtnSetTotalSizeRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnSetTotalSizeRequestDescriptor = $convert.base64Decode(
-    'ChZEdG5TZXRUb3RhbFNpemVSZXF1ZXN0Eh0KCnRvdGFsX3NpemUYASABKA1SCXRvdGFsU2l6ZQ'
-    '==');
+final $typed_data.Uint8List dtnSetTotalSizeRequestDescriptor =
+    $convert.base64Decode(
+        'ChZEdG5TZXRUb3RhbFNpemVSZXF1ZXN0Eh0KCnRvdGFsX3NpemUYASABKA1SCXRvdGFsU2l6ZQ'
+        '==');
 
 @$core.Deprecated('Use dtnSetTotalSizeResponseDescriptor instead')
 const DtnSetTotalSizeResponse$json = {
@@ -176,7 +272,7 @@ const DtnSetTotalSizeResponse$json = {
 };
 
 /// Descriptor for `DtnSetTotalSizeResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List dtnSetTotalSizeResponseDescriptor = $convert.base64Decode(
-    'ChdEdG5TZXRUb3RhbFNpemVSZXNwb25zZRIWCgZzdGF0dXMYASABKAhSBnN0YXR1cxIYCgdtZX'
-    'NzYWdlGAIgASgJUgdtZXNzYWdl');
-
+final $typed_data.Uint8List dtnSetTotalSizeResponseDescriptor =
+    $convert.base64Decode(
+        'ChdEdG5TZXRUb3RhbFNpemVSZXNwb25zZRIWCgZzdGF0dXMYASABKAhSBnN0YXR1cxIYCgdtZX'
+        'NzYWdlGAIgASgJUgdtZXNzYWdl');

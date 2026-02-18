@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: router/router.proto
-//
-// @dart = 2.12
+// Generated from router/router.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -34,12 +36,60 @@ final $typed_data.Uint8List connectionModuleDescriptor = $convert.base64Decode(
 const Router$json = {
   '1': 'Router',
   '2': [
-    {'1': 'routing_table_request', '3': 1, '4': 1, '5': 11, '6': '.qaul.rpc.router.RoutingTableRequest', '9': 0, '10': 'routingTableRequest'},
-    {'1': 'routing_table', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.router.RoutingTableList', '9': 0, '10': 'routingTable'},
-    {'1': 'connections_request', '3': 3, '4': 1, '5': 11, '6': '.qaul.rpc.router.ConnectionsRequest', '9': 0, '10': 'connectionsRequest'},
-    {'1': 'connections_list', '3': 4, '4': 1, '5': 11, '6': '.qaul.rpc.router.ConnectionsList', '9': 0, '10': 'connectionsList'},
-    {'1': 'neighbours_request', '3': 5, '4': 1, '5': 11, '6': '.qaul.rpc.router.NeighboursRequest', '9': 0, '10': 'neighboursRequest'},
-    {'1': 'neighbours_list', '3': 6, '4': 1, '5': 11, '6': '.qaul.rpc.router.NeighboursList', '9': 0, '10': 'neighboursList'},
+    {
+      '1': 'routing_table_request',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.RoutingTableRequest',
+      '9': 0,
+      '10': 'routingTableRequest'
+    },
+    {
+      '1': 'routing_table',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.RoutingTableList',
+      '9': 0,
+      '10': 'routingTable'
+    },
+    {
+      '1': 'connections_request',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsRequest',
+      '9': 0,
+      '10': 'connectionsRequest'
+    },
+    {
+      '1': 'connections_list',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsList',
+      '9': 0,
+      '10': 'connectionsList'
+    },
+    {
+      '1': 'neighbours_request',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.NeighboursRequest',
+      '9': 0,
+      '10': 'neighboursRequest'
+    },
+    {
+      '1': 'neighbours_list',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.router.NeighboursList',
+      '9': 0,
+      '10': 'neighboursList'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -65,14 +115,21 @@ const RoutingTableRequest$json = {
 };
 
 /// Descriptor for `RoutingTableRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List routingTableRequestDescriptor = $convert.base64Decode(
-    'ChNSb3V0aW5nVGFibGVSZXF1ZXN0');
+final $typed_data.Uint8List routingTableRequestDescriptor =
+    $convert.base64Decode('ChNSb3V0aW5nVGFibGVSZXF1ZXN0');
 
 @$core.Deprecated('Use routingTableListDescriptor instead')
 const RoutingTableList$json = {
   '1': 'RoutingTableList',
   '2': [
-    {'1': 'routing_table', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.router.RoutingTableEntry', '10': 'routingTable'},
+    {
+      '1': 'routing_table',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.RoutingTableEntry',
+      '10': 'routingTable'
+    },
   ],
 };
 
@@ -86,7 +143,14 @@ const RoutingTableEntry$json = {
   '1': 'RoutingTableEntry',
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'connections', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.router.RoutingTableConnection', '10': 'connections'},
+    {
+      '1': 'connections',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.RoutingTableConnection',
+      '10': 'connections'
+    },
   ],
 };
 
@@ -100,7 +164,14 @@ final $typed_data.Uint8List routingTableEntryDescriptor = $convert.base64Decode(
 const RoutingTableConnection$json = {
   '1': 'RoutingTableConnection',
   '2': [
-    {'1': 'module', '3': 2, '4': 1, '5': 14, '6': '.qaul.rpc.router.ConnectionModule', '10': 'module'},
+    {
+      '1': 'module',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.qaul.rpc.router.ConnectionModule',
+      '10': 'module'
+    },
     {'1': 'rtt', '3': 3, '4': 1, '5': 13, '10': 'rtt'},
     {'1': 'hop_count', '3': 5, '4': 1, '5': 13, '10': 'hopCount'},
     {'1': 'via', '3': 4, '4': 1, '5': 12, '10': 'via'},
@@ -119,17 +190,45 @@ const ConnectionsRequest$json = {
 };
 
 /// Descriptor for `ConnectionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List connectionsRequestDescriptor = $convert.base64Decode(
-    'ChJDb25uZWN0aW9uc1JlcXVlc3Q=');
+final $typed_data.Uint8List connectionsRequestDescriptor =
+    $convert.base64Decode('ChJDb25uZWN0aW9uc1JlcXVlc3Q=');
 
 @$core.Deprecated('Use connectionsListDescriptor instead')
 const ConnectionsList$json = {
   '1': 'ConnectionsList',
   '2': [
-    {'1': 'lan', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.router.ConnectionsUserEntry', '10': 'lan'},
-    {'1': 'internet', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.router.ConnectionsUserEntry', '10': 'internet'},
-    {'1': 'ble', '3': 3, '4': 3, '5': 11, '6': '.qaul.rpc.router.ConnectionsUserEntry', '10': 'ble'},
-    {'1': 'local', '3': 4, '4': 3, '5': 11, '6': '.qaul.rpc.router.ConnectionsUserEntry', '10': 'local'},
+    {
+      '1': 'lan',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsUserEntry',
+      '10': 'lan'
+    },
+    {
+      '1': 'internet',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsUserEntry',
+      '10': 'internet'
+    },
+    {
+      '1': 'ble',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsUserEntry',
+      '10': 'ble'
+    },
+    {
+      '1': 'local',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionsUserEntry',
+      '10': 'local'
+    },
   ],
 };
 
@@ -146,7 +245,14 @@ const ConnectionsUserEntry$json = {
   '1': 'ConnectionsUserEntry',
   '2': [
     {'1': 'user_id', '3': 1, '4': 1, '5': 12, '10': 'userId'},
-    {'1': 'connections', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.router.ConnectionEntry', '10': 'connections'},
+    {
+      '1': 'connections',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.ConnectionEntry',
+      '10': 'connections'
+    },
   ],
 };
 
@@ -177,16 +283,37 @@ const NeighboursRequest$json = {
 };
 
 /// Descriptor for `NeighboursRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List neighboursRequestDescriptor = $convert.base64Decode(
-    'ChFOZWlnaGJvdXJzUmVxdWVzdA==');
+final $typed_data.Uint8List neighboursRequestDescriptor =
+    $convert.base64Decode('ChFOZWlnaGJvdXJzUmVxdWVzdA==');
 
 @$core.Deprecated('Use neighboursListDescriptor instead')
 const NeighboursList$json = {
   '1': 'NeighboursList',
   '2': [
-    {'1': 'lan', '3': 1, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'lan'},
-    {'1': 'internet', '3': 2, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'internet'},
-    {'1': 'ble', '3': 3, '4': 3, '5': 11, '6': '.qaul.rpc.router.NeighboursEntry', '10': 'ble'},
+    {
+      '1': 'lan',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.NeighboursEntry',
+      '10': 'lan'
+    },
+    {
+      '1': 'internet',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.NeighboursEntry',
+      '10': 'internet'
+    },
+    {
+      '1': 'ble',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.router.NeighboursEntry',
+      '10': 'ble'
+    },
   ],
 };
 
@@ -210,4 +337,3 @@ const NeighboursEntry$json = {
 final $typed_data.Uint8List neighboursEntryDescriptor = $convert.base64Decode(
     'Cg9OZWlnaGJvdXJzRW50cnkSFwoHbm9kZV9pZBgBIAEoDFIGbm9kZUlkEhAKA3J0dBgCIAEoDV'
     'IDcnR0');
-

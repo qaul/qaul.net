@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Chat Module Interactions
@@ -10,15 +10,19 @@ use prost::Message;
 use std::fmt;
 
 /// include generated protobuf RPC rust definition file
+#[allow(unused)]
 mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
 }
+#[allow(unused)]
 mod proto_message {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.messaging.rs");
 }
+#[allow(unused)]
 mod proto_group {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.group.rs");
 }
+#[allow(unused)]
 mod proto_file {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.chatfile.rs");
 }

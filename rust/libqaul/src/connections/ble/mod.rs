@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! BLE Connection Module
@@ -95,7 +95,7 @@ impl fmt::Display for ModuleStatus {
 pub struct Ble {
     /// qaul BLE id
     ///
-    /// 16 Byte short form of qaul node ID
+    /// 8 Bytes short form of qaul node ID
     ///
     /// The BLE id is a smaller representation of the qaul
     /// node id to exchange it in a legacy BLE message with
@@ -109,9 +109,17 @@ pub struct Ble {
 
 impl Ble {
     /// initialize the BLE module
-    pub fn init() {
+    pub async fn init() {
         // get small BLE ID
         let ble_id = Node::get_small_id();
+        #[cfg(all(target_os = "linux", feature = "ble"))]
+        tokio::spawn(async move {
+            while !ble_module::is_ble_enabled().await {
+                log::error!("BLE not enabled, Please power on bluetooth on your device");
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            }
+            ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
+        });
 
         // initialize local state
         {
@@ -127,7 +135,7 @@ impl Ble {
             };
             BLE.set(RwLock::new(ble));
         }
-
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         //#[cfg(target_os = "android")]
         Self::info_send_request();
     }
@@ -606,7 +614,6 @@ impl Ble {
     /// BLE message received
     fn message_received(message: proto::BleDirectReceived) {
         log::info!("BLE message received");
-
         // get node ID of sender
         let node_id: PeerId;
         if let Some(node) = Neighbours::node_from_small_id(message.from.clone()) {

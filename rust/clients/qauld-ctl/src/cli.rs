@@ -23,6 +23,8 @@ pub struct Cli {
 pub enum Commands {
     /// node details
     Node(NodeArgs),
+    /// User Accounts
+    Account(AccountArgs),
 }
 
 #[derive(Args, Debug)]
@@ -35,4 +37,40 @@ pub struct NodeArgs {
 pub enum NodeSubcmd {
     /// prints the local node id
     Info,
+}
+
+#[derive(Args, Debug)]
+pub struct AccountArgs {
+    #[command(subcommand)]
+    pub command: AccountSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AccountSubcmd {
+    /// get's and displays the default user account
+    Default,
+    /// create a new user account with the name {User Name}
+    Create {
+        /// Specify the username to create an account with
+        #[arg(short, long)]
+        username: String,
+        /// Specify the password to create an account with
+        #[arg(short, long)]
+        password: Option<String>,
+    },
+    /// set or change password for the current user account (prompts for input)
+    Password,
+    /// login to an existing user account
+    Login {
+        /// Specify the username to create an account with
+        #[arg(short, long)]
+        username: String,
+        /// Specify the password to create an account with
+        #[arg(short, long)]
+        password: String,
+    },
+    /// logout from the current user session
+    Logout,
+    /// check current authentication status (logged in/out, session info)
+    Status,
 }

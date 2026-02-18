@@ -1,13 +1,15 @@
+// This is a generated file - do not edit.
 //
-//  Generated code. Do not modify.
-//  source: node/node.proto
-//
-// @dart = 2.12
+// Generated from node/node.proto.
+
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+// ignore_for_file: unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -18,7 +20,15 @@ const Node$json = {
   '1': 'Node',
   '2': [
     {'1': 'get_node_info', '3': 1, '4': 1, '5': 8, '9': 0, '10': 'getNodeInfo'},
-    {'1': 'info', '3': 2, '4': 1, '5': 11, '6': '.qaul.rpc.node.NodeInformation', '9': 0, '10': 'info'},
+    {
+      '1': 'info',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.node.NodeInformation',
+      '9': 0,
+      '10': 'info'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -43,4 +53,3 @@ const NodeInformation$json = {
 final $typed_data.Uint8List nodeInformationDescriptor = $convert.base64Decode(
     'Cg9Ob2RlSW5mb3JtYXRpb24SGwoJaWRfYmFzZTU4GAEgASgJUghpZEJhc2U1OBIcCglhZGRyZX'
     'NzZXMYAiADKAlSCWFkZHJlc3Nlcw==');
-

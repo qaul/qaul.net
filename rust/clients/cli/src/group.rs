@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Group module functions
@@ -13,6 +13,7 @@ mod proto {
 }
 
 /// include chat protobuf RPC file
+#[allow(unused)]
 mod proto_chat {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
 }

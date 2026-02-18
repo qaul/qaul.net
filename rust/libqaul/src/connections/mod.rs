@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # Qaul Connections Modules
@@ -73,6 +73,38 @@ impl ConnectionModule {
     }
 }
 
+/// Connections Module - wrapper for instance-based connection management
+///
+/// This struct wraps all connection-related state for a single libqaul instance.
+/// The actual swarms and connection states are managed internally.
+pub struct ConnectionsModule {
+    /// Whether connections have been initialized
+    initialized: bool,
+}
+
+impl ConnectionsModule {
+    /// Create a new ConnectionsModule (instance-based)
+    pub fn new() -> Self {
+        Self { initialized: false }
+    }
+
+    /// Check if connections are initialized
+    pub fn is_initialized(&self) -> bool {
+        self.initialized
+    }
+
+    /// Mark as initialized (called after swarms are created)
+    pub fn set_initialized(&mut self) {
+        self.initialized = true;
+    }
+}
+
+impl Default for ConnectionsModule {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Collection of all connections of libqaul
 /// each collection is a libp2p swarm
 pub struct Connections {
@@ -81,7 +113,7 @@ pub struct Connections {
 }
 
 impl Connections {
-    /// initialize connections
+    /// initialize connections (global state - for backward compatibility)
     pub async fn init() -> Connections {
         // get node keys
         let node_keys = Node::get_keys();
@@ -93,7 +125,7 @@ impl Connections {
         let internet = Internet::init(&node_keys).await;
 
         // initialize BLE  module
-        Ble::init();
+        Ble::init().await;
 
         let conn = Connections {
             lan: Some(lan),

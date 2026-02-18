@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Open Community Project Association https://ocpa.ch
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
 //! # C-API for the threaded libqaul
@@ -33,7 +33,7 @@ pub extern "C" fn start(s: *const c_char) {
 
     let r_str = c_str.to_str().unwrap();
     println!("{}", r_str.to_string());
-    super::start(r_str.to_string());
+    let _instance = super::start_instance_in_thread(r_str.to_string(), None);
 }
 
 /// start libqaul on desktop operating systems
@@ -46,7 +46,7 @@ pub extern "C" fn start(s: *const c_char) {
 /// to be provided.
 #[no_mangle]
 pub extern "C" fn start_desktop() {
-    super::start_desktop();
+    let _instance = super::start_desktop();
 }
 
 /// check if libqaul finished initializing
@@ -235,66 +235,4 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
 
     // return success
     0
-}
-
-/// receive SYS messages from libqaul
-///
-/// You need to provide the pointer to a buffer and declare
-/// the length of a buffer.
-/// If a message was received, this function copies the message
-/// into the buffer.
-///
-/// The function returns the length of the message.
-/// The return value '0' means no message was received.
-///
-/// A negative value is an error.
-/// -1 : an error occurred
-/// -2 : buffer to small
-/// -3 : buffer pointer is null
-#[no_mangle]
-pub extern "C" fn receive_sys_from_libqaul(buffer: *mut libc::c_uchar, buffer_length: u32) -> i32 {
-    // poll rpc channel
-    let received = crate::rpc::sys::Sys::receive_from_libqaul();
-
-    match received {
-        Ok(message) => {
-            // check if no message
-            if message.len() == 0 {
-                return 0;
-            }
-
-            // buffer-pointer sanity check
-            if buffer.is_null() {
-                log::error!("provided buffer pointer is null");
-                return -3;
-            }
-
-            // check buffer len
-            let buffer_length_usize: usize = buffer_length as usize;
-            if message.len() >= buffer_length_usize {
-                log::error!(
-                    "Buffer size to small! message size: {} < buffer size {}",
-                    message.len(),
-                    buffer_length
-                );
-                // return -2: buffer size to small
-                return -2;
-            }
-
-            // copy message into provided buffer
-            unsafe {
-                std::ptr::copy_nonoverlapping(message.as_ptr(), buffer, message.len());
-            }
-
-            // return message length
-            let len: i32 = message.len() as i32;
-            return len;
-        }
-        Err(err) => {
-            // log error message
-            log::error!("{:?}", err);
-            // return -1: an error occurred
-            return -1;
-        }
-    }
 }
