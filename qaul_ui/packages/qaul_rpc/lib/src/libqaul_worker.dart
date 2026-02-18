@@ -92,8 +92,12 @@ class LibqaulWorker {
     _sendMessage(Modules.FEED, msg);
   }
 
-  Future<void> getUsers() async =>
-      await _sendMessage(Modules.USERS, Users(userRequest: UserRequest()));
+  Future<void> getUsers({int? offset, int? limit}) async {
+    final request = UserRequest();
+    if (offset != null) request.offset = offset;
+    if (limit != null) request.limit = limit;
+    await _sendMessage(Modules.USERS, Users(userRequest: request));
+  }
 
   void getUserSecurityNumber(User u) async {
     final msg = Users(

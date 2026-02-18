@@ -8,32 +8,98 @@ class _Users extends BaseTab {
 }
 
 class _UsersState extends _BaseTabState<_Users> {
+  static const _pageSize = 50;
+  late final ScrollController _scrollController;
+  final _isLoadingMore = ValueNotifier<bool>(false);
+  final _hasMore = ValueNotifier<bool>(true);
+  int _currentOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshUsers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _isLoadingMore.dispose();
+    _hasMore.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      _loadMoreUsers();
+    }
+  }
+
+  void _updatePaginationState() {
+    final paginationState = ref.read(usersProvider).pagination;
+    if (paginationState != null) {
+      _hasMore.value = paginationState.hasMore;
+      _currentOffset = paginationState.offset + paginationState.limit;
+      return;
+    }
+    _currentOffset += _pageSize;
+  }
+
+  Future<void> _loadMoreUsers() async {
+    if (_isLoadingMore.value || !_hasMore.value) return;
+
+    _isLoadingMore.value = true;
+    try {
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.getUsers(offset: _currentOffset, limit: _pageSize);
+      _updatePaginationState();
+    } finally {
+      _isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> _refreshUsers() async {
+    _currentOffset = 0;
+    _hasMore.value = true;
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.getUsers(offset: 0, limit: _pageSize);
+    _updatePaginationState();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final refreshUsers = useCallback(() async {
-      final worker = ref.read(qaulWorkerProvider);
-      await worker.getUsers();
-    }, [UniqueKey()]);
+
+    ref.listen(usersProvider, (previous, next) {
+      if (next.pagination != null && !next.pagination!.hasMore) {
+        _hasMore.value = false;
+      }
+    });
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: CronTaskDecorator(
-        schedule: const Duration(milliseconds: 1000),
-        callback: () async => await refreshUsers(),
-        child: RefreshIndicator(
-          onRefresh: () async => await refreshUsers(),
-          child: SearchUserDecorator(builder: (_, users) {
-            return EmptyStateTextDecorator(
-              l10n.emptyUsersList,
-              isEmpty: users.isEmpty,
-              child: ListView.separated(
-                controller: ScrollController(),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: users.length,
-                separatorBuilder: (_, _) => const Divider(height: 12.0),
-                itemBuilder: (_, i) {
-                  final user = users[i];
+      body: ListenableBuilder(
+        listenable: _isLoadingMore,
+        builder: (context, _) => LoadingDecorator(
+          isLoading: _isLoadingMore.value,
+          child: RefreshIndicator(
+            onRefresh: () async => await _refreshUsers(),
+            child: SearchUserDecorator(builder: (_, users) {
+              return EmptyStateTextDecorator(
+                l10n.emptyUsersList,
+                isEmpty: users.isEmpty,
+                child: ListView.separated(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: users.length,
+                  separatorBuilder: (_, _) => const Divider(height: 12.0),
+                  itemBuilder: (_, i) {
+                    final user = users[i];
                   var theme = Theme.of(context).textTheme;
                   var hasConnections =
                       user.availableTypes != null && user.availableTypes!.isNotEmpty;
@@ -68,10 +134,11 @@ class _UsersState extends _BaseTabState<_Users> {
                       tapRoutesToDetailsScreen: true,
                     ),
                   );
-                },
-              ),
-            );
-          }),
+                  },
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );
