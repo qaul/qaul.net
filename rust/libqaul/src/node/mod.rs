@@ -246,7 +246,12 @@ impl Node {
     }
 
     /// Process incoming RPC request messages for node module
-    pub fn rpc(data: Vec<u8>, lan: Option<&mut Lan>, internet: Option<&mut Internet>) {
+    pub fn rpc(
+        data: Vec<u8>,
+        lan: Option<&mut Lan>,
+        internet: Option<&mut Internet>,
+        request_id: String,
+    ) {
         match proto::Node::decode(&data[..]) {
             Ok(node) => {
                 match node.message {
@@ -297,7 +302,7 @@ impl Node {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Node.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

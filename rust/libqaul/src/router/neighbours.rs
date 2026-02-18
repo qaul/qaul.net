@@ -301,7 +301,7 @@ impl Neighbours {
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_neighbours_list() {
+    pub fn rpc_send_neighbours_list(request_id: String) {
         // create lists per module
         let mut lan_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
         let mut internet_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
@@ -364,7 +364,7 @@ impl Neighbours {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Router.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }

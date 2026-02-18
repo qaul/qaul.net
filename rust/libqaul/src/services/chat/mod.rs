@@ -65,6 +65,7 @@ impl Chat {
         user_id: Vec<u8>,
         _lan: Option<&mut Lan>,
         _internet: Option<&mut Internet>,
+        request_id: String,
     ) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
 
@@ -91,7 +92,7 @@ impl Chat {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Chat.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                         // send messageproto::Container, "".to_string(), Vec::new() );

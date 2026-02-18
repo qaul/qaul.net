@@ -130,21 +130,21 @@ impl Router {
 
     /// Process incoming RPC request messages and send them to
     /// the submodules
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, request_id: String) {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
                     Some(proto::router::Message::RoutingTableRequest(_request)) => {
                         // send routing table list
-                        RoutingTable::rpc_send_routing_table();
+                        RoutingTable::rpc_send_routing_table(request_id);
                     }
                     Some(proto::router::Message::ConnectionsRequest(_request)) => {
                         // send connections list
-                        ConnectionTable::rpc_send_connections_list();
+                        ConnectionTable::rpc_send_connections_list(request_id);
                     }
                     Some(proto::router::Message::NeighboursRequest(_request)) => {
                         // send neighbours list
-                        Neighbours::rpc_send_neighbours_list();
+                        Neighbours::rpc_send_neighbours_list(request_id);
                     }
                     _ => {}
                 }

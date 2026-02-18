@@ -10,6 +10,7 @@ members = [
     # binaries
     "clients/cli",
     "clients/qauld",
+    "clients/qauld-ctl",
 
     # libp2p modules
     "libp2p_modules/qaul_info",

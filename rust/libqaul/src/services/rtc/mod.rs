@@ -198,7 +198,7 @@ impl Rtc {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::RtcRpc::decode(&data[..]) {
@@ -229,7 +229,7 @@ impl Rtc {
                                 Rpc::send_message(
                                     buf,
                                     crate::rpc::proto::Modules::Rtc.into(),
-                                    "".to_string(),
+                                    request_id,
                                     Vec::new(),
                                 );
                             }
@@ -264,7 +264,7 @@ impl Rtc {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Rtc.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

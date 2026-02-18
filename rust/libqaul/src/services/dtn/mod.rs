@@ -351,7 +351,7 @@ impl Dtn {
     }
 
     /// process commands from RPC
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         // create peer ID from bytes
         let my_user_id;
         match PeerId::from_bytes(&user_id) {
@@ -383,7 +383,7 @@ impl Dtn {
                     Rpc::send_message(
                         proto_message.encode_to_vec(),
                         crate::rpc::proto::Modules::Dtn.into(),
-                        "".to_string(),
+                        request_id,
                         Vec::new(),
                     );
                 }
@@ -417,7 +417,7 @@ impl Dtn {
                             Rpc::send_message(
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
-                                "".to_string(),
+                                request_id,
                                 Vec::new(),
                             );
                         }
@@ -468,7 +468,7 @@ impl Dtn {
                             Rpc::send_message(
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
-                                "".to_string(),
+                                request_id,
                                 Vec::new(),
                             );
                         }
@@ -527,7 +527,7 @@ impl Dtn {
                             Rpc::send_message(
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
-                                "".to_string(),
+                                request_id,
                                 Vec::new(),
                             );
                         }
@@ -558,7 +558,7 @@ impl Dtn {
                             Rpc::send_message(
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
-                                "".to_string(),
+                                request_id,
                                 Vec::new(),
                             );
                         }

@@ -280,7 +280,7 @@ impl Users {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto::Users::decode(&data[..]) {
@@ -303,27 +303,30 @@ impl Users {
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
                         // attempt to find the user with the associated id
-                        Self::with_resolved_user(&updated_user.id, |user_id, _q8id, user_result| {
-                            // update user entity
-                            let user = User {
-                                id: user_id,
-                                key: user_result.key.clone(),
-                                name: user_result.name.clone(),
-                                verified: updated_user.verified,
-                                blocked: updated_user.blocked,
-                            };
+                        Self::with_resolved_user(
+                            &updated_user.id,
+                            |user_id, _q8id, user_result| {
+                                // update user entity
+                                let user = User {
+                                    id: user_id,
+                                    key: user_result.key.clone(),
+                                    name: user_result.name.clone(),
+                                    verified: updated_user.verified,
+                                    blocked: updated_user.blocked,
+                                };
 
-                            *user_result = user;
+                                *user_result = user;
 
-                            // persist the updated entity
-                            DbUsers::add_user(UserData {
-                                id: user_id.to_bytes(),
-                                key: user_result.key.clone().encode_protobuf(),
-                                name: user_result.name.clone(),
-                                verified: updated_user.verified,
-                                blocked: updated_user.blocked,
-                            });
-                        });
+                                // persist the updated entity
+                                DbUsers::add_user(UserData {
+                                    id: user_id.to_bytes(),
+                                    key: user_result.key.clone().encode_protobuf(),
+                                    name: user_result.name.clone(),
+                                    verified: updated_user.verified,
+                                    blocked: updated_user.blocked,
+                                });
+                            },
+                        );
                     }
                     Some(proto::users::Message::SecurityNumberRequest(secure_req)) => {
                         match Self::get_security_number(&account_id, &secure_req.user_id) {
@@ -372,13 +375,9 @@ impl Users {
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
 
                             let proto_message = proto::Users {
-                                message: Some(
-                                    proto::users::Message::GetUserByIdResponse(
-                                        proto::GetUserByIdResponse {
-                                            user: Some(entry),
-                                        },
-                                    ),
-                                ),
+                                message: Some(proto::users::Message::GetUserByIdResponse(
+                                    proto::GetUserByIdResponse { user: Some(entry) },
+                                )),
                             };
 
                             let mut buf = Vec::with_capacity(proto_message.encoded_len());

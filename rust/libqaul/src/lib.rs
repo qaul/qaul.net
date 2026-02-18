@@ -5,6 +5,7 @@
 //!
 //! Library for qaul
 
+use crate::rpc::authentication::Authentication;
 use crossbeam_channel::Receiver;
 use filetime::FileTime;
 use futures::prelude::*;
@@ -17,7 +18,6 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use crate::rpc::authentication::Authentication;
 
 // crate modules
 pub mod api;

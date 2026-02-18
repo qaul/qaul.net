@@ -716,7 +716,7 @@ impl Ble {
     }
 
     /// Process incoming RPC request messages for BLE module
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, request_id: String) {
         log::trace!("BLE rpc message received");
 
         match proto_rpc::Ble::decode(&data[..]) {
@@ -757,7 +757,7 @@ impl Ble {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Ble.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -796,7 +796,7 @@ impl Ble {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Ble.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

@@ -22,7 +22,7 @@ pub struct Debug {}
 
 impl Debug {
     /// Process incoming RPC request messages for debug module
-    pub fn rpc(data: Vec<u8>, _user_id: Vec<u8>) {
+    pub fn rpc(data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
         match proto::Debug::decode(&data[..]) {
             Ok(debug) => {
                 match debug.message {
@@ -44,7 +44,7 @@ impl Debug {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Debug.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -91,7 +91,7 @@ impl Debug {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Debug.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

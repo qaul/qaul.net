@@ -2,10 +2,10 @@
 // This software is published under the AGPLv3 license.
 
 //! # Libqaul Timestamp Utility
-//! 
+//!
 //! This Utility centrally deals with time and
 //! timestamp related operations.
-//! 
+//!
 //! All time labels shall use this timestamps.
 //! The timestamp is a u64 in milliseconds since UNIX_EPOCH
 
@@ -13,18 +13,15 @@ use std::convert::TryFrom;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Timestamp Utility
-/// 
+///
 /// Provides functions to all timestamp related
 /// operations.
-/// 
+///
 /// Timestamps are u64 numbers containing the milliseconds since UNIX_EPOCH
 #[derive(Clone, Debug)]
-pub struct Timestamp {
-
-}
+pub struct Timestamp {}
 
 impl Timestamp {
-
     pub fn create_time() -> SystemTime {
         SystemTime::now()
     }
@@ -37,17 +34,16 @@ impl Timestamp {
                 Err(e) => {
                     log::error!("convert timestamp to u64 error: {}", e);
                 }
-            }    
-        }
-        else {
+            }
+        } else {
             log::error!("Time is before UNIX_EPOCH");
         }
         // one hour after zero == 3600'000 milliseconds
         60 * 60 * 1000
-    }    
+    }
 
     /// get a timestamp since UNIX_EPOCH in milliseconds for now
-    /// 
+    ///
     /// The function should never panick.
     /// If it fails it returns the timestamp 1 hour after zero ( == 360'000 milliseconds ).
     pub fn get_timestamp() -> u64 {
