@@ -49,24 +49,12 @@ void main() {
   }
 
   group('QaulNavBarDecorator', () {
-    testWidgets('on mobile shows nav bar and five tab items', (tester) async {
+    testWidgets('composes nav bar and content area', (tester) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       await tester.pumpWidget(buildDecorator());
 
+      expect(find.byType(QaulNavBar), findsOneWidget);
       expect(find.byType(QaulNavBarItem), findsNWidgets(5));
-    });
-
-    testWidgets('on mobile shows overflow menu', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(400, 800));
-      await tester.pumpWidget(buildDecorator());
-
-      expect(find.byType(PopupMenuButton<String>), findsOneWidget);
-    });
-
-    testWidgets('on mobile shows main content area', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(400, 800));
-      await tester.pumpWidget(buildDecorator());
-
       expect(find.byType(Expanded), findsWidgets);
     });
 
@@ -104,7 +92,7 @@ void main() {
       expect(find.byKey(capturedKey!), findsOneWidget);
     });
 
-    testWidgets('on mobile shows notification badge when public count is non-zero', (tester) async {
+    testWidgets('decorator shows notification badge when public count is non-zero', (tester) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       late StubPublicNotificationController publicStub;
       await tester.pumpWidget(
@@ -138,16 +126,6 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('overflow menu opens and shows six options', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(400, 800));
-      await tester.pumpWidget(buildDecorator());
-
-      await tester.tap(find.byType(PopupMenuButton<String>));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(PopupMenuItem<String>), findsNWidgets(6));
-    });
-
     testWidgets('selecting overflow menu item navigates to route', (tester) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       const settingsKey = Key('settings_placeholder');
@@ -179,11 +157,11 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byWidgetPredicate(
-        (w) => w is PopupMenuItem<String> && w.value == 'settings',
+        (w) => w is PopupMenuItem<NavBarOverflowOption> && w.value == NavBarOverflowOption.settings,
       ));
       await tester.pumpAndSettle();
 

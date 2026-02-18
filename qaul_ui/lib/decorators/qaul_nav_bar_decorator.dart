@@ -10,6 +10,14 @@ import '../providers/providers.dart';
 import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
 
+enum NavBarOverflowOption {
+  settings,
+  about,
+  license,
+  support,
+  oldNetwork,
+  files,
+}
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({super.key, required this.child});
@@ -25,30 +33,33 @@ class QaulNavBarDecorator extends StatefulWidget {
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   final _pageViewKey = GlobalKey();
 
-  Map<String, String> get _overflowMenuOptions => {
-        'settings': AppLocalizations.of(context)!.settings,
-        'about': AppLocalizations.of(context)!.about,
-        'license': AppLocalizations.of(context)!.agplLicense,
-        'support': AppLocalizations.of(context)!.support,
-        'old-network': AppLocalizations.of(context)!.routingDataTable,
-        'files': AppLocalizations.of(context)!.fileHistory,
-      };
+  Map<NavBarOverflowOption, String> _overflowMenuLabels(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return {
+      NavBarOverflowOption.settings: l10n.settings,
+      NavBarOverflowOption.about: l10n.about,
+      NavBarOverflowOption.license: l10n.agplLicense,
+      NavBarOverflowOption.support: l10n.support,
+      NavBarOverflowOption.oldNetwork: l10n.routingDataTable,
+      NavBarOverflowOption.files: l10n.fileHistory,
+    };
+  }
 
-  void _handleClick(String value) {
-    switch (value) {
-      case 'settings':
+  void _handleOverflowSelected(BuildContext context, NavBarOverflowOption option) {
+    switch (option) {
+      case NavBarOverflowOption.settings:
         Navigator.pushNamed(context, NavigationHelper.settings);
         break;
-      case 'about':
+      case NavBarOverflowOption.about:
         Navigator.pushNamed(context, NavigationHelper.about);
         break;
-      case 'license':
+      case NavBarOverflowOption.license:
         Navigator.pushNamed(context, NavigationHelper.license);
         break;
-      case 'support':
+      case NavBarOverflowOption.support:
         Navigator.pushNamed(context, NavigationHelper.support);
         break;
-      case 'old-network':
+      case NavBarOverflowOption.oldNetwork:
         Navigator.push(context, MaterialPageRoute(builder: (_) {
           return Scaffold(
             appBar: AppBar(
@@ -65,7 +76,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
           );
         }));
         break;
-      case 'files':
+      case NavBarOverflowOption.files:
         Navigator.pushNamed(context, NavigationHelper.fileHistory);
         break;
     }
@@ -76,20 +87,88 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     return ResponsiveLayout(
       mobileBody: Column(
         children: [
-          _buildHorizontalBar(context),
+          QaulNavBar(
+            vertical: false,
+            overflowMenuLabels: _overflowMenuLabels(context),
+            onOverflowSelected: (option) => _handleOverflowSelected(context, option),
+          ),
           Expanded(child: widget.child(_pageViewKey)),
         ],
       ),
       tabletBody: Row(
         children: [
-          _buildVerticalBar(context),
+          QaulNavBar(
+            vertical: true,
+            overflowMenuLabels: _overflowMenuLabels(context),
+            onOverflowSelected: (option) => _handleOverflowSelected(context, option),
+          ),
           Expanded(child: widget.child(_pageViewKey)),
         ],
       ),
     );
   }
+}
 
-  List<Widget> _tabBarContent({bool vertical = false}) {
+class QaulNavBar extends StatelessWidget {
+  const QaulNavBar({
+    super.key,
+    required this.vertical,
+    required this.overflowMenuLabels,
+    required this.onOverflowSelected,
+  });
+
+  final bool vertical;
+  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final void Function(NavBarOverflowOption) onOverflowSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (vertical) {
+            final width = constraints.maxWidth.isFinite
+                ? (constraints.maxWidth * 0.1).clamp(0.0, 1000.0)
+                : 80.0;
+            return ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width),
+              child: _barBackground(
+                context,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: _tabBarContent(context, vertical: true),
+                ),
+                vertical: true,
+              ),
+            );
+          }
+          final height = constraints.maxHeight.isFinite
+              ? (constraints.maxHeight * 0.13).clamp(0.0, 600.0)
+              : 104.0;
+          final width = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : 400.0;
+          return SizedBox(
+            width: width,
+            height: height,
+            child: _barBackground(
+              context,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: _tabBarContent(context, vertical: false),
+                ),
+              ),
+              vertical: false,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _tabBarContent(BuildContext context, {required bool vertical}) {
     return [
       const QaulNavBarItem(TabType.account),
       Expanded(
@@ -113,69 +192,26 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
                 ],
               ),
       ),
-      PopupMenuButton<String>(
-        onSelected: _handleClick,
+      PopupMenuButton<NavBarOverflowOption>(
+        onSelected: onOverflowSelected,
         splashRadius: 20,
         iconSize: 32,
         icon: Icon(vertical ? Icons.more_horiz : Icons.more_vert),
         itemBuilder: (BuildContext context) {
-          return _overflowMenuOptions.keys.map((String key) {
-            return PopupMenuItem<String>(
-              value: key,
-              child: Text(_overflowMenuOptions[key]!),
-            );
-          }).toList();
+          return NavBarOverflowOption.values
+              .map((option) => PopupMenuItem<NavBarOverflowOption>(
+                    value: option,
+                    child: Text(overflowMenuLabels[option]!),
+                  ))
+              .toList();
         },
       ),
     ];
   }
 
-  Widget _buildHorizontalBar(BuildContext context) {
-    final safePadding = MediaQuery.of(context).padding.top;
-    final safeFraction = safePadding / MediaQuery.of(context).size.height;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: 600 + safePadding),
-      child: FractionallySizedBox(
-        heightFactor: 0.13 + safeFraction,
-        child: _barBackground(
-          context,
-          Padding(
-            padding: EdgeInsets.only(left: 8, right: 8, top: safePadding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _tabBarContent(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVerticalBar(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 1000),
-      child: FractionallySizedBox(
-        widthFactor: 0.1,
-        child: _barBackground(
-          context,
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(height: MediaQuery.of(context).viewPadding.top),
-              ..._tabBarContent(vertical: true),
-            ],
-          ),
-          vertical: true,
-        ),
-      ),
-    );
-  }
-
   Widget _barBackground(BuildContext context, Widget child,
       {bool vertical = false}) {
     final ltr = Directionality.of(context) == TextDirection.ltr;
-
     final barTheme = Theme.of(context).appBarTheme;
     final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
     return Container(
