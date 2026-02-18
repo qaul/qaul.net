@@ -12,19 +12,19 @@ use std::fmt;
 /// include generated protobuf RPC rust definition file
 #[allow(unused)]
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
+    include!("../../../libqaul/src/services/chat/qaul.rpc.chat.rs");
 }
 #[allow(unused)]
 mod proto_message {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.messaging.rs");
+    include!("../../../libqaul/src/services/messaging/qaul.net.messaging.rs");
 }
 #[allow(unused)]
 mod proto_group {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.group.rs");
+    include!("../../../libqaul/src/services/group/qaul.net.group.rs");
 }
 #[allow(unused)]
 mod proto_file {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.chatfile.rs");
+    include!("../../../libqaul/src/services/chat/qaul.net.chatfile.rs");
 }
 
 /// chat module function handling

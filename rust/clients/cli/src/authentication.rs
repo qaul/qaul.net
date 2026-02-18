@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 
 /// protobuf message definitions for authentication RPC
 pub mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.authentication.rs");
+    include!("../../../libqaul/src/rpc/qaul.rpc.authentication.rs");
 }
 
 /// Session information persisted to filesystem

@@ -8,7 +8,7 @@ use prost::Message;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.router.rs");
+    include!("../../../libqaul/src/router/qaul.rpc.router.rs");
 }
 
 /// router module function handling

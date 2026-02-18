@@ -11,7 +11,7 @@ use std::sync::RwLock;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
+    include!("../../../libqaul/src/node/qaul.rpc.user_accounts.rs");
 }
 
 /// mutable user account state

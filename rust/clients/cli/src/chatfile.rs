@@ -9,7 +9,7 @@ use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chatfile.rs");
+    include!("../../../libqaul/src/services/chat/qaul.rpc.chatfile.rs");
 }
 
 /// Chat file module function handling
