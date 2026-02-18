@@ -9,10 +9,10 @@ use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rtc.rs");
+    include!("../../../libqaul/src/services/rtc/qaul.rpc.rtc.rs");
 }
 mod proto_net {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.net.rtc.rs");
+    include!("../../../libqaul/src/services/rtc/qaul.net.rtc.rs");
 }
 
 /// GrouChat module function handling

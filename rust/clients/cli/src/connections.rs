@@ -12,7 +12,7 @@ use prost::Message;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.connections.rs");
+    include!("../../../libqaul/src/connections/qaul.rpc.connections.rs");
 }
 
 /// connections function handling

@@ -9,12 +9,12 @@ use std::fmt;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
+    include!("../../../libqaul/src/services/group/qaul.rpc.group.rs");
 }
 
 /// include chat protobuf RPC file
 mod proto_chat {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
+    include!("../../../libqaul/src/services/chat/qaul.rpc.chat.rs");
 }
 
 /// Group module function handling
