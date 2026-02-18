@@ -116,7 +116,7 @@ fn main() {
         Ok(_) => {
             // copy generated protobuf files to their module locations
             let out_dir = env::var_os("OUT_DIR").unwrap();
-            let to = Path::new("src/rpc/protobuf_generated/rust");
+            let to = Path::new("../../protobuf/protobuf_generated/rust");
 
             // copy to central rust file folder
             // UI rpc

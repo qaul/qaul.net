@@ -8,7 +8,7 @@ use prost::Message;
 
 /// include generated protobuf RPC rust definition file
 pub mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
+    include!("../../../libqaul/src/rpc/qaul.rpc.rs");
 }
 
 /// RPC message communication between client

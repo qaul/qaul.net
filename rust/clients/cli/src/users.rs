@@ -12,7 +12,7 @@ use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
 mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
+    include!("../../../libqaul/src/router/qaul.rpc.users.rs");
 }
 
 /// users function handling

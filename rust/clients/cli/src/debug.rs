@@ -8,7 +8,7 @@ use libqaul;
 use super::rpc::Rpc;
 
 /// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.debug.rs"); }
+mod proto { include!("../../../libqaul/src/rpc/qaul.rpc.debug.rs"); }
 
 /// debug module function handling
 pub struct Debug {}
