@@ -7,37 +7,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
-import '../helpers/navigation_helper.dart';
-import '../l10n/app_localizations.dart';
-import '../providers/providers.dart';
-import '../screens/home/tabs/tab.dart';
-import '../widgets/widgets.dart';
+import '../../l10n/app_localizations.dart';
+import '../../providers/providers.dart';
+import '../../widgets/widgets.dart';
 
-import 'qaul_nav_bar_constants.dart';
-
-(Color, Color, Color) _navBarColors(ThemeData theme) {
-  if (theme.brightness == Brightness.dark) {
-    return (
-      kNavBarSelectedBackgroundDark,
-      theme.iconTheme.color!,
-      theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color!,
-    );
-  }
-  return (
-    kNavBarSelectedBackgroundLight,
-    kNavBarIconColorLight,
-    kNavBarIconColorLight,
-  );
-}
-
-enum NavBarOverflowOption {
-  settings,
-  about,
-  license,
-  support,
-  oldNetwork,
-  files,
-}
+import '../constants.dart';
+import '../nav_bar_helper.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({super.key, required this.child});
@@ -53,55 +28,6 @@ class QaulNavBarDecorator extends StatefulWidget {
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   final _pageViewKey = GlobalKey();
 
-  Map<NavBarOverflowOption, String> _overflowMenuLabels(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return {
-      NavBarOverflowOption.settings: l10n.settings,
-      NavBarOverflowOption.about: l10n.about,
-      NavBarOverflowOption.license: l10n.agplLicense,
-      NavBarOverflowOption.support: l10n.support,
-      NavBarOverflowOption.oldNetwork: l10n.routingDataTable,
-      NavBarOverflowOption.files: l10n.fileHistory,
-    };
-  }
-
-  void _handleOverflowSelected(BuildContext context, NavBarOverflowOption option) {
-    switch (option) {
-      case NavBarOverflowOption.settings:
-        Navigator.pushNamed(context, NavigationHelper.settings);
-        break;
-      case NavBarOverflowOption.about:
-        Navigator.pushNamed(context, NavigationHelper.about);
-        break;
-      case NavBarOverflowOption.license:
-        Navigator.pushNamed(context, NavigationHelper.license);
-        break;
-      case NavBarOverflowOption.support:
-        Navigator.pushNamed(context, NavigationHelper.support);
-        break;
-      case NavBarOverflowOption.oldNetwork:
-        Navigator.push(context, MaterialPageRoute(builder: (_) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: const IconButtonFactory(),
-              title: Row(
-                children: [
-                  const Icon(Icons.language),
-                  const SizedBox(width: kNavBarHorizontalPadding),
-                  Text(AppLocalizations.of(context)!.routingDataTable),
-                ],
-              ),
-            ),
-            body: BaseTab.network(),
-          );
-        }));
-        break;
-      case NavBarOverflowOption.files:
-        Navigator.pushNamed(context, NavigationHelper.fileHistory);
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
@@ -110,8 +36,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
           Expanded(child: widget.child(_pageViewKey)),
           QaulNavBar(
             vertical: false,
-            overflowMenuLabels: _overflowMenuLabels(context),
-            onOverflowSelected: (option) => _handleOverflowSelected(context, option),
+            overflowMenuLabels: navBarOverflowMenuLabels(context),
+            onOverflowSelected: (option) =>
+                handleNavBarOverflowSelected(context, option),
           ),
         ],
       ),
@@ -119,8 +46,9 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
         children: [
           QaulNavBar(
             vertical: true,
-            overflowMenuLabels: _overflowMenuLabels(context),
-            onOverflowSelected: (option) => _handleOverflowSelected(context, option),
+            overflowMenuLabels: navBarOverflowMenuLabels(context),
+            onOverflowSelected: (option) =>
+                handleNavBarOverflowSelected(context, option),
           ),
           Expanded(child: widget.child(_pageViewKey)),
         ],
@@ -320,7 +248,7 @@ class QaulNavBarItem extends HookConsumerWidget {
 
     final theme = Theme.of(context);
     final l18ns = AppLocalizations.of(context);
-    final (selectedBackgroundColor, iconColor, activeColor) = _navBarColors(theme);
+    final (selectedBackgroundColor, iconColor, activeColor) = navBarColors(theme);
 
     switch (tab) {
       case TabType.account:

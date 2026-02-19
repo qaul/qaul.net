@@ -21,6 +21,21 @@ String navBarTabIconPath(TabType tab, bool selected) {
   return '$_navBarIconsPath/$name$suffix.svg';
 }
 
+(Color, Color, Color) navBarColors(ThemeData theme) {
+  if (theme.brightness == Brightness.dark) {
+    return (
+      kNavBarSelectedBackgroundDark,
+      theme.iconTheme.color!,
+      theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color!,
+    );
+  }
+  return (
+    kNavBarSelectedBackgroundLight,
+    kNavBarIconColorLight,
+    kNavBarIconColorLight,
+  );
+}
+
 const double kNavBarSelectedSize = 45.0;
 const double kNavBarSelectedRadius = 10.0;
 const double kNavBarVerticalSpacing = 41.5;
