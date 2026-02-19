@@ -4,11 +4,84 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:utils/utils.dart';
+
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
 import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
+
+const String _navBarIconsPath = 'assets/icons/nav_bar';
+
+String navBarIconPath(String name) {
+  return '$_navBarIconsPath/$name.svg';
+}
+
+String navBarTabIconPath(TabType tab, bool selected) {
+  final name = switch (tab) {
+    TabType.users => 'people',
+    TabType.public => 'public',
+    TabType.chat => 'chat',
+    TabType.network => 'network',
+    TabType.account => null,
+  };
+  if (name == null) return '';
+  final suffix = selected ? '-filled' : '-outlined';
+  return '$_navBarIconsPath/$name$suffix.svg';
+}
+
+const double kNavBarSelectedSize = 45.0;
+const double kNavBarSelectedRadius = 10.0;
+const double kNavBarVerticalSpacing = 41.5;
+const Color kNavBarSelectedBackgroundDark = Color(0xFF898989);
+const Color kNavBarDarkBackground = Color(0xFF000000);
+const double kNavBarMobileHeight = 100.0;
+const double kNavBarMobileMargin = 16.0;
+
+const _navBarTabIconSizes = {
+  TabType.chat: Size(34, 21),
+  TabType.network: Size(23, 23),
+  TabType.users: Size(30, 18.34),
+  TabType.public: Size(31, 26),
+};
+
+Size navBarTabIconSize(TabType tab) =>
+    _navBarTabIconSizes[tab] ?? (throw StateError('$tab has no icon size'));
+
+const Size kNavBarMenuIconSize = Size(4.92, 20);
+const double kNavBarAccountSize = 40.0;
+const Color kNavBarSelectedBackgroundLight = Color(0xFFE5E5E5);
+const Color kNavBarIconColorLight = Color(0xFF000000);
+
+const TextStyle kNavBarLabelStyle = TextStyle(
+  fontFamily: 'Roboto',
+  fontSize: 8,
+  fontWeight: FontWeight.w600,
+);
+
+const TextStyle kNavBarAvatarTextStyle = TextStyle(
+  fontFamily: 'Roboto',
+  fontSize: 20,
+  fontWeight: FontWeight.w300,
+  color: Color(0xFFFFFFFF),
+);
+
+(Color, Color, Color) _navBarColors(ThemeData theme) {
+  if (theme.brightness == Brightness.dark) {
+    return (
+      kNavBarSelectedBackgroundDark,
+      theme.iconTheme.color!,
+      theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color!,
+    );
+  }
+  return (
+    kNavBarSelectedBackgroundLight,
+    kNavBarIconColorLight,
+    kNavBarIconColorLight,
+  );
+}
 
 enum NavBarOverflowOption {
   settings,
@@ -87,12 +160,12 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
     return ResponsiveLayout(
       mobileBody: Column(
         children: [
+          Expanded(child: widget.child(_pageViewKey)),
           QaulNavBar(
             vertical: false,
             overflowMenuLabels: _overflowMenuLabels(context),
             onOverflowSelected: (option) => _handleOverflowSelected(context, option),
           ),
-          Expanded(child: widget.child(_pageViewKey)),
         ],
       ),
       tabletBody: Row(
@@ -123,10 +196,10 @@ class QaulNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (vertical) {
+    if (vertical) {
+      return SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
             final width = constraints.maxWidth.isFinite
                 ? (constraints.maxWidth * 0.1).clamp(0.0, 1000.0)
                 : 80.0;
@@ -141,84 +214,126 @@ class QaulNavBar extends StatelessWidget {
                 vertical: true,
               ),
             );
-          }
-          final height = constraints.maxHeight.isFinite
-              ? (constraints.maxHeight * 0.13).clamp(0.0, 600.0)
-              : 104.0;
-          final width = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : 400.0;
-          return SizedBox(
-            width: width,
-            height: height,
-            child: _barBackground(
-              context,
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: _tabBarContent(context, vertical: false),
-                ),
+          },
+        ),
+      );
+    }
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: SizedBox(
+        height: kNavBarMobileHeight,
+        child: _barBackground(
+            context,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: _tabBarContent(context, vertical: false),
               ),
-              vertical: false,
             ),
-          );
-        },
-      ),
+            vertical: false,
+          ),
+        ),
     );
   }
 
   List<Widget> _tabBarContent(BuildContext context, {required bool vertical}) {
+    final menuButton = PopupMenuButton<NavBarOverflowOption>(
+      onSelected: onOverflowSelected,
+      splashRadius: 20,
+      iconSize: kNavBarMenuIconSize.height,
+        icon: Builder(
+          builder: (context) {
+            final theme = Theme.of(context);
+            final color = theme.brightness == Brightness.dark
+                ? (theme.iconTheme.color ?? Colors.white)
+                : kNavBarIconColorLight;
+            return SizedBox(
+            width: kNavBarMenuIconSize.width,
+            height: kNavBarMenuIconSize.height,
+            child: SvgPicture.asset(
+              navBarIconPath('menu'),
+              width: kNavBarMenuIconSize.width,
+              height: kNavBarMenuIconSize.height,
+              fit: BoxFit.contain,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+            ),
+          );
+        },
+      ),
+      itemBuilder: (BuildContext context) {
+        return NavBarOverflowOption.values
+            .map((option) => PopupMenuItem<NavBarOverflowOption>(
+                  value: option,
+                  child: Text(overflowMenuLabels[option]!),
+                ))
+            .toList();
+      },
+    );
+
+    if (vertical) {
+      return [
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 24),
+                  const QaulNavBarItem(TabType.account),
+                  const SizedBox(height: kNavBarVerticalSpacing),
+                  const QaulNavBarItem(TabType.public),
+                  const SizedBox(height: kNavBarVerticalSpacing),
+                  const QaulNavBarItem(TabType.users),
+                  const SizedBox(height: kNavBarVerticalSpacing),
+                  const QaulNavBarItem(TabType.chat),
+                  const SizedBox(height: kNavBarVerticalSpacing),
+                  const QaulNavBarItem(TabType.network),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: menuButton,
+              ),
+            ],
+          ),
+        ),
+      ];
+    }
+
     return [
       const QaulNavBarItem(TabType.account),
       Expanded(
-        child: vertical
-            ? const Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  QaulNavBarItem(TabType.public),
-                  QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
-                  QaulNavBarItem(TabType.network),
-                ],
-              )
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  QaulNavBarItem(TabType.public),
-                  QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
-                  QaulNavBarItem(TabType.network),
-                ],
-              ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: const [
+            QaulNavBarItem(TabType.public),
+            QaulNavBarItem(TabType.users),
+            QaulNavBarItem(TabType.chat),
+            QaulNavBarItem(TabType.network),
+          ],
+        ),
       ),
-      PopupMenuButton<NavBarOverflowOption>(
-        onSelected: onOverflowSelected,
-        splashRadius: 20,
-        iconSize: 32,
-        icon: Icon(vertical ? Icons.more_horiz : Icons.more_vert),
-        itemBuilder: (BuildContext context) {
-          return NavBarOverflowOption.values
-              .map((option) => PopupMenuItem<NavBarOverflowOption>(
-                    value: option,
-                    child: Text(overflowMenuLabels[option]!),
-                  ))
-              .toList();
-        },
-      ),
+      menuButton,
     ];
   }
 
   Widget _barBackground(BuildContext context, Widget child,
       {bool vertical = false}) {
+    final theme = Theme.of(context);
     final ltr = Directionality.of(context) == TextDirection.ltr;
-    final barTheme = Theme.of(context).appBarTheme;
+    final barTheme = theme.appBarTheme;
     final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
+    final backgroundColor = theme.brightness == Brightness.dark
+        ? kNavBarDarkBackground
+        : (barTheme.backgroundColor ?? Colors.transparent);
     return Container(
-      alignment: Alignment.bottomCenter,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border(
-          bottom: vertical ? BorderSide.none : side,
+          bottom: BorderSide.none,
           left: !vertical
               ? BorderSide.none
               : !ltr
@@ -230,7 +345,7 @@ class QaulNavBar extends StatelessWidget {
                   ? side
                   : BorderSide.none,
         ),
-        color: barTheme.backgroundColor,
+        color: backgroundColor,
       ),
       child: child,
     );
@@ -241,12 +356,12 @@ class QaulNavBarItem extends HookConsumerWidget {
   const QaulNavBarItem(this.tab, {super.key});
   final TabType tab;
 
-  final double _iconSize = 32.0;
+  static const double _iconSize = 45.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(homeScreenControllerProvider.notifier);
-    var selected = useState(false);
+    var selected = useState(ref.read(homeScreenControllerProvider) == tab);
 
     useEffect(() {
       ref.listenManual(homeScreenControllerProvider, (previous, next) {
@@ -255,16 +370,15 @@ class QaulNavBarItem extends HookConsumerWidget {
       return null;
     }, []);
 
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     final l18ns = AppLocalizations.of(context);
+    final (selectedBackgroundColor, iconColor, activeColor) = _navBarColors(theme);
 
-    String svgPath;
-    String tooltip;
-    double sizeFactor = 1.0;
     switch (tab) {
       case TabType.account:
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
+        return SizedBox(
+          width: kNavBarAccountSize,
+          height: kNavBarAccountSize,
           child: Tooltip(
             message: l18ns!.userAccountNavButtonTooltip,
             child: InkWell(
@@ -273,55 +387,121 @@ class QaulNavBarItem extends HookConsumerWidget {
               hoverColor: Colors.transparent,
               focusColor: Colors.transparent,
               highlightColor: Colors.transparent,
-              child: QaulAvatar.small(badgeEnabled: false),
+              borderRadius: BorderRadius.circular(kNavBarAccountSize / 2),
+              child: Center(
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final user = ref.watch(defaultUserProvider);
+                    final userColor = user != null
+                        ? colorGenerationStrategy(user.idBase58)
+                        : Colors.red.shade700;
+                    final initialsText = user != null
+                        ? initials(user.name)
+                        : 'WW';
+                    return CircleAvatar(
+                      radius: kNavBarAccountSize / 2,
+                      backgroundColor: userColor,
+                      child: Text(
+                        initialsText,
+                        style: kNavBarAvatarTextStyle,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         );
       case TabType.users:
-        svgPath = 'assets/icons/people.svg';
-        tooltip = l18ns!.usersNavButtonTooltip;
-        sizeFactor = 1.45;
-        break;
       case TabType.public:
-        svgPath = 'assets/icons/public.svg';
-        tooltip = l18ns!.publicNavButtonTooltip;
-        sizeFactor = 1.5;
-        break;
       case TabType.chat:
-        svgPath = 'assets/icons/chat.svg';
-        tooltip = l18ns!.chatNavButtonTooltip;
-        sizeFactor = 1.45;
-        break;
       case TabType.network:
-        svgPath = 'assets/icons/network.svg';
-        tooltip = l18ns!.network;
-        sizeFactor = 1.3;
         break;
     }
 
-    final activeColor = Theme.of(context).navigationBarTheme.surfaceTintColor!;
-    final button = _SelectedIndicatorDecorator(
-      isSelected: selected,
-      label: tooltip,
-      selectedColor: activeColor,
-      child: SizedBox(
-        width: _iconSize * sizeFactor,
-        height: _iconSize * sizeFactor,
-        child: IconButton(
-          tooltip: tooltip,
-          splashRadius: 0.01,
-          icon: SvgPicture.asset(
-            svgPath,
-            // fit: BoxFit.cover,
-            fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(
-              selected.value ? activeColor : theme.iconTheme.color!,
-              BlendMode.srcATop,
+    final isSelected = selected.value;
+    final String tooltip;
+    switch (tab) {
+      case TabType.users:
+        tooltip = l18ns!.usersNavButtonTooltip;
+        break;
+      case TabType.public:
+        tooltip = l18ns!.publicNavButtonTooltip;
+        break;
+      case TabType.chat:
+        tooltip = l18ns!.chatNavButtonTooltip;
+        break;
+      case TabType.network:
+        tooltip = l18ns!.network;
+        break;
+      default:
+        tooltip = '';
+    }
+    final svgPath = navBarTabIconPath(tab, isSelected);
+    final iconSize = navBarTabIconSize(tab);
+
+    final iconWidget = SvgPicture.asset(
+      svgPath,
+      width: iconSize.width,
+      height: iconSize.height,
+      fit: BoxFit.contain,
+      colorFilter: ColorFilter.mode(
+        selected.value ? activeColor : iconColor,
+        BlendMode.srcATop,
+      ),
+    );
+
+    final squareWidget = SizedBox(
+      width: _iconSize,
+      height: _iconSize,
+      child: Material(
+        color: selected.value
+            ? selectedBackgroundColor
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(kNavBarSelectedRadius),
+        child: InkWell(
+          onTap: () => controller.goToTab(tab),
+          borderRadius: BorderRadius.circular(kNavBarSelectedRadius),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: Tooltip(
+            message: tooltip,
+            child: Center(
+              child: SizedBox(
+                width: iconSize.width,
+                height: iconSize.height,
+                child: iconWidget,
+              ),
             ),
           ),
-          onPressed: () => controller.goToTab(tab),
         ),
       ),
+    );
+
+    final shouldShowLabel = tab != TabType.account && tooltip.isNotEmpty;
+    final button = ValueListenableBuilder<bool>(
+      valueListenable: selected,
+      builder: (context, isSelected, _) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            squareWidget,
+            if (isSelected && shouldShowLabel)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  tooltip.toUpperCase(),
+                  style: kNavBarLabelStyle.copyWith(
+                    color: activeColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        );
+      },
     );
 
     if (tab == TabType.public) {
@@ -346,48 +526,6 @@ class QaulNavBarItem extends HookConsumerWidget {
       );
     }
     return button;
-  }
-}
-
-class _SelectedIndicatorDecorator extends StatelessWidget {
-  const _SelectedIndicatorDecorator({
-    required this.isSelected,
-    required this.label,
-    required this.selectedColor,
-    required this.child,
-  });
-
-  final ValueNotifier<bool> isSelected;
-  final Widget child;
-  final String label;
-  final Color selectedColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (context, orientation) {
-      if (orientation != Orientation.landscape) return child;
-
-      var indicatorLength = (24.0 + 8.0 + 8.0) * 1.5;
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          child,
-          Container(
-              width: indicatorLength,
-              margin: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                label.toUpperCase(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 8,
-                  color: isSelected.value ? selectedColor : Colors.transparent,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ],
-      );
-    });
   }
 }
 
