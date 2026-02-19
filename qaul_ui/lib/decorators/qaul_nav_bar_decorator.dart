@@ -39,6 +39,16 @@ const Color kNavBarSelectedBackgroundDark = Color(0xFF898989);
 const Color kNavBarDarkBackground = Color(0xFF000000);
 const double kNavBarMobileHeight = 100.0;
 const double kNavBarMobileMargin = 16.0;
+const double kNavBarHorizontalPadding = 8.0;
+const double kNavBarVerticalTopSpacing = 24.0;
+const double kNavBarVerticalMenuPadding = 24.0;
+const double kNavBarLabelTopPadding = 4.0;
+const double kNavBarVerticalWidthPercentage = 0.1;
+const double kNavBarVerticalMaxWidth = 1000.0;
+const double kNavBarVerticalDefaultWidth = 80.0;
+const double kNavBarMenuSplashRadius = 20.0;
+const double kNavBarBadgeFontSize = 10.0;
+const double kNavBarBadgePositionOffset = 8.0;
 
 const _navBarTabIconSizes = {
   TabType.chat: Size(34, 21),
@@ -140,7 +150,7 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
               title: Row(
                 children: [
                   const Icon(Icons.language),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: kNavBarHorizontalPadding),
                   Text(AppLocalizations.of(context)!.routingDataTable),
                 ],
               ),
@@ -201,8 +211,9 @@ class QaulNavBar extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth.isFinite
-                ? (constraints.maxWidth * 0.1).clamp(0.0, 1000.0)
-                : 80.0;
+                ? (constraints.maxWidth * kNavBarVerticalWidthPercentage)
+                    .clamp(0.0, kNavBarVerticalMaxWidth)
+                : kNavBarVerticalDefaultWidth;
             return ConstrainedBox(
               constraints: BoxConstraints(maxWidth: width),
               child: _barBackground(
@@ -226,7 +237,8 @@ class QaulNavBar extends StatelessWidget {
         child: _barBackground(
             context,
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: kNavBarHorizontalPadding),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: _tabBarContent(context, vertical: false),
@@ -241,7 +253,7 @@ class QaulNavBar extends StatelessWidget {
   List<Widget> _tabBarContent(BuildContext context, {required bool vertical}) {
     final menuButton = PopupMenuButton<NavBarOverflowOption>(
       onSelected: onOverflowSelected,
-      splashRadius: 20,
+      splashRadius: kNavBarMenuSplashRadius,
       iconSize: kNavBarMenuIconSize.height,
         icon: Builder(
           builder: (context) {
@@ -281,7 +293,7 @@ class QaulNavBar extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 24),
+                  const SizedBox(height: kNavBarVerticalTopSpacing),
                   const QaulNavBarItem(TabType.account),
                   const SizedBox(height: kNavBarVerticalSpacing),
                   const QaulNavBarItem(TabType.public),
@@ -294,7 +306,8 @@ class QaulNavBar extends StatelessWidget {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                    vertical: kNavBarVerticalMenuPadding),
                 child: menuButton,
               ),
             ],
@@ -355,8 +368,6 @@ class QaulNavBar extends StatelessWidget {
 class QaulNavBarItem extends HookConsumerWidget {
   const QaulNavBarItem(this.tab, {super.key});
   final TabType tab;
-
-  static const double _iconSize = 45.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -452,8 +463,8 @@ class QaulNavBarItem extends HookConsumerWidget {
     );
 
     final squareWidget = SizedBox(
-      width: _iconSize,
-      height: _iconSize,
+      width: kNavBarSelectedSize,
+      height: kNavBarSelectedSize,
       child: Material(
         color: selected.value
             ? selectedBackgroundColor
@@ -488,7 +499,7 @@ class QaulNavBarItem extends HookConsumerWidget {
             squareWidget,
             if (isSelected && shouldShowLabel)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: kNavBarLabelTopPadding),
                 child: Text(
                   tooltip.toUpperCase(),
                   style: kNavBarLabelStyle.copyWith(
@@ -552,12 +563,14 @@ class _TabNotificationBadge extends StatelessWidget {
               badgeContent: Text(
                 '${count ?? ''}',
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: kNavBarBadgeFontSize,
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              position: BadgePosition.bottomEnd(bottom: 8, end: 8),
+              position: BadgePosition.bottomEnd(
+                  bottom: kNavBarBadgePositionOffset,
+                  end: kNavBarBadgePositionOffset),
               child: child,
             ),
             Positioned.fill(
