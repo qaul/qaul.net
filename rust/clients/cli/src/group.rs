@@ -7,15 +7,9 @@ use super::rpc::Rpc;
 use prost::Message;
 use std::fmt;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/services/group/qaul.rpc.group.rs");
-}
-
-/// include chat protobuf RPC file
-mod proto_chat {
-    include!("../../../libqaul/src/services/chat/qaul.rpc.chat.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_group as proto;
+use qaul_proto::qaul_rpc_chat as proto_chat;
 
 /// Group module function handling
 pub struct Group {}

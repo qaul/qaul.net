@@ -7,10 +7,8 @@ use super::rpc::Rpc;
 use prost::Message;
 use std::fmt;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/services/dtn/qaul.rpc.dtn.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_dtn as proto;
 
 /// Group module function handling
 pub struct Dtn {}

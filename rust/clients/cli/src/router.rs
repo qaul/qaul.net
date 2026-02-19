@@ -6,10 +6,8 @@
 use super::rpc::Rpc;
 use prost::Message;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/router/qaul.rpc.router.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_router as proto;
 
 /// router module function handling
 pub struct Router {}

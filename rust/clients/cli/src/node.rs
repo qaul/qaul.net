@@ -6,8 +6,8 @@
 use prost::Message;
 use super::rpc::Rpc;
 
-/// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/node/qaul.rpc.node.rs"); }
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_node as proto;
 
 /// node module function handling
 pub struct Node {}

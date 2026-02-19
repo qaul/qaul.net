@@ -7,4 +7,4 @@ protoc \
     --java_out=../protobuf_generated/java \
     --kotlin_out=../protobuf_generated/kotlin \
     \
-    --proto_path="../../" $PROTO_FILES
+    --proto_path="../../rust/qaul-proto/proto" $PROTO_FILES

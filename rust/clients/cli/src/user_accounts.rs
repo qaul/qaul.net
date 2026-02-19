@@ -9,10 +9,8 @@ use serde::{Deserialize, Serialize};
 use state::InitCell;
 use std::sync::RwLock;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/node/qaul.rpc.user_accounts.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_user_accounts as proto;
 
 /// mutable user account state
 static USERACCOUNTS: InitCell<RwLock<UserAccounts>> = InitCell::new();

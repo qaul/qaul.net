@@ -4,6 +4,9 @@ members = [
     # qaul library
     "libqaul",
 
+    # protobuf types
+    "../protobuf/qaul-proto",
+
     # binaries
     "clients/cli",
     "clients/qauld",

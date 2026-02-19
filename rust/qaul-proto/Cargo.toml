@@ -1,0 +1,12 @@
+[package]
+name = "qaul-proto"
+version = "2.0.0-rc.5"
+edition = "2021"
+license = "AGPL-3.0"
+
+[dependencies]
+prost = "0.14"
+serde = { version = "1.0", features = ["derive"] }
+
+[build-dependencies]
+prost-build = "0.14"

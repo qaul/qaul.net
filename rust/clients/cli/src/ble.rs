@@ -8,9 +8,9 @@
 use prost::Message;
 use super::rpc::Rpc;
 
-/// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/connections/ble/qaul.rpc.ble.rs"); }
-mod proto_sys { include!("../../../libqaul/src/connections/ble/qaul.sys.ble.rs"); }
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_ble as proto;
+use qaul_proto::qaul_sys_ble as proto_sys;
 
 /// BLE Module Function Handling
 pub struct Ble {}

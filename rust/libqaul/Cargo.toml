@@ -61,9 +61,7 @@ directories = "6.0"
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
-
-[build-dependencies]
-prost-build = "0.14"
+qaul-proto = { path = "../qaul-proto" }
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]

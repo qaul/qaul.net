@@ -6,8 +6,8 @@
 use prost::Message;
 use super::rpc::Rpc;
 
-/// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/services/feed/qaul.rpc.feed.rs"); }
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_feed as proto;
 
 /// feed module function handling
 pub struct Feed {}
