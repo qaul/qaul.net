@@ -7,8 +7,8 @@ use prost::Message;
 use libqaul;
 use super::rpc::Rpc;
 
-/// include generated protobuf RPC rust definition file
-mod proto { include!("../../../libqaul/src/rpc/qaul.rpc.debug.rs"); }
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_debug as proto;
 
 /// debug module function handling
 pub struct Debug {}

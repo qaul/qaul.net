@@ -63,13 +63,11 @@ directories = "6.0"
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
+qaul-proto = { path = "../qaul-proto" }
 
 # Linux BLE module
 [target.'cfg(target_os = "linux")'.dependencies]
 ble_module = { path = "../ble_module", optional = true }
-
-[build-dependencies]
-prost-build = "0.14"
 
 # special setting for android
 [target.'cfg(target_os = "android")'.dependencies]

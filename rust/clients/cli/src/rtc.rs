@@ -7,14 +7,9 @@ use super::rpc::Rpc;
 use prost::Message;
 use std::fmt;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/services/rtc/qaul.rpc.rtc.rs");
-}
-#[allow(unused)]
-mod proto_net {
-    include!("../../../libqaul/src/services/rtc/qaul.net.rtc.rs");
-}
+use qaul_proto::qaul_net_rtc as proto_net;
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_rtc as proto;
 
 /// GrouChat module function handling
 pub struct Rtc {}

@@ -18,9 +18,7 @@ use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 /// Protobuf message definitions for authentication RPC
-pub mod proto {
-    include!("qaul.rpc.authentication.rs");
-}
+pub use qaul_proto::qaul_rpc_authentication as proto;
 
 /// Active authentication challenge for a user
 #[allow(dead_code)]
