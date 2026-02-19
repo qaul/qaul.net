@@ -16,10 +16,8 @@ use libqaul::storage::configuration::Configuration;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
-/// protobuf message definitions for authentication RPC
-pub mod proto {
-    include!("../../../libqaul/src/rpc/qaul.rpc.authentication.rs");
-}
+/// protobuf RPC definition
+pub use qaul_proto::qaul_rpc_authentication as proto;
 
 /// Session information persisted to filesystem
 ///

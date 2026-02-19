@@ -8,6 +8,7 @@ edition = "2021"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
+qaul-proto = { path = "../../qaul-proto" }
 tokio = { version = "1", features = ["full", "io-std"] }
 futures = "0.3"
 log = "0.4"

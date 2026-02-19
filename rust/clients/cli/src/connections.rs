@@ -10,10 +10,8 @@
 use super::rpc::Rpc;
 use prost::Message;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/connections/qaul.rpc.connections.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_connections as proto;
 
 /// connections function handling
 pub struct Connections {}

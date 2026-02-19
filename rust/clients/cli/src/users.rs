@@ -10,10 +10,8 @@ use uuid::Uuid;
 
 use super::rpc::Rpc;
 
-/// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../libqaul/src/router/qaul.rpc.users.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_users as proto;
 
 /// users function handling
 pub struct Users {}
