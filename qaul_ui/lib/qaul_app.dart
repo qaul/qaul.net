@@ -38,7 +38,7 @@ class QaulApp extends PlatformAwareBuilder {
       toolbarHeight: 72,
       backgroundColor: Colors.transparent,
       elevation: 0.0,
-      // Shadow not used as elevation is 0.0 - using this to inject color of decorators/qaul_nav_bar_decorator.dart:157
+      // Shadow not used as elevation is 0.0 - using this to inject color of nav_bar/widgets/qaul_nav_bar_decorator.dart
       shadowColor: Colors.grey.shade300,
       titleTextStyle: const TextStyle(
           fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),

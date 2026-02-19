@@ -104,7 +104,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
         return const Icon(CupertinoIcons.globe);
       case NetworkTypeFilter.all:
         return SvgPicture.asset(
-          'assets/icons/network.svg',
+          'assets/icons/nav_bar/network-outlined.svg',
           colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcATop),
         );
     }
