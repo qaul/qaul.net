@@ -6,21 +6,25 @@ use crate::{
     proto::{user_accounts, CreateUserAccount, Modules, SetPasswordRequest, UserAccounts},
 };
 
+pub fn default_user_proto_message() -> (Vec<u8>, Modules) {
+    let proto_message = UserAccounts {
+        message: Some(user_accounts::Message::GetDefaultUserAccount(true)),
+    };
+
+    // encode message
+    let mut buf = Vec::with_capacity(proto_message.encoded_len());
+    proto_message
+        .encode(&mut buf)
+        .expect("Vec<u8> provides capacity as needed");
+    (buf, Modules::Useraccounts)
+}
+
 impl RpcCommand for AccountSubcmd {
     fn encode_request(&self) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {
         match &self {
             AccountSubcmd::Default => {
-                let proto_message = UserAccounts {
-                    message: Some(user_accounts::Message::GetDefaultUserAccount(true)),
-                };
-
-                // encode message
-                let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                proto_message
-                    .encode(&mut buf)
-                    .expect("Vec<u8> provides capacity as needed");
-
-                Ok((buf, Modules::Useraccounts))
+                let res = default_user_proto_message();
+                Ok(res)
             }
             AccountSubcmd::Create { username, password } => {
                 let proto_message = UserAccounts {
