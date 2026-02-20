@@ -23,6 +23,10 @@ pub struct Cli {
 pub enum Commands {
     /// node details
     Node(NodeArgs),
+    /// User Accounts
+    Account(AccountArgs),
+    /// Functions for all users known by your node
+    Users(UsersArgs),
 }
 
 #[derive(Args, Debug)]
@@ -35,4 +39,82 @@ pub struct NodeArgs {
 pub enum NodeSubcmd {
     /// prints the local node id
     Info,
+}
+
+#[derive(Args, Debug)]
+pub struct AccountArgs {
+    #[command(subcommand)]
+    pub command: AccountSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AccountSubcmd {
+    /// get's and displays the default user account
+    Default,
+    /// create a new user account with the name {User Name}
+    Create {
+        /// Specify the username to create an account with
+        #[arg(short, long)]
+        username: String,
+        /// Specify the password to create an account with
+        #[arg(short, long)]
+        password: Option<String>,
+    },
+    /// set or change password for the current user account
+    Password {
+        /// Specify the password to create or change
+        #[arg(short, long)]
+        password: String,
+    },
+    /// login to an existing user account
+    Login {
+        /// Specify the username to create an account with
+        #[arg(short, long)]
+        username: String,
+        /// Specify the password to create an account with
+        #[arg(short, long)]
+        password: String,
+    },
+    /// logout from the current user session
+    Logout,
+    /// check current authentication status (logged in/out, session info)
+    Status,
+}
+
+#[derive(Args, Debug)]
+pub struct UsersArgs {
+    #[command(subcommand)]
+    pub command: UsersSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum UsersSubcmd {
+    /// display all users known to this router
+    List,
+    /// display all online users known to this router
+    Online,
+    /// verify user with {User ID}
+    Verify {
+        /// Specify the User ID to verify
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// block user with {User ID}
+    Block {
+        /// Specify the User ID to block
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// get the security number for a specific user
+    Secure {
+        /// Specify the User ID to get security number
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// get detailed information for a single user by their {User ID}
+    Get {
+        /// Specify the User ID to get details for
+        #[arg(short, long)]
+        user_id: String,
+    },
 }

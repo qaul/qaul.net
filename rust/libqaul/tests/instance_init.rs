@@ -36,7 +36,10 @@ fn test_node_id_is_valid() {
     // A valid PeerId has a non-empty string representation
     let id_string = node_id.to_string();
     assert!(!id_string.is_empty(), "Node ID should not be empty");
-    assert!(id_string.len() > 10, "Node ID should have reasonable length");
+    assert!(
+        id_string.len() > 10,
+        "Node ID should have reasonable length"
+    );
 }
 
 #[test]
@@ -47,7 +50,10 @@ fn test_node_id_derived_from_keypair() {
     let derived_id = libp2p::PeerId::from(keypair.public());
     let node_id = instance.node_id();
 
-    assert_eq!(derived_id, node_id, "PeerId derived from keypair should match node_id()");
+    assert_eq!(
+        derived_id, node_id,
+        "PeerId derived from keypair should match node_id()"
+    );
 }
 
 #[test]
@@ -57,7 +63,10 @@ fn test_storage_path_matches() {
     let expected_path = dir.path().to_str().unwrap();
     let actual_path = instance.storage_path();
 
-    assert_eq!(actual_path, expected_path, "Storage path should match the provided path");
+    assert_eq!(
+        actual_path, expected_path,
+        "Storage path should match the provided path"
+    );
 }
 
 #[test]
@@ -65,7 +74,10 @@ fn test_config_file_created() {
     let (_, dir) = &*INSTANCE;
 
     let config_path = dir.path().join("config.yaml");
-    assert!(config_path.exists(), "config.yaml should be created in the storage directory");
+    assert!(
+        config_path.exists(),
+        "config.yaml should be created in the storage directory"
+    );
 }
 
 #[test]
@@ -74,7 +86,10 @@ fn test_database_directory_created() {
 
     // The sled database creates a directory named "node.db" in the storage path
     let db_path = dir.path().join("node.db");
-    assert!(db_path.exists(), "Database directory (node.db) should be created");
+    assert!(
+        db_path.exists(),
+        "Database directory (node.db) should be created"
+    );
     assert!(db_path.is_dir(), "Database path should be a directory");
 }
 
@@ -84,7 +99,10 @@ fn test_is_initialized_false_without_run() {
 
     // Without calling run(), is_initialized should be false
     // because the INITIALIZED flag is only set after the event loop starts
-    assert!(!instance.is_initialized(), "is_initialized() should be false before run() is called");
+    assert!(
+        !instance.is_initialized(),
+        "is_initialized() should be false before run() is called"
+    );
 }
 
 #[test]
@@ -118,7 +136,16 @@ fn test_config_node_marked_initialized() {
     let config = libqaul::storage::configuration::Configuration::load_or_create(config_path);
 
     // After instance creation, the node should be marked as initialized in the saved file
-    assert_eq!(config.node.initialized, 1, "Node should be marked as initialized in config file");
-    assert!(!config.node.id.is_empty(), "Node ID in config file should not be empty");
-    assert!(!config.node.keys.is_empty(), "Node keys in config file should not be empty");
+    assert_eq!(
+        config.node.initialized, 1,
+        "Node should be marked as initialized in config file"
+    );
+    assert!(
+        !config.node.id.is_empty(),
+        "Node ID in config file should not be empty"
+    );
+    assert!(
+        !config.node.keys.is_empty(),
+        "Node keys in config file should not be empty"
+    );
 }
