@@ -93,25 +93,22 @@ impl RpcCommand for UsersSubcmd {
 
                 Ok((buf, Modules::Users))
             }
-            UsersSubcmd::Secure { .. } => {
-                return Err(
-                    "secure requires an authenticated session, which is not yet supported".into(),
-                );
-                // let id = bs58::decode(&user_id).into_vec()?;
+            UsersSubcmd::Secure { user_id } => {
+                let id = bs58::decode(&user_id).into_vec()?;
 
-                // let proto_message = Users {
-                //     message: Some(users::Message::SecurityNumberRequest(
-                //         SecurityNumberRequest { user_id: id },
-                //     )),
-                // };
+                let proto_message = Users {
+                    message: Some(users::Message::SecurityNumberRequest(
+                        SecurityNumberRequest { user_id: id },
+                    )),
+                };
 
-                // // encode message
-                // let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                // proto_message
-                //     .encode(&mut buf)
-                //     .expect("Vec<u8> provides capacity as needed");
+                // encode message
+                let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                proto_message
+                    .encode(&mut buf)
+                    .expect("Vec<u8> provides capacity as needed");
 
-                // Ok((buf, Modules::Users))
+                Ok((buf, Modules::Users))
             }
             UsersSubcmd::Get { user_id } => {
                 let id = bs58::decode(&user_id).into_vec()?;
