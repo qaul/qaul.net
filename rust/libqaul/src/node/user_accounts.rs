@@ -427,7 +427,7 @@ impl UserAccounts {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Useraccounts.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }
@@ -437,7 +437,11 @@ impl UserAccounts {
                         let user_peer_id = match PeerId::from_bytes(&user_id) {
                             Ok(id) => id,
                             Err(_) => {
-                                Self::send_password_response(false, "Invalid user Id".to_string());
+                                Self::send_password_response(
+                                    false,
+                                    "Invalid user Id".to_string(),
+                                    request_id,
+                                );
                                 return;
                             }
                         };
@@ -447,9 +451,10 @@ impl UserAccounts {
                             Ok(()) => Self::send_password_response(
                                 true,
                                 "Password updated successfully".to_string(),
+                                request_id,
                             ),
                             Err(error) => {
-                                Self::send_password_response(false, error);
+                                Self::send_password_response(false, error, request_id);
                             }
                         }
                     }
@@ -463,7 +468,7 @@ impl UserAccounts {
     }
 
     /// send password operation response ot client
-    fn send_password_response(success: bool, message: String) {
+    fn send_password_response(success: bool, message: String, request_id: String) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordResponse(
                 proto::SetPasswordResponse {
@@ -478,7 +483,7 @@ impl UserAccounts {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Useraccounts.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }

@@ -62,7 +62,7 @@ This is the example user list for Alice:
 
 ```
 All known Users
-No. | User Name | User Id | Veryfied | Blocked | Connectivity
+No. | User Name | User Id | Verified | Blocked | Connectivity
     | Group ID | Public Key
 1 | Alice | "12D3KooWAih9wpC3xKkkJvgXhUKsrUJpzmZvthGLu4NnrSGD6sJ5" | N | N | Online
    | 0d67ab7c-c120-e7af-0d67-ab7cc120e7af | uKzCgcLmRVFu3B74saY5gDzWSXHs1BrwU1mUT7KCva9
