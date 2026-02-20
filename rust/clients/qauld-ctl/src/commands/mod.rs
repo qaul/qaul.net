@@ -10,6 +10,8 @@ mod node;
 mod user_accounts;
 mod users;
 
+pub use user_accounts::default_user_proto_message;
+
 /// Represents a single RPC command that can be sent to a running qauld daemon over the Unix socket.
 pub trait RpcCommand {
     /// Encodes a CLI subcommand into a raw protobuf request payload and the target RPC module

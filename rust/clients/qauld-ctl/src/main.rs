@@ -10,7 +10,7 @@ use cli::{Cli, Commands};
 use futures::{SinkExt, StreamExt};
 use prost::Message;
 use tokio::net::UnixStream;
-use tokio_util::codec::LengthDelimitedCodec;
+use tokio_util::codec::{Framed, LengthDelimitedCodec};
 use uuid::Uuid;
 
 use crate::commands::RpcCommand;
@@ -25,6 +25,58 @@ pub mod proto {
 
 mod cli;
 mod commands;
+
+/// A Pre flight requesst to get the user ID before executing any command
+async fn preflight_request(
+    client: &mut Framed<UnixStream, LengthDelimitedCodec>,
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    log::info!("executing preflight request");
+    let (data, module) = commands::default_user_proto_message();
+    let request_id = Uuid::new_v4().to_string();
+
+    let proto_message = proto::QaulRpc {
+        module: module.into(),
+        request_id,
+        user_id: Vec::new(),
+        data,
+    };
+
+    let mut rpc_msg = Vec::with_capacity(proto_message.encoded_len());
+    proto_message
+        .encode(&mut rpc_msg)
+        .expect("Vec<u8> provides capacity as needed");
+    client.send(rpc_msg.into()).await?;
+
+    let (user_id_bytes, id) = if let Some(Ok(data)) = client.next().await {
+        match proto::QaulRpc::decode(&data[..]) {
+            Ok(msg) => {
+                let user_accounts = proto::UserAccounts::decode(&msg.data[..])?;
+                match user_accounts.message {
+                    Some(proto::user_accounts::Message::DefaultUserAccount(
+                        default_useraccount,
+                    )) => {
+                        if default_useraccount.user_account_exists {
+                            if let Some(my_user_account) = default_useraccount.my_user_account {
+                                (my_user_account.id, my_user_account.id_base58)
+                            } else {
+                                (Vec::new(), "".to_string())
+                            }
+                        } else {
+                            (Vec::new(), "".to_string())
+                        }
+                    }
+                    _ => (Vec::new(), "".to_string()),
+                }
+            }
+            _ => (Vec::new(), "".to_string()),
+        }
+    } else {
+        (Vec::new(), "".to_string())
+    };
+
+    log::info!("preflight request succedded for user_id: {id}");
+    Ok(user_id_bytes)
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -51,19 +103,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .length_adjustment(0)
         .new_framed(client);
 
+    let request_id = Uuid::new_v4().to_string();
+    let user_id = preflight_request(&mut framed_client).await?;
+
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::Account(a) => Box::new(a.command) as Box<dyn RpcCommand>,
         Commands::Users(u) => Box::new(u.command) as Box<dyn RpcCommand>,
     };
 
-    let request_id = Uuid::new_v4().to_string();
     let (data, module) = rpc_command.encode_request()?;
     // Create RPC message container
     let proto_message = proto::QaulRpc {
         module: module.into(),
         request_id,
-        user_id: Vec::new(),
+        user_id,
         data,
     };
 
