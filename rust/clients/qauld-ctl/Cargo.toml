@@ -21,3 +21,4 @@ prost = "0.14"
 clap = { version = "4.5", features = ["derive", "env"]}
 tokio-util = { version = "0.7.18", features = ["codec"] }
 uuid = { version = "1.13", features = ["v4"] }
+bs58 = "0.5"

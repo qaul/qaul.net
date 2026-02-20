@@ -3,7 +3,7 @@ use prost::Message;
 use crate::{
     cli::AccountSubcmd,
     commands::RpcCommand,
-    proto::{user_accounts, CreateUserAccount, Modules, UserAccounts},
+    proto::{user_accounts, CreateUserAccount, Modules, SetPasswordRequest, UserAccounts},
 };
 
 impl RpcCommand for AccountSubcmd {
@@ -39,6 +39,19 @@ impl RpcCommand for AccountSubcmd {
 
                 Ok((buf, Modules::Useraccounts))
             }
+            AccountSubcmd::Password { password } => {
+                let proto_message = UserAccounts {
+                    message: Some(user_accounts::Message::SetPasswordRequest(
+                        SetPasswordRequest {
+                            password: Some(password.to_string()),
+                        },
+                    )),
+                };
+
+                let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                proto_message.encode(&mut buf).unwrap();
+                Ok((buf, Modules::Useraccounts))
+            }
             _ => {
                 todo!()
             }
@@ -68,7 +81,21 @@ impl RpcCommand for AccountSubcmd {
                     println!("No user account created yet. Please create an account by running: qauld-ctl account create --help");
                 }
             }
-            _ => {}
+            Some(user_accounts::Message::MyUserAccount(acct)) => {
+                println!("New user account created:");
+                println!("{}, ID[{}]", acct.name, acct.id_base58);
+                println!("    public key: {}", acct.key_base58);
+            }
+            Some(user_accounts::Message::SetPasswordResponse(response)) => {
+                if response.success {
+                    println!(" Password updated");
+                } else {
+                    println!("{}", response.error_message);
+                }
+            }
+            _ => {
+                log::error!("unprocessable RPC user accounts message");
+            }
         };
         Ok(())
     }

@@ -281,8 +281,6 @@ impl Users {
 
     /// Process incoming RPC request messages
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
-
         match proto::Users::decode(&data[..]) {
             Ok(users) => {
                 match users.message {
@@ -291,6 +289,7 @@ impl Users {
                             UserFilter::All,
                             user_request.offset,
                             user_request.limit,
+                            request_id,
                         );
                     }
                     Some(proto::users::Message::UserOnlineRequest(user_online_request)) => {
@@ -298,6 +297,7 @@ impl Users {
                             UserFilter::OnlineOnly,
                             user_online_request.offset,
                             user_online_request.limit,
+                            request_id,
                         );
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
@@ -329,6 +329,16 @@ impl Users {
                         );
                     }
                     Some(proto::users::Message::SecurityNumberRequest(secure_req)) => {
+                        let account_id = match PeerId::from_bytes(&user_id) {
+                            Ok(id) => id,
+                            Err(e) => {
+                                log::error!(
+                                    "security number request requires an authenticated user: {}",
+                                    e
+                                );
+                                return;
+                            }
+                        };
                         match Self::get_security_number(&account_id, &secure_req.user_id) {
                             Ok(x) => {
                                 let mut security_number_blocks: Vec<u32> = vec![];
@@ -358,7 +368,7 @@ impl Users {
                                 Rpc::send_message(
                                     buf,
                                     crate::rpc::proto::Modules::Users.into(),
-                                    "".to_string(),
+                                    request_id,
                                     Vec::new(),
                                 );
                             }
@@ -370,6 +380,8 @@ impl Users {
                     Some(proto::users::Message::GetUserByIdRequest(req)) => {
                         log::trace!("GetByIdRequest protobuf RPC message");
                         // attempt to find the user with the associated id
+                        let account_id = PeerId::from_bytes(&user_id).ok();
+
                         Self::with_resolved_user(&req.user_id, |_, q8id, user| {
                             let online_users = RoutingTable::get_online_users_info();
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
@@ -389,7 +401,7 @@ impl Users {
                             Rpc::send_message(
                                 buf,
                                 crate::rpc::proto::Modules::Users.into(),
-                                "".to_string(),
+                                request_id,
                                 Vec::new(),
                             );
                         });
@@ -457,7 +469,7 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    fn build_user_list(filter: UserFilter, offset: u32, limit: u32) {
+    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, request_id: String) {
         let users = USERS.get().read().unwrap();
 
         let user_list = if let Some(account) = UserAccounts::get_default_user() {
@@ -489,7 +501,7 @@ impl Users {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Users.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }
@@ -527,7 +539,7 @@ pub struct UserData {
 fn build_user_entry(
     user: &User,
     online_users: &BTreeMap<Vec<u8>, Vec<super::table::RoutingConnectionEntry>>,
-    account_id: &PeerId,
+    account_id: &Option<PeerId>,
     q8id: &Vec<u8>,
 ) -> proto::UserEntry {
     let mut connectivity: i32 = 0;
@@ -546,7 +558,11 @@ fn build_user_entry(
     }
 
     let (_key_type, key_base58) = Users::get_protobuf_public_key(user.key.clone());
-    let group_id = GroupId::from_peers(account_id, &user.id).to_bytes();
+    let group_id = if let Some(id) = account_id {
+        GroupId::from_peers(id, &user.id).to_bytes()
+    } else {
+        Vec::new()
+    };
 
     proto::UserEntry {
         name: user.name.clone(),
@@ -599,7 +615,7 @@ fn build_user_list_from(
             break;
         }
 
-        let entry = build_user_entry(user, online_users, account_id, id);
+        let entry = build_user_entry(user, online_users, &Some(account_id.clone()), id);
         user_list.user.push(entry);
     }
 
@@ -899,7 +915,7 @@ mod tests {
         let acc = account_id();
 
         let (q8id, user) = users.iter().next().unwrap();
-        let entry = build_user_entry(user, &online, &acc, q8id);
+        let entry = build_user_entry(user, &online, &Some(acc.clone()), q8id);
 
         assert_eq!(entry.name, "user_0");
         assert_eq!(entry.id, user.id.to_bytes());
@@ -918,7 +934,7 @@ mod tests {
         let acc = account_id();
 
         let (q8id, user) = users.iter().next().unwrap();
-        let entry = build_user_entry(user, &online, &acc, q8id);
+        let entry = build_user_entry(user, &online, &Some(acc.clone()), q8id);
 
         assert_eq!(entry.connectivity, 1);
         assert_eq!(entry.connections.len(), 1);

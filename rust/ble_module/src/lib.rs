@@ -28,7 +28,6 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
         local.block_on(&rt, async move {
             main_loop(sys_rpc_callback, rpc_receiver).await;
         });
-
     });
 }
 

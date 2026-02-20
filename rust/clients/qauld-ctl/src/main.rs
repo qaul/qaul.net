@@ -20,6 +20,7 @@ pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
 }
 
 mod cli;
@@ -53,6 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::Account(a) => Box::new(a.command) as Box<dyn RpcCommand>,
+        Commands::Users(u) => Box::new(u.command) as Box<dyn RpcCommand>,
     };
 
     let request_id = Uuid::new_v4().to_string();
@@ -71,10 +73,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Vec<u8> provides capacity as needed");
     framed_client.send(rpc_msg.into()).await?;
 
-    if let Some(Ok(data)) = framed_client.next().await {
-        match proto::QaulRpc::decode(&data[..]) {
-            Ok(msg) => rpc_command.decode_response(&msg.data[..])?,
-            _ => {}
+    if rpc_command.expects_response() {
+        if let Some(Ok(data)) = framed_client.next().await {
+            match proto::QaulRpc::decode(&data[..]) {
+                Ok(msg) => rpc_command.decode_response(&msg.data[..])?,
+                _ => {}
+            }
         }
     }
 
