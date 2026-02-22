@@ -39,6 +39,7 @@ pub struct RoutingUserEntry {
     #[allow(dead_code)]
     pub pgid_update_hc: u8,
     //online time
+    #[allow(dead_code)]
     pub online_time: u64,
     /// best routing entry per connection module
     pub connections: Vec<RoutingConnectionEntry>,
@@ -163,23 +164,6 @@ impl RoutingTable {
             }
         }
         users
-    }
-
-    /// Create routing information for a specific neighbour node,
-    /// to be sent to this neighbour node.
-    pub fn get_online_user_ids(last_sent: u64) -> Vec<Vec<u8>> {
-        let mut user_ids: Vec<Vec<u8>> = vec![];
-
-        // get access to routing table
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
-
-        // loop through routing table
-        for (user_id, user) in routing_table.table.iter() {
-            if user.online_time >= last_sent {
-                user_ids.push(user_id.clone());
-            }
-        }
-        user_ids
     }
 
     /// send protobuf RPC neighbours list

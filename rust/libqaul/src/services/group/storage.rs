@@ -112,6 +112,7 @@ impl GroupStorage {
     }
 
     /// Check if a group exists in the data base
+    #[allow(dead_code)]
     pub fn group_exists(account_id: PeerId, group_id: Vec<u8>) -> bool {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
