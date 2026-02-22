@@ -60,28 +60,6 @@ pub struct FeedMessageData {
     pub content: String,
 }
 
-/// Serializable format of the feed message
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FeedMessageSend {
-    /// the user id of the user sending this message
-    pub sender: Vec<u8>,
-    /// the content of the message
-    pub content: String,
-    /// the time when this message was sent in seconds
-    pub time: f64,
-}
-
-/// Feed message container
-///
-/// Contains the message and the message ID
-/// which is verifiable signature of from the sending
-/// user of the message
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FeedMessageSendContainer {
-    pub message: FeedMessageSend,
-    pub id: Vec<u8>,
-}
-
 /// qaul Feed storage and logic
 pub struct Feed {
     /// in memory BTreeMap of messages
@@ -559,10 +537,7 @@ impl Feed {
                         // get feed messages from data base
                         // Pagination is optional: when limit is set to 0, we fallback to the previous index-based impl
                         let feed_list = if feed_request.limit > 0 {
-                            Self::get_paginated_messages(
-                                feed_request.offset,
-                                feed_request.limit,
-                            )
+                            Self::get_paginated_messages(feed_request.offset, feed_request.limit)
                         } else {
                             Self::get_messages(feed_request.last_index)
                         };
@@ -654,8 +629,7 @@ fn build_feed_list_from(
             break;
         }
 
-        let sender_id_base58 =
-            bs58::encode(content.sender.clone()).into_string();
+        let sender_id_base58 = bs58::encode(content.sender.clone()).into_string();
 
         let time_sent = timestamp::Timestamp::create_time();
 

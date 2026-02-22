@@ -8,7 +8,7 @@
 
 use prost::Message;
 use state::InitCell;
-use std::sync::{Arc, RwLock};
+use std::sync::RwLock;
 
 pub mod connections;
 pub mod feed_requester;
