@@ -466,6 +466,7 @@ impl Feed {
         // create empty feed list
         let mut feed_list = proto::FeedMessageList {
             feed_message: Vec::new(),
+            pagination: None,
         };
 
         // get feed message store
@@ -527,6 +528,12 @@ impl Feed {
         feed_list
     }
 
+    /// Get messages from database using pagination
+    fn get_paginated_messages(offset: u32, limit: u32) -> proto::FeedMessageList {
+        let feed = FEED.get().read().unwrap();
+        build_feed_list_from(&feed.messages, offset, limit)
+    }
+
     /// Sign a message with the private key
     /// The signature can be validated with the corresponding public key.
     pub fn sign_message(buf: &Vec<u8>, keys: Keypair) -> Vec<u8> {
@@ -550,7 +557,15 @@ impl Feed {
                 match feed.message {
                     Some(proto::feed::Message::Request(feed_request)) => {
                         // get feed messages from data base
-                        let feed_list = Self::get_messages(feed_request.last_index);
+                        // Pagination is optional: when limit is set to 0, we fallback to the previous index-based impl
+                        let feed_list = if feed_request.limit > 0 {
+                            Self::get_paginated_messages(
+                                feed_request.offset,
+                                feed_request.limit,
+                            )
+                        } else {
+                            Self::get_messages(feed_request.last_index)
+                        };
 
                         // pack message
                         let proto_message = proto::Feed {
@@ -608,5 +623,163 @@ impl Feed {
                 log::error!("{:?}", error);
             }
         }
+    }
+}
+
+/// Build a paginated feed message list from the in-memory BTreeMap.
+///
+/// This is a free function (outside `impl Feed`) so it can be unit-tested
+/// without initialising the Feed module or a sled database.
+fn build_feed_list_from(
+    messages: &BTreeMap<Vec<u8>, proto_net::FeedMessageContent>,
+    offset: u32,
+    limit: u32,
+) -> proto::FeedMessageList {
+    let mut feed_list = proto::FeedMessageList {
+        feed_message: Vec::new(),
+        pagination: None,
+    };
+
+    let total = messages.len() as u32;
+
+    let mut skipped: u32 = 0;
+
+    for (signature, content) in messages {
+        if skipped < offset {
+            skipped += 1;
+            continue;
+        }
+
+        if limit > 0 && feed_list.feed_message.len() >= limit as usize {
+            break;
+        }
+
+        let sender_id_base58 =
+            bs58::encode(content.sender.clone()).into_string();
+
+        let time_sent = timestamp::Timestamp::create_time();
+
+        let feed_message = proto::FeedMessage {
+            sender_id: content.sender.clone(),
+            sender_id_base58,
+            message_id: signature.clone(),
+            message_id_base58: bs58::encode(signature).into_string(),
+            time_sent: humantime::format_rfc3339(time_sent.clone()).to_string(),
+            timestamp_sent: content.time,
+            time_received: humantime::format_rfc3339(time_sent).to_string(),
+            timestamp_received: content.time,
+            content: content.content.clone(),
+            index: 0,
+        };
+
+        feed_list.feed_message.push(feed_message);
+    }
+
+    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+
+    feed_list.pagination = Some(proto::PaginationMetadata {
+        has_more,
+        total,
+        offset,
+        limit,
+    });
+
+    feed_list
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Helper: build a BTreeMap with `n` FeedMessageContent entries.
+    /// Keys are synthetic signatures (single byte) to keep tests simple.
+    fn make_feed_messages(n: u64) -> BTreeMap<Vec<u8>, proto_net::FeedMessageContent> {
+        (1..=n)
+            .map(|i| {
+                let key = vec![i as u8];
+                let content = proto_net::FeedMessageContent {
+                    sender: vec![0xAA, 0xBB],
+                    content: format!("message {}", i),
+                    time: 1000 + i,
+                };
+                (key, content)
+            })
+            .collect()
+    }
+
+    #[test]
+    fn empty_messages() {
+        let messages = BTreeMap::new();
+        let list = build_feed_list_from(&messages, 0, 0);
+
+        assert_eq!(list.feed_message.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 0);
+    }
+
+    #[test]
+    fn pagination_echoes_offset_and_limit() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 3, 7);
+
+        let p = list.pagination.unwrap();
+        assert_eq!(p.offset, 3);
+        assert_eq!(p.limit, 7);
+    }
+
+    #[test]
+    fn first_page() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 0, 2);
+
+        assert_eq!(list.feed_message.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn middle_page() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 2, 2);
+
+        assert_eq!(list.feed_message.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn last_page_partial() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 4, 2);
+
+        assert_eq!(list.feed_message.len(), 1);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn offset_beyond_total_returns_no_messages() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 10, 2);
+
+        assert_eq!(list.feed_message.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn limit_larger_than_total_returns_all_messages() {
+        let messages = make_feed_messages(5);
+        let list = build_feed_list_from(&messages, 0, 100);
+
+        assert_eq!(list.feed_message.len(), 5);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
     }
 }

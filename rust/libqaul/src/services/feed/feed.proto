@@ -24,16 +24,31 @@ message FeedMessageRequest {
     // The message index is a continues numbering
     // of incoming messages in the database of the node.
     //
-    // When this variable is set, only 
+    // When this variable is set, only
     // newer messages will be sent.
     // Default value is 0, when the value
     // is 0, all feed messages will be sent.
     uint64 last_index = 2;
+    // Number of items to skip from the beginning of the filtered set.
+    // Default is 0 (no offset).
+    uint32 offset = 10;
+    // Maximum number of items to return.
+    // Default is 0, which means return all items.
+    uint32 limit = 20;
+}
+
+// Pagination metadata returned with list responses.
+message PaginationMetadata {
+    bool has_more = 10;
+    uint32 total = 20;
+    uint32 offset = 30;
+    uint32 limit = 40;
 }
 
 // List of feed messages
 message FeedMessageList {
     repeated FeedMessage feed_message = 1;
+    PaginationMetadata pagination = 10;
 }
 
 // A single feed message
