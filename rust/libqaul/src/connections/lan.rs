@@ -21,7 +21,7 @@
 //! ```
 
 use libp2p::{
-    floodsub::{Floodsub, FloodsubEvent},
+    floodsub,
     identity::Keypair,
     mdns, noise, ping,
     swarm::{NetworkBehaviour, Swarm},
@@ -41,7 +41,7 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 #[derive(NetworkBehaviour)]
 #[behaviour(to_swarm = "QaulLanEvent")]
 pub struct QaulLanBehaviour {
-    pub floodsub: Floodsub,
+    pub floodsub: floodsub::Behaviour,
     pub mdns: mdns::tokio::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
@@ -103,9 +103,9 @@ impl QaulLanBehaviour {
         }
     }
 
-    fn floodsub_event(&mut self, event: FloodsubEvent) {
+    fn floodsub_event(&mut self, event: floodsub::Event) {
         match event {
-            FloodsubEvent::Message(msg) => {
+            floodsub::Event::Message(msg) => {
                 // feed Message
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received(ConnectionModule::Lan, msg.source, resp);
@@ -118,15 +118,15 @@ impl QaulLanBehaviour {
 
 #[derive(Debug)]
 pub enum QaulLanEvent {
-    Floodsub(FloodsubEvent),
+    Floodsub(floodsub::Event),
     Mdns(mdns::Event),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
 }
 
-impl From<FloodsubEvent> for QaulLanEvent {
-    fn from(event: FloodsubEvent) -> Self {
+impl From<floodsub::Event> for QaulLanEvent {
+    fn from(event: floodsub::Event) -> Self {
         Self::Floodsub(event)
     }
 }
@@ -179,7 +179,7 @@ impl Lan {
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
-            floodsub: Floodsub::new(Node::get_id()),
+            floodsub: floodsub::Behaviour::new(Node::get_id()),
             mdns,
             ping: ping::Behaviour::new(ping_config),
             qaul_info: QaulInfo::new(Node::get_id()),

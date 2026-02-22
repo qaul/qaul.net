@@ -28,8 +28,7 @@
 //! ```
 
 use libp2p::{
-    floodsub::{Floodsub, FloodsubEvent},
-    identify,
+    floodsub, identify,
     identity::Keypair,
     noise, ping,
     swarm::{NetworkBehaviour, Swarm},
@@ -55,7 +54,7 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 #[derive(NetworkBehaviour)]
 #[behaviour(to_swarm = "QaulInternetEvent")]
 pub struct QaulInternetBehaviour {
-    pub floodsub: Floodsub,
+    pub floodsub: floodsub::Behaviour,
     pub identify: identify::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
@@ -150,9 +149,9 @@ impl QaulInternetBehaviour {
         }
     }
 
-    fn floodsub_event(&mut self, event: FloodsubEvent) {
+    fn floodsub_event(&mut self, event: floodsub::Event) {
         match event {
-            FloodsubEvent::Message(msg) => {
+            floodsub::Event::Message(msg) => {
                 // feed Message
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
                     Feed::received(ConnectionModule::Internet, msg.source, resp);
@@ -178,15 +177,15 @@ static INTERNETCONNECTIONS: InitCell<RwLock<BTreeMap<String, PeerId>>> = InitCel
 
 #[derive(Debug)]
 pub enum QaulInternetEvent {
-    Floodsub(FloodsubEvent),
+    Floodsub(floodsub::Event),
     Identify(identify::Event),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
     QaulMessaging(QaulMessagingEvent),
 }
 
-impl From<FloodsubEvent> for QaulInternetEvent {
-    fn from(event: FloodsubEvent) -> Self {
+impl From<floodsub::Event> for QaulInternetEvent {
+    fn from(event: floodsub::Event) -> Self {
         Self::Floodsub(event)
     }
 }
@@ -243,7 +242,7 @@ impl Internet {
 
         // create behaviour
         let mut behaviour: QaulInternetBehaviour = QaulInternetBehaviour {
-            floodsub: Floodsub::new(Node::get_id()),
+            floodsub: floodsub::Behaviour::new(Node::get_id()),
             identify: identify::Behaviour::new(identify::Config::new(
                 "/ipfs/0.1.0".into(),
                 Node::get_keys().public(),
