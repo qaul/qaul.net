@@ -6,6 +6,7 @@
 use crate::proto;
 
 mod authentication;
+mod feed;
 mod node;
 mod user_accounts;
 mod users;

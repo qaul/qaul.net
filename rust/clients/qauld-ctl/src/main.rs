@@ -22,6 +22,7 @@ pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
 }
 
 mod cli;
@@ -60,16 +61,24 @@ async fn preflight_request(
                             if let Some(my_user_account) = default_useraccount.my_user_account {
                                 (my_user_account.id, my_user_account.id_base58)
                             } else {
+                                log::warn!("user account not found");
                                 (Vec::new(), "".to_string())
                             }
                         } else {
+                            log::warn!("default account not found");
                             (Vec::new(), "".to_string())
                         }
                     }
-                    _ => (Vec::new(), "".to_string()),
+                    _ => {
+                        log::error!("failed to parse RPC message");
+                        (Vec::new(), "".to_string())
+                    }
                 }
             }
-            _ => (Vec::new(), "".to_string()),
+            _ => {
+                log::error!("failed to decode RPC");
+                (Vec::new(), "".to_string())
+            }
         }
     } else {
         (Vec::new(), "".to_string())
@@ -109,11 +118,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
-<<<<<<< HEAD
-=======
         Commands::Account(a) => Box::new(a.command) as Box<dyn RpcCommand>,
         Commands::Users(u) => Box::new(u.command) as Box<dyn RpcCommand>,
->>>>>>> 48c1f40c (feat(server): #541 completed users commands)
+        Commands::Feed(f) => Box::new(f.command) as Box<dyn RpcCommand>,
     };
 
     let (data, module) = rpc_command.encode_request()?;
