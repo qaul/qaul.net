@@ -27,6 +27,8 @@ pub enum Commands {
     Account(AccountArgs),
     /// Functions for all users known by your node
     Users(UsersArgs),
+    /// Feed
+    Feed(FeedArgs),
 }
 
 #[derive(Args, Debug)]
@@ -116,5 +118,28 @@ pub enum UsersSubcmd {
         /// Specify the User ID to get details for
         #[arg(short, long)]
         user_id: String,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct FeedArgs {
+    #[command(subcommand)]
+    pub command: FeedSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FeedSubcmd {
+    Send {
+        /// sends the {FeedMessage} to the network and distributes it to all connected nodes
+        ///  * the message is signed and can be validated
+        ///  * at least one user needs to be created
+        #[arg(short, long)]
+        message: String,
+    },
+    /// displays all feed messages
+    List {
+        /// displays only feed messages newer than {Feed Message ID}
+        #[arg(short, long)]
+        feed_message_id: Option<u64>,
     },
 }
