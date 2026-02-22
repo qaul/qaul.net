@@ -72,6 +72,8 @@ impl Feed {
                 proto::FeedMessageRequest{
                     last_received: Vec::new(),
                     last_index,
+                    offset: 0,
+                    limit: 0,
                 }
             )),
         };
