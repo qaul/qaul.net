@@ -7,8 +7,17 @@ class FeedMessage extends PublicPost {
   final User author;
   final String sentTimestamp;
 
-  // TODO
-  FeedMessage(PublicPost message, this.author, this.sentTimestamp) : super();
+  FeedMessage(PublicPost message, this.author, this.sentTimestamp)
+      : super(
+          senderId: message.senderId,
+          index: message.index,
+          senderIdBase58: message.senderIdBase58,
+          messageId: message.messageId,
+          messageIdBase58: message.messageIdBase58,
+          content: message.content,
+          sendTime: message.sendTime,
+          receiveTime: message.receiveTime,
+        );
 }
 
 class FeedMessageStore extends Notifier<List<FeedMessage>> {
@@ -56,3 +65,5 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
     await worker.sendPublicMessage(messageText);
   }
 }
+
+// 

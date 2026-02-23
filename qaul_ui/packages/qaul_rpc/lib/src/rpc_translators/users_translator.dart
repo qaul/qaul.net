@@ -1,5 +1,10 @@
 part of 'abstract_rpc_module_translator.dart';
 
+class GetUserByIdResult {
+  final User? user;
+  GetUserByIdResult(this.user);
+}
+
 class UsersTranslator extends RpcModuleTranslator {
   @override
   Modules get type => Modules.USERS;
@@ -47,6 +52,23 @@ class UsersTranslator extends RpcModuleTranslator {
           securityNumberBlocks: res.securityNumberBlocks,
         );
         return RpcTranslatorResponse(type, secNo);
+      case Users_Message.getUserByIdResponse:
+        final res = message.ensureGetUserByIdResponse();
+        if (!res.hasUser()) {
+          return RpcTranslatorResponse(type, GetUserByIdResult(null));
+        }
+        final u = res.user;
+        final user = User(
+          name: u.name,
+          id: Uint8List.fromList(u.id),
+          conversationId: Uint8List.fromList(u.groupId),
+          keyBase58: u.keyBase58,
+          isBlocked: u.blocked,
+          isVerified: u.verified,
+          status: _mapFrom(u.connectivity),
+          availableTypes: _mapFromRoutingTable(u.connections),
+        );
+        return RpcTranslatorResponse(type, GetUserByIdResult(user));
       default:
         return super.decodeMessageBytes(data, ref);
     }
