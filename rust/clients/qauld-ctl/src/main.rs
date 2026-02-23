@@ -22,6 +22,8 @@ pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
+    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
 }
 
 mod cli;
@@ -120,6 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Account(a) => Box::new(a.command) as Box<dyn RpcCommand>,
         Commands::Users(u) => Box::new(u.command) as Box<dyn RpcCommand>,
         Commands::Feed(f) => Box::new(f.command) as Box<dyn RpcCommand>,
+        Commands::Group(g) => Box::new(g.command) as Box<dyn RpcCommand>,
     };
 
     let (data, module) = rpc_command.encode_request()?;
