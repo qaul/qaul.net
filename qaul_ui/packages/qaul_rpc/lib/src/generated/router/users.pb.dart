@@ -27,6 +27,8 @@ enum Users_Message {
   userUpdate,
   securityNumberRequest,
   securityNumberResponse,
+  getUserByIdRequest,
+  getUserByIdResponse,
   notSet
 }
 
@@ -39,6 +41,8 @@ class Users extends $pb.GeneratedMessage {
     UserEntry? userUpdate,
     SecurityNumberRequest? securityNumberRequest,
     SecurityNumberResponse? securityNumberResponse,
+    GetUserByIDRequest? getUserByIdRequest,
+    GetUserByIDResponse? getUserByIdResponse,
   }) {
     final result = create();
     if (userRequest != null) result.userRequest = userRequest;
@@ -49,6 +53,10 @@ class Users extends $pb.GeneratedMessage {
       result.securityNumberRequest = securityNumberRequest;
     if (securityNumberResponse != null)
       result.securityNumberResponse = securityNumberResponse;
+    if (getUserByIdRequest != null)
+      result.getUserByIdRequest = getUserByIdRequest;
+    if (getUserByIdResponse != null)
+      result.getUserByIdResponse = getUserByIdResponse;
     return result;
   }
 
@@ -68,13 +76,15 @@ class Users extends $pb.GeneratedMessage {
     4: Users_Message.userUpdate,
     5: Users_Message.securityNumberRequest,
     6: Users_Message.securityNumberResponse,
+    7: Users_Message.getUserByIdRequest,
+    8: Users_Message.getUserByIdResponse,
     0: Users_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Users',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8])
     ..aOM<UserRequest>(1, _omitFieldNames ? '' : 'userRequest',
         subBuilder: UserRequest.create)
     ..aOM<UserOnlineRequest>(2, _omitFieldNames ? '' : 'userOnlineRequest',
@@ -89,6 +99,10 @@ class Users extends $pb.GeneratedMessage {
     ..aOM<SecurityNumberResponse>(
         6, _omitFieldNames ? '' : 'securityNumberResponse',
         subBuilder: SecurityNumberResponse.create)
+    ..aOM<GetUserByIDRequest>(7, _omitFieldNames ? '' : 'getUserByIdRequest',
+        subBuilder: GetUserByIDRequest.create)
+    ..aOM<GetUserByIDResponse>(8, _omitFieldNames ? '' : 'getUserByIdResponse',
+        subBuilder: GetUserByIDResponse.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -115,6 +129,8 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   @$pb.TagNumber(5)
   @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   Users_Message whichMessage() => _Users_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
@@ -122,6 +138,8 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   @$pb.TagNumber(5)
   @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// User Request returns a user list
@@ -223,6 +241,142 @@ class Users extends $pb.GeneratedMessage {
   void clearSecurityNumberResponse() => $_clearField(6);
   @$pb.TagNumber(6)
   SecurityNumberResponse ensureSecurityNumberResponse() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  GetUserByIDRequest get getUserByIdRequest => $_getN(6);
+  @$pb.TagNumber(7)
+  set getUserByIdRequest(GetUserByIDRequest value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasGetUserByIdRequest() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearGetUserByIdRequest() => $_clearField(7);
+  @$pb.TagNumber(7)
+  GetUserByIDRequest ensureGetUserByIdRequest() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  GetUserByIDResponse get getUserByIdResponse => $_getN(7);
+  @$pb.TagNumber(8)
+  set getUserByIdResponse(GetUserByIDResponse value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasGetUserByIdResponse() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearGetUserByIdResponse() => $_clearField(8);
+  @$pb.TagNumber(8)
+  GetUserByIDResponse ensureGetUserByIdResponse() => $_ensure(7);
+}
+
+class GetUserByIDRequest extends $pb.GeneratedMessage {
+  factory GetUserByIDRequest({
+    $core.List<$core.int>? userId,
+  }) {
+    final result = create();
+    if (userId != null) result.userId = userId;
+    return result;
+  }
+
+  GetUserByIDRequest._();
+
+  factory GetUserByIDRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetUserByIDRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetUserByIDRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
+      createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(
+        10, _omitFieldNames ? '' : 'userId', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUserByIDRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUserByIDRequest copyWith(
+          void Function(GetUserByIDRequest) updates) =>
+      super.copyWith((message) => updates(message as GetUserByIDRequest))
+          as GetUserByIDRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetUserByIDRequest create() => GetUserByIDRequest._();
+  @$core.override
+  GetUserByIDRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetUserByIDRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetUserByIDRequest>(create);
+  static GetUserByIDRequest? _defaultInstance;
+
+  @$pb.TagNumber(10)
+  $core.List<$core.int> get userId => $_getN(0);
+  @$pb.TagNumber(10)
+  set userId($core.List<$core.int> value) => $_setBytes(0, value);
+  @$pb.TagNumber(10)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearUserId() => $_clearField(10);
+}
+
+class GetUserByIDResponse extends $pb.GeneratedMessage {
+  factory GetUserByIDResponse({
+    UserEntry? user,
+  }) {
+    final result = create();
+    if (user != null) result.user = user;
+    return result;
+  }
+
+  GetUserByIDResponse._();
+
+  factory GetUserByIDResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetUserByIDResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetUserByIDResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
+      createEmptyInstance: create)
+    ..aOM<UserEntry>(10, _omitFieldNames ? '' : 'user',
+        subBuilder: UserEntry.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUserByIDResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetUserByIDResponse copyWith(
+          void Function(GetUserByIDResponse) updates) =>
+      super.copyWith((message) => updates(message as GetUserByIDResponse))
+          as GetUserByIDResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetUserByIDResponse create() => GetUserByIDResponse._();
+  @$core.override
+  GetUserByIDResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetUserByIDResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetUserByIDResponse>(create);
+  static GetUserByIDResponse? _defaultInstance;
+
+  @$pb.TagNumber(10)
+  UserEntry get user => $_getN(0);
+  @$pb.TagNumber(10)
+  set user(UserEntry value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasUser() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearUser() => $_clearField(10);
+  @$pb.TagNumber(10)
+  UserEntry ensureUser() => $_ensure(0);
 }
 
 /// UI request for some users

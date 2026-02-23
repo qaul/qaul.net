@@ -48,6 +48,8 @@ class LibqaulWorker {
 
   final _heartbeats = Queue<bool>();
 
+  Completer<User?>? _pendingGetUserById;
+
   void _init() async {
     if (_initialized.isCompleted) return;
     // Throws when called for some reason
@@ -97,6 +99,20 @@ class LibqaulWorker {
     if (offset != null) request.offset = offset;
     if (limit != null) request.limit = limit;
     await _sendMessage(Modules.USERS, Users(userRequest: request));
+  }
+
+  Future<User?> getUserById(Uint8List userId) async {
+    _pendingGetUserById?.completeError(
+        StateError('GetUserById replaced by new request'));
+    _pendingGetUserById = Completer<User?>();
+    _sendMessage(Modules.USERS,
+        Users(getUserByIdRequest: GetUserByIDRequest(userId: userId)));
+    return _pendingGetUserById!.future;
+  }
+
+  void _completeGetUserById(User? user) {
+    _pendingGetUserById?.complete(user);
+    _pendingGetUserById = null;
   }
 
   void getUserSecurityNumber(User u) async {
@@ -387,6 +403,10 @@ class LibqaulWorker {
     final res = await translator.decodeMessageBytes(m.data, _ref);
     if (res == null) return;
 
+    if (res.data is GetUserByIdResult) {
+      _completeGetUserById((res.data as GetUserByIdResult).user);
+      return;
+    }
     if (res.module == Modules.BLE && res.data is BleRightsRequest) {
       _log.fine('BleRightsRequest received, must be handled by native code');
       return;

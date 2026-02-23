@@ -11,14 +11,22 @@ class UsersStore extends Notifier<List<User>> {
     // TODO (refactor out of users tab, i.e. anything that calls qaulWorker directly on qaul_ui/lib/screens/home/tabs/users_tab.dart)
     final users = ref
         .watch(usersProvider)
+        .data
         .where((u) => !(u.isBlocked ?? false))
         .toList();
     return users;
   }
 
   Future<User?> getByUserID(String idBase58) async {
-    // TODO: first verify if user is in store state, otherwise fetch that individual using the new libqaul message
-    throw UnimplementedError("TODO must call libqaul worker with new message (to be created)");
+    final match = state.where((u) => u.idBase58 == idBase58);
+    if (match.isNotEmpty) return match.first;
+    try {
+      final worker = ref.read(qaulWorkerProvider);
+      final userId = Uint8List.fromList(Base58Decode(idBase58));
+      return worker.getUserById(userId);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<List<User>> getMoreUsers(int offset) async {
