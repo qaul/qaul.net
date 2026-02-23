@@ -29,6 +29,8 @@ pub enum Commands {
     Users(UsersArgs),
     /// Feed
     Feed(FeedArgs),
+    /// Group
+    Group(GroupArgs),
 }
 
 #[derive(Args, Debug)]
@@ -141,5 +143,70 @@ pub enum FeedSubcmd {
         /// displays only feed messages newer than {Feed Message ID}
         #[arg(short, long)]
         feed_message_id: Option<u64>,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct GroupArgs {
+    #[command(subcommand)]
+    pub command: GroupSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum GroupSubcmd {
+    /// creates a new group
+    Create {
+        /// name of the group to create
+        #[arg(short, long)]
+        name: String,
+    },
+    /// list all available groups
+    List,
+    /// shows the group information
+    Info {
+        /// the group id
+        #[arg(short, long)]
+        id: String,
+    },
+    /// invite a user to a group
+    Invite {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+        /// the user to add the group
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// list received pending invitations
+    Invited,
+    /// accept group invitation
+    Accept {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// decline group invitation
+    Decline {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// remove a group member from the group
+    Remove {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+        /// the user to add the group
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// rename a group
+    Rename {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+        /// the new name for the group
+        #[arg(short, long)]
+        name: String,
     },
 }
