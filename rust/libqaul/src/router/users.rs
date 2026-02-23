@@ -29,6 +29,7 @@ pub mod proto {
 }
 
 /// Import protobuf router_net_info definitions
+#[allow(unused)]
 pub mod proto_net {
     include!("qaul.net.router_net_info.rs");
 }

@@ -21,7 +21,7 @@ use std::time::Duration;
 
 // crate modules
 pub mod api;
-mod connections;
+pub mod connections;
 pub mod node;
 mod router;
 mod rpc;

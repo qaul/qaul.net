@@ -12,6 +12,8 @@ fn request_feed_list(last_index: u64) -> Result<(Vec<u8>, Modules), Box<dyn std:
         message: Some(feed::Message::Request(FeedMessageRequest {
             last_received: Vec::new(),
             last_index,
+            offset: 0,
+            limit: 0,
         })),
     };
 

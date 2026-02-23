@@ -72,6 +72,8 @@ impl Feed {
             message: Some(proto::feed::Message::Request(proto::FeedMessageRequest {
                 last_received: Vec::new(),
                 last_index,
+                offset: 0,
+                limit: 0,
             })),
         };
 

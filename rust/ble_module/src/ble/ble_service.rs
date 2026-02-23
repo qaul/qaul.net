@@ -167,7 +167,7 @@ impl IdleBleService {
                         None => {
                             let adp2 = adp.clone();
                             let cmd_tx2 = cmd_tx2.clone();
-                            tokio::task::spawn_local(async move {
+                            tokio::task::spawn(async move {
                                 match adp2.device(req.device_address) {
                                     Ok(device) => {
                                         match cmd_tx2

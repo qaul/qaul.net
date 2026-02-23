@@ -13,6 +13,24 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
+/// Copy a generated protobuf file, prepending `#[allow(dead_code)]` before
+/// every `pub struct` and `pub enum` to suppress unused-code warnings.
+fn copy_allowing_dead_code(from: &Path, to: &Path) {
+    let content = fs::read_to_string(from).unwrap();
+    let patched = content
+        .lines()
+        .map(|line| {
+            if line.starts_with("pub struct ") || line.starts_with("pub enum ") {
+                format!("#[allow(dead_code)]\n{line}")
+            } else {
+                line.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    fs::write(to, patched).unwrap();
+}
+
 fn main() {
     let mut prost_build = prost_build::Config::new();
 
@@ -60,6 +78,10 @@ fn main() {
         "#[derive(serde::Serialize, serde::Deserialize)]",
     );
     prost_build.type_attribute("Data", "#[derive(serde::Serialize, serde::Deserialize)]");
+
+    // suppress dead_code warnings on RTC generated types
+    prost_build.type_attribute("qaul.net.rtc", "#[allow(dead_code)]");
+    prost_build.type_attribute("qaul.rpc.rtc", "#[allow(dead_code)]");
 
     // compile these protobuf files
     match prost_build.compile_protos(
@@ -163,11 +185,10 @@ fn main() {
                 to.join("qaul.rpc.dtn.rs"),
             )
             .unwrap();
-            fs::copy(
-                Path::new(&out_dir).join("qaul.rpc.rtc.rs"),
-                to.join("qaul.rpc.rtc.rs"),
-            )
-            .unwrap();
+            copy_allowing_dead_code(
+                &Path::new(&out_dir).join("qaul.rpc.rtc.rs"),
+                &to.join("qaul.rpc.rtc.rs"),
+            );
             fs::copy(
                 Path::new(&out_dir).join("qaul.rpc.ble.rs"),
                 to.join("qaul.rpc.ble.rs"),
@@ -185,11 +206,10 @@ fn main() {
                 to.join("qaul.net.router_net_info.rs"),
             )
             .unwrap();
-            fs::copy(
-                Path::new(&out_dir).join("qaul.net.messaging.rs"),
-                to.join("qaul.net.messaging.rs"),
-            )
-            .unwrap();
+            copy_allowing_dead_code(
+                &Path::new(&out_dir).join("qaul.net.messaging.rs"),
+                &to.join("qaul.net.messaging.rs"),
+            );
             fs::copy(
                 Path::new(&out_dir).join("qaul.net.feed.rs"),
                 to.join("qaul.net.feed.rs"),
@@ -205,11 +225,10 @@ fn main() {
                 to.join("qaul.net.group.rs"),
             )
             .unwrap();
-            fs::copy(
-                Path::new(&out_dir).join("qaul.net.rtc.rs"),
-                to.join("qaul.net.rtc.rs"),
-            )
-            .unwrap();
+            copy_allowing_dead_code(
+                &Path::new(&out_dir).join("qaul.net.rtc.rs"),
+                &to.join("qaul.net.rtc.rs"),
+            );
             fs::copy(
                 Path::new(&out_dir).join("qaul.net.ble.rs"),
                 to.join("qaul.net.ble.rs"),
@@ -288,11 +307,10 @@ fn main() {
                 Path::new("src/services/dtn/qaul.rpc.dtn.rs"),
             )
             .unwrap();
-            fs::copy(
+            copy_allowing_dead_code(
                 &Path::new(&out_dir).join("qaul.rpc.rtc.rs"),
                 Path::new("src/services/rtc/qaul.rpc.rtc.rs"),
-            )
-            .unwrap();
+            );
             fs::copy(
                 &Path::new(&out_dir).join("qaul.rpc.ble.rs"),
                 Path::new("src/connections/ble/qaul.rpc.ble.rs"),
@@ -330,11 +348,10 @@ fn main() {
                 Path::new("src/services/group/qaul.net.group.rs"),
             )
             .unwrap();
-            fs::copy(
+            copy_allowing_dead_code(
                 &Path::new(&out_dir).join("qaul.net.rtc.rs"),
                 Path::new("src/services/rtc/qaul.net.rtc.rs"),
-            )
-            .unwrap();
+            );
             fs::copy(
                 &Path::new(&out_dir).join("qaul.net.crypto.rs"),
                 Path::new("src/services/crypto/qaul.net.crypto.rs"),

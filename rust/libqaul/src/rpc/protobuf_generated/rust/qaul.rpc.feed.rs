@@ -39,12 +39,34 @@ pub struct FeedMessageRequest {
     /// is 0, all feed messages will be sent.
     #[prost(uint64, tag = "2")]
     pub last_index: u64,
+    /// Number of items to skip from the beginning of the filtered set.
+    /// Default is 0 (no offset).
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    /// Maximum number of items to return.
+    /// Default is 0, which means return all items.
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+/// Pagination metadata returned with list responses.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PaginationMetadata {
+    #[prost(bool, tag = "10")]
+    pub has_more: bool,
+    #[prost(uint32, tag = "20")]
+    pub total: u32,
+    #[prost(uint32, tag = "30")]
+    pub offset: u32,
+    #[prost(uint32, tag = "40")]
+    pub limit: u32,
 }
 /// List of feed messages
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedMessageList {
     #[prost(message, repeated, tag = "1")]
     pub feed_message: ::prost::alloc::vec::Vec<FeedMessage>,
+    #[prost(message, optional, tag = "10")]
+    pub pagination: ::core::option::Option<PaginationMetadata>,
 }
 /// A single feed message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
