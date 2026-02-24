@@ -6,6 +6,7 @@ use super::utils::find_device_by_mac;
 use crate::{
     ble::ble_uuids::{main_service_uuid, msg_char, read_char},
     ble::utils,
+    gatt_protocol::{self, GattMessageReassembler},
     rpc::{process_received_message, proto_sys::ble::Message::*, proto_sys::*, utils::*},
 };
 use async_std::{channel::Sender, prelude::*, task::JoinHandle};
@@ -522,6 +523,8 @@ impl IdleBleService {
         let (ble_msg_sender, ble_msg_reciever) = async_std::channel::unbounded::<(Address, Vec<u8>)>();
                 
         async_std::task::spawn(async move {
+            let mut internal_sender = internal_sender;
+            let mut reassemblers: HashMap<String, GattMessageReassembler> = HashMap::new();
             log::info!("Spawned message listener for device.");             
             loop {
                 if let Ok((mac_address, buffer)) = ble_msg_reciever.recv().await{
@@ -529,46 +532,29 @@ impl IdleBleService {
                         log::info!("Write stream from device {:?} has ended", &mac_address);
                         continue;
                     }
-                    let mut hex_msg = utils::bytes_to_hex(&buffer);
-                    if hex_msg.contains("24") {
-                        // Remove trailing zeros
-                        let trimmed = hex_msg.trim_end_matches('0');
-                        hex_msg = trimmed.to_string();
-                    }
+                    let hex_msg = utils::bytes_to_hex(&buffer);
                     log::info!("Received message: {:?} from {:?}", &hex_msg, &mac_address);
                     let stringified_addr = utils::mac_to_string(&mac_address);
+                    let decode_result = {
+                        let decoder = reassemblers
+                            .entry(stringified_addr.clone())
+                            .or_default();
+                        decoder.push_chunk(&buffer)
+                    };
 
-                    match utils::find_msg_map_by_mac(stringified_addr.clone()) {
-                        Some(mut old_value) => {
-                            if hex_msg.ends_with("2424")
-                                || (old_value.ends_with("24") && hex_msg == "24")
-                            {
-                                old_value = old_value + &hex_msg;
-                                let trim_old_value = &old_value[4..old_value.len() - 4];
-                                    log::info!("Received message: {:?} ", trim_old_value);
-                                if !trim_old_value.contains("2424") {
-                                    hex_msg = trim_old_value.to_string();
-
-                                    utils::message_received((hex_msg, mac_address), internal_sender.clone());
-                                    utils::remove_msg_map_by_mac(stringified_addr);
-                                }
-                            } else {
-                                old_value += &hex_msg;
-                                utils::add_msg_map(stringified_addr, old_value);
-                            }
+                    match decode_result {
+                        Ok(Some(message)) => {
+                            internal_sender.send_direct_received(message.qaul_id, message.message);
+                            reassemblers.remove(&stringified_addr);
                         }
-                        None => {
-                            if hex_msg.starts_with("2424") && hex_msg.ends_with("2424") {
-                                let trim_hex_msg = &hex_msg[4..&hex_msg.len() - 4];
-                                if !trim_hex_msg.contains("2424") {
-                                    hex_msg = trim_hex_msg.to_string();
-                                    utils::message_received((hex_msg, mac_address), internal_sender.clone());
-                                }
-                            } else if hex_msg.starts_with("2424") {
-                                utils::add_msg_map(stringified_addr, hex_msg.clone());
-                            } else {
-                                // Error handling
-                            }
+                        Ok(None) => {}
+                        Err(err) => {
+                            log::error!(
+                                "Error decoding GATT message from {}: {}",
+                                &stringified_addr,
+                                err
+                            );
+                            reassemblers.remove(&stringified_addr);
                         }
                     }
                 }
@@ -598,9 +584,11 @@ impl IdleBleService {
                                     log::debug!("Write stream from device {:?} has ended", &mac_address);
                                     continue;
                                 }
-                                Ok(_) => {
+                                Ok(read_len) => {
                                     if device_known { 
-                                        let _ = ble_msg_sender.send((mac_address, read_buf)).await; 
+                                        let _ = ble_msg_sender
+                                            .send((mac_address, read_buf[..read_len].to_vec()))
+                                            .await;
                                     }
                                 },
                                 Err(err) => {
@@ -660,31 +648,14 @@ impl IdleBleService {
         // Messages from queue are read and broken down into packets of 40 bytes and streamed to the remote device.
         let extracted_queue = hash_map.get(&stringified_addr).clone();
         let mut message_id: String = "".to_string();
-        let mut send_queue: VecDeque<String> = VecDeque::new();
+        let mut send_queue: VecDeque<Vec<u8>> = VecDeque::new();
         if let Some(queue) = extracted_queue {
             let mut queue = queue.clone();
             if !queue.is_empty() {
                 let data = queue.pop_front().unwrap();
                 message_id = data.0;
-                let i8_qaul_id: Vec<i8> = data.1.into_iter().map(|x| x as i8).collect();
-                let i8_message: Vec<i8> = data.2.into_iter().map(|x| x as i8).collect();
-                let msg = utils::Message {
-                    qaul_id: Some(i8_qaul_id),
-                    message: Some(i8_message),
-                };
-                let json_str = serde_json::to_string(&msg).unwrap();
-                let bt_array = json_str.as_bytes();
-                let delimiter = vec![0x24, 0x24];
-                let temp = [delimiter.clone(), bt_array.to_vec(), delimiter].concat();
-                let mut final_data = utils::bytes_to_hex(&temp);
-
-                while final_data.len() > 40 {
-                    send_queue.push_back(final_data[..40].to_string());
-                    final_data = final_data[40..].to_string();
-                }
-                if !final_data.is_empty() {
-                    send_queue.push_back(final_data);
-                }
+                let chunks = gatt_protocol::encode_direct_message_chunks(&data.1, &data.2)?;
+                send_queue = chunks.into_iter().collect();
             }
         }
 
@@ -711,21 +682,21 @@ impl IdleBleService {
                         utils::update_last_found(*mac_address);
                         read_char_found = true;
                         while send_queue.len() > 0 {
-                            let data: String;
+                            let chunk: Vec<u8>;
                             match send_queue.pop_front() {
-                                Some(queue_top) => data = queue_top,
+                                Some(queue_top) => chunk = queue_top,
                                 None => {
                                     log::error!("No data found in queue");
                                     break;
                                 }
                             }
+                            let chunk_hex = utils::bytes_to_hex(&chunk);
                             log::info!(
                                 "Sending data to device {} : {:?}",
                                 &stringified_addr,
-                                &data
+                                &chunk_hex
                             );
-                            let data = utils::hex_to_bytes(&data);
-                            match chara.write(&data).await {
+                            match chara.write(&chunk).await {
                                 Ok(()) => {
                                     log::debug!(
                                         "Data sent to device {}",
