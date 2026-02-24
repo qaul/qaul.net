@@ -93,7 +93,7 @@ impl Users {
         // save user to the data base
         DbUsers::add_user(UserData {
             id: id_bytes,
-            key: key.clone().encode_protobuf(),
+            key: key.encode_protobuf(),
             name: name.clone(),
             verified,
             blocked,
@@ -118,7 +118,7 @@ impl Users {
     /// and save it to the data base
     pub fn add_with_check(id: PeerId, key: PublicKey, name: String) {
         // check if user is valid
-        if id != key.clone().to_peer_id() {
+        if id != key.to_peer_id() {
             log::error!("user id & key do not match {}", id.to_base58());
             return;
         }
@@ -197,7 +197,7 @@ impl Users {
             if let Some(value) = store.users.get(q8id) {
                 let user_info = router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
-                    key: value.key.clone().encode_protobuf(),
+                    key: value.key.encode_protobuf(),
                     name: value.name.clone(),
                 };
                 users.info.push(user_info);
@@ -302,7 +302,7 @@ impl Users {
                                 // persist the updated entity
                                 DbUsers::add_user(UserData {
                                     id: user_id.to_bytes(),
-                                    key: user_result.key.clone().encode_protobuf(),
+                                    key: user_result.key.encode_protobuf(),
                                     name: user_result.name.clone(),
                                     verified: updated_user.verified,
                                     blocked: updated_user.blocked,
