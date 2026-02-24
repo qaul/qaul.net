@@ -275,4 +275,89 @@ mod tests {
         let count = *connection_count.lock().unwrap();
         assert!(count >= 2, "Should have connected at least twice (1 fail, 1 success). Count: {}", count);
     }
+
+    // TODO: Setup proper integration test environment.
+    // The following test is commented out because mocking the global state of libqaul
+    // (Storage, Configuration, UserAccounts) is complex within this unit test context.
+    /*
+    // Integration test with ServicesModule and Feed
+    #[tokio::test]
+    async fn test_radio_integration_with_feed() {
+        // Initialize simple logger for debug
+        let _ = simplelog::SimpleLogger::init(simplelog::LevelFilter::Trace, simplelog::Config::default());
+
+        // Setup temporary sled DB for Feed
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let storage_path = tmp_dir.path().to_str().unwrap().to_string();
+
+        // Initialize Configuration manually to bypass global default issues
+        let mut config = crate::storage::configuration::Configuration::default();
+        config.node.initialized = 1; // Mark as initialized
+
+        // We need to set the global CONFIG state manually if we can't rely on defaults
+        // But Storage::init sets both Storage and Config.
+        // Let's try to set Storage::init and assume it works if we don't call Config::default()
+        // inside UserAccounts::create (which calls Configuration::get_mut() or similar).
+
+        crate::storage::Storage::init(storage_path);
+
+        // Initialize UserAccounts and create a user
+        crate::node::user_accounts::UserAccounts::init();
+        crate::node::user_accounts::UserAccounts::create("testuser".to_string(), None);
+
+        // Initialize Services
+        let services = crate::services::ServicesModule::new();
+        // We only init Feed manually to avoid full service stack complexity (networking etc)
+        crate::services::feed::Feed::init();
+
+        // Setup mock radio server
+        let listener = TcpListener::bind("127.0.0.1:0").await.expect("Failed to bind");
+        let port = listener.local_addr().unwrap().port();
+
+        tokio::spawn(async move {
+            loop {
+                if let Ok((mut socket, _)) = listener.accept().await {
+                    let response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n\r\n";
+                    let _ = socket.write_all(response.as_bytes()).await;
+                    // Send 5 chunks of 100 bytes
+                    for i in 0..5 {
+                        let data = vec![i as u8; 100];
+                        if let Err(_) = socket.write_all(&data).await { break; }
+                        tokio::time::sleep(Duration::from_millis(50)).await;
+                    }
+                }
+            }
+        });
+
+        let url = format!("http://127.0.0.1:{}", port);
+
+        // Start Radio via ServicesModule
+        services.start_radio(url.clone(), 100);
+
+        // Wait for processing
+        tokio::time::sleep(Duration::from_secs(2)).await;
+
+        // Verify messages in Feed
+        // We fetch the latest 10 messages
+        let message_ids = crate::services::feed::Feed::get_latest_message_ids(10);
+        let messages = crate::services::feed::Feed::get_messges_by_ids(&message_ids);
+
+        assert!(messages.len() >= 4, "Should have received at least 4 chunks in Feed (got {})", messages.len());
+
+        // Verify content format
+        let (_, _, content, _) = &messages[0];
+        assert!(content.starts_with("radio_chunk:"), "Message content should start with 'radio_chunk:'");
+
+        // Verify stop
+        services.stop_radio();
+
+        // Check if task is aborted (we can't easily check the task state directly,
+        // but we can ensure no more messages are added if we keep the server running)
+        let count_before = messages.len();
+        tokio::time::sleep(Duration::from_secs(1)).await;
+
+        let message_ids_after = crate::services::feed::Feed::get_latest_message_ids(100);
+        assert_eq!(message_ids_after.len(), count_before, "Should not receive new messages after stop");
+    }
+    */
 }
